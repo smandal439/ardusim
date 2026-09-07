@@ -262,13 +262,17 @@
                         </svg> </button>
                 </div>
             </div>
-            <div class="board-tabs" style="display:flex;gap:2px;padding:2px 8px;background:var(--panel-bg,#1e1e1e);border-bottom:1px solid var(--border-color,#333);">
-                <button id="board-tab-1" class="board-tab active" style="padding:4px 12px;border:none;background:#2d2d2d;color:#4fc3f7;cursor:pointer;border-radius:4px 4px 0 0;font-size:12px;font-weight:600;">Board 1</button>
-                <button id="board-tab-2" class="board-tab" style="padding:4px 12px;border:none;background:transparent;color:#888;cursor:pointer;border-radius:4px 4px 0 0;font-size:12px;font-weight:600;">Board 2</button>
+            <div class="board-tabs">
+                <button id="board-tab-1" class="board-tab active">
+                    <span class="board-tab-icon">①</span> Board 1
+                </button>
+                <button id="board-tab-2" class="board-tab">
+                    <span class="board-tab-icon">②</span> Board 2
+                </button>
             </div>
             <div class="editor-container" id="editor-container"></div>
             <div id="board2-editor-area" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-                <textarea id="board2-code-textarea" style="flex:1;width:100%;background:#1e1e1e;color:#d4d4d4;border:none;padding:12px;font-family:'Fira Code','Cascadia Code','Consolas',monospace;font-size:13px;line-height:1.6;resize:none;outline:none;tab-size:2;" spellcheck="false"></textarea>
+                <textarea id="board2-code-textarea" spellcheck="false"></textarea>
             </div>
             <div class="editor-footer"> <span id="editor-cursor">Ln 1, Col 1</span> <span id="editor-lang">Arduino
                     C++</span> <span id="editor-errors"></span> </div>
