@@ -388,6 +388,29 @@ class ArduinoSimulator {
     // Remove C++ type casts like (int), (float), etc.
     js = js.replace(/\((?:int|float|double|long|byte|char|uint8_t|uint16_t)\)\s*/g, '');
 
+    // typedef struct { ... } Name; → remove (type-only definition)
+    js = js.replace(/\btypedef\s+struct\s*\{[^}]*\}\s*\w+\s*;/g, '');
+
+    // struct Name { ... }; → remove (type-only definition)
+    js = js.replace(/\bstruct\s+\w+\s*\{[^}]*\}\s*;/g, '');
+
+    // struct Name varName; → var varName = {};
+    js = js.replace(/\bstruct\s+(\w+)\s+(\w+)\s*;/g, 'var $2 = {};');
+
+    // memcpy(&dest, src, sizeof(dest)) → dest = src (for struct copy)
+    // Also matches after sizeof has been replaced with .length
+    js = js.replace(/\bmemcpy\s*\(\s*&(\w+)\s*,\s*(\w+)\s*,\s*(?:\1\.length|sizeof\s*\(\s*\1\s*\))\s*\)/g, '$1 = $2');
+
+    // memcpy(dest, src, len) → _a.memcpy(dest, src, len) — fallback
+    js = js.replace(/\bmemcpy\s*\(([^)]+)\)/g, '_a.memcpy($1)');
+
+    // StructType varName = { field: value, ... }; → var varName = { field: value, ... };
+    js = js.replace(/\b(\w+)\s+(\w+)\s*=\s*\{/g, function(match, type, name) {
+      // Skip known keywords, function calls, etc.
+      if (/^(var|let|const|function|return|if|else|for|while|do|switch|case|break|continue|new|delete|typeof|instanceof|void|null|undefined|true|false|this|class|extends|import|export|default|try|catch|finally|throw|async|await|yield|static|super|with|debugger|in|of)$/.test(type)) return match;
+      return 'var ' + name + ' = {';
+    });
+
     // String() → String()  (already fine for JS)
     // String to string comparison: == for strings works in JS, so fine
     // .charAt(), .length, .indexOf() — all work in JS
@@ -666,6 +689,18 @@ class ArduinoSimulator {
         /* Interrupts */
         attachInterrupt(num, fn, mode) { },
         detachInterrupt(num) { },
+
+        /* Memory copy (general fallback) */
+        memcpy(dest, src, len) {
+          if (typeof dest === 'object' && typeof src === 'object') {
+            if (Array.isArray(src)) {
+              Object.assign(dest, src);
+            } else {
+              for (var k in src) { dest[k] = src[k]; }
+            }
+          }
+          return dest;
+        },
 
         /* ══════════ ESP32 — LEDC PWM ══════════ */
         ledcSetup(channel, freq, resolution) {
