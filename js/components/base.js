@@ -414,7 +414,29 @@ const COMPONENT_CATALOG = [
       ]
     }
   },
-  { category: 'Instruments', ids: ['multimeter', 'func_gen', 'dso_4ch', 'osc_probe_ch1', 'osc_probe_ch2', 'dso_probe_ch1', 'dso_probe_ch2', 'dso_probe_ch3', 'dso_probe_ch4', 'la_probe_ch1', 'la_probe_ch2', 'la_probe_ch3', 'la_probe_ch4', 'la_probe_ch5', 'la_probe_ch6', 'la_probe_ch7', 'la_probe_ch8'] },
+  {
+    category: 'Instruments',
+    ids: ['multimeter', 'func_gen', 'dso_4ch'],
+    dropdown: {
+      id: 'probe', label: 'Probes', icon: '🔍', desc: 'Oscilloscope, DSO & Logic Analyzer Probes',
+      variants: [
+        { id: 'osc_probe_ch1', name: 'OSC CH1', icon: '🟢', color: '#73ff00' },
+        { id: 'osc_probe_ch2', name: 'OSC CH2', icon: '🟠', color: '#ff9800' },
+        { id: 'dso_probe_ch1', name: 'DSO CH1', icon: '🟡', color: '#ffe600' },
+        { id: 'dso_probe_ch2', name: 'DSO CH2', icon: '🔵', color: '#00e5ff' },
+        { id: 'dso_probe_ch3', name: 'DSO CH3', icon: '🟣', color: '#ff3090' },
+        { id: 'dso_probe_ch4', name: 'DSO CH4', icon: '🟢', color: '#30ff60' },
+        { id: 'la_probe_ch1', name: 'LA CH1', icon: '🔵', color: '#00e5ff' },
+        { id: 'la_probe_ch2', name: 'LA CH2', icon: '🟠', color: '#ff9800' },
+        { id: 'la_probe_ch3', name: 'LA CH3', icon: '🟢', color: '#4caf50' },
+        { id: 'la_probe_ch4', name: 'LA CH4', icon: '🔴', color: '#ff5722' },
+        { id: 'la_probe_ch5', name: 'LA CH5', icon: '🟣', color: '#ab47bc' },
+        { id: 'la_probe_ch6', name: 'LA CH6', icon: '🟡', color: '#ffee33' },
+        { id: 'la_probe_ch7', name: 'LA CH7', icon: '🩷', color: '#e91e63' },
+        { id: 'la_probe_ch8', name: 'LA CH8', icon: '💚', color: '#76ff03' },
+      ]
+    }
+  },
 ];
 
 /* Export */

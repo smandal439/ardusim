@@ -1311,6 +1311,11 @@ class ArduinoSimulator {
     this._emitPinChange(pinKey, value);
   }
 
+  setPinVoltage(inst, pinId, voltage) {
+    if (!inst || !pinId) return;
+    this.pinStates[`${inst.id}_${pinId}`] = voltage;
+  }
+
   /* ══════════════ TONE ══════════════ */
   _initAudio() {
     if (!this._toneCtx) {

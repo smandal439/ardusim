@@ -4290,6 +4290,12 @@ class CircuitCanvas {
       if (tp === 'p4') return this._readDigitalInput(other.id, 'p3');
       return 0;
     }
+    if (other.type === 'func_gen') {
+      const rs = other.runtimeState || {};
+      const v = wireTarget.pinId === 'ch1_out' ? (rs.ch1_voltage || 0)
+        : wireTarget.pinId === 'ch2_out' ? (rs.ch2_voltage || 0) : 0;
+      return v > 0 ? 1 : 0;
+    }
     const pn = this._getConnectedPinNum(fromInstId, pinId);
     if (pn !== null) {
       const sim = window.ArduinoSim;
