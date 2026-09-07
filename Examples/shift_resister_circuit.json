@@ -1,0 +1,344 @@
+{
+  "id": "shift_resister_circuit",
+  "name": "shift resister circuit",
+  "icon": "🔧",
+  "desc": "A custom shift resister example circuit circuit example.",
+  "tags": [
+    "74595",
+    "digital",
+    "shift resister"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1788770288588_4sbsh",
+        "type": "ic_74hc595",
+        "x": 95,
+        "y": 115,
+        "rotation": 1,
+        "props": {}
+      },
+      {
+        "id": "comp_1788770325988_w22oo",
+        "type": "power_5v",
+        "x": 195,
+        "y": -25,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_1788770328053_rceew",
+        "type": "power_gnd",
+        "x": 110,
+        "y": 235,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_1788770353157_4r67m",
+        "type": "arduino_uno",
+        "x": 255,
+        "y": 60,
+        "rotation": 3,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "comp_1788770377680_k1rrd",
+        "type": "multi_led_array",
+        "x": -60,
+        "y": 100,
+        "rotation": 3,
+        "props": {
+          "label": "8-LED ARRAY"
+        }
+      },
+      {
+        "id": "power_gnd_1788770471239",
+        "type": "power_gnd",
+        "x": 60,
+        "y": 0,
+        "rotation": 2,
+        "props": {}
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1788770334277_pylwr",
+        "from": {
+          "instId": "comp_1788770328053_rceew",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788770339332_0b94x",
+        "from": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "comp_1788770325988_w22oo",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788770479488_ehu23",
+        "from": {
+          "instId": "comp_1788770377680_k1rrd",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "power_gnd_1788770471239",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788770483935_9xmbp",
+        "from": {
+          "instId": "comp_1788770377680_k1rrd",
+          "pinId": "l8"
+        },
+        "to": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "QB"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788770485607_rq8ko",
+        "from": {
+          "instId": "comp_1788770377680_k1rrd",
+          "pinId": "l7"
+        },
+        "to": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "QC"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788770487321_menu8",
+        "from": {
+          "instId": "comp_1788770377680_k1rrd",
+          "pinId": "l6"
+        },
+        "to": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "QD"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788770488895_z2t97",
+        "from": {
+          "instId": "comp_1788770377680_k1rrd",
+          "pinId": "l5"
+        },
+        "to": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "QE"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788770490615_qazb8",
+        "from": {
+          "instId": "comp_1788770377680_k1rrd",
+          "pinId": "l4"
+        },
+        "to": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "QF"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788770492329_lk9q1",
+        "from": {
+          "instId": "comp_1788770377680_k1rrd",
+          "pinId": "l3"
+        },
+        "to": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "QG"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788770493935_w5kx6",
+        "from": {
+          "instId": "comp_1788770377680_k1rrd",
+          "pinId": "l2"
+        },
+        "to": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "QH"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788770496753_3lln0",
+        "from": {
+          "instId": "comp_1788770377680_k1rrd",
+          "pinId": "l1"
+        },
+        "to": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "QA"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788770558824_wyabj",
+        "from": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "OE"
+        },
+        "to": {
+          "instId": "comp_1788770328053_rceew",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 212,
+            "y": 123
+          },
+          {
+            "x": 212,
+            "y": 211
+          },
+          {
+            "x": 125,
+            "y": 211
+          }
+        ]
+      },
+      {
+        "id": "wire_1788770911805_c1qih",
+        "from": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "RCLK"
+        },
+        "to": {
+          "instId": "comp_1788770353157_4r67m",
+          "pinId": "D8"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 235,
+            "y": 140
+          },
+          {
+            "x": 238,
+            "y": 128
+          }
+        ]
+      },
+      {
+        "id": "wire_1788770939093_1osah",
+        "from": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "SRCLK"
+        },
+        "to": {
+          "instId": "comp_1788770353157_4r67m",
+          "pinId": "D11"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 220,
+            "y": 157
+          },
+          {
+            "x": 220,
+            "y": 86
+          }
+        ]
+      },
+      {
+        "id": "wire_1788770984174_mjx4p",
+        "from": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "SER"
+        },
+        "to": {
+          "instId": "comp_1788770353157_4r67m",
+          "pinId": "D12"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 212,
+            "y": 106
+          },
+          {
+            "x": 212,
+            "y": 72
+          }
+        ]
+      },
+      {
+        "id": "wire_1788771207985_4vdcj",
+        "from": {
+          "instId": "comp_1788770288588_4sbsh",
+          "pinId": "SRCLR"
+        },
+        "to": {
+          "instId": "comp_1788770325988_w22oo",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 212,
+            "y": 174
+          },
+          {
+            "x": 212,
+            "y": 29
+          },
+          {
+            "x": 210,
+            "y": 29
+          }
+        ]
+      },
+      {
+        "id": "wire_1788771350724_3kerm",
+        "from": {
+          "instId": "comp_1788770353157_4r67m",
+          "pinId": "GND_D"
+        },
+        "to": {
+          "instId": "comp_1788770328053_rceew",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "int latchPin = 8;  // Pin connected to Pin 12 of 74HC595\nint clockPin = 11; // Pin connected to Pin 11 of 74HC595\nint dataPin = 12;  // Pin connected to Pin 14 of 74HC595\n\nvoid setup() {\n  pinMode(latchPin, OUTPUT);\n  pinMode(clockPin, OUTPUT);\n  pinMode(dataPin, OUTPUT);\n}\n\nvoid loop() {\n  for (int number = 0; number < 256; number++) {\n    digitalWrite(latchPin, LOW);\n    shiftOut(dataPin, clockPin, MSBFIRST, number);\n    digitalWrite(latchPin, HIGH);\n    delay(500);\n  }\n}\n"
+}
