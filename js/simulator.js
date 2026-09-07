@@ -83,22 +83,30 @@ class ArduinoSimulator {
     // 4. Replace function declarations (return type + name + params + brace)
     const userFnNames = new Set();
     js = js.replace(/\bF\s*\(\s*("[^"]*"|'[^']*')\s*\)/g, '$1');
+    // Build type pattern from centralized definitions
+    const _types = window.CppTypes;
+    const _typePat = _types ? _types.getTypePattern() :
+      'void|bool|char|int|float|double|long|short|byte|boolean|unsigned|signed|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t|ssize_t';
+    const _fullTypePat = _types ? _types.getFullTypeRegex().source.replace(/^/,'(?:').replace(/$/,'').replace(/\(\?:const\\s\+\)/g,'(?:const\\s+)?').replace(/\(\?:unsigned\\s\+\)/g,'(?:unsigned\\s+)?') : `(?:const\\s+)?(?:unsigned\\s+)?(?:${_typePat})\\s*\\*?\\s*`;
+
     js = js.replace(
-      /\b(?:void|int|float|double|long|unsigned|unsigned\s+long|unsigned\s+int|unsigned\s+char|byte|boolean|bool|char\s*\*?|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t)\s+(\w+)\s*\(([^)]*)\)\s*\{/g,
+      new RegExp(`\\b(?:void|int|float|double|long|unsigned|unsigned\\s+long|unsigned\\s+int|unsigned\\s+char|byte|boolean|bool|char\\s*\\*?|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t)\\s+(\\w+)\\s*\\(([^)]*)\\)\\s*\\{`, 'g'),
       (match, name, params) => {
         userFnNames.add(name);
-        const cleanParams = params.replace(/\b(?:const\s+)?(?:unsigned\s+)?(?:int|long|short|byte|float|double|boolean|bool|char|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t)\s*\*?\s*/g, '');
+        const cleanParams = params.replace(
+          new RegExp(`\\b(?:const\\s+)?(?:unsigned\\s+)?(?:${_typePat})\\s*\\*?\\s*`, 'g'), ''
+        );
         return `async function ${name}(${cleanParams}) {`;
       }
     );
 
     // 5. Handle variable declarations (not already transformed)
-    // Strip C-style casts first: (unsigned char)1 → 1, (long)expr → expr
-    js = js.replace(/\((?:unsigned\s+char|unsigned\s+long|unsigned\s+int|unsigned\s+short|unsigned|long\s+long|long|int|short|byte|float|double)\)\s*(?=[a-zA-Z0-9_\(])/g, '');
+    // Strip C-style casts: (unsigned char)1 → 1, (long)expr → expr
+    js = js.replace(new RegExp(`\\((?:unsigned\\s+char|unsigned\\s+long|unsigned\\s+int|unsigned\\s+short|unsigned|long\\s+long|long|int|short|byte|float|double)\\)\\s*(?=[a-zA-Z0-9_\\(])`, 'g'), '');
     // unsigned char x; → let x;  (MUST be before plain char rule)
     js = js.replace(/\bunsigned\s+char\s+(\w+)(?=\s*[=;,\[\)])/g, 'let $1');
-    // int x = 5; → let x = 5;
-    js = js.replace(/\b(?:unsigned\s+)?(?:int|long|short|byte|float|double|boolean|bool|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t)\s+(\w+)(?=\s*[=;,\[\)])/g, 'let $1');
+    // Type var = ...; → let var = ...; (using centralized types)
+    js = js.replace(new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)(?=\\s*[=;,\\[\\)])`, 'g'), 'let $1');
     // char x = 'a'; → let x = 'a';
     js = js.replace(/\bchar\s+(\w+)(?=\s*[=;,\[\)])/g, 'let $1');
     // Standalone unsigned x; → let x; (unsigned alone = unsigned int in C)
@@ -108,7 +116,7 @@ class ArduinoSimulator {
     js = js.replace(/\bconst\s+var\b/g, 'var');
     js = js.replace(/\bconst\s+async\b/g, 'async');
     // Strip const before type keywords: const int x = 5; → int x = 5;
-    js = js.replace(/\bconst\s+((?:unsigned\s+)?(?:int|long|short|byte|float|double|boolean|bool|char|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t))\s*\*?\s*/g, '$1 ');
+    js = js.replace(new RegExp(`\\bconst\\s+((?:unsigned\\s+)?(?:${_typePat}))\\s*\\*?\\s*`, 'g'), '$1 ');
     // char* name[] = { ... } → var name = [ ... ]  (C-style string array)
     js = js.replace(/\bchar\s*\*\s+(\w+)\s*\[\s*\]\s*=\s*\{([^}]*)\}/g, 'var $1 = [$2]');
 
@@ -386,7 +394,7 @@ class ArduinoSimulator {
     }
 
     // Remove C++ type casts like (int), (float), etc.
-    js = js.replace(/\((?:int|float|double|long|byte|char|uint8_t|uint16_t)\)\s*/g, '');
+    js = js.replace(new RegExp(`\\((?:${_typePat}|size_t)\\)\\s*`, 'g'), '');
 
     // typedef struct { ... } Name; → remove (type-only definition)
     js = js.replace(/\btypedef\s+struct\s*\{[^}]*\}\s*\w+\s*;/g, '');
