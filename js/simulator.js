@@ -234,14 +234,16 @@ class ArduinoSimulator {
       js = js.replace(/\bA4\b/g, '32');
       js = js.replace(/\bA5\b/g, '33');
     } else if (this.board === 'arduino_nano') {
-      // Arduino Nano: ATmega328P, LED on D13, A0-A7 analog pins
+      // Arduino Nano: ATmega328P, LED on D13, A0-A7 analog pins (A0=14..A7=21)
       js = js.replace(/\bLED_BUILTIN\b/g, '13');
-      js = js.replace(/\bA0\b/g, 'A0');
-      js = js.replace(/\bA1\b/g, 'A1');
-      js = js.replace(/\bA2\b/g, 'A2');
-      js = js.replace(/\bA3\b/g, 'A3');
-      js = js.replace(/\bA4\b/g, 'A4');
-      js = js.replace(/\bA5\b/g, 'A5');
+      js = js.replace(/\bA0\b/g, '14');
+      js = js.replace(/\bA1\b/g, '15');
+      js = js.replace(/\bA2\b/g, '16');
+      js = js.replace(/\bA3\b/g, '17');
+      js = js.replace(/\bA4\b/g, '18');
+      js = js.replace(/\bA5\b/g, '19');
+      js = js.replace(/\bA6\b/g, '20');
+      js = js.replace(/\bA7\b/g, '21');
     } else {
       js = js.replace(/\bLED_BUILTIN\b/g, '13');
       js = js.replace(/\bA0\b/g, '14');
