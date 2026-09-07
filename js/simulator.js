@@ -405,6 +405,14 @@ class ArduinoSimulator {
     // struct Name varName; → var varName = {};
     js = js.replace(/\bstruct\s+(\w+)\s+(\w+)\s*;/g, 'var $2 = {};');
 
+    // PascalCaseTypeName varName; → var varName = {};  (catches struct/class instances like DataPacket myData;)
+    js = js.replace(/\b([A-Z]\w+)\s+(\w+)\s*;/g, function(match, typeName, varName) {
+      if (/^(Array|Object|String|Number|Boolean|RegExp|Date|Error|Map|Set|Promise|Symbol|Math|JSON|Console|Window|Document|Element|Event|Node|Timer|URL|Proxy|Reflect)$/.test(typeName)) return match;
+      if (/^(Serial|Wire|SPI|WiFi|WiFiClient|EEPROM|Stream|Print|HardwareSerial|Serial1|Serial2)$/.test(typeName)) return match;
+      if (/^(If|Else|For|While|Do|Switch|Case|Return|Function|Var|Let|Const|Import|Export|New|Delete|Try|Catch|Finally|Throw|Async|Await|Yield|Static|Super|With|Debugger|In|Of|This|Void|Typeof|Instanceof|Null|Undefined|True|False|Break|Continue|Default)$/.test(typeName)) return match;
+      return 'var ' + varName + ' = {};';
+    });
+
     // memcpy(&dest, src, sizeof(dest)) → dest = src (for struct copy)
     // Also matches after sizeof has been replaced with .length
     js = js.replace(/\bmemcpy\s*\(\s*&(\w+)\s*,\s*(\w+)\s*,\s*(?:\1\.length|sizeof\s*\(\s*\1\s*\))\s*\)/g, '$1 = $2');
