@@ -3113,3 +3113,48 @@ canvas {
   }
 }
 
+/* Board tabs for dual-board support */
+.board-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 2px 8px;
+  background: var(--panel-bg, #1e1e1e);
+  border-bottom: 1px solid var(--border-color, #333);
+}
+.board-tab {
+  padding: 4px 12px;
+  border: none;
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.15s, color 0.15s;
+}
+.board-tab.active {
+  background: #2d2d2d;
+  color: #4fc3f7;
+}
+.board-tab:hover:not(.active) {
+  background: #252525;
+  color: #aaa;
+}
+#board2-code-textarea {
+  flex: 1;
+  width: 100%;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border: none;
+  padding: 12px;
+  font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+  tab-size: 2;
+}
+#board2-code-textarea:focus {
+  outline: none;
+}
+

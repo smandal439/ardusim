@@ -11,6 +11,7 @@ class ArduinoSimulator {
     this.simTime = 0; // ms
     this.speed = 1;
     this.board = 'arduino_uno'; // arduino_uno | esp32_devkit_v1
+    this.boardIndex = 0; // 0 = primary, 1 = secondary (for dual-board)
     this.pinStates = {}; // pinKey → value (0-255, or 0/1)
     this.pinModes = {}; // pinKey → INPUT/OUTPUT/INPUT_PULLUP
     this.serialBaud = 9600;
@@ -519,8 +520,9 @@ class ArduinoSimulator {
           // sketch may call analogRead() before the next canvas animation
           // frame has copied the component value into pinStates.
           if (canvas && Number.isFinite(pinNum) && typeof canvas._readAnalogInput === 'function') {
-            const board = typeof canvas.getBoardInst === 'function'
-              ? canvas.getBoardInst() : null;
+            const board = typeof canvas.getBoardInstByIndex === 'function'
+              ? canvas.getBoardInstByIndex(self.boardIndex)
+              : (typeof canvas.getBoardInst === 'function' ? canvas.getBoardInst() : null);
             if (board) {
               let label = null;
               if (board.type === 'arduino_uno') {
@@ -1060,6 +1062,15 @@ class ArduinoSimulator {
     this._fps = 0;
     this._loopCount = 0;
     this._iterSinceDelay = 0;
+    // Reset ESP-NOW bus for this board
+    if (window._espnowBus) {
+      // Remove this board's entry so it can re-register
+      for (var bid in window._espnowBus.boards) {
+        if (window._espnowBus.boards[bid].simulator === this) {
+          delete window._espnowBus.boards[bid];
+        }
+      }
+    }
     // Generate session ID for remote control (every run)
     this.sessionId = Math.random().toString(36).slice(2, 7);
 
@@ -1543,6 +1554,7 @@ class ArduinoSimulator {
 /* Examples are now loaded from the examples/ folder as individual JSON files. */
 
 /* Export */
+window.ArduinoSimulator = ArduinoSimulator;
 window.ArduinoSim = new ArduinoSimulator();
 window.EXAMPLE_SKETCHES = [];
 window.loadExamplesFromFiles = async function () {
@@ -1575,7 +1587,8 @@ window.loadExamplesFromFiles = async function () {
     'neopixel_8x8_matrix_rainbow_2', 'neopixel_8x8_matrix_rainbow_3','neopixel_8x8_matrix_rainbow_4',
     'opamp_741_non_inverting', 'vl53l0x_proximity_sensor', 'esp32_i2s_music_player',
     'esp32_i2s_local_radio_player', 'lcd', 'read_rfid_card_raw_data', 'lcd_print_remotely',
-    'rfid_inventory_tracker','shift_resister_circuit','7408_test_with_logic_analyzer'];
+    'rfid_inventory_tracker','shift_resister_circuit','7408_test_with_logic_analyzer',
+    'espnow_sender','espnow_receiver','coap_client'];
   const sketches = [];
   const cacheBust = '?v=' + Date.now();
   for (const name of files) {

@@ -1,0 +1,71 @@
+{
+  "id": "espnow_receiver",
+  "name": "ESP-NOW Receiver",
+  "icon": "📻",
+  "desc": "ESP-NOW wireless receiver - receives data from a sender board",
+  "tags": ["esp32", "wireless", "intermediate"],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "esp32_devkit_v1",
+        "x": 250,
+        "y": 150,
+        "width": 180,
+        "height": 200,
+        "props": { "label": "ESP32 Receiver" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 120,
+        "y": 180,
+        "width": 30,
+        "height": 60,
+        "props": { "color": "#3333ff", "colorName": "Blue" },
+        "runtimeState": { "val": 0, "lit": false, "brightness": 0, "current_mA": 0, "overload": false, "blown": false, "_warnedBlown": false },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 120,
+        "y": 260,
+        "width": 20,
+        "height": 60,
+        "props": { "value": 220, "unit": "Ω" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": { "instId": "b1", "pinId": "D2" },
+        "to": { "instId": "led1", "pinId": "anode" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": { "instId": "led1", "pinId": "cathode" },
+        "to": { "instId": "r1", "pinId": "p1" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": { "instId": "r1", "pinId": "p2" },
+        "to": { "instId": "b1", "pinId": "GND1" },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n * ESP-NOW Receiver — Board 2\n * Receives data from Board 1 (Sender)\n * Blue LED on D2 blinks on each receive\n */\n\n#include <esp_now.h>\n#include <WiFi.h>\n\n// Data structure to receive\ntypedef struct {\n  int counter;\n  float temperature;\n} DataPacket;\n\nDataPacket incomingData;\n\n// Callback when data is received\nvoid OnDataRecv(const uint8_t *mac, const uint8_t *data, int len) {\n  memcpy(&incomingData, data, sizeof(incomingData));\n  \n  Serial.print(\"Received #\");\n  Serial.print(incomingData.counter);\n  Serial.print(\" temp=\");\n  Serial.println(incomingData.temperature);\n  \n  // Blink LED on receive\n  digitalWrite(2, HIGH);\n  delay(50);\n  digitalWrite(2, LOW);\n}\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(2, OUTPUT);\n  \n  // Initialize WiFi in station mode\n  WiFi.mode(WIFI_STA);\n  Serial.print(\"Receiver MAC: \");\n  Serial.println(WiFi.macAddress());\n  \n  // Initialize ESP-NOW\n  esp_now_init();\n  esp_now_register_recv_cb(OnDataRecv);\n  \n  Serial.println(\"ESP-NOW Receiver ready - waiting for data...\");\n}\n\nvoid loop() {\n  delay(100);\n}"
+}

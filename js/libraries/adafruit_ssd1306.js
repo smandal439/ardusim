@@ -31,10 +31,16 @@ window.ArduinoLibs['Adafruit_SSD1306'] = {
   },
 
   constructor: function (width, height, wire, reset) {
-    // Lazily grab `self` from the runtime once it's available.
-    // By the time user code calls methods, the runtime has set _simSelf.
+    // Per-instance self lookup using WeakMap (supports multiple simulators)
+    if (!window.ArduinoLibs['Adafruit_SSD1306']._selfMap) {
+      window.ArduinoLibs['Adafruit_SSD1306']._selfMap = new WeakMap();
+    }
+    var _selfMap = window.ArduinoLibs['Adafruit_SSD1306']._selfMap;
     function getSelf() {
-      return window.ArduinoLibs['Adafruit_SSD1306']._simSelf || null;
+      // Try all known simulators
+      if (window.App && window.App.sim && _selfMap.has(window.App.sim)) return _selfMap.get(window.App.sim);
+      if (window.App && window.App.sim2 && _selfMap.has(window.App.sim2)) return _selfMap.get(window.App.sim2);
+      return null;
     }
 
     var _addr = 0x3C;
@@ -103,8 +109,11 @@ window.ArduinoLibs['Adafruit_SSD1306'] = {
   },
 
   runtime: function (self) {
-    // Expose self so constructor-created methods can emit events
-    window.ArduinoLibs['Adafruit_SSD1306']._simSelf = self;
+    // Per-instance self storage via WeakMap
+    if (!window.ArduinoLibs['Adafruit_SSD1306']._selfMap) {
+      window.ArduinoLibs['Adafruit_SSD1306']._selfMap = new WeakMap();
+    }
+    window.ArduinoLibs['Adafruit_SSD1306']._selfMap.set(self, self);
 
     return {
       oledClearDisplay: function (v) {

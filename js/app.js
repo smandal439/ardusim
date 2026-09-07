@@ -3,6 +3,7 @@
 class App {
   constructor() {
     this.sim = window.ArduinoSim;
+    this.sim2 = null; // second simulator instance for dual-board
     this.editor = window.EditorManager;
     this.canvas = null;
     this.serial = null;
@@ -26,6 +27,10 @@ class App {
     this._examplesObserver = null;
     this._savedQuery = '';
     this.remote = null;
+    // Dual-board support
+    this._activeBoard = 0; // 0 = Board 1 (primary), 1 = Board 2 (secondary)
+    this._board2Code = ''; // stores Board 2 code (Board 1 uses editor)
+    this._board2HasCode = false;
   }
 
   init() {
@@ -53,6 +58,10 @@ class App {
       if (this.editor) {
         this.editor.init();
       }
+
+      // Initialize second simulator for dual-board
+      this._initSim2();
+      this._bindBoard2TabUI();
 
       this._initMobile();
 
@@ -501,14 +510,159 @@ class App {
     }
   }
 
+  /* ══════════════════════ DUAL-BOARD SUPPORT ══════════════════════ */
+  _initSim2() {
+    if (window.ArduinoSimulator) {
+      this.sim2 = new window.ArduinoSimulator();
+      this.sim2.boardIndex = 1;
+      this.sim2.board = 'esp32_devkit_v1';
+    }
+  }
+
+  _attachSim2Events() {
+    if (!this.sim2) return;
+    const tag = (text) => '[Board2] ' + text;
+
+    this.sim2.onSerial = (text, type) => {
+      const suppressed = type === 'data' && this.serial?.isBaudMismatched();
+      this.serial?.receive(tag(text), type);
+      if (!suppressed) this.plotter?.addSerial(tag(text));
+      if (this.remote && type === 'data') this.remote.publishSerial(tag(text));
+    };
+
+    this.sim2.onStart = () => {
+      this.output?.log('[Board2] Compile OK — running', 'success');
+    };
+
+    this.sim2.onPinChange = (pinKey, value) => {
+      if (this.canvas) this.canvas.updateSimState(this.sim2.pinStates);
+      this._updatePinMonitor();
+    };
+
+    this.sim2.onTick = () => {};
+
+    this.sim2.onError = (err) => {
+      this.showToast('[Board2] ' + err, 'error');
+      this.output?.log('[Board2] Error: ' + err, 'error');
+    };
+
+    this.sim2.onStop = () => {
+      this.output?.log('[Board2] Stopped', 'system');
+    };
+
+    this.sim2.onEvent = (type, data) => {
+      if (!this.canvas) return;
+      const insts = this.canvas.components || [];
+      // Route display events for Board 2's components (OLED, TFT, etc.)
+      for (const inst of insts) {
+        if (inst.type === 'ssd1306_128x64_i2c' && type === 'oled_power') {
+          this.canvas.emitEvent?.('oled_draw', { ...data, __board2: true });
+        }
+      }
+    };
+  }
+
+  _bindBoard2TabUI() {
+    const board1Btn = document.getElementById('board-tab-1');
+    const board2Btn = document.getElementById('board-tab-2');
+    const board2Area = document.getElementById('board2-editor-area');
+
+    if (board1Btn) {
+      board1Btn.addEventListener('click', () => this._switchToBoard(0));
+    }
+    if (board2Btn) {
+      board2Btn.addEventListener('click', () => this._switchToBoard(1));
+    }
+  }
+
+  _switchToBoard(idx) {
+    const board1Btn = document.getElementById('board-tab-1');
+    const board2Btn = document.getElementById('board-tab-2');
+    const board2Area = document.getElementById('board2-editor-area');
+
+    if (this._activeBoard === idx) return;
+
+    // Save current editor content to the current board slot
+    if (this._activeBoard === 0) {
+      this._board1CodeCache = this.editor?.getCode?.() || '';
+    }
+
+    this._activeBoard = idx;
+
+    // Update tab UI
+    if (board1Btn) board1Btn.classList.toggle('active', idx === 0);
+    if (board2Btn) board2Btn.classList.toggle('active', idx === 1);
+
+    if (idx === 0) {
+      // Switch to Board 1: restore editor content
+      if (board2Area) board2Area.style.display = 'none';
+      const editorEl = document.getElementById('editor-container');
+      if (editorEl) editorEl.style.display = '';
+      if (this.editor?.setCode && this._board1CodeCache) {
+        this.editor.setCode(this._board1CodeCache);
+      }
+    } else {
+      // Switch to Board 2: show textarea
+      if (board2Area) board2Area.style.display = 'flex';
+      const editorEl = document.getElementById('editor-container');
+      if (editorEl) editorEl.style.display = 'none';
+      const textarea = document.getElementById('board2-code-textarea');
+      if (textarea) textarea.value = this._board2Code || this._getDefaultBoard2Code();
+    }
+  }
+
+  _getBoard2Code() {
+    if (this._activeBoard === 1) {
+      const textarea = document.getElementById('board2-code-textarea');
+      return textarea ? textarea.value : this._board2Code;
+    }
+    return this._board2Code || '';
+  }
+
+  _getDefaultBoard2Code() {
+    return `/*
+ * ArduSim — Board 2 (Receiver)
+ * This board runs on the secondary ESP32.
+ * Both boards run simultaneously when you click "Run".
+ */
+
+#include <esp_now.h>
+#include <WiFi.h>
+
+typedef struct {
+  int value;
+} DataPacket;
+
+DataPacket incomingData;
+
+void OnDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
+  memcpy(&incomingData, data, sizeof(incomingData));
+  Serial.print("Received: ");
+  Serial.println(incomingData.value);
+}
+
+void setup() {
+  Serial.begin(9600);
+  WiFi.mode(WIFI_STA);
+  esp_now_init();
+  esp_now_register_recv_cb(OnDataRecv);
+  Serial.println("Board 2 ready - waiting for data...");
+}
+
+void loop() {
+  delay(100);
+}`;
+  }
+
   /* ══════════════════════ SIMULATOR EVENTS ══════════════════════ */
   _attachSimulatorEvents() {
     this.sim.onSerial = (text, type) => {
       const suppressed = type === 'data' && this.serial?.isBaudMismatched();
-      this.serial?.receive(text, type);
-      if (!suppressed) this.plotter?.addSerial(text);
+      const tagged = this._activeBoard === 1 || (this.sim2 && this.sim2.isRunning) ? '[Board1] ' + text : text;
+      this.serial?.receive(tagged, type);
+      if (!suppressed) this.plotter?.addSerial(tagged);
       // Send serial output to remote clients
-      if (this.remote && type === 'data') this.remote.publishSerial(text);
+      if (this.remote && type === 'data') this.remote.publishSerial(tagged);
     };
 
     this.sim.onStart = () => {
@@ -1015,28 +1169,49 @@ class App {
     if (this.editor) this.editor.clearErrors();
 
     this.sim.stop();
+    if (this.sim2) this.sim2.stop();
     this._pendingRunEpoch = this._runEpoch;
-    let result;
+
+    // Run Board 1
+    let result1;
     try {
-      result = await this.sim.run(code);
+      result1 = await this.sim.run(code);
     } catch (err) {
-      console.error('[ArduSim] Run error:', err);
-      this._updateCompileStatus('Compile failed');
+      console.error('[ArduSim] Board 1 run error:', err);
+      this._updateCompileStatus('Board 1 compile failed');
       this._updateStatus('Simulation failed');
-      this.output?.log(`Simulation failed unexpectedly: ${err && err.message ? err.message : err}`, 'error');
-      this.showToast('Simulation failed unexpectedly', 'error');
+      this.output?.log(`Board 1 failed: ${err && err.message ? err.message : err}`, 'error');
+      this.showToast('Board 1 simulation failed', 'error');
       this._setRunningState(false);
       return;
     }
     if (this._pendingRunEpoch !== this._runEpoch) {
-      // Stop was requested while this run was in flight — leave the stopped state as-is
       this._updateCompileStatus('Stopped');
       return;
     }
-    if (!result) {
+    if (!result1) {
       this._setRunningState(false);
-      this._updateCompileStatus('Compile failed');
-      this.output?.log('Compile failed — see the error message below', 'error');
+      this._updateCompileStatus('Board 1 compile failed');
+      this.output?.log('Board 1 compile failed — see the error message below', 'error');
+      return;
+    }
+
+    // Run Board 2 if it has code
+    const board2Code = this._getBoard2Code();
+    if (board2Code && board2Code.trim().length > 20) {
+      this._attachSim2Events();
+      try {
+        const result2 = await this.sim2.run(board2Code);
+        if (result2) {
+          this._updateCompileStatus('Running (2 boards)');
+          this.output?.log('[Board2] Compile OK — running', 'success');
+        } else {
+          this.output?.log('[Board2] Compile failed — only Board 1 running', 'warn');
+        }
+      } catch (err) {
+        console.error('[ArduSim] Board 2 run error:', err);
+        this.output?.log('[Board2] Error: ' + (err.message || err), 'error');
+      }
     }
   }
 
@@ -1044,6 +1219,7 @@ class App {
     const wasRunning = this.isRunning;
     this._runEpoch++;
     this.sim.stop();
+    if (this.sim2) this.sim2.stop();
     this._setRunningState(false);
     this._updateStatus('Stopped');
     if (wasRunning) this.output?.log('Simulation stopped', 'system');
@@ -1056,6 +1232,7 @@ class App {
     const pauseBtn = document.getElementById('btn-pause');
     if (this.sim.isPaused) {
       this.sim.resume();
+      if (this.sim2) this.sim2.resume();
       this._updateStatus('Simulation resumed');
       this.output?.log('Simulation resumed', 'success');
       if (pauseBtn) {
@@ -1063,6 +1240,7 @@ class App {
       }
     } else {
       this.sim.pause();
+      if (this.sim2) this.sim2.pause();
       this._updateStatus('Simulation paused');
       this.output?.log('Simulation paused', 'warn');
       if (pauseBtn) {

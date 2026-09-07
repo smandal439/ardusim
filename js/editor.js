@@ -226,6 +226,11 @@ void loop() {
           { label: 'ledcSetup', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'ledcSetup(${1:channel}, ${2:freq}, ${3:resolution});' },
           { label: 'ledcAttachPin', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'ledcAttachPin(${1:pin}, ${2:channel});' },
           { label: 'ledcWrite', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'ledcWrite(${1:channel}, ${2:duty});' },
+          { label: 'esp_now_init', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'esp_now_init();' },
+          { label: 'esp_now_add_peer', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'memcpy(${1:peerInfo}.peer_addr, ${2:macAddress}, 6);\n${1:peerInfo}.channel = 0;\n${1:peerInfo}.encrypt = false;\nesp_now_add_peer(&${1:peerInfo});' },
+          { label: 'esp_now_send', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'esp_now_send(${1:macAddress}, (uint8_t *)&${2:data}, sizeof(${2:data}));' },
+          { label: 'WiFi.mode', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'WiFi.mode(WIFI_STA);' },
+          { label: 'WiFi.macAddress', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'WiFi.macAddress()' },
         ];
 
         // Dynamically add library classes and include hints
@@ -1301,6 +1306,17 @@ void loop() {
         { name: 'isListening', snippet: 'isListening()', doc: 'Check if listening' },
         { name: 'overflow', snippet: 'overflow()', doc: 'Check buffer overflow' },
         { name: 'flush', snippet: 'flush()', doc: 'Wait for TX to complete' },
+      ],
+      CoapClient: [
+        { name: 'get', snippet: 'get("${1:/path}")', doc: 'CoAP GET request' },
+        { name: 'put', snippet: 'put("${1:/path}", ${2:data})', doc: 'CoAP PUT request' },
+        { name: 'post', snippet: 'post("${1:/path}", ${2:data})', doc: 'CoAP POST request' },
+        { name: 'delete', snippet: 'delete("${1:/path}")', doc: 'CoAP DELETE request' },
+        { name: 'loop', snippet: 'loop()', doc: 'Poll for responses' },
+      ],
+      CoapServer: [
+        { name: 'add_resource', snippet: 'add_resource("${1:/path}", ${2:handlerFn})', doc: 'Add a resource handler' },
+        { name: 'start', snippet: 'start()', doc: 'Start the CoAP server' },
       ],
     };
 

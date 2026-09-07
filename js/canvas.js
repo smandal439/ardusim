@@ -2346,6 +2346,17 @@ class CircuitCanvas {
     return this.components.find(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano') || null;
   }
 
+  // Get all board instances on the canvas
+  getAllBoardInsts() {
+    return this.components.filter(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano');
+  }
+
+  // Get board instance by index (0-based)
+  getBoardInstByIndex(idx) {
+    const boards = this.getAllBoardInsts();
+    return boards[idx] || null;
+  }
+
   // Update component display based on simulation state and circuit electrical paths
   updateSimState(pinStates) {
     const { getComponentClass } = window.ArduinoComponents;
