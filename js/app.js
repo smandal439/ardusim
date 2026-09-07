@@ -1192,16 +1192,17 @@ void loop() {
     if (this.sim2) this.sim2.stop();
     this._pendingRunEpoch = this._runEpoch;
 
-    // Run Board 1
+    // Compile Board 1 first (compile only, don't block)
+    this._setRunningState(true);
+    this._updateCompileStatus('Compiling…');
     let result1;
     try {
-      result1 = await this.sim.run(code);
+      result1 = await this.sim.compile(code);
     } catch (err) {
-      console.error('[ArduSim] Board 1 run error:', err);
+      console.error('[ArduSim] Board 1 compile error:', err);
       this._updateCompileStatus('Board 1 compile failed');
-      this._updateStatus('Simulation failed');
       this.output?.log(`Board 1 failed: ${err && err.message ? err.message : err}`, 'error');
-      this.showToast('Board 1 simulation failed', 'error');
+      this.showToast('Board 1 compilation failed', 'error');
       this._setRunningState(false);
       return;
     }
@@ -1209,29 +1210,49 @@ void loop() {
       this._updateCompileStatus('Stopped');
       return;
     }
-    if (!result1) {
+    if (!result1 || !result1.ok) {
       this._setRunningState(false);
       this._updateCompileStatus('Board 1 compile failed');
       this.output?.log('Board 1 compile failed — see the error message below', 'error');
       return;
     }
 
-    // Run Board 2 if it has code
+    // Compile Board 2
     const board2Code = this._getBoard2Code();
+    let hasBoard2 = false;
     if (board2Code && board2Code.trim().length > 20) {
       this._attachSim2Events();
       try {
-        const result2 = await this.sim2.run(board2Code);
-        if (result2) {
-          this._updateCompileStatus('Running (2 boards)');
-          this.output?.log('[Board2] Compile OK — running', 'success');
+        const result2 = await this.sim2.compile(board2Code);
+        if (result2 && result2.ok) {
+          hasBoard2 = true;
+          this.output?.log('[Board2] Compile OK', 'success');
         } else {
           this.output?.log('[Board2] Compile failed — only Board 1 running', 'warn');
         }
       } catch (err) {
-        console.error('[ArduSim] Board 2 run error:', err);
-        this.output?.log('[Board2] Error: ' + (err.message || err), 'error');
+        console.error('[ArduSim] Board 2 compile error:', err);
+        this.output?.log('[Board2] Compile error: ' + (err.message || err), 'error');
       }
+    }
+
+    // Both compiled — run them in parallel (don't await)
+    this._updateCompileStatus(hasBoard2 ? 'Running (2 boards)' : 'Running');
+    this._updateStatus('Simulation running');
+    this.output?.log('Compile OK — running simulation' + (hasBoard2 ? ' (2 boards)' : ''), 'success');
+
+    // Reset state for Board 1
+    this.sim.simTime = 0;
+    this.sim.pinStates = {};
+    this.sim.pinModes = {};
+    this.sim._iterSinceDelay = 0;
+    this.sim._startExecution();
+    if (hasBoard2) {
+      this.sim2.simTime = 0;
+      this.sim2.pinStates = {};
+      this.sim2.pinModes = {};
+      this.sim2._iterSinceDelay = 0;
+      this.sim2._startExecution();
     }
   }
 

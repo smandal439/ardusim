@@ -1207,6 +1207,61 @@ class ArduinoSimulator {
     return !hadError;
   }
 
+  /* Start execution of already-compiled code (non-blocking, for dual-board parallel run) */
+  _startExecution() {
+    if (!this._compiledCtx) return;
+    this.isRunning = true;
+    this.isPaused = false;
+    this._resumeAudio();
+    const runId = ++this._runSeq;
+    const { keys, vals, fn } = this._compiledCtx;
+
+    this._serialLog('[ArduSim] Simulation started\n', 'system');
+    if (this.onStart) this.onStart();
+
+    // Start FPS ticker
+    this._fpsInterval = setInterval(() => this._tickFps(), 500);
+
+    const self = this;
+    (async () => {
+      let hadError = false;
+      try {
+        const { setup, loop } = fn(...vals);
+        await setup();
+        while (self.isRunning && runId === self._runSeq) {
+          if (self.isPaused) {
+            await new Promise(resolve => { self._resumeResolve = resolve; });
+          }
+          self._iterSinceDelay++;
+          if (self._iterSinceDelay > self._MAX_TIGHT_ITERS) {
+            self._iterSinceDelay = 0;
+            await new Promise(r => setTimeout(r, 1));
+          }
+          await loop();
+          self._loopCount++;
+          await new Promise(r => setTimeout(r, 0));
+        }
+      } catch (err) {
+        if (err && err.message !== 'SIMULATION_STOPPED') {
+          hadError = true;
+          const friendly = self._friendlyError(err.message ? err.message : String(err), err instanceof Error ? err : undefined);
+          self._emitError(friendly);
+          self._serialLog(`[Error] ${friendly}\n`, 'error');
+        }
+      } finally {
+        if (runId === self._runSeq) {
+          if (self._fpsInterval) { clearInterval(self._fpsInterval); self._fpsInterval = null; }
+          if (self._resumeResolve) { const r = self._resumeResolve; self._resumeResolve = null; r(); }
+        }
+      }
+      if (runId === self._runSeq) {
+        self.isRunning = false;
+        self._serialLog('[ArduSim] Simulation stopped\n', 'system');
+        if (self.onStop) self.onStop();
+      }
+    })();
+  }
+
   stop() {
     this.isRunning = false;
     this.isPaused = false;
