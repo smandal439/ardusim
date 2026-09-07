@@ -521,13 +521,18 @@ class App {
 
   _attachSim2Events() {
     if (!this.sim2) return;
-    const tag = (text) => '[Board2] ' + text;
 
     this.sim2.onSerial = (text, type) => {
       const suppressed = type === 'data' && this.serial?.isBaudMismatched();
-      this.serial?.receive(tag(text), type);
-      if (!suppressed) this.plotter?.addSerial(tag(text));
-      if (this.remote && type === 'data') this.remote.publishSerial(tag(text));
+      this._serialBuf2 += text;
+      const lines = this._serialBuf2.split('\n');
+      this._serialBuf2 = lines.pop();
+      for (const line of lines) {
+        const tagged = '[Board2] ' + line + '\n';
+        this.serial?.receive(tagged, type);
+        if (!suppressed) this.plotter?.addSerial(tagged);
+        if (this.remote && type === 'data') this.remote.publishSerial(tagged);
+      }
     };
 
     this.sim2.onStart = () => {
@@ -612,10 +617,9 @@ class App {
   }
 
   _getBoard2Code() {
-    if (this._activeBoard === 1) {
-      const textarea = document.getElementById('board2-code-textarea');
-      return textarea ? textarea.value : this._board2Code;
-    }
+    const textarea = document.getElementById('board2-code-textarea');
+    const fromTextarea = textarea ? textarea.value : '';
+    if (fromTextarea && fromTextarea.trim().length > 0) return fromTextarea;
     return this._board2Code || '';
   }
 
@@ -656,19 +660,35 @@ void loop() {
 
   /* ══════════════════════ SIMULATOR EVENTS ══════════════════════ */
   _attachSimulatorEvents() {
+    // Buffer serial output per-simulator so [Board] tag appears once per line
+    this._serialBuf1 = '';
+    this._serialBuf2 = '';
+
     this.sim.onSerial = (text, type) => {
       const suppressed = type === 'data' && this.serial?.isBaudMismatched();
-      const tagged = this._activeBoard === 1 || (this.sim2 && this.sim2.isRunning) ? '[Board1] ' + text : text;
-      this.serial?.receive(tagged, type);
-      if (!suppressed) this.plotter?.addSerial(tagged);
-      // Send serial output to remote clients
-      if (this.remote && type === 'data') this.remote.publishSerial(tagged);
+      const needsTag = this.sim2 && this.sim2.isRunning;
+      if (needsTag) {
+        this._serialBuf1 += text;
+        // Emit complete lines with tag
+        const lines = this._serialBuf1.split('\n');
+        this._serialBuf1 = lines.pop(); // keep incomplete last line in buffer
+        for (const line of lines) {
+          const tagged = '[Board1] ' + line + '\n';
+          this.serial?.receive(tagged, type);
+          if (!suppressed) this.plotter?.addSerial(tagged);
+          if (this.remote && type === 'data') this.remote.publishSerial(tagged);
+        }
+      } else {
+        this.serial?.receive(text, type);
+        if (!suppressed) this.plotter?.addSerial(text);
+        if (this.remote && type === 'data') this.remote.publishSerial(text);
+      }
     };
 
     this.sim.onStart = () => {
       if (this._pendingRunEpoch !== this._runEpoch) return; // stop requested while starting
       this._setRunningState(true);
-      this._updateCompileStatus('Running');
+      this._updateCompileStatus(this.sim2 && this.sim2.isRunning ? 'Running (2 boards)' : 'Running');
       this._updateStatus('Simulation running');
       this.output?.log('Compile OK — running simulation', 'success');
       // Start remote control bridge
@@ -1220,6 +1240,15 @@ void loop() {
     this._runEpoch++;
     this.sim.stop();
     if (this.sim2) this.sim2.stop();
+    // Flush serial buffers
+    if (this._serialBuf1) {
+      this.serial?.receive('[Board1] ' + this._serialBuf1, 'data');
+      this._serialBuf1 = '';
+    }
+    if (this._serialBuf2) {
+      this.serial?.receive('[Board2] ' + this._serialBuf2, 'data');
+      this._serialBuf2 = '';
+    }
     this._setRunningState(false);
     this._updateStatus('Stopped');
     if (wasRunning) this.output?.log('Simulation stopped', 'system');
