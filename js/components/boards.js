@@ -1240,6 +1240,34 @@ defComp({
     ctx.font = '4px monospace';
     ctx.fillText('GPIO2', ledCx, ledCy - 6);
 
+    // ── WiFi status icon (top-right of shield) ──
+    const wifiX = 90, wifiY = 50;    
+    const wifiOn = sim && sim._wifiConnected;
+    const wifiColor = wifiOn ? '#00ccff' : '#333';
+
+    if (wifiOn) {
+      ctx.shadowColor = '#00ccff';
+      ctx.shadowBlur = 8;
+    }
+    ctx.strokeStyle = wifiColor;
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round';
+    for (let r = 5; r <= 15; r += 5) {
+      ctx.beginPath();
+      ctx.arc(wifiX, wifiY, r, -Math.PI, -Math.PI / 2);
+      ctx.stroke();
+    }
+    ctx.fillStyle = wifiColor;
+    ctx.beginPath();
+    ctx.arc(wifiX, wifiY, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = wifiOn ? 'rgba(0,204,255,0.7)' : 'rgba(255,255,255,0.2)';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'center';    
+    ctx.fillText('WiFi', wifiX, wifiY + 15);
+
     // ── Board name (enhanced) ──
     ctx.shadowColor = 'rgba(0,0,0,0.5)';
     ctx.shadowBlur = 4;
@@ -1248,7 +1276,7 @@ defComp({
     ctx.textAlign = 'center';
     ctx.fillText('ESP32', W / 2, H - 6);
     ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.font = '5px monospace';
+    ctx.font = '6px monospace';
     ctx.fillText('DEVKIT V1', W / 2, H - 0.5);
     ctx.shadowBlur = 0;
 

@@ -819,11 +819,17 @@ class ArduinoSimulator {
       SPI: { begin() { }, transfer() { return 0; }, end() { }, setClockDivider() { }, setBitOrder() { }, setDataMode() { } },
       /* ESP32 Wi-Fi object stub */
       WiFi: {
-        begin(ssid, pass) { self._serialLog(`[ESP32 Wi-Fi] Connecting to "${ssid}"...\n`, 'system'); setTimeout(() => self._serialLog('[ESP32 Wi-Fi] Connected! IP: 192.168.1.105\n', 'system'), Math.max(50, 800 / self.speed)); },
+        begin(ssid, pass) {
+          self._serialLog(`[ESP32 Wi-Fi] Connecting to "${ssid}"...\n`, 'system');
+          setTimeout(() => {
+            self._wifiConnected = true;
+            self._serialLog('[ESP32 Wi-Fi] Connected! IP: 192.168.1.105\n', 'system');
+          }, Math.max(50, 800 / self.speed));
+        },
         localIP() { return '192.168.1.105'; },
         softAPIP() { return '192.168.4.1'; },
-        status() { return 3; },
-        disconnect() { },
+        status() { return self._wifiConnected ? 3 : 6; },
+        disconnect() { self._wifiConnected = false; },
         mode() { },
         softAP(ssid) { self._serialLog(`[ESP32 Wi-Fi] SoftAP "${ssid}" started\n`, 'system'); },
         setAutoConnect() { },
@@ -1047,6 +1053,7 @@ class ArduinoSimulator {
     this._lcdLines = ['', ''];
     this._lcdCursor = { col: 0, row: 0 };
     this._mqtt = { subs: new Map(), connected: false };
+    this._wifiConnected = false;
     this._startRealTime = Date.now();
     this._fpsFrames = 0;
     this._fpsLast = Date.now();
