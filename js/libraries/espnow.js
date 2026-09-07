@@ -182,7 +182,7 @@ window.ArduinoLibs['ESP-NOW'] = {
               if (b.recvCb && b.simulator) {
                 (function(target) {
                   setTimeout(function() {
-                    try { target.recvCb(board.macBytes, payload, payload.length, true); } catch (e) {}
+                    try { target.recvCb(board.macBytes, dataObj, payload.length, true); } catch (e) {}
                   }, Math.max(5, 10 / (self.speed || 1)));
                 })(b);
                 delivered = true;
@@ -197,7 +197,7 @@ window.ArduinoLibs['ESP-NOW'] = {
               if (target.recvCb && target.simulator) {
                 (function(t) {
                   setTimeout(function() {
-                    try { t.recvCb(board.macBytes, payload, payload.length, false); } catch (e) {}
+                    try { t.recvCb(board.macBytes, dataObj, payload.length, false); } catch (e) {}
                   }, Math.max(5, 10 / (self.speed || 1)));
                 })(target);
                 delivered = true;
