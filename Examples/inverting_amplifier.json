@@ -1,0 +1,255 @@
+{
+  "id": "inverting_amplifier",
+  "name": "Inverting amplifier",
+  "icon": "🔧",
+  "desc": "A custom Inverting amplifier circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1788777336866_j46g5",
+        "type": "lm741",
+        "x": 305,
+        "y": 300,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_1788777354572_44b6k",
+        "type": "bench_power_supply",
+        "x": -155,
+        "y": 160,
+        "rotation": 0,
+        "props": {
+          "powered": 1,
+          "outputEnabled": 1,
+          "voltageSet": 12,
+          "currentLimit": 2.5,
+          "actualCurrentPos": 0,
+          "actualCurrentNeg": 0,
+          "mode": "CV",
+          "actualCurrent5V": 0
+        }
+      },
+      {
+        "id": "comp_1788777404594_2venb",
+        "type": "resistor",
+        "x": 410,
+        "y": 380,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "comp_1788777406322_2rvwf",
+        "type": "resistor",
+        "x": 410,
+        "y": 275,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "comp_1788777448635_gfo9v",
+        "type": "func_gen",
+        "x": 390,
+        "y": 25,
+        "rotation": 0,
+        "props": {
+          "powered": 1,
+          "ch1_wave": "sine",
+          "ch1_freq": 2,
+          "ch1_amp": 5,
+          "ch1_offset": 0,
+          "ch1_phase": 0,
+          "ch1_duty": 50,
+          "ch2_wave": "square",
+          "ch2_freq": 2,
+          "ch2_amp": 3,
+          "ch2_offset": 0,
+          "ch2_phase": 90,
+          "ch2_duty": 50
+        }
+      },
+      {
+        "id": "comp_1788777466923_flv6b",
+        "type": "dso_4ch",
+        "x": 635,
+        "y": 275,
+        "rotation": 0,
+        "props": {
+          "powered": 1,
+          "runStop": 1,
+          "singleTrigger": 0,
+          "autoSet": 0,
+          "timebase": 0.001,
+          "trig_source": "ch1",
+          "trig_level": 0,
+          "trig_mode": "auto",
+          "trig_slope": "rising",
+          "ch1_en": true,
+          "ch1_vdiv": 1,
+          "ch1_pos": 2,
+          "ch1_coupling": "dc",
+          "ch1_probe": 1,
+          "ch2_en": true,
+          "ch2_vdiv": 2,
+          "ch2_pos": 0,
+          "ch2_coupling": "dc",
+          "ch2_probe": 1,
+          "math_op": "off",
+          "dsoMode": "scope"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1788777381882_p3uz1",
+        "from": {
+          "instId": "comp_1788777336866_j46g5",
+          "pinId": "VCCP"
+        },
+        "to": {
+          "instId": "comp_1788777354572_44b6k",
+          "pinId": "POS"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788777384354_wh1qc",
+        "from": {
+          "instId": "comp_1788777336866_j46g5",
+          "pinId": "VCCN"
+        },
+        "to": {
+          "instId": "comp_1788777354572_44b6k",
+          "pinId": "NEG"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788777392643_flbtg",
+        "from": {
+          "instId": "comp_1788777336866_j46g5",
+          "pinId": "INP"
+        },
+        "to": {
+          "instId": "comp_1788777354572_44b6k",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788777422283_o4nbq",
+        "from": {
+          "instId": "comp_1788777404594_2venb",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1788777406322_2rvwf",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788777425474_nwsa7",
+        "from": {
+          "instId": "comp_1788777336866_j46g5",
+          "pinId": "INN"
+        },
+        "to": {
+          "instId": "comp_1788777404594_2venb",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788777430627_wrip5",
+        "from": {
+          "instId": "comp_1788777336866_j46g5",
+          "pinId": "OUT"
+        },
+        "to": {
+          "instId": "comp_1788777406322_2rvwf",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788777488044_spnuv",
+        "from": {
+          "instId": "comp_1788777404594_2venb",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "comp_1788777448635_gfo9v",
+          "pinId": "ch1_out"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 420,
+            "y": 239
+          },
+          {
+            "x": 470,
+            "y": 239
+          }
+        ]
+      },
+      {
+        "id": "wire_1788777491647_h6o8y",
+        "from": {
+          "instId": "comp_1788777354572_44b6k",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "comp_1788777448635_gfo9v",
+          "pinId": "ch1_gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788777505341_w82wj",
+        "from": {
+          "instId": "comp_1788777336866_j46g5",
+          "pinId": "OUT"
+        },
+        "to": {
+          "instId": "comp_1788777466923_flv6b",
+          "pinId": "ch1_in"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788777523135_h1ce5",
+        "from": {
+          "instId": "comp_1788777466923_flv6b",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "comp_1788777354572_44b6k",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "void setup() {\n   // Put your setup code here, to run once when the board starts:\n}\nvoid loop() {\n  // Put your main code here, to run repeatedly indefinitely:\n}"
+}

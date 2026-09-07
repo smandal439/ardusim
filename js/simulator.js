@@ -1563,7 +1563,7 @@ window.loadExamplesFromFiles = async function () {
     'neopixel_8x8_matrix_rainbow_2', 'neopixel_8x8_matrix_rainbow_3','neopixel_8x8_matrix_rainbow_4',
     'opamp_741_non_inverting', 'vl53l0x_proximity_sensor', 'esp32_i2s_music_player',
     'esp32_i2s_local_radio_player', 'lcd', 'read_rfid_card_raw_data', 'lcd_print_remotely',
-    'rfid_inventory_tracker','shift_resister_circuit'];
+    'rfid_inventory_tracker','shift_resister_circuit','7408_test_with_logic_analyzer'];
   const sketches = [];
   const cacheBust = '?v=' + Date.now();
   for (const name of files) {
