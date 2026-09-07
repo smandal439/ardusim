@@ -60,7 +60,6 @@ window.ArduinoLibs['ESP-NOW'] = {
     if (!window._espnowBus) {
       window._espnowBus = {
         boards: {},
-        nextBoardId: 0,
       };
     }
     const bus = window._espnowBus;
@@ -85,7 +84,8 @@ window.ArduinoLibs['ESP-NOW'] = {
 
     return {
       espnowInit: function() {
-        _myBoardId = bus.nextBoardId++;
+        // Use boardIndex for deterministic MAC (matches WiFi.macAddress())
+        _myBoardId = self.boardIndex || 0;
         var mac = 'AA:BB:CC:DD:EE:' + String(_myBoardId + 1).padStart(2, '0');
         bus.boards[_myBoardId] = {
           mac: mac,
