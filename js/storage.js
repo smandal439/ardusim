@@ -47,7 +47,7 @@ const StorageManager = {
   },
 
   /* ── Save project to the Saved Projects library ── */
-  saveToLibrary(code, circuitData, projectName = 'Untitled Project') {
+  saveToLibrary(code, circuitData, projectName = 'Untitled Project', board2Code = '') {
     const projects = this.getSavedProjects();
     const project = {
       id:       this._genId(),
@@ -56,6 +56,7 @@ const StorageManager = {
       name:     projectName,
       code,
       circuit:  circuitData,
+      board2Code,
     };
     // Re-saving keeps the original id (upsert by project name)
     const idx = projects.findIndex(p => p.name === projectName);

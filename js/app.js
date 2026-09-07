@@ -590,6 +590,9 @@ class App {
     // Save current editor content to the current board slot
     if (this._activeBoard === 0) {
       this._board1CodeCache = this.editor?.getCode?.() || '';
+    } else if (this._activeBoard === 1) {
+      const textarea = document.getElementById('board2-code-textarea');
+      if (textarea) this._board2Code = textarea.value;
     }
 
     this._activeBoard = idx;
@@ -612,7 +615,9 @@ class App {
       const editorEl = document.getElementById('editor-container');
       if (editorEl) editorEl.style.display = 'none';
       const textarea = document.getElementById('board2-code-textarea');
-      if (textarea) textarea.value = this._board2Code || this._getDefaultBoard2Code();
+      if (textarea && !textarea.value.trim()) {
+        textarea.value = this._board2Code || this._getDefaultBoard2Code();
+      }
     }
   }
 
@@ -1220,7 +1225,9 @@ void loop() {
     // Compile Board 2
     const board2Code = this._getBoard2Code();
     let hasBoard2 = false;
-    if (board2Code && board2Code.trim().length > 20) {
+    const b2Len = board2Code ? board2Code.trim().length : 0;
+    this.output?.log(`[Board2] Code length: ${b2Len} chars`, 'system');
+    if (board2Code && b2Len > 20) {
       this._attachSim2Events();
       try {
         const result2 = await this.sim2.compile(board2Code);
@@ -1336,8 +1343,9 @@ void loop() {
   /* ══════════════════════ SAVE / DOWNLOAD / LOAD / SHARE ══════════════════════ */
   saveProject() {
     const code = this.editor?.getCode() || '';
+    const board2Code = this._board2Code || document.getElementById('board2-code-textarea')?.value || '';
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
-    window.StorageManager?.saveToLibrary(code, circuitData, this._projectName);
+    window.StorageManager?.saveToLibrary(code, circuitData, this._projectName, board2Code);
   }
 
   downloadProject() {
@@ -1447,6 +1455,9 @@ void loop() {
     if (!p) { this.showToast('Saved project not found', 'error'); return; }
     if (this.editor) this.editor.setCode(p.code || '');
     if (this.canvas) this.canvas.deserialize(p.circuit || { components: [], wires: [] });
+    this._board2Code = p.board2Code || '';
+    const textarea = document.getElementById('board2-code-textarea');
+    if (textarea) textarea.value = this._board2Code;
     this._syncBoardFromCanvas();
     this._setProjectName(p.name || 'Untitled Project');
     this._refreshCanvasSummary();
@@ -1469,6 +1480,9 @@ _newProject() {
     // Reset the canvas and editor to a fresh state
     this.canvas?.clearCanvas();
     this.editor?.setCode('void setup() {\n   // Put your setup code here, to run once when the board starts:\n}\nvoid loop() {\n  // Put your main code here, to run repeatedly indefinitely:\n}');
+    this._board2Code = '';
+    const b2ta = document.getElementById('board2-code-textarea');
+    if (b2ta) b2ta.value = '';
     this._setProjectName('Untitled Project');
     this.output?.log('New project created', 'system');
     // Focus the editor for immediate typing
@@ -2428,6 +2442,9 @@ _newProject() {
       item.addEventListener('click', () => {
         this._setProjectName(example.name);
         if (this.editor) this.editor.setCode(example.code || '');
+        this._board2Code = example.board2Code || '';
+        const b2ta = document.getElementById('board2-code-textarea');
+        if (b2ta) b2ta.value = this._board2Code;
         if (example.circuit && this.canvas) this._loadExampleCircuit(example.circuit);
         this._closeModal();
         this.showToast(`${example.name} loaded`, 'success');
@@ -2463,6 +2480,9 @@ _newProject() {
     if (!ex) { this.showToast(`Example "${id}" not found`, 'error'); return; }
     this._setProjectName(ex.name);
     if (this.editor) this.editor.setCode(ex.code || '');
+    this._board2Code = ex.board2Code || '';
+    const b2ta = document.getElementById('board2-code-textarea');
+    if (b2ta) b2ta.value = this._board2Code;
     if (ex.circuit && this.canvas) this._loadExampleCircuit(ex.circuit);
     this.showToast(`${ex.name} loaded`, 'success');
   }
