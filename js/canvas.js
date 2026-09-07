@@ -1088,14 +1088,28 @@ class CircuitCanvas {
   }
 
   rotateSelected() {
-    if (!this.selected) return;
+    const selComps = this.components.filter(c => c.selected);
+    if (selComps.length === 0 && this.selected) selComps.push(this.selected);
+    if (selComps.length === 0) return;
     this._pushHistory();
-    this.selected.rotation = ((this.selected.rotation || 0) + 1) % 4;
+    for (const c of selComps) {
+      c.rotation = ((c.rotation || 0) + 1) % 4;
+    }
     this._onChanged();
   }
 
   deleteSelected() {
-    if (this.selected) { this.removeComponent(this.selected.id); return; }
+    const selComps = this.components.filter(c => c.selected);
+    if (selComps.length > 0) {
+      this._pushHistory();
+      const ids = new Set(selComps.map(c => c.id));
+      this.wires = this.wires.filter(w => !ids.has(w.from.instId) && !ids.has(w.to.instId));
+      this.components = this.components.filter(c => !ids.has(c.id));
+      this.selected = null;
+      this.selectedWire = null;
+      this._onChanged();
+      return;
+    }
     if (this.selectedWire) { this.removeWire(this.selectedWire.id); }
   }
 
@@ -1105,62 +1119,126 @@ class CircuitCanvas {
   }
 
   duplicateSelected() {
-    if (!this.selected) return null;
-    const orig = this.selected;
-    const def = window.ArduinoComponents.COMPONENT_DEFS[orig.type];
-    const offset = this.GRID * 2;
-    const copy = {
-      id: `${orig.type}_${Date.now()}`,
-      type: orig.type,
-      x: orig.x + offset,
-      y: orig.y + offset,
-      width: def ? def.width : orig.width,
-      height: def ? def.height : orig.height,
-      props: JSON.parse(JSON.stringify(orig.props || (def ? def.defaultProps : {}))),
-      runtimeState: {},
-      selected: true,
-      rotation: orig.rotation || 0,
-    };
+    // Collect all selected components
+    let selComps = this.components.filter(c => c.selected);
+    if (selComps.length === 0 && this.selected) selComps = [this.selected];
+    if (selComps.length === 0) return null;
+
     this._pushHistory();
     this._selectAll(false);
-    this.components.push(copy);
-    this.selected = copy;
+
+    const selIds = new Set(selComps.map(c => c.id));
+    const selWires = this.wires.filter(w => selIds.has(w.from.instId) && selIds.has(w.to.instId));
+    const offset = this.GRID * 2;
+    const idMap = {};
+    const dupes = [];
+
+    for (const orig of selComps) {
+      const def = window.ArduinoComponents.COMPONENT_DEFS[orig.type];
+      const newId = `${orig.type}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      idMap[orig.id] = newId;
+      const copy = {
+        id: newId,
+        type: orig.type,
+        x: orig.x + offset,
+        y: orig.y + offset,
+        width: def ? def.width : orig.width,
+        height: def ? def.height : orig.height,
+        props: JSON.parse(JSON.stringify(orig.props || (def ? def.defaultProps : {}))),
+        runtimeState: {},
+        selected: true,
+        rotation: orig.rotation || 0,
+      };
+      this.components.push(copy);
+      dupes.push(copy);
+    }
+
+    for (const w of selWires) {
+      const nf = idMap[w.from.instId], nt = idMap[w.to.instId];
+      if (nf && nt) this.addWire(nf, w.from.pinId, nt, w.to.pinId, w.color, w.waypoints);
+    }
+
+    this.selected = dupes[dupes.length - 1] || null;
     this.selectedWire = null;
     this._onChanged();
-    return copy;
+    return this.selected;
   }
 
   copySelected() {
-    if (this.selected) {
-      this._clipboard = JSON.parse(JSON.stringify(this.selected));
-    }
+    // Collect all components where selected === true
+    let selComps = this.components.filter(c => c.selected);
+    // Fall back to single selected component
+    if (selComps.length === 0 && this.selected) selComps = [this.selected];
+    if (selComps.length === 0) return;
+
+    const selIds = new Set(selComps.map(c => c.id));
+    // Only copy wires where BOTH endpoints are in the selected set
+    const selWires = this.wires.filter(w =>
+      selIds.has(w.from.instId) && selIds.has(w.to.instId)
+    );
+
+    this._clipboard = {
+      components: JSON.parse(JSON.stringify(selComps)),
+      wires: JSON.parse(JSON.stringify(selWires)),
+    };
   }
 
   paste() {
     if (!this._clipboard) return;
-    const orig = this._clipboard;
-    const def = window.ArduinoComponents.COMPONENT_DEFS[orig.type];
-    const offset = this.GRID * 2;
-    const copy = {
-      id: `${orig.type}_${Date.now()}`,
-      type: orig.type,
-      x: orig.x + offset,
-      y: orig.y + offset,
-      width: def ? def.width : orig.width,
-      height: def ? def.height : orig.height,
-      props: JSON.parse(JSON.stringify(orig.props || {})),
-      runtimeState: {},
-      selected: true,
-      rotation: orig.rotation || 0,
-    };
+    const { components: origComps, wires: origWires } = this._clipboard;
+    if (!origComps || origComps.length === 0) return;
+
     this._pushHistory();
     this._selectAll(false);
-    this.components.push(copy);
-    this.selected = copy;
+
+    // Compute bounding box of clipboard components for offset
+    let minX = Infinity, minY = Infinity;
+    for (const c of origComps) {
+      if (c.x < minX) minX = c.x;
+      if (c.y < minY) minY = c.y;
+    }
+
+    const offset = this.GRID * 4;
+    const idMap = {}; // oldId → newId
+    const pastedComps = [];
+
+    for (const orig of origComps) {
+      const def = window.ArduinoComponents.COMPONENT_DEFS[orig.type];
+      const newId = `${orig.type}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      idMap[orig.id] = newId;
+      const copy = {
+        id: newId,
+        type: orig.type,
+        x: orig.x + offset,
+        y: orig.y + offset,
+        width: def ? def.width : orig.width,
+        height: def ? def.height : orig.height,
+        props: JSON.parse(JSON.stringify(orig.props || {})),
+        runtimeState: {},
+        selected: true,
+        rotation: orig.rotation || 0,
+      };
+      this.components.push(copy);
+      pastedComps.push(copy);
+    }
+
+    // Remap and add wires
+    for (const origWire of (origWires || [])) {
+      const newFromId = idMap[origWire.from.instId];
+      const newToId = idMap[origWire.to.instId];
+      if (!newFromId || !newToId) continue;
+      this.addWire(newFromId, origWire.from.pinId, newToId, origWire.to.pinId, origWire.color, origWire.waypoints);
+    }
+
+    this.selected = pastedComps[pastedComps.length - 1] || null;
     this.selectedWire = null;
-    // update clipboard pos for sequential pastes
-    this._clipboard.x += offset;
-    this._clipboard.y += offset;
+
+    // Update clipboard positions for sequential pastes
+    for (const c of this._clipboard.components) {
+      c.x += offset;
+      c.y += offset;
+    }
+
     this._onChanged();
   }
 
