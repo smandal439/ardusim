@@ -1,0 +1,89 @@
+{
+  "id": "esp_now_sender_with_receiver",
+  "name": "ESP-NOW Sender-with-Receiver",
+  "icon": "🔧",
+  "desc": "A custom ESP-NOW Sender-with-Receiver circuit example.",
+  "tags": [
+    "espnow",
+    "sender"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "esp32_devkit_v1",
+        "x": 250,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32 Sender"
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 120,
+        "y": 180,
+        "rotation": 0,
+        "props": {
+          "color": "#33ff33",
+          "colorName": "Green"
+        }
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 120,
+        "y": 260,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n* ESP-NOW Sender — Board 1\n* Sends a counter to Board 2 every second\n* Green LED on D2 blinks on each send\n*/\n\n#include <esp_now.h>\n#include <WiFi.h>\n\n// Receiver MAC address (Board 2)\nuint8_t receiverMAC[] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0x02};\n\nesp_now_peer_info_t peerInfo;\n\n// Data structure to send\ntypedef struct {\n  int counter;\n  float temperature;\n} DataPacket;\n\nDataPacket myData;\nint sendCount = 0;\n\n// Callback when data is sent\nvoid OnDataSent(const uint8_t *mac, esp_now_send_status_t status) {\n  if (status == ESP_NOW_SEND_SUCCESS) {\n    Serial.println(\"Data sent OK!\");\n  } else {\n    Serial.println(\"Send failed!\");\n  }\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n\n// Initialize WiFi in station mode\n  WiFi.mode(WIFI_STA);\n  Serial.print(\"Sender MAC: \");\n  Serial.println(WiFi.macAddress());\n\n// Initialize ESP-NOW\n  esp_now_init();\n  esp_now_register_send_cb(OnDataSent);\n\n// Configure peer\n  memcpy(peerInfo.peer_addr, receiverMAC, 6);\n  peerInfo.channel = 0;\n  peerInfo.encrypt = false;\n  esp_now_add_peer(&peerInfo);\n\n  Serial.println(\"ESP-NOW Sender ready!\");\n}\n\nvoid loop() {\n  sendCount++;\n  myData.counter = sendCount;\n  myData.temperature = 22.5 + (sendCount % 10) * 0.5;\n\n// Blink LED on send\n  digitalWrite(2, HIGH);\n\n// Send data\n  esp_now_send(receiverMAC, (uint8_t *)&myData, sizeof(myData));\n\n  Serial.print(\"Sent #\");\n  Serial.print(sendCount);\n  Serial.print(\" temp=\");\n  Serial.println(myData.temperature);\n\n  digitalWrite(2, LOW);\n  delay(1000);\n}\n\n/*\n#include <esp_now.h>\n#include <WiFi.h>\n\n// Data structure to receive\ntypedef struct {\n  int counter;\n  float temperature;\n} DataPacket;\n\nDataPacket incomingData;\n\n// Callback when data is received\nvoid OnDataRecv(const uint8_t *mac, const uint8_t *data, int len) {\n  memcpy(&incomingData, data, sizeof(incomingData));\n  \n  Serial.print(\"Received #\");\n  Serial.print(incomingData.counter);\n  Serial.print(\" temp=\");\n  Serial.println(incomingData.temperature);\n  \n  // Blink LED on receive\n  digitalWrite(2, HIGH);\n  delay(50);\n  digitalWrite(2, LOW);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n  \n  // Initialize WiFi in station mode\n  WiFi.mode(WIFI_STA);\n  Serial.print(\"Receiver MAC: \");\n  Serial.println(WiFi.macAddress());\n  \n  // Initialize ESP-NOW\n  esp_now_init();\n  esp_now_register_recv_cb(OnDataRecv);\n  \n  Serial.println(\"ESP-NOW Receiver ready - waiting for data...\");\n}\n\nvoid loop() {\n  delay(100);\n}\n*/",
+  "board2Code": "/*\n * ESP-NOW Receiver — Board 2\n * Receives data from Board 1 (Sender)\n * Blue LED on D2 blinks on each receive\n */\n\n#include <esp_now.h>\n#include <WiFi.h>\n\n// Data structure to receive\ntypedef struct {\n  int counter;\n  float temperature;\n} DataPacket;\n\nDataPacket incomingData;\n\n// Callback when data is received\nvoid OnDataRecv(const uint8_t *mac, const uint8_t *data, int len) {\n  memcpy(&incomingData, data, sizeof(incomingData));\n  \n  Serial.print(\"Received #\");\n  Serial.print(incomingData.counter);\n  Serial.print(\" temp=\");\n  Serial.println(incomingData.temperature);\n  \n  // Blink LED on receive\n  digitalWrite(2, HIGH);\n  delay(50);\n  digitalWrite(2, LOW);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n  \n  // Initialize WiFi in station mode\n  WiFi.mode(WIFI_STA);\n  Serial.print(\"Receiver MAC: \");\n  Serial.println(WiFi.macAddress());\n  \n  // Initialize ESP-NOW\n  esp_now_init();\n  esp_now_register_recv_cb(OnDataRecv);\n  \n  Serial.println(\"ESP-NOW Receiver ready - waiting for data...\");\n}\n\nvoid loop() {\n  delay(100);\n}"
+}
