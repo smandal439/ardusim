@@ -170,6 +170,148 @@ function _breadboardGetGroup(pinId) {
 }
 window._breadboardGetGroup = _breadboardGetGroup;
 
+/* ════════════════ Small Breadboard (16-column) ════════════════ */
+function _genSmallBreadboardPins() {
+  const W = 320, H = 170, cols = 16, startX = 36, stepX = (W - 72) / (cols - 1);
+  const upperTopY = 45, upperBotY = 90;
+  const lowerTopY = 102, lowerBotY = 147;
+  const pins = [];
+
+  for (let c = 0; c < cols; c++) {
+    const hx = Math.round(startX + c * stepX);
+    const n = c + 1;
+    pins.push({ id: `ut${n}`, label: `${n}a`, type: PIN_TYPE.SIGNAL, x: hx, y: upperTopY, side: 'top' });
+    pins.push({ id: `ub${n}`, label: `${n}e`, type: PIN_TYPE.SIGNAL, x: hx, y: upperBotY, side: 'top' });
+    pins.push({ id: `lt${n}`, label: `${n}f`, type: PIN_TYPE.SIGNAL, x: hx, y: lowerTopY, side: 'bottom' });
+    pins.push({ id: `lb${n}`, label: `${n}j`, type: PIN_TYPE.SIGNAL, x: hx, y: lowerBotY, side: 'bottom' });
+  }
+
+  pins.push({ id: 'rp', label: '+', type: PIN_TYPE.POWER, x: 24, y: 14, side: 'top' });
+  pins.push({ id: 'rn', label: '-', type: PIN_TYPE.GND, x: 24, y: 24, side: 'top' });
+  pins.push({ id: 'bp', label: '+', type: PIN_TYPE.POWER, x: 24, y: H - 24, side: 'bottom' });
+  pins.push({ id: 'bn', label: '-', type: PIN_TYPE.GND, x: 24, y: H - 14, side: 'bottom' });
+  return pins;
+}
+
+defComp({
+  id: 'breadboard_small',
+  name: 'Breadboard (Small)',
+  category: 'Passive',
+  icon: '🟦',
+  desc: '170 tie-point mini breadboard — 16 columns × 2 halves (upper a–e, lower f–j) + 4 power rails. Ideal for DIP IC circuits',
+  width: 320,
+  height: 170,
+  defaultProps: {},
+  pins: _genSmallBreadboardPins(),
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const W = 320, H = 170;
+    ctx.save();
+    ctx.translate(x, y);
+
+    // 1. Base Housing
+    ctx.fillStyle = '#dfdbd0';
+    roundRect(ctx, 0, 0, W, H, 6);
+    ctx.fill();
+    const bodyGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bodyGrad.addColorStop(0, '#fcfbfa');
+    bodyGrad.addColorStop(0.5, '#f4f1ea');
+    bodyGrad.addColorStop(1, '#ebe6dc');
+    ctx.fillStyle = bodyGrad;
+    roundRect(ctx, 2, 2, W - 4, H - 4, 5);
+    ctx.fill();
+    ctx.strokeStyle = '#c4bfb2'; ctx.lineWidth = 1;
+    roundRect(ctx, 0.5, 0.5, W - 1, H - 1, 6); ctx.stroke();
+
+    // Side tabs
+    ctx.fillStyle = '#d4cfc2';
+    roundRect(ctx, -2, H / 2 - 10, 3, 20, 2); ctx.fill();
+    roundRect(ctx, W - 1, H / 2 - 10, 3, 20, 2); ctx.fill();
+
+    // 2. Center DIP Trough
+    const midY = H / 2;
+    const grooveH = 10;
+    const grooveGrad = ctx.createLinearGradient(0, midY - grooveH / 2, 0, midY + grooveH / 2);
+    grooveGrad.addColorStop(0, '#b8b4a6');
+    grooveGrad.addColorStop(0.25, '#d3cfc3');
+    grooveGrad.addColorStop(0.75, '#e8e5dc');
+    grooveGrad.addColorStop(1, '#ffffff');
+    ctx.fillStyle = grooveGrad;
+    ctx.fillRect(12, midY - grooveH / 2, W - 24, grooveH);
+
+    // 3. Power Rail Stripes
+    const railX1 = 28, railX2 = W - 28;
+    ctx.strokeStyle = '#e53935'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(railX1, 10); ctx.lineTo(railX2, 10); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(railX1, H - 10); ctx.lineTo(railX2, H - 10); ctx.stroke();
+    ctx.strokeStyle = '#1e88e5';
+    ctx.beginPath(); ctx.moveTo(railX1, 28); ctx.lineTo(railX2, 28); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(railX1, H - 28); ctx.lineTo(railX2, H - 28); ctx.stroke();
+
+    // Polarity glyphs
+    ctx.font = 'bold 10px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#e53935';
+    ctx.fillText('+', 18, 10); ctx.fillText('+', W - 18, 10);
+    ctx.fillText('+', 18, H - 10); ctx.fillText('+', W - 18, H - 10);
+    ctx.fillStyle = '#1e88e5';
+    ctx.fillText('−', 18, 28); ctx.fillText('−', W - 18, 28);
+    ctx.fillText('−', 18, H - 28); ctx.fillText('−', W - 18, H - 28);
+
+    // 4. Tie-Hole Renderer
+    function drawTieHole(hx, hy) {
+      ctx.fillStyle = '#dcd7cc';
+      ctx.fillRect(hx - 3, hy - 3, 6, 6);
+      ctx.fillStyle = '#181715';
+      ctx.fillRect(hx - 2, hy - 2, 4, 4);
+      ctx.fillStyle = '#52504a';
+      ctx.fillRect(hx - 1, hy - 0.8, 2, 1.6);
+    }
+
+    // 5. 16-Column Grid
+    const cols = 16, startX = 36, stepX = (W - 72) / (cols - 1);
+    const upperRowsY = [45, 56, 67, 78, 90];
+    const lowerRowsY = [102, 113, 124, 135, 147];
+    const rowLabelsUpper = ['a', 'b', 'c', 'd', 'e'];
+    const rowLabelsLower = ['f', 'g', 'h', 'i', 'j'];
+
+    ctx.fillStyle = '#7a766c';
+    ctx.font = 'bold 8px "JetBrains Mono", sans-serif';
+    for (let r = 0; r < 5; r++) {
+      ctx.fillText(rowLabelsUpper[r], 18, upperRowsY[r]);
+      ctx.fillText(rowLabelsUpper[r], W - 18, upperRowsY[r]);
+      ctx.fillText(rowLabelsLower[r], 18, lowerRowsY[r]);
+      ctx.fillText(rowLabelsLower[r], W - 18, lowerRowsY[r]);
+    }
+
+    for (let col = 0; col < cols; col++) {
+      const hx = startX + col * stepX;
+      const colNum = col + 1;
+      if (colNum === 1 || colNum % 5 === 0 || colNum === cols) {
+        ctx.fillStyle = '#666157';
+        ctx.font = 'bold 7.5px "JetBrains Mono", sans-serif';
+        ctx.fillText(colNum.toString(), hx, 36);
+        ctx.fillText(colNum.toString(), hx, H - 36);
+      }
+      for (let r = 0; r < 5; r++) drawTieHole(hx, upperRowsY[r]);
+      for (let r = 0; r < 5; r++) drawTieHole(hx, lowerRowsY[r]);
+    }
+
+    // 6. Power Rail Sockets (12-hole grouped arrays)
+    for (let i = 0; i < 12; i++) {
+      const groupOffset = Math.floor(i / 4) * 6;
+      const hx = 38 + i * ((W - 90) / 11) + groupOffset;
+      drawTieHole(hx, 14);
+      drawTieHole(hx, 24);
+      drawTieHole(hx, H - 24);
+      drawTieHole(hx, H - 14);
+    }
+
+    if (inst.selected) drawSelectionRect(ctx, -4, -4, W + 8, H + 8);
+    ctx.restore();
+  }
+});
+
 defComp({
   id: 'breadboard',
   name: 'Breadboard',

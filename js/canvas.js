@@ -4051,9 +4051,9 @@ class CircuitCanvas {
       }
 
       // 4c. Breadboard internal connectivity
-      if (inst.type === 'breadboard') {
+      if (inst.type === 'breadboard' || inst.type === 'breadboard_small') {
         const defs = window.ArduinoComponents?.COMPONENT_DEFS;
-        const def = defs && defs['breadboard'];
+        const def = defs && defs[inst.type];
         if (def) {
           const myGroup = window._breadboardGetGroup(current.pinId);
           if (myGroup) {
@@ -4174,9 +4174,9 @@ class CircuitCanvas {
       }
 
       // Breadboard internal connectivity
-      if (inst.type === 'breadboard') {
+      if (inst.type === 'breadboard' || inst.type === 'breadboard_small') {
         const defs = window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS;
-        const def = defs && defs['breadboard'];
+        const def = defs && defs[inst.type];
         if (def) {
           const myGroup = window._breadboardGetGroup(current.pinId);
           if (myGroup) {

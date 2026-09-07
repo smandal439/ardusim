@@ -179,10 +179,11 @@ class ElectricalEngine {
       case 'bulb_12v':
         conns.push([key('anode'), key('cathode')]);
         break;
-      case 'breadboard': {
+      case 'breadboard':
+      case 'breadboard_small': {
         // Breadboard groups: rows a-e share a rail, rows f-j share a rail
         const groups = {};
-        const def = (window.ArduinoComponents?.COMPONENT_DEFS || {})['breadboard'];
+        const def = (window.ArduinoComponents?.COMPONENT_DEFS || {})[inst.type];
         if (def && def.pins) {
           for (const pin of def.pins) {
             const g = this._breadboardGroup(pin.id);
