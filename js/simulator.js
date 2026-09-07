@@ -446,12 +446,12 @@ class ArduinoSimulator {
                   let arduinoPinNum = null;
                   if (w.from.instId === inst.id && w.from.pinId === cPinId) {
                     const other = canvas.components.find(ci => ci.id === w.to.instId);
-                    if (other && (other.type === 'arduino_uno' || other.type === 'esp32_devkit_v1')) {
+                    if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1')) {
                       arduinoPinNum = canvas._pinToNumber(w.to.pinId);
                     }
                   } else if (w.to.instId === inst.id && w.to.pinId === cPinId) {
                     const other = canvas.components.find(ci => ci.id === w.from.instId);
-                    if (other && (other.type === 'arduino_uno' || other.type === 'esp32_devkit_v1')) {
+                    if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1')) {
                       arduinoPinNum = canvas._pinToNumber(w.from.pinId);
                     }
                   }
@@ -476,12 +476,12 @@ class ArduinoSimulator {
                 let rPinNum = null;
                 if (w.from.instId === inst.id && w.from.pinId === rPinId) {
                   const other = canvas.components.find(ci => ci.id === w.to.instId);
-                  if (other && (other.type === 'arduino_uno' || other.type === 'esp32_devkit_v1')) {
+                  if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1')) {
                     rPinNum = canvas._pinToNumber(w.to.pinId);
                   }
                 } else if (w.to.instId === inst.id && w.to.pinId === rPinId) {
                   const other = canvas.components.find(ci => ci.id === w.from.instId);
-                  if (other && (other.type === 'arduino_uno' || other.type === 'esp32_devkit_v1')) {
+                  if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1')) {
                     rPinNum = canvas._pinToNumber(w.from.pinId);
                   }
                 }
@@ -524,6 +524,9 @@ class ArduinoSimulator {
               if (board.type === 'arduino_uno') {
                 const unoMap = { 14: 'A0', 15: 'A1', 16: 'A2', 17: 'A3', 18: 'A4', 19: 'A5' };
                 label = unoMap[pinNum] || null;
+              } else if (board.type === 'arduino_nano') {
+                const nanoMap = { 14: 'A0', 15: 'A1', 16: 'A2', 17: 'A3', 18: 'A4', 19: 'A5', 20: 'A6', 21: 'A7' };
+                label = nanoMap[pinNum] || null;
               } else if (board.type === 'esp32_devkit_v1') {
                 const espMap = { 36: 'A0', 39: 'A1', 34: 'A2', 35: 'A3', 32: 'A4', 33: 'A5' };
                 label = espMap[pinNum] || null;

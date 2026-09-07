@@ -2013,7 +2013,7 @@ class CircuitCanvas {
   }
 
   _pinToNumber(pinId) {
-    const analogMap = { A0: 14, A1: 15, A2: 16, A3: 17, A4: 18, A5: 19 };
+    const analogMap = { A0: 14, A1: 15, A2: 16, A3: 17, A4: 18, A5: 19, A6: 20, A7: 21 };
     if (pinId in analogMap) return analogMap[pinId];
     // ESP32 DevKit V1 pin aliases
     const esp32Map = { VP: 36, VN: 39, TX0: 1, RX0: 3, EN: 0 };
@@ -3826,8 +3826,8 @@ class CircuitCanvas {
       }
       visited.add(nodeKey);
 
-      // 1. Arduino Uno Pins
-      if (inst.type === 'arduino_uno') {
+      // 1. Arduino Uno / Nano Pins
+      if (inst.type === 'arduino_uno' || inst.type === 'arduino_nano') {
         const pinId = current.pinId;
         if (pinId === 'GND1' || pinId === 'GND2' || pinId === 'GND_D' || pinId === 'GND') {
           grounds.push({ type: 'gnd', instId: inst.id, pinId, resistance: current.resistance });
@@ -4091,7 +4091,7 @@ class CircuitCanvas {
 
   // Quick check if a pin is a ground-type pin (for parallel path re-visiting)
   _isGroundPin(inst, pinId) {
-    if (inst.type === 'arduino_uno') {
+    if (inst.type === 'arduino_uno' || inst.type === 'arduino_nano') {
       return pinId === 'GND1' || pinId === 'GND2' || pinId === 'GND_D' || pinId === 'GND';
     }
     if (inst.type === 'esp32_devkit_v1') {
@@ -4102,7 +4102,7 @@ class CircuitCanvas {
     if (inst.type === 'mb102_power') return pinId === 'gnd_t' || pinId === 'gnd_b' || pinId === 'aux_gnd';
     if (inst.type === 'battery') return pinId === 'neg';
     // Arduino digital pin LOW acts as ground
-    if (inst.type === 'arduino_uno' || inst.type === 'esp32_devkit_v1') {
+    if (inst.type === 'arduino_uno' || inst.type === 'arduino_nano' || inst.type === 'esp32_devkit_v1') {
       const pinNum = this._pinToNumber(pinId);
       if (pinNum != null) {
         const sim = window.ArduinoSim;
@@ -4264,7 +4264,7 @@ class CircuitCanvas {
 
       const otherInst = this.components.find(c => c.id === otherInstId);
       if (!otherInst) continue;
-      if (otherInst.type === 'arduino_uno' || otherInst.type === 'esp32_devkit_v1') {
+      if (otherInst.type === 'arduino_uno' || otherInst.type === 'arduino_nano' || otherInst.type === 'esp32_devkit_v1') {
         return this._pinToNumber(otherPinId);
       }
     }

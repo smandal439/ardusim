@@ -1972,7 +1972,7 @@ class GuideManager {
       const label = pinInfo.label || p.label || p.id;
       const typeLabel = GUIDE_PIN_TYPE_LABELS[p.type] || this._cap(p.type);
       const desc = pinInfo.desc || '';
-      const pinNum = def.id === 'arduino_uno' && /^[AD]\d+$/.test(p.id)
+      const pinNum = (def.id === 'arduino_uno' || def.id === 'arduino_nano') && /^[AD]\d+$/.test(p.id)
         ? this._pinToUnoNum(p.id) : null;
       return `
         <tr>

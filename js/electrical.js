@@ -280,6 +280,7 @@ class ElectricalEngine {
 
     switch (inst.type) {
       case 'arduino_uno':
+      case 'arduino_nano':
       case 'esp32_devkit_v1': {
         const maxV = inst.type === 'esp32_devkit_v1' ? 3.3 : 5.0;
         const sim = window.ArduinoSim;
