@@ -100,6 +100,18 @@ class ArduinoSimulator {
       }
     );
 
+    // 4b. Plugin-specific transpile rules (BEFORE variable declarations)
+    //     so plugin rules like esp_now_peer_info_t can match before Type→let stripping
+    const _plugins = this._getPlugins();
+    const _pluginEntries = Object.entries(_plugins).sort((a, b) => (a[1].priority || 50) - (b[1].priority || 50));
+    for (const [_libName, _lib] of _pluginEntries) {
+      if (_lib.transpile) {
+        for (const [_pattern, _replacement] of _lib.transpile) {
+          js = js.replace(_pattern, _replacement);
+        }
+      }
+    }
+
     // 5. Handle variable declarations (not already transformed)
     // Strip C-style casts: (unsigned char)1 → 1, (long)expr → expr
     js = js.replace(new RegExp(`\\((?:unsigned\\s+char|unsigned\\s+long|unsigned\\s+int|unsigned\\s+short|unsigned|long\\s+long|long|int|short|byte|float|double)\\)\\s*(?=[a-zA-Z0-9_\\(])`, 'g'), '');
@@ -166,12 +178,6 @@ class ArduinoSimulator {
           js = js.replace(new RegExp(`\\b${cls}\\s+(\\w+)\\s*(?:\\(([^)]*)\\))?\\s*;`, 'g'), `var $1 = new ${cls}($2)`);
           // ClassName varName = ClassName(args);
           js = js.replace(new RegExp(`\\b${cls}\\s+(\\w+)\\s*=\\s*${cls}\\s*\\(([^)]*)\\)\\s*;`, 'g'), `var $1 = new ${cls}($2)`);
-        }
-      }
-      // Plugin-specific transpile rules
-      if (lib.transpile) {
-        for (const [pattern, replacement] of lib.transpile) {
-          js = js.replace(pattern, replacement);
         }
       }
     }
