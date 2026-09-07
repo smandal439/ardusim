@@ -31,15 +31,15 @@ defComp({
   defaultProps: { mode: 'astable', frequency: 1000, dutyCycle: 50 },
   pins: [
     /* Bottom row (pins 1-4, left to right) */
-    { id: 'GND',  label: '1', type: PIN_TYPE.GND,     x:  0, y: 50, side: 'bottom' },
+    { id: 'GND', label: '1', type: PIN_TYPE.GND, x: 0, y: 50, side: 'bottom' },
     { id: 'TRIG', label: '2', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
-    { id: 'OUT',  label: '3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
-    { id: 'RST',  label: '4', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'OUT', label: '3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'RST', label: '4', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
     /* Top row (pins 8-5, left to right) */
-    { id: 'VCC',  label: '8', type: PIN_TYPE.POWER,   x:  0, y:  0, side: 'top' },
-    { id: 'DIS',  label: '7', type: PIN_TYPE.DIGITAL, x: 17, y:  0, side: 'top' },
-    { id: 'THR',  label: '6', type: PIN_TYPE.DIGITAL, x: 34, y:  0, side: 'top' },
-    { id: 'CV',   label: '5', type: PIN_TYPE.SIGNAL,  x: 51, y:  0, side: 'top' },
+    { id: 'VCC', label: '8', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'DIS', label: '7', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'THR', label: '6', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'CV', label: '5', type: PIN_TYPE.SIGNAL, x: 51, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -124,21 +124,21 @@ defComp({
   defaultProps: {},
   pins: [
     /* Bottom row (pins 1-7, left to right) */
-    { id: 'A1',  label: '1A',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'B1',  label: '1B',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'Y1',  label: '1Y',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'A2',  label: '2A',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'B2',  label: '2B',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'Y2',  label: '2Y',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'GND', label: 'GND', type: PIN_TYPE.GND,     x: 102, y: 50, side: 'bottom' },
+    { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
     /* Top row (pins 14-8, left to right) */
-    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'B4',  label: '4B',  type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'A4',  label: '4A',  type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'Y4',  label: '4Y',  type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'B3',  label: '3B',  type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'A3',  label: '3A',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'Y3',  label: '3Y',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -219,21 +219,21 @@ defComp({
   defaultProps: {},
   pins: [
     /* Bottom row (pins 1-7) */
-    { id: 'A1',  label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'Y1',  label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'A2',  label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'Y2',  label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'A3',  label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'Y3',  label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'GND', label: '7',  type: PIN_TYPE.GND,     x: 102, y: 50, side: 'bottom' },
+    { id: 'A1', label: '1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'Y1', label: '2', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'A2', label: '3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'Y2', label: '4', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'A3', label: '5', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Y3', label: '6', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: '7', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
     /* Top row (pins 14-8) */
-    { id: 'VCC', label: '14', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'A6',  label: '13', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'Y6',  label: '12', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'A5',  label: '11', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'Y5',  label: '10', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'A4',  label: '9',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'Y4',  label: '8',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
+    { id: 'VCC', label: '14', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'A6', label: '13', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'Y6', label: '12', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'A5', label: '11', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'Y5', label: '10', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'A4', label: '9', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Y4', label: '8', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -310,21 +310,21 @@ defComp({
   defaultProps: {},
   pins: [
     /* Bottom row (pins 1-7, left to right) */
-    { id: 'A1',  label: '1A',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'B1',  label: '1B',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'Y1',  label: '1Y',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'A2',  label: '2A',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'B2',  label: '2B',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'Y2',  label: '2Y',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'GND', label: 'GND', type: PIN_TYPE.GND,     x: 102, y: 50, side: 'bottom' },
+    { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
     /* Top row (pins 14-8, left to right) */
-    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'B4',  label: '4B',  type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'A4',  label: '4A',  type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'Y4',  label: '4Y',  type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'B3',  label: '3B',  type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'A3',  label: '3A',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'Y3',  label: '3Y',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -402,21 +402,21 @@ defComp({
   defaultProps: {},
   pins: [
     /* Bottom row (pins 1-7, left to right) */
-    { id: 'A1',  label: '1A',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'B1',  label: '1B',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'Y1',  label: '1Y',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'A2',  label: '2A',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'B2',  label: '2B',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'Y2',  label: '2Y',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'GND', label: 'GND', type: PIN_TYPE.GND,     x: 102, y: 50, side: 'bottom' },
+    { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
     /* Top row (pins 14-8, left to right) */
-    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'B4',  label: '4B',  type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'A4',  label: '4A',  type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'Y4',  label: '4Y',  type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'B3',  label: '3B',  type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'A3',  label: '3A',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'Y3',  label: '3Y',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -496,24 +496,25 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    /* Bottom row (pins 1-8, left to right) */
-    { id: 'QA',    label: 'Q0',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'QB',    label: 'Q1',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'QC',    label: 'Q2',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'QD',    label: 'Q3',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'QE',    label: 'Q4',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'QF',    label: 'Q5',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'QG',    label: 'Q6',  type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'GND',   label: 'GND', type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-    /* Top row (pins 16-9, left to right) */
-    { id: 'VCC',   label: 'VCC', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'QHn',   label: "Q7'",type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'QH',    label: 'Q7',  type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'SRCLR', label: '/RST', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'SRCLK', label: 'SRCLK',type:PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'RCLK',  label: 'RCLK',type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'OE',    label: '/OE', type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'SER',   label: 'SER', type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+    /* Bottom Row (Pins 1–8, Left to Right) */
+    { id: 'QB', label: 'Q1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' }, // Pin 1
+    { id: 'QC', label: 'Q2', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' }, // Pin 2
+    { id: 'QD', label: 'Q3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' }, // Pin 3
+    { id: 'QE', label: 'Q4', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' }, // Pin 4
+    { id: 'QF', label: 'Q5', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' }, // Pin 5
+    { id: 'QG', label: 'Q6', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' }, // Pin 6
+    { id: 'QH', label: 'Q7', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' }, // Pin 7
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' }, // Pin 8
+
+    /* Top Row (Pins 16–9, Left to Right) */
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },    // Pin 16
+    { id: 'QA', label: 'Q0', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },    // Pin 15
+    { id: 'SER', label: 'SER', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },    // Pin 14
+    { id: 'OE', label: '/OE', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },    // Pin 13
+    { id: 'RCLK', label: 'RCLK/Latch', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },    // Pin 12
+    { id: 'SRCLK', label: 'SRCLK', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },    // Pin 11
+    { id: 'SRCLR', label: '/RST', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },    // Pin 10
+    { id: 'QHn', label: "Q7'", type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },    // Pin 9
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -573,7 +574,7 @@ defComp({
     ctx.restore();
   }
 });
-
+// 
 /* ══════════════════════════════════════════════════════════
    74HC138 — 3-to-8 Line Decoder (16-pin DIP)
    
@@ -598,23 +599,23 @@ defComp({
   defaultProps: {},
   pins: [
     /* Bottom row (pins 1-8, left to right) */
-    { id: 'A0',   label: 'A0',   type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'A1',   label: 'A1',   type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'A2',   label: 'A2',   type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'G2A',  label: 'G2A',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'G2B',  label: 'G2B',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'G1',   label: 'G1',   type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'Y7',   label: 'Y7',   type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'GND',  label: 'GND',  type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
+    { id: 'A0', label: 'A0', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'A1', label: 'A1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'A2', label: 'A2', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'G2A', label: 'G2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'G2B', label: 'G2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'G1', label: 'G1', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'Y7', label: 'Y7', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
     /* Top row (pins 16-9, left to right) */
-    { id: 'VCC',  label: 'VCC',  type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'Y0',   label: 'Y0',   type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'Y1',   label: 'Y1',   type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'Y2',   label: 'Y2',   type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'Y3',   label: 'Y3',   type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'Y4',   label: 'Y4',   type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'Y5',   label: 'Y5',   type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'Y6',   label: 'Y6',   type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'Y0', label: 'Y0', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'Y1', label: 'Y1', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Y2', label: 'Y2', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'Y3', label: 'Y3', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'Y4', label: 'Y4', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Y5', label: 'Y5', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'Y6', label: 'Y6', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -701,27 +702,27 @@ defComp({
   defaultProps: {},
   pins: [
     /* Bottom row (pins 1-10, left to right) */
-    { id: 'DIR', label: 'DIR', type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'A1',  label: 'A1',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'A2',  label: 'A2',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'A3',  label: 'A3',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'A4',  label: 'A4',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'A5',  label: 'A5',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'A6',  label: 'A6',  type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'A7',  label: 'A7',  type: PIN_TYPE.DIGITAL, x: 119, y: 50, side: 'bottom' },
-    { id: 'A8',  label: 'A8',  type: PIN_TYPE.DIGITAL, x: 136, y: 50, side: 'bottom' },
-    { id: 'GND', label: 'GND', type: PIN_TYPE.GND,     x: 153, y: 50, side: 'bottom' },
+    { id: 'DIR', label: 'DIR', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'A1', label: 'A1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'A2', label: 'A2', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'A3', label: 'A3', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'A4', label: 'A4', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'A5', label: 'A5', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'A6', label: 'A6', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'A7', label: 'A7', type: PIN_TYPE.DIGITAL, x: 119, y: 50, side: 'bottom' },
+    { id: 'A8', label: 'A8', type: PIN_TYPE.DIGITAL, x: 136, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 153, y: 50, side: 'bottom' },
     /* Top row (pins 20-11, left to right) */
-    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'OE',  label: '/OE', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'B1',  label: 'B1',  type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'B2',  label: 'B2',  type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'B3',  label: 'B3',  type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'B4',  label: 'B4',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'B5',  label: 'B5',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'B6',  label: 'B6',  type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
-    { id: 'B7',  label: 'B7',  type: PIN_TYPE.DIGITAL, x: 136, y:  0, side: 'top' },
-    { id: 'B8',  label: 'B8',  type: PIN_TYPE.DIGITAL, x: 153, y:  0, side: 'top' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'OE', label: '/OE', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'B1', label: 'B1', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'B2', label: 'B2', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'B3', label: 'B3', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'B4', label: 'B4', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'B5', label: 'B5', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'B6', label: 'B6', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+    { id: 'B7', label: 'B7', type: PIN_TYPE.DIGITAL, x: 136, y: 0, side: 'top' },
+    { id: 'B8', label: 'B8', type: PIN_TYPE.DIGITAL, x: 153, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -806,20 +807,20 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    { id: 'CLR1', label: '/CLR1', type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'D1',   label: 'D1',    type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'CLK1', label: 'CLK1',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'PRE1', label: '/PRE1', type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'Q1',   label: 'Q1',    type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'Q1n',  label: "Q1'",   type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'GND',  label: 'GND',   type: PIN_TYPE.GND,     x: 102, y: 50, side: 'bottom' },
-    { id: 'VCC',  label: 'VCC',   type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'CLK2', label: 'CLK2',  type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'Q2n',  label: "Q2'",   type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'Q2',   label: 'Q2',    type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'PRE2', label: '/PRE2', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'CLR2', label: '/CLR2', type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'D2',   label: 'D2',    type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
+    { id: 'CLR1', label: '/CLR1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'D1', label: 'D1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'CLK1', label: 'CLK1', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'PRE1', label: '/PRE1', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'Q1', label: 'Q1', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Q1n', label: "Q1'", type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'CLK2', label: 'CLK2', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'Q2n', label: "Q2'", type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Q2', label: 'Q2', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'PRE2', label: '/PRE2', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'CLR2', label: '/CLR2', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'D2', label: 'D2', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -881,22 +882,22 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    { id: 'SHLD',  label: '/SHLD', type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'CLK',   label: 'CLK',   type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'E',     label: 'E',     type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'F',     label: 'F',     type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'G',     label: 'G',     type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'H',     label: 'H',     type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'Q7',    label: 'Q7',    type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'GND',   label: 'GND',   type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-    { id: 'VCC',   label: 'VCC',   type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'A',     label: 'A',     type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'CLKINH',label: 'CLKINH',type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'Hn',    label: "H'",    type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'Gn',    label: "G'",    type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'Fn',    label: "F'",    type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'SER',   label: 'SER',   type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'Q7n',   label: "Q7'",   type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+    { id: 'SHLD', label: '/SHLD', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'CLK', label: 'CLK', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'E', label: 'E', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'F', label: 'F', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'G', label: 'G', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'H', label: 'H', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'Q7', label: 'Q7', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'CLKINH', label: 'CLKINH', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Hn', label: "H'", type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'Gn', label: "G'", type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'Fn', label: "F'", type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'SER', label: 'SER', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'Q7n', label: "Q7'", type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -959,22 +960,22 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    { id: 'CPU', label: 'CPU',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'CPD', label: 'CPD',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'PL',  label: '/PL',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'TC_D',label: 'TC_D', type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'TC_U',label: 'TC_U', type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'QA',  label: 'QA',   type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'QB',  label: 'QB',   type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'GND', label: 'GND',  type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-    { id: 'VCC', label: 'VCC',  type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'MR',  label: 'MR',   type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'DD',  label: 'D',    type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'A',   label: 'A',    type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'B',   label: 'B',    type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'C',   label: 'C',    type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'CO',  label: 'CO',   type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'BO',  label: 'BO',   type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+    { id: 'CPU', label: 'CPU', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'CPD', label: 'CPD', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'PL', label: '/PL', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'TC_D', label: 'TC_D', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'TC_U', label: 'TC_U', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'QA', label: 'QA', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'QB', label: 'QB', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'MR', label: 'MR', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'DD', label: 'D', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'B', label: 'B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'C', label: 'C', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'CO', label: 'CO', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'BO', label: 'BO', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -1041,22 +1042,22 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    { id: 'A',   label: 'A',   type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'B',   label: 'B',   type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'C',   label: 'C',   type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'D',   label: 'D',   type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'LT',  label: '/LT', type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'RBI', label: '/RBI',type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'BI',  label: '/BI', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'GND', label: 'GND', type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'f',   label: 'f',   type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'a',   label: 'a',   type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'b',   label: 'b',   type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'c',   label: 'c',   type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'g',   label: 'g',   type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'd',   label: 'd',   type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'e',   label: 'e',   type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+    { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'B', label: 'B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'C', label: 'C', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'D', label: 'D', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'LT', label: '/LT', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'RBI', label: '/RBI', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'BI', label: '/BI', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'f', label: 'f', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'a', label: 'a', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'b', label: 'b', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'c', label: 'c', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'g', label: 'g', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'd', label: 'd', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'e', label: 'e', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -1116,22 +1117,22 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    { id: 'EI',  label: '/EI', type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'I0',  label: 'I0',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'I1',  label: 'I1',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'I2',  label: 'I2',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'I3',  label: 'I3',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'A1',  label: 'A1',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'A2',  label: 'A2',  type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'GND', label: 'GND', type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'EO',  label: '/EO', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'GS',  label: '/GS', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'I4',  label: 'I4',  type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'I5',  label: 'I5',  type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'I6',  label: 'I6',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'I7',  label: 'I7',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'A0',  label: 'A0',  type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+    { id: 'EI', label: '/EI', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'I0', label: 'I0', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'I1', label: 'I1', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'I2', label: 'I2', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'I3', label: 'I3', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'A1', label: 'A1', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'A2', label: 'A2', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'EO', label: '/EO', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'GS', label: '/GS', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'I4', label: 'I4', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'I5', label: 'I5', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'I6', label: 'I6', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'I7', label: 'I7', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'A0', label: 'A0', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -1187,14 +1188,14 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    { id: 'OFF1', label: '1',  type: PIN_TYPE.DIGITAL, x:  0, y: 50, side: 'bottom' },
-    { id: 'INN',  label: '2',  type: PIN_TYPE.SIGNAL,  x: 17, y: 50, side: 'bottom' },
-    { id: 'INP',  label: '3',  type: PIN_TYPE.SIGNAL,  x: 34, y: 50, side: 'bottom' },
-    { id: 'VCCN', label: '4',  type: PIN_TYPE.GND,     x: 51, y: 50, side: 'bottom' },
-    { id: 'OFF2', label: '5',  type: PIN_TYPE.DIGITAL, x:  0, y:  0, side: 'top' },
-    { id: 'OUT',  label: '6',  type: PIN_TYPE.SIGNAL,  x: 17, y:  0, side: 'top' },
-    { id: 'VCCP', label: '7',  type: PIN_TYPE.POWER,   x: 34, y:  0, side: 'top' },
-    { id: 'NC',   label: '8',  type: PIN_TYPE.DIGITAL, x: 51, y:  0, side: 'top' },
+    { id: 'OFF1', label: '1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'INN', label: '2', type: PIN_TYPE.SIGNAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'INP', label: '3', type: PIN_TYPE.SIGNAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'VCCN', label: '4', type: PIN_TYPE.GND, x: 51, y: 50, side: 'bottom' },
+    { id: 'OFF2', label: '5', type: PIN_TYPE.DIGITAL, x: 0, y: 0, side: 'top' },
+    { id: 'OUT', label: '6', type: PIN_TYPE.SIGNAL, x: 17, y: 0, side: 'top' },
+    { id: 'VCCP', label: '7', type: PIN_TYPE.POWER, x: 34, y: 0, side: 'top' },
+    { id: 'NC', label: '8', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -1289,20 +1290,20 @@ class IC74HC00Component extends Component {
 class IC74HC04Component extends Component {
   getPins() {
     return [
-      { id: 'A1', label: '1A',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-      { id: 'Y1', label: '1Y',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-      { id: 'A2', label: '2A',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-      { id: 'Y2', label: '2Y',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-      { id: 'A3', label: '3A',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-      { id: 'Y3', label: '3Y',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-      { id: 'GND', label: 'GND', type: PIN_TYPE.GND,     x: 102, y: 50, side: 'bottom' },
-      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-      { id: 'A6', label: '6A',  type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-      { id: 'Y6', label: '6Y',  type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-      { id: 'A5', label: '5A',  type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-      { id: 'Y5', label: '5Y',  type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-      { id: 'A4', label: '4A',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-      { id: 'Y4', label: '4Y',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
+      { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'A6', label: '6A', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'Y6', label: '6Y', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'A5', label: '5A', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'Y5', label: '5Y', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1489,7 +1490,7 @@ class IC74HC595Component extends Component {
       write(pinId, bitVal);
     });
 
-    const q7nVal = (this.runtimeState._shiftReg >> 7) & 1;
+    const q7nVal = (~this.runtimeState._shiftReg >> 7) & 1;
     this.runtimeState.QHn = q7nVal ? 255 : 0;
     write('QHn', q7nVal);
   }
@@ -1510,22 +1511,22 @@ class IC74HC595Component extends Component {
 class IC74HC138Component extends Component {
   getPins() {
     return [
-      { id: 'A0',   label: 'A0',   type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-      { id: 'A1',   label: 'A1',   type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-      { id: 'A2',   label: 'A2',   type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-      { id: 'G2A',  label: 'G2A',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-      { id: 'G2B',  label: 'G2B',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-      { id: 'G1',   label: 'G1',   type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-      { id: 'Y7',   label: 'Y7',   type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-      { id: 'GND',  label: 'GND',  type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-      { id: 'VCC',  label: 'VCC',  type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-      { id: 'Y0',   label: 'Y0',   type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-      { id: 'Y1',   label: 'Y1',   type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-      { id: 'Y2',   label: 'Y2',   type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-      { id: 'Y3',   label: 'Y3',   type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-      { id: 'Y4',   label: 'Y4',   type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-      { id: 'Y5',   label: 'Y5',   type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-      { id: 'Y6',   label: 'Y6',   type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+      { id: 'A0', label: 'A0', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'A1', label: 'A1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'A2', label: 'A2', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'G2A', label: 'G2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'G2B', label: 'G2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'G1', label: 'G1', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'Y7', label: 'Y7', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'Y0', label: 'Y0', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'Y1', label: 'Y1', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'Y2', label: 'Y2', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'Y3', label: 'Y3', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'Y4', label: 'Y4', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'Y5', label: 'Y5', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'Y6', label: 'Y6', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1564,26 +1565,26 @@ class IC74HC138Component extends Component {
 class IC74HC245Component extends Component {
   getPins() {
     return [
-      { id: 'DIR', label: 'DIR', type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-      { id: 'A1',  label: 'A1',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-      { id: 'A2',  label: 'A2',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-      { id: 'A3',  label: 'A3',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-      { id: 'A4',  label: 'A4',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-      { id: 'A5',  label: 'A5',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-      { id: 'A6',  label: 'A6',  type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-      { id: 'A7',  label: 'A7',  type: PIN_TYPE.DIGITAL, x: 119, y: 50, side: 'bottom' },
-      { id: 'A8',  label: 'A8',  type: PIN_TYPE.DIGITAL, x: 136, y: 50, side: 'bottom' },
-      { id: 'GND', label: 'GND', type: PIN_TYPE.GND,     x: 153, y: 50, side: 'bottom' },
-      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-      { id: 'OE',  label: '/OE', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-      { id: 'B1',  label: 'B1',  type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-      { id: 'B2',  label: 'B2',  type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-      { id: 'B3',  label: 'B3',  type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-      { id: 'B4',  label: 'B4',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-      { id: 'B5',  label: 'B5',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-      { id: 'B6',  label: 'B6',  type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
-      { id: 'B7',  label: 'B7',  type: PIN_TYPE.DIGITAL, x: 136, y:  0, side: 'top' },
-      { id: 'B8',  label: 'B8',  type: PIN_TYPE.DIGITAL, x: 153, y:  0, side: 'top' },
+      { id: 'DIR', label: 'DIR', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'A1', label: 'A1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'A2', label: 'A2', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'A3', label: 'A3', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'A4', label: 'A4', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'A5', label: 'A5', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'A6', label: 'A6', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'A7', label: 'A7', type: PIN_TYPE.DIGITAL, x: 119, y: 50, side: 'bottom' },
+      { id: 'A8', label: 'A8', type: PIN_TYPE.DIGITAL, x: 136, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 153, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'OE', label: '/OE', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'B1', label: 'B1', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'B2', label: 'B2', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'B3', label: 'B3', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'B4', label: 'B4', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'B5', label: 'B5', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'B6', label: 'B6', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+      { id: 'B7', label: 'B7', type: PIN_TYPE.DIGITAL, x: 136, y: 0, side: 'top' },
+      { id: 'B8', label: 'B8', type: PIN_TYPE.DIGITAL, x: 153, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1639,20 +1640,20 @@ class IC74HC245Component extends Component {
 class IC74HC74Component extends Component {
   getPins() {
     return [
-      { id: 'CLR1', label: '/CLR1', type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-      { id: 'D1',   label: 'D1',    type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-      { id: 'CLK1', label: 'CLK1',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-      { id: 'PRE1', label: '/PRE1', type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-      { id: 'Q1',   label: 'Q1',    type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-      { id: 'Q1n',  label: "Q1'",   type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-      { id: 'GND',  label: 'GND',   type: PIN_TYPE.GND,     x: 102, y: 50, side: 'bottom' },
-      { id: 'VCC',  label: 'VCC',   type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-      { id: 'CLK2', label: 'CLK2',  type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-      { id: 'Q2n',  label: "Q2'",   type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-      { id: 'Q2',   label: 'Q2',    type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-      { id: 'PRE2', label: '/PRE2', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-      { id: 'CLR2', label: '/CLR2', type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-      { id: 'D2',   label: 'D2',    type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
+      { id: 'CLR1', label: '/CLR1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'D1', label: 'D1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'CLK1', label: 'CLK1', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'PRE1', label: '/PRE1', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'Q1', label: 'Q1', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'Q1n', label: "Q1'", type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'CLK2', label: 'CLK2', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'Q2n', label: "Q2'", type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'Q2', label: 'Q2', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'PRE2', label: '/PRE2', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'CLR2', label: '/CLR2', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'D2', label: 'D2', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1711,22 +1712,22 @@ class IC74HC74Component extends Component {
 class IC74HC165Component extends Component {
   getPins() {
     return [
-      { id: 'SHLD',   label: '/SHLD', type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-      { id: 'CLK',    label: 'CLK',   type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-      { id: 'E',      label: 'E',     type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-      { id: 'F',      label: 'F',     type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-      { id: 'G',      label: 'G',     type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-      { id: 'H',      label: 'H',     type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-      { id: 'Q7',     label: 'Q7',    type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-      { id: 'GND',    label: 'GND',   type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-      { id: 'VCC',    label: 'VCC',   type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-      { id: 'A',      label: 'A',     type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-      { id: 'CLKINH', label: 'CLKINH',type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-      { id: 'Hn',     label: "H'",    type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-      { id: 'Gn',     label: "G'",    type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-      { id: 'Fn',     label: "F'",    type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-      { id: 'SER',    label: 'SER',   type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-      { id: 'Q7n',    label: "Q7'",   type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+      { id: 'SHLD', label: '/SHLD', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'CLK', label: 'CLK', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'E', label: 'E', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'F', label: 'F', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'G', label: 'G', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'H', label: 'H', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'Q7', label: 'Q7', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'CLKINH', label: 'CLKINH', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'Hn', label: "H'", type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'Gn', label: "G'", type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'Fn', label: "F'", type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'SER', label: 'SER', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'Q7n', label: "Q7'", type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1776,22 +1777,22 @@ class IC74HC165Component extends Component {
 class IC74HC193Component extends Component {
   getPins() {
     return [
-      { id: 'CPU',  label: 'CPU',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-      { id: 'CPD',  label: 'CPD',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-      { id: 'PL',   label: '/PL',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-      { id: 'TC_D', label: 'TC_D', type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-      { id: 'TC_U', label: 'TC_U', type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-      { id: 'QA',   label: 'QA',   type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-      { id: 'QB',   label: 'QB',   type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-      { id: 'GND',  label: 'GND',  type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-      { id: 'VCC',  label: 'VCC',  type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-      { id: 'MR',   label: 'MR',   type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-      { id: 'DD',   label: 'D',    type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-      { id: 'A',    label: 'A',    type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-      { id: 'B',    label: 'B',    type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-      { id: 'C',    label: 'C',    type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-      { id: 'CO',   label: 'CO',   type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-      { id: 'BO',   label: 'BO',   type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+      { id: 'CPU', label: 'CPU', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'CPD', label: 'CPD', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'PL', label: '/PL', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'TC_D', label: 'TC_D', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'TC_U', label: 'TC_U', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'QA', label: 'QA', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'QB', label: 'QB', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'MR', label: 'MR', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'DD', label: 'D', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'B', label: 'B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'C', label: 'C', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'CO', label: 'CO', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'BO', label: 'BO', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1815,9 +1816,9 @@ class IC74HC193Component extends Component {
       this.runtimeState.count = 0;
     } else if (pl === 0) {
       let val = 0;
-      if (read('A'))  val |= 1;
-      if (read('B'))  val |= 2;
-      if (read('C'))  val |= 4;
+      if (read('A')) val |= 1;
+      if (read('B')) val |= 2;
+      if (read('C')) val |= 4;
       if (read('DD')) val |= 8;
       this.runtimeState.count = val & 0xF;
     } else {
@@ -1855,22 +1856,22 @@ class IC74HC193Component extends Component {
 class IC74HC47Component extends Component {
   getPins() {
     return [
-      { id: 'A',   label: 'A',   type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-      { id: 'B',   label: 'B',   type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-      { id: 'C',   label: 'C',   type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-      { id: 'D',   label: 'D',   type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-      { id: 'LT',  label: '/LT', type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-      { id: 'RBI', label: '/RBI',type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-      { id: 'BI',  label: '/BI', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-      { id: 'GND', label: 'GND', type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-      { id: 'f',   label: 'f',   type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-      { id: 'a',   label: 'a',   type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-      { id: 'b',   label: 'b',   type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-      { id: 'c',   label: 'c',   type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-      { id: 'g',   label: 'g',   type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-      { id: 'd',   label: 'd',   type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-      { id: 'e',   label: 'e',   type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+      { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'B', label: 'B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'C', label: 'C', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'D', label: 'D', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'LT', label: '/LT', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'RBI', label: '/RBI', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'BI', label: '/BI', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'f', label: 'f', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'a', label: 'a', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'b', label: 'b', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'c', label: 'c', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'g', label: 'g', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'd', label: 'd', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'e', label: 'e', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1886,8 +1887,8 @@ class IC74HC47Component extends Component {
     if (read('B')) bcd |= 2;
     if (read('C')) bcd |= 4;
     if (read('D')) bcd |= 8;
-    const segTable = [0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,
-                       0x77,0x7C,0x39,0x5E,0x79,0x71];
+    const segTable = [0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F,
+      0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71];
     const lt = read('LT');
     const bi = read('BI');
     let segments;
@@ -1924,22 +1925,22 @@ class IC74HC47Component extends Component {
 class IC74HC148Component extends Component {
   getPins() {
     return [
-      { id: 'EI',  label: '/EI', type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-      { id: 'I0',  label: 'I0',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-      { id: 'I1',  label: 'I1',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-      { id: 'I2',  label: 'I2',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-      { id: 'I3',  label: 'I3',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-      { id: 'A1',  label: 'A1',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-      { id: 'A2',  label: 'A2',  type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-      { id: 'GND', label: 'GND', type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-      { id: 'EO',  label: '/EO', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-      { id: 'GS',  label: '/GS', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-      { id: 'I4',  label: 'I4',  type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-      { id: 'I5',  label: 'I5',  type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-      { id: 'I6',  label: 'I6',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-      { id: 'I7',  label: 'I7',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-      { id: 'A0',  label: 'A0',  type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+      { id: 'EI', label: '/EI', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'I0', label: 'I0', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'I1', label: 'I1', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'I2', label: 'I2', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'I3', label: 'I3', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'A1', label: 'A1', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'A2', label: 'A2', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'EO', label: '/EO', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'GS', label: '/GS', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'I4', label: 'I4', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'I5', label: 'I5', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'I6', label: 'I6', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'I7', label: 'I7', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'A0', label: 'A0', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1951,7 +1952,7 @@ class IC74HC148Component extends Component {
       if (pn !== null) sim.pinStates[`pin_${pn}`] = val ? 255 : 0;
     };
     const ei = read('EI');
-    const inputs = [0,1,2,3,4,5,6,7].map(i => !read(`I${i}`));
+    const inputs = [0, 1, 2, 3, 4, 5, 6, 7].map(i => !read(`I${i}`));
     let activeIdx = -1;
     for (let i = 7; i >= 0; i--) {
       if (inputs[i]) { activeIdx = i; break; }
