@@ -1178,7 +1178,7 @@ class CircuitCanvas {
     );
 
     this._clipboard = {
-      components: JSON.parse(JSON.stringify(selComps)),
+      components: JSON.parse(JSON.stringify(selComps, (k, v) => k === '_componentInstance' ? undefined : v)),
       wires: JSON.parse(JSON.stringify(selWires)),
     };
   }
