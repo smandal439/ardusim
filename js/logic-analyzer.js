@@ -398,7 +398,8 @@ class LogicAnalyzer {
     const channelCount = activeChannels.length || 1;
     const labelW = 60;
     const plotW = W - labelW;
-    const channelH = Math.floor(H / channelCount);
+    const bottomPad = 10;
+    const channelH = Math.floor((H - bottomPad) / channelCount);
     const windowMs = this.timebase * this.gridDivs;
 
     // Determine time window from data
