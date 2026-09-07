@@ -1489,7 +1489,7 @@ class IC74HC595Component extends Component {
       write(pinId, bitVal);
     });
 
-    const q7nVal = (~this.runtimeState._shiftReg >> 7) & 1;
+    const q7nVal = (this.runtimeState._shiftReg >> 7) & 1;
     this.runtimeState.QHn = q7nVal ? 255 : 0;
     write('QHn', q7nVal);
   }

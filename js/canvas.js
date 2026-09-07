@@ -3023,7 +3023,7 @@ class CircuitCanvas {
             inst.runtimeState[pinId] = bitVal ? 255 : 0;
             write(pinId, bitVal);
           });
-          const q7nVal = (~inst.runtimeState._shiftReg >> 7) & 1;
+          const q7nVal = (inst.runtimeState._shiftReg >> 7) & 1;
           inst.runtimeState.QHn = q7nVal ? 255 : 0;
           write('QHn', q7nVal);
           break;
