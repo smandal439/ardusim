@@ -1,65 +1,75 @@
 {
   "id": "vl53l0x_proximity_sensor",
   "name": "VL53L0X Laser Distance Measurement",
-  "icon": "📏",
+  "icon": "🔧",
+  "desc": "Measure distance with VL53L0X laser ToF sensor via I2C. LEDs light up based on distance thresholds — green for close, red for far.",
   "tags": [
     "sensor",
     "I2C",
     "distance",
     "VL53L0X"
   ],
-  "desc": "Measure distance with VL53L0X laser ToF sensor via I2C. LEDs light up based on distance thresholds — green for close, red for far.",
-  "circuit": {
+ "circuit": {
     "components": [
       {
         "id": "board1",
         "type": "arduino_uno",
         "x": 150,
         "y": 180,
-        "props": {}
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
       },
       {
         "id": "tof1",
         "type": "vl53l0x",
         "x": 450,
         "y": 120,
+        "rotation": 0,
         "props": {
           "distance": 150
         }
       },
       {
-        "id": "led_close",
-        "type": "led_green",
-        "x": 450,
-        "y": 300,
-        "props": {
-          "color": "#00ff00"
-        }
-      },
-      {
-        "id": "led_far",
+        "id": "comp_1788796399250_6ljla",
         "type": "led",
-        "x": 510,
-        "y": 300,
+        "x": 535,
+        "y": 210,
+        "rotation": 0,
         "props": {
-          "color": "#ff0000"
+          "color": "#ff3333",
+          "colorName": "Red"
         }
       },
       {
-        "id": "res1",
+        "id": "comp_1788796405267_e96rg",
+        "type": "led_green",
+        "x": 595,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "color": "#33ff66",
+          "colorName": "Green"
+        }
+      },
+      {
+        "id": "comp_1788796418264_trvvs",
         "type": "resistor",
-        "x": 340,
-        "y": 300,
+        "x": 540,
+        "y": 310,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Ω"
         }
       },
       {
-        "id": "res2",
+        "id": "comp_1788796421421_tlti8",
         "type": "resistor",
-        "x": 400,
-        "y": 300,
+        "x": 600,
+        "y": 310,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Ω"
@@ -77,7 +87,8 @@
           "instId": "board1",
           "pinId": "5V2"
         },
-        "color": "#ff0000"
+        "color": "#ff0000",
+        "waypoints": []
       },
       {
         "id": "w_gnd1",
@@ -89,7 +100,8 @@
           "instId": "board1",
           "pinId": "GND3"
         },
-        "color": "#000000"
+        "color": "#000000",
+        "waypoints": []
       },
       {
         "id": "w_scl",
@@ -101,7 +113,8 @@
           "instId": "board1",
           "pinId": "A5"
         },
-        "color": "#00ccff"
+        "color": "#00ccff",
+        "waypoints": []
       },
       {
         "id": "w_sda",
@@ -113,81 +126,88 @@
           "instId": "board1",
           "pinId": "A4"
         },
-        "color": "#00ffcc"
+        "color": "#00ffcc",
+        "waypoints": []
       },
       {
-        "id": "w_d7_res1",
+        "id": "wire_1788796432490_rdfke",
         "from": {
           "instId": "board1",
           "pinId": "D7"
         },
         "to": {
-          "instId": "res1",
-          "pinId": "p1"
-        },
-        "color": "#00cc00"
-      },
-      {
-        "id": "w_res1_led_close",
-        "from": {
-          "instId": "res1",
-          "pinId": "p2"
-        },
-        "to": {
-          "instId": "led_close",
+          "instId": "comp_1788796399250_6ljla",
           "pinId": "anode"
         },
-        "color": "#00cc00"
+        "color": null,
+        "waypoints": []
       },
       {
-        "id": "w_led_close_gnd",
-        "from": {
-          "instId": "led_close",
-          "pinId": "cathode"
-        },
-        "to": {
-          "instId": "board1",
-          "pinId": "GND3"
-        },
-        "color": "#000000"
-      },
-      {
-        "id": "w_d8_res2",
+        "id": "wire_1788796435439_e7k2x",
         "from": {
           "instId": "board1",
           "pinId": "D8"
         },
         "to": {
-          "instId": "res2",
-          "pinId": "p1"
-        },
-        "color": "#cc0000"
-      },
-      {
-        "id": "w_res2_led_far",
-        "from": {
-          "instId": "res2",
-          "pinId": "p2"
-        },
-        "to": {
-          "instId": "led_far",
+          "instId": "comp_1788796405267_e96rg",
           "pinId": "anode"
         },
-        "color": "#cc0000"
+        "color": null,
+        "waypoints": []
       },
       {
-        "id": "w_led_far_gnd",
+        "id": "wire_1788796437879_r4frb",
         "from": {
-          "instId": "led_far",
+          "instId": "comp_1788796399250_6ljla",
           "pinId": "cathode"
         },
         "to": {
+          "instId": "comp_1788796418264_trvvs",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788796439533_fs8dt",
+        "from": {
+          "instId": "comp_1788796421421_tlti8",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1788796405267_e96rg",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788796442786_pc9gp",
+        "from": {
           "instId": "board1",
           "pinId": "GND1"
         },
-        "color": "#000000"
+        "to": {
+          "instId": "comp_1788796418264_trvvs",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788796446225_bcyba",
+        "from": {
+          "instId": "board1",
+          "pinId": "GND1"
+        },
+        "to": {
+          "instId": "comp_1788796421421_tlti8",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
       }
     ]
   },
-  "code": "#include <Wire.h>\n#include <Adafruit_VL53L0X.h>\n\nAdafruit_VL53L0X lox = Adafruit_VL53L0X();\n\nconst int ledClose = 7;\nconst int ledFar   = 8;\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(ledClose, OUTPUT);\n  pinMode(ledFar, OUTPUT);\n\n  Serial.println(\"VL53L0X Distance Sensor\");\n\n  if (!lox.begin()) {\n    Serial.println(F(\"Failed to boot VL53L0X!\"));\n    while (1);\n  }\n  Serial.println(F(\"Sensor ready.\"));\n}\n\nvoid loop() {\n  VL53L0X_RangingMeasurementData_t measure;\n  lox.rangingTest(&measure, false);\n\n  if (measure.RangeStatus != 4) {\n    int dist = measure.RangeMilliMeter;\n    Serial.print(\"Distance: \");\n    Serial.print(dist);\n    Serial.println(\" mm\");\n\n    if (dist < 100) {\n      digitalWrite(ledClose, HIGH);\n      digitalWrite(ledFar, LOW);\n    } else if (dist < 300) {\n      digitalWrite(ledClose, LOW);\n      digitalWrite(ledFar, HIGH);\n    } else {\n      digitalWrite(ledClose, LOW);\n      digitalWrite(ledFar, LOW);\n    }\n  } else {\n    Serial.println(\"Out of range\");\n    digitalWrite(ledClose, LOW);\n    digitalWrite(ledFar, LOW);\n  }\n\n  delay(100);\n}"
+  "code": "#include <Wire.h>\n#include <Adafruit_VL53L0X.h>\n\nAdafruit_VL53L0X lox = Adafruit_VL53L0X();\n\nconst int ledClose = 7;\nconst int ledFar   = 8;\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(ledClose, OUTPUT);\n  pinMode(ledFar, OUTPUT);\n\n  Serial.println(\"VL53L0X Distance Sensor\");\n\n  if (!lox.begin()) {\n    Serial.println(F(\"Failed to boot VL53L0X!\"));\n    // while (1);\n  }\n  Serial.println(F(\"Sensor ready.\"));\n}\n\nvoid loop() {\n  VL53L0X_RangingMeasurementData_t measure;\n  lox.rangingTest(&measure, false);\n\n  if (measure.RangeStatus != 4) {\n    int dist = measure.RangeMilliMeter;\n    Serial.print(\"Distance: \");\n    Serial.print(dist);\n    Serial.println(\" mm\");\n\n    if (dist < 100) {\n      digitalWrite(ledClose, HIGH);\n      digitalWrite(ledFar, LOW);\n    } else if (dist < 300) {\n      digitalWrite(ledClose, LOW);\n      digitalWrite(ledFar, HIGH);\n    } else {\n      digitalWrite(ledClose, LOW);\n      digitalWrite(ledFar, LOW);\n    }\n  } else {\n    Serial.println(\"Out of range\");\n    digitalWrite(ledClose, LOW);\n    digitalWrite(ledFar, LOW);\n  }\n\n  delay(100);\n}"
 }
