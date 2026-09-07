@@ -87,7 +87,7 @@ class ArduinoSimulator {
       /\b(?:void|int|float|double|long|unsigned|unsigned\s+long|unsigned\s+int|unsigned\s+char|byte|boolean|bool|char\s*\*?|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t)\s+(\w+)\s*\(([^)]*)\)\s*\{/g,
       (match, name, params) => {
         userFnNames.add(name);
-        const cleanParams = params.replace(/\b(?:unsigned\s+)?(?:int|long|short|byte|float|double|boolean|bool|char|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t)\s*\*?\s*/g, '');
+        const cleanParams = params.replace(/\b(?:const\s+)?(?:unsigned\s+)?(?:int|long|short|byte|float|double|boolean|bool|char|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t)\s*\*?\s*/g, '');
         return `async function ${name}(${cleanParams}) {`;
       }
     );
@@ -108,7 +108,7 @@ class ArduinoSimulator {
     js = js.replace(/\bconst\s+var\b/g, 'var');
     js = js.replace(/\bconst\s+async\b/g, 'async');
     // Strip const before type keywords: const int x = 5; → int x = 5;
-    js = js.replace(/\bconst\s+((?:unsigned\s+)?(?:int|long|short|byte|float|double|boolean|bool|char|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t))\b/g, '$1');
+    js = js.replace(/\bconst\s+((?:unsigned\s+)?(?:int|long|short|byte|float|double|boolean|bool|char|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t))\s*\*?\s*/g, '$1 ');
     // char* name[] = { ... } → var name = [ ... ]  (C-style string array)
     js = js.replace(/\bchar\s*\*\s+(\w+)\s*\[\s*\]\s*=\s*\{([^}]*)\}/g, 'var $1 = [$2]');
 
@@ -868,6 +868,11 @@ class ArduinoSimulator {
         status() { return self._wifiConnected ? 3 : 6; },
         disconnect() { self._wifiConnected = false; },
         mode() { },
+        macAddress() {
+          // Return a deterministic MAC based on board index
+          const idx = self.boardIndex || 0;
+          return 'AA:BB:CC:DD:EE:' + String(idx + 1).padStart(2, '0');
+        },
         softAP(ssid) { self._serialLog(`[ESP32 Wi-Fi] SoftAP "${ssid}" started\n`, 'system'); },
         setAutoConnect() { },
         reconnect() { self._serialLog('[ESP32 Wi-Fi] Reconnected\n', 'system'); },
