@@ -1272,11 +1272,11 @@ defComp({
     ctx.shadowColor = 'rgba(0,0,0,0.5)';
     ctx.shadowBlur = 4;
     ctx.fillStyle = 'rgba(255,255,255,0.8)';
-    ctx.font = 'bold 8px monospace';
+    ctx.font = 'bold 10px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('ESP32', W / 2, H - 6);
     ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.font = '6px monospace';
+    ctx.font = '8px monospace';
     ctx.fillText('DEVKIT V1', W / 2, H - 0.5);
     ctx.shadowBlur = 0;
 
