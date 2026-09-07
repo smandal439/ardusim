@@ -1,0 +1,546 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-08-23T10:39:16.414Z",
+  "name": "multi colour led blink",
+  "code": "void setup() {\r\n// setup code\r\n  pinMode(0, OUTPUT);\r\n  pinMode(1, OUTPUT);\r\n  pinMode(2, OUTPUT);\r\n  pinMode(3, OUTPUT);\r\n  pinMode(4, OUTPUT);\r\n  pinMode(5, OUTPUT);\r\n}\r\nvoid loop() {\r\n// loop code\r\n  digitalWrite(0, HIGH);\r\n  digitalWrite(1, HIGH);\r\n  digitalWrite(2, HIGH);\r\n  digitalWrite(3, HIGH);\r\n  digitalWrite(4, HIGH);\r\n  digitalWrite(5, HIGH);\r\n  delay(5000);\r\n  digitalWrite(0, LOW);\r\n  digitalWrite(1, LOW);\r\n  digitalWrite(3, LOW);\r\n  digitalWrite(2, LOW);\r\n  digitalWrite(4, LOW);\r\n  digitalWrite(5, LOW);\r\n  delay(1000);\r\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1787479900960_4dc5t",
+        "type": "arduino_uno",
+        "x": 85,
+        "y": 25,
+        "width": 230,
+        "height": 150,
+        "props": {
+          "label": "UNO"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787479900960_a0f5q",
+        "type": "led",
+        "x": 105,
+        "y": 250,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        },
+        "runtimeState": {
+          "val": 1,
+          "lit": true,
+          "brightness": 0.928976919549213,
+          "current_mA": 12.244897959183673,
+          "overload": false,
+          "blown": false,
+          "_warnedBlown": false
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787479900960_khqv2",
+        "type": "resistor",
+        "x": 110,
+        "y": 330,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Î©"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787480583271_ow2q0",
+        "type": "led_green",
+        "x": 175,
+        "y": 245,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#33ff66",
+          "colorName": "Green"
+        },
+        "runtimeState": {
+          "val": 1,
+          "lit": true,
+          "brightness": 0.928976919549213,
+          "current_mA": 12.244897959183673,
+          "overload": false,
+          "blown": false,
+          "_warnedBlown": false
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787480635156_480d3",
+        "type": "led_blue",
+        "x": 240,
+        "y": 245,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#3399ff",
+          "colorName": "Blue"
+        },
+        "runtimeState": {
+          "val": 1,
+          "lit": true,
+          "brightness": 0.928976919549213,
+          "current_mA": 12.244897959183673,
+          "overload": false,
+          "blown": false,
+          "_warnedBlown": false
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787480641338_2thon",
+        "type": "led_yellow",
+        "x": 295,
+        "y": 245,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#ffee33",
+          "colorName": "Yellow"
+        },
+        "runtimeState": {
+          "val": 1,
+          "lit": true,
+          "brightness": 0.928976919549213,
+          "current_mA": 12.244897959183673,
+          "overload": false,
+          "blown": false,
+          "_warnedBlown": false
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787480645176_jnb9p",
+        "type": "led_orange",
+        "x": 350,
+        "y": 240,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#ff8833",
+          "colorName": "Orange"
+        },
+        "runtimeState": {
+          "val": 1,
+          "lit": true,
+          "brightness": 0.928976919549213,
+          "current_mA": 12.244897959183673,
+          "overload": false,
+          "blown": false,
+          "_warnedBlown": false
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787480649869_wa50q",
+        "type": "led_white",
+        "x": 400,
+        "y": 240,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#ffffff",
+          "colorName": "White"
+        },
+        "runtimeState": {
+          "val": 1,
+          "lit": true,
+          "brightness": 0.928976919549213,
+          "current_mA": 12.244897959183673,
+          "overload": false,
+          "blown": false,
+          "_warnedBlown": false
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787480669456_bgwwq",
+        "type": "resistor",
+        "x": 180,
+        "y": 330,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Î©"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787480671586_do3e3",
+        "type": "resistor",
+        "x": 240,
+        "y": 330,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Î©"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787480673408_8d9ph",
+        "type": "resistor",
+        "x": 300,
+        "y": 325,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Î©"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787480675180_u2znz",
+        "type": "resistor",
+        "x": 355,
+        "y": 330,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Î©"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787480677178_4uwr8",
+        "type": "resistor",
+        "x": 405,
+        "y": 330,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Î©"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1787479900960_swqr0",
+        "from": {
+          "instId": "comp_1787479900960_a0f5q",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "comp_1787479900960_khqv2",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787480688552_hy6zs",
+        "from": {
+          "instId": "comp_1787480583271_ow2q0",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "comp_1787480669456_bgwwq",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787480691248_ig8nj",
+        "from": {
+          "instId": "comp_1787480635156_480d3",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "comp_1787480671586_do3e3",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787480693910_vyes2",
+        "from": {
+          "instId": "comp_1787480641338_2thon",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "comp_1787480673408_8d9ph",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787480697101_byx3p",
+        "from": {
+          "instId": "comp_1787480645176_jnb9p",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "comp_1787480675180_u2znz",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787480700030_01sy1",
+        "from": {
+          "instId": "comp_1787480649869_wa50q",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "comp_1787480677178_4uwr8",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787480705153_iaot2",
+        "from": {
+          "instId": "comp_1787479900960_khqv2",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "comp_1787480669456_bgwwq",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787480707717_gip38",
+        "from": {
+          "instId": "comp_1787480669456_bgwwq",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "comp_1787480671586_do3e3",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787480710769_sd9o2",
+        "from": {
+          "instId": "comp_1787480671586_do3e3",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "comp_1787480673408_8d9ph",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787480713580_32al2",
+        "from": {
+          "instId": "comp_1787480675180_u2znz",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "comp_1787480677178_4uwr8",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787480716319_218u2",
+        "from": {
+          "instId": "comp_1787480673408_8d9ph",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "comp_1787480675180_u2znz",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 310,
+            "y": 415
+          },
+          {
+            "x": 365,
+            "y": 415
+          }
+        ]
+      },
+      {
+        "id": "wire_1787480760413_pomf6",
+        "from": {
+          "instId": "comp_1787479900960_4dc5t",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1787479900960_khqv2",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787480771081_leu2k",
+        "from": {
+          "instId": "comp_1787479900960_4dc5t",
+          "pinId": "D0"
+        },
+        "to": {
+          "instId": "comp_1787479900960_a0f5q",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 50,
+            "y": 37
+          },
+          {
+            "x": 50,
+            "y": 226
+          },
+          {
+            "x": 120,
+            "y": 226
+          }
+        ]
+      },
+      {
+        "id": "wire_1787480775575_5k923",
+        "from": {
+          "instId": "comp_1787479900960_4dc5t",
+          "pinId": "D1"
+        },
+        "to": {
+          "instId": "comp_1787480583271_ow2q0",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787480778616_nzzfw",
+        "from": {
+          "instId": "comp_1787480635156_480d3",
+          "pinId": "anode"
+        },
+        "to": {
+          "instId": "comp_1787479900960_4dc5t",
+          "pinId": "D2"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 255,
+            "y": 13
+          },
+          {
+            "x": 123,
+            "y": 13
+          }
+        ]
+      },
+      {
+        "id": "wire_1787480782370_dqow5",
+        "from": {
+          "instId": "comp_1787480641338_2thon",
+          "pinId": "anode"
+        },
+        "to": {
+          "instId": "comp_1787479900960_4dc5t",
+          "pinId": "D3"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 310,
+            "y": 13
+          },
+          {
+            "x": 137,
+            "y": 13
+          }
+        ]
+      },
+      {
+        "id": "wire_1787480788206_q6x04",
+        "from": {
+          "instId": "comp_1787480645176_jnb9p",
+          "pinId": "anode"
+        },
+        "to": {
+          "instId": "comp_1787479900960_4dc5t",
+          "pinId": "D4"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 365,
+            "y": 13
+          },
+          {
+            "x": 151,
+            "y": 13
+          }
+        ]
+      },
+      {
+        "id": "wire_1787480794642_m49on",
+        "from": {
+          "instId": "comp_1787480649869_wa50q",
+          "pinId": "anode"
+        },
+        "to": {
+          "instId": "comp_1787479900960_4dc5t",
+          "pinId": "D5"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 415,
+            "y": 13
+          },
+          {
+            "x": 165,
+            "y": 13
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-09-02T15:37:26.145Z",
+  "name": "led array blink2",
+  "code": "const int led_array[8] = {0, 1, 2, 3, 4, 5, 6, 7}; // Pins connected to LEDs\r\n\r\nvoid setup() {\r\n  for (int i = 0; i < 8; i++) {\r\n    pinMode(led_array[i], OUTPUT);\r\n  }\r\n}\r\n\r\nvoid loop() {\r\n  cylonBounce(100, 2);      // Knight Rider scanning effect\r\n  centerInOut(100, 2);      // Expand from center to edges, then collapse back\r\n  binaryCounter(150);       // Counts from 0 to 255 in binary\r\n  alternatingFlash(150, 4);  // Toggles odd and even LEDs\r\n  stackingBar(80);          // Tetris-style stacking effect\r\n}\r\n\r\n// Helper to turn off all LEDs\r\nvoid clearLeds() {\r\n  for (int i = 0; i < 8; i++) {\r\n    digitalWrite(led_array[i], LOW);\r\n  }\r\n}\r\n\r\n// Pattern 1: Cylon / Knight Rider Bounce\r\nvoid cylonBounce(int delayTime, int repeats) {\r\n  for (int r = 0; r < repeats; r++) {\r\n    for (int i = 0; i < 8; i++) {\r\n      clearLeds();\r\n      digitalWrite(led_array[i], HIGH);\r\n      delay(delayTime);\r\n    }\r\n    for (int i = 6; i > 0; i--) {\r\n      clearLeds();\r\n      digitalWrite(led_array[i], HIGH);\r\n      delay(delayTime);\r\n    }\r\n  }\r\n  clearLeds();\r\n}\r\n\r\n// Pattern 2: Center-Out and Center-In Expansion\r\nvoid centerInOut(int delayTime, int repeats) {\r\n  for (int r = 0; r < repeats; r++) {\r\n    // Expand from center\r\n    for (int i = 0; i < 4; i++) {\r\n      clearLeds();\r\n      digitalWrite(led_array[3 - i], HIGH);\r\n      digitalWrite(led_array[4 + i], HIGH);\r\n      delay(delayTime);\r\n    }\r\n    // Collapse to center\r\n    for (int i = 2; i >= 0; i--) {\r\n      clearLeds();\r\n      digitalWrite(led_array[3 - i], HIGH);\r\n      digitalWrite(led_array[4 + i], HIGH);\r\n      delay(delayTime);\r\n    }\r\n  }\r\n  clearLeds();\r\n}\r\n\r\n// Pattern 3: 8-Bit Binary Counter (0 - 255)\r\nvoid binaryCounter(int delayTime) {\r\n  for (int count = 0; count < 256; count++) {\r\n    for (int bit = 0; bit < 8; bit++) {\r\n      int state = (count >> bit) & 1;\r\n      digitalWrite(led_array[bit], state);\r\n    }\r\n    delay(delayTime);\r\n  }\r\n  clearLeds();\r\n}\r\n\r\n// Pattern 4: Alternating Odd / Even Flashing\r\nvoid alternatingFlash(int delayTime, int repeats) {\r\n  for (int r = 0; r < repeats; r++) {\r\n    // Evens ON, Odds OFF\r\n    for (int i = 0; i < 8; i++) {\r\n      digitalWrite(led_array[i], (i % 2 == 0) ? HIGH : LOW);\r\n    }\r\n    delay(delayTime);\r\n\r\n    // Odds ON, Evens OFF\r\n    for (int i = 0; i < 8; i++) {\r\n      digitalWrite(led_array[i], (i % 2 != 0) ? HIGH : LOW);\r\n    }\r\n    delay(delayTime);\r\n  }\r\n  clearLeds();\r\n}\r\n\r\n// Pattern 5: Tetris-style Stacking Fill\r\nvoid stackingBar(int delayTime) {\r\n  clearLeds();\r\n  for (int limit = 7; limit >= 0; limit--) {\r\n    for (int i = 0; i <= limit; i++) {\r\n      digitalWrite(led_array[i], HIGH);\r\n      delay(delayTime);\r\n      if (i < limit) {\r\n        digitalWrite(led_array[i], LOW);\r\n      }\r\n    }\r\n  }\r\n  delay(500);\r\n  clearLeds();\r\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1788362036025_17yxs",
+        "type": "multi_led_array",
+        "x": 25,
+        "y": -90,
+        "width": 150,
+        "height": 70,
+        "props": {
+          "label": "8-LED ARRAY"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1788362080757_wm0zc",
+        "type": "arduino_uno",
+        "x": -25,
+        "y": 25,
+        "width": 230,
+        "height": 150,
+        "props": {
+          "label": "UNO"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1788362110262_fk8po",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D0"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362112051_s1k3b",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D1"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362116460_1z2o8",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l3"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362118388_hpewp",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D3"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l4"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362120746_rf9jz",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D4"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l5"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362122653_wj2o2",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D5"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l6"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362127576_zwa2d",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D6"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l7"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362129553_ri6wt",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D7"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l8"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362137219_3npi5",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "GND_D"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  }
+}

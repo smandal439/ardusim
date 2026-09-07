@@ -1,0 +1,157 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-09-02T15:19:46.488Z",
+  "name": "led array blink",
+  "code": "\r\nint led_array[]={0,1,2,3,4,5,6,7};\r\nvoid setup() {\r\nfor (int i = 0; i < 8; i++) {\r\n  pinMode(led_array[i], OUTPUT);\r\n}\r\n\r\n}\r\nvoid loop() {\r\n  for (int i = 0; i < 8; i++) {\r\n    digitalWrite(led_array[i], HIGH);\r\n    delay(100);\r\n  }\r\n  for (int i = 7; i >= 0; i--) {\r\n    digitalWrite(led_array[i], LOW);\r\n    delay(100);\r\n  }\r\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1788362036025_17yxs",
+        "type": "multi_led_array",
+        "x": 25,
+        "y": -90,
+        "width": 150,
+        "height": 70,
+        "props": {
+          "label": "8-LED ARRAY"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1788362080757_wm0zc",
+        "type": "arduino_uno",
+        "x": -25,
+        "y": 25,
+        "width": 230,
+        "height": 150,
+        "props": {
+          "label": "UNO"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1788362110262_fk8po",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D0"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362112051_s1k3b",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D1"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362116460_1z2o8",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l3"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362118388_hpewp",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D3"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l4"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362120746_rf9jz",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D4"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l5"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362122653_wj2o2",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D5"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l6"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362127576_zwa2d",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D6"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l7"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362129553_ri6wt",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "D7"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "l8"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788362137219_3npi5",
+        "from": {
+          "instId": "comp_1788362080757_wm0zc",
+          "pinId": "GND_D"
+        },
+        "to": {
+          "instId": "comp_1788362036025_17yxs",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-08-21T14:16:57.880Z",
+  "name": "led_control_using_data",
+  "code": "int leds[] = {0,1,2, 3, 4, 5, 6, 7};\nint data = 0;\n\nvoid setup() {\n  for (int i = 0; i < 8; i++) {\n    pinMode(leds[i], OUTPUT);\n  }\n}\n\nvoid loop() {\n  // Update all 8 LEDs to reflect the bits of 'data'\n  for (int i = 0; i < 8; i++) {\n    digitalWrite(leds[i], (data >> i) & 1);\n  }\n  \n  data++; // Increment to the next number\n  \n  // Reset after 255 (8-bit max value is 255)\n  if (data > 255) {\n    data = 0;\n  }\n  \n  delay(500); // Wait 1 second before showing the next number\n}\n\n\n/*\nint data = 0;\n\nvoid setup() {\n  pinMode(11, OUTPUT);\n  pinMode(12, OUTPUT);\n  pinMode(13, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(11, (data & 1) ? HIGH : LOW);\n  digitalWrite(12, (data & 2) ? HIGH : LOW);\n  digitalWrite(13, (data & 4) ? HIGH : LOW);\n  \n //digitalWrite(11, (data >> 0) & 1);\n // digitalWrite(12, (data >> 1) & 1);\n //digitalWrite(13, (data >> 2) & 1);\n  \n  data++;\n  delay(100);\n}\n*/",
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1787320867814_q49h4",
+        "type": "arduino_uno",
+        "x": 120,
+        "y": 160,
+        "width": 230,
+        "height": 150,
+        "props": {
+          "label": "UNO"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787320878994_n1tyb",
+        "type": "multi_led_array",
+        "x": 120,
+        "y": 60,
+        "width": 90,
+        "height": 60,
+        "props": {},
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787320889582_bq690",
+        "type": "multi_led_array",
+        "x": 220,
+        "y": 60,
+        "width": 90,
+        "height": 60,
+        "props": {},
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1787320916908",
+        "from": {
+          "instId": "comp_1787320878994_n1tyb",
+          "pinId": "led_r"
+        },
+        "to": {
+          "instId": "comp_1787320867814_q49h4",
+          "pinId": "D0"
+        }
+      },
+      {
+        "id": "wire_1787320919705",
+        "from": {
+          "instId": "comp_1787320878994_n1tyb",
+          "pinId": "led_y"
+        },
+        "to": {
+          "instId": "comp_1787320867814_q49h4",
+          "pinId": "D1"
+        }
+      },
+      {
+        "id": "wire_1787320924036",
+        "from": {
+          "instId": "comp_1787320878994_n1tyb",
+          "pinId": "led_g"
+        },
+        "to": {
+          "instId": "comp_1787320867814_q49h4",
+          "pinId": "D2"
+        }
+      },
+      {
+        "id": "wire_1787320999442",
+        "from": {
+          "instId": "comp_1787320867814_q49h4",
+          "pinId": "D3"
+        },
+        "to": {
+          "instId": "comp_1787320878994_n1tyb",
+          "pinId": "led_b"
+        }
+      },
+      {
+        "id": "wire_1787321016183",
+        "from": {
+          "instId": "comp_1787320867814_q49h4",
+          "pinId": "D4"
+        },
+        "to": {
+          "instId": "comp_1787320889582_bq690",
+          "pinId": "led_r"
+        }
+      },
+      {
+        "id": "wire_1787321018192",
+        "from": {
+          "instId": "comp_1787320867814_q49h4",
+          "pinId": "D5"
+        },
+        "to": {
+          "instId": "comp_1787320889582_bq690",
+          "pinId": "led_y"
+        }
+      },
+      {
+        "id": "wire_1787321021607",
+        "from": {
+          "instId": "comp_1787320867814_q49h4",
+          "pinId": "D6"
+        },
+        "to": {
+          "instId": "comp_1787320889582_bq690",
+          "pinId": "led_g"
+        }
+      },
+      {
+        "id": "wire_1787321024753",
+        "from": {
+          "instId": "comp_1787320867814_q49h4",
+          "pinId": "D7"
+        },
+        "to": {
+          "instId": "comp_1787320889582_bq690",
+          "pinId": "led_b"
+        }
+      },
+      {
+        "id": "wire_1787321029163",
+        "from": {
+          "instId": "comp_1787320878994_n1tyb",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "comp_1787320889582_bq690",
+          "pinId": "gnd"
+        }
+      },
+      {
+        "id": "wire_1787321033082",
+        "from": {
+          "instId": "comp_1787320867814_q49h4",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1787320889582_bq690",
+          "pinId": "gnd"
+        }
+      }
+    ]
+  }
+}

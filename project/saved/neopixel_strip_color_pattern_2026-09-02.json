@@ -1,0 +1,332 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-09-02T15:48:42.447Z",
+  "name": "NeoPixel Strip Color pattern",
+  "code": "#include <Adafruit_NeoPixel.h>\n\n#define LED_PIN    6   // Arduino digital pin connected to NeoPixel DI\n#define NUM_LEDS  28   // Total number of LEDs in your NeoPixel strip or ring\n\n// Initialize the NeoPixel object\n// Argument 1 = Number of LEDs in strip\n// Argument 2 = Arduino pin number (most are valid)\n// Argument 3 = Pixel type flags, add together as needed (e.g., NEO_GRB + NEO_KHZ800)\nAdafruit_NeoPixel strip(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);\n\nvoid setup() {\n  strip.begin();           // Initialize the NeoPixel strip object\n  strip.show();            // Turn off all pixels ASAP\n  strip.setBrightness(255); // Set global brightness (0 to 255)\n}\n\nvoid loop() {\n  // Pattern 1: Solid Color Fills (Red, Green, Blue)\n  colorFill(strip.Color(255, 0, 0), 50);   // Red\n  delay(1000);\n  colorFill(strip.Color(0, 255, 0), 50);   // Green\n  delay(1000);\n  colorFill(strip.Color(0, 0, 255), 50);   // Blue\n  delay(1000);\n\n  // Pattern 2: Theater Chase (Marquee style style)\n  theaterChase(strip.Color(255, 255, 255), 50); // White\n  theaterChase(strip.Color(255,   0,   0), 50); // Red\n\n  // Pattern 3: Knight Rider / Cylon Scanner\n  cylonScanner(strip.Color(255, 0, 0), 40); // Red Scanner\n\n  // Pattern 4: Rainbow Cycle\n  rainbowCycle(10); \n}\n\n// ==========================================\n// PATTERN FUNCTIONS\n// ==========================================\n\n// Pattern 1: Fill the pixels one after the other with a color\nvoid colorFill(uint32_t color, int wait) {\n  for(int i=0; i<strip.numPixels(); i++) {\n    strip.setPixelColor(i, color);         // Set pixel index 'i' to color\n    strip.show();                          // Refresh the physical strip\n    delay(wait);\n  }\n}\n\n// Pattern 2: Theater-style crawling lights\nvoid theaterChase(uint32_t color, int wait) {\n  for(int a=0; a<10; a++) {                // Repeat the chase loop 10 times\n    for(int b=0; b<3; b++) {               // Cycle through 3 offset states\n      strip.clear();                       // Turn off all pixels\n      for(int c=b; c<strip.numPixels(); c += 3) {\n        strip.setPixelColor(c, color);     // Turn on every third pixel\n      }\n      strip.show();\n      delay(wait);\n    }\n  }\n}\n\n// Pattern 3: Back-and-forth eye scanner (Cylon / Knight Rider effect)\nvoid cylonScanner(uint32_t color, int wait) {\n  // Scan forward\n  for(int i=0; i<strip.numPixels(); i++) {\n    strip.clear();\n    strip.setPixelColor(i, color);\n    // Optional trailing effect (dimmer adjacent pixels)\n    if(i > 0) strip.setPixelColor(i-1, scaleColor(color, 0.2)); \n    strip.show();\n    delay(wait);\n  }\n  // Scan backward\n  for(int i=strip.numPixels()-1; i>=0; i--) {\n    strip.clear();\n    strip.setPixelColor(i, color);\n    if(i < strip.numPixels()-1) strip.setPixelColor(i+1, scaleColor(color, 0.2));\n    strip.show();\n    delay(wait);\n  }\n}\n\n// Pattern 4: Smoothly flows a rainbow across the entire length\nvoid rainbowCycle(int wait) {\n  for(long firstPixelHue = 0; firstPixelHue < 5*65536; firstPixelHue += 256) {\n    for(int i=0; i<strip.numPixels(); i++) {\n      int pixelHue = firstPixelHue + (i * 65536 / strip.numPixels());\n      strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));\n    }\n    strip.show();\n    delay(wait);\n  }\n}\n\n// Helper Function: Scales an RGB color down to create a dim trailing effect\nuint32_t scaleColor(uint32_t color, float factor) {\n  uint8_t r = (uint8_t)((color >> 16) & 0xFF) * factor;\n  uint8_t g = (uint8_t)((color >> 8) & 0xFF) * factor;\n  uint8_t b = (uint8_t)(color & 0xFF) * factor;\n  return strip.Color(r, g, b);\n}\n",
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 90,
+        "y": 75,
+        "width": 230,
+        "height": 150,
+        "props": {
+          "label": "UNO"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "np1",
+        "type": "neopixel_strip",
+        "x": 70,
+        "y": -15,
+        "width": 180,
+        "height": 48,
+        "props": {
+          "numPixels": 8,
+          "r": 0,
+          "g": 0,
+          "b": 0,
+          "brightness": 255
+        },
+        "runtimeState": {
+          "brightness": 255,
+          "pixels": [
+            {
+              "r": 255,
+              "g": 0,
+              "b": 0
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 0
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 0
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 0
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 0
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 0
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 0
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 0
+            }
+          ]
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "np2",
+        "type": "neopixel_strip",
+        "x": 265,
+        "y": -15,
+        "width": 180,
+        "height": 48,
+        "props": {
+          "numPixels": 8,
+          "r": 0,
+          "g": 0,
+          "b": 0,
+          "brightness": 255
+        },
+        "runtimeState": {
+          "brightness": 255,
+          "pixels": [
+            {
+              "r": 255,
+              "g": 0,
+              "b": 0
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 0
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 0
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 0
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 249
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 249
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 249
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 247
+            }
+          ]
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1788364077710_snewx",
+        "type": "neopixel_ring",
+        "x": 365,
+        "y": 45,
+        "width": 120,
+        "height": 128,
+        "props": {
+          "numPixels": 12,
+          "r": 0,
+          "g": 0,
+          "b": 0,
+          "brightness": 255
+        },
+        "runtimeState": {
+          "brightness": 255,
+          "pixels": [
+            {
+              "r": 255,
+              "g": 0,
+              "b": 247
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 247
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 247
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 244
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 244
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 244
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 244
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 244
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 241
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 241
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 241
+            },
+            {
+              "r": 255,
+              "g": 0,
+              "b": 241
+            }
+          ]
+        },
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "np1",
+          "pinId": "DOUT"
+        },
+        "to": {
+          "instId": "np2",
+          "pinId": "DIN"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 234,
+            "y": 57
+          },
+          {
+            "x": 297,
+            "y": 57
+          }
+        ]
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "np1",
+          "pinId": "VCC"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "np1",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "np2",
+          "pinId": "VCC"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "np2",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "np1",
+          "pinId": "DIN"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D6"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788364081540_ffnni",
+        "from": {
+          "instId": "comp_1788364077710_snewx",
+          "pinId": "DIN"
+        },
+        "to": {
+          "instId": "np2",
+          "pinId": "DOUT"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  }
+}

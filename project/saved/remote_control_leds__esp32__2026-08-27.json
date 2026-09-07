@@ -1,0 +1,319 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-08-27T10:06:38.009Z",
+  "name": "Remote Control LEDs (ESP32)",
+  "code": "/*\n * Remote Control LEDs (ESP32)\n * \n * Use the Remote Control feature to toggle\n * these 4 LEDs from your phone!\n *\n * How to use:\n * 1. Run this sketch\n * 2. Click the Remote button (phone icon) in the header\n * 3. Open the URL on your phone\n * 4. Toggle D2, D4, D5, D12 to control the LEDs\n */\n\nint ledPins[] = {2, 4, 5, 12};\nint ledCount = 4;\n\nvoid setup() {\n  Serial.begin(115200);\n  for (int i = 0; i < ledCount; i++) {\n    pinMode(ledPins[i], OUTPUT);\n    digitalWrite(ledPins[i], LOW);\n  }\n  Serial.println(\"ESP32 Remote Control LEDs ready!\");\n  Serial.println(\"Toggle D2, D4, D5, D12 from your phone.\");\n}\n\nvoid loop() {\n  // Read pin states and update LEDs\n  for (int i = 0; i < ledCount; i++) {\n    int val = digitalRead(ledPins[i]);\n    digitalWrite(ledPins[i], val);\n  }\n  delay(50);\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "esp32_devkit_v1",
+        "x": 250,
+        "y": 65,
+        "width": 170,
+        "height": 272,
+        "props": {
+          "label": "ESP32"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 30,
+        "y": 120,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "led2",
+        "type": "led_green",
+        "x": 80,
+        "y": 120,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#33ff33",
+          "colorName": "Green"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "led3",
+        "type": "led_blue",
+        "x": 130,
+        "y": 120,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#3366ff",
+          "colorName": "Blue"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "led4",
+        "type": "led_yellow",
+        "x": 180,
+        "y": 120,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#ffff33",
+          "colorName": "Yellow"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 35,
+        "y": 215,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "r2",
+        "type": "resistor",
+        "x": 85,
+        "y": 215,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "r3",
+        "type": "resistor",
+        "x": 135,
+        "y": 215,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "r4",
+        "type": "resistor",
+        "x": 185,
+        "y": 215,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 409,
+            "y": 360
+          },
+          {
+            "x": 15,
+            "y": 360
+          },
+          {
+            "x": 15,
+            "y": 96
+          },
+          {
+            "x": 45,
+            "y": 96
+          }
+        ]
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "b1",
+          "pinId": "D4"
+        },
+        "to": {
+          "instId": "led2",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "led2",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r2",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "r2",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w7",
+        "from": {
+          "instId": "b1",
+          "pinId": "D5"
+        },
+        "to": {
+          "instId": "led3",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w8",
+        "from": {
+          "instId": "led3",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r3",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w9",
+        "from": {
+          "instId": "r3",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w10",
+        "from": {
+          "instId": "b1",
+          "pinId": "D12"
+        },
+        "to": {
+          "instId": "led4",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w11",
+        "from": {
+          "instId": "led4",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r4",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w12",
+        "from": {
+          "instId": "r4",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  }
+}

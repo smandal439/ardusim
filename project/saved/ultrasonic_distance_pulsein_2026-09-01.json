@@ -1,0 +1,195 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-09-01T17:54:45.141Z",
+  "name": "Ultrasonic Distance pulseIn",
+  "code": "const int trigPin = 7;\nconst int echoPin = 8;\nlong duration;\nint distance;\n\nvoid setup() {\n  pinMode(trigPin, OUTPUT);\n  pinMode(echoPin, INPUT);\n  Serial.begin(115200);\n}\n\nvoid loop() {\n  digitalWrite(trigPin, LOW);\n  delayMicroseconds(2);\n  digitalWrite(trigPin, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(trigPin, LOW);\n  \n  duration = pulseIn(echoPin, HIGH);\n  distance = duration * 0.034 / 2;  \n  Serial.print(\"Distance: \");\n  Serial.print(distance);\n  Serial.println(\" cm\");\n  delay(500);\n}\n",
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 100,
+        "width": 230,
+        "height": 150,
+        "props": {
+          "label": "UNO"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "son1",
+        "type": "hcsr04",
+        "x": 115,
+        "y": 285,
+        "width": 90,
+        "height": 85,
+        "props": {
+          "distance": 20
+        },
+        "runtimeState": {
+          "_prevTrig": false,
+          "_echoEndMs": null,
+          "distance": 2
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 455,
+        "y": 115,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        },
+        "runtimeState": {
+          "val": 0,
+          "lit": false,
+          "brightness": 0,
+          "current_mA": 0,
+          "overload": false,
+          "blown": false,
+          "_warnedBlown": false
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 460,
+        "y": 230,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "son1",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "son1",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "b1",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788283731340_f3cat",
+        "from": {
+          "instId": "son1",
+          "pinId": "trig"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D7"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 145,
+            "y": 300
+          },
+          {
+            "x": 145,
+            "y": 88
+          },
+          {
+            "x": 308,
+            "y": 88
+          }
+        ]
+      },
+      {
+        "id": "wire_1788283734746_sxfoz",
+        "from": {
+          "instId": "son1",
+          "pinId": "echo"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D8"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 166,
+            "y": 88
+          },
+          {
+            "x": 322,
+            "y": 88
+          }
+        ]
+      },
+      {
+        "id": "wire_1788285169865_2kwmi",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  }
+}

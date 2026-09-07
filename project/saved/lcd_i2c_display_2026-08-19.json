@@ -1,0 +1,89 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-08-19T15:08:36.748Z",
+  "name": "LCD I2C Display",
+  "code": "/*\n * LCD I2C — display text on a 16x2 LCD with a PCF8574 I2C backpack.\n * Wiring: LCD VCC → 5V, GND → GND, SDA → A4, SCL → A5.\n */\n\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nint counter = 0;\n\nvoid setup() {\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"Hello, ArduSim!\");\n  lcd.setCursor(0, 1);\n  lcd.print(\"LCD I2C : 0x27\");\n}\n\nvoid loop() {\n  delay(500);\n  counter++;\n  lcd.setCursor(0, 1);\n  lcd.print(\"Count: \");\n  lcd.print(counter);\n  lcd.print(\"        \");\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 100,
+        "width": 230,
+        "height": 150,
+        "props": {
+          "label": "UNO"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "lcd1",
+        "type": "lcd1602_i2c",
+        "x": 480,
+        "y": 140,
+        "width": 120,
+        "height": 65,
+        "props": {
+          "address": "0x27",
+          "line1": "Hello, I2C!    ",
+          "line2": "Addr: 0x27      "
+        },
+        "runtimeState": {
+          "line1": "Hello, ArduSim! ",
+          "line2": "Count: 40       "
+        },
+        "selected": true,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "lcd1",
+          "pinId": "vcc"
+        }
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "to": {
+          "instId": "lcd1",
+          "pinId": "gnd"
+        }
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "b1",
+          "pinId": "A4"
+        },
+        "to": {
+          "instId": "lcd1",
+          "pinId": "sda"
+        }
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "b1",
+          "pinId": "A5"
+        },
+        "to": {
+          "instId": "lcd1",
+          "pinId": "scl"
+        }
+      }
+    ]
+  }
+}

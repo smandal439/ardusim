@@ -1,0 +1,361 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-08-23T11:25:44.260Z",
+  "name": "Logic Analyzer Test",
+  "code": "/*\n * Logic Analyzer Test\n * Generates 4 digital signals at different frequencies:\n *   D2 = 1 Hz   (500ms period)\n *   D3 = 2 Hz   (250ms period)\n *   D4 = 5 Hz   (100ms period)\n *   D5 = 10 Hz  (50ms period)\n *\n * Open the Logic Analyzer tab in the bottom panel.\n * Set CH1=D2, CH2=D3, CH3=D4, CH4=D5.\n * Press Run and observe the square waves!\n */\n\nvoid setup() {\n  pinMode(2, OUTPUT);\n  pinMode(3, OUTPUT);\n  pinMode(4, OUTPUT);\n  pinMode(5, OUTPUT);\n  Serial.println(\"Logic Analyzer Test — 4 channels\");\n}\n\nvoid loop() {\n  digitalWrite(2, HIGH);\n  digitalWrite(3, HIGH);\n  digitalWrite(4, HIGH);\n  digitalWrite(5, HIGH);\n  delay(50);\n\n  digitalWrite(5, LOW);\n  delay(50);\n\n  digitalWrite(4, LOW);\n  delay(50);\n\n  digitalWrite(3, LOW);\n  delay(50);\n\n  digitalWrite(2, LOW);\n  digitalWrite(3, HIGH);\n  digitalWrite(4, HIGH);\n  digitalWrite(5, HIGH);\n  delay(50);\n\n  digitalWrite(5, LOW);\n  delay(50);\n\n  digitalWrite(4, LOW);\n  delay(50);\n\n  digitalWrite(3, LOW);\n  delay(50);\n}\n",
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 325,
+        "y": 60,
+        "width": 230,
+        "height": 150,
+        "props": {
+          "label": "UNO"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 100,
+        "y": 260,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        },
+        "runtimeState": {
+          "val": 1,
+          "lit": true,
+          "brightness": 0.928976919549213,
+          "current_mA": 12.244897959183673,
+          "overload": false,
+          "blown": false,
+          "_warnedBlown": false
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 100,
+        "y": 340,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Î©"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "r2",
+        "type": "resistor",
+        "x": 160,
+        "y": 340,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Î©"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "r3",
+        "type": "resistor",
+        "x": 220,
+        "y": 340,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Î©"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "r4",
+        "type": "resistor",
+        "x": 280,
+        "y": 340,
+        "width": 20,
+        "height": 60,
+        "props": {
+          "value": 220,
+          "unit": "Î©"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787484153030_27ci7",
+        "type": "led_green",
+        "x": 155,
+        "y": 260,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#33ff66",
+          "colorName": "Green"
+        },
+        "runtimeState": {
+          "val": 0,
+          "lit": false,
+          "brightness": 0,
+          "current_mA": 0,
+          "overload": false,
+          "blown": false,
+          "_warnedBlown": false
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787484155950_f8efw",
+        "type": "led_blue",
+        "x": 215,
+        "y": 260,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#3399ff",
+          "colorName": "Blue"
+        },
+        "runtimeState": {
+          "val": 0,
+          "lit": false,
+          "brightness": 0,
+          "current_mA": 0,
+          "overload": false,
+          "blown": false,
+          "_warnedBlown": false
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787484158841_99w0k",
+        "type": "led_yellow",
+        "x": 275,
+        "y": 260,
+        "width": 30,
+        "height": 60,
+        "props": {
+          "color": "#ffee33",
+          "colorName": "Yellow"
+        },
+        "runtimeState": {
+          "val": 0,
+          "lit": false,
+          "brightness": 0,
+          "current_mA": 0,
+          "overload": false,
+          "blown": false,
+          "_warnedBlown": false
+        },
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787484186074_w87qk",
+        "from": {
+          "instId": "comp_1787484153030_27ci7",
+          "pinId": "anode"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D3"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787484188846_5pudu",
+        "from": {
+          "instId": "comp_1787484155950_f8efw",
+          "pinId": "anode"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D3"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 230,
+            "y": 73
+          },
+          {
+            "x": 297,
+            "y": 73
+          }
+        ]
+      },
+      {
+        "id": "wire_1787484197669_lgy1m",
+        "from": {
+          "instId": "comp_1787484158841_99w0k",
+          "pinId": "anode"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D5"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 290,
+            "y": 73
+          },
+          {
+            "x": 325,
+            "y": 73
+          }
+        ]
+      },
+      {
+        "id": "wire_1787484211297_iollx",
+        "from": {
+          "instId": "r3",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787484236708_jqa0e",
+        "from": {
+          "instId": "r2",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787484246108_4tqv5",
+        "from": {
+          "instId": "r2",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1787484153030_27ci7",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787484247787_bmfml",
+        "from": {
+          "instId": "r3",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1787484155950_f8efw",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787484249560_5a496",
+        "from": {
+          "instId": "r4",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1787484158841_99w0k",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787484263245_kd4v7",
+        "from": {
+          "instId": "r4",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 290,
+            "y": 425
+          },
+          {
+            "x": 443,
+            "y": 425
+          }
+        ]
+      }
+    ]
+  }
+}

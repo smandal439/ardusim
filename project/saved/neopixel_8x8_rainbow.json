@@ -1,0 +1,80 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-09-03T00:00:00.000Z",
+  "name": "NeoPixel 8x8 Matrix Rainbow Pattern",
+  "code": "/*\r\n * NeoPixel 8x8 Matrix Rainbow Pattern\r\n * \r\n * Displays a scrolling rainbow gradient on the\r\n * 8x8 WS2812B NeoPixel matrix.\r\n *\r\n * Wiring:\r\n *   Matrix 5V  → Arduino 5V\r\n *   Matrix GND → Arduino GND\r\n *   Matrix DIN → Arduino D6\r\n */\r\n\r\n#include <Adafruit_NeoPixel.h>\r\n\r\n#define MATRIX_PIN   6\r\n#define MATRIX_SIZE  64\r\n\r\nAdafruit_NeoPixel matrix = Adafruit_NeoPixel(MATRIX_SIZE, MATRIX_PIN, NEO_GRB + NEO_KHZ800);\r\n\r\nvoid setup() {\r\n  Serial.begin(115200);\r\n  Serial.println(\"8x8 NeoPixel Matrix - Rainbow\");\r\n  matrix.begin();\r\n  matrix.setBrightness(80);\r\n  matrix.show();\r\n}\r\n\r\nvoid loop() {\r\n  static uint16_t hueOffset = 0;\r\n  \r\n  for (int i = 0; i < MATRIX_SIZE; i++) {\r\n    int row = i / 8;\r\n    int col = i % 8;\r\n    uint16_t hue = (hueOffset + (row + col) * 500) % 65536;\r\n    matrix.setPixelColor(i, matrix.ColorHSV(hue, 255, 255));\r\n  }\r\n  \r\n  matrix.show();\r\n  hueOffset += 256;\r\n  delay(50);\r\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_arduino_01",
+        "type": "arduino_uno",
+        "x": -60,
+        "y": -10,
+        "width": 230,
+        "height": 150,
+        "props": {
+          "label": "UNO"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_neopixel_matrix_01",
+        "type": "neopixel_8x8_matrix",
+        "x": 280,
+        "y": -30,
+        "width": 180,
+        "height": 205,
+        "props": {
+          "brightness": 1.0,
+          "pixels": null
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_5v",
+        "from": {
+          "instId": "comp_neopixel_matrix_01",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "comp_arduino_01",
+          "pinId": "5V2"
+        },
+        "color": "#ff0000",
+        "waypoints": []
+      },
+      {
+        "id": "wire_gnd",
+        "from": {
+          "instId": "comp_neopixel_matrix_01",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "comp_arduino_01",
+          "pinId": "GND3"
+        },
+        "color": "#000000",
+        "waypoints": []
+      },
+      {
+        "id": "wire_din",
+        "from": {
+          "instId": "comp_neopixel_matrix_01",
+          "pinId": "DIN"
+        },
+        "to": {
+          "instId": "comp_arduino_01",
+          "pinId": "D6"
+        },
+        "color": "#00cc00",
+        "waypoints": []
+      }
+    ]
+  }
+}

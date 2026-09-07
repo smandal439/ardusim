@@ -1,0 +1,91 @@
+{
+  "id": "lcd_print_remotely",
+  "name": "LCD PRINT REMOTELY",
+  "icon": "🔧",
+  "desc": "A custom LCD PRINT REMOTELY circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1788610065503_ejyg6",
+        "type": "arduino_uno",
+        "x": 305,
+        "y": 290,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "comp_1788610075717_oee0u",
+        "type": "lcd1602_i2c",
+        "x": 555,
+        "y": 295,
+        "rotation": 0,
+        "props": {
+          "address": "0x27",
+          "line1": "Hello, I2C!    ",
+          "line2": "Addr: 0x27      "
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1788610083268_ossem",
+        "from": {
+          "instId": "comp_1788610065503_ejyg6",
+          "pinId": "GND3"
+        },
+        "to": {
+          "instId": "comp_1788610075717_oee0u",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788610085758_lkh39",
+        "from": {
+          "instId": "comp_1788610065503_ejyg6",
+          "pinId": "5V2"
+        },
+        "to": {
+          "instId": "comp_1788610075717_oee0u",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788610088988_ujwhs",
+        "from": {
+          "instId": "comp_1788610065503_ejyg6",
+          "pinId": "SCL"
+        },
+        "to": {
+          "instId": "comp_1788610075717_oee0u",
+          "pinId": "scl"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788610091255_mion5",
+        "from": {
+          "instId": "comp_1788610065503_ejyg6",
+          "pinId": "SDA"
+        },
+        "to": {
+          "instId": "comp_1788610075717_oee0u",
+          "pinId": "sda"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n* LCD I2C — display text on a 16x2 LCD with a PCF8574 I2C backpack.\n* Wiring: LCD VCC → 5V, GND → GND, SDA → A4, SCL → A5.\n*/\n\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nint counter = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.clear();\n}\n\nvoid loop() {\n  if (Serial.available()>0) {\n    String data=Serial.readStringUntil('\\n');\n    data.trim();\n    Serial.println(\"Received data = \");\n    Serial.println(data);\n    lcd.clear();\n    lcd.setCursor(0, 0);\n    lcd.print(\"RX data = \");\n    lcd.setCursor(0, 1);\n    lcd.print(data);\n  }\n}"
+}

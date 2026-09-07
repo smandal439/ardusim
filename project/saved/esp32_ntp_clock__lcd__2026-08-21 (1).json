@@ -1,0 +1,94 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-08-21T18:38:41.963Z",
+  "name": "ESP32 NTP Clock (LCD)",
+  "code": "/*\n * ESP32 NTP Clock on LCD I2C - Indian Standard Time (IST)\n * Connects to Wi-Fi, fetches UTC time via ntpEpoch(),\n * applies UTC+5:30 offset, and displays HH:MM:SS on a 16x2 LCD.\n *\n * Wiring: LCD VCC -> 3V3/5V, GND -> GND, SDA -> D21, SCL -> D22\n */\n\n#include <WiFi.h>\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nconst char* ssid     = \"ArduSimNet\";\nconst char* password = \"simulator\";\n\n// IST is UTC +5:30 (5*3600 + 30*60 = 19800 seconds)\nconst long istOffsetSec = 19800;\n\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nvoid setup() {\n  Serial.begin(115200);\n  lcd.init();\n  lcd.backlight();\n\n  lcd.setCursor(0, 0);\n  lcd.print(\"Connecting...\");\n  Serial.println(\"Connecting to Wi-Fi...\");\n\n  WiFi.begin(ssid, password);\n  while (WiFi.status() != WL_CONNECTED) {\n    delay(300);\n    Serial.print(\".\");\n  }\n  Serial.println();\n  Serial.print(\"IP: \");\n  Serial.println(WiFi.localIP());\n\n  lcd.clear();\n  lcd.setCursor(0, 0);\n  lcd.print(\"   NTP Clock\");\n  lcd.setCursor(0, 1);\n  lcd.print(WiFi.localIP());\n  delay(1500);\n}\n\nvoid loop() {\n  // Fetch UTC epoch and apply IST offset\n  unsigned long epoch = ntpEpoch() + istOffsetSec;\n\n  int hours   = (epoch % 86400) / 3600;\n  int minutes = (epoch % 3600)   / 60;\n  int seconds = epoch % 60;\n\n  lcd.setCursor(0, 0);\n  lcd.print(\"  NTP Time (IST) \");\n\n  lcd.setCursor(0, 1);\n  lcd.print(\"    \");\n  if (hours < 10) lcd.print(\"0\");\n  lcd.print(hours);\n  lcd.print(\":\");\n  if (minutes < 10) lcd.print(\"0\");\n  lcd.print(minutes);\n  lcd.print(\":\");\n  if (seconds < 10) lcd.print(\"0\");\n  lcd.print(seconds);\n  lcd.print(\"    \");\n\n  Serial.print(\"IST Time: \");\n  if (hours < 10) Serial.print(\"0\");\n  Serial.print(hours);\n  Serial.print(\":\");\n  if (minutes < 10) Serial.print(\"0\");\n  Serial.print(minutes);\n  Serial.print(\":\");\n  if (seconds < 10) Serial.print(\"0\");\n  Serial.println(seconds);\n\n  delay(1000);\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "esp32_devkit_v1",
+        "x": 300,
+        "y": 60,
+        "width": 170,
+        "height": 272,
+        "props": {
+          "label": "ESP32"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "lcd1",
+        "type": "lcd1602_i2c",
+        "x": 110,
+        "y": 320,
+        "width": 120,
+        "height": 65,
+        "props": {
+          "address": "0x27",
+          "line1": "Hello, I2C!    ",
+          "line2": "Addr: 0x27      "
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "3V3"
+        },
+        "to": {
+          "instId": "lcd1",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "to": {
+          "instId": "lcd1",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "b1",
+          "pinId": "D21"
+        },
+        "to": {
+          "instId": "lcd1",
+          "pinId": "sda"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "b1",
+          "pinId": "D22"
+        },
+        "to": {
+          "instId": "lcd1",
+          "pinId": "scl"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  }
+}

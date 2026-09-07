@@ -1,0 +1,95 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-08-24T08:59:37.273Z",
+  "name": "Stepper Motor",
+  "code": "/*\r\nWiring (28BYJ-48 to Arduino via ULN2003)\r\nIN1 ->Arduino Pin 8\r\nIN2 -> Arduino Pin 9\r\nIN3 -> Arduino Pin 10\r\nIN4 -> Arduino Pin 11\r\nVCC -> 5V (external 5V supply recommended for torque)\r\nGND -> Arduino GND\r\nArduino Sketch (Built-in Stepper.h)\r\nNote on Pin Order: The Stepper library energizes coils \r\nsequentially.Because the 28BYJ-48 uses a 4-phase \r\nunipolar sequence, the pins must be\r\ninitialized in the order IN1, IN3, IN2, IN4 (pins 8, 10, 9, 11)\r\nrather than numerical order.\r\n*/\r\n\r\n#include <Stepper.h>\r\n\r\n// Number of steps per full revolution in 4-step sequence mode\r\nconst int STEPS_PER_REV = 2048;\r\n\r\n// Initialize library with pin sequence: IN1, IN3, IN2, IN4\r\nStepper myStepper(STEPS_PER_REV, 8, 10, 9, 11);\r\n\r\nvoid setup() {\r\n// Set speed in RPM (typical range for 28BYJ-48 is 5 to 15 RPM)\r\n  myStepper.setSpeed(10);\r\n  Serial.begin(9600);\r\n  Serial.println(\"Stepper motor ready.\");\r\n}\r\n\r\nvoid loop() {\r\n// Rotate 1 full revolution clockwise\r\n  Serial.println(\"Rotating Clockwise...\");\r\n  myStepper.step(STEPS_PER_REV);\r\n  delay(1000);\r\n\r\n// Rotate 1 full revolution counter-clockwise\r\n  Serial.println(\"Rotating Counter-Clockwise...\");\r\n  myStepper.step(-STEPS_PER_REV);\r\n  delay(1000);\r\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1787556913949_ge64o",
+        "type": "stepper_28byj",
+        "x": 75,
+        "y": 105,
+        "width": 100,
+        "height": 100,
+        "props": {
+          "angle": 0
+        },
+        "runtimeState": {
+          "_lastPattern": 0,
+          "active": false
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1787556919717_f4b2y",
+        "type": "arduino_uno",
+        "x": -10,
+        "y": 255,
+        "width": 230,
+        "height": 150,
+        "props": {
+          "label": "UNO"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1787561680631_9nwse",
+        "from": {
+          "instId": "comp_1787556913949_ge64o",
+          "pinId": "IN1"
+        },
+        "to": {
+          "instId": "comp_1787556919717_f4b2y",
+          "pinId": "D8"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787561683227_0thwc",
+        "from": {
+          "instId": "comp_1787556913949_ge64o",
+          "pinId": "IN2"
+        },
+        "to": {
+          "instId": "comp_1787556919717_f4b2y",
+          "pinId": "D9"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787561685287_kt5m7",
+        "from": {
+          "instId": "comp_1787556913949_ge64o",
+          "pinId": "IN3"
+        },
+        "to": {
+          "instId": "comp_1787556919717_f4b2y",
+          "pinId": "D10"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787561687406_9iko7",
+        "from": {
+          "instId": "comp_1787556913949_ge64o",
+          "pinId": "IN4"
+        },
+        "to": {
+          "instId": "comp_1787556919717_f4b2y",
+          "pinId": "D11"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  }
+}

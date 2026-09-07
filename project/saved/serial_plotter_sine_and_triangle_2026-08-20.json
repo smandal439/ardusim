@@ -1,0 +1,77 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-08-20T18:31:23.544Z",
+  "name": "Serial Plotter sine and triangle",
+  "code": "/* \n * Serial Plotter — Controls frequency of a Sine and Triangle wave\n * using a potentiometer on A0.\n */\nint potPin = A0;\nfloat phase = 0.0; // Keeps track of the wave positions smoothly\n\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int potValue = analogRead(potPin);\n  \n  // Map pot value (0-1023) to a frequency factor (0.01 to 0.2)\n  float frequencyFactor = 0.01 + ((float)potValue / 1023.0) * 0.19;\n  \n  // Advance the phase based on the pot setting\n  phase += frequencyFactor;\n  if (phase >= 2.0 * PI) {\n    phase -= 2.0 * PI;\n  }\n\n  // 1. Calculate Sine Wave (scaled between 0 and 1023)\n  int sine = (int)((sin(phase) + 1.0) * 511.5);\n\n  // 2. Calculate Triangle Wave (scaled between 0 and 1023)\n  // Normalizes phase to 0.0 - 1.0 range for the math\n  float normPhase = phase / (2.0 * PI); \n  int triangle;\n  if (normPhase < 0.5) {\n    triangle = (int)(normPhase * 2.0 * 1023.0);         // Rising edge\n  } else {\n    triangle = (int)((1.0 - normPhase) * 2.0 * 1023.0); // Falling edge\n  }\n\n  // Print data formatted for the Serial Plotter\n  Serial.print(\"pot:\");\n  Serial.print(potValue);\n  Serial.print(\" sine:\");\n  Serial.print(sine);\n  Serial.print(\" triangle:\");\n  Serial.println(triangle);\n\n  delay(30); // Slightly faster delay for smoother high-frequency viewing\n}\n",
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 100,
+        "width": 230,
+        "height": 150,
+        "props": {
+          "label": "UNO"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "pot1",
+        "type": "potentiometer",
+        "x": 120,
+        "y": 300,
+        "width": 50,
+        "height": 60,
+        "props": {
+          "value": 512,
+          "maxValue": 1023,
+          "resistance": 10000
+        },
+        "runtimeState": {
+          "value": 302
+        },
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "pot1",
+          "pinId": "vcc"
+        }
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "pot1",
+          "pinId": "wiper"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "A0"
+        }
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "pot1",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        }
+      }
+    ]
+  }
+}

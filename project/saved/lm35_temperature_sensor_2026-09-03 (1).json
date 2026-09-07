@@ -1,0 +1,83 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-09-03T19:17:31.846Z",
+  "name": "LM35 Temperature Sensor",
+  "code": "#include <Wire.h>\r\n#include <LiquidCrystal_I2C.h>\r\n\r\nLiquidCrystal_I2C lcd(0x27, 16, 2);\r\nconst int sensorPin = A5;\r\n\r\nvoid setup() {\r\n  Serial.begin(115200);\r\n  lcd.init();\r\n  lcd.backlight();\r\n  lcd.setCursor(0, 0);\r\n  lcd.print(\"Hello, ArduSim!\");\r\n  lcd.setCursor(0, 1);\r\n  lcd.print(\"LCD I2C : 0x27\");\r\n}\r\n\r\nvoid loop() {\r\n  int sensorValue = analogRead(sensorPin);\r\n  \r\n  float temperatureCelsius = (sensorValue * 500.0) / 1023.0;\r\n  float temperatureFahrenheit = (temperatureCelsius * 1.8) + 32.0;\r\n\r\n  Serial.print(\"Temperature: \");\r\n  Serial.print(temperatureCelsius);\r\n  Serial.print(\" °C  |  \");\r\n  Serial.print(temperatureFahrenheit);\r\n  Serial.println(\" °F\");\r\n  lcd.clear();\r\n  lcd.setCursor(0, 0);\r\n  lcd.print(\"Temperature: \");\r\n  lcd.setCursor(0, 1);\r\n  lcd.print(temperatureCelsius);\r\n  lcd.print(\"°C \");\r\n  lcd.print(temperatureFahrenheit);\r\n  lcd.print(\"°F\");\r\n  delay(1000);\r\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1787826805002_k02zx",
+        "type": "arduino_uno",
+        "x": -75,
+        "y": -25,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "comp_1787827101296_ppqvb",
+        "type": "lm35_sensor",
+        "x": 175,
+        "y": -40,
+        "rotation": 0,
+        "props": {
+          "temp": 25
+        }
+      },
+      {
+        "id": "comp_1788455730723_11dsf",
+        "type": "lcd1602_i2c",
+        "x": -35,
+        "y": -135,
+        "rotation": 0,
+        "props": {
+          "address": "0x27",
+          "line1": "Hello, I2C!    ",
+          "line2": "Addr: 0x27      "
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1787827107550_qy4e0",
+        "from": {
+          "instId": "comp_1787827101296_ppqvb",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "comp_1787826805002_k02zx",
+          "pinId": "5V2"
+        },
+        "color": "#F44336",
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787827109731_txau8",
+        "from": {
+          "instId": "comp_1787826805002_k02zx",
+          "pinId": "GND3"
+        },
+        "to": {
+          "instId": "comp_1787827101296_ppqvb",
+          "pinId": "GND"
+        },
+        "color": "#424242",
+        "waypoints": []
+      },
+      {
+        "id": "wire_1787827119318_u41pm",
+        "from": {
+          "instId": "comp_1787826805002_k02zx",
+          "pinId": "A5"
+        },
+        "to": {
+          "instId": "comp_1787827101296_ppqvb",
+          "pinId": "OUT"
+        },
+        "color": "#FFC107",
+        "waypoints": []
+      }
+    ]
+  }
+}

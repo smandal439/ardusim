@@ -1,0 +1,155 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-09-01T18:31:38.800Z",
+  "name": "DHT11 Temperature & Humidity",
+  "code": "#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n#include <DHT.h>\n\n#define DHTPIN 2     // Digital pin connected to the DHT11 data pin\n#define DHTTYPE DHT11   // Defining sensor type as DHT11\n\nDHT dht(DHTPIN, DHTTYPE);\nLiquidCrystal_I2C lcd(0x27, 16, 2); // Set the LCD address to 0x27 for a 16 chars and 2 line display\n\nvoid setup() {\n  Serial.begin(115200);\n  dht.begin();\n  lcd.init();          // Initialize the LCD\n  lcd.backlight();     // Turn on the backlight\n}\n\nvoid loop() {\n  // Wait 2 seconds between measurements (DHT11 is slow)\n  delay(2000);\n  lcd.clear();\n\n  // Read humidity and temperature\n  float h = dht.readHumidity();\n  float t = dht.readTemperature(); // Read temperature in Celsius\n\n  // Check if readings failed and exit early to try again\n  if (isnan(h) || isnan(t)) {\n    lcd.setCursor(0, 0);\n    lcd.print(\"Sensor Error\");\n    return;\n  }\n\n  // Display Temperature on LCD\n  lcd.setCursor(0, 0);\n  lcd.print(\"Temp: \");\n  lcd.print(t);\n  lcd.print(\" °C\");\n\n  // Display Humidity on LCD\n  lcd.setCursor(0, 1);\n  lcd.print(\"Humidity: \");\n  lcd.print(h);\n  lcd.print(\" %\");\n}\n",
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 100,
+        "width": 230,
+        "height": 150,
+        "props": {
+          "label": "UNO"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "dht1",
+        "type": "dht11",
+        "x": 90,
+        "y": 135,
+        "width": 58,
+        "height": 88,
+        "props": {
+          "temperature": 25,
+          "humidity": 60
+        },
+        "runtimeState": {
+          "temperature": 42,
+          "humidity": 100
+        },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1788286045312_7ynf5",
+        "type": "lcd1602_i2c",
+        "x": 440,
+        "y": 110,
+        "width": 170,
+        "height": 90,
+        "props": {
+          "address": "0x27",
+          "line1": "Hello, I2C!    ",
+          "line2": "Addr: 0x27      "
+        },
+        "runtimeState": {
+          "line1": "Temp: 42 °C     ",
+          "line2": "Humidity: 100 % ",
+          "powered": true
+        },
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "dht1",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "b1",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "dht1",
+          "pinId": "data"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "dht1",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788286071854_7vb79",
+        "from": {
+          "instId": "b1",
+          "pinId": "SDA"
+        },
+        "to": {
+          "instId": "comp_1788286045312_7ynf5",
+          "pinId": "sda"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788286075102_7frmw",
+        "from": {
+          "instId": "b1",
+          "pinId": "SCL"
+        },
+        "to": {
+          "instId": "comp_1788286045312_7ynf5",
+          "pinId": "scl"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788286298499_r25hd",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V2"
+        },
+        "to": {
+          "instId": "comp_1788286045312_7ynf5",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788286300685_2akou",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND3"
+        },
+        "to": {
+          "instId": "comp_1788286045312_7ynf5",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  }
+}

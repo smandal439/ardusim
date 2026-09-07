@@ -1,0 +1,132 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-09-01T09:12:25.639Z",
+  "name": "Read RFID Card Raw Data",
+  "code": "/*\nMFRC522 RFID Reader\t    ESP32\t          Description\nSDA\t                    GPIO 5\t        SPI signal input, I2C data line, or UART data input\nSCK\t                    GPIO 18\t        SPI clock\nMOSI\t                  GPIO 23\t        SPI data input\nMISO\t                  GPIO 19\t        SPI master-in-slave-out, I2C serial clock, or UART serial output\nIRQ\t                    Don’t connect\t  Interrupt pin; signals the microcontroller when an RFID tag is nearby\nGND\t                    GND\t\nRST\t                    GPIO 21\t        LOW signal to put the module in power-down mode; send a HIGH signal to reset the module\n3.3V\t                  3.3V\t          Power supply (2.5-3.3V)\n*/\n#include <MFRC522v2.h>\n#include <MFRC522DriverSPI.h>\n//#include <MFRC522DriverI2C.h>\n#include <MFRC522DriverPinSimple.h>\n#include <MFRC522Debug.h>\n\n// Learn more about using SPI/I2C or check the pin assigment for your board: https://github.com/OSSLibraries/Arduino_MFRC522v2#pin-layout\nMFRC522DriverPinSimple ss_pin(5);\n\nMFRC522DriverSPI driver{ss_pin}; // Create SPI driver\n//MFRC522DriverI2C driver{};     // Create I2C driver\nMFRC522 mfrc522{driver};         // Create MFRC522 instance\n\nvoid setup() {\n  Serial.begin(115200);  // Initialize serial communication\n  while (!Serial);       // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4).\n  \n  mfrc522.PCD_Init();    // Init MFRC522 board.\n  MFRC522Debug::PCD_DumpVersionToSerial(mfrc522, Serial);\t// Show details of PCD - MFRC522 Card Reader details.\n  Serial.println(F(\"Scan PICC to see UID, SAK, type, and data blocks...\"));\n}\n\nvoid loop() {\n  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.\n  if (!mfrc522.PICC_IsNewCardPresent()) {\n    return;\n  }\n\n  // Select one of the cards.\n  if (!mfrc522.PICC_ReadCardSerial()) {\n    return;\n  }\n\n  // Dump debug info about the card; PICC_HaltA() is automatically called.\n  MFRC522Debug::PICC_DumpToSerial(mfrc522, Serial, &(mfrc522.uid));\n\n  delay(2000);\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1788253315097_o4iaf",
+        "type": "rc522",
+        "x": 365,
+        "y": -25,
+        "width": 60,
+        "height": 80,
+        "props": {
+          "tagPresent": false,
+          "uid": "00:00:00:00"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_1788253844720_xtsz2",
+        "type": "esp32_devkit_v1",
+        "x": 115,
+        "y": -85,
+        "width": 170,
+        "height": 272,
+        "props": {
+          "label": "ESP32"
+        },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1788253872025_9mtae",
+        "from": {
+          "instId": "comp_1788253315097_o4iaf",
+          "pinId": "SDA"
+        },
+        "to": {
+          "instId": "comp_1788253844720_xtsz2",
+          "pinId": "D5"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788253879416_y4p8e",
+        "from": {
+          "instId": "comp_1788253315097_o4iaf",
+          "pinId": "SCK"
+        },
+        "to": {
+          "instId": "comp_1788253844720_xtsz2",
+          "pinId": "D18"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788253903144_iaogg",
+        "from": {
+          "instId": "comp_1788253315097_o4iaf",
+          "pinId": "MOSI"
+        },
+        "to": {
+          "instId": "comp_1788253844720_xtsz2",
+          "pinId": "D23"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788253910272_o2z1q",
+        "from": {
+          "instId": "comp_1788253315097_o4iaf",
+          "pinId": "MISO"
+        },
+        "to": {
+          "instId": "comp_1788253844720_xtsz2",
+          "pinId": "D19"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788253915135_wy7jr",
+        "from": {
+          "instId": "comp_1788253844720_xtsz2",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1788253315097_o4iaf",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788253925616_k3m8b",
+        "from": {
+          "instId": "comp_1788253315097_o4iaf",
+          "pinId": "RST"
+        },
+        "to": {
+          "instId": "comp_1788253844720_xtsz2",
+          "pinId": "D21"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788253932929_cjycp",
+        "from": {
+          "instId": "comp_1788253844720_xtsz2",
+          "pinId": "3V3"
+        },
+        "to": {
+          "instId": "comp_1788253315097_o4iaf",
+          "pinId": "3V3"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  }
+}

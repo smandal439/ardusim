@@ -1,0 +1,150 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-09-03T17:59:29.858Z",
+  "name": "ESP32 I2S Online Music Player",
+  "code": "#include <WiFi.h>\n#include <HTTPClient.h>\n#include <driver/i2s.h>\n\n// ─── WiFi credentials ───\nconst char* ssid     = \"YOUR_WIFI_SSID\";\nconst char* password = \"YOUR_WIFI_PASS\";\n\n// ─── Music server URL ───\n// Points to a local server that streams raw PCM audio\n// The server should return audio as: 16-bit, 44100 Hz, stereo, signed LE\nconst char* streamUrl = \"http://10.152.232.1:5000/guest\";\n\n// ─── I2S Configuration for MAX98357A ───\n#define I2S_PORT       I2S_NUM_0\n#define I2S_BCLK_PIN   26   // Bit Clock\n#define I2S_LRCK_PIN   25   // Word Select (LRC)\n#define I2S_DOUT_PIN   22   // Serial Data Out\n\n// ─── Buffer settings ───\n#define I2S_BUF_SIZE   1024\n#define I2S_BUF_COUNT  4\n\nvoid setupI2S() {\n  i2s_config_t i2s_config = {\n    .mode                 = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),\n    .sample_rate          = 44100,\n    .bits_per_sample      = I2S_BITS_PER_SAMPLE_16BIT,\n    .channel_format       = I2S_CHANNEL_FMT_RIGHT_LEFT,\n    .communication_format = I2S_COMM_FORMAT_STAND_I2S,\n    .intr_alloc_flags     = ESP_INTR_FLAG_LEVEL1,\n    .dma_buf_count        = I2S_BUF_COUNT,\n    .dma_buf_len          = I2S_BUF_SIZE,\n    .use_apll             = false,\n    .tx_desc_auto_clear   = true,\n  };\n\n  i2s_pin_config_t pin_config = {\n    .bck_io_num   = I2S_BCLK_PIN,\n    .ws_io_num    = I2S_LRCK_PIN,\n    .data_out_num = I2S_DOUT_PIN,\n    .data_in_num  = I2S_PIN_NO_CHANGE,\n  };\n\n  i2s_driver_install(I2S_PORT, &i2s_config, 0, NULL);\n  i2s_set_pin(I2S_PORT, &pin_config);\n  i2s_zero_dma_buffer(I2S_PORT);\n  Serial.println(\"[MUSIC] I2S initialized\");\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println(\"\\n=== ESP32 I2S Online Music Player ===\");\n\n  // Connect to WiFi\n  Serial.printf(\"[WIFI] Connecting to %s\", ssid);\n  WiFi.begin(ssid, password);\n  while (WiFi.status() != WL_CONNECTED) {\n    delay(500);\n    Serial.print(\".\");\n  }\n  Serial.printf(\"\\n[WIFI] Connected! IP: %s\\n\", WiFi.localIP().toString().c_str());\n\n  // Initialize I2S\n  setupI2S();\n  Serial.println(\"[MUSIC] Ready to stream music...\");\n}\n\nvoid streamAudio() {\n  HTTPClient http;\n  http.begin(streamUrl);\n  http.setTimeout(10000);\n\n  int httpCode = http.GET();\n  if (httpCode != HTTP_CODE_OK) {\n    Serial.printf(\"[MUSIC] Server error: %d\\n\", httpCode);\n    http.end();\n    return;\n  }\n\n  Serial.printf(\"[MUSIC] Streaming from %s\\n\", streamUrl);\n\n  WiFiClient* stream = http.getStreamPtr();\n  uint8_t buffer[I2S_BUF_SIZE];\n  size_t totalPlayed = 0;\n\n  while (stream->connected() && stream->available()) {\n    int bytesRead = stream->readBytes(buffer, sizeof(buffer));\n    if (bytesRead <= 0) continue;\n\n    size_t bytesWritten = 0;\n    i2s_write(I2S_PORT, buffer, bytesRead, &bytesWritten, portMAX_DELAY);\n    totalPlayed += bytesWritten;\n\n    // Print progress every 100KB\n    if ((totalPlayed / 102400) != ((totalPlayed - bytesWritten) / 102400)) {\n      Serial.printf(\"[MUSIC] Played %.1f KB\\n\", totalPlayed / 1024.0);\n    }\n  }\n\n  Serial.printf(\"[MUSIC] Stream finished (%.2f MB)\\n\", totalPlayed / 1048576.0);\n  http.end();\n}\n\nvoid loop() {\n  if (WiFi.status() != WL_CONNECTED) {\n    Serial.println(\"[WIFI] Disconnected. Reconnecting...\");\n    WiFi.reconnect();\n    while (WiFi.status() != WL_CONNECTED) delay(500);\n  }\n\n  Serial.println(\"[MUSIC] Starting playback...\");\n  streamAudio();\n\n  Serial.println(\"[MUSIC] Waiting 2s before next stream...\");\n  delay(2000);\n}\n",
+  "circuit": {
+    "components": [
+      {
+        "id": "esp",
+        "type": "esp32_devkit_v1",
+        "x": 350,
+        "y": 50,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32"
+        }
+      },
+      {
+        "id": "amp",
+        "type": "max98357a",
+        "x": 600,
+        "y": 160,
+        "rotation": 0,
+        "props": {
+          "label": "MAX98357A",
+          "gain": "12dB",
+          "channel_mode": "stereo_mix"
+        }
+      },
+      {
+        "id": "spk",
+        "type": "speaker_4ohm",
+        "x": 750,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "SPEAKER",
+          "impedance": 4,
+          "power_rating": 3
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w_bclk",
+        "from": {
+          "instId": "esp",
+          "pinId": "D26"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "bclk"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w_lrc",
+        "from": {
+          "instId": "esp",
+          "pinId": "D25"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "lrc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w_din",
+        "from": {
+          "instId": "esp",
+          "pinId": "D22"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "din"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w_5v",
+        "from": {
+          "instId": "esp",
+          "pinId": "VIN"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "vin"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w_gnd",
+        "from": {
+          "instId": "esp",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w_sd",
+        "from": {
+          "instId": "amp",
+          "pinId": "sd"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w_out_p",
+        "from": {
+          "instId": "amp",
+          "pinId": "out_p"
+        },
+        "to": {
+          "instId": "spk",
+          "pinId": "pos"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w_out_n",
+        "from": {
+          "instId": "amp",
+          "pinId": "out_n"
+        },
+        "to": {
+          "instId": "spk",
+          "pinId": "neg"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  }
+}
