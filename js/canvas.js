@@ -3023,6 +3023,9 @@ class CircuitCanvas {
             inst.runtimeState[pinId] = bitVal ? 255 : 0;
             write(pinId, bitVal);
           });
+          const q7nVal = (~inst.runtimeState._shiftReg >> 7) & 1;
+          inst.runtimeState.QHn = q7nVal ? 255 : 0;
+          write('QHn', q7nVal);
           break;
         }
 
@@ -4003,7 +4006,7 @@ class CircuitCanvas {
         ic_74hc00: ['Y1', 'Y2', 'Y3', 'Y4'],
         ic_74hc08: ['Y1', 'Y2', 'Y3', 'Y4'],
         ic_74hc32: ['Y1', 'Y2', 'Y3', 'Y4'],
-        ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH'],
+        ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'],
         ic_74hc138: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'],
         ic_74hc245: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
         ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
@@ -4117,7 +4120,7 @@ class CircuitCanvas {
       ic_74hc00: ['Y1', 'Y2', 'Y3', 'Y4'],
       ic_74hc08: ['Y1', 'Y2', 'Y3', 'Y4'],
       ic_74hc32: ['Y1', 'Y2', 'Y3', 'Y4'],
-      ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH'],
+      ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'],
       ic_74hc138: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'],
       ic_74hc245: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
       ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
@@ -4308,7 +4311,7 @@ class CircuitCanvas {
       ic_74hc04: ['Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6'],
       ic_74hc08: ['Y1', 'Y2', 'Y3', 'Y4'],
       ic_74hc32: ['Y1', 'Y2', 'Y3', 'Y4'],
-      ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH'],
+      ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'],
       ic_74hc138: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'],
       ic_74hc245: ['A1','A2','A3','A4','A5','A6','A7','A8','B1','B2','B3','B4','B5','B6','B7','B8'],
       ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
@@ -4366,7 +4369,7 @@ class CircuitCanvas {
       ic_74hc04: ['Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6'],
       ic_74hc08: ['Y1', 'Y2', 'Y3', 'Y4'],
       ic_74hc32: ['Y1', 'Y2', 'Y3', 'Y4'],
-      ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH'],
+      ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'],
       ic_74hc138: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'],
       ic_74hc245: ['A1','A2','A3','A4','A5','A6','A7','A8','B1','B2','B3','B4','B5','B6','B7','B8'],
       ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
@@ -4398,7 +4401,7 @@ class CircuitCanvas {
       ic_74hc04: ['Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6'],
       ic_74hc08: ['Y1', 'Y2', 'Y3', 'Y4'],
       ic_74hc32: ['Y1', 'Y2', 'Y3', 'Y4'],
-      ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH'],
+      ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'],
       ic_74hc138: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'],
       ic_74hc245: ['A1','A2','A3','A4','A5','A6','A7','A8','B1','B2','B3','B4','B5','B6','B7','B8'],
       ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],

@@ -1488,6 +1488,10 @@ class IC74HC595Component extends Component {
       this.runtimeState[pinId] = bitVal ? 255 : 0;
       write(pinId, bitVal);
     });
+
+    const q7nVal = (~this.runtimeState._shiftReg >> 7) & 1;
+    this.runtimeState.QHn = q7nVal ? 255 : 0;
+    write('QHn', q7nVal);
   }
   _readDigitalInput(pinId) {
     const pn = this.getConnectedPinNum(pinId);
