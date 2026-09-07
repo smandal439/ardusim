@@ -390,7 +390,7 @@ const COMPONENT_CATALOG = [
   { category: 'Actuators', ids: ['servo', 'dc_motor', 'relay', 'stepper_28byj', 'l298n', 'servo_continuous'] },
   { category: 'Audio', ids: ['max98357a', 'speaker_4ohm'] },
   { category: 'Sensors', ids: ['dht11', 'hcsr04', 'ldr', 'pir', 'mpu6050', 'ir_obstacle', 'flex_sensor', 'thermistor', 'lm35_sensor', 'bme280', 'vl53l0x', 'rc522', 'ir_receiver', 'hc05'] },
-  { category: 'Passive', ids: ['resistor', 'capacitor', 'breadboard', 'diode_1n4007'] },
+  { category: 'Passive', ids: ['resistor', 'capacitor', 'breadboard', 'breadboard_small', 'diode_1n4007'] },
   { category: 'Power', ids: ['power_5v', 'power_gnd', 'mb102_power', 'bench_power_supply'] },
   {
     category: 'Digital ICs', ids: [],
@@ -414,7 +414,29 @@ const COMPONENT_CATALOG = [
       ]
     }
   },
-  { category: 'Instruments', ids: ['multimeter', 'func_gen', 'dso_4ch', 'osc_probe_ch1', 'osc_probe_ch2', 'dso_probe_ch1', 'dso_probe_ch2', 'dso_probe_ch3', 'dso_probe_ch4', 'la_probe_ch1', 'la_probe_ch2', 'la_probe_ch3', 'la_probe_ch4', 'la_probe_ch5', 'la_probe_ch6', 'la_probe_ch7', 'la_probe_ch8'] },
+  {
+    category: 'Instruments',
+    ids: ['multimeter', 'func_gen', 'dso_4ch'],
+    dropdown: {
+      id: 'probe', label: 'Probes', icon: '🔍', desc: 'Oscilloscope, DSO & Logic Analyzer Probes',
+      variants: [
+        { id: 'osc_probe_ch1', name: 'OSC CH1', icon: '🟢', color: '#73ff00' },
+        { id: 'osc_probe_ch2', name: 'OSC CH2', icon: '🟠', color: '#ff9800' },
+        { id: 'dso_probe_ch1', name: 'DSO CH1', icon: '🟡', color: '#ffe600' },
+        { id: 'dso_probe_ch2', name: 'DSO CH2', icon: '🔵', color: '#00e5ff' },
+        { id: 'dso_probe_ch3', name: 'DSO CH3', icon: '🟣', color: '#ff3090' },
+        { id: 'dso_probe_ch4', name: 'DSO CH4', icon: '🟢', color: '#30ff60' },
+        { id: 'la_probe_ch1', name: 'LA CH1', icon: '🔵', color: '#00e5ff' },
+        { id: 'la_probe_ch2', name: 'LA CH2', icon: '🟠', color: '#ff9800' },
+        { id: 'la_probe_ch3', name: 'LA CH3', icon: '🟢', color: '#4caf50' },
+        { id: 'la_probe_ch4', name: 'LA CH4', icon: '🔴', color: '#ff5722' },
+        { id: 'la_probe_ch5', name: 'LA CH5', icon: '🟣', color: '#ab47bc' },
+        { id: 'la_probe_ch6', name: 'LA CH6', icon: '🟡', color: '#ffee33' },
+        { id: 'la_probe_ch7', name: 'LA CH7', icon: '🩷', color: '#e91e63' },
+        { id: 'la_probe_ch8', name: 'LA CH8', icon: '💚', color: '#76ff03' },
+      ]
+    }
+  },
 ];
 
 /* Export */

@@ -1,0 +1,194 @@
+{
+  "version": "1.1",
+  "savedAt": "2026-09-07T12:00:00.000Z",
+  "name": "74HC595 Shift Register Test",
+  "code": "void setup() {\n  pinMode(2, OUTPUT);\n  pinMode(3, OUTPUT);\n  digitalWrite(2, HIGH);\n  digitalWrite(3, LOW);\n}\nvoid loop() {\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "vcc1",
+        "type": "power_5v",
+        "x": 280,
+        "y": -220,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "gnd1",
+        "type": "power_gnd",
+        "x": 420,
+        "y": 90,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "srclk_gen",
+        "type": "func_gen",
+        "x": 100,
+        "y": -180,
+        "rotation": 0,
+        "props": {
+          "powered": 1,
+          "ch1_wave": "square",
+          "ch1_freq": 4,
+          "ch1_amp": 5,
+          "ch1_offset": 0,
+          "ch1_phase": 0,
+          "ch1_duty": 50,
+          "ch2_wave": "square",
+          "ch2_freq": 8,
+          "ch2_amp": 5,
+          "ch2_offset": 0,
+          "ch2_phase": 2,
+          "ch2_duty": 50
+        }
+      },
+      {
+        "id": "rclk_gen",
+        "type": "func_gen",
+        "x": 100,
+        "y": 40,
+        "rotation": 0,
+        "props": {
+          "powered": 1,
+          "ch1_wave": "square",
+          "ch1_freq": 0.5,
+          "ch1_amp": 5,
+          "ch1_offset": 0,
+          "ch1_phase": 0,
+          "ch1_duty": 50,
+          "ch2_wave": "square",
+          "ch2_freq": 1,
+          "ch2_amp": 5,
+          "ch2_offset": 0,
+          "ch2_phase": 2,
+          "ch2_duty": 50
+        }
+      },
+      {
+        "id": "sr",
+        "type": "ic_74hc595",
+        "x": 280,
+        "y": -90,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "la_ch1",
+        "type": "la_probe_ch1",
+        "x": 50,
+        "y": 140,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "la_ch2",
+        "type": "la_probe_ch2",
+        "x": 50,
+        "y": 200,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "la_ch3",
+        "type": "la_probe_ch3",
+        "x": 50,
+        "y": 260,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "la_ch4",
+        "type": "la_probe_ch4",
+        "x": 50,
+        "y": 290,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "led0",
+        "type": "led",
+        "x": 350,
+        "y": -220,
+        "rotation": 0,
+        "props": { "color": "red" }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 380,
+        "y": -220,
+        "rotation": 0,
+        "props": { "color": "green" }
+      },
+      {
+        "id": "led2",
+        "type": "led",
+        "x": 410,
+        "y": -220,
+        "rotation": 0,
+        "props": { "color": "red" }
+      },
+      {
+        "id": "led3",
+        "type": "led",
+        "x": 440,
+        "y": -220,
+        "rotation": 0,
+        "props": { "color": "green" }
+      },
+      {
+        "id": "rled0",
+        "type": "resistor",
+        "x": 350,
+        "y": -160,
+        "rotation": 0,
+        "props": { "value": 220, "unit": "Ω" }
+      },
+      {
+        "id": "rled1",
+        "type": "resistor",
+        "x": 380,
+        "y": -160,
+        "rotation": 0,
+        "props": { "value": 220, "unit": "Ω" }
+      },
+      {
+        "id": "rled2",
+        "type": "resistor",
+        "x": 410,
+        "y": -160,
+        "rotation": 0,
+        "props": { "value": 220, "unit": "Ω" }
+      },
+      {
+        "id": "rled3",
+        "type": "resistor",
+        "x": 440,
+        "y": -160,
+        "rotation": 0,
+        "props": { "value": 220, "unit": "Ω" }
+      }
+    ],
+    "wires": [
+      { "from": { "component": "srclk_gen", "pin": "ch1" }, "to": { "component": "sr", "pin": "SRCLK" } },
+      { "from": { "component": "rclk_gen", "pin": "ch1" }, "to": { "component": "sr", "pin": "RCLK" } },
+      { "from": { "component": "srclk_gen", "pin": "ch1" }, "to": { "component": "la_ch1", "pin": "in" } },
+      { "from": { "component": "rclk_gen", "pin": "ch1" }, "to": { "component": "la_ch2", "pin": "in" } },
+      { "from": { "component": "sr", "pin": "QA" }, "to": { "component": "rled0", "pin": "a" } },
+      { "from": { "component": "sr", "pin": "QB" }, "to": { "component": "rled1", "pin": "a" } },
+      { "from": { "component": "sr", "pin": "QC" }, "to": { "component": "rled2", "pin": "a" } },
+      { "from": { "component": "sr", "pin": "QD" }, "to": { "component": "rled3", "pin": "a" } },
+      { "from": { "component": "rled0", "pin": "b" }, "to": { "component": "led0", "pin": "a" } },
+      { "from": { "component": "rled1", "pin": "b" }, "to": { "component": "led1", "pin": "a" } },
+      { "from": { "component": "rled2", "pin": "b" }, "to": { "component": "led2", "pin": "a" } },
+      { "from": { "component": "rled3", "pin": "b" }, "to": { "component": "led3", "pin": "a" } },
+      { "from": { "component": "led0", "pin": "b" }, "to": { "component": "gnd1", "pin": "in" } },
+      { "from": { "component": "led1", "pin": "b" }, "to": { "component": "gnd1", "pin": "in" } },
+      { "from": { "component": "led2", "pin": "b" }, "to": { "component": "gnd1", "pin": "in" } },
+      { "from": { "component": "led3", "pin": "b" }, "to": { "component": "gnd1", "pin": "in" } },
+      { "from": { "component": "sr", "pin": "QA" }, "to": { "component": "la_ch3", "pin": "in" } },
+      { "from": { "component": "sr", "pin": "QB" }, "to": { "component": "la_ch4", "pin": "in" } }
+    ]
+  }
+}

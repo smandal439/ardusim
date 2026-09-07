@@ -1,0 +1,191 @@
+{
+  "id": "7408_test_with_logic_analyzer",
+  "name": "7408 test with logic analyzer",
+  "icon": "🔧",
+  "desc": "A custom 7408 test with logic analyzer circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1788763144531_m3z0x",
+        "type": "power_5v",
+        "x": 295,
+        "y": -165,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_1788763146523_hx0xv",
+        "type": "power_gnd",
+        "x": 400,
+        "y": 95,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_1788763152412_r9qaz",
+        "type": "func_gen",
+        "x": -150,
+        "y": -170,
+        "rotation": 0,
+        "props": {
+          "powered": 1,
+          "ch1_wave": "square",
+          "ch1_freq": 2,
+          "ch1_amp": 5,
+          "ch1_offset": 0,
+          "ch1_phase": 0,
+          "ch1_duty": 50,
+          "ch2_wave": "square",
+          "ch2_freq": 4,
+          "ch2_amp": 5,
+          "ch2_offset": 0,
+          "ch2_phase": 2,
+          "ch2_duty": 50
+        }
+      },
+      {
+        "id": "comp_1788763206514_huo4f",
+        "type": "la_probe_ch1",
+        "x": -80,
+        "y": 85,
+        "rotation": 2,
+        "props": {}
+      },
+      {
+        "id": "comp_1788763212594_pf45c",
+        "type": "la_probe_ch2",
+        "x": 15,
+        "y": 80,
+        "rotation": 2,
+        "props": {}
+      },
+      {
+        "id": "comp_1788767952437_ka2ki",
+        "type": "ic_74hc08",
+        "x": 260,
+        "y": -70,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_1788768006036_xgnvk",
+        "type": "la_probe_ch3",
+        "x": 285,
+        "y": 90,
+        "rotation": 2,
+        "props": {}
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1788763183147_9zs1x",
+        "from": {
+          "instId": "comp_1788763152412_r9qaz",
+          "pinId": "ch1_gnd"
+        },
+        "to": {
+          "instId": "comp_1788763146523_hx0xv",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788767956006_cic5k",
+        "from": {
+          "instId": "comp_1788767952437_ka2ki",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "comp_1788763146523_hx0xv",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788767958209_k83uy",
+        "from": {
+          "instId": "comp_1788767952437_ka2ki",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "comp_1788763144531_m3z0x",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788767963001_txjp1",
+        "from": {
+          "instId": "comp_1788763152412_r9qaz",
+          "pinId": "ch1_out"
+        },
+        "to": {
+          "instId": "comp_1788767952437_ka2ki",
+          "pinId": "A1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788767965994_lq6ae",
+        "from": {
+          "instId": "comp_1788763152412_r9qaz",
+          "pinId": "ch2_out"
+        },
+        "to": {
+          "instId": "comp_1788767952437_ka2ki",
+          "pinId": "B1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788767986901_mgn26",
+        "from": {
+          "instId": "comp_1788763152412_r9qaz",
+          "pinId": "ch1_out"
+        },
+        "to": {
+          "instId": "comp_1788763206514_huo4f",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788767988876_ds97a",
+        "from": {
+          "instId": "comp_1788763152412_r9qaz",
+          "pinId": "ch2_out"
+        },
+        "to": {
+          "instId": "comp_1788763212594_pf45c",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788768012331_28cht",
+        "from": {
+          "instId": "comp_1788767952437_ka2ki",
+          "pinId": "Y1"
+        },
+        "to": {
+          "instId": "comp_1788768006036_xgnvk",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "void setup() {\n   // Put your setup code here, to run once when the board starts:\n}\nvoid loop() {\n  // Put your main code here, to run repeatedly indefinitely:\n}"
+}

@@ -31,15 +31,15 @@ defComp({
   defaultProps: { mode: 'astable', frequency: 1000, dutyCycle: 50 },
   pins: [
     /* Bottom row (pins 1-4, left to right) */
-    { id: 'GND',  label: '1', type: PIN_TYPE.GND,     x:  0, y: 50, side: 'bottom' },
+    { id: 'GND', label: '1', type: PIN_TYPE.GND, x: 0, y: 50, side: 'bottom' },
     { id: 'TRIG', label: '2', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
-    { id: 'OUT',  label: '3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
-    { id: 'RST',  label: '4', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'OUT', label: '3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'RST', label: '4', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
     /* Top row (pins 8-5, left to right) */
-    { id: 'VCC',  label: '8', type: PIN_TYPE.POWER,   x:  0, y:  0, side: 'top' },
-    { id: 'DIS',  label: '7', type: PIN_TYPE.DIGITAL, x: 17, y:  0, side: 'top' },
-    { id: 'THR',  label: '6', type: PIN_TYPE.DIGITAL, x: 34, y:  0, side: 'top' },
-    { id: 'CV',   label: '5', type: PIN_TYPE.SIGNAL,  x: 51, y:  0, side: 'top' },
+    { id: 'VCC', label: '8', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'DIS', label: '7', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'THR', label: '6', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'CV', label: '5', type: PIN_TYPE.SIGNAL, x: 51, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -124,21 +124,21 @@ defComp({
   defaultProps: {},
   pins: [
     /* Bottom row (pins 1-7, left to right) */
-    { id: 'A1',  label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'B1',  label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'Y1',  label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'A2',  label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'B2',  label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'Y2',  label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'GND', label: '7',  type: PIN_TYPE.GND,     x: 102, y: 50, side: 'bottom' },
+    { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
     /* Top row (pins 14-8, left to right) */
-    { id: 'VCC', label: '14', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'B4',  label: '13', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'A4',  label: '12', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'Y4',  label: '11', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'B3',  label: '10', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'A3',  label: '9',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'Y3',  label: '8',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -219,21 +219,21 @@ defComp({
   defaultProps: {},
   pins: [
     /* Bottom row (pins 1-7) */
-    { id: 'A1',  label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'Y1',  label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'A2',  label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'Y2',  label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'A3',  label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'Y3',  label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'GND', label: '7',  type: PIN_TYPE.GND,     x: 102, y: 50, side: 'bottom' },
+    { id: 'A1', label: '1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'Y1', label: '2', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'A2', label: '3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'Y2', label: '4', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'A3', label: '5', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Y3', label: '6', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: '7', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
     /* Top row (pins 14-8) */
-    { id: 'VCC', label: '14', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'A6',  label: '13', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'Y6',  label: '12', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'A5',  label: '11', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'Y5',  label: '10', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'A4',  label: '9',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'Y4',  label: '8',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
+    { id: 'VCC', label: '14', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'A6', label: '13', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'Y6', label: '12', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'A5', label: '11', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'Y5', label: '10', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'A4', label: '9', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Y4', label: '8', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -310,21 +310,21 @@ defComp({
   defaultProps: {},
   pins: [
     /* Bottom row (pins 1-7, left to right) */
-    { id: 'A1',  label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'B1',  label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'Y1',  label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'A2',  label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'B2',  label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'Y2',  label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'GND', label: '7',  type: PIN_TYPE.GND,     x: 102, y: 50, side: 'bottom' },
+    { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
     /* Top row (pins 14-8, left to right) */
-    { id: 'VCC', label: '14', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'B4',  label: '13', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'A4',  label: '12', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'Y4',  label: '11', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'B3',  label: '10', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'A3',  label: '9',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'Y3',  label: '8',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -402,21 +402,21 @@ defComp({
   defaultProps: {},
   pins: [
     /* Bottom row (pins 1-7, left to right) */
-    { id: 'A1',  label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'B1',  label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'Y1',  label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'A2',  label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'B2',  label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'Y2',  label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'GND', label: '7',  type: PIN_TYPE.GND,     x: 102, y: 50, side: 'bottom' },
+    { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
     /* Top row (pins 14-8, left to right) */
-    { id: 'VCC', label: '14', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'B4',  label: '13', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'A4',  label: '12', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'Y4',  label: '11', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'B3',  label: '10', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'A3',  label: '9',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'Y3',  label: '8',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -496,24 +496,25 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    /* Bottom row (pins 1-8, left to right) */
-    { id: 'QB',    label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'QC',    label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'QD',    label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'QE',    label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'QF',    label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'QG',    label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'QH',    label: '7',  type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'GND',   label: '8',  type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-    /* Top row (pins 16-9, left to right) */
-    { id: 'VCC',   label: '16', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'QA',    label: '15', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'SER',   label: '14', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'OE',    label: '13', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'RCLK',  label: '12', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'SRCLK', label: '11', type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'SRCLR', label: '10', type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'QHp',   label: '9',  type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+    /* Bottom Row (Pins 1–8, Left to Right) */
+    { id: 'QB', label: 'Q1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' }, // Pin 1
+    { id: 'QC', label: 'Q2', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' }, // Pin 2
+    { id: 'QD', label: 'Q3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' }, // Pin 3
+    { id: 'QE', label: 'Q4', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' }, // Pin 4
+    { id: 'QF', label: 'Q5', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' }, // Pin 5
+    { id: 'QG', label: 'Q6', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' }, // Pin 6
+    { id: 'QH', label: 'Q7', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' }, // Pin 7
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' }, // Pin 8
+
+    /* Top Row (Pins 16–9, Left to Right) */
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },    // Pin 16
+    { id: 'QA', label: 'Q0', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },    // Pin 15
+    { id: 'SER', label: 'SER', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },    // Pin 14
+    { id: 'OE', label: '/OE', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },    // Pin 13
+    { id: 'RCLK', label: 'RCLK/Latch', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },    // Pin 12
+    { id: 'SRCLK', label: 'SRCLK', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },    // Pin 11
+    { id: 'SRCLR', label: '/RST', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },    // Pin 10
+    { id: 'QHn', label: "Q7'", type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },    // Pin 9
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -573,7 +574,7 @@ defComp({
     ctx.restore();
   }
 });
-
+// 
 /* ══════════════════════════════════════════════════════════
    74HC138 — 3-to-8 Line Decoder (16-pin DIP)
    
@@ -598,23 +599,23 @@ defComp({
   defaultProps: {},
   pins: [
     /* Bottom row (pins 1-8, left to right) */
-    { id: 'A0',   label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'A1',   label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'A2',   label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'G2A',  label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'G2B',  label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'G1',   label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'Y7',   label: '7',  type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'GND',  label: '8',  type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
+    { id: 'A0', label: 'A0', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'A1', label: 'A1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'A2', label: 'A2', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'G2A', label: 'G2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'G2B', label: 'G2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'G1', label: 'G1', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'Y7', label: 'Y7', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
     /* Top row (pins 16-9, left to right) */
-    { id: 'VCC',  label: '16', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'Y0',   label: '15', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'Y1',   label: '14', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'Y2',   label: '13', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'Y3',   label: '12', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'Y4',   label: '11', type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'Y5',   label: '10', type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'Y6',   label: '9',  type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'Y0', label: 'Y0', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'Y1', label: 'Y1', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Y2', label: 'Y2', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'Y3', label: 'Y3', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'Y4', label: 'Y4', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Y5', label: 'Y5', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'Y6', label: 'Y6', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -701,27 +702,27 @@ defComp({
   defaultProps: {},
   pins: [
     /* Bottom row (pins 1-10, left to right) */
-    { id: 'DIR', label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'A1',  label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'A2',  label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'A3',  label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'A4',  label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'A5',  label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'A6',  label: '7',  type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'A7',  label: '8',  type: PIN_TYPE.DIGITAL, x: 119, y: 50, side: 'bottom' },
-    { id: 'A8',  label: '9',  type: PIN_TYPE.DIGITAL, x: 136, y: 50, side: 'bottom' },
-    { id: 'GND', label: '10', type: PIN_TYPE.GND,     x: 153, y: 50, side: 'bottom' },
+    { id: 'DIR', label: 'DIR', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'A1', label: 'A1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'A2', label: 'A2', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'A3', label: 'A3', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'A4', label: 'A4', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'A5', label: 'A5', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'A6', label: 'A6', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'A7', label: 'A7', type: PIN_TYPE.DIGITAL, x: 119, y: 50, side: 'bottom' },
+    { id: 'A8', label: 'A8', type: PIN_TYPE.DIGITAL, x: 136, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 153, y: 50, side: 'bottom' },
     /* Top row (pins 20-11, left to right) */
-    { id: 'VCC', label: '20', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'OE',  label: '19', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'B1',  label: '18', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'B2',  label: '17', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'B3',  label: '16', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'B4',  label: '15', type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'B5',  label: '14', type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'B6',  label: '13', type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
-    { id: 'B7',  label: '12', type: PIN_TYPE.DIGITAL, x: 136, y:  0, side: 'top' },
-    { id: 'B8',  label: '11', type: PIN_TYPE.DIGITAL, x: 153, y:  0, side: 'top' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'OE', label: '/OE', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'B1', label: 'B1', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'B2', label: 'B2', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'B3', label: 'B3', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'B4', label: 'B4', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'B5', label: 'B5', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'B6', label: 'B6', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+    { id: 'B7', label: 'B7', type: PIN_TYPE.DIGITAL, x: 136, y: 0, side: 'top' },
+    { id: 'B8', label: 'B8', type: PIN_TYPE.DIGITAL, x: 153, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -806,20 +807,20 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    { id: 'CLR1', label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'D1',   label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'CLK1', label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'PRE1', label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'Q1',   label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'Q1n',  label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'GND',  label: '7',  type: PIN_TYPE.GND,     x: 102, y: 50, side: 'bottom' },
-    { id: 'VCC',  label: '14', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'CLK2', label: '13', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'Q2n',  label: '12', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'Q2',   label: '11', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'PRE2', label: '10', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'CLR2', label: '9',  type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'D2',   label: '8',  type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
+    { id: 'CLR1', label: '/CLR1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'D1', label: 'D1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'CLK1', label: 'CLK1', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'PRE1', label: '/PRE1', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'Q1', label: 'Q1', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Q1n', label: "Q1'", type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'CLK2', label: 'CLK2', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'Q2n', label: "Q2'", type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Q2', label: 'Q2', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'PRE2', label: '/PRE2', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'CLR2', label: '/CLR2', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'D2', label: 'D2', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -881,22 +882,22 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    { id: 'SHLD',  label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'CLK',   label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'E',     label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'F',     label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'G',     label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'H',     label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'Q7',    label: '7',  type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'GND',   label: '8',  type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-    { id: 'VCC',   label: '16', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'A',     label: '15', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'CLKINH',label: '14', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'Hn',    label: '13', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'Gn',    label: '12', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'Fn',    label: '11', type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'SER',   label: '10', type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'Q7n',   label: '9',  type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+    { id: 'SHLD', label: '/SHLD', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'CLK', label: 'CLK', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'E', label: 'E', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'F', label: 'F', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'G', label: 'G', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'H', label: 'H', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'Q7', label: 'Q7', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'CLKINH', label: 'CLKINH', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Hn', label: "H'", type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'Gn', label: "G'", type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'Fn', label: "F'", type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'SER', label: 'SER', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'Q7n', label: "Q7'", type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -959,22 +960,22 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    { id: 'CPU', label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'CPD', label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'PL',  label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'TC_D',label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'TC_U',label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'QA',  label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'QB',  label: '7',  type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'GND', label: '8',  type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-    { id: 'VCC', label: '16', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'MR',  label: '14', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'DD',  label: '15', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'A',   label: '13', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'B',   label: '12', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'C',   label: '11', type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'CO',  label: '10', type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'BO',  label: '9',  type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+    { id: 'CPU', label: 'CPU', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'CPD', label: 'CPD', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'PL', label: '/PL', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'TC_D', label: 'TC_D', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'TC_U', label: 'TC_U', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'QA', label: 'QA', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'QB', label: 'QB', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'MR', label: 'MR', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'DD', label: 'D', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'B', label: 'B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'C', label: 'C', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'CO', label: 'CO', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'BO', label: 'BO', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -1041,22 +1042,22 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    { id: 'A',   label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'B',   label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'C',   label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'D',   label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'LT',  label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'RBI', label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'BI',  label: '7',  type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'GND', label: '8',  type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-    { id: 'VCC', label: '16', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'f',   label: '15', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'a',   label: '14', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'b',   label: '13', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'c',   label: '12', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'g',   label: '11', type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'd',   label: '10', type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'e',   label: '9',  type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+    { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'B', label: 'B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'C', label: 'C', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'D', label: 'D', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'LT', label: '/LT', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'RBI', label: '/RBI', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'BI', label: '/BI', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'f', label: 'f', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'a', label: 'a', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'b', label: 'b', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'c', label: 'c', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'g', label: 'g', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'd', label: 'd', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'e', label: 'e', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -1116,22 +1117,22 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    { id: 'EI',  label: '1',  type: PIN_TYPE.DIGITAL, x:   0, y: 50, side: 'bottom' },
-    { id: 'I0',  label: '2',  type: PIN_TYPE.DIGITAL, x:  17, y: 50, side: 'bottom' },
-    { id: 'I1',  label: '3',  type: PIN_TYPE.DIGITAL, x:  34, y: 50, side: 'bottom' },
-    { id: 'I2',  label: '4',  type: PIN_TYPE.DIGITAL, x:  51, y: 50, side: 'bottom' },
-    { id: 'I3',  label: '5',  type: PIN_TYPE.DIGITAL, x:  68, y: 50, side: 'bottom' },
-    { id: 'A1',  label: '6',  type: PIN_TYPE.DIGITAL, x:  85, y: 50, side: 'bottom' },
-    { id: 'A2',  label: '7',  type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
-    { id: 'GND', label: '8',  type: PIN_TYPE.GND,     x: 119, y: 50, side: 'bottom' },
-    { id: 'VCC', label: '16', type: PIN_TYPE.POWER,   x:   0, y:  0, side: 'top' },
-    { id: 'EO',  label: '15', type: PIN_TYPE.DIGITAL, x:  17, y:  0, side: 'top' },
-    { id: 'GS',  label: '14', type: PIN_TYPE.DIGITAL, x:  34, y:  0, side: 'top' },
-    { id: 'I4',  label: '13', type: PIN_TYPE.DIGITAL, x:  51, y:  0, side: 'top' },
-    { id: 'I5',  label: '12', type: PIN_TYPE.DIGITAL, x:  68, y:  0, side: 'top' },
-    { id: 'I6',  label: '11', type: PIN_TYPE.DIGITAL, x:  85, y:  0, side: 'top' },
-    { id: 'I7',  label: '10', type: PIN_TYPE.DIGITAL, x: 102, y:  0, side: 'top' },
-    { id: 'A0',  label: '9',  type: PIN_TYPE.DIGITAL, x: 119, y:  0, side: 'top' },
+    { id: 'EI', label: '/EI', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'I0', label: 'I0', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'I1', label: 'I1', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'I2', label: 'I2', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'I3', label: 'I3', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'A1', label: 'A1', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'A2', label: 'A2', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'EO', label: '/EO', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'GS', label: '/GS', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'I4', label: 'I4', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'I5', label: 'I5', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'I6', label: 'I6', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'I7', label: 'I7', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'A0', label: 'A0', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -1187,14 +1188,14 @@ defComp({
   height: 50,
   defaultProps: {},
   pins: [
-    { id: 'OFF1', label: '1',  type: PIN_TYPE.DIGITAL, x:  0, y: 50, side: 'bottom' },
-    { id: 'INN',  label: '2',  type: PIN_TYPE.SIGNAL,  x: 17, y: 50, side: 'bottom' },
-    { id: 'INP',  label: '3',  type: PIN_TYPE.SIGNAL,  x: 34, y: 50, side: 'bottom' },
-    { id: 'VCCN', label: '4',  type: PIN_TYPE.GND,     x: 51, y: 50, side: 'bottom' },
-    { id: 'OFF2', label: '5',  type: PIN_TYPE.DIGITAL, x:  0, y:  0, side: 'top' },
-    { id: 'OUT',  label: '6',  type: PIN_TYPE.SIGNAL,  x: 17, y:  0, side: 'top' },
-    { id: 'VCCP', label: '7',  type: PIN_TYPE.POWER,   x: 34, y:  0, side: 'top' },
-    { id: 'NC',   label: '8',  type: PIN_TYPE.DIGITAL, x: 51, y:  0, side: 'top' },
+    { id: 'OFF1', label: '1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'INN', label: '2', type: PIN_TYPE.SIGNAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'INP', label: '3', type: PIN_TYPE.SIGNAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'VCCN', label: '4', type: PIN_TYPE.GND, x: 51, y: 50, side: 'bottom' },
+    { id: 'OFF2', label: '5', type: PIN_TYPE.DIGITAL, x: 0, y: 0, side: 'top' },
+    { id: 'OUT', label: '6', type: PIN_TYPE.SIGNAL, x: 17, y: 0, side: 'top' },
+    { id: 'VCCP', label: '7', type: PIN_TYPE.POWER, x: 34, y: 0, side: 'top' },
+    { id: 'NC', label: '8', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -1244,20 +1245,20 @@ defComp({
 class IC74HC00Component extends Component {
   getPins() {
     return [
-      { id: 'A1', label: '1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
-      { id: 'B1', label: '2', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
-      { id: 'Y1', label: '3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
-      { id: 'A2', label: '4', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
-      { id: 'B2', label: '5', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
-      { id: 'Y2', label: '6', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
-      { id: 'GND', label: '7', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
-      { id: 'VCC', label: '14', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
-      { id: 'B4', label: '13', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
-      { id: 'A4', label: '12', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
-      { id: 'Y4', label: '11', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
-      { id: 'B3', label: '10', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
-      { id: 'A3', label: '9', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
-      { id: 'Y3', label: '8', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1274,29 +1275,35 @@ class IC74HC00Component extends Component {
   }
   _readDigitalInput(pinId) {
     const pn = this.getConnectedPinNum(pinId);
-    if (pn === null) return 0;
-    const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
-    return val > 128 ? 1 : 0;
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
   }
 }
 
 class IC74HC04Component extends Component {
   getPins() {
     return [
-      { id: 'A1', label: '1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
-      { id: 'Y1', label: '2', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
-      { id: 'A2', label: '3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
-      { id: 'Y2', label: '4', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
-      { id: 'A3', label: '5', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
-      { id: 'Y3', label: '6', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
-      { id: 'GND', label: '7', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
-      { id: 'VCC', label: '14', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
-      { id: 'A6', label: '13', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
-      { id: 'Y6', label: '12', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
-      { id: 'A5', label: '11', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
-      { id: 'Y5', label: '10', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
-      { id: 'A4', label: '9', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
-      { id: 'Y4', label: '8', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'A6', label: '6A', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'Y6', label: '6Y', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'A5', label: '5A', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'Y5', label: '5Y', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1313,29 +1320,35 @@ class IC74HC04Component extends Component {
   }
   _readDigitalInput(pinId) {
     const pn = this.getConnectedPinNum(pinId);
-    if (pn === null) return 0;
-    const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
-    return val > 128 ? 1 : 0;
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
   }
 }
 
 class IC74HC08Component extends Component {
   getPins() {
     return [
-      { id: 'A1', label: '1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
-      { id: 'B1', label: '2', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
-      { id: 'Y1', label: '3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
-      { id: 'A2', label: '4', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
-      { id: 'B2', label: '5', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
-      { id: 'Y2', label: '6', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
-      { id: 'GND', label: '7', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
-      { id: 'VCC', label: '14', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
-      { id: 'B4', label: '13', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
-      { id: 'A4', label: '12', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
-      { id: 'Y4', label: '11', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
-      { id: 'B3', label: '10', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
-      { id: 'A3', label: '9', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
-      { id: 'Y3', label: '8', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1352,29 +1365,35 @@ class IC74HC08Component extends Component {
   }
   _readDigitalInput(pinId) {
     const pn = this.getConnectedPinNum(pinId);
-    if (pn === null) return 0;
-    const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
-    return val > 128 ? 1 : 0;
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
   }
 }
 
 class IC74HC32Component extends Component {
   getPins() {
     return [
-      { id: 'A1', label: '1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
-      { id: 'B1', label: '2', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
-      { id: 'Y1', label: '3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
-      { id: 'A2', label: '4', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
-      { id: 'B2', label: '5', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
-      { id: 'Y2', label: '6', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
-      { id: 'GND', label: '7', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
-      { id: 'VCC', label: '14', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
-      { id: 'B4', label: '13', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
-      { id: 'A4', label: '12', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
-      { id: 'Y4', label: '11', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
-      { id: 'B3', label: '10', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
-      { id: 'A3', label: '9', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
-      { id: 'Y3', label: '8', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1391,31 +1410,37 @@ class IC74HC32Component extends Component {
   }
   _readDigitalInput(pinId) {
     const pn = this.getConnectedPinNum(pinId);
-    if (pn === null) return 0;
-    const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
-    return val > 128 ? 1 : 0;
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
   }
 }
 
 class IC74HC595Component extends Component {
   getPins() {
     return [
-      { id: 'SER', label: '14', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
-      { id: 'OE', label: '13', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
-      { id: 'SRCLR', label: '10', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
-      { id: 'SRCLK', label: '11', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
-      { id: 'RCLK', label: '12', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
-      { id: 'GND', label: '8', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
-      { id: 'VCC', label: '16', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
-      { id: 'QHn', label: '9', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
-      { id: 'QA', label: '15', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
-      { id: 'QB', label: '1', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
-      { id: 'QC', label: '2', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
-      { id: 'QD', label: '3', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
-      { id: 'QE', label: '4', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
-      { id: 'QF', label: '5', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
-      { id: 'QG', label: '6', type: PIN_TYPE.DIGITAL, x: 136, y: 0, side: 'top' },
-      { id: 'QH', label: '7', type: PIN_TYPE.DIGITAL, x: 153, y: 0, side: 'top' },
+      { id: 'QA', label: 'Q0', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'QB', label: 'Q1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'QC', label: 'Q2', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'QD', label: 'Q3', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'QE', label: 'Q4', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'QF', label: 'Q5', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'QG', label: 'Q6', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'QHn', label: "Q7'", type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'QH', label: 'Q7', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'SRCLR', label: '/RST', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'SRCLK', label: 'SRCLK', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'RCLK', label: 'RCLK', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'OE', label: '/OE', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'SER', label: 'SER', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
     ];
   }
   update(canvas) {
@@ -1464,12 +1489,505 @@ class IC74HC595Component extends Component {
       this.runtimeState[pinId] = bitVal ? 255 : 0;
       write(pinId, bitVal);
     });
+
+    const q7nVal = (~this.runtimeState._shiftReg >> 7) & 1;
+    this.runtimeState.QHn = q7nVal ? 255 : 0;
+    write('QHn', q7nVal);
   }
   _readDigitalInput(pinId) {
     const pn = this.getConnectedPinNum(pinId);
-    if (pn === null) return 0;
-    const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
-    return val > 128 ? 1 : 0;
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
+class IC74HC138Component extends Component {
+  getPins() {
+    return [
+      { id: 'A0', label: 'A0', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'A1', label: 'A1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'A2', label: 'A2', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'G2A', label: 'G2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'G2B', label: 'G2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'G1', label: 'G1', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'Y7', label: 'Y7', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'Y0', label: 'Y0', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'Y1', label: 'Y1', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'Y2', label: 'Y2', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'Y3', label: 'Y3', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'Y4', label: 'Y4', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'Y5', label: 'Y5', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'Y6', label: 'Y6', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const write = (id, val) => {
+      const pn = this.getConnectedPinNum(id);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = val ? 255 : 0;
+    };
+    const a0 = read('A0'), a1 = read('A1'), a2 = read('A2');
+    const g1 = read('G1'), g2a = read('G2A'), g2b = read('G2B');
+    const enabled = g1 === 1 && g2a === 0 && g2b === 0;
+    const addr = (a2 << 2) | (a1 << 1) | a0;
+    for (let i = 0; i < 8; i++) {
+      const outVal = (enabled && i === addr) ? 0 : 1;
+      this.runtimeState[`Y${i}`] = outVal ? 255 : 0;
+      write(`Y${i}`, outVal);
+    }
+    this.runtimeState.activeOutput = enabled ? addr : -1;
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
+class IC74HC245Component extends Component {
+  getPins() {
+    return [
+      { id: 'DIR', label: 'DIR', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'A1', label: 'A1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'A2', label: 'A2', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'A3', label: 'A3', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'A4', label: 'A4', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'A5', label: 'A5', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'A6', label: 'A6', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'A7', label: 'A7', type: PIN_TYPE.DIGITAL, x: 119, y: 50, side: 'bottom' },
+      { id: 'A8', label: 'A8', type: PIN_TYPE.DIGITAL, x: 136, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 153, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'OE', label: '/OE', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'B1', label: 'B1', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'B2', label: 'B2', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'B3', label: 'B3', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'B4', label: 'B4', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'B5', label: 'B5', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'B6', label: 'B6', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+      { id: 'B7', label: 'B7', type: PIN_TYPE.DIGITAL, x: 136, y: 0, side: 'top' },
+      { id: 'B8', label: 'B8', type: PIN_TYPE.DIGITAL, x: 153, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const readVal = (id) => {
+      const pn = this.getConnectedPinNum(id);
+      return pn !== null ? (sim.pinStates[`pin_${pn}`] || 0) : 0;
+    };
+    const writeVal = (id, val) => {
+      const pn = this.getConnectedPinNum(id);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = val;
+    };
+    const dir = read('DIR');
+    const oe = read('OE');
+    this.runtimeState.direction = dir;
+    if (oe === 1) {
+      for (let i = 1; i <= 8; i++) {
+        this.runtimeState[`A${i}`] = 0;
+        this.runtimeState[`B${i}`] = 0;
+        writeVal(`A${i}`, 0);
+        writeVal(`B${i}`, 0);
+      }
+    } else if (dir === 1) {
+      for (let i = 1; i <= 8; i++) {
+        const val = readVal(`A${i}`);
+        this.runtimeState[`B${i}`] = val;
+        writeVal(`B${i}`, val);
+      }
+    } else {
+      for (let i = 1; i <= 8; i++) {
+        const val = readVal(`B${i}`);
+        this.runtimeState[`A${i}`] = val;
+        writeVal(`A${i}`, val);
+      }
+    }
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
+class IC74HC74Component extends Component {
+  getPins() {
+    return [
+      { id: 'CLR1', label: '/CLR1', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'D1', label: 'D1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'CLK1', label: 'CLK1', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'PRE1', label: '/PRE1', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'Q1', label: 'Q1', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'Q1n', label: "Q1'", type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'CLK2', label: 'CLK2', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'Q2n', label: "Q2'", type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'Q2', label: 'Q2', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'PRE2', label: '/PRE2', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'CLR2', label: '/CLR2', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'D2', label: 'D2', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const write = (id, val) => {
+      const pn = this.getConnectedPinNum(id);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = val ? 255 : 0;
+    };
+    if (this.runtimeState._lastCLK1 === undefined) this.runtimeState._lastCLK1 = 0;
+    if (this.runtimeState._lastCLK2 === undefined) this.runtimeState._lastCLK2 = 0;
+    if (this.runtimeState.Q1 === undefined) this.runtimeState.Q1 = 0;
+    if (this.runtimeState.Q2 === undefined) this.runtimeState.Q2 = 0;
+
+    const clr1 = read('CLR1'), pre1 = read('PRE1');
+    const clk1 = read('CLK1'), d1 = read('D1');
+    if (clr1 === 0) {
+      this.runtimeState.Q1 = 0;
+    } else if (pre1 === 0) {
+      this.runtimeState.Q1 = 1;
+    } else if (clk1 === 1 && this.runtimeState._lastCLK1 === 0) {
+      this.runtimeState.Q1 = d1;
+    }
+    this.runtimeState._lastCLK1 = clk1;
+    write('Q1', this.runtimeState.Q1);
+    write('Q1n', this.runtimeState.Q1 ? 0 : 1);
+
+    const clr2 = read('CLR2'), pre2 = read('PRE2');
+    const clk2 = read('CLK2'), d2 = read('D2');
+    if (clr2 === 0) {
+      this.runtimeState.Q2 = 0;
+    } else if (pre2 === 0) {
+      this.runtimeState.Q2 = 1;
+    } else if (clk2 === 1 && this.runtimeState._lastCLK2 === 0) {
+      this.runtimeState.Q2 = d2;
+    }
+    this.runtimeState._lastCLK2 = clk2;
+    write('Q2', this.runtimeState.Q2);
+    write('Q2n', this.runtimeState.Q2 ? 0 : 1);
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
+class IC74HC165Component extends Component {
+  getPins() {
+    return [
+      { id: 'SHLD', label: '/SHLD', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'CLK', label: 'CLK', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'E', label: 'E', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'F', label: 'F', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'G', label: 'G', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'H', label: 'H', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'Q7', label: 'Q7', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'CLKINH', label: 'CLKINH', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'Hn', label: "H'", type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'Gn', label: "G'", type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'Fn', label: "F'", type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'SER', label: 'SER', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'Q7n', label: "Q7'", type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const write = (id, val) => {
+      const pn = this.getConnectedPinNum(id);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = val ? 255 : 0;
+    };
+    if (this.runtimeState._lastCLK165 === undefined) this.runtimeState._lastCLK165 = 0;
+    if (this.runtimeState.bits === undefined) this.runtimeState.bits = 0;
+
+    const shld = read('SHLD');
+    const clk = read('CLK');
+    const clkInh = read('CLKINH');
+
+    if (shld === 0) {
+      let val = 0;
+      const pinOrder = ['A', 'E', 'F', 'G', 'H', 'Fn', 'Gn', 'Hn'];
+      for (let i = 0; i < 8; i++) {
+        if (read(pinOrder[i])) val |= (1 << i);
+      }
+      this.runtimeState.bits = val;
+    } else if (clk === 1 && this.runtimeState._lastCLK165 === 0 && clkInh === 0) {
+      const ser = read('SER');
+      this.runtimeState.bits = ((this.runtimeState.bits << 1) | ser) & 0xFF;
+    }
+    this.runtimeState._lastCLK165 = clk;
+    write('Q7', (this.runtimeState.bits >> 7) & 1);
+    write('Q7n', (this.runtimeState.bits >> 7) & 1 ? 0 : 1);
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
+class IC74HC193Component extends Component {
+  getPins() {
+    return [
+      { id: 'CPU', label: 'CPU', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'CPD', label: 'CPD', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'PL', label: '/PL', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'TC_D', label: 'TC_D', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'TC_U', label: 'TC_U', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'QA', label: 'QA', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'QB', label: 'QB', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'MR', label: 'MR', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'DD', label: 'D', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'B', label: 'B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'C', label: 'C', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'CO', label: 'CO', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'BO', label: 'BO', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const write = (id, val) => {
+      const pn = this.getConnectedPinNum(id);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = val ? 255 : 0;
+    };
+    if (this.runtimeState.count === undefined) this.runtimeState.count = 0;
+    if (this.runtimeState._lastCPU === undefined) this.runtimeState._lastCPU = 0;
+    if (this.runtimeState._lastCPD === undefined) this.runtimeState._lastCPD = 0;
+
+    const mr = read('MR');
+    const pl = read('PL');
+    const cpu = read('CPU');
+    const cpd = read('CPD');
+
+    if (mr) {
+      this.runtimeState.count = 0;
+    } else if (pl === 0) {
+      let val = 0;
+      if (read('A')) val |= 1;
+      if (read('B')) val |= 2;
+      if (read('C')) val |= 4;
+      if (read('DD')) val |= 8;
+      this.runtimeState.count = val & 0xF;
+    } else {
+      if (cpu === 1 && this.runtimeState._lastCPU === 0) {
+        this.runtimeState.count = (this.runtimeState.count + 1) & 0xF;
+      }
+      if (cpd === 1 && this.runtimeState._lastCPD === 0) {
+        this.runtimeState.count = (this.runtimeState.count - 1) & 0xF;
+      }
+    }
+    this.runtimeState._lastCPU = cpu;
+    this.runtimeState._lastCPD = cpd;
+    const c = this.runtimeState.count;
+    write('QA', c & 1);
+    write('QB', (c >> 1) & 1);
+    write('CO', (c === 0xF) ? 0 : 1);
+    write('BO', (c === 0x0) ? 0 : 1);
+    write('TC_U', c === 0xF ? 1 : 0);
+    write('TC_D', c === 0x0 ? 1 : 0);
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
+class IC74HC47Component extends Component {
+  getPins() {
+    return [
+      { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'B', label: 'B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'C', label: 'C', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'D', label: 'D', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'LT', label: '/LT', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'RBI', label: '/RBI', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'BI', label: '/BI', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'f', label: 'f', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'a', label: 'a', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'b', label: 'b', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'c', label: 'c', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'g', label: 'g', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'd', label: 'd', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'e', label: 'e', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const write = (id, val) => {
+      const pn = this.getConnectedPinNum(id);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = val ? 255 : 0;
+    };
+    let bcd = 0;
+    if (read('A')) bcd |= 1;
+    if (read('B')) bcd |= 2;
+    if (read('C')) bcd |= 4;
+    if (read('D')) bcd |= 8;
+    const segTable = [0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F,
+      0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71];
+    const lt = read('LT');
+    const bi = read('BI');
+    let segments;
+    if (bi === 0) {
+      segments = 0x00;
+    } else if (lt === 0) {
+      segments = 0x7F;
+    } else {
+      segments = segTable[bcd] || 0x7F;
+    }
+    this.runtimeState.segments = segments;
+    write('a', (segments & 0x01) ? 0 : 1);
+    write('b', (segments & 0x02) ? 0 : 1);
+    write('c', (segments & 0x04) ? 0 : 1);
+    write('d', (segments & 0x08) ? 0 : 1);
+    write('e', (segments & 0x10) ? 0 : 1);
+    write('f', (segments & 0x20) ? 0 : 1);
+    write('g', (segments & 0x40) ? 0 : 1);
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
+class IC74HC148Component extends Component {
+  getPins() {
+    return [
+      { id: 'EI', label: '/EI', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'I0', label: 'I0', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'I1', label: 'I1', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'I2', label: 'I2', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'I3', label: 'I3', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'A1', label: 'A1', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'A2', label: 'A2', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'EO', label: '/EO', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'GS', label: '/GS', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'I4', label: 'I4', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'I5', label: 'I5', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'I6', label: 'I6', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'I7', label: 'I7', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'A0', label: 'A0', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const write = (id, val) => {
+      const pn = this.getConnectedPinNum(id);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = val ? 255 : 0;
+    };
+    const ei = read('EI');
+    const inputs = [0, 1, 2, 3, 4, 5, 6, 7].map(i => !read(`I${i}`));
+    let activeIdx = -1;
+    for (let i = 7; i >= 0; i--) {
+      if (inputs[i]) { activeIdx = i; break; }
+    }
+    const anyActive = activeIdx >= 0;
+    if (ei === 1) {
+      write('A0', 0); write('A1', 0); write('A2', 0);
+      write('GS', 0); write('EO', 0);
+      this.runtimeState.code = null;
+    } else {
+      if (anyActive) {
+        write('A0', activeIdx & 1);
+        write('A1', (activeIdx >> 1) & 1);
+        write('A2', (activeIdx >> 2) & 1);
+        write('GS', 1);
+        write('EO', 0);
+      } else {
+        write('A0', 1); write('A1', 1); write('A2', 1);
+        write('GS', 0);
+        write('EO', 1);
+      }
+      this.runtimeState.code = anyActive ? activeIdx : null;
+    }
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
   }
 }
 
@@ -1478,3 +1996,10 @@ registerComponent('ic_74hc04', IC74HC04Component);
 registerComponent('ic_74hc08', IC74HC08Component);
 registerComponent('ic_74hc32', IC74HC32Component);
 registerComponent('ic_74hc595', IC74HC595Component);
+registerComponent('ic_74hc138', IC74HC138Component);
+registerComponent('ic_74hc245', IC74HC245Component);
+registerComponent('ic_74hc74', IC74HC74Component);
+registerComponent('ic_74hc165', IC74HC165Component);
+registerComponent('ic_74hc193', IC74HC193Component);
+registerComponent('ic_74hc47', IC74HC47Component);
+registerComponent('ic_74hc148', IC74HC148Component);
