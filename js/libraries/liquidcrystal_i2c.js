@@ -65,6 +65,16 @@ window.ArduinoLibs['LiquidCrystal_I2C'] = {
       },
       lcdPrint: function (varName, val, decimals) {
         if (varName && varName.__oled) { if (varName.print) varName.print(val); return; }
+        if (varName && varName.__tft) {
+          var text = formatText(val, decimals);
+          var cursor = self._tftCursor || { col: 0, row: 0 };
+          var size = self._tftTextSize || 1;
+          var fg = self._tftFgColor != null ? self._tftFgColor : 0xFFFF;
+          var bg = self._tftBgColor != null ? self._tftBgColor : 0x0000;
+          self._emitEvent('tft_draw', { op: 'print', text: text, x: cursor.col, y: cursor.row, size: size, fg: fg, bg: bg });
+          self._tftCursor = { col: cursor.col + text.length * 6 * size, row: cursor.row };
+          return;
+        }
         var text = formatText(val, decimals);
         if (!self._lcdCursors) self._lcdCursors = {};
         var cursor = self._lcdCursors[varName.addr] || { col: 0, row: 0 };
@@ -74,6 +84,16 @@ window.ArduinoLibs['LiquidCrystal_I2C'] = {
       },
       lcdPrintln: function (varName, val, decimals) {
         if (varName && varName.__oled) { if (varName.println) varName.println(val); return; }
+        if (varName && varName.__tft) {
+          var text = formatText(val, decimals);
+          var cursor = self._tftCursor || { col: 0, row: 0 };
+          var size = self._tftTextSize || 1;
+          var fg = self._tftFgColor != null ? self._tftFgColor : 0xFFFF;
+          var bg = self._tftBgColor != null ? self._tftBgColor : 0x0000;
+          self._emitEvent('tft_draw', { op: 'print', text: text, x: cursor.col, y: cursor.row, size: size, fg: fg, bg: bg });
+          self._tftCursor = { col: 0, row: cursor.row + 8 * size };
+          return;
+        }
         var text = formatText(val, decimals);
         if (!self._lcdCursors) self._lcdCursors = {};
         var cursor = self._lcdCursors[varName.addr] || { col: 0, row: 0 };
