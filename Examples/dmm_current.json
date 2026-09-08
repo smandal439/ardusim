@@ -2,7 +2,7 @@
   "version": "1.1",
   "savedAt": "2026-08-29T10:00:00.000Z",
   "name": "DMM Current Measurement",
-  "code": "/*\n * DMM Current Measurement\n * The DMM is placed in series to measure current through an LED.\n * Circuit: 5V → R1 → DMM → LED → GND\n */\n\nvoid setup() {\n  Serial.begin(9600);\n  Serial.println(\"DMM Current Demo\");\n  Serial.println(\"Current = V / R\");\n}\n\nvoid loop() {\n  delay(1000);\n}",
+  "code": "/*\n * DMM Current Measurement\n * The DMM is placed in series to measure current through an LED.\n * Circuit: 5V → R1 → DMM → LED → GND\n */\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"DMM Current Demo\");\n  Serial.println(\"Current = V / R\");\n}\n\nvoid loop() {\n  delay(1000);\n}",
   "circuit": {
     "components": [
       {

@@ -2,7 +2,7 @@
   "version": "1.1",
   "savedAt": "2026-08-29T10:00:00.000Z",
   "name": "DMM Resistance Check",
-  "code": "/*\n * DMM Resistance Check\n * Use the multimeter in resistance mode to measure a resistor.\n * Connect the DMM probes across the resistor.\n */\n\nvoid setup() {\n  Serial.begin(9600);\n  Serial.println(\"DMM Resistance Demo\");\n  Serial.println(\"Connect DMM across R1 to measure\");\n}\n\nvoid loop() {\n  delay(1000);\n}",
+  "code": "/*\n * DMM Resistance Check\n * Use the multimeter in resistance mode to measure a resistor.\n * Connect the DMM probes across the resistor.\n */\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"DMM Resistance Demo\");\n  Serial.println(\"Connect DMM across R1 to measure\");\n}\n\nvoid loop() {\n  delay(1000);\n}",
   "circuit": {
     "components": [
       {

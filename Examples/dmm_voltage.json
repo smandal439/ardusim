@@ -2,7 +2,7 @@
   "version": "1.1",
   "savedAt": "2026-08-29T10:00:00.000Z",
   "name": "DMM Voltage Measurement",
-  "code": "/*\n * DMM Voltage Measurement\n * Use a multimeter to measure voltage across an LED circuit.\n * The DMM is connected in parallel across the resistor.\n */\n\nvoid setup() {\n  pinMode(13, OUTPUT);\n  Serial.begin(9600);\n  Serial.println(\"DMM Voltage Demo\");\n}\n\nvoid loop() {\n  digitalWrite(13, HIGH);\n  Serial.println(\"LED ON — measure voltage across R1\");\n  delay(2000);\n  digitalWrite(13, LOW);\n  Serial.println(\"LED OFF\");\n  delay(2000);\n}",
+  "code": "/*\n * DMM Voltage Measurement\n * Use a multimeter to measure voltage across an LED circuit.\n * The DMM is connected in parallel across the resistor.\n */\n\nvoid setup() {\n  pinMode(13, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"DMM Voltage Demo\");\n}\n\nvoid loop() {\n  digitalWrite(13, HIGH);\n  Serial.println(\"LED ON — measure voltage across R1\");\n  delay(2000);\n  digitalWrite(13, LOW);\n  Serial.println(\"LED OFF\");\n  delay(2000);\n}",
   "circuit": {
     "components": [
       {

@@ -104,5 +104,5 @@
       }
     ]
   },
-  "code": "/*\n * PIR Motion Alarm — detect motion on D2\n * Flip the \"Motion\" slider ON to trigger the LED and alarm messages.\n */\n\nint pirPin = 2;\nint ledPin = 13;\n\nvoid setup() {\n  pinMode(pirPin, INPUT);\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(9600);\n  Serial.println(\"PIR alarm armed\");\n}\n\nvoid loop() {\n  int motion = digitalRead(pirPin);\n\n  if (motion == HIGH) {\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"MOTION DETECTED!\");\n  } else {\n    digitalWrite(ledPin, LOW);\n  }\n  delay(200);\n}"
+  "code": "/*\n * PIR Motion Alarm — detect motion on D2\n * Flip the \"Motion\" slider ON to trigger the LED and alarm messages.\n */\n\nint pirPin = 2;\nint ledPin = 13;\n\nvoid setup() {\n  pinMode(pirPin, INPUT);\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"PIR alarm armed\");\n}\n\nvoid loop() {\n  int motion = digitalRead(pirPin);\n\n  if (motion == HIGH) {\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"MOTION DETECTED!\");\n  } else {\n    digitalWrite(ledPin, LOW);\n  }\n  delay(200);\n}"
 }

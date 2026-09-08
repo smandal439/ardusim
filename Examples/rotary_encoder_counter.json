@@ -4,7 +4,7 @@
   "icon": "🎛️",
   "desc": "EC11 rotary encoder increments/decrements a counter displayed on Serial",
   "tags": ["input", "encoder", "rotary", "counter"],
-  "code": "int pinA = 2;\nint pinB = 3;\nint swPin = 4;\nint counter = 0;\nint lastA = LOW;\n\nvoid setup() {\n  pinMode(pinA, INPUT_PULLUP);\n  pinMode(pinB, INPUT_PULLUP);\n  pinMode(swPin, INPUT_PULLUP);\n  Serial.begin(9600);\n  lastA = digitalRead(pinA);\n}\n\nvoid loop() {\n  int curA = digitalRead(pinA);\n  int curB = digitalRead(pinB);\n  if (curA != lastA) {\n    if (curA == HIGH) {\n      counter += (curB == HIGH) ? 1 : -1;\n    } else {\n      counter += (curB == HIGH) ? -1 : 1;\n    }\n    lastA = curA;\n    Serial.print(\"Counter: \");\n    Serial.println(counter);\n  }\n  if (digitalRead(swPin) == LOW) {\n    counter = 0;\n    Serial.println(\"Reset!\");\n    delay(200);\n  }\n  delay(10);\n}",
+  "code": "int pinA = 2;\nint pinB = 3;\nint swPin = 4;\nint counter = 0;\nint lastA = LOW;\n\nvoid setup() {\n  pinMode(pinA, INPUT_PULLUP);\n  pinMode(pinB, INPUT_PULLUP);\n  pinMode(swPin, INPUT_PULLUP);\n  Serial.begin(115200);\n  lastA = digitalRead(pinA);\n}\n\nvoid loop() {\n  int curA = digitalRead(pinA);\n  int curB = digitalRead(pinB);\n  if (curA != lastA) {\n    if (curA == HIGH) {\n      counter += (curB == HIGH) ? 1 : -1;\n    } else {\n      counter += (curB == HIGH) ? -1 : 1;\n    }\n    lastA = curA;\n    Serial.print(\"Counter: \");\n    Serial.println(counter);\n  }\n  if (digitalRead(swPin) == LOW) {\n    counter = 0;\n    Serial.println(\"Reset!\");\n    delay(200);\n  }\n  delay(10);\n}",
   "circuit": {
     "components": [
       {

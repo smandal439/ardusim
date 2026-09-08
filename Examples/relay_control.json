@@ -369,5 +369,5 @@
       }
     ]
   },
-  "code": "/*\n * Relay Control — energize the coil on D9\n * The LED connected to the relay's NO contact turns on\n * when the relay is active.\n */\n\nint relayPin = 9;\n\nvoid setup() {\n  pinMode(relayPin, OUTPUT);\n  Serial.begin(9600);\n  Serial.println(\"Relay example started\");\n}\n\nvoid loop() {\n  digitalWrite(relayPin, HIGH);\n  Serial.println(\"Relay ON\");\n  delay(1000);\n\n  digitalWrite(relayPin, LOW);\n  Serial.println(\"Relay OFF\");\n  delay(1000);\n}"
+  "code": "/*\n * Relay Control — energize the coil on D9\n * The LED connected to the relay's NO contact turns on\n * when the relay is active.\n */\n\nint relayPin = 9;\n\nvoid setup() {\n  pinMode(relayPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Relay example started\");\n}\n\nvoid loop() {\n  digitalWrite(relayPin, HIGH);\n  Serial.println(\"Relay ON\");\n  delay(1000);\n\n  digitalWrite(relayPin, LOW);\n  Serial.println(\"Relay OFF\");\n  delay(1000);\n}"
   }

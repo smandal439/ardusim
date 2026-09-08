@@ -104,6 +104,6 @@
         "waypoints": []
       }
     ]
-  },  "code": "/*\n * Blink — Classic Arduino example\n * Blinks the built-in LED on pin 13\n */\n\nint ledPin = LED_BUILTIN;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(9600);\n  Serial.println(\"Blink started!\");\n}\n\nvoid loop() {\n  digitalWrite(ledPin, HIGH);\n  Serial.println(\"LED ON\");\n  delay(1000);\n\n  digitalWrite(ledPin, LOW);\n  Serial.println(\"LED OFF\");\n  delay(1000);\n}"
+  },  "code": "/*\n * Blink — Classic Arduino example\n * Blinks the built-in LED on pin 13\n */\n\nint ledPin = LED_BUILTIN;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Blink started!\");\n}\n\nvoid loop() {\n  digitalWrite(ledPin, HIGH);\n  Serial.println(\"LED ON\");\n  delay(1000);\n\n  digitalWrite(ledPin, LOW);\n  Serial.println(\"LED OFF\");\n  delay(1000);\n}"
   
 }

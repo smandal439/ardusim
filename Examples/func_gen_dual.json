@@ -2,7 +2,7 @@
   "version": "1.1",
   "savedAt": "2026-08-29T10:00:00.000Z",
   "name": "Func Gen Dual Channel",
-  "code": "/*\n * Function Generator Dual Channel Demo\n * CH1 outputs a sine wave, CH2 outputs a square wave.\n * Both channels drive LEDs through resistors.\n */\n\nvoid setup() {\n  pinMode(2, INPUT);\n  pinMode(3, INPUT);\n  Serial.begin(9600);\n  Serial.println(\"Dual Channel Func Gen Demo\");\n}\n\nvoid loop() {\n  int ch1 = digitalRead(2);\n  int ch2 = digitalRead(3);\n  Serial.print(\"CH1: \");\n  Serial.print(ch1);\n  Serial.print(\"  CH2: \");\n  Serial.println(ch2);\n  delay(50);\n}",
+  "code": "/*\n * Function Generator Dual Channel Demo\n * CH1 outputs a sine wave, CH2 outputs a square wave.\n * Both channels drive LEDs through resistors.\n */\n\nvoid setup() {\n  pinMode(2, INPUT);\n  pinMode(3, INPUT);\n  Serial.begin(115200);\n  Serial.println(\"Dual Channel Func Gen Demo\");\n}\n\nvoid loop() {\n  int ch1 = digitalRead(2);\n  int ch2 = digitalRead(3);\n  Serial.print(\"CH1: \");\n  Serial.print(ch1);\n  Serial.print(\"  CH2: \");\n  Serial.println(ch2);\n  delay(50);\n}",
   "circuit": {
     "components": [
       {

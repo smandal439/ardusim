@@ -2,7 +2,7 @@
   "name": "Nano Blink",
   "id": "nano_blink",
   "version": "1.1",
-  "code": "/*\n * Nano Blink — classic blink on the Arduino Nano\n * Uses LED_BUILTIN (D13) and an external LED on D9 with PWM fade\n */\n\nconst int extLed = 9;   // PWM pin\n\nvoid setup() {\n  pinMode(LED_BUILTIN, OUTPUT);\n  pinMode(extLed, OUTPUT);\n  Serial.begin(9600);\n  Serial.println(\"Nano blink started!\");\n}\n\nvoid loop() {\n  // Blink the built-in LED\n  digitalWrite(LED_BUILTIN, HIGH);\n  Serial.println(\"LED ON\");\n  delay(500);\n  digitalWrite(LED_BUILTIN, LOW);\n  Serial.println(\"LED OFF\");\n  delay(500);\n\n  // Fade the external LED through PWM values\n  for (int v = 0; v <= 255; v += 5) {\n    analogWrite(extLed, v);\n    delay(10);\n  }\n  for (int v = 255; v >= 0; v -= 5) {\n    analogWrite(extLed, v);\n    delay(10);\n  }\n}",
+  "code": "/*\n * Nano Blink — classic blink on the Arduino Nano\n * Uses LED_BUILTIN (D13) and an external LED on D9 with PWM fade\n */\n\nconst int extLed = 9;   // PWM pin\n\nvoid setup() {\n  pinMode(LED_BUILTIN, OUTPUT);\n  pinMode(extLed, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Nano blink started!\");\n}\n\nvoid loop() {\n  // Blink the built-in LED\n  digitalWrite(LED_BUILTIN, HIGH);\n  Serial.println(\"LED ON\");\n  delay(500);\n  digitalWrite(LED_BUILTIN, LOW);\n  Serial.println(\"LED OFF\");\n  delay(500);\n\n  // Fade the external LED through PWM values\n  for (int v = 0; v <= 255; v += 5) {\n    analogWrite(extLed, v);\n    delay(10);\n  }\n  for (int v = 255; v >= 0; v -= 5) {\n    analogWrite(extLed, v);\n    delay(10);\n  }\n}",
   "circuit": {
     "components": [
       { "id": "n1", "type": "arduino_nano", "x": 200, "y": 120 },

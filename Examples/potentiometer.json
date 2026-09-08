@@ -104,5 +104,5 @@
       }
     ]
   },
-  "code": "/*\n * Potentiometer — Analog input reading\n */\n\nint potPin = A0;\nint ledPin = 9;\nint potValue = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n  Serial.println(\"Potentiometer reader ready.\");\n}\n\nvoid loop() {\n  potValue = analogRead(potPin);\n\n  // Map to PWM range\n  int brightness = map(potValue, 0, 1023, 0, 255);\n  analogWrite(ledPin, brightness);\n\n  Serial.print(\"Pot: \");\n  Serial.print(potValue);\n  Serial.print(\" | Brightness: \");\n  Serial.println(brightness);\n\n  delay(100);\n}"
+  "code": "/*\n * Potentiometer — Analog input reading\n */\n\nint potPin = A0;\nint ledPin = 9;\nint potValue = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Potentiometer reader ready.\");\n}\n\nvoid loop() {\n  potValue = analogRead(potPin);\n\n  // Map to PWM range\n  int brightness = map(potValue, 0, 1023, 0, 255);\n  analogWrite(ledPin, brightness);\n\n  Serial.print(\"Pot: \");\n  Serial.print(potValue);\n  Serial.print(\" | Brightness: \");\n  Serial.println(brightness);\n\n  delay(100);\n}"
 }

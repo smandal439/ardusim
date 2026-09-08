@@ -4,7 +4,7 @@
   "icon": "📶",
   "desc": "Toggle LED on/off via Bluetooth using HC-05 module and Serial communication",
   "tags": ["bluetooth", "hc05", "uart", "led", "wireless"],
-  "code": "int ledPin = 13;\nbool ledState = false;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(9600);\n  digitalWrite(ledPin, LOW);\n}\n\nvoid loop() {\n  if (Serial.available() > 0) {\n    char c = Serial.read();\n    if (c == '1') {\n      ledState = true;\n      digitalWrite(ledPin, HIGH);\n      Serial.println(\"LED ON\");\n    } else if (c == '0') {\n      ledState = false;\n      digitalWrite(ledPin, LOW);\n      Serial.println(\"LED OFF\");\n    }\n  }\n  delay(50);\n}",
+  "code": "int ledPin = 13;\nbool ledState = false;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  digitalWrite(ledPin, LOW);\n}\n\nvoid loop() {\n  if (Serial.available() > 0) {\n    char c = Serial.read();\n    if (c == '1') {\n      ledState = true;\n      digitalWrite(ledPin, HIGH);\n      Serial.println(\"LED ON\");\n    } else if (c == '0') {\n      ledState = false;\n      digitalWrite(ledPin, LOW);\n      Serial.println(\"LED OFF\");\n    }\n  }\n  delay(50);\n}",
   "circuit": {
     "components": [
       {

@@ -105,5 +105,5 @@
       }
     ]
   },
-  "code": "/*\n * LDR Night Lamp — LED brightness follows ambient light\n * Slide the LDR \"Light\" slider: bright light → brighter LED.\n */\n\nint ldrPin = A0;\nint ledPin = 9;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(9600);\n  Serial.println(\"LDR lamp started\");\n}\n\nvoid loop() {\n  int light = analogRead(ldrPin);          // 0..1023\n  int brightness = map(light, 0, 1023, 0, 255);\n  analogWrite(ledPin, brightness);\n\n  Serial.print(\"Light: \");\n  Serial.print(light);\n  Serial.print(\"  Brightness: \");\n  Serial.println(brightness);\n  delay(50);\n}"
+  "code": "/*\n * LDR Night Lamp — LED brightness follows ambient light\n * Slide the LDR \"Light\" slider: bright light → brighter LED.\n */\n\nint ldrPin = A0;\nint ledPin = 9;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"LDR lamp started\");\n}\n\nvoid loop() {\n  int light = analogRead(ldrPin);          // 0..1023\n  int brightness = map(light, 0, 1023, 0, 255);\n  analogWrite(ledPin, brightness);\n\n  Serial.print(\"Light: \");\n  Serial.print(light);\n  Serial.print(\"  Brightness: \");\n  Serial.println(brightness);\n  delay(50);\n}"
 }

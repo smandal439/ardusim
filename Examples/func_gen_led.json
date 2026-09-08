@@ -2,7 +2,7 @@
   "version": "1.1",
   "savedAt": "2026-08-29T10:00:00.000Z",
   "name": "Func Gen LED Flasher",
-  "code": "/*\n * Function Generator LED Flasher\n * A function generator outputs a square wave to flash an LED.\n * CH1 (square wave) drives the LED through a resistor.\n */\n\nvoid setup() {\n  pinMode(2, INPUT);\n  Serial.begin(9600);\n  Serial.println(\"Func Gen LED Demo\");\n}\n\nvoid loop() {\n  int val = digitalRead(2);\n  if (val == HIGH) {\n    Serial.println(\"HIGH — LED on\");\n  } else {\n    Serial.println(\"LOW — LED off\");\n  }\n  delay(50);\n}",
+  "code": "/*\n * Function Generator LED Flasher\n * A function generator outputs a square wave to flash an LED.\n * CH1 (square wave) drives the LED through a resistor.\n */\n\nvoid setup() {\n  pinMode(2, INPUT);\n  Serial.begin(115200);\n  Serial.println(\"Func Gen LED Demo\");\n}\n\nvoid loop() {\n  int val = digitalRead(2);\n  if (val == HIGH) {\n    Serial.println(\"HIGH — LED on\");\n  } else {\n    Serial.println(\"LOW — LED off\");\n  }\n  delay(50);\n}",
   "circuit": {
     "components": [
       {

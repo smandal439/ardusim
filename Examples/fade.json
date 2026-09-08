@@ -2,7 +2,7 @@
   "version": "1.1",
   "savedAt": "2026-08-24T10:51:10.791Z",
   "name": "Fade LED (PWM)",
-  "code": "/*\n * Fade — LED brightness fade using PWM\n */\n\nint ledPin = 9;\nint brightness = 0;\nint fadeAmount = 5;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  analogWrite(ledPin, brightness);\n  brightness += fadeAmount;\n\n  if (brightness <= 0 || brightness >= 255) {\n    fadeAmount = -fadeAmount;\n    Serial.print(\"Brightness: \");\n    Serial.println(brightness);\n  }\n\n  delay(30);\n}",
+  "code": "/*\n * Fade — LED brightness fade using PWM\n */\n\nint ledPin = 9;\nint brightness = 0;\nint fadeAmount = 5;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n}\n\nvoid loop() {\n  analogWrite(ledPin, brightness);\n  brightness += fadeAmount;\n\n  if (brightness <= 0 || brightness >= 255) {\n    fadeAmount = -fadeAmount;\n    Serial.print(\"Brightness: \");\n    Serial.println(brightness);\n  }\n\n  delay(30);\n}",
   "circuit": {
     "components": [
       {

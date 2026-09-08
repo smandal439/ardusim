@@ -4,7 +4,7 @@
   "icon": "🎚️",
   "desc": "Read 8-position DIP switch as binary input and display decimal value on Serial",
   "tags": ["input", "dip", "switch", "binary", "digital"],
-  "code": "int pins[8] = {2, 3, 4, 5, 6, 7, 8, 9};\n\nvoid setup() {\n  for (int i = 0; i < 8; i++) {\n    pinMode(pins[i], INPUT_PULLUP);\n  }\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int value = 0;\n  for (int i = 0; i < 8; i++) {\n    if (digitalRead(pins[i]) == HIGH) {\n      value |= (1 << i);\n    }\n  }\n  Serial.print(\"Binary: \");\n  for (int i = 7; i >= 0; i--) {\n    Serial.print((value >> i) & 1);\n  }\n  Serial.print(\"  Decimal: \");\n  Serial.println(value);\n  delay(200);\n}",
+  "code": "int pins[8] = {2, 3, 4, 5, 6, 7, 8, 9};\n\nvoid setup() {\n  for (int i = 0; i < 8; i++) {\n    pinMode(pins[i], INPUT_PULLUP);\n  }\n  Serial.begin(115200);\n}\n\nvoid loop() {\n  int value = 0;\n  for (int i = 0; i < 8; i++) {\n    if (digitalRead(pins[i]) == HIGH) {\n      value |= (1 << i);\n    }\n  }\n  Serial.print(\"Binary: \");\n  for (int i = 7; i >= 0; i--) {\n    Serial.print((value >> i) & 1);\n  }\n  Serial.print(\"  Decimal: \");\n  Serial.println(value);\n  delay(200);\n}",
   "circuit": {
     "components": [
       {

@@ -93,5 +93,5 @@
       }
     ]
   },
-  "code": "/*\n * Button — Read push button, control LED\n */\n\nint buttonPin = 2;\nint ledPin = 13;\nint buttonState = 0;\n\nvoid setup() {\n  pinMode(buttonPin, INPUT_PULLUP);\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(9600);\n  Serial.println(\"Button test ready.\");\n}\n\nvoid loop() {\n  buttonState = digitalRead(buttonPin);\n\n  if (buttonState == LOW) {   // LOW when pressed (pullup)\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"Button PRESSED - LED ON\");\n  } else {\n    digitalWrite(ledPin, LOW);\n  }\n\n  delay(50);\n}"
+  "code": "/*\n * Button — Read push button, control LED\n */\n\nint buttonPin = 2;\nint ledPin = 13;\nint buttonState = 0;\n\nvoid setup() {\n  pinMode(buttonPin, INPUT_PULLUP);\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Button test ready.\");\n}\n\nvoid loop() {\n  buttonState = digitalRead(buttonPin);\n\n  if (buttonState == LOW) {   // LOW when pressed (pullup)\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"Button PRESSED - LED ON\");\n  } else {\n    digitalWrite(ledPin, LOW);\n  }\n\n  delay(50);\n}"
 }

@@ -24,5 +24,5 @@
     ],
     "wires": []
   },
-  "code": "void setup() {\n  Serial.begin(9600);\n  \n  int myNumber = 84; \n  \n  // This will print \"1010100\" on the Serial Monitor\n  Serial.println(myNumber, BIN);\n  printFormattedBinary(myNumber); \n}\n\nvoid loop() {\n  // Empty\n}\nvoid printFormattedBinary(byte myByte) {\n  for (int i = 7; i >= 0; i--) {\n    Serial.print(bitRead(myByte, i));\n  }\n  Serial.println(); // New line after printing the full byte\n}\n\n"
+  "code": "void setup() {\n  Serial.begin(115200);\n  \n  int myNumber = 84; \n  \n  // This will print \"1010100\" on the Serial Monitor\n  Serial.println(myNumber, BIN);\n  printFormattedBinary(myNumber); \n}\n\nvoid loop() {\n  // Empty\n}\nvoid printFormattedBinary(byte myByte) {\n  for (int i = 7; i >= 0; i--) {\n    Serial.print(bitRead(myByte, i));\n  }\n  Serial.println(); // New line after printing the full byte\n}\n\n"
 }
