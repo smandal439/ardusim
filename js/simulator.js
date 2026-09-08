@@ -1049,6 +1049,11 @@ class ArduinoSimulator {
       }
       if (lib.constructor) {
         result[libName] = lib.constructor;
+        if (lib.classes) {
+          for (const cls of lib.classes) {
+            if (cls !== libName) result[cls] = lib.constructor;
+          }
+        }
       }
       if (lib.constants) {
         Object.assign(result, lib.constants);
@@ -1210,6 +1215,7 @@ class ArduinoSimulator {
   /* Start execution of already-compiled code (non-blocking, for dual-board parallel run) */
   _startExecution() {
     if (!this._compiledCtx) return;
+    this.sessionId = Math.random().toString(36).slice(2, 7);
     this.isRunning = true;
     this.isPaused = false;
     this._resumeAudio();

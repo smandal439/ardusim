@@ -71,20 +71,25 @@ window.ArduinoLibs['BME280'] = {
   },
 
   runtime: function(self) {
+    function findInst() {
+      var canvas = window.CircuitCanvas;
+      if (!canvas || !Array.isArray(canvas.components)) return null;
+      return canvas.components.find(function(c) { return c.type === 'bme280'; }) || null;
+    }
     return {
       bme280Begin: function(obj) { return true; },
       bme280ReadTemp: function(obj) {
-        var inst = self._bme280FindInst();
+        var inst = findInst();
         if (!inst) return 25;
         return (inst.runtimeState && inst.runtimeState.temperature !== undefined) ? inst.runtimeState.temperature : (inst.props ? inst.props.temperature : 25);
       },
       bme280ReadHum: function(obj) {
-        var inst = self._bme280FindInst();
+        var inst = findInst();
         if (!inst) return 50;
         return (inst.runtimeState && inst.runtimeState.humidity !== undefined) ? inst.runtimeState.humidity : (inst.props ? inst.props.humidity : 50);
       },
       bme280ReadPres: function(obj) {
-        var inst = self._bme280FindInst();
+        var inst = findInst();
         var hpa = 1013.25;
         if (inst) {
           hpa = (inst.runtimeState && inst.runtimeState.pressure !== undefined) ? inst.runtimeState.pressure : (inst.props ? inst.props.pressure : 1013.25);
@@ -92,8 +97,13 @@ window.ArduinoLibs['BME280'] = {
         return hpa * 100;
       },
       bme280ReadAlt: function(obj, seaLevel) {
-        var pres = self._bme280ReadPres(obj) / 100.0;
-        return 44330.0 * (1.0 - Math.pow(pres / (seaLevel || 1013.25), 0.1903));
+        var pres = findInst();
+        var hpa = 1013.25;
+        if (pres) {
+          hpa = (pres.runtimeState && pres.runtimeState.pressure !== undefined) ? pres.runtimeState.pressure : (pres.props ? pres.props.pressure : 1013.25);
+        }
+        var presPa = hpa * 100;
+        return 44330.0 * (1.0 - Math.pow(presPa / 100.0 / (seaLevel || 1013.25), 0.1903));
       },
     };
   },
