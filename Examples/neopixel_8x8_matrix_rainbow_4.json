@@ -4,11 +4,12 @@
   "icon": "🔧",
   "desc": "A custom NeoPixel 8x8 Matrix Rainbow 4 circuit example.",
   "tags": [
-    "custom",
-    "circuit",
     "neopixel",
     "rainbow",
-    "pattern"
+    "pattern",
+    "matrix",
+    "8x8",
+    "display"
   ],
   "circuit": {
     "components": [

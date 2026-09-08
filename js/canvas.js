@@ -4548,11 +4548,6 @@ class CircuitCanvas {
       const maxValue = Number(other.props?.maxValue ?? 1023);
       return Math.max(0, Math.min(1023, Math.round((Number(value) / maxValue) * 1023)));
     }
-    // LM35 outputs 10 mV/°C → ADC = (temp * 0.01 / 5.0) * 1023
-    if (other.type === 'lm35_sensor' && wireTarget.pinId === 'OUT') {
-      const temp = Number(other.runtimeState?.temp ?? other.props?.temp ?? 25);
-      return Math.max(0, Math.min(1023, Math.round((temp * 0.01 / 5.0) * 1023)));
-    }
 
     const pn = this._getConnectedPinNum(fromInstId, pinId);
     if (pn !== null) {
