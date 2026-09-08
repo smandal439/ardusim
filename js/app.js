@@ -54,6 +54,7 @@ class App {
       this._restoreProject();
       this._setupBeforeUnloadGuard();
       this._syncProjectsFromServer();
+      this._initDefaultLayout();
 
       if (this.editor) {
         this.editor.init();
@@ -144,6 +145,7 @@ class App {
     const zoomInBtn  = get('btn-zoom-in');
     const zoomOutBtn = get('btn-zoom-out');
     const fitViewBtn = get('btn-fit-view');
+    const canvasFullscreenBtn = get('btn-canvas-fullscreen');
     const undoBtn    = get('btn-undo-canvas');
     const redoBtn    = get('btn-redo-canvas');
     const oscClearBtn = get('btn-osc-clear');
@@ -228,6 +230,7 @@ class App {
     zoomInBtn?.addEventListener('click', () => this.canvas?.zoomIn());
     zoomOutBtn?.addEventListener('click', () => this.canvas?.zoomOut());
     fitViewBtn?.addEventListener('click', () => this.canvas?.fitView());
+    canvasFullscreenBtn?.addEventListener('click', () => this._toggleCanvasFullscreen());
     undoBtn?.addEventListener('click', () => this.canvas?.undo());
     redoBtn?.addEventListener('click', () => this.canvas?.redo());
     oscClearBtn?.addEventListener('click', () => this.osc?.clear());
@@ -380,6 +383,10 @@ class App {
         return;
       }
       if (e.key === 'Escape') {
+        if (document.body.classList.contains('canvas-fullscreen')) {
+          this._toggleCanvasFullscreen();
+          return;
+        }
         if (window.GuideManager?.isOpen?.()) {
           window.GuideManager.close();
           return;
@@ -2126,6 +2133,8 @@ _newProject() {
 
   /* ══════════════════════ VIEW FOCUS MODES ══════════════════════ */
   _setView(view) {
+    // Exit canvas fullscreen if active
+    document.body.classList.remove('canvas-fullscreen');
     if (this._activeView === view) {
       // Clicking the active view restores the default layout
       this._activeView = null;
@@ -2176,6 +2185,33 @@ _newProject() {
       const btn = document.getElementById(`btn-view-${v}`);
       if (btn) btn.classList.toggle('active', this._activeView === v);
     });
+  }
+
+  _toggleCanvasFullscreen() {
+    const isFullscreen = document.body.classList.toggle('canvas-fullscreen');
+    const btn = document.getElementById('btn-canvas-fullscreen');
+    if (btn) btn.title = isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen Canvas (Esc to exit)';
+    if (isFullscreen && this._activeView) {
+      document.body.classList.remove('view-code', 'view-circuit', 'view-serial');
+      this._activeView = null;
+      this._updateViewButtons();
+    }
+  }
+
+  /* ══════════════════════ DEFAULT LAYOUT ══════════════════════ */
+  _initDefaultLayout() {
+    const LS_KEY = 'ardusim-layout';
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { /* noop */ }
+    // If user has never resized anything, start with panels collapsed for maximum canvas space
+    if (!saved.editorW && !saved.compW && !saved.bottomH) {
+      const toggleEditor = document.getElementById('btn-toggle-editor');
+      const toggleComponents = document.getElementById('btn-toggle-components');
+      const toggleBottom = document.getElementById('btn-toggle-bottom');
+      this._togglePanel('panel-editor', toggleEditor, 'Collapse Editor', 'Expand Editor');
+      this._togglePanel('panel-components', toggleComponents, 'Collapse Panel', 'Expand Panel');
+      this._toggleBottomPanel(toggleBottom);
+    }
   }
 
   /* ══════════════════════ PANEL RESIZERS ══════════════════════ */

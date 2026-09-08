@@ -53,11 +53,11 @@
   --pin-pwm:        #bc8cff;
 
   /* Spacing */
-  --hdr-height:     52px;
+  --hdr-height:     40px;
   --statusbar-h:    26px;
   --bottom-h:       200px;
-  --panel-editor-w: 460px;
-  --panel-comp-w:   260px;
+  --panel-editor-w: 380px;
+  --panel-comp-w:   200px;
 
   /* Effects */
   --shadow-sm:      0 1px 3px rgba(0,0,0,0.4);
@@ -525,6 +525,33 @@ body.view-serial .bottom-panel {
   bottom: 0;
 }
 
+/* ═══════════════ CANVAS FULLSCREEN MODE ═══════════════ */
+body.canvas-fullscreen .header,
+body.canvas-fullscreen .sim-statusbar,
+body.canvas-fullscreen .bottom-panel,
+body.canvas-fullscreen .panel-editor,
+body.canvas-fullscreen .panel-components,
+body.canvas-fullscreen #resizer-left,
+body.canvas-fullscreen #resizer-right,
+body.canvas-fullscreen #resizer-bottom { display: none; }
+
+body.canvas-fullscreen .main-layout {
+  top: 0; bottom: 0;
+}
+
+body.canvas-fullscreen .panel-canvas {
+  flex: 1; width: auto;
+}
+
+body.canvas-fullscreen .panel-canvas .panel-header {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+}
+
+body.canvas-fullscreen #btn-canvas-fullscreen svg {
+  transform: rotate(180deg);
+}
+
 .panel-resizer {
   width: 4px;
   background: transparent;
@@ -565,7 +592,7 @@ body.view-serial #resizer-bottom { display: none; }
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-  height: 36px;
+  height: 30px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   background: var(--bg-panel-alt);
@@ -645,7 +672,7 @@ body.view-serial #resizer-bottom { display: none; }
   align-items: center;
   gap: 10px;
   padding: 0 12px;
-  height: 24px;
+  height: 20px;
   background: var(--bg-root);
   border-top: 1px solid var(--border-subtle);
   font-size: 11px;
@@ -2649,7 +2676,7 @@ body.view-serial #resizer-bottom { display: none; }
     width: 100%;
   }
   .panel-canvas .panel-header {
-    height: 36px;
+  height: 30px;
     padding: 0 6px;
     gap: 4px;
   }
