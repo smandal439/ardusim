@@ -35,6 +35,7 @@ void loop() {
             sw_data |= (1 << i);
         }
     }
-    esp_now_send(receiverMAC, &sw_data, sizeof(sw_data));
+    // esp_now_send(receiverMAC, &sw_data, sizeof(sw_data));
+    esp_now_send(receiverMAC, (uint8_t *)&sw_data, sizeof(sw_data));
     delay(100); // Send updates every 100ms
 }

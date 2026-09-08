@@ -2,7 +2,7 @@
 #include <WiFi.h>
 
 #define GND_PIN 15
-// Correct pin mapping matching JSON wires: l1->21, l2->19, l3->18, l4->5, l5->17, l6->16, l7->4, l8->2
+// Pin mapping matching JSON wires: l1->21, l2->19, l3->18, l4->5, l5->17, l6->16, l7->4, l8->2
 const int Leds[8] = {21, 19, 18, 5, 17, 16, 4, 2};
 
 void updateLEDs(uint8_t received_data) {
@@ -18,7 +18,15 @@ void onRecvData(const esp_now_recv_info_t *info, const uint8_t *data, int len) {
 void onRecvData(const uint8_t *mac, const uint8_t *data, int len) {
 #endif
     if (len == sizeof(uint8_t)) {
+        // Print the received 8-bit hex value to Serial Monitor
+        Serial.print("[Board2] Received: 0x");
+        if (data[0] < 0x10) Serial.print("0"); // Print leading zero if single hex digit
+        Serial.println(data[0], HEX);
+
         updateLEDs(data[0]);
+    } else {
+        Serial.print("[Board2] Error: Unexpected data length ");
+        Serial.println(len);
     }
 }
 
@@ -36,11 +44,15 @@ void setup() {
     }
 
     WiFi.mode(WIFI_STA);
-    if (esp_now_init() != ESP_OK) return;
+    if (esp_now_init() != ESP_OK) {
+        Serial.println("[Board2] Error initializing ESP-NOW");
+        return;
+    }
 
     esp_now_register_recv_cb(onRecvData);
+    Serial.println("[Board2] Receiver ready — waiting for commands...");
 }
 
 void loop() {
-    // Callback handles incoming ESP-NOW data
+    // Free loop; ESP-NOW callbacks process data asynchronously
 }
