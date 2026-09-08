@@ -1373,8 +1373,9 @@ void loop() {
 
   downloadProject() {
     const code = this.editor?.getCode() || '';
+    const board2Code = this._board2Code || document.getElementById('board2-code-textarea')?.value || '';
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
-    window.StorageManager?.downloadProject(code, circuitData, this._projectName);
+    window.StorageManager?.downloadProject(code, circuitData, this._projectName, board2Code);
   }
 
   saveAsExample() {
@@ -1385,13 +1386,17 @@ void loop() {
     const tags = window.prompt('Tags, separated by commas:', 'custom, circuit');
     if (tags === null) return;
     const code = this.editor?.getCode() || '';
+    const board2Code = this._board2Code || document.getElementById('board2-code-textarea')?.value || '';
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
-    window.StorageManager?.downloadExample(code, circuitData, name.trim(), description.trim(), tags);
+    window.StorageManager?.downloadExample(code, circuitData, name.trim(), description.trim(), tags, board2Code);
   }
 
   loadProject() {
     window.StorageManager?.loadFromFile((project) => {
       if (this.editor) this.editor.setCode(project.code || '');
+      this._board2Code = project.board2Code || '';
+      const b2ta = document.getElementById('board2-code-textarea');
+      if (b2ta) b2ta.value = this._board2Code;
       if (this.canvas) this.canvas.deserialize(project.circuit || { components: [], wires: [] });
       this._syncBoardFromCanvas();
       this._setProjectName(project.name || 'Untitled Project');
@@ -1401,8 +1406,9 @@ void loop() {
 
   shareProject() {
     const code = this.editor?.getCode() || '';
+    const board2Code = this._board2Code || document.getElementById('board2-code-textarea')?.value || '';
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
-    window.StorageManager?.shareUrl(code, circuitData);
+    window.StorageManager?.shareUrl(code, circuitData, board2Code);
   }
 
   /* ══════════════════════ SAVED PROJECTS ══════════════════════ */
@@ -1491,7 +1497,7 @@ void loop() {
   _downloadSavedProject(id) {
     const p = (window.StorageManager?.getSavedProjects() || []).find(x => x.id === id);
     if (!p) return;
-    window.StorageManager?.downloadProject(p.code || '', p.circuit || { components: [], wires: [] }, p.name || 'Untitled Project');
+    window.StorageManager?.downloadProject(p.code || '', p.circuit || { components: [], wires: [] }, p.name || 'Untitled Project', p.board2Code || '');
   }
 
   _deleteSavedProject(id) {
@@ -1516,16 +1522,17 @@ _newProject() {
   /* ══════════════════════ AUTO-SAVE ══════════════════════ */
   _triggerAutoSave() {
     if (!this._autoSaveDebounced) {
-      this._autoSaveDebounced = window.Utils?.debounce((code, circuit) => {
-        window.StorageManager?.autoSave(code, circuit, this._projectName || 'Untitled Project');
-      }, 2000) ?? ((code, circuit) => {
+      this._autoSaveDebounced = window.Utils?.debounce((code, circuit, b2) => {
+        window.StorageManager?.autoSave(code, circuit, this._projectName || 'Untitled Project', b2);
+      }, 2000) ?? ((code, circuit, b2) => {
         clearTimeout(this._autoSaveTimer);
-        this._autoSaveTimer = setTimeout(() => window.StorageManager?.autoSave(code, circuit, this._projectName || 'Untitled Project'), 2000);
+        this._autoSaveTimer = setTimeout(() => window.StorageManager?.autoSave(code, circuit, this._projectName || 'Untitled Project', b2), 2000);
       });
     }
     const code = this.editor?.getCode() || '';
+    const board2Code = this._board2Code || document.getElementById('board2-code-textarea')?.value || '';
     const circuit = this.canvas?.serialize() || { components: [], wires: [] };
-    this._autoSaveDebounced(code, circuit);
+    this._autoSaveDebounced(code, circuit, board2Code);
   }
 
   /* ══════════════════════ COMPONENT LIBRARY ══════════════════════ */
@@ -1670,6 +1677,9 @@ _newProject() {
     const project = window.StorageManager?.autoLoad?.();
     if (project) {
       if (this.editor) this.editor.setCode(project.code || '');
+      this._board2Code = project.board2Code || '';
+      const b2ta = document.getElementById('board2-code-textarea');
+      if (b2ta) b2ta.value = this._board2Code;
       if (this.canvas) this.canvas.deserialize(project.circuit || { components: [], wires: [] });
       this._syncBoardFromCanvas();
       this._setProjectName(project.name || 'Untitled Project');
@@ -1682,6 +1692,9 @@ _newProject() {
     const shared = window.StorageManager?.loadFromUrl?.();
     if (shared) {
       if (this.editor) this.editor.setCode(shared.code || '');
+      this._board2Code = shared.board2Code || '';
+      const b2ta = document.getElementById('board2-code-textarea');
+      if (b2ta) b2ta.value = this._board2Code;
       if (this.canvas) this.canvas.deserialize(shared.circuit || { components: [], wires: [] });
       this._syncBoardFromCanvas();
       this._setProjectName(shared.name || 'Shared Project');

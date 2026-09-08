@@ -2,7 +2,7 @@
    sw.js — Service Worker for ArduSim PWA
    ═══════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'ardusim-v30';
+const CACHE_NAME = 'ardusim-v31';
 
 // Compute base path dynamically so the SW works on both root domains
 // (ardusim.app) and GitHub Pages subpaths (/Online-Circuit-Simulator/).

@@ -49,24 +49,27 @@ const db = new DatabaseSync(DB_FILE);
 db.exec('PRAGMA journal_mode=WAL;');
 db.exec(`
   CREATE TABLE IF NOT EXISTS projects (
-    id        TEXT PRIMARY KEY,
-    version   TEXT NOT NULL DEFAULT '1.1',
-    saved_at  TEXT,
-    name      TEXT NOT NULL,
-    code      TEXT NOT NULL DEFAULT '',
-    circuit   TEXT NOT NULL DEFAULT '{}'
+    id          TEXT PRIMARY KEY,
+    version     TEXT NOT NULL DEFAULT '1.1',
+    saved_at    TEXT,
+    name        TEXT NOT NULL,
+    code        TEXT NOT NULL DEFAULT '',
+    circuit     TEXT NOT NULL DEFAULT '{}',
+    board2_code TEXT NOT NULL DEFAULT ''
   );
 `);
+try { db.exec(`ALTER TABLE projects ADD COLUMN board2_code TEXT NOT NULL DEFAULT ''`); } catch (e) { /* column already exists */ }
 
 const stmtInsert = db.prepare(`
-  INSERT INTO projects (id, version, saved_at, name, code, circuit)
-  VALUES (?, ?, ?, ?, ?, ?)
+  INSERT INTO projects (id, version, saved_at, name, code, circuit, board2_code)
+  VALUES (?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT(id) DO UPDATE SET
-    version  = excluded.version,
-    saved_at = excluded.saved_at,
-    name     = excluded.name,
-    code     = excluded.code,
-    circuit  = excluded.circuit
+    version    = excluded.version,
+    saved_at   = excluded.saved_at,
+    name       = excluded.name,
+    code       = excluded.code,
+    circuit    = excluded.circuit,
+    board2_code = excluded.board2_code
 `);
 const stmtAll    = db.prepare('SELECT * FROM projects ORDER BY saved_at DESC');
 const stmtCount  = db.prepare('SELECT COUNT(*) as cnt FROM projects');
@@ -79,12 +82,13 @@ function rowToProject(row) {
   let circuit = {};
   try { circuit = JSON.parse(row.circuit || '{}'); } catch (e) { circuit = {}; }
   return {
-    id:       row.id,
-    version:  row.version,
-    savedAt:  row.saved_at,
-    name:     row.name,
-    code:     row.code,
+    id:         row.id,
+    version:    row.version,
+    savedAt:    row.saved_at,
+    name:       row.name,
+    code:       row.code,
     circuit,
+    board2Code: row.board2_code || '',
   };
 }
 
@@ -132,6 +136,7 @@ function sanitizeProject(body) {
   if (!body || typeof body !== 'object') return null;
   const name = typeof body.name === 'string' && body.name.trim() ? body.name.trim().slice(0, 200) : 'Untitled Project';
   const code = typeof body.code === 'string' ? body.code.slice(0, 100_000) : '';
+  const board2Code = typeof body.board2Code === 'string' ? body.board2Code.slice(0, 100_000) : '';
   const circuit = body.circuit && typeof body.circuit === 'object'
     ? { components: Array.isArray(body.circuit.components) ? body.circuit.components.slice(0, 500) : [],
         wires:      Array.isArray(body.circuit.wires) ? body.circuit.wires.slice(0, 1000) : [] }
@@ -144,6 +149,7 @@ function sanitizeProject(body) {
     name,
     code,
     circuit,
+    board2Code,
   };
 }
 
@@ -272,7 +278,7 @@ const server = http.createServer(async (req, res) => {
       if (cnt >= MAX_PROJECTS) {
         stmtDeleteOldest.run();
       }
-      stmtInsert.run(project.id, project.version, project.savedAt, project.name, project.code, JSON.stringify(project.circuit));
+      stmtInsert.run(project.id, project.version, project.savedAt, project.name, project.code, JSON.stringify(project.circuit), project.board2Code || '');
       return sendJson(res, 200, { project });
     } catch (e) {
       const status = e.message.includes('Unsupported Media Type') ? 415 : 400;

@@ -147,7 +147,7 @@ const StorageManager = {
   },
 
   /* ── Download project as JSON file ── */
-  downloadProject(code, circuitData, projectName = 'ArduSim Project') {
+  downloadProject(code, circuitData, projectName = 'ArduSim Project', board2Code = '') {
     const project = {
       version:  this.VERSION,
       savedAt:  new Date().toISOString(),
@@ -155,6 +155,7 @@ const StorageManager = {
       code,
       circuit:  circuitData,
     };
+    if (board2Code) project.board2Code = board2Code;
     const json = JSON.stringify(project, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url  = URL.createObjectURL(blob);
@@ -171,7 +172,7 @@ const StorageManager = {
     this.showToast('Project downloaded!', 'success');
   },
 
-  downloadExample(code, circuitData, name, description, tags) {
+  downloadExample(code, circuitData, name, description, tags, board2Code = '') {
     const id = name.toLowerCase().trim()
       .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'custom_example';
     const example = {
@@ -183,6 +184,7 @@ const StorageManager = {
       circuit: circuitData,
       code,
     };
+    if (board2Code) example.board2Code = board2Code;
     const json = JSON.stringify(example, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -225,7 +227,7 @@ const StorageManager = {
   },
 
   /* ── Save to localStorage (auto-save) ── */
-  autoSave(code, circuitData, projectName = 'Untitled Project') {
+  autoSave(code, circuitData, projectName = 'Untitled Project', board2Code = '') {
     try {
       const project = {
         version:   this.VERSION,
@@ -234,6 +236,7 @@ const StorageManager = {
         name:      projectName,
         savedAt:   Date.now(),
       };
+      if (board2Code) project.board2Code = board2Code;
       const json = JSON.stringify(project);
       localStorage.setItem(this.LS_KEY, json);
       this._lastSavedAt = Date.now();
@@ -269,9 +272,9 @@ const StorageManager = {
   },
 
   /* ── Share via URL ── */
-  shareUrl(code, circuitData) {
+  shareUrl(code, circuitData, board2Code = '') {
     try {
-      const data = JSON.stringify({ code, circuit: circuitData });
+      const data = JSON.stringify({ code, circuit: circuitData, board2Code: board2Code || undefined });
       // Use btoa with URI encoding for unicode safety
       const compressed = btoa(unescape(encodeURIComponent(data)));
       const url = `${window.location.origin}${window.location.pathname}?project=${compressed}`;
