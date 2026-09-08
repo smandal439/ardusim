@@ -1,0 +1,155 @@
+{
+  "id": "two_lcd",
+  "name": "TWO LCD",
+  "icon": "🔧",
+  "desc": "A custom TWO LCD circuit example.",
+  "tags": [
+    "lcd",
+    "i2c",
+    "display",
+    "arduino"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1788610065503_ejyg6",
+        "type": "arduino_uno",
+        "x": 305,
+        "y": 290,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "comp_1788610075717_oee0u",
+        "type": "lcd1602_i2c",
+        "x": 555,
+        "y": 295,
+        "rotation": 0,
+        "props": {
+          "address": "0x27",
+          "line1": "Hello, I2C!    ",
+          "line2": "Addr: 0x27      "
+        }
+      },
+      {
+        "id": "comp_1788882177503_p7hcs",
+        "type": "lcd1602_i2c",
+        "x": 735,
+        "y": 295,
+        "rotation": 0,
+        "props": {
+          "address": "0x3F"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1788610083268_ossem",
+        "from": {
+          "instId": "comp_1788610065503_ejyg6",
+          "pinId": "GND3"
+        },
+        "to": {
+          "instId": "comp_1788610075717_oee0u",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788610085758_lkh39",
+        "from": {
+          "instId": "comp_1788610065503_ejyg6",
+          "pinId": "5V2"
+        },
+        "to": {
+          "instId": "comp_1788610075717_oee0u",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788610088988_ujwhs",
+        "from": {
+          "instId": "comp_1788610065503_ejyg6",
+          "pinId": "SCL"
+        },
+        "to": {
+          "instId": "comp_1788610075717_oee0u",
+          "pinId": "scl"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788610091255_mion5",
+        "from": {
+          "instId": "comp_1788610065503_ejyg6",
+          "pinId": "SDA"
+        },
+        "to": {
+          "instId": "comp_1788610075717_oee0u",
+          "pinId": "sda"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788882192850_41wux",
+        "from": {
+          "instId": "comp_1788882177503_p7hcs",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "comp_1788610065503_ejyg6",
+          "pinId": "GND3"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788882195082_xu5ep",
+        "from": {
+          "instId": "comp_1788610065503_ejyg6",
+          "pinId": "5V2"
+        },
+        "to": {
+          "instId": "comp_1788882177503_p7hcs",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788882198634_iu5mq",
+        "from": {
+          "instId": "comp_1788610065503_ejyg6",
+          "pinId": "SCL"
+        },
+        "to": {
+          "instId": "comp_1788882177503_p7hcs",
+          "pinId": "scl"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788882201672_2uktj",
+        "from": {
+          "instId": "comp_1788610065503_ejyg6",
+          "pinId": "SDA"
+        },
+        "to": {
+          "instId": "comp_1788882177503_p7hcs",
+          "pinId": "sda"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nLiquidCrystal_I2C lcd1(0x27, 16, 2);  // First LCD at 0x27\nLiquidCrystal_I2C lcd2(0x3F, 16, 2);  // Second LCD at 0x3F\n\nvoid setup() {\n  lcd1.init();\n  lcd2.init();\n  lcd1.backlight();\n  lcd2.backlight();\n  \n  lcd1.setCursor(0, 0);\n  lcd1.print(\"Temp: 25.3 C\");\n  lcd1.setCursor(0, 1);\n  lcd1.print(\"Humidity: 60%\");\n  \n  lcd2.setCursor(0, 0);\n  lcd2.print(\"Pressure:\");\n  lcd2.setCursor(0, 1);\n  lcd2.print(\"1013.25 hPa\");\n}\n\nvoid loop() {\n  // Update independently\n}"
+}
