@@ -1,0 +1,77 @@
+{
+  "id": "esp_now_dual_led_control2",
+  "name": "ESP-NOW DIP Switch to 8-LED",
+  "icon": "🔧",
+  "desc": "Board 1 reads 8 DIP switches and sends their state via ESP-NOW. Board 2 receives and displays on an 8-LED array.",
+  "tags": [
+    "espnow",
+    "esp32",
+    "led",
+    "switch",
+    "intermediate"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "esp1",
+        "type": "esp32_devkit_v1",
+        "x": 200,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32 Sender"
+        }
+      },
+      {
+        "id": "esp2",
+        "type": "esp32_devkit_v1",
+        "x": 495,
+        "y": 160,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32 Receiver"
+        }
+      },
+      {
+        "id": "led_arr",
+        "type": "multi_led_array",
+        "x": 700,
+        "y": 115,
+        "rotation": 0,
+        "props": {
+          "label": "8-LED ARRAY"
+        }
+      },
+      {
+        "id": "dsw",
+        "type": "dip_switch",
+        "x": 45,
+        "y": 130,
+        "rotation": 0,
+        "props": {
+          "switches": 8
+        }
+      }
+    ],
+    "wires": [
+      { "id": "w1",  "from": { "instId": "esp1", "pinId": "D13" }, "to": { "instId": "dsw", "pinId": "1" }, "color": null, "waypoints": [] },
+      { "id": "w2",  "from": { "instId": "esp1", "pinId": "D12" }, "to": { "instId": "dsw", "pinId": "2" }, "color": null, "waypoints": [] },
+      { "id": "w3",  "from": { "instId": "esp1", "pinId": "D14" }, "to": { "instId": "dsw", "pinId": "3" }, "color": null, "waypoints": [] },
+      { "id": "w4",  "from": { "instId": "esp1", "pinId": "D27" }, "to": { "instId": "dsw", "pinId": "4" }, "color": null, "waypoints": [] },
+      { "id": "w5",  "from": { "instId": "esp1", "pinId": "D26" }, "to": { "instId": "dsw", "pinId": "5" }, "color": null, "waypoints": [] },
+      { "id": "w6",  "from": { "instId": "esp1", "pinId": "D25" }, "to": { "instId": "dsw", "pinId": "6" }, "color": null, "waypoints": [] },
+      { "id": "w7",  "from": { "instId": "esp1", "pinId": "D33" }, "to": { "instId": "dsw", "pinId": "7" }, "color": null, "waypoints": [] },
+      { "id": "w8",  "from": { "instId": "esp1", "pinId": "D32" }, "to": { "instId": "dsw", "pinId": "8" }, "color": null, "waypoints": [] },
+      { "id": "w9",  "from": { "instId": "esp2", "pinId": "D21" }, "to": { "instId": "led_arr", "pinId": "l1" }, "color": null, "waypoints": [] },
+      { "id": "w10", "from": { "instId": "esp2", "pinId": "D19" }, "to": { "instId": "led_arr", "pinId": "l2" }, "color": null, "waypoints": [] },
+      { "id": "w11", "from": { "instId": "esp2", "pinId": "D18" }, "to": { "instId": "led_arr", "pinId": "l3" }, "color": null, "waypoints": [] },
+      { "id": "w12", "from": { "instId": "esp2", "pinId": "D5"  }, "to": { "instId": "led_arr", "pinId": "l4" }, "color": null, "waypoints": [] },
+      { "id": "w13", "from": { "instId": "esp2", "pinId": "D17" }, "to": { "instId": "led_arr", "pinId": "l5" }, "color": null, "waypoints": [] },
+      { "id": "w14", "from": { "instId": "esp2", "pinId": "D16" }, "to": { "instId": "led_arr", "pinId": "l6" }, "color": null, "waypoints": [] },
+      { "id": "w15", "from": { "instId": "esp2", "pinId": "D4"  }, "to": { "instId": "led_arr", "pinId": "l7" }, "color": null, "waypoints": [] },
+      { "id": "w16", "from": { "instId": "esp2", "pinId": "D2"  }, "to": { "instId": "led_arr", "pinId": "l8" }, "color": null, "waypoints": [] }
+    ]
+  },
+  "code": "#include <esp_now.h>\n#include <WiFi.h>\n\nuint8_t receiverMAC[] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0x02};\n\nesp_now_peer_info_t peerInfo;\n\nint sw[] = {13, 12, 14, 27, 26, 25, 33, 32};\n\nvoid onSendDone(const uint8_t *mac, esp_now_send_status_t status) {\n  Serial.print(\"Send: \");\n  Serial.println(status == ESP_NOW_SEND_SUCCESS ? \"OK\" : \"FAIL\");\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  for (int i = 0; i < 8; i++) {\n    pinMode(sw[i], INPUT_PULLUP);\n  }\n\n  WiFi.mode(WIFI_STA);\n  Serial.print(\"Sender MAC: \");\n  Serial.println(WiFi.macAddress());\n\n  esp_now_init();\n  esp_now_register_send_cb(onSendDone);\n\n  memcpy(peerInfo.peer_addr, receiverMAC, 6);\n  peerInfo.channel = 0;\n  peerInfo.encrypt = false;\n  esp_now_add_peer(&peerInfo);\n  Serial.println(\"Sender ready — waiting 3s for receiver...\");\n  delay(3000);\n}\n\nvoid loop() {\n  uint8_t sw_data = 0;\n  for (int i = 0; i < 8; i++) {\n    if (digitalRead(sw[i]) == HIGH) {\n      sw_data |= (1 << i);\n    }\n  }\n  esp_now_send(receiverMAC, (uint8_t *)&sw_data, sizeof(sw_data));\n  Serial.print(\"Sent: 0x\");\n  Serial.println(sw_data, HEX);\n  delay(1000);\n}",
+  "board2Code": "#include <esp_now.h>\n#include <WiFi.h>\n\nint Leds[] = {21, 19, 18, 5, 17, 16, 4, 2};\n\nvoid onRecvData(const uint8_t *mac, const uint8_t *data, int len) {\n  if (len < 1) return;\n  uint8_t received_data = data[0];\n  for (int i = 0; i < 8; i++) {\n    int state = bitRead(received_data, i);\n    digitalWrite(Leds[i], state);\n  }\n  Serial.print(\"Received: 0x\");\n  Serial.println(received_data, HEX);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  for (int i = 0; i < 8; i++) {\n    pinMode(Leds[i], OUTPUT);\n    digitalWrite(Leds[i], LOW);\n  }\n\n  WiFi.mode(WIFI_STA);\n  Serial.print(\"Receiver MAC: \");\n  Serial.println(WiFi.macAddress());\n\n  esp_now_init();\n  esp_now_register_recv_cb(onRecvData);\n  Serial.println(\"Receiver ready — waiting for commands...\");\n}\n\nvoid loop() {\n  delay(100);\n}"
+}
