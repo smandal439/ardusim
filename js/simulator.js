@@ -416,6 +416,10 @@ class ArduinoSimulator {
     // Remove C++ type casts like (int), (float), etc.
     js = js.replace(new RegExp(`\\((?:${_typePat}|size_t)\\)\\s*`, 'g'), '');
 
+    // C++ pointer dereference: *(type *)var → var
+    // e.g. *(int *)data → data, *(float *)ptr → ptr
+    js = js.replace(new RegExp(`\\*\\(\\s*(?:${_typePat}|size_t)\\s*\\*\\)\\s*(\\w+)`, 'g'), '$1');
+
     // memcpy(&dest, src, sizeof(dest)) → dest = src (for struct copy)
     // Also matches after sizeof has been replaced with .length
     js = js.replace(/\bmemcpy\s*\(\s*&(\w+)\s*,\s*(\w+)\s*,\s*(?:\1\.length|sizeof\s*\(\s*\1\s*\))\s*\)/g, '$1 = $2');

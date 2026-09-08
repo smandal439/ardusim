@@ -173,6 +173,7 @@ window.ArduinoLibs['ESP-NOW'] = {
 
         // Find target board(s) and deliver
         var delivered = false;
+        var resolvedTargetMac = board.macBytes; // fallback to own MAC if target not found
 
         if (targetAddr === 'FF:FF:FF:FF:FF:FF') {
           // Broadcast
@@ -194,6 +195,7 @@ window.ArduinoLibs['ESP-NOW'] = {
           for (var bid2 in bus.boards) {
             if (bus.boards[bid2].mac === targetAddr) {
               var target = bus.boards[bid2];
+              resolvedTargetMac = target.macBytes;
               if (target.recvCb && target.simulator) {
                 (function(t) {
                   setTimeout(function() {
@@ -207,12 +209,14 @@ window.ArduinoLibs['ESP-NOW'] = {
           }
         }
 
-        // Trigger send callback with status
+        // Trigger send callback with status — pass the *peer's* MAC, not our own
         var status = delivered ? 0 : 1; // ESP_NOW_SEND_SUCCESS or FAIL
         if (board.sendCb) {
-          setTimeout(function() {
-            try { board.sendCb(board.macBytes, status); } catch (e) {}
-          }, Math.max(5, 10 / (self.speed || 1)));
+          (function(peerMac, sendStatus) {
+            setTimeout(function() {
+              try { board.sendCb(peerMac, sendStatus); } catch (e) {}
+            }, Math.max(5, 10 / (self.speed || 1)));
+          })(resolvedTargetMac, status);
         }
 
         return 0; // ESP_OK
