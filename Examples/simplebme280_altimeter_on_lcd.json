@@ -1,0 +1,181 @@
+{
+  "id": "simplebme280_altimeter_on_lcd",
+  "name": "SimpleBME280 Altimeter on ILI9341",
+  "icon": "🖥️",
+  "desc": "Display temperature, pressure, and altitude from a SimpleBME280 sensor on an ILI9341 color TFT display via SPI",
+  "tags": [
+    "intermediate",
+    "display",
+    "tft",
+    "bme",
+    "sensor",
+    "spi"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "s1",
+        "type": "bme280",
+        "x": 380,
+        "y": 320,
+        "rotation": 0,
+        "props": {
+          "temperature": 25,
+          "humidity": 50,
+          "pressure": 1013
+        }
+      },
+      {
+        "id": "comp_1788874346481_apb1p",
+        "type": "ili9341",
+        "x": 490,
+        "y": 105,
+        "rotation": 0,
+        "props": {}
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "s1",
+          "pinId": "VCC"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "s1",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "b1",
+          "pinId": "A5"
+        },
+        "to": {
+          "instId": "s1",
+          "pinId": "SCL"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "b1",
+          "pinId": "A4"
+        },
+        "to": {
+          "instId": "s1",
+          "pinId": "SDA"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788874442017_n2rop",
+        "from": {
+          "instId": "b1",
+          "pinId": "D10"
+        },
+        "to": {
+          "instId": "comp_1788874346481_apb1p",
+          "pinId": "CS"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788874452505_oxxdu",
+        "from": {
+          "instId": "comp_1788874346481_apb1p",
+          "pinId": "DC"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D9"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788874461047_aspby",
+        "from": {
+          "instId": "comp_1788874346481_apb1p",
+          "pinId": "MOSI"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D11"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788874467032_lg69p",
+        "from": {
+          "instId": "comp_1788874346481_apb1p",
+          "pinId": "SCK"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D13"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788875545522_k0f4s",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND3"
+        },
+        "to": {
+          "instId": "comp_1788874346481_apb1p",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788875548112_hh9d7",
+        "from": {
+          "instId": "comp_1788874346481_apb1p",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "5V2"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n* ILI9341 TFT Display — Weather & Altimeter\n*\n* Wiring (Arduino Uno to ILI9341):\n*   5V  to VCC\n*   GND to GND\n*   D10 to CS\n*   D9  to DC\n*   D11 to MOSI\n*   D13 to SCK\n*\n* SimpleBME280:\n*   VCC -> 5V\n*   GND -> GND\n*   SCL -> A5\n*   SDA -> A4\n*/\n\n#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_ILI9341.h>\n#include <SimpleBME280.h>\n\n#define SEALEVELPRESSURE_HPA (1013.25)\n#define TFT_CS 10\n#define TFT_DC 9\n\nAdafruit_ILI9341 tft(TFT_CS, TFT_DC);\nSimpleBME280 bme;\n\nvoid setup()\n{\n  Serial.begin(9600);\n  Wire.begin();\n  bme.begin();\n  tft.begin();\n  tft.setRotation(1); // Landscape mode (320x240)\n\n  Serial.println(\"SimpleBME280 Altimeter\");\n  Serial.println(\"----------------------\");\n\n// Background\n  tft.fillScreen(ILI9341_NAVY);\n\n// Decorative border\n  tft.drawRect(5, 5, 310, 230, ILI9341_CYAN);\n  tft.drawRect(8, 8, 304, 224, ILI9341_DARKCYAN);\n\n// Title Block\n  tft.setTextColor(ILI9341_YELLOW);\n  tft.setTextSize(2);\n  tft.setCursor(20, 18);\n  tft.println(\"ArduSim TFT\");\n\n  tft.setTextColor(ILI9341_WHITE);\n  tft.setTextSize(1);\n  tft.setCursor(20, 40);\n  tft.println(\"ILI9341 240x320 Color Display\");\n}\n\nvoid loop()\n{\n  float tempC = bme.readTemperature();\n  float presPa = bme.readPressure();\n  float altM = bme.readAltitude(SEALEVELPRESSURE_HPA);\n\n// Serial output\n  Serial.print(\"Temp:     \"); Serial.print(tempC, 1); Serial.println(\" C\");\n  Serial.print(\"Pressure: \"); Serial.print(presPa / 100.0, 1); Serial.println(\" hPa\");\n  Serial.print(\"Altitude: \"); Serial.print(altM, 1); Serial.println(\" m\");\n  Serial.println(\"----------------------\");\n\n// Clear previous sensor values area without wiping the frame/header\n  tft.fillRect(15, 65, 290, 150, ILI9341_NAVY);\n\n  tft.setTextSize(2);\n\n// Row 1: Temperature\n  tft.setTextColor(ILI9341_YELLOW);\n  tft.setCursor(20, 75);\n  tft.print(\"Temp:\");\n  tft.setTextColor(ILI9341_YELLOW);\n  tft.setCursor(140, 75);\n  tft.print(tempC, 1);\n  tft.print(\" C\");\n\n// Row 2: Pressure\n  tft.setTextColor(ILI9341_YELLOW);\n  tft.setCursor(20, 120);\n  tft.print(\"Pressure:\");\n  tft.setTextColor(ILI9341_YELLOW);\n  tft.setCursor(140, 120);\n  tft.print(presPa / 100.0, 1);\n  tft.print(\" hPa\");\n\n// Row 3: Altitude\n  tft.setTextColor(ILI9341_GREEN);\n  tft.setCursor(20, 165);\n  tft.print(\"Altitude:\");\n  tft.setTextColor(ILI9341_WHITE);\n  tft.setCursor(140, 165);\n  tft.print(altM, 1);\n  tft.print(\" m\");\n\n  delay(2000);\n}"
+}

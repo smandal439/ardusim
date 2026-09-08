@@ -3,6 +3,8 @@ window.ArduinoLibs['Adafruit_ILI9341'] = {
   classes: ['Adafruit_ILI9341'],
   includes:['<Adafruit_ILI9341.h>'],
   transpile: [
+    [/(\w+)\.print\(([^)]*)\)/g, '_a.tftPrint($1, $2)'],
+    [/(\w+)\.println\(([^)]*)\)/g, '_a.tftPrintln($1, $2)'],
     [/(\w+)\.setTextColor\(/g, '_a.tftSetTextColor($1, '],
     [/(\w+)\.setTextSize\(/g, '_a.tftSetTextSize($1, '],
     [/(\w+)\.setTextWrap\(/g, '_a.tftSetTextWrap($1, '],
@@ -45,14 +47,23 @@ window.ArduinoLibs['Adafruit_ILI9341'] = {
   runtime: function(self) {
     var num = function(v) { return Math.round(Number(v) || 0); };
     var drawTft = function(op, extra) { self._emitEvent('tft_draw', Object.assign({ op: op }, extra)); };
+    function tftFormatText(val, decimals) {
+      var n = Number(val);
+      if (typeof val === 'number' || (typeof val === 'string' && val.trim() !== '' && Number.isFinite(n))) {
+        if (!Number.isInteger(n) && Number.isFinite(Number(decimals))) {
+          return n.toFixed(Math.max(0, Math.min(6, Number(decimals))));
+        }
+      }
+      return String(val);
+    }
     return {
       tftBegin: function(varName) { self._emitEvent('tft_power', { on: true }); },
       tftSetCursor: function(varName, col, row) {
         if (varName && varName.__tft) self._tftCursor = { col: num(col), row: num(row) };
       },
-      tftPrint: function(varName, val) {
+      tftPrint: function(varName, val, decimals) {
         if (!varName || !varName.__tft) return;
-        var text = String(val);
+        var text = tftFormatText(val, decimals);
         var cursor = self._tftCursor || { col: 0, row: 0 };
         var size = self._tftTextSize || 1;
         var fg = self._tftFgColor != null ? self._tftFgColor : 0xFFFF;
@@ -60,9 +71,9 @@ window.ArduinoLibs['Adafruit_ILI9341'] = {
         drawTft('print', { text: text, x: cursor.col, y: cursor.row, size: size, fg: fg, bg: bg });
         self._tftCursor = { col: cursor.col + text.length * 6 * size, row: cursor.row };
       },
-      tftPrintln: function(varName, val) {
+      tftPrintln: function(varName, val, decimals) {
         if (!varName || !varName.__tft) return;
-        var text = String(val);
+        var text = tftFormatText(val, decimals);
         var cursor = self._tftCursor || { col: 0, row: 0 };
         var size = self._tftTextSize || 1;
         var fg = self._tftFgColor != null ? self._tftFgColor : 0xFFFF;

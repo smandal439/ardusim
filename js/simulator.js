@@ -1704,7 +1704,7 @@ window.loadExamplesFromFiles = async function () {
     'ic_nand_test', 'logic_analyzer_test', 'temperature_LCD', 'dmm_current',
     'dmm_resistance', 'dmm_voltage', 'func_gen_dual', 'func_gen_led', 'remote_control_leds',
     'remote_servo_control', 'lm35_temperature', 'keypad_interfacing', 'bme280_weather',
-    'bmp280_altitude', 'dso_oscilloscope', 'simplebme280_basic', 'simplebme280_altitude',
+    'bmp280_altitude', 'dso_oscilloscope', 'simplebme280_basic',     'simplebme280_altitude', 'simplebme280_altimeter_on_lcd',
     'max7219', 'ili9341', 'astable_555', 'neopixel_strip_chase', 'ir_obstacle_led',
     'l298n_dc_motor', 'servo_continuous_spin', 'rotary_encoder_counter', 'print_binary_data',
     'dip_switch_binary', 'hc05_bluetooth_led', 'rotary_encoder_servo',

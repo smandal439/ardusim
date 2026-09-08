@@ -1103,8 +1103,24 @@ void loop() {
             drawLinePx(data.x + data.w, data.y + rx, data.x + data.w, data.y + data.h - rx, c);
           } else if (op === 'fillRoundRect') {
             const [r, g, b] = rgb565toRGB(data.color);
+            const rr = Math.min(data.r || 0, data.w / 2, data.h / 2);
             for (let py = data.y; py < data.y + data.h; py++) {
-              for (let px = data.x; px < data.x + data.w; px++) setPx(px, py, r, g, b);
+              for (let px = data.x; px < data.x + data.w; px++) {
+                let skip = false;
+                if (rr > 0) {
+                  const corners = [
+                    [data.x + rr, data.y + rr],
+                    [data.x + data.w - 1 - rr, data.y + rr],
+                    [data.x + rr, data.y + data.h - 1 - rr],
+                    [data.x + data.w - 1 - rr, data.y + data.h - 1 - rr]
+                  ];
+                  for (const [cx, cy] of corners) {
+                    const dx = px - cx, dy = py - cy;
+                    if (dx * dx + dy * dy > rr * rr) { skip = true; break; }
+                  }
+                }
+                if (!skip) setPx(px, py, r, g, b);
+              }
             }
           } else if (op === 'triangle') {
             const c = data.color;
