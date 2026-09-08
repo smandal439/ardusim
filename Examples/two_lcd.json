@@ -151,5 +151,5 @@
       }
     ]
   },
-  "code": "#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nLiquidCrystal_I2C lcd1(0x27, 16, 2);  // First LCD at 0x27\nLiquidCrystal_I2C lcd2(0x3F, 16, 2);  // Second LCD at 0x3F\n\nvoid setup() {\n  lcd1.init();\n  lcd2.init();\n  lcd1.backlight();\n  lcd2.backlight();\n  \n  lcd1.setCursor(0, 0);\n  lcd1.print(\"Temp: 25.3 C\");\n  lcd1.setCursor(0, 1);\n  lcd1.print(\"Humidity: 60%\");\n  \n  lcd2.setCursor(0, 0);\n  lcd2.print(\"Pressure:\");\n  lcd2.setCursor(0, 1);\n  lcd2.print(\"1013.25 hPa\");\n}\n\nvoid loop() {\n  // Update independently\n}"
+  "code": "#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nLiquidCrystal_I2C lcd1(0x27, 16, 2);  // First LCD at 0x27\nLiquidCrystal_I2C lcd2(0x3F, 16, 2);  // Second LCD at 0x3F\n\nvoid setup() {\n  lcd1.init();\n  lcd2.init();\n  lcd1.backlight();\n  lcd2.backlight();\n  \n  lcd1.setCursor(0, 0);\n  lcd1.print(\"Temp: 25.3 °C\");\n  lcd1.setCursor(0, 1);\n  lcd1.print(\"Humidity: 60%\");\n  \n  lcd2.setCursor(0, 0);\n  lcd2.print(\"Pressure:\");\n  lcd2.setCursor(0, 1);\n  lcd2.print(\"1013.25 hPa\");\n}\n\nvoid loop() {\n  // Update independently\n}"
 }
