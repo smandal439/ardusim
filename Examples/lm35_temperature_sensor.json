@@ -41,8 +41,8 @@
         "rotation": 0,
         "props": {
           "address": "0x27",
-          "line1": "Hello, I2C!    ",
-          "line2": "Addr: 0x27      "
+          "line1": "",
+          "line2": ""
         }
       }
     ],
@@ -85,8 +85,60 @@
         },
         "color": "#FFC107",
         "waypoints": []
+      },
+      {
+        "id": "wire_1788891334876_asmiu",
+        "from": {
+          "instId": "comp_1788455730723_11dsf",
+          "pinId": "sda"
+        },
+        "to": {
+          "instId": "comp_1787826805002_k02zx",
+          "pinId": "SDA"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788891336625_uho1m",
+        "from": {
+          "instId": "comp_1787826805002_k02zx",
+          "pinId": "SCL"
+        },
+        "to": {
+          "instId": "comp_1788455730723_11dsf",
+          "pinId": "scl"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788891344636_1hagf",
+        "from": {
+          "instId": "comp_1787826805002_k02zx",
+          "pinId": "GND3"
+        },
+        "to": {
+          "instId": "comp_1788455730723_11dsf",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788891347704_rinb4",
+        "from": {
+          "instId": "comp_1788455730723_11dsf",
+          "pinId": "vcc"
+        },
+        "to": {
+          "instId": "comp_1787826805002_k02zx",
+          "pinId": "5V2"
+        },
+        "color": null,
+        "waypoints": []
       }
     ]
   },
-  "code": "#include <Wire.h>\r\n#include <LiquidCrystal_I2C.h>\r\n\r\nLiquidCrystal_I2C lcd(0x27, 16, 2);\r\nconst int sensorPin = A5;\r\n\r\nvoid setup() {\r\n  Serial.begin(115200);\r\n  lcd.init();\r\n  lcd.backlight();\r\n  lcd.setCursor(0, 0);\r\n  lcd.print(\"Hello, ArduSim!\");\r\n  lcd.setCursor(0, 1);\r\n  lcd.print(\"LCD I2C : 0x27\");\r\n}\r\n\r\nvoid loop() {\r\n  int sensorValue = analogRead(sensorPin);\r\n  \r\n  float temperatureCelsius = (sensorValue * 500.0) / 1023.0;\r\n  float temperatureFahrenheit = (temperatureCelsius * 1.8) + 32.0;\r\n\r\n  Serial.print(\"Temperature: \");\r\n  Serial.print(temperatureCelsius);\r\n  Serial.print(\" °C  |  \");\r\n  Serial.print(temperatureFahrenheit);\r\n  Serial.println(\" °F\");\r\n  lcd.clear();\r\n  lcd.setCursor(0, 0);\r\n  lcd.print(\"Temp: \");\r\n  lcd.print(temperatureCelsius);\r\n  lcd.print(\"°C \");\r\n  lcd.setCursor(6, 1);\r\n  lcd.print(temperatureFahrenheit);\r\n  lcd.print(\"°F\");\r\n  delay(1000);\r\n}"
+  "code": "#include <Wire.h>\r\n#include <LiquidCrystal_I2C.h>\r\n\r\nLiquidCrystal_I2C lcd(0x27, 16, 2);\r\nconst int sensorPin = A5;\r\n\r\nvoid setup() {\r\n  Serial.begin(115200);\r\n  lcd.init();\r\n  lcd.backlight();\r\n  lcd.setCursor(0, 0);\r\n  lcd.print(\"Hello, ArduSim!\");\r\n  lcd.setCursor(0, 1);\r\n  lcd.print(\"LCD I2C : 0x27\");\r\n}\r\n\r\nvoid loop() {\r\n  int sensorValue = analogRead(sensorPin);\r\n  \r\n  float temperatureCelsius = (sensorValue * 500.0) / 1023.0;\r\n  float temperatureFahrenheit = (temperatureCelsius * 1.8) + 32.0;\r\n\r\n  Serial.print(\"Temperature: \");\r\n  Serial.print(temperatureCelsius);\r\n  Serial.print(\" °C  |  \");\r\n  Serial.print(temperatureFahrenheit);\r\n  Serial.println(\" °F\");\r\n  lcd.clear();\r\n  lcd.setCursor(0, 0);\r\n  lcd.print(\"Temp: \");\r\n  lcd.print(temperatureCelsius);\r\n  lcd.print(\"°C \");\r\n  lcd.setCursor(0, 1); \r\n  lcd.print(\"      \") ;\r\n  lcd.print(temperatureFahrenheit);\r\n  lcd.print(\"°F\");\r\n  delay(1000);\r\n}"
 }
