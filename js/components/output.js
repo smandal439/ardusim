@@ -1085,7 +1085,7 @@ defComp({
   desc: '16x2 character LCD display with integrated PCF8574 I2C daughterboard adapter (Enlarged)',
   width: 170,
   height: 90,
-  defaultProps: { address: '0x27', line1: 'Hello, I2C!    ', line2: 'Addr: 0x27      ' },
+  defaultProps: { address: '0x27' },
   interactive: [
     { field: 'address', label: 'I2C Address', type: 'text' },
   ],

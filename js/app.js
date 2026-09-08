@@ -781,7 +781,7 @@ void loop() {
 
         if (type === 'lcd_power') {
           if (!inst.runtimeState) inst.runtimeState = {};
-          inst.runtimeState.powered = true;
+          inst.runtimeState.powered = data && data.on !== undefined ? Boolean(data.on) : true;
         } else if (type === 'lcd_clear') {
           if (!inst.runtimeState) inst.runtimeState = {};
           inst.runtimeState.line1 = '';
