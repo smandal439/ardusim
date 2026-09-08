@@ -1,0 +1,127 @@
+{
+  "id": "espnow_dual_led_control",
+  "name": "ESP-NOW Dual LED Control",
+  "icon": "📡",
+  "desc": "Two ESP32 boards on one canvas — Board 1 sends ESP-NOW commands to remotely control Board 2's LED",
+  "tags": [
+    "espnow",
+    "esp32",
+    "wireless",
+    "led",
+    "intermediate"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "esp1",
+        "type": "esp32_devkit_v1",
+        "x": 200,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32 Sender"
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 80,
+        "y": 180,
+        "rotation": 0,
+        "props": {
+          "color": "#33ff33",
+          "colorName": "Green"
+        }
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 80,
+        "y": 260,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "esp2",
+        "type": "esp32_devkit_v1",
+        "x": 550,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32 Receiver"
+        }
+      },
+      {
+        "id": "led2",
+        "type": "led",
+        "x": 700,
+        "y": 180,
+        "rotation": 0,
+        "props": {
+          "color": "#3366ff",
+          "colorName": "Blue"
+        }
+      },
+      {
+        "id": "r2",
+        "type": "resistor",
+        "x": 700,
+        "y": 260,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": { "instId": "esp1", "pinId": "D2" },
+        "to": { "instId": "led1", "pinId": "anode" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": { "instId": "led1", "pinId": "cathode" },
+        "to": { "instId": "r1", "pinId": "p1" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": { "instId": "r1", "pinId": "p2" },
+        "to": { "instId": "esp1", "pinId": "GND1" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": { "instId": "esp2", "pinId": "D2" },
+        "to": { "instId": "led2", "pinId": "anode" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w5",
+        "from": { "instId": "led2", "pinId": "cathode" },
+        "to": { "instId": "r2", "pinId": "p1" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w6",
+        "from": { "instId": "r2", "pinId": "p2" },
+        "to": { "instId": "esp2", "pinId": "GND1" },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n * ESP-NOW Dual LED Control — Board 1 (Sender)\n *\n * Reads D4 as a virtual button. When pressed, sends\n * LED_ON / LED_OFF commands to Board 2 via ESP-NOW.\n * Green LED on D2 blinks on each send.\n *\n * Circuit:\n *   D2 -> Green LED -> 220 ohm -> GND\n *   D4 -> Button (internal pull-up)\n */\n\n#include <esp_now.h>\n#include <WiFi.h>\n\n// Board 2 MAC address\nuint8_t receiverMAC[] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0x02};\n\nesp_now_peer_info_t peerInfo;\n\n// Message types\n#define CMD_LED_ON   1\n#define CMD_LED_OFF  0\n\nint lastButtonState = HIGH;\n\nvoid onSendDone(const uint8_t *mac, esp_now_send_status_t status) {\n  Serial.print(\"Send: \");\n  Serial.println(status == ESP_NOW_SEND_SUCCESS ? \"OK\" : \"FAIL\");\n}\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(2, OUTPUT);\n  pinMode(4, INPUT_PULLUP);\n\n  WiFi.mode(WIFI_STA);\n  Serial.print(\"Sender MAC: \");\n  Serial.println(WiFi.macAddress());\n\n  esp_now_init();\n  esp_now_register_send_cb(onSendDone);\n\n  memcpy(peerInfo.peer_addr, receiverMAC, 6);\n  peerInfo.channel = 0;\n  peerInfo.encrypt = false;\n  esp_now_add_peer(&peerInfo);\n\n  Serial.println(\"Sender ready — press D4 to toggle remote LED\");\n}\n\nvoid loop() {\n  int btn = digitalRead(4);\n\n  if (btn != lastButtonState) {\n    lastButtonState = btn;\n\n    int cmd = (btn == LOW) ? CMD_LED_ON : CMD_LED_OFF;\n    esp_now_send(receiverMAC, (uint8_t *)&cmd, sizeof(cmd));\n\n    // Blink green LED on send\n    digitalWrite(2, HIGH);\n    delay(50);\n    digitalWrite(2, LOW);\n\n    Serial.print(\"Sent command: \");\n    Serial.println(cmd == CMD_LED_ON ? \"LED_ON\" : \"LED_OFF\");\n  }\n\n  delay(50);\n}",
+  "board2Code": "/*\n * ESP-NOW Dual LED Control — Board 2 (Receiver)\n *\n * Receives LED_ON / LED_OFF commands from Board 1.\n * Blue LED on D2 turns ON or OFF accordingly.\n *\n * Circuit:\n *   D2 -> Blue LED -> 220 ohm -> GND\n */\n\n#include <esp_now.h>\n#include <WiFi.h>\n\n#define CMD_LED_ON   1\n#define CMD_LED_OFF  0\n\nvoid onRecvData(const uint8_t *mac, const uint8_t *data, int len) {\n  if (len != sizeof(int)) return;\n  int cmd = *(int *)data;\n\n  digitalWrite(2, cmd == CMD_LED_ON ? HIGH : LOW);\n\n  Serial.print(\"Received: \");\n  Serial.print(cmd == CMD_LED_ON ? \"LED_ON\" : \"LED_OFF\");\n  Serial.print(\" from \");\n\n  char macStr[18];\n  snprintf(macStr, sizeof(macStr), \"%02X:%02X:%02X:%02X:%02X:%02X\",\n           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);\n  Serial.println(macStr);\n}\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(2, OUTPUT);\n  digitalWrite(2, LOW);\n\n  WiFi.mode(WIFI_STA);\n  Serial.print(\"Receiver MAC: \");\n  Serial.println(WiFi.macAddress());\n\n  esp_now_init();\n  esp_now_register_recv_cb(onRecvData);\n\n  Serial.println(\"Receiver ready — waiting for commands...\");\n}\n\nvoid loop() {\n  delay(100);\n}"
+}
