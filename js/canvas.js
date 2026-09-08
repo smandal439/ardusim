@@ -4,6 +4,41 @@
 
 'use strict';
 
+/* ── Hoisted IC output-pin tables (used by _readDigitalInput / _readAnalogInput) ── */
+const IC_OUTPUT_MAP = {
+  ic_555: { pins: ['OUT'], activeLow: [] },
+  ic_74hc00: { pins: ['Y1', 'Y2', 'Y3', 'Y4'], activeLow: [] },
+  ic_74hc04: { pins: ['Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6'], activeLow: [] },
+  ic_74hc08: { pins: ['Y1', 'Y2', 'Y3', 'Y4'], activeLow: [] },
+  ic_74hc32: { pins: ['Y1', 'Y2', 'Y3', 'Y4'], activeLow: [] },
+  ic_74hc595: { pins: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'], activeLow: [] },
+  ic_74hc138: { pins: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'], activeLow: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'] },
+  ic_74hc245: { pins: ['A1','A2','A3','A4','A5','A6','A7','A8','B1','B2','B3','B4','B5','B6','B7','B8'], activeLow: [] },
+  ic_74hc74: { pins: ['Q1', 'Q1n', 'Q2', 'Q2n'], activeLow: ['Q1n', 'Q2n'] },
+  ic_74hc165: { pins: ['Q7', 'Q7n'], activeLow: ['Q7n'] },
+  ic_74hc193: { pins: ['QA', 'QB', 'QC', 'QD', 'CO', 'BO'], activeLow: ['CO', 'BO'] },
+  ic_74hc47: { pins: ['a', 'b', 'c', 'd', 'e', 'f', 'g'], activeLow: ['a', 'b', 'c', 'd', 'e', 'f', 'g'] },
+  ic_74hc148: { pins: ['A0', 'A1', 'A2', 'GS', 'EO'], activeLow: ['A0', 'A1', 'A2', 'GS', 'EO'] },
+  lm741: { pins: ['OUT'], activeLow: [] },
+};
+const IC_OUTPUT_PIN_LIST = {
+  ic_555: ['OUT'],
+  potentiometer: ['wiper'],
+  ic_74hc00: ['Y1', 'Y2', 'Y3', 'Y4'],
+  ic_74hc04: ['Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6'],
+  ic_74hc08: ['Y1', 'Y2', 'Y3', 'Y4'],
+  ic_74hc32: ['Y1', 'Y2', 'Y3', 'Y4'],
+  ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'],
+  ic_74hc138: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'],
+  ic_74hc245: ['A1','A2','A3','A4','A5','A6','A7','A8','B1','B2','B3','B4','B5','B6','B7','B8'],
+  ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
+  ic_74hc165: ['Q7', 'Q7n'],
+  ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],
+  ic_74hc47: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+  ic_74hc148: ['A0', 'A1', 'A2', 'GS', 'EO'],
+  lm741: ['OUT'],
+};
+
 class CircuitCanvas {
   constructor(canvasEl, wrapperEl) {
     this.canvas = canvasEl;
@@ -64,6 +99,7 @@ class CircuitCanvas {
   _resize() {
     const w = this.wrapper.clientWidth;
     const h = this.wrapper.clientHeight;
+    if (w === 0 || h === 0) return;
     this.canvas.width = w;
     this.canvas.height = h;
     if (this.panX === 0 && this.panY === 0) {
@@ -4472,24 +4508,7 @@ class CircuitCanvas {
   }
 
   // 6. Integrated Circuits with Active-LOW default handling
-  const IC_OUT = {
-    ic_555: { pins: ['OUT'], activeLow: [] },
-    ic_74hc00: { pins: ['Y1', 'Y2', 'Y3', 'Y4'], activeLow: [] },
-    ic_74hc04: { pins: ['Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6'], activeLow: [] },
-    ic_74hc08: { pins: ['Y1', 'Y2', 'Y3', 'Y4'], activeLow: [] },
-    ic_74hc32: { pins: ['Y1', 'Y2', 'Y3', 'Y4'], activeLow: [] },
-    ic_74hc595: { pins: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'], activeLow: [] },
-    ic_74hc138: { pins: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'], activeLow: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'] },
-    ic_74hc245: { pins: ['A1','A2','A3','A4','A5','A6','A7','A8','B1','B2','B3','B4','B5','B6','B7','B8'], activeLow: [] },
-    ic_74hc74: { pins: ['Q1', 'Q1n', 'Q2', 'Q2n'], activeLow: ['Q1n', 'Q2n'] },
-    ic_74hc165: { pins: ['Q7', 'Q7n'], activeLow: ['Q7n'] },
-    ic_74hc193: { pins: ['QA', 'QB', 'QC', 'QD', 'CO', 'BO'], activeLow: ['CO', 'BO'] },
-    ic_74hc47: { pins: ['a', 'b', 'c', 'd', 'e', 'f', 'g'], activeLow: ['a', 'b', 'c', 'd', 'e', 'f', 'g'] },
-    ic_74hc148: { pins: ['A0', 'A1', 'A2', 'GS', 'EO'], activeLow: ['A0', 'A1', 'A2', 'GS', 'EO'] },
-    lm741: { pins: ['OUT'], activeLow: [] }
-  };
-
-  const icSpec = IC_OUT[other.type];
+  const icSpec = IC_OUTPUT_MAP[other.type];
   if (icSpec && icSpec.pins.includes(targetPin)) {
     const rs = other.runtimeState || {};
     if (rs[targetPin] !== undefined) {
@@ -4535,24 +4554,7 @@ class CircuitCanvas {
       const sim = window.ArduinoSim;
       return (sim && sim.pinStates) ? (sim.pinStates[`pin_${pn}`] || 0) : 0;
     }
-    const IC_OUT2 = {
-      ic_555: ['OUT'],
-      potentiometer: ['wiper'],
-      ic_74hc00: ['Y1', 'Y2', 'Y3', 'Y4'],
-      ic_74hc04: ['Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6'],
-      ic_74hc08: ['Y1', 'Y2', 'Y3', 'Y4'],
-      ic_74hc32: ['Y1', 'Y2', 'Y3', 'Y4'],
-      ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'],
-      ic_74hc138: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'],
-      ic_74hc245: ['A1','A2','A3','A4','A5','A6','A7','A8','B1','B2','B3','B4','B5','B6','B7','B8'],
-      ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
-      ic_74hc165: ['Q7', 'Q7n'],
-      ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],
-      ic_74hc47: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
-      ic_74hc148: ['A0', 'A1', 'A2', 'GS', 'EO'],
-      lm741: ['OUT'],
-    };
-    if (IC_OUT2[other.type] && IC_OUT2[other.type].includes(wireTarget.pinId)) {
+    if (IC_OUTPUT_PIN_LIST[other.type] && IC_OUTPUT_PIN_LIST[other.type].includes(wireTarget.pinId)) {
       const raw = other.runtimeState && other.runtimeState[wireTarget.pinId] != null
         ? other.runtimeState[wireTarget.pinId] : 0;
       return Math.round((raw / 255) * 1023);

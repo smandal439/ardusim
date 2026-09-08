@@ -81,7 +81,7 @@ class App {
         <div class="loading-error">
           <svg width="48" height="48" viewBox="0 0 16 16" fill="#da3633"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1m0 3a.905.905 0 0 1 .9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/></svg>
           <h3>Failed to initialize ArduSim</h3>
-          <p>${String(msg).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]))}</p>
+          <p>${this._escHtml(msg)}</p>
           <button onclick="location.reload()">Reload</button>
         </div>`;
     }
@@ -1528,7 +1528,7 @@ _newProject() {
         item.className = 'comp-item comp-dropdown';
         item.dataset.type = dd.id;
         item.title = dd.desc || dd.label;
-        item.innerHTML = `<span class="comp-icon">${dd.icon || '🔧'}</span><span class="comp-info"><span class="comp-name">${dd.label}</span><span class="comp-desc">${dd.desc || ''}</span></span><span class="comp-dropdown-arrow">▾</span>`;
+        item.innerHTML = `<span class="comp-icon">${this._escHtml(dd.icon || '🔧')}</span><span class="comp-info"><span class="comp-name">${this._escHtml(dd.label)}</span><span class="comp-desc">${this._escHtml(dd.desc || '')}</span></span><span class="comp-dropdown-arrow">▾</span>`;
 
         const menu = document.createElement('div');
         menu.className = 'comp-dropdown-menu';
@@ -1539,7 +1539,7 @@ _newProject() {
           const btn = document.createElement('button');
           btn.className = 'comp-dropdown-item';
           btn.dataset.type = v.id;
-          btn.innerHTML = `<span class="comp-icon">${v.icon}</span><span class="comp-info"><span class="comp-name">${v.name}</span>${vdef ? `<span class="comp-desc">${vdef.desc || ''}</span>` : ''}</span>`;
+          btn.innerHTML = `<span class="comp-icon">${this._escHtml(v.icon)}</span><span class="comp-info"><span class="comp-name">${this._escHtml(v.name)}</span>${vdef ? `<span class="comp-desc">${this._escHtml(vdef.desc || '')}</span>` : ''}</span>`;
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
             menu.style.display = 'none';
@@ -1575,7 +1575,7 @@ _newProject() {
         item.dataset.type = id;
         item.title = def.desc || def.name;
         const shortDesc = (def.desc || '').length > 42 ? def.desc.slice(0, 42) + '…' : (def.desc || '');
-        item.innerHTML = `<span class="comp-icon">${def.icon || '🔧'}</span><span class="comp-info"><span class="comp-name">${def.name}</span>${shortDesc ? `<span class="comp-desc">${shortDesc}</span>` : ''}</span>`;
+        item.innerHTML = `<span class="comp-icon">${this._escHtml(def.icon || '🔧')}</span><span class="comp-info"><span class="comp-name">${this._escHtml(def.name)}</span>${shortDesc ? `<span class="comp-desc">${this._escHtml(shortDesc)}</span>` : ''}</span>`;
         item.addEventListener('click', () => {
           if (this.canvas) {
             this.canvas.startPlacing(id);
@@ -2549,7 +2549,7 @@ _newProject() {
       : '';
     infoBlock.innerHTML = `
       <div class="props-desc">
-        <span class="props-comp-icon">${def ? def.icon : '🔧'}</span>
+        <span class="props-comp-icon">${this._escHtml(def ? def.icon : '🔧')}</span>
         <div>
           <p class="props-desc-text">${esc(g.longDesc || def?.desc || '')}</p>
           <button type="button" class="gh-btn gh-btn-ghost gh-btn-sm props-ref-btn">Open full reference →</button>

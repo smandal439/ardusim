@@ -25,6 +25,9 @@ export const ProjectSharer = {
     ));
     
     const shareableUrl = `${window.location.origin}${window.location.pathname}#project=${encoded}`;
+    if (shareableUrl.length > 8000) {
+      console.warn('[Sharing] URL length ' + shareableUrl.length + ' exceeds 8000 characters — may not work in all browsers');
+    }
     return shareableUrl;
   },
 

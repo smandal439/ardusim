@@ -909,7 +909,7 @@ class ArduinoSimulator {
         // Unique per-session suffix so a shared public broker doesn't clash
         // with other users running the same example.
         // Reuse existing session ID (set in run()) or generate new one
-        const session = self.sessionId || Math.random().toString(36).slice(2, 7);
+        const session = self.sessionId || Math.random().toString(36).slice(2, 18);
         self.sessionId = session;
         const ns = (topic) => `${topic}/${session}`;
         const bare = (topic) => (String(topic).endsWith(`/${session}`)
@@ -982,7 +982,7 @@ class ArduinoSimulator {
           },
           setCallback(callback) { cb = callback; },
           connect(id) {
-            const clientId = id || `ArduSim_${Math.random().toString(36).slice(2, 8)}`;
+            const clientId = id || `ArduSim_${Math.random().toString(36).slice(2, 18)}`;
             connected = true;
             broker.connected = true;
             self._serialLog(`[MQTT] Connecting as "${clientId}"...\n`, 'system');
@@ -1066,6 +1066,10 @@ class ArduinoSimulator {
   /* ══════════════ COMPILE & RUN ══════════════ */
   async compile(code) {
     try {
+      if (typeof code !== 'string') code = '';
+      if (code.length > 100_000) {
+        return { ok: false, error: 'Code exceeds maximum length (100 KB). Please shorten your sketch.' };
+      }
       const js = this.transpile(code);
       const ctx = this.buildContext();
       const rawKeys = Object.keys(ctx);
@@ -1136,7 +1140,7 @@ class ArduinoSimulator {
       }
     }
     // Generate session ID for remote control (every run)
-    this.sessionId = Math.random().toString(36).slice(2, 7);
+    this.sessionId = Math.random().toString(36).slice(2, 18);
 
     // Compile first
     const result = await this.compile(code);
@@ -1215,7 +1219,7 @@ class ArduinoSimulator {
   /* Start execution of already-compiled code (non-blocking, for dual-board parallel run) */
   _startExecution() {
     if (!this._compiledCtx) return;
-    this.sessionId = Math.random().toString(36).slice(2, 7);
+    this.sessionId = Math.random().toString(36).slice(2, 18);
     this.isRunning = true;
     this.isPaused = false;
     this._resumeAudio();

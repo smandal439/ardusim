@@ -129,7 +129,7 @@ class ArduSimRemote {
 
     try {
       this.client = window.mqtt.connect(this.broker, {
-        clientId: `ArduSimPhone_${Math.random().toString(36).slice(2, 8)}`,
+        clientId: `ArduSimPhone_${Math.random().toString(36).slice(2, 18)}`,
         clean: true,
         connectTimeout: 10000,
         reconnectPeriod: 5000,

@@ -23,13 +23,30 @@ const ROOT      = __dirname;
 const DATA_DIR  = path.join(ROOT, 'data');
 const DB_FILE   = path.join(DATA_DIR, 'ardusim.db');
 const PORT      = Number(process.env.PORT) || 3000;
-// const HOST      = process.env.HOST || '127.0.0.1';
-const HOST = '0.0.0.0'; 
+const HOST      = process.env.HOST || '127.0.0.1';
 const MAX_BODY  = 2 * 1024 * 1024; // 2 MB request limit
+const MAX_PROJECTS = 1000;
+
+/* ── Rate limiting (in-memory, per IP) ── */
+const _rateBuckets = new Map();
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX_WRITE = 30; // max POST/DELETE per window
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  let bucket = _rateBuckets.get(ip);
+  if (!bucket || now - bucket.start > RATE_WINDOW_MS) {
+    bucket = { start: now, count: 0 };
+    _rateBuckets.set(ip, bucket);
+  }
+  bucket.count++;
+  return bucket.count <= RATE_MAX_WRITE;
+}
 
 /* ── SQLite storage ── */
 fs.mkdirSync(DATA_DIR, { recursive: true });
 const db = new DatabaseSync(DB_FILE);
+db.exec('PRAGMA journal_mode=WAL;');
 db.exec(`
   CREATE TABLE IF NOT EXISTS projects (
     id        TEXT PRIMARY KEY,
@@ -52,8 +69,10 @@ const stmtInsert = db.prepare(`
     circuit  = excluded.circuit
 `);
 const stmtAll    = db.prepare('SELECT * FROM projects ORDER BY saved_at DESC');
+const stmtCount  = db.prepare('SELECT COUNT(*) as cnt FROM projects');
 const stmtById   = db.prepare('SELECT * FROM projects WHERE id = ?');
 const stmtDelete = db.prepare('DELETE FROM projects WHERE id = ?');
+const stmtDeleteOldest = db.prepare('DELETE FROM projects WHERE id IN (SELECT id FROM projects ORDER BY saved_at ASC LIMIT 1)');
 
 function rowToProject(row) {
   if (!row) return null;
@@ -78,8 +97,17 @@ function sendJson(res, status, data) {
   res.end(JSON.stringify(data));
 }
 
+function getClientIp(req) {
+  return (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress || '';
+}
+
 function readJsonBody(req, limit = MAX_BODY) {
   return new Promise((resolve, reject) => {
+    const ct = req.headers['content-type'] || '';
+    if (!ct.includes('application/json')) {
+      reject(new Error('Unsupported Media Type: expected application/json'));
+      return;
+    }
     let size = 0;
     const chunks = [];
     req.on('data', (c) => {
@@ -102,13 +130,13 @@ function readJsonBody(req, limit = MAX_BODY) {
 
 function sanitizeProject(body) {
   if (!body || typeof body !== 'object') return null;
-  const name = typeof body.name === 'string' && body.name.trim() ? body.name.trim() : 'Untitled Project';
-  const code = typeof body.code === 'string' ? body.code : '';
+  const name = typeof body.name === 'string' && body.name.trim() ? body.name.trim().slice(0, 200) : 'Untitled Project';
+  const code = typeof body.code === 'string' ? body.code.slice(0, 100_000) : '';
   const circuit = body.circuit && typeof body.circuit === 'object'
-    ? { components: Array.isArray(body.circuit.components) ? body.circuit.components : [],
-        wires:      Array.isArray(body.circuit.wires) ? body.circuit.wires : [] }
+    ? { components: Array.isArray(body.circuit.components) ? body.circuit.components.slice(0, 500) : [],
+        wires:      Array.isArray(body.circuit.wires) ? body.circuit.wires.slice(0, 1000) : [] }
     : { components: [], wires: [] };
-  const id = typeof body.id === 'string' && body.id.trim() ? body.id.trim() : 'p_' + crypto.randomBytes(8).toString('hex');
+  const id = typeof body.id === 'string' && body.id.trim() ? body.id.trim().slice(0, 100) : 'p_' + crypto.randomBytes(8).toString('hex');
   return {
     id,
     version: typeof body.version === 'string' ? body.version : '1.1',
@@ -151,13 +179,21 @@ const BLOCKED = ['/node_modules', '/data', '/.git', '/server.js', '/package.json
 
 function serveStatic(req, res, urlPath) {
   if (urlPath === '/' || urlPath === '') urlPath = '/index.html';
-  if (BLOCKED.some(b => urlPath === b || urlPath.startsWith(b + '/'))) {
+
+  // Decode first, then check blocklist (prevents double-encoding bypass)
+  let decoded;
+  try {
+    decoded = decodeURIComponent(urlPath);
+  } catch (e) {
+    return sendJson(res, 400, { error: 'Bad request' });
+  }
+  if (BLOCKED.some(b => decoded === b || decoded.startsWith(b + '/'))) {
     return sendJson(res, 404, { error: 'Not found' });
   }
 
   let filePath;
   try {
-    filePath = path.normalize(path.join(ROOT, decodeURIComponent(urlPath)));
+    filePath = path.normalize(path.join(ROOT, decoded));
   } catch (e) {
     return sendJson(res, 400, { error: 'Bad request' });
   }
@@ -193,6 +229,7 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || HOST}`);
   const pathname = url.pathname;
   const method = req.method;
+  const clientIp = getClientIp(req);
 
   // API routes (handled before static so they always win)
   if (pathname === '/api/health' && method === 'GET') {
@@ -214,19 +251,32 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/api/projects' && method === 'GET') {
-    const projects = stmtAll.all().map(rowToProject);
-    return sendJson(res, 200, { projects });
+    const limit = Math.min(Math.max(parseInt(url.searchParams.get('limit'), 10) || 200, 1), 1000);
+    const offset = Math.max(parseInt(url.searchParams.get('offset'), 10) || 0, 0);
+    const stmtPaginated = db.prepare(`SELECT * FROM projects ORDER BY saved_at DESC LIMIT ? OFFSET ?`);
+    const projects = stmtPaginated.all(limit, offset).map(rowToProject);
+    const total = stmtCount.get().cnt;
+    return sendJson(res, 200, { projects, total });
   }
 
   if (pathname === '/api/projects' && method === 'POST') {
+    if (!checkRateLimit(clientIp)) {
+      return sendJson(res, 429, { error: 'Rate limit exceeded. Try again later.' });
+    }
     try {
       const body = await readJsonBody(req);
       const project = sanitizeProject(body);
       if (!project) return sendJson(res, 400, { error: 'Invalid project' });
+      // Enforce project count limit
+      const { cnt } = stmtCount.get();
+      if (cnt >= MAX_PROJECTS) {
+        stmtDeleteOldest.run();
+      }
       stmtInsert.run(project.id, project.version, project.savedAt, project.name, project.code, JSON.stringify(project.circuit));
       return sendJson(res, 200, { project });
     } catch (e) {
-      return sendJson(res, 400, { error: e.message });
+      const status = e.message.includes('Unsupported Media Type') ? 415 : 400;
+      return sendJson(res, status, { error: e.message });
     }
   }
 
@@ -238,6 +288,9 @@ const server = http.createServer(async (req, res) => {
       return p ? sendJson(res, 200, { project: p }) : sendJson(res, 404, { error: 'Project not found' });
     }
     if (method === 'DELETE') {
+      if (!checkRateLimit(clientIp)) {
+        return sendJson(res, 429, { error: 'Rate limit exceeded. Try again later.' });
+      }
       stmtDelete.run(id);
       return sendJson(res, 200, { ok: true, id });
     }
@@ -270,4 +323,3 @@ server.listen(PORT, HOST, () => {
   console.log(`▶ ArduSim server running at http://${HOST}:${PORT}`);
   console.log(`  DB: ${DB_FILE}`);
 });
-

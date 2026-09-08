@@ -21,7 +21,7 @@ class RemoteControl {
     if (!sessionId || typeof window.mqtt !== 'function') return;
 
     this.sessionId = sessionId;
-    const clientId = `ArduSimRC_${Math.random().toString(36).slice(2, 8)}`;
+    const clientId = `ArduSimRC_${Math.random().toString(36).slice(2, 18)}`;
 
     try {
       this.client = window.mqtt.connect(this._broker, {

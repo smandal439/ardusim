@@ -72,8 +72,12 @@ class ElectricalEngine {
     const parent = new Map();
     const find = (key) => {
       if (!parent.has(key)) parent.set(key, key);
-      if (parent.get(key) !== key) parent.set(key, find(parent.get(key)));
-      return parent.get(key);
+      let root = key;
+      while (parent.get(root) !== root) root = parent.get(root);
+      // Path compression
+      let curr = key;
+      while (curr !== root) { const next = parent.get(curr); parent.set(curr, root); curr = next; }
+      return root;
     };
     const union = (a, b) => {
       const ra = find(a), rb = find(b);
