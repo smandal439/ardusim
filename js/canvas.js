@@ -4554,6 +4554,14 @@ class CircuitCanvas {
       const sim = window.ArduinoSim;
       return (sim && sim.pinStates) ? (sim.pinStates[`pin_${pn}`] || 0) : 0;
     }
+    // If the source is a board but the wire target is a sensor (not a board),
+    // read from pinStates directly — sensors like LM35 write ADC values there.
+    const fromInst = this.components.find(c => c.id === fromInstId);
+    if (fromInst && (fromInst.type === 'arduino_uno' || fromInst.type === 'arduino_nano' || fromInst.type === 'esp32_devkit_v1')) {
+      const boardPn = this._pinToNumber(pinId);
+      const sim = window.ArduinoSim;
+      return (sim && sim.pinStates) ? (sim.pinStates[`pin_${boardPn}`] || 0) : 0;
+    }
     if (IC_OUTPUT_PIN_LIST[other.type] && IC_OUTPUT_PIN_LIST[other.type].includes(wireTarget.pinId)) {
       const raw = other.runtimeState && other.runtimeState[wireTarget.pinId] != null
         ? other.runtimeState[wireTarget.pinId] : 0;
