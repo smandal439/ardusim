@@ -1366,14 +1366,14 @@ void loop() {
   /* ══════════════════════ SAVE / DOWNLOAD / LOAD / SHARE ══════════════════════ */
   saveProject() {
     const code = this.editor?.getCode() || '';
-    const board2Code = this._board2Code || document.getElementById('board2-code-textarea')?.value || '';
+    const board2Code = this._getBoard2Code();
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
     window.StorageManager?.saveToLibrary(code, circuitData, this._projectName, board2Code);
   }
 
   downloadProject() {
     const code = this.editor?.getCode() || '';
-    const board2Code = this._board2Code || document.getElementById('board2-code-textarea')?.value || '';
+    const board2Code = this._getBoard2Code();
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
     window.StorageManager?.downloadProject(code, circuitData, this._projectName, board2Code);
   }
@@ -1386,7 +1386,7 @@ void loop() {
     const tags = window.prompt('Tags, separated by commas:', 'custom, circuit');
     if (tags === null) return;
     const code = this.editor?.getCode() || '';
-    const board2Code = this._board2Code || document.getElementById('board2-code-textarea')?.value || '';
+    const board2Code = this._getBoard2Code();
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
     window.StorageManager?.downloadExample(code, circuitData, name.trim(), description.trim(), tags, board2Code);
   }
@@ -1406,7 +1406,7 @@ void loop() {
 
   shareProject() {
     const code = this.editor?.getCode() || '';
-    const board2Code = this._board2Code || document.getElementById('board2-code-textarea')?.value || '';
+    const board2Code = this._getBoard2Code();
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
     window.StorageManager?.shareUrl(code, circuitData, board2Code);
   }
@@ -1530,7 +1530,7 @@ _newProject() {
       });
     }
     const code = this.editor?.getCode() || '';
-    const board2Code = this._board2Code || document.getElementById('board2-code-textarea')?.value || '';
+    const board2Code = this._getBoard2Code();
     const circuit = this.canvas?.serialize() || { components: [], wires: [] };
     this._autoSaveDebounced(code, circuit, board2Code);
   }
