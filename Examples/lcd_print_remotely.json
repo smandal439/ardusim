@@ -4,10 +4,10 @@
   "icon": "🔧",
   "desc": "A custom LCD PRINT REMOTELY circuit example.",
   "tags": [
-    "cld",
-    "i2c",
+    "lcd",
     "remote",
-    "serial"    
+    "serial",
+    "bluetooth"
   ],
   "circuit": {
     "components": [
@@ -89,5 +89,5 @@
       }
     ]
   },
-  "code": "/*\n* LCD I2C — display text on a 16x2 LCD with a PCF8574 I2C backpack.\n* Wiring: LCD VCC → 5V, GND → GND, SDA → A4, SCL → A5.\n*/\n\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nint counter = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.clear();\n}\n\nvoid loop() {\n  if (Serial.available()>0) {\n    String data=Serial.readStringUntil('\\n');\n    data.trim();\n    Serial.println(\"Received data = \");\n    Serial.println(data);\n    lcd.clear();\n    lcd.setCursor(0, 0);\n    lcd.print(\"RX data = \");\n    lcd.setCursor(0, 1);\n    lcd.print(data);\n  }\n}"
+  "code": "/*\n* LCD I2C — display text on a 16x2 LCD with a PCF8574 I2C backpack.\n* Wiring: LCD VCC → 5V, GND → GND, SDA → A4, SCL → A5.\n*/\n\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nint counter = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.clear();\n}\n\nvoid loop() {\n  if (Serial.available()>0) {\n    String data=Serial.readStringUntil('\\n');\n    data.trim();\n    Serial.println(\"Received data = \");\n    Serial.println(data);\n    lcd.setCursor(0, 0);    \n    lcd.print(\"RX data =       \");\n    delay(10);\n    lcd.setCursor(0, 1);    \n    delay(10);\n    // lcd.print(\"                \");\n    lcd.print(data);\n    int a=sizeof(data);\n    for (int i = 0; i < 16-a; i++) {\n      lcd.print(\" \");\n    }\n    Serial.println(a);\n\n  }\n}"
 }
