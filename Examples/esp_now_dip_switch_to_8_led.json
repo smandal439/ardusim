@@ -2,10 +2,12 @@
   "id": "esp_now_dip_switch_to_8_led",
   "name": "ESP-NOW DIP Switch to 8-LED",
   "icon": "🔧",
-  "desc": "A custom ESP-NOW DIP Switch to 8-LED circuit example.",
+  "desc": "A custom ESP-NOW DIP Switch to 8-LED circuit example.aaaaaaaaaa",
   "tags": [
     "custom",
-    "circuit"
+    "circuit",
+    "espnow"
+
   ],
   "circuit": {
     "components": [

@@ -1,6 +1,6 @@
 {
-  "id": "espnow_dual_led_control",
-  "name": "ESP-NOW Dual LED Control",
+  "id": "espnow_led_control",
+  "name": "ESP-NOW LED Control",
   "icon": "📡",
   "desc": "Two ESP32 boards on one canvas — Board 1 sends ESP-NOW commands to remotely control Board 2's LED",
   "tags": [
