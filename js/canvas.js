@@ -194,6 +194,30 @@ class CircuitCanvas {
     ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(0, 10); ctx.stroke();
   }
 
+  _getSimForInst(inst) {
+    const boards = this.getAllBoardInsts();
+    const sim1 = window.ArduinoSim;
+    const sim2 = window.App && window.App.sim2;
+    if (!sim2) return sim1;
+    if (boards.length < 2) return sim1;
+    const boardTypes = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano'];
+    if (boardTypes.includes(inst.type)) {
+      const idx = boards.indexOf(inst);
+      return idx === 1 ? sim2 : sim1;
+    }
+    for (const wire of this.wires) {
+      let otherInstId;
+      if (wire.from.instId === inst.id) otherInstId = wire.to.instId;
+      else if (wire.to.instId === inst.id) otherInstId = wire.from.instId;
+      else continue;
+      const other = this.components.find(c => c.id === otherInstId);
+      if (!other || !boardTypes.includes(other.type)) continue;
+      const idx = boards.indexOf(other);
+      return idx === 1 ? sim2 : sim1;
+    }
+    return sim1;
+  }
+
   _drawComponents(ctx) {
     const { COMPONENT_DEFS, getComponentClass } = window.ArduinoComponents;
     const sim = window.ArduinoSim;
@@ -202,8 +226,10 @@ class CircuitCanvas {
       const def = COMPONENT_DEFS[inst.type];
       if (!def) continue;
 
+      const instSim = this._getSimForInst(inst);
+
       if (typeof def.step === 'function') {
-        def.step(inst, sim?.isRunning ? sim : null);
+        def.step(inst, instSim?.isRunning ? instSim : null);
       }
 
       ctx.save();
@@ -218,9 +244,9 @@ class CircuitCanvas {
       // Prefer class-based render() over def.draw()
       const CompClass = getComponentClass(inst.type);
       if (CompClass && typeof inst._componentInstance === 'object' && typeof inst._componentInstance.render === 'function') {
-        inst._componentInstance.render(ctx, sim?.isRunning ? sim : null);
+        inst._componentInstance.render(ctx, instSim?.isRunning ? instSim : null);
       } else {
-        def.draw(ctx, { ...inst }, sim?.isRunning ? sim : null);
+        def.draw(ctx, { ...inst }, instSim?.isRunning ? instSim : null);
       }
 
       // Draw pins
@@ -246,7 +272,7 @@ class CircuitCanvas {
   }
 
   _drawPins(ctx, inst, def) {
-    const sim = window.ArduinoSim;
+    const sim = this._getSimForInst(inst);
 
     for (const pin of def.pins) {
       const wx = inst.x + pin.x;
