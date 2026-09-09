@@ -565,7 +565,51 @@ class App {
     this.sim2.onEvent = (type, data) => {
       if (!this.canvas) return;
       const insts = this.canvas.components || [];
-      // Route display events for Board 2's components (OLED, TFT, etc.)
+
+      // LCD display events (16×2 parallel and I2C/PCF8574 versions)
+      for (const inst of insts) {
+        if (inst.type !== 'lcd1602' && inst.type !== 'lcd1602_i2c') continue;
+
+        if (inst.type === 'lcd1602_i2c') {
+          const sdaPin = this.canvas._getConnectedPinNum(inst.id, 'sda');
+          const sclPin = this.canvas._getConnectedPinNum(inst.id, 'scl');
+          if (sdaPin === null || sclPin === null) continue;
+
+          if (data && data.addr != null) {
+            const raw = String(inst.props && inst.props.address || '0x27').trim();
+            const instAddr = raw.startsWith('0x') || raw.startsWith('0X')
+              ? parseInt(raw, 16) || 0x27
+              : Number(raw) || 0x27;
+            const evtAddr = Number(data.addr) || 0;
+            if (instAddr !== evtAddr) continue;
+          }
+        }
+
+        if (type === 'lcd_power') {
+          if (!inst.runtimeState) inst.runtimeState = {};
+          inst.runtimeState.powered = data && data.on !== undefined ? Boolean(data.on) : true;
+        } else if (type === 'lcd_clear') {
+          if (!inst.runtimeState) inst.runtimeState = {};
+          inst.runtimeState.line1 = '';
+          inst.runtimeState.line2 = '';
+        } else if (type === 'lcd_print') {
+          if (!inst.runtimeState) inst.runtimeState = {};
+          const cursor = (data && data.cursor) || { col: 0, row: 0 };
+          const lineKey = cursor.row === 1 ? 'line2' : 'line1';
+          const text = String(data && data.text !== undefined ? data.text : '');
+          const line = String(inst.runtimeState[lineKey] || '').padEnd(16, ' ').slice(0, 16).split('');
+          const col = Math.max(0, Math.min(15, cursor.col || 0));
+          for (let i = 0; i < text.length && col + i < 16; i++) {
+            line[col + i] = text[i];
+          }
+          inst.runtimeState[lineKey] = line.join('');
+        } else if (type === 'lcd_backlight') {
+          if (!inst.runtimeState) inst.runtimeState = {};
+          inst.runtimeState.backlight = data && data.backlight;
+        }
+      }
+
+      // OLED (SSD1306 I2C) display events
       for (const inst of insts) {
         if (inst.type === 'ssd1306_128x64_i2c' && type === 'oled_power') {
           this.canvas.emitEvent?.('oled_draw', { ...data, __board2: true });
