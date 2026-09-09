@@ -1,0 +1,268 @@
+{
+  "id": "dip_switch_and_led_array",
+  "name": "DIP Switch and LED Array",
+  "icon": "🔧",
+  "desc": "A custom DIP Switch and LED Array circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 80,
+        "y": 120,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "dip1",
+        "type": "dip_switch",
+        "x": 50,
+        "y": 5,
+        "rotation": 0,
+        "props": {
+          "switches": 0
+        }
+      },
+      {
+        "id": "comp_1788974524425_xvbwp",
+        "type": "multi_led_array",
+        "x": 225,
+        "y": 10,
+        "rotation": 0,
+        "props": {
+          "label": "8-LED ARRAY"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1788974564076_emrgj",
+        "from": {
+          "instId": "b1",
+          "pinId": "D0"
+        },
+        "to": {
+          "instId": "dip1",
+          "pinId": "1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974566828_k8zia",
+        "from": {
+          "instId": "b1",
+          "pinId": "D1"
+        },
+        "to": {
+          "instId": "dip1",
+          "pinId": "2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974568794_sktwn",
+        "from": {
+          "instId": "b1",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "dip1",
+          "pinId": "3"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974570575_aoy8o",
+        "from": {
+          "instId": "b1",
+          "pinId": "D3"
+        },
+        "to": {
+          "instId": "dip1",
+          "pinId": "4"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974572545_dqj6j",
+        "from": {
+          "instId": "b1",
+          "pinId": "D4"
+        },
+        "to": {
+          "instId": "dip1",
+          "pinId": "5"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974574757_xc1hp",
+        "from": {
+          "instId": "b1",
+          "pinId": "D5"
+        },
+        "to": {
+          "instId": "dip1",
+          "pinId": "6"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974576462_ut6vt",
+        "from": {
+          "instId": "b1",
+          "pinId": "D6"
+        },
+        "to": {
+          "instId": "dip1",
+          "pinId": "7"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974578458_shfmn",
+        "from": {
+          "instId": "b1",
+          "pinId": "D7"
+        },
+        "to": {
+          "instId": "dip1",
+          "pinId": "8"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974582524_cqara",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND_D"
+        },
+        "to": {
+          "instId": "comp_1788974524425_xvbwp",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974586541_mi0l7",
+        "from": {
+          "instId": "b1",
+          "pinId": "D8"
+        },
+        "to": {
+          "instId": "comp_1788974524425_xvbwp",
+          "pinId": "l1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974588089_3hf7j",
+        "from": {
+          "instId": "b1",
+          "pinId": "D9"
+        },
+        "to": {
+          "instId": "comp_1788974524425_xvbwp",
+          "pinId": "l2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974589693_c736z",
+        "from": {
+          "instId": "b1",
+          "pinId": "D10"
+        },
+        "to": {
+          "instId": "comp_1788974524425_xvbwp",
+          "pinId": "l3"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974591998_9ybtm",
+        "from": {
+          "instId": "b1",
+          "pinId": "D11"
+        },
+        "to": {
+          "instId": "comp_1788974524425_xvbwp",
+          "pinId": "l4"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974593639_na9ec",
+        "from": {
+          "instId": "b1",
+          "pinId": "D12"
+        },
+        "to": {
+          "instId": "comp_1788974524425_xvbwp",
+          "pinId": "l5"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974596040_417cc",
+        "from": {
+          "instId": "b1",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "comp_1788974524425_xvbwp",
+          "pinId": "l6"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974606190_bj3xn",
+        "from": {
+          "instId": "b1",
+          "pinId": "A0"
+        },
+        "to": {
+          "instId": "comp_1788974524425_xvbwp",
+          "pinId": "l7"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1788974609038_04nrc",
+        "from": {
+          "instId": "b1",
+          "pinId": "A1"
+        },
+        "to": {
+          "instId": "comp_1788974524425_xvbwp",
+          "pinId": "l8"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "int switchs[8] = {0, 1, 2, 3, 4, 5, 6, 7};\nint leds[8] = {8, 9, 10, 11, 12, 13, A0, A1};\n\nvoid setup() {\n  for (int i = 0; i < 8; i++) {\n    pinMode(switchs[i], INPUT_PULLUP);\n  }\n  for (int i = 0; i < 8; i++) {\n    pinMode(leds[i], OUTPUT);\n  }\n  Serial.begin(115200);\n}\n\nvoid loop() {\n  int value = 0;\n  for (int i = 0; i < 8; i++) {\n    if (digitalRead(switchs[i]) == HIGH) {\n      value |= (1 << i);\n    }\n  }\n  \n  for (int i = 7; i >= 0; i--) {\n    digitalWrite(leds[i],(value >> i) & 1);\n  }\n  \n}"
+}
