@@ -6,7 +6,7 @@ window.ArduinoLibs = window.ArduinoLibs || {};
 window.ArduinoLibs['CoAP'] = {
   priority: 54,
   classes: ['CoapClient', 'CoapServer'],
-  includes: ['<CoapClient.h>'],
+  includes: ['<CoapClient.h>', '<CoapServer.h>'],
 
   transpile: [
     // CoapClient varName; → var varName = _a.coapCreateClient();
