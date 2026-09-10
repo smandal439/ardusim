@@ -129,26 +129,22 @@ window.ArduinoLibs['TinyGPSPlus'] = {
       // encode: feed a single character (returns true if new sentence decoded)
       _gps_encode: function(c) {
         this._data.charsProcessed++;
-        // Every 100 characters, "decode" a new sentence
+        // Sync from canvas GPS component on every character for instant availability
+        var canvas = window.CircuitCanvas;
+        if (canvas && Array.isArray(canvas.components)) {
+          var inst = canvas.components.find(function(c) { return c.type === 'gps_neo6m'; });
+          if (inst) {
+            var rs = inst.runtimeState || {};
+            var pr = inst.props || {};
+            this._data.lat = (rs.latitude !== undefined ? rs.latitude : pr.latitude) || this._data.lat;
+            this._data.lng = (rs.longitude !== undefined ? rs.longitude : pr.longitude) || this._data.lng;
+            this._data.altitudeMeters = (rs.altitude !== undefined ? rs.altitude : pr.altitude) || this._data.altitudeMeters;
+            this._data.satellites = (rs.satellites !== undefined ? rs.satellites : pr.satellites) || this._data.satellites;
+          }
+        }
+        // Every 100 characters, count as a decoded sentence
         if (this._data.charsProcessed % 100 === 0) {
           this._data.passedChecksum++;
-          // Sync with canvas component interactive properties
-          var canvas = window.CircuitCanvas;
-          if (canvas && Array.isArray(canvas.components)) {
-            var inst = canvas.components.find(function(c) { return c.type === 'gps_neo6m'; });
-            if (inst) {
-              var rs = inst.runtimeState || {};
-              var pr = inst.props || {};
-              this._data.lat = (rs.latitude !== undefined ? rs.latitude : pr.latitude) || this._data.lat;
-              this._data.lng = (rs.longitude !== undefined ? rs.longitude : pr.longitude) || this._data.lng;
-              this._data.altitudeMeters = (rs.altitude !== undefined ? rs.altitude : pr.altitude) || this._data.altitudeMeters;
-              this._data.satellites = (rs.satellites !== undefined ? rs.satellites : pr.satellites) || this._data.satellites;
-            }
-          }
-          // Slightly vary position to simulate movement
-          this._data.lat += (Math.random() - 0.5) * 0.0001;
-          this._data.lng += (Math.random() - 0.5) * 0.0001;
-          this._data.altitudeMeters += (Math.random() - 0.5) * 0.5;
           this._data.speedKmph = Math.random() * 60;
           this._data.courseDeg = Math.random() * 360;
         }
