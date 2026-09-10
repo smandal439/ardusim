@@ -275,7 +275,7 @@
         "id": "wire_1788345240117_798t2",
         "from": {
           "instId": "rly",
-          "pinId": "nc"
+          "pinId": "no"
         },
         "to": {
           "instId": "comp_1787680735754_su6qr",
