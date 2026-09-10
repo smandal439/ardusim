@@ -13,26 +13,26 @@ window.ArduinoLibs['BluetoothSerial'] = {
     // BluetoothSerial varName; → var varName = {};
     [/\bBluetoothSerial\s+(\w+)\s*;/g, 'var $1 = {};'],
 
-    // varName.begin("name") → _a.btSerialBegin(varName, "name")
-    [/\b(\w+)\.begin\s*\(\s*("[^"]*"|'[^']*')\s*\)/g, '_a.btSerialBegin($1, $2)'],
+    // SerialBT.begin("name") → _a.btSerialBegin("name")
+    [/\bSerialBT\.begin\s*\(\s*("[^"]*"|'[^']*')\s*\)/g, '_a.btSerialBegin($2)'],
 
-    // varName.write(val) → _a.btSerialWrite(varName, val)
-    [/\b(\w+)\.write\s*\(([^)]+)\)/g, '_a.btSerialWrite($1, $2)'],
+    // SerialBT.write(val) → _a.btSerialWrite(val)
+    [/\bSerialBT\.write\s*\(([^)]+)\)/g, '_a.btSerialWrite($1)'],
 
-    // varName.print(val) → _a.btSerialPrint(varName, val)
-    [/\b(\w+)\.print\s*\(([^)]+)\)/g, '_a.btSerialPrint($1, $2)'],
+    // SerialBT.print(val) → _a.btSerialPrint(val)
+    [/\bSerialBT\.print\s*\(([^)]+)\)/g, '_a.btSerialPrint($1)'],
 
-    // varName.println(val) → _a.btSerialPrintln(varName, val)
-    [/\b(\w+)\.println\s*\(([^)]+)\)/g, '_a.btSerialPrintln($1, $2)'],
+    // SerialBT.println(val) → _a.btSerialPrintln(val)
+    [/\bSerialBT\.println\s*\(([^)]+)\)/g, '_a.btSerialPrintln($1)'],
 
-    // varName.available() → _a.btSerialAvailable(varName)
-    [/\b(\w+)\.available\s*\(\s*\)/g, '_a.btSerialAvailable($1)'],
+    // SerialBT.available() → _a.btSerialAvailable()
+    [/\bSerialBT\.available\s*\(\s*\)/g, '_a.btSerialAvailable()'],
 
-    // varName.read() → _a.btSerialRead(varName)
-    [/\b(\w+)\.read\s*\(\s*\)/g, '_a.btSerialRead($1)'],
+    // SerialBT.read() → _a.btSerialRead()
+    [/\bSerialBT\.read\s*\(\s*\)/g, '_a.btSerialRead()'],
 
-    // varName.hasClient() → _a.btSerialHasClient(varName)
-    [/\b(\w+)\.hasClient\s*\(\s*\)/g, '_a.btSerialHasClient($1)'],
+    // SerialBT.hasClient() → _a.btSerialHasClient()
+    [/\bSerialBT\.hasClient\s*\(\s*\)/g, '_a.btSerialHasClient()'],
   ],
 
   constants: {},
@@ -64,7 +64,7 @@ window.ArduinoLibs['BluetoothSerial'] = {
     }
 
     return {
-      btSerialBegin: function(btObj, name) {
+      btSerialBegin: function(name) {
         _myBoardId = self.boardIndex || 0;
         _btName = name || ('ESP32_BT' + (_myBoardId + 1));
 
@@ -78,7 +78,7 @@ window.ArduinoLibs['BluetoothSerial'] = {
         self._serialLog('[Bluetooth] Started as "' + _btName + '"\n', 'system');
       },
 
-      btSerialWrite: function(btObj, val) {
+      btSerialWrite: function(val) {
         var board = _getMyBoard();
         if (!board || !board.initialized) return;
 
@@ -108,27 +108,27 @@ window.ArduinoLibs['BluetoothSerial'] = {
         self._serialLog('[Bluetooth] TX ' + bytes.length + 'B -> "' + target.name + '"\n', 'system');
       },
 
-      btSerialPrint: function(btObj, val) {
-        self._a.btSerialWrite(btObj, String(val));
+      btSerialPrint: function(val) {
+        self._a.btSerialWrite(String(val));
       },
 
-      btSerialPrintln: function(btObj, val) {
-        self._a.btSerialWrite(btObj, String(val) + '\n');
+      btSerialPrintln: function(val) {
+        self._a.btSerialWrite(String(val) + '\n');
       },
 
-      btSerialAvailable: function(btObj) {
+      btSerialAvailable: function() {
         var board = _getMyBoard();
         if (!board) return 0;
         return board.inputBuffer.length;
       },
 
-      btSerialRead: function(btObj) {
+      btSerialRead: function() {
         var board = _getMyBoard();
         if (!board || board.inputBuffer.length === 0) return -1;
         return board.inputBuffer.shift();
       },
 
-      btSerialHasClient: function(btObj) {
+      btSerialHasClient: function() {
         var target = _findOtherBoard();
         return target && target.initialized ? 1 : 0;
       },
