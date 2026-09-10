@@ -26,6 +26,20 @@
           "color": "#00FF00",
           "label": "GPS Fix LED"
         }
+      },
+      {
+        "id": "gps1",
+        "type": "gps_neo6m",
+        "x": 350,
+        "y": 350,
+        "rotation": 0,
+        "props": {
+          "label": "NEO-6M GPS",
+          "latitude": 28.6139,
+          "longitude": 77.2090,
+          "altitude": 215,
+          "satellites": 8
+        }
       }
     ],
     "wires": [
@@ -40,6 +54,34 @@
         "id": "w2",
         "from": { "instId": "esp1", "pinId": "GND" },
         "to": { "instId": "led1", "pinId": "cathode" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": { "instId": "esp1", "pinId": "3V3" },
+        "to": { "instId": "gps1", "pinId": "VCC" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": { "instId": "esp1", "pinId": "GND1" },
+        "to": { "instId": "gps1", "pinId": "GND" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w5",
+        "from": { "instId": "gps1", "pinId": "TX" },
+        "to": { "instId": "esp1", "pinId": "D16" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w6",
+        "from": { "instId": "gps1", "pinId": "RX" },
+        "to": { "instId": "esp1", "pinId": "D17" },
         "color": null,
         "waypoints": []
       }

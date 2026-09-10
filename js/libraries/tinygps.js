@@ -79,15 +79,27 @@ window.ArduinoLibs['TinyGPSPlus'] = {
   },
 
   constructor: function() {
+    // Read GPS data from canvas component if available
+    var canvas = window.CircuitCanvas;
+    var gpsInst = null;
+    if (canvas && Array.isArray(canvas.components)) {
+      gpsInst = canvas.components.find(function(c) { return c.type === 'gps_neo6m'; }) || null;
+    }
+    function getProp(key, fallback) {
+      if (!gpsInst) return fallback;
+      if (gpsInst.runtimeState && gpsInst.runtimeState[key] !== undefined) return gpsInst.runtimeState[key];
+      if (gpsInst.props && gpsInst.props[key] !== undefined) return gpsInst.props[key];
+      return fallback;
+    }
     return {
       __class: 'TinyGPSPlus',
       _data: {
-        lat: 28.6139,       // New Delhi, India
-        lng: 77.2090,
+        lat: getProp('latitude', 28.6139),
+        lng: getProp('longitude', 77.2090),
         locationValid: true,
         locationAge: 0,
         altitudeValid: true,
-        altitudeMeters: 215.0,
+        altitudeMeters: getProp('altitude', 215.0),
         altitudeAge: 0,
         dateValid: true,
         year: 2026,
@@ -101,7 +113,7 @@ window.ArduinoLibs['TinyGPSPlus'] = {
         centisecond: 50,
         timeAge: 0,
         satellitesValid: true,
-        satellites: 8,
+        satellites: getProp('satellites', 8),
         satellitesAge: 0,
         hdopValid: true,
         hdop: 1.2,
@@ -120,6 +132,19 @@ window.ArduinoLibs['TinyGPSPlus'] = {
         // Every 100 characters, "decode" a new sentence
         if (this._data.charsProcessed % 100 === 0) {
           this._data.passedChecksum++;
+          // Sync with canvas component interactive properties
+          var canvas = window.CircuitCanvas;
+          if (canvas && Array.isArray(canvas.components)) {
+            var inst = canvas.components.find(function(c) { return c.type === 'gps_neo6m'; });
+            if (inst) {
+              var rs = inst.runtimeState || {};
+              var pr = inst.props || {};
+              this._data.lat = (rs.latitude !== undefined ? rs.latitude : pr.latitude) || this._data.lat;
+              this._data.lng = (rs.longitude !== undefined ? rs.longitude : pr.longitude) || this._data.lng;
+              this._data.altitudeMeters = (rs.altitude !== undefined ? rs.altitude : pr.altitude) || this._data.altitudeMeters;
+              this._data.satellites = (rs.satellites !== undefined ? rs.satellites : pr.satellites) || this._data.satellites;
+            }
+          }
           // Slightly vary position to simulate movement
           this._data.lat += (Math.random() - 0.5) * 0.0001;
           this._data.lng += (Math.random() - 0.5) * 0.0001;

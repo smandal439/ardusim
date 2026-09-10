@@ -2965,3 +2965,197 @@ registerComponent('ir_obstacle', IRObstacleComponent);
 registerComponent('flex_sensor', FlexSensorComponent);
 registerComponent('thermistor', ThermistorComponent);
 registerComponent('mpu6050', MPU6050Component);
+
+/* ═══════════════════════ GPS NEO-6M/8M Module ═══════════════════════ */
+
+defComp({
+  id: 'gps_neo6m',
+  name: 'GPS NEO-6M/8M',
+  category: 'Sensors',
+  icon: '🛰️',
+  desc: 'NEO-6M/8M GPS module with TinyGPS++ — provides latitude, longitude, altitude, satellites, speed, and time via UART',
+  width: 64,
+  height: 80,
+  defaultProps: { latitude: 28.6139, longitude: 77.2090, altitude: 215, satellites: 8 },
+  interactive: [
+    { field: 'latitude', label: 'Lat', min: -90, max: 90, step: 0.0001, unit: '°' },
+    { field: 'longitude', label: 'Lng', min: -180, max: 180, step: 0.0001, unit: '°' },
+    { field: 'altitude', label: 'Alt', min: -500, max: 9000, step: 1, unit: 'm' },
+    { field: 'satellites', label: 'Sats', min: 0, max: 20, step: 1, unit: '' },
+  ],
+  pins: [
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 12, y: 80, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 26, y: 80, side: 'bottom' },
+    { id: 'TX', label: 'TX', type: PIN_TYPE.DIGITAL, x: 40, y: 80, side: 'bottom' },
+    { id: 'RX', label: 'RX', type: PIN_TYPE.DIGITAL, x: 54, y: 80, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const lat = inst.runtimeState?.latitude ?? inst.props.latitude ?? 28.6139;
+    const lng = inst.runtimeState?.longitude ?? inst.props.longitude ?? 77.2090;
+    const alt = inst.runtimeState?.altitude ?? inst.props.altitude ?? 215;
+    const sats = inst.runtimeState?.satellites ?? inst.props.satellites ?? 8;
+    const isPowered = sim?.isRunning ? (inst.runtimeState?.powered ?? true) : false;
+    const hasFix = isPowered && sats > 0;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // 1. Blue PCB Body (NEO-6M breakout board)
+    ctx.fillStyle = '#1a3a6e';
+    roundRect(ctx, 0, 0, 64, 68, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#4a7ab5';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // 2. GPS Antenna (ceramic patch — top portion)
+    const antGrad = ctx.createLinearGradient(6, 3, 58, 25);
+    antGrad.addColorStop(0, '#8a8a8a');
+    antGrad.addColorStop(0.3, '#b0b0b0');
+    antGrad.addColorStop(0.7, '#9a9a9a');
+    antGrad.addColorStop(1, '#7a7a7a');
+    ctx.fillStyle = antGrad;
+    roundRect(ctx, 6, 3, 52, 22, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+
+    // Antenna center dot
+    ctx.fillStyle = '#666';
+    ctx.beginPath();
+    ctx.arc(32, 14, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Antenna label
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 4px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('GPS', 32, 15);
+
+    // 3. NEO-6M Chip (black IC)
+    const chipGrad = ctx.createLinearGradient(18, 28, 46, 42);
+    chipGrad.addColorStop(0, '#2a2a2a');
+    chipGrad.addColorStop(0.5, '#1a1a1a');
+    chipGrad.addColorStop(1, '#111');
+    ctx.fillStyle = chipGrad;
+    roundRect(ctx, 18, 28, 28, 14, 1.5);
+    ctx.fill();
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 0.3;
+    ctx.stroke();
+
+    // Chip label
+    ctx.fillStyle = '#aaa';
+    ctx.font = 'bold 3.5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('NEO-6M', 32, 36);
+
+    // 4. Power LED
+    ctx.fillStyle = isPowered ? '#00ff44' : '#223322';
+    ctx.beginPath();
+    ctx.arc(8, 30, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+    if (isPowered) {
+      ctx.shadowColor = '#00ff44';
+      ctx.shadowBlur = 4;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // 5. Fix LED (blinks when satellite fix acquired)
+    const blinkOn = hasFix && (Date.now() % 1000 < 500);
+    ctx.fillStyle = blinkOn ? '#00ccff' : '#112233';
+    ctx.beginPath();
+    ctx.arc(56, 30, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+    if (blinkOn) {
+      ctx.shadowColor = '#00ccff';
+      ctx.shadowBlur = 5;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // 6. Live Data Display
+    ctx.fillStyle = '#0a1628';
+    roundRect(ctx, 4, 46, 56, 16, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#1e3a5f';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+
+    // Lat/Lng readout
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 4px monospace';
+
+    ctx.fillStyle = '#00e5ff';
+    ctx.fillText('LAT', 6, 52);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(lat.toFixed(4), 20, 52);
+
+    ctx.fillStyle = '#00e5ff';
+    ctx.fillText('LNG', 6, 58);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(lng.toFixed(4), 20, 58);
+
+    // Satellites count
+    ctx.fillStyle = '#ffab00';
+    ctx.font = 'bold 4px monospace';
+    ctx.fillText('SAT', 44, 52);
+    ctx.fillStyle = hasFix ? '#00ff88' : '#ff4444';
+    ctx.fillText(String(sats), 56, 52);
+
+    // Altitude
+    ctx.fillStyle = '#b388ff';
+    ctx.fillText('ALT', 44, 58);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(alt + 'm', 56, 58);
+
+    // 7. Silkscreen Pin Labels
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 4.5px sans-serif';
+    ctx.textAlign = 'center';
+    const pinLabels = ['VCC', 'GND', 'TX', 'RX'];
+    const pinXs = [12, 26, 40, 54];
+
+    pinXs.forEach((px, idx) => {
+      ctx.fillText(pinLabels[idx], px, 68);
+
+      // Gold Solder Pads
+      ctx.fillStyle = '#d4af37';
+      ctx.beginPath();
+      ctx.arc(px, 72, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hole
+      ctx.fillStyle = '#1a1a1a';
+      ctx.beginPath();
+      ctx.arc(px, 72, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pin Leads extending to 80
+      ctx.strokeStyle = '#d4d4d4';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(px, 74);
+      ctx.lineTo(px, 80);
+      ctx.stroke();
+
+      // Pin Header Metallic Highlight
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(px - 0.5, 74);
+      ctx.lineTo(px - 0.5, 80);
+      ctx.stroke();
+    });
+
+    // Selection Highlight
+    if (inst.selected && typeof drawSelectionRect === 'function') {
+      drawSelectionRect(ctx, -2, -2, 68, 84);
+    }
+
+    ctx.restore();
+  }
+});
