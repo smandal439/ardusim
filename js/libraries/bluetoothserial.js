@@ -14,7 +14,7 @@ window.ArduinoLibs['BluetoothSerial'] = {
     [/\bBluetoothSerial\s+(\w+)\s*;/g, 'var $1 = {};'],
 
     // SerialBT.begin("name") → _a.btSerialBegin("name")
-    [/\bSerialBT\.begin\s*\(\s*("[^"]*"|'[^']*')\s*\)/g, '_a.btSerialBegin($2)'],
+    [/\bSerialBT\.begin\s*\(\s*("[^"]*"|'[^']*')\s*\)/g, '_a.btSerialBegin($1)'],
 
     // SerialBT.write(val) → _a.btSerialWrite(val)
     [/\bSerialBT\.write\s*\(([^)]+)\)/g, '_a.btSerialWrite($1)'],
