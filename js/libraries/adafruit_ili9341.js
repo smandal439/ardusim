@@ -3,6 +3,7 @@ window.ArduinoLibs['Adafruit_ILI9341'] = {
   classes: ['Adafruit_ILI9341'],
   includes:['<Adafruit_ILI9341.h>'],
   transpile: [
+    [/(\w+)\.begin\s*\(\s*\)/g, '_a.tftBegin($1)'],
     [/(\w+)\.setTextColor\(/g, '_a.tftSetTextColor($1, '],
     [/(\w+)\.setTextSize\(/g, '_a.tftSetTextSize($1, '],
     [/(\w+)\.setTextWrap\(/g, '_a.tftSetTextWrap($1, '],
