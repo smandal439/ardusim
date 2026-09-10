@@ -208,7 +208,7 @@ class ArduinoSimulator {
     // WebServer server(80);  →  let server = new WebServer(80);
     // Adafruit_SSD1306 display(128, 64, &Wire, -1);  →  let display = new Adafruit_SSD1306(128, 64, Wire, -1);
     // Adafruit_ILI9341 tft(CS, DC, MOSI, SCK, RESET);  →  let tft = new Adafruit_ILI9341(CS, DC, MOSI, SCK, RESET);
-    js = js.replace(/\b(Servo|LiquidCrystal|LiquidCrystal_I2C|WiFiClient|PubSubClient|WebServer|Adafruit_SSD1306|Adafruit_ILI9341|SimpleBME280|Adafruit_VL53L0X|DHT)\s+(\w+)\s*(?:\(([^)]*)\))?\s*;/g, 'let $2 = new $1($3)');
+    js = js.replace(/\b(Servo|LiquidCrystal|LiquidCrystal_I2C|WiFiClient|PubSubClient|WebServer|Adafruit_SSD1306|Adafruit_ILI9341|SimpleBME280|Adafruit_VL53L0X|DHT|Stepper)\s+(\w+)\s*(?:\(([^)]*)\))?\s*;/g, 'let $2 = new $1($3)');
     // Adafruit_VL53L0X lox = Adafruit_VL53L0X();  →  let lox = new Adafruit_VL53L0X();
     js = js.replace(/\b(Adafruit_VL53L0X)\s+(\w+)\s*=\s*\1\s*\(([^)]*)\)\s*;?/g, function (_, t, n, a) { return 'let ' + n + ' = new ' + t + '(' + a + ');'; });
 
@@ -224,6 +224,16 @@ class ArduinoSimulator {
           js = js.replace(new RegExp(`\\b${cls}\\s+(\\w+)\\s*(?:\\(([^)]*)\\))?\\s*;`, 'g'), `var $1 = new ${cls}($2)`);
           // ClassName varName = ClassName(args);
           js = js.replace(new RegExp(`\\b${cls}\\s+(\\w+)\\s*=\\s*${cls}\\s*\\(([^)]*)\\)\\s*;`, 'g'), `var $1 = new ${cls}($2)`);
+        }
+      }
+    }
+
+    // 5c. Second pass: re-apply plugin transpile rules after class constructors
+    //     so `new Stepper(...)` created by constructor detection gets transpiled
+    for (const [_libName, _lib] of pluginEntries) {
+      if (_lib.transpile) {
+        for (const [_pattern, _replacement] of _lib.transpile) {
+          js = js.replace(_pattern, _replacement);
         }
       }
     }
