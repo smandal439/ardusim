@@ -48,11 +48,10 @@ window.ArduinoLibs['CoAP-Simple'] = {
     [/\b(\w+)\.server\s*\(\s*(\w+)\s*,\s*("[^"]*"|'[^']*')\s*\)/g, '_a.coapSimpleServer($1, $2, $3)'],
 
     // varName.start() → _a.coapSimpleStart(varName)
-    // NOTE: intentionally NOT included here — coap.js .start() rule handles it
-    // and coapServerStart is patched to support __coapSimple objects too.
+    [/\b(\w+)\.start\s*\(\s*\)/g, '_a.coapSimpleStart($1)'],
 
-    // varName.loop() → await _a.coapSimpleLoop(varName)
-    // NOTE: intentionally NOT included here — coap.js .loop() rule handles it
+    // varName.loop() → _a.coapSimpleLoop(varName)
+    [/\b(\w+)\.loop\s*\(\s*\)/g, '_a.coapSimpleLoop($1)'],
 
     // varName.sendResponse(ip, port, msgid, resp) → _a.coapSimpleSendResponse(varName, ip, port, msgid, resp)
     [/\b(\w+)\.sendResponse\s*\(([^)]+)\)/g, '_a.coapSimpleSendResponse($1, $2)'],
