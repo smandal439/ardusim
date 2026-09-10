@@ -53,9 +53,54 @@ class ArduinoSimulator {
     return window.ArduinoLibs || {};
   }
 
+  /**
+   * Extract #include directives from source code BEFORE they are stripped.
+   * Returns a Set of header names, e.g. {"esp_now.h", "WiFi.h"}
+   */
+  _extractIncludes(code) {
+    const includes = new Set();
+    const re = /^[ \t]*#\s*include\s*[<"]([^>"]+)[>"]/gm;
+    let m;
+    while ((m = re.exec(code)) !== null) {
+      includes.add(m[1]);
+    }
+    return includes;
+  }
+
+  /**
+   * Filter plugins: only return those whose `includes` array overlaps with
+   * the sketch's #include directives. Plugins with NO includes are always active.
+   * This prevents e.g. BluetoothSerial rules from running on an ESP-NOW sketch.
+   */
+  _getActivePlugins(code) {
+    const all = this._getPlugins();
+    const sketchIncludes = this._extractIncludes(code);
+    const active = {};
+
+    for (const [name, lib] of Object.entries(all)) {
+      // Plugins with no includes array (or empty) are always active
+      if (!lib.includes || lib.includes.length === 0) {
+        active[name] = lib;
+        continue;
+      }
+      // Check if ANY of this plugin's includes appear in the sketch
+      for (const inc of lib.includes) {
+        // Normalize: strip < > " ' wrappers for comparison
+        const normalized = inc.replace(/^[<"']|[>"]$/g, '');
+        if (sketchIncludes.has(normalized)) {
+          active[name] = lib;
+          break;
+        }
+      }
+    }
+    return active;
+  }
+
   /* ══════════════ TRANSPILER ══════════════ */
   transpile(code) {
     if (typeof code !== 'string') code = '';
+    // Store active plugins for buildContext() to use (avoids re-scanning)
+    this._activePlugins = this._getActivePlugins(code);
     let js = code;
 
     // Remove comments temporarily for processing, then restore
@@ -102,7 +147,8 @@ class ArduinoSimulator {
 
     // 4b. Plugin-specific transpile rules (BEFORE variable declarations)
     //     so plugin rules like esp_now_peer_info_t can match before Type→let stripping
-    const _plugins = this._getPlugins();
+    //     Only apply plugins whose #include headers are present in the sketch.
+    const _plugins = this._activePlugins;
     const _pluginEntries = Object.entries(_plugins).sort((a, b) => (a[1].priority || 50) - (b[1].priority || 50));
     for (const [_libName, _lib] of _pluginEntries) {
       if (_lib.transpile) {
@@ -167,7 +213,7 @@ class ArduinoSimulator {
     js = js.replace(/\b(Adafruit_VL53L0X)\s+(\w+)\s*=\s*\1\s*\(([^)]*)\)\s*;?/g, function (_, t, n, a) { return 'let ' + n + ' = new ' + t + '(' + a + ');'; });
 
     // Plugin-provided class constructors
-    const plugins = this._getPlugins();
+    const plugins = this._activePlugins;
     // Sort plugins: lower priority runs first; LCD plugins run last (priority 100) so their
     // broad \w+ rules don't hijack method calls from Servo, Wire, SPI, etc.
     const pluginEntries = Object.entries(plugins).sort((a, b) => (a[1].priority || 50) - (b[1].priority || 50));
@@ -1045,7 +1091,8 @@ class ArduinoSimulator {
     };
 
     // Inject plugin-provided runtime functions, constructors, and constants
-    const plugins = this._getPlugins();
+    // Use active plugins set by transpile(); fallback to all if not set
+    const plugins = this._activePlugins || this._getPlugins();
     for (const [libName, lib] of Object.entries(plugins)) {
       if (lib.runtime) {
         const rt = lib.runtime(self);
