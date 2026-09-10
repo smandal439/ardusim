@@ -6,18 +6,26 @@
 // returned by the constructor. This avoids the transpiler hijacking lcd.print() etc.
 window.ArduinoLibs = window.ArduinoLibs || {};
 window.ArduinoLibs['Adafruit_SSD1306'] = {
-  priority: 101,
+  priority: 50,
   classes: ['Adafruit_SSD1306'],
   includes: ['<Adafruit_SSD1306.h>'],
 
-  // Only SSD1306-SPECIFIC methods that no other plugin defines.
-  // Shared methods (.print, .setCursor, .drawPixel, etc.) live on the constructor object.
+  // SSD1306-SPECIFIC + shared Adafruit_GFX methods (must run BEFORE GFX plugin at priority 99)
   transpile: [
+    // SSD1306-specific
     [/(\w+)\.clearDisplay\s*\(\s*\)/g, function (m, v) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m; return '_a.oledClearDisplay(' + v + ')'; }],
     [/(\w+)\.display\s*\(\s*\)/g, function (m, v) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m; return '_a.oledFlush(' + v + ')'; }],
     [/(\w+)\.invertDisplay\s*\(([^)]*)\)/g, function (m, v, a) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m; return '_a.oledInvertDisplay(' + v + ', ' + a + ')'; }],
     [/(\w+)\.dim\s*\(([^)]*)\)/g, function (m, v, a) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m; return '_a.oledDim(' + v + ', ' + a + ')'; }],
     [/(\w+)\.setContrast\s*\(([^)]*)\)/g, function (m, v, a) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m; return '_a.oledSetContrast(' + v + ', ' + a + ')'; }],
+    // Shared Adafruit_GFX methods (with proper variable capture to prevent GFX plugin mangling)
+    [/(\w+)\.setTextColor\s*\(([^)]*)\)/g, function (m, v, a) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m; return '_a.oledSetTextColor(' + v + ', ' + a + ')'; }],
+    [/(\w+)\.setTextSize\s*\(([^)]*)\)/g, function (m, v, a) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m; return '_a.oledSetTextSize(' + v + ', ' + a + ')'; }],
+    [/(\w+)\.setTextWrap\s*\(([^)]*)\)/g, function (m, v, a) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m; return '_a.oledSetTextWrap(' + v + ', ' + a + ')'; }],
+    [/(\w+)\.setCursor\s*\(([^)]*)\)/g, function (m, v, a) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m; return '_a.oledSetCursor(' + v + ', ' + a + ')'; }],
+    [/(\w+)\.setRotation\s*\(([^)]*)\)/g, function (m, v, a) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m; return '_a.oledSetRotation(' + v + ', ' + a + ')'; }],
+    [/(\w+)\.print\s*\(([^)]*)\)/g, function (m, v, a) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m; return '_a.oledPrint(' + v + ', ' + a + ')'; }],
+    [/(\w+)\.println\s*\(([^)]*)\)/g, function (m, v, a) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m; return '_a.oledPrintln(' + v + ', ' + a + ')'; }],
   ],
 
   constants: {
@@ -131,6 +139,14 @@ window.ArduinoLibs['Adafruit_SSD1306'] = {
       oledSetContrast: function (v, val) {
         self._emitEvent('oled_draw', { op: 'contrast', contrast: Number(val) || 0, addr: v.addr || 0x3C });
       },
+      // Shared Adafruit_GFX methods — delegate to constructor's real methods
+      oledSetTextColor: function (v, fg, bg) { if (v && v.setTextColor) v.setTextColor(fg, bg); },
+      oledSetTextSize: function (v, s) { if (v && v.setTextSize) v.setTextSize(s); },
+      oledSetTextWrap: function (v, w) { if (v && v.setTextWrap) v.setTextWrap(w); },
+      oledSetCursor: function (v, x, y) { if (v && v.setCursor) v.setCursor(x, y); },
+      oledSetRotation: function (v, r) { if (v && v.setRotation) v.setRotation(r); },
+      oledPrint: function (v, msg) { if (v && v.print) v.print(msg); },
+      oledPrintln: function (v, msg) { if (v && v.println) v.println(msg); },
     };
   },
 };
