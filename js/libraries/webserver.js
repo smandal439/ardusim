@@ -1,7 +1,7 @@
 window.ArduinoLibs = window.ArduinoLibs || {};
 window.ArduinoLibs['WebServer'] = {
   classes: ['WebServer'],
-  includes: ['<ESP8266WebServer.h>'],
+  includes: ['<ESP8266WebServer.h>', '<WebServer.h>'],
   constructor: function(port) {
     return { __class: 'WebServer', port: port };
   },
