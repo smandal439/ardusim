@@ -180,9 +180,6 @@ class ElectricalEngine {
         }
         break;
       }
-      case 'bulb_12v':
-        conns.push([key('anode'), key('cathode')]);
-        break;
       case 'breadboard':
       case 'breadboard_small': {
         // Breadboard groups: rows a-e share a rail, rows f-j share a rail
