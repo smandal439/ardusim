@@ -1,0 +1,34 @@
+{
+  "id": "bluetooth_serial_bridge",
+  "name": "Bluetooth Serial Bridge (2 ESP32)",
+  "icon": "\uD83D\uDCF6",
+  "desc": "Two ESP32 boards communicate via Bluetooth Classic (SPP). Type in one board's Serial Monitor and the data appears on the other board.",
+  "tags": ["esp32", "bluetooth", "serial", "communication", "circuit"],
+  "circuit": {
+    "components": [
+      {
+        "id": "esp1",
+        "type": "esp32_devkit_v1",
+        "x": 250,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32 Bluetooth A"
+        }
+      },
+      {
+        "id": "esp2",
+        "type": "esp32_devkit_v1",
+        "x": 550,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32 Bluetooth B"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "code": "/*\n * Bluetooth Serial Bridge — Board A\n * Sends any Serial Monitor input via Bluetooth.\n * Received Bluetooth data is printed to Serial Monitor.\n *\n * Open the Serial Monitor for both boards to chat.\n */\n\n#include <BluetoothSerial.h>\n\nBluetoothSerial SerialBT;\n\nvoid setup() {\n  Serial.begin(115200);\n  SerialBT.begin(\"ESP32_BT_A\");\n  Serial.println(\"Board A: Bluetooth started as ESP32_BT_A\");\n  Serial.println(\"Type in Serial Monitor to send via Bluetooth\");\n}\n\nvoid loop() {\n  // Read from computer Serial Monitor and send to Bluetooth\n  if (Serial.available()) {\n    SerialBT.write(Serial.read());\n  }\n\n  // Read from Bluetooth and send to computer Serial Monitor\n  if (SerialBT.available()) {\n    Serial.write(SerialBT.read());\n  }\n\n  delay(20);\n}",
+  "board2Code": "/*\n * Bluetooth Serial Bridge — Board B\n * Sends any Serial Monitor input via Bluetooth.\n * Received Bluetooth data is printed to Serial Monitor.\n *\n * Open the Serial Monitor for both boards to chat.\n */\n\n#include <BluetoothSerial.h>\n\nBluetoothSerial SerialBT;\n\nvoid setup() {\n  Serial.begin(115200);\n  SerialBT.begin(\"ESP32_BT_B\");\n  Serial.println(\"Board B: Bluetooth started as ESP32_BT_B\");\n  Serial.println(\"Type in Serial Monitor to send via Bluetooth\");\n}\n\nvoid loop() {\n  // Read from computer Serial Monitor and send to Bluetooth\n  if (Serial.available()) {\n    SerialBT.write(Serial.read());\n  }\n\n  // Read from Bluetooth and send to computer Serial Monitor\n  if (SerialBT.available()) {\n    Serial.write(SerialBT.read());\n  }\n\n  delay(20);\n}"
+}

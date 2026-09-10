@@ -1717,7 +1717,7 @@ window.loadExamplesFromFiles = async function () {
     'esp32_i2s_local_radio_player', 'lcd', 'read_rfid_card_raw_data', 'lcd_print_remotely',
     'rfid_inventory_tracker','shift_resister_circuit','7408_test_with_logic_analyzer',
     'espnow_sender','espnow_receiver','coap_client','coap_dip_switch_to_8_led','coap_simple_server','espnow_led_control',
-    'two_lcd','esp_now_dip_switch_to_8_led','dip_switch_and_led_array','morse_code_using_serial_data'];
+    'two_lcd','esp_now_dip_switch_to_8_led','dip_switch_and_led_array','morse_code_using_serial_data','bluetooth_serial_bridge'];
   const sketches = [];
   const cacheBust = '?v=' + Date.now();
   for (const name of files) {
