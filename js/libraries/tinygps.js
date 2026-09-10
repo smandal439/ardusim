@@ -134,11 +134,12 @@ window.ArduinoLibs['TinyGPSPlus'] = {
         if (canvas && Array.isArray(canvas.components)) {
           var inst = canvas.components.find(function(c) { return c.type === 'gps_neo6m'; });
           if (inst) {
+            var rs = inst.runtimeState || {};
             var pr = inst.props || {};
-            this._data.lat = pr.latitude || this._data.lat;
-            this._data.lng = pr.longitude || this._data.lng;
-            this._data.altitudeMeters = pr.altitude || this._data.altitudeMeters;
-            this._data.satellites = pr.satellites || this._data.satellites;
+            this._data.lat = rs.latitude ?? pr.latitude ?? this._data.lat;
+            this._data.lng = rs.longitude ?? pr.longitude ?? this._data.lng;
+            this._data.altitudeMeters = rs.altitude ?? pr.altitude ?? this._data.altitudeMeters;
+            this._data.satellites = rs.satellites ?? pr.satellites ?? this._data.satellites;
           }
         }
         // Every 100 characters, count as a decoded sentence
