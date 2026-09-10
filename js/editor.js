@@ -920,22 +920,33 @@ void loop() {
       endColumn: 100,
       message: msg,
     }]);
-    const el = document.getElementById('editor-errors');
-    if (el) {
-      el.textContent = `\u26D4 ${msg}`;
-      el.style.color = '#f85149';
-    }
+    this._showErrorPanel(line, msg);
   },
 
   clearErrors() {
     if (!this.editor) return;
     const model = this.editor.getModel();
     if (model) monaco.editor.setModelMarkers(model, 'ardusim', []);
-    const el = document.getElementById('editor-errors');
-    if (el) {
-      el.textContent = '';
-      el.style.color = '';
+    this._hideErrorPanel();
+  },
+
+  _showErrorPanel(line, msg) {
+    const panel = document.getElementById('editor-error-panel');
+    const textEl = document.getElementById('editor-error-text');
+    if (!panel || !textEl) return;
+    const prefix = line > 0 ? `Line ${line}: ` : '';
+    textEl.textContent = prefix + msg;
+    panel.style.display = '';
+    if (!this._errorCloseBound) {
+      this._errorCloseBound = true;
+      const btn = document.getElementById('editor-error-close');
+      if (btn) btn.addEventListener('click', () => this.clearErrors());
     }
+  },
+
+  _hideErrorPanel() {
+    const panel = document.getElementById('editor-error-panel');
+    if (panel) panel.style.display = 'none';
   },
 
   /**
@@ -964,12 +975,6 @@ void loop() {
 
       if (result.ok) {
         this.clearErrors();
-        const el = document.getElementById('editor-errors');
-        if (el) {
-          el.textContent = '\u2705 Compiled successfully';
-          el.style.color = '#3fb950';
-          setTimeout(() => { if (el) el.textContent = ''; }, 2000);
-        }
       } else {
         this._showCompileError(result.error, result.rawError);
       }
@@ -984,8 +989,7 @@ void loop() {
     if (line > 0) {
       this.showError(line, message);
     } else {
-      const el = document.getElementById('editor-errors');
-      if (el) el.textContent = `\u26D4 ${message}`;
+      this._showErrorPanel(0, message);
     }
   },
 

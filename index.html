@@ -275,7 +275,14 @@
                 <textarea id="board2-code-textarea" spellcheck="false"></textarea>
             </div>
             <div class="editor-footer"> <span id="editor-cursor">Ln 1, Col 1</span> <span id="editor-lang">Arduino
-                    C++</span> <span id="editor-errors"></span> </div>
+                    C++</span> </div>
+            <div class="editor-error-panel" id="editor-error-panel" style="display:none;">
+                <div class="editor-error-panel-inner">
+                    <span class="editor-error-icon">⚠</span>
+                    <span class="editor-error-text" id="editor-error-text"></span>
+                    <button class="editor-error-close" id="editor-error-close" title="Dismiss">✕</button>
+                </div>
+            </div>
         </div> <!-- RESIZER left -->
         <div class="panel-resizer" id="resizer-left" title="Drag to resize"></div> <!-- CENTER: Circuit Canvas -->
         <div class="panel panel-canvas" id="panel-canvas">
@@ -1075,6 +1082,7 @@
     <script src="js/libraries/cpp_types.js?v=20260907-1"></script>
     <script src="js/libraries/espnow.js?v=20260907-1"></script>
     <script src="js/libraries/coap.js?v=20260907-1"></script>
+    <script src="js/libraries/coap_simple.js?v=20260910-1"></script>
     <script src="js/libraries/serial.js?v=20260905-1"></script>
     <script src="js/simulator.js?v=20260905-8"></script>
     <script src="js/canvas.js?v=20260826-3"></script>

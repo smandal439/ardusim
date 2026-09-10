@@ -94,7 +94,7 @@ class ArduinoSimulator {
       (match, name, params) => {
         userFnNames.add(name);
         const cleanParams = params.replace(
-          new RegExp(`\\b(?:const\\s+)?(?:unsigned\\s+)?(?:${_typePat})\\s*\\*?\\s*`, 'g'), ''
+          new RegExp(`\\b(?:const\\s+)?(?:unsigned\\s+)?(?:${_typePat})\\s*[&*]?\\s*`, 'g'), ''
         );
         return `async function ${name}(${cleanParams}) {`;
       }
@@ -1716,7 +1716,7 @@ window.loadExamplesFromFiles = async function () {
     'opamp_741_non_inverting', 'vl53l0x_proximity_sensor', 'esp32_i2s_music_player',
     'esp32_i2s_local_radio_player', 'lcd', 'read_rfid_card_raw_data', 'lcd_print_remotely',
     'rfid_inventory_tracker','shift_resister_circuit','7408_test_with_logic_analyzer',
-    'espnow_sender','espnow_receiver','coap_client','coap_dip_switch_to_8_led','espnow_led_control',
+    'espnow_sender','espnow_receiver','coap_client','coap_dip_switch_to_8_led','coap_simple_server','espnow_led_control',
     'two_lcd','esp_now_dip_switch_to_8_led','dip_switch_and_led_array','morse_code_using_serial_data'];
   const sketches = [];
   const cacheBust = '?v=' + Date.now();

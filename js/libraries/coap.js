@@ -18,25 +18,27 @@ window.ArduinoLibs['CoAP'] = {
 
     // CoapResponse varName; → var varName = { code: 0, payload: null, valid: false };
     [/\bCoapResponse\s+(\w+)\s*;/g, 'var $1 = { code: 0, payload: null, valid: false };'],
+    // CoapResponse varName = expr; → var varName = expr;
+    [/\bCoapResponse\s+(\w+)\s*=\s*/g, 'var $1 = '],
 
-    // varName.get(url) → _a.coapGet(varName, url)
-    [/\b(\w+)\.get\s*\(\s*("[^"]*"|'[^']*')\s*\)/g, '_a.coapGet($1, $2)'],
-    [/\b(\w+)\.get\s*\(\s*(\w+)\s*\)/g, '_a.coapGet($1, $2)'],
+    // varName.get(url) → await _a.coapGet(varName, url)
+    [/\b(\w+)\.get\s*\(\s*("[^"]*"|'[^']*')\s*\)/g, 'await _a.coapGet($1, $2)'],
+    [/\b(\w+)\.get\s*\(\s*(\w+)\s*\)/g, 'await _a.coapGet($1, $2)'],
 
-    // varName.put(url, data) → _a.coapPut(varName, url, data)
-    [/\b(\w+)\.put\s*\(\s*("[^"]*"|'[^']*')\s*,\s*([^)]+)\)/g, '_a.coapPut($1, $2, $3)'],
-    [/\b(\w+)\.put\s*\(\s*(\w+)\s*,\s*([^)]+)\)/g, '_a.coapPut($1, $2, $3)'],
+    // varName.put(url, data) → await _a.coapPut(varName, url, data)
+    [/\b(\w+)\.put\s*\(\s*("[^"]*"|'[^']*')\s*,\s*([^)]+)\)/g, 'await _a.coapPut($1, $2, $3)'],
+    [/\b(\w+)\.put\s*\(\s*(\w+)\s*,\s*([^)]+)\)/g, 'await _a.coapPut($1, $2, $3)'],
 
-    // varName.post(url, data) → _a.coapPost(varName, url, data)
-    [/\b(\w+)\.post\s*\(\s*("[^"]*"|'[^']*')\s*,\s*([^)]+)\)/g, '_a.coapPost($1, $2, $3)'],
-    [/\b(\w+)\.post\s*\(\s*(\w+)\s*,\s*([^)]+)\)/g, '_a.coapPost($1, $2, $3)'],
+    // varName.post(url, data) → await _a.coapPost(varName, url, data)
+    [/\b(\w+)\.post\s*\(\s*("[^"]*"|'[^']*')\s*,\s*([^)]+)\)/g, 'await _a.coapPost($1, $2, $3)'],
+    [/\b(\w+)\.post\s*\(\s*(\w+)\s*,\s*([^)]+)\)/g, 'await _a.coapPost($1, $2, $3)'],
 
-    // varName.delete(url) → _a.coapDelete(varName, url)
-    [/\b(\w+)\.delete\s*\(\s*("[^"]*"|'[^']*')\s*\)/g, '_a.coapDelete($1, $2)'],
-    [/\b(\w+)\.delete\s*\(\s*(\w+)\s*\)/g, '_a.coapDelete($1, $2)'],
+    // varName.delete(url) → await _a.coapDelete(varName, url)
+    [/\b(\w+)\.delete\s*\(\s*("[^"]*"|'[^']*')\s*\)/g, 'await _a.coapDelete($1, $2)'],
+    [/\b(\w+)\.delete\s*\(\s*(\w+)\s*\)/g, 'await _a.coapDelete($1, $2)'],
 
-    // varName.loop() → _a.coapLoop(varName)
-    [/\b(\w+)\.loop\s*\(\s*\)/g, '_a.coapLoop($1)'],
+    // varName.loop() → await _a.coapLoop(varName)
+    [/\b(\w+)\.loop\s*\(\s*\)/g, 'await _a.coapLoop($1)'],
 
     // Server methods
     // server.add_resource(path, handlerFn) → _a.coapAddResource(server, path, handlerFn)
@@ -137,7 +139,7 @@ window.ArduinoLibs['CoAP'] = {
         return { index: index };
       },
 
-      coapGet: function(client, url) {
+      coapGet: async function(client, url) {
         var path = _parseUrl(url);
         self._serialLog('[CoAP] GET ' + path + '\n', 'system');
 
@@ -147,7 +149,7 @@ window.ArduinoLibs['CoAP'] = {
           var srv = state.servers[sid];
           if (srv.started && srv.resources[path]) {
             try {
-              result = srv.resources[path]();
+              result = await srv.resources[path]();
             } catch (e) {
               result = null;
             }
@@ -165,7 +167,7 @@ window.ArduinoLibs['CoAP'] = {
         return { code: 69, payload: result, valid: true };
       },
 
-      coapPut: function(client, url, data) {
+      coapPut: async function(client, url, data) {
         var path = _parseUrl(url);
         var payload = typeof data === 'string' ? data : JSON.stringify(data);
         self._serialLog('[CoAP] PUT ' + path + ' <- ' + payload + '\n', 'system');
@@ -194,7 +196,7 @@ window.ArduinoLibs['CoAP'] = {
         return { code: 163, payload: '{"error":"no server"}', valid: true };
       },
 
-      coapPost: function(client, url, data) {
+      coapPost: async function(client, url, data) {
         var path = _parseUrl(url);
         var payload = typeof data === 'string' ? data : JSON.stringify(data);
         self._serialLog('[CoAP] POST ' + path + ' <- ' + payload + '\n', 'system');
@@ -204,7 +206,7 @@ window.ArduinoLibs['CoAP'] = {
           var srv = state.servers[sid];
           if (srv.started && srv.resources[path]) {
             try {
-              var result = srv.resources[path](payload);
+              var result = await srv.resources[path](payload);
               return { code: 69, payload: result || '', valid: true };
             } catch (e) {
               return { code: 160, payload: '{"error":"internal"}', valid: true };
@@ -214,7 +216,7 @@ window.ArduinoLibs['CoAP'] = {
         return { code: 132, payload: '{"error":"not found"}', valid: true };
       },
 
-      coapDelete: function(client, url) {
+      coapDelete: async function(client, url) {
         var path = _parseUrl(url);
         self._serialLog('[CoAP] DELETE ' + path + '\n', 'system');
 
@@ -237,11 +239,11 @@ window.ArduinoLibs['CoAP'] = {
         if (serverObj && serverObj.__coapServer) {
           var srv = state.servers[serverObj._id];
           if (srv) {
-            // Wrap the handler to return a string
+            // Wrap the handler — may be async (transpiler makes all user functions async)
             var fn = handlerFn;
-            srv.resources[path] = function(payload) {
+            srv.resources[path] = async function(payload) {
               try {
-                return fn(payload || '');
+                return await fn(payload || '');
               } catch (e) {
                 return '{"error":"handler failed"}';
               }
@@ -252,7 +254,7 @@ window.ArduinoLibs['CoAP'] = {
       },
 
       coapServerStart: function(serverObj) {
-        if (serverObj && serverObj.__coapServer) {
+        if (serverObj && (serverObj.__coapServer || serverObj.__coapSimple)) {
           var srv = state.servers[serverObj._id];
           if (srv) {
             srv.started = true;

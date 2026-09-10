@@ -1,0 +1,60 @@
+{
+  "id": "coap_simple_server",
+  "name": "CoAP Simple Server (coap-simple.h)",
+  "icon": "🌐",
+  "desc": "Demonstrates coap-simple.h callback-based API. Board1 runs a CoAP server with /light (LED control) and /sensor/temperature endpoints. Board2 is a CoAP client that polls both endpoints.",
+  "tags": ["esp32", "iot", "coap", "coap-simple", "circuit"],
+  "circuit": {
+    "components": [
+      {
+        "id": "esp1",
+        "type": "esp32_devkit_v1",
+        "x": 250,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32 CoAP Server"
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 120,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "color": "#FF0000",
+          "label": "LED"
+        }
+      },
+      {
+        "id": "esp2",
+        "type": "esp32_devkit_v1",
+        "x": 550,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32 CoAP Client"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": { "instId": "esp1", "pinId": "D5" },
+        "to": { "instId": "led1", "pinId": "anode" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": { "instId": "esp1", "pinId": "GND" },
+        "to": { "instId": "led1", "pinId": "cathode" },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n * CoAP Server — coap-simple.h (Board 1)\n * Uses callback-based API:\n *   coap.server(callback, \"path\");\n *   coap.sendResponse(ip, port, msgid, resp);\n *\n * Endpoints:\n *   /light           — PUT \"1\"/\"ON\" to turn LED on, \"0\"/\"OFF\" to turn off\n *   /sensor/temperature — GET returns mock JSON {\"temp\": 24.5, \"unit\": \"C\"}\n */\n\n#include <coap-simple.h>\n#include <WiFiUdp.h>\n\nWiFiUDP udp;\nCoap coap(udp);\n\nconst int LED_PIN = 5;\n\nvoid callback_light(CoapPacket &packet, IPAddress ip, int port)\n{\n  String payload = String(packet.payload);\n\n  Serial.print(\"[Server] /light payload: '\");\n  Serial.print(payload);\n  Serial.println(\"'\");\n\n  if (payload == \"1\" || payload == \"ON\")\n  {\n    digitalWrite(LED_PIN, HIGH);\n    Serial.println(\"[Server] LED ON\");\n    coap.sendResponse(ip, port, packet.messageid, \"LED turned ON\");\n  }\n  else if (payload == \"0\" || payload == \"OFF\")\n  {\n    digitalWrite(LED_PIN, LOW);\n    Serial.println(\"[Server] LED OFF\");\n    coap.sendResponse(ip, port, packet.messageid, \"LED turned OFF\");\n  }\n  else\n  {\n    int state = digitalRead(LED_PIN);\n    String response = \"LED status: \" + String(state ? \"ON\" : \"OFF\");\n    coap.sendResponse(ip, port, packet.messageid, response.c_str());\n  }\n}\n\nvoid callback_temp(CoapPacket &packet, IPAddress ip, int port)\n{\n  float mockTemp = 24.5;\n  String response = \"{\\\"temp\\\": \" + String(mockTemp) + \", \\\"unit\\\": \\\"C\\\"}\";\n  coap.sendResponse(ip, port, packet.messageid, response.c_str());\n}\n\nvoid setup()\n{\n  Serial.begin(115200);\n  delay(500);\n  Serial.println(\"=== coap-simple.h Server Starting ===\");\n\n  pinMode(LED_PIN, OUTPUT);\n\n  coap.server(callback_light, \"light\");\n  coap.server(callback_temp, \"sensor/temperature\");\n  coap.start();\n\n  Serial.println(\"CoAP Server started on port 5683\");\n  Serial.println(\"Endpoints: /light, /sensor/temperature\");\n}\n\nvoid loop()\n{\n  coap.loop();\n}",
+  "board2Code": "/*\n * CoAP Client — Board 2\n * Uses CoapClient API to poll the coap-simple.h server on Board1.\n * Toggles an LED on D2 each time it gets a successful response.\n */\n\n#include <CoapClient.h>\n\nCoapClient client;\nbool ledState = false;\n\nvoid setup()\n{\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n  Serial.println(\"[Client] CoAP Client starting...\");\n  delay(2000);\n}\n\nvoid loop()\n{\n  // GET /sensor/temperature\n  CoapResponse tempResp = client.get(\"/sensor/temperature\");\n  if (tempResp.valid && tempResp.code == COAP_CONTENT)\n  {\n    Serial.print(\"[Client] Temperature: \");\n    Serial.println(tempResp.payload);\n    ledState = !ledState;\n    digitalWrite(2, ledState ? HIGH : LOW);\n  }\n  else\n  {\n    Serial.println(\"[Client] No response from server\");\n  }\n\n  delay(1000);\n\n  // POST to /light with \"ON\"\n  CoapResponse lightResp = client.put(\"/light\", \"1\");\n  if (lightResp.valid)\n  {\n    Serial.print(\"[Client] /light response: \");\n    Serial.println(lightResp.payload);\n  }\n\n  delay(2000);\n\n  // POST to /light with \"OFF\"\n  lightResp = client.put(\"/light\", \"0\");\n  if (lightResp.valid)\n  {\n    Serial.print(\"[Client] /light response: \");\n    Serial.println(lightResp.payload);\n  }\n\n  delay(2000);\n}"
+}

@@ -62,6 +62,10 @@ window.CppTypes = {
     'CoapServer',
     'CoapResponse',
     'CoapOption',
+    'Coap',
+    'CoapPacket',
+    'IPAddress',
+    'WiFiUDP',
     'Stepper',
     'esp_now_peer_info_t',
     'esp_now_send_status_t',
@@ -82,6 +86,14 @@ window.CppTypes = {
     'i2s_bits_per_sample_t',
     'i2s_channel_fmt_t',
     'i2s_comm_format_t',
+  ],
+
+  // ── Additional types recognized by the type pattern (for parameter/variable stripping) ──
+  additional: [
+    'CoapPacket',
+    'IPAddress',
+    'WiFiUDP',
+    'String',
   ],
 
   // ── Constants that are also type-like ──
@@ -118,6 +130,7 @@ window.CppTypes = {
       ...this.primitives,
       ...this.fixedWidth,
       ...this.espIdf,
+      ...(this.additional || []),
     ];
     // Sort longest-first so 'unsigned int' matches before 'int'
     all.sort((a, b) => b.length - a.length);
