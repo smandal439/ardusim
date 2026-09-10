@@ -3015,12 +3015,6 @@ defComp({
 
     const state = inst.runtimeState;
 
-    // Always sync from props so slider changes take effect immediately
-    if (inst.props.latitude !== undefined) state.latitude = inst.props.latitude;
-    if (inst.props.longitude !== undefined) state.longitude = inst.props.longitude;
-    if (inst.props.altitude !== undefined) state.altitude = inst.props.altitude;
-    if (inst.props.satellites !== undefined) state.satellites = inst.props.satellites;
-
     const isPowered = state.powered;
     const sats = state.satellites ?? inst.props.satellites ?? 8;
     const hasFix = isPowered && sats > 0;
