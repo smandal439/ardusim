@@ -2423,7 +2423,23 @@ class CircuitCanvas {
   updateSimState(pinStates) {
     const { getComponentClass } = window.ArduinoComponents;
 
-    // Solve electrical graph first
+    // Pre-update relay state so buildGraph uses latest active flag
+    for (const inst of this.components) {
+      if (inst.type === 'relay') {
+        const CompClass = getComponentClass(inst.type);
+        if (CompClass) {
+          if (!inst._componentInstance || inst._componentInstance.type !== inst.type) {
+            inst._componentInstance = new CompClass(inst);
+          }
+          inst._componentInstance.canvas = this;
+          inst._componentInstance.update(this);
+        }
+      }
+    }
+
+    // Rebuild electrical graph with current relay states
+    this.engine.buildGraph(this.components, this.wires);
+    // Solve electrical graph
     this.engine.solve(this);
 
     for (const inst of this.components) {
