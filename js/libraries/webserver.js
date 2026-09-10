@@ -3,9 +3,10 @@ window.ArduinoLibs['WebServer'] = {
   classes: ['WebServer'],
   includes: ['<ESP8266WebServer.h>', '<WebServer.h>'],
   constructor: function(port) {
-    return { __class: 'WebServer', port: port };
+    return { __webserver: true, port: port };
   },
   transpile: [
+    [/(\w+)\.begin\s*\(\s*\)/g, '_a.serverBegin($1)'],
     [/(\w+)\.on\(/g, '_a.serverOn($1, '],
     [/(\w+)\.send\(/g, '_a.serverSend($1, '],
     [/(\w+)\.arg\(/g, '_a.serverArg($1, '],
@@ -21,11 +22,11 @@ window.ArduinoLibs['WebServer'] = {
     HTTP_PATCH: 'PATCH',
     HTTP_ANY: 'ANY',
   },
-  constructor: function(port) {
-    return { __webserver: true, port: port };
-  },
   runtime: function(self) {
     return {
+      serverBegin: function(server) {
+        self._serialLog('[WebServer] Server started on port ' + (server && server.port ? server.port : 80) + '\n', 'system');
+      },
       serverOn: function(server, path, m3, m4) {
         var cfg = (self._web = self._web || { port: 80, routes: [], reqIdx: 0, lastHit: 0 });
         var handler = typeof m3 === 'function' ? m3 : m4;
