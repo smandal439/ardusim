@@ -198,19 +198,69 @@ window.ArduinoLibs['Serial'] = {
 
       /* Serial1 (ESP32 UART1) — aliases to same serial buffer for simulation */
       serial1Begin: function(baud) { self.serialBaud = baud; self._serialLog('[Serial1] Opened at ' + baud + ' baud\n', 'system'); },
-      serial1Print: function(val, fmt) { self._a.serialPrint(val, fmt); },
-      serial1Println: function(val, fmt) { self._a.serialPrintln(val, fmt); },
-      serial1Read: function() { return self._a.serialRead(); },
-      serial1Available: function() { return self._a.serialAvailable(); },
-      serial1Write: function(val) { self._a.serialWrite(val); },
+      serial1Print: function(val, fmt) {
+        var str;
+        if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
+        else if (fmt === 2) str = parseInt(val).toString(2);
+        else if (fmt === 8) str = parseInt(val).toString(8);
+        else if (typeof val === 'number' && !Number.isInteger(val)) {
+          var dec = fmt !== undefined ? fmt : 2;
+          str = val.toFixed(dec);
+        } else str = String(val);
+        self._serialLog(str, 'data');
+      },
+      serial1Println: function(val, fmt) {
+        var str;
+        if (val === undefined) str = '';
+        else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
+        else if (fmt === 2) str = parseInt(val).toString(2);
+        else if (fmt === 8) str = parseInt(val).toString(8);
+        else if (typeof val === 'number' && !Number.isInteger(val)) {
+          var dec = fmt !== undefined ? fmt : 2;
+          str = val.toFixed(dec);
+        } else str = String(val);
+        self._serialLog(str + '\n', 'data');
+      },
+      serial1Read: function() {
+        return self.serialInputBuffer.length > 0
+          ? self.serialInputBuffer.shift().charCodeAt(0)
+          : -1;
+      },
+      serial1Available: function() { return self.serialInputBuffer.length; },
+      serial1Write: function(val) { self._serialLog(String.fromCharCode(val), 'data'); },
 
       /* Serial2 (ESP32 UART2) — aliases to same serial buffer for simulation */
       serial2Begin: function(baud) { self.serialBaud = baud; self._serialLog('[Serial2] Opened at ' + baud + ' baud\n', 'system'); },
-      serial2Print: function(val, fmt) { self._a.serialPrint(val, fmt); },
-      serial2Println: function(val, fmt) { self._a.serialPrintln(val, fmt); },
-      serial2Read: function() { return self._a.serialRead(); },
-      serial2Available: function() { return self._a.serialAvailable(); },
-      serial2Write: function(val) { self._a.serialWrite(val); },
+      serial2Print: function(val, fmt) {
+        var str;
+        if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
+        else if (fmt === 2) str = parseInt(val).toString(2);
+        else if (fmt === 8) str = parseInt(val).toString(8);
+        else if (typeof val === 'number' && !Number.isInteger(val)) {
+          var dec = fmt !== undefined ? fmt : 2;
+          str = val.toFixed(dec);
+        } else str = String(val);
+        self._serialLog(str, 'data');
+      },
+      serial2Println: function(val, fmt) {
+        var str;
+        if (val === undefined) str = '';
+        else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
+        else if (fmt === 2) str = parseInt(val).toString(2);
+        else if (fmt === 8) str = parseInt(val).toString(8);
+        else if (typeof val === 'number' && !Number.isInteger(val)) {
+          var dec = fmt !== undefined ? fmt : 2;
+          str = val.toFixed(dec);
+        } else str = String(val);
+        self._serialLog(str + '\n', 'data');
+      },
+      serial2Read: function() {
+        return self.serialInputBuffer.length > 0
+          ? self.serialInputBuffer.shift().charCodeAt(0)
+          : -1;
+      },
+      serial2Available: function() { return self.serialInputBuffer.length; },
+      serial2Write: function(val) { self._serialLog(String.fromCharCode(val), 'data'); },
     };
   },
 };
