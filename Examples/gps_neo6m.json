@@ -1,0 +1,49 @@
+{
+  "id": "gps_neo6m",
+  "name": "GPS NEO-6M/8M Tracker",
+  "icon": "🛰️",
+  "desc": "ESP32 reads latitude, longitude, altitude, satellites, speed, and date/time from a NEO-6M/8M GPS module via Serial2. LED on D2 blinks when a valid fix is obtained.",
+  "tags": ["esp32", "gps", "neo6m", "neo8m", "navigation", "iot"],
+  "circuit": {
+    "components": [
+      {
+        "id": "esp1",
+        "type": "esp32_devkit_v1",
+        "x": 300,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32"
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 120,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "color": "#00FF00",
+          "label": "GPS Fix LED"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": { "instId": "esp1", "pinId": "D2" },
+        "to": { "instId": "led1", "pinId": "anode" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": { "instId": "esp1", "pinId": "GND" },
+        "to": { "instId": "led1", "pinId": "cathode" },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n * GPS NEO-6M/8M Tracker — ESP32\n *\n * Hardware:\n *   NEO-6M/8M GPS Module:\n *     VCC -> 3.3V\n *     GND -> GND\n *     TX  -> GPIO16 (RX2)\n *     RX  -> GPIO17 (TX2)\n *   LED:\n *     Anode -> D2 (via 220 ohm resistor)\n *     Cathode -> GND\n *\n * The GPS module sends NMEA sentences at 9600 baud.\n * ESP32 Serial2 reads the data and TinyGPS++ parses it.\n * LED on D2 blinks when a valid GPS fix is obtained.\n */\n\n#include <TinyGPS++.h>\n\n// TinyGPS++ instance\nTinyGPSPlus gps;\n\n// LED pin for GPS fix indication\nconst int LED_PIN = 2;\nbool ledState = false;\nunsigned long lastBlink = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial2.begin(9600, SERIAL_8N1, 16, 17);\n\n  pinMode(LED_PIN, OUTPUT);\n  digitalWrite(LED_PIN, LOW);\n\n  Serial.println(\"========================================\");\n  Serial.println(\"  GPS NEO-6M/8M Tracker\");\n  Serial.println(\"  TinyGPS++ Library\");\n  Serial.println(\"========================================\");\n  Serial.println(\"Waiting for GPS fix...\");\n  Serial.println();\n}\n\nvoid loop() {\n  // Feed NMEA data from GPS module into TinyGPS++\n  while (Serial2.available() > 0) {\n    gps.encode(Serial2.read());\n  }\n\n  // Print GPS data every second\n  static unsigned long lastPrint = 0;\n  if (millis() - lastPrint >= 1000) {\n    lastPrint = millis();\n\n    if (gps.location.isValid()) {\n      // Valid fix — blink LED\n      if (millis() - lastBlink >= 500) {\n        lastBlink = millis();\n        ledState = !ledState;\n        digitalWrite(LED_PIN, ledState ? HIGH : LOW);\n      }\n\n      Serial.println(\"--- GPS Fix Acquired ---\");\n\n      // Location\n      Serial.print(\"Latitude:    \");\n      Serial.print(gps.location.lat(), 6);\n      Serial.println(\" deg\");\n      Serial.print(\"Longitude:   \");\n      Serial.print(gps.location.lng(), 6);\n      Serial.println(\" deg\");\n\n      // Altitude\n      if (gps.altitude.isValid()) {\n        Serial.print(\"Altitude:    \");\n        Serial.print(gps.altitude.meters(), 1);\n        Serial.print(\" m  (\");\n        Serial.print(gps.altitude.feet(), 1);\n        Serial.println(\" ft)\");\n      }\n\n      // Satellites & HDOP\n      if (gps.satellites.isValid()) {\n        Serial.print(\"Satellites:  \");\n        Serial.println(gps.satellites.value());\n      }\n      if (gps.hdop.isValid()) {\n        Serial.print(\"HDOP:        \");\n        Serial.println(gps.hdop.hdop(), 1);\n      }\n\n      // Speed\n      if (gps.speed.isValid()) {\n        Serial.print(\"Speed:       \");\n        Serial.print(gps.speed.kmph(), 1);\n        Serial.print(\" km/h  (\");\n        Serial.print(gps.speed.mph(), 1);\n        Serial.print(\" mph  \");\n        Serial.print(gps.speed.knots(), 1);\n        Serial.println(\" knots)\");\n      }\n\n      // Course\n      if (gps.course.isValid()) {\n        Serial.print(\"Course:      \");\n        Serial.print(gps.course.deg(), 1);\n        Serial.println(\" deg\");\n      }\n\n      // Date\n      if (gps.date.isValid()) {\n        Serial.print(\"Date:        \");\n        Serial.print(gps.date.day());\n        Serial.print(\"/\");\n        Serial.print(gps.date.month());\n        Serial.print(\"/\");\n        Serial.println(gps.date.year());\n      }\n\n      // Time\n      if (gps.time.isValid()) {\n        Serial.print(\"Time (UTC):  \");\n        if (gps.time.hour() < 10) Serial.print('0');\n        Serial.print(gps.time.hour());\n        Serial.print(':');\n        if (gps.time.minute() < 10) Serial.print('0');\n        Serial.print(gps.time.minute());\n        Serial.print(':');\n        if (gps.time.second() < 10) Serial.print('0');\n        Serial.println(gps.time.second());\n      }\n\n      // Stats\n      Serial.print(\"Chars:       \");\n      Serial.print(gps.charsProcessed());\n      Serial.print(\"  Pass: \");\n      Serial.print(gps.passedChecksum());\n      Serial.print(\"  Fail: \");\n      Serial.println(gps.failedChecksum());\n      Serial.println();\n\n    } else {\n      // No fix yet\n      Serial.print(\".\");\n      digitalWrite(LED_PIN, LOW);\n    }\n  }\n}"
+}

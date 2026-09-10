@@ -25,6 +25,14 @@ window.ArduinoLibs['TinyGPSPlus'] = {
     [/\.location\.lat\s*\(\s*\)/g, '._gps_locationLat()'],
     [/\.location\.lng\s*\(\s*\)/g, '._gps_locationLng()'],
     [/\.location\.age\s*\(\s*\)/g, '._gps_locationAge()'],
+    // Altitude methods
+    [/\.altitude\.isValid\s*\(\s*\)/g, '._gps_altitudeIsValid()'],
+    [/\.altitude\.meters\s*\(\s*\)/g, '._gps_altitudeMeters()'],
+    [/\.altitude\.feet\s*\(\s*\)/g, '._gps_altitudeFeet()'],
+    [/\.altitude\.kilometers\s*\(\s*\)/g, '._gps_altitudeKm()'],
+    [/\.altitude\.miles\s*\(\s*\)/g, '._gps_altitudeMiles()'],
+    [/\.altitude\.nauticalMiles\s*\(\s*\)/g, '._gps_altitudeNmi()'],
+    [/\.altitude\.age\s*\(\s*\)/g, '._gps_altitudeAge()'],
     // Date methods
     [/\.date\.isValid\s*\(\s*\)/g, '._gps_dateIsValid()'],
     [/\.date\.year\s*\(\s*\)/g, '._gps_dateYear()'],
@@ -43,6 +51,7 @@ window.ArduinoLibs['TinyGPSPlus'] = {
     [/\.satellites\.value\s*\(\s*\)/g, '._gps_satellites()'],
     [/\.satellites\.age\s*\(\s*\)/g, '._gps_satellitesAge()'],
     [/\.hdop\.isValid\s*\(\s*\)/g, '._gps_hdopIsValid()'],
+    [/\.hdop\.hdop\s*\(\s*\)/g, '._gps_hdop()'],
     [/\.hdop\.value\s*\(\s*\)/g, '._gps_hdop()'],
     [/\.hdop\.age\s*\(\s*\)/g, '._gps_hdopAge()'],
     // Speed / Course
@@ -77,6 +86,9 @@ window.ArduinoLibs['TinyGPSPlus'] = {
         lng: 77.2090,
         locationValid: true,
         locationAge: 0,
+        altitudeValid: true,
+        altitudeMeters: 215.0,
+        altitudeAge: 0,
         dateValid: true,
         year: 2026,
         month: 9,
@@ -111,6 +123,7 @@ window.ArduinoLibs['TinyGPSPlus'] = {
           // Slightly vary position to simulate movement
           this._data.lat += (Math.random() - 0.5) * 0.0001;
           this._data.lng += (Math.random() - 0.5) * 0.0001;
+          this._data.altitudeMeters += (Math.random() - 0.5) * 0.5;
           this._data.speedKmph = Math.random() * 60;
           this._data.courseDeg = Math.random() * 360;
         }
@@ -121,6 +134,14 @@ window.ArduinoLibs['TinyGPSPlus'] = {
       _gps_locationLat: function() { return this._data.lat; },
       _gps_locationLng: function() { return this._data.lng; },
       _gps_locationAge: function() { return this._data.locationAge; },
+      // Altitude
+      _gps_altitudeIsValid: function() { return this._data.altitudeValid; },
+      _gps_altitudeMeters: function() { return this._data.altitudeMeters; },
+      _gps_altitudeFeet: function() { return this._data.altitudeMeters * 3.28084; },
+      _gps_altitudeKm: function() { return this._data.altitudeMeters / 1000.0; },
+      _gps_altitudeMiles: function() { return this._data.altitudeMeters * 0.000621371; },
+      _gps_altitudeNmi: function() { return this._data.altitudeMeters * 0.000539957; },
+      _gps_altitudeAge: function() { return this._data.altitudeAge; },
       // Date
       _gps_dateIsValid: function() { return this._data.dateValid; },
       _gps_dateYear: function() { return this._data.year; },
