@@ -1831,7 +1831,8 @@ window.loadExamplesFromFiles = async function () {
     'espnow_sender','espnow_receiver','coap_client','coap_dip_switch_to_8_led','coap_simple_server',
     'espnow_led_control',
     'two_lcd','esp_now_dip_switch_to_8_led','dip_switch_and_led_array','morse_code_using_serial_data',
-    'bluetooth_serial_bridge','gps_neo_6m_8m_tracker'];
+    'bluetooth_serial_bridge','gps_neo_6m_8m_tracker',
+    'zigbee_sender_receiver','zigbee_sensor_network','zigbee_led_control'];
   const sketches = [];
   const cacheBust = '?v=' + Date.now();
   for (const name of files) {

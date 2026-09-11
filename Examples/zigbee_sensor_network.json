@@ -1,0 +1,118 @@
+{
+  "id": "zigbee_sensor_network",
+  "name": "Zigbee Sensor Network",
+  "icon": "🌡️",
+  "desc": "End Device reads potentiometer value and sends it via Zigbee to Coordinator for monitoring",
+  "tags": [
+    "zigbee",
+    "sensor",
+    "potentiometer",
+    "esp32",
+    "wireless",
+    "iot",
+    "intermediate"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "esp32_devkit_v1",
+        "x": 250,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "Zigbee Coordinator"
+        }
+      },
+      {
+        "id": "b2",
+        "type": "esp32_devkit_v1",
+        "x": 550,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "Zigbee Sensor Node"
+        }
+      },
+      {
+        "id": "pot1",
+        "type": "potentiometer",
+        "x": 700,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "value": 50,
+          "maxValue": 100
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 120,
+        "y": 180,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 120,
+        "y": 260,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": { "instId": "b1", "pinId": "D2" },
+        "to": { "instId": "led1", "pinId": "anode" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": { "instId": "led1", "pinId": "cathode" },
+        "to": { "instId": "r1", "pinId": "p1" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": { "instId": "r1", "pinId": "p2" },
+        "to": { "instId": "b1", "pinId": "GND1" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": { "instId": "pot1", "pinId": "wiper" },
+        "to": { "instId": "b2", "pinId": "A0" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w5",
+        "from": { "instId": "pot1", "pinId": "p1" },
+        "to": { "instId": "b2", "pinId": "5V" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w6",
+        "from": { "instId": "pot1", "pinId": "p2" },
+        "to": { "instId": "b2", "pinId": "GND1" },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n * Zigbee Coordinator — Board 1\n * Receives sensor data from Zigbee End Device\n * Red LED on D2 blinks on each data receive\n */\n\n#include <Zigbee.h>\n\n// Sensor data structure\ntypedef struct {\n  int sensorValue;\n  float voltage;\n} SensorPacket;\n\nSensorPacket sensorData;\nint packetCount = 0;\n\n// Callback when data is received\nvoid onDataReceived(uint8_t *data, int len) {\n  memcpy(&sensorData, data, sizeof(sensorData));\n  packetCount++;\n\n  Serial.print(\"[Coordinator] RX #\");\n  Serial.print(packetCount);\n  Serial.print(\" | Sensor: \");\n  Serial.print(sensorData.sensorValue);\n  Serial.print(\" (");\n  Serial.print(sensorData.voltage);\n  Serial.println(\"V)\");\n\n  // Blink LED on receive\n  digitalWrite(2, HIGH);\n  delay(30);\n  digitalWrite(2, LOW);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n\n  // Initialize Zigbee network\n  Zigbee.begin(11, 0x1234);\n  Zigbee.onReceive(onDataReceived);\n\n  Serial.println(\"[Coordinator] Zigbee Sensor Network - Coordinator\");\n  Serial.print(\"[Coordinator] Address: 0x\");\n  Serial.println(Zigbee.getNodeAddress(), HEX);\n  Serial.println(\"[Coordinator] Waiting for sensor data...\\n\");\n}\n\nvoid loop() {\n  delay(100);\n}",
+  "board2Code": "/*\n * Zigbee End Device (Sensor Node) — Board 2\n * Reads potentiometer on A0 and sends via Zigbee\n * Sends sensor data every 1.5 seconds\n */\n\n#include <Zigbee.h>\n\n// Coordinator short address\nuint16_t coordinatorAddr = 0x0000;\n\n// Sensor data structure\ntypedef struct {\n  int sensorValue;\n  float voltage;\n} SensorPacket;\n\nSensorPacket sensorData;\nint sendCount = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(A0, INPUT);\n\n  // Initialize Zigbee\n  Zigbee.begin(11, 0x1234);\n\n  Serial.println(\"[Sensor Node] Zigbee Sensor Node ready!\");\n  Serial.print(\"[Sensor Node] Address: 0x\");\n  Serial.println(Zigbee.getNodeAddress(), HEX);\n  Serial.println(\"[Sensor Node] Reading potentiometer on A0...\\n\");\n}\n\nvoid loop() {\n  // Read potentiometer (0-4095 for 12-bit ADC)\n  int rawValue = analogRead(A0);\n  float voltage = rawValue * (3.3 / 4095.0);\n\n  sensorData.sensorValue = rawValue;\n  sensorData.voltage = voltage;\n\n  // Send to Coordinator\n  Zigbee.send(coordinatorAddr, (uint8_t *)&sensorData, sizeof(sensorData));\n\n  sendCount++;\n  Serial.print(\"[Sensor Node] TX #\");\n  Serial.print(sendCount);\n  Serial.print(\" | Raw: \");\n  Serial.print(rawValue);\n  Serial.print(\" | Voltage: \");\n  Serial.print(voltage);\n  Serial.println(\"V\");\n\n  delay(1500);\n}"
+}

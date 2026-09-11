@@ -1,0 +1,129 @@
+{
+  "id": "zigbee_sender_receiver",
+  "name": "Zigbee Sender & Receiver",
+  "icon": "📡",
+  "desc": "Basic Zigbee communication: Coordinator sends data to End Device over Zigbee mesh network",
+  "tags": [
+    "zigbee",
+    "sender",
+    "receiver",
+    "esp32",
+    "wireless",
+    "iot",
+    "intermediate"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "esp32_devkit_v1",
+        "x": 250,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "Zigbee Coordinator"
+        }
+      },
+      {
+        "id": "b2",
+        "type": "esp32_devkit_v1",
+        "x": 550,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "Zigbee End Device"
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 120,
+        "y": 180,
+        "rotation": 0,
+        "props": {
+          "color": "#33ff33",
+          "colorName": "Green"
+        }
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 120,
+        "y": 260,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "led2",
+        "type": "led",
+        "x": 700,
+        "y": 180,
+        "rotation": 0,
+        "props": {
+          "color": "#3333ff",
+          "colorName": "Blue"
+        }
+      },
+      {
+        "id": "r2",
+        "type": "resistor",
+        "x": 700,
+        "y": 260,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": { "instId": "b1", "pinId": "D2" },
+        "to": { "instId": "led1", "pinId": "anode" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": { "instId": "led1", "pinId": "cathode" },
+        "to": { "instId": "r1", "pinId": "p1" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": { "instId": "r1", "pinId": "p2" },
+        "to": { "instId": "b1", "pinId": "GND1" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": { "instId": "b2", "pinId": "D2" },
+        "to": { "instId": "led2", "pinId": "anode" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w5",
+        "from": { "instId": "led2", "pinId": "cathode" },
+        "to": { "instId": "r2", "pinId": "p1" },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w6",
+        "from": { "instId": "r2", "pinId": "p2" },
+        "to": { "instId": "b2", "pinId": "GND1" },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n * Zigbee Coordinator — Board 1\n * Sends a counter to End Device every 2 seconds\n * Green LED on D2 blinks on each send\n */\n\n#include <Zigbee.h>\n\n// End Device short address (assigned automatically)\nuint16_t endDeviceAddr = 0x0001;\n\n// Data structure to send\ntypedef struct {\n  int counter;\n  float temperature;\n} DataPacket;\n\nDataPacket myData;\nint sendCount = 0;\n\n// Callback when data is sent\nvoid onSendStatus(int status) {\n  if (status == ZIGBEE_SEND_SUCCESS) {\n    Serial.println(\"[Coordinator] Send OK\");\n  } else {\n    Serial.println(\"[Coordinator] Send FAILED\");\n  }\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n\n  // Initialize Zigbee on channel 11, PAN ID 0x1234\n  Zigbee.begin(11, 0x1234);\n  Zigbee.onSend(onSendStatus);\n\n  Serial.println(\"[Coordinator] Zigbee network started!\");\n  Serial.print(\"[Coordinator] Short Address: 0x\");\n  Serial.println(Zigbee.getNodeAddress(), HEX);\n  Serial.print(\"[Coordinator] PAN ID: 0x\");\n  Serial.println(Zigbee.getPanId(), HEX);\n  Serial.print(\"[Coordinator] Channel: \");\n  Serial.println(Zigbee.getChannel());\n  Serial.println();\n}\n\nvoid loop() {\n  sendCount++;\n  myData.counter = sendCount;\n  myData.temperature = 22.5 + (sendCount % 10) * 0.5;\n\n  // Blink LED on send\n  digitalWrite(2, HIGH);\n\n  // Send data to End Device\n  Zigbee.send(endDeviceAddr, (uint8_t *)&myData, sizeof(myData));\n\n  Serial.print(\"[Coordinator] Sent #\");\n  Serial.print(sendCount);\n  Serial.print(\" temp=\");\n  Serial.println(myData.temperature);\n\n  digitalWrite(2, LOW);\n  delay(2000);\n}",
+  "board2Code": "/*\n * Zigbee End Device — Board 2\n * Receives data from Coordinator (Board 1)\n * Blue LED on D2 blinks on each receive\n */\n\n#include <Zigbee.h>\n\n// Data structure to receive\ntypedef struct {\n  int counter;\n  float temperature;\n} DataPacket;\n\nDataPacket incomingData;\n\n// Callback when data is received\nvoid onDataReceived(uint8_t *data, int len) {\n  // Copy data into our struct\n  memcpy(&incomingData, data, sizeof(incomingData));\n\n  Serial.print(\"[End Device] Received #\");\n  Serial.print(incomingData.counter);\n  Serial.print(\" temp=\");\n  Serial.println(incomingData.temperature);\n\n  // Blink LED on receive\n  digitalWrite(2, HIGH);\n  delay(50);\n  digitalWrite(2, LOW);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n\n  // Initialize Zigbee on same channel and PAN\n  Zigbee.begin(11, 0x1234);\n  Zigbee.onReceive(onDataReceived);\n\n  Serial.println(\"[End Device] Zigbee node ready!\");\n  Serial.print(\"[End Device] Short Address: 0x\");\n  Serial.println(Zigbee.getNodeAddress(), HEX);\n  Serial.print(\"[End Device] Waiting for data from Coordinator...\\n\");\n}\n\nvoid loop() {\n  delay(100);\n}"
+}
