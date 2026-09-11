@@ -69,6 +69,7 @@ window.ArduinoLibs['RtcDS3231'] = {
     [/(\w+)\.ForceSetRamData\s*\(([^)]+)\)/g, '$1._noop()'],
 
     /* RtcDateTime accessors */
+    [/(\w+)\.IsValid\s*\(\)/g, '$1._isDateTimeValid()'],
     [/(\w+)\.TotalSeconds\s*\(\)/g, '$1._totalSeconds()'],
     [/(\w+)\.Year\s*\(\)/g, '$1._year()'],
     [/(\w+)\.Month\s*\(\)/g, '$1._month()'],
@@ -169,6 +170,7 @@ window.ArduinoLibs['RtcDS3231'] = {
         return this._se + this._mi * 60 + this._hr * 3600 +
                this._dy * 86400 + this._mo * 2592000 + this._yr * 31536000;
       };
+      o._isDateTimeValid = function () { return true; };
       return o;
     }
 
