@@ -1,18 +1,26 @@
 {
-  "name": "Nano Blink",
   "id": "nano_blink",
-  "version": "1.1",
-  "code": "/*\n * Nano Blink — classic blink on the Arduino Nano\n * Uses LED_BUILTIN (D13) and an external LED on D9 with PWM fade\n */\n\nconst int extLed = 9;   // PWM pin\n\nvoid setup() {\n  pinMode(LED_BUILTIN, OUTPUT);\n  pinMode(extLed, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Nano blink started!\");\n}\n\nvoid loop() {\n  // Blink the built-in LED\n  digitalWrite(LED_BUILTIN, HIGH);\n  Serial.println(\"LED ON\");\n  delay(500);\n  digitalWrite(LED_BUILTIN, LOW);\n  Serial.println(\"LED OFF\");\n  delay(500);\n\n  // Fade the external LED through PWM values\n  for (int v = 0; v <= 255; v += 5) {\n    analogWrite(extLed, v);\n    delay(10);\n  }\n  for (int v = 255; v >= 0; v -= 5) {\n    analogWrite(extLed, v);\n    delay(10);\n  }\n}",
+  "name": "Nano Blink",
+  "icon": "🔴",
+  "desc": "Classic blink on Arduino Nano — built-in LED on D13 plus PWM fade on an external LED (D9)",
+  "tags": [
+    "beginner",
+    "nano",
+    "led",
+    "pwm",
+    "output"
+  ],
   "circuit": {
     "components": [
       { "id": "n1", "type": "arduino_nano", "x": 200, "y": 120 },
-      { "id": "led1", "type": "led", "x": 110, "y": 300 },
-      { "id": "r1", "type": "resistor", "x": 110, "y": 380 }
+      { "id": "led1", "type": "led", "x": 110, "y": 300, "props": { "color": "#ff3333", "colorName": "Red" } },
+      { "id": "r1", "type": "resistor", "x": 110, "y": 380, "props": { "value": 220, "unit": "Ω" } }
     ],
     "wires": [
       { "id": "w1", "from": { "instId": "n1", "pinId": "D13" }, "to": { "instId": "led1", "pinId": "anode" } },
       { "id": "w2", "from": { "instId": "led1", "pinId": "cathode" }, "to": { "instId": "r1", "pinId": "p1" } },
       { "id": "w3", "from": { "instId": "r1", "pinId": "p2" }, "to": { "instId": "n1", "pinId": "GND2" } }
     ]
-  }
+  },
+  "code": "/*\n * Nano Blink — classic blink on the Arduino Nano\n * Blinks the built-in LED on D13\n */\n\nint ledPin = LED_BUILTIN;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Nano blink started!\");\n}\n\nvoid loop() {\n  digitalWrite(ledPin, HIGH);\n  Serial.println(\"LED ON\");\n  delay(500);\n  digitalWrite(ledPin, LOW);\n  Serial.println(\"LED OFF\");\n  delay(500);\n}"
 }
