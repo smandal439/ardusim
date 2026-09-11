@@ -134,6 +134,52 @@ window.ArduinoLibs['RtcDS3231'] = {
       rs._lastTick = (window.ArduinoSim && window.ArduinoSim.simTime) || 0;
     }
 
+    /* Local constructors — avoid _a reference (not in scope inside runtime closure) */
+    function _makeRtcDateTime(yr, mo, dy, hr, mi, se) {
+      var o = {};
+      if (typeof yr === 'string') {
+        var parts = yr.split(' ');
+        var months = { JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12 };
+        o._yr = parseInt(parts[2]) || 2026;
+        o._mo = months[parts[0]] || 1;
+        o._dy = parseInt(parts[1]) || 1;
+        if (typeof mo === 'string') {
+          var tp = mo.split(':');
+          o._hr = parseInt(tp[0]) || 0;
+          o._mi = parseInt(tp[1]) || 0;
+          o._se = parseInt(tp[2]) || 0;
+        } else {
+          o._hr = 0; o._mi = 0; o._se = 0;
+        }
+      } else {
+        o._yr = yr || 2026;
+        o._mo = mo || 1;
+        o._dy = dy || 1;
+        o._hr = hr || 0;
+        o._mi = mi || 0;
+        o._se = se || 0;
+      }
+      o._year = function ()  { return this._yr; };
+      o._month = function () { return this._mo; };
+      o._day = function ()   { return this._dy; };
+      o._hour = function ()  { return this._hr; };
+      o._minute = function () { return this._mi; };
+      o._second = function () { return this._se; };
+      o._totalSeconds = function () {
+        return this._se + this._mi * 60 + this._hr * 3600 +
+               this._dy * 86400 + this._mo * 2592000 + this._yr * 31536000;
+      };
+      return o;
+    }
+
+    function _makeRtcTemperature(degC) {
+      return {
+        _degC: degC || 25.0,
+        _asFloatDegC: function () { return this._degC; },
+        _asWholeDegrees: function () { return Math.floor(this._degC); }
+      };
+    }
+
     return {
       _RtcDS3231: function (addr) {
         this.address = addr || 0x68;
@@ -150,7 +196,7 @@ window.ArduinoLibs['RtcDS3231'] = {
 
         this._getDateTime = function () {
           var t = _readTime();
-          return new _a._RtcDateTime(t.year, t.month, t.day, t.hour, t.minute, t.second);
+          return _makeRtcDateTime(t.year, t.month, t.day, t.hour, t.minute, t.second);
         };
 
         this._setDateTime = function (dt) {
@@ -170,7 +216,7 @@ window.ArduinoLibs['RtcDS3231'] = {
             var pr = comp.props || {};
             temp = rs.temperature ?? pr.temperature ?? 25.0;
           }
-          return new _a._RtcTemperature(temp);
+          return _makeRtcTemperature(temp);
         };
 
         this._isDateTimeValid = function () { return true; };
@@ -180,46 +226,11 @@ window.ArduinoLibs['RtcDS3231'] = {
       },
 
       _RtcDateTime: function (yr, mo, dy, hr, mi, se) {
-        /* Accept both (yr, mo, dy, hr, mi, se) and (__DATE__, __TIME__) strings */
-        if (typeof yr === 'string') {
-          /* Parse "MMM DD YYYY" and "HH:MM:SS" from __DATE__ / __TIME__ */
-          var parts = yr.split(' ');
-          var months = { JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12 };
-          this._yr = parseInt(parts[2]) || 2026;
-          this._mo = months[parts[0]] || 1;
-          this._dy = parseInt(parts[1]) || 1;
-          if (typeof mo === 'string') {
-            var tp = mo.split(':');
-            this._hr = parseInt(tp[0]) || 0;
-            this._mi = parseInt(tp[1]) || 0;
-            this._se = parseInt(tp[2]) || 0;
-          } else {
-            this._hr = 0; this._mi = 0; this._se = 0;
-          }
-        } else {
-          this._yr = yr || 2026;
-          this._mo = mo || 1;
-          this._dy = dy || 1;
-          this._hr = hr || 0;
-          this._mi = mi || 0;
-          this._se = se || 0;
-        }
-        this._year = function ()  { return this._yr; };
-        this._month = function () { return this._mo; };
-        this._day = function ()   { return this._dy; };
-        this._hour = function ()  { return this._hr; };
-        this._minute = function () { return this._mi; };
-        this._second = function () { return this._se; };
-        this._totalSeconds = function () {
-          return this._se + this._mi * 60 + this._hr * 3600 +
-                 this._dy * 86400 + this._mo * 2592000 + this._yr * 31536000;
-        };
+        return _makeRtcDateTime(yr, mo, dy, hr, mi, se);
       },
 
       _RtcTemperature: function (degC) {
-        this._degC = degC || 25.0;
-        this._asFloatDegC = function () { return this._degC; };
-        this._asWholeDegrees = function () { return Math.floor(this._degC); };
+        return _makeRtcTemperature(degC);
       },
     };
   },
