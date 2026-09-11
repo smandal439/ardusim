@@ -3666,7 +3666,7 @@ class CircuitCanvas {
         case 'flex_sensor': {
           const sim = window.ArduinoSim;
           if (!sim || !sim.pinStates) break;
-          const bend = inst.props.bend ?? 0;
+          const bend = inst.runtimeState?.bend ?? inst.props.bend ?? 0;
           inst.runtimeState.bend = bend;
           const sigPn = this._getConnectedPinNum(inst.id, 'SIG');
           if (sigPn !== null) sim.pinStates[`pin_${sigPn}`] = bend;
@@ -3677,7 +3677,7 @@ class CircuitCanvas {
         case 'thermistor': {
           const sim = window.ArduinoSim;
           if (!sim || !sim.pinStates) break;
-          const temp = inst.props.temperature ?? 25;
+          const temp = inst.runtimeState?.temperature ?? inst.props.temperature ?? 25;
           inst.runtimeState.temperature = temp;
           // Convert temperature to analog value (simplified: 0-1023 maps to -10-80°C)
           const analogVal = Math.round(((temp + 10) / 90) * 1023);

@@ -2914,7 +2914,7 @@ class FlexSensorComponent extends Component {
   update(canvas) {
     const sim = window.ArduinoSim;
     if (!sim || !sim.pinStates) return;
-    const bend = this.props.bend ?? 0;
+    const bend = this.runtimeState?.bend ?? this.props.bend ?? 0;
     this.runtimeState.bend = bend;
     const sigPn = this.getConnectedPinNum('SIG');
     if (sigPn !== null) sim.pinStates[`pin_${sigPn}`] = bend;
@@ -2931,7 +2931,7 @@ class ThermistorComponent extends Component {
   update(canvas) {
     const sim = window.ArduinoSim;
     if (!sim || !sim.pinStates) return;
-    const temp = this.props.temperature ?? 25;
+    const temp = this.runtimeState?.temperature ?? this.props.temperature ?? 25;
     this.runtimeState.temperature = temp;
     const analogVal = Math.round(((temp + 10) / 90) * 1023);
     const p1Pn = this.getConnectedPinNum('p1');
@@ -3328,23 +3328,21 @@ defComp({
   step(inst, sim) {
     if (!sim?.isRunning) return;
     
-    // Initialize runtime state if not present
-    if (!inst.runtimeState) {
-      inst.runtimeState = {
-        latitude: inst.props.latitude ?? 28.6139,
-        longitude: inst.props.longitude ?? 77.2090,
-        altitude: inst.props.altitude ?? 215,
-        satellites: inst.props.satellites ?? 8,
-        powered: true,
-        lastNmeaTime: 0,
-        nmeaBuffer: ''
-      };
-    }
-
+    // Ensure runtimeState exists with all required fields.
+    // The slider writes to inst.runtimeState[ctrl.field], which may create a
+    // partial object before simulation starts. Fill in any missing fields.
+    inst.runtimeState = inst.runtimeState || {};
     const state = inst.runtimeState;
+    if (state.latitude === undefined)  state.latitude  = inst.props.latitude  ?? 28.6139;
+    if (state.longitude === undefined) state.longitude = inst.props.longitude ?? 77.2090;
+    if (state.altitude === undefined)  state.altitude  = inst.props.altitude  ?? 215;
+    if (state.satellites === undefined) state.satellites = inst.props.satellites ?? 8;
+    if (state.powered === undefined)   state.powered   = true;
+    if (state.lastNmeaTime === undefined) state.lastNmeaTime = 0;
+    if (state.nmeaBuffer === undefined)   state.nmeaBuffer = '';
 
     const isPowered = state.powered;
-    const sats = state.satellites ?? inst.props.satellites ?? 8;
+    const sats = state.satellites;
     const hasFix = isPowered && sats > 0;
 
     if (!hasFix) return;
