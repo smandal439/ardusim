@@ -21,10 +21,29 @@
 - **Real-time FPS & Timing**: Status bar displays exact simulation time and frame-rates.
 - **Library Support**:
   - `Servo` (angle writes and positioning)
-  - `LiquidCrystal` & `LiquidCrystal_I2C` (text display, cursor control)
+  - `LiquidCrystal` & `LiquidCrystal_I2C` (16x2 and 20x4 text display, cursor control)
   - `Wire` (I2C communication stubs)
   - `SPI` (bus communication stubs)
   - `EEPROM` (512-byte persistent simulation)
+  - `Zigbee` (mesh networking with Coordinator/End Device architecture)
+  - `ESP-NOW` (peer-to-peer wireless communication)
+  - `BluetoothSerial` (Classic Bluetooth SPP)
+  - `CoAP` / `coap-simple` (Constrained Application Protocol)
+  - `PubSubClient` (MQTT publish/subscribe)
+  - `WiFi` (Wi-Fi connection simulation)
+  - `HTTPClient` & `WebServer` (HTTP requests and server)
+  - `DHT` (DHT11/22 temperature & humidity sensor)
+  - `NewPing` (HC-SR04 ultrasonic sensor)
+  - `Adafruit_SSD1306` & `Adafruit_GFX` (OLED display)
+  - `Adafruit_MPU6050` (accelerometer/gyroscope)
+  - `BME280` (weather sensor)
+  - `FastLED` & `Adafruit_NeoPixel` (LED strip control)
+  - `MFRC522` (RFID reader)
+  - `IRremote` (infrared remote)
+  - `TinyGPS++` (GPS NMEA parsing)
+  - `ArduinoJson` (JSON serialization)
+  - `Stepper` (stepper motor control)
+  - `SoftwareSerial` (software serial ports)
   - `tone()` / `noTone()` (Web Audio API synthesis)
 - **Speed Control**: Variable simulation speeds (0.25× to 10×).
 
@@ -117,13 +136,15 @@ A clean, compact toolbar keeps everything within reach without cluttering the wo
 ## 📦 Component Library
 
 - **Boards**: Arduino Uno R3 (ATmega328P), ESP32 DevKit V1
-- **Outputs**: Standard LED (Red, Green, Blue, Yellow, Orange, White), RGB LED, Multi-LED Array, 16x2 LCD Display (HD44780/I2C), OLED Display (SSD1306), Piezo Buzzer, 7-Segment Display, NeoPixel Strip, 12V Bulb
-- **Inputs**: Push Button, Potentiometer (Rotary Angle Sensor), Joystick
-- **Actuators**: Micro Servo Motor (SG90), DC Motor, Relay Module, Stepper Motor (28BYJ-48)
-- **Sensors**: DHT11 Temperature & Humidity, HC-SR04 Ultrasonic, LDR Light Sensor, PIR Motion, MPU6050 Accelerometer/Gyro, IR Obstacle, Flex Sensor, Thermistor
+- **Outputs**: Standard LED (Red, Green, Blue, Yellow, Orange, White), RGB LED, Multi-LED Array, 16x2 LCD Display (HD44780/I2C), 20x4 LCD Display (HD44780/I2C), OLED Display (SSD1306), Piezo Buzzer, 7-Segment Display, NeoPixel Strip, NeoPixel Ring, NeoPixel 8x8 Matrix, MAX7219 LED Matrix, ILI9341 TFT, 12V Bulb
+- **Inputs**: Push Button, Potentiometer (Rotary Angle Sensor), Joystick, 4x4 Keypad, Rotary Encoder, DIP Switch
+- **Actuators**: Micro Servo Motor (SG90), Continuous Rotation Servo, DC Motor, Relay Module, Stepper Motor (28BYJ-48), L298N Motor Driver
+- **Audio**: MAX98357A I2S Amplifier, 4 Ohm Speaker
+- **Sensors**: DHT11 Temperature & Humidity, HC-SR04 Ultrasonic, LDR Light Sensor, PIR Motion, MPU6050 Accelerometer/Gyro, DS3231 RTC, IR Obstacle, Flex Sensor, Thermistor, LM35 Temperature, BME280 Weather, VL53L0X Proximity, MFRC522 RFID, IR Receiver, HC-05 Bluetooth, NEO-6M GPS
 - **Passives & Power**: Resistors (custom resistance), Capacitors, Diode (1N4007), Breadboard, 5V Power Supply, Ground (GND) Rail, MB102 Power Supply, Bench Power Supply
-- **Digital ICs**: 555 Timer, 74HC00 (NAND), 74HC04 (NOT), 74HC08 (AND), 74HC32 (OR), 74HC595 (Shift Register), 74HC138 (Decoder), 74HC245 (Buffer)
-- **Instruments**: Multimeter, Function Generator
+- **Digital ICs**: 555 Timer, 74HC00 (NAND), 74HC04 (NOT), 74HC08 (AND), 74HC32 (OR), 74HC74 (Dual DFF), 74HC47 (BCD→7Seg), 74HC148 (Encoder), 74HC595 (Shift Register), 74HC138 (Decoder), 74HC165 (PISO), 74HC193 (Counter), 74HC245 (Buffer), LM741 Op-Amp
+- **Instruments**: Multimeter, Function Generator, DSO 4-Channel Oscilloscope
+- **Probes**: Oscilloscope (2ch), DSO (4ch), Logic Analyzer (8ch)
 
 ---
 
@@ -154,8 +175,63 @@ Phone (browser)  ←→  HiveMQ Broker  ←→  Simulator (browser)
 ### Example Projects
 - **Remote Control LEDs**: Toggle 4 LEDs from your phone
 - **Remote Servo Control**: Use A0 slider to control servo angle
+- **Zigbee Sender/Receiver**: Basic Coordinator→End Device communication
+- **Zigbee Sensor Network**: End Device reads potentiometer, sends via Zigbee
+- **Zigbee LED Control**: Bidirectional ON/OFF commands with ACK
+- **ESP-NOW Sender/Receiver**: Peer-to-peer wireless data transfer
+- **Bluetooth Serial Bridge**: ESP32-to-ESP32 Bluetooth communication
+- **CoAP Client/Server**: RESTful IoT protocol demonstration
+- **MQTT ESP32**: Publish/Subscribe messaging via broker
 
 > See the **Examples** panel in the simulator for these projects.
+
+---
+
+## 📡 Wireless Communication Protocols
+
+The simulator supports multiple wireless communication protocols for multi-board projects. Each protocol uses a shared global bus to deliver messages between boards in real-time.
+
+### ESP-NOW (Peer-to-Peer)
+- **Library**: `<esp_now.h>` + `<WiFi.h>`
+- **Pattern**: Direct peer-to-peer communication with MAC addresses
+- **Features**: Unicast & broadcast, send/receive callbacks, peer management
+- **Examples**: ESP-NOW Sender/Receiver, Bidirectional Communication, DIP Switch to 8 LEDs
+
+### Zigbee (Mesh Network)
+- **Library**: `<Zigbee.h>`
+- **Pattern**: Coordinator/End Device architecture with short addresses
+- **Features**: Channel & PAN ID configuration, node discovery, ping, bidirectional messaging
+- **Architecture**:
+  - Board 0 = Coordinator (address `0x0000`)
+  - Board 1 = End Device (address `0x0001`)
+- **API**:
+  ```cpp
+  Zigbee.begin(channel, panId);      // Initialize network
+  Zigbee.send(addr, data, len);      // Send data
+  Zigbee.onReceive(callback);        // Register receive handler
+  Zigbee.getNodeAddress();           // Get short address
+  Zigbee.getPanId();                 // Get PAN ID
+  Zigbee.ping(destAddr);             // Ping a node
+  ```
+- **Examples**: Zigbee Sender/Receiver, Sensor Network, Bidirectional LED Control
+
+### Bluetooth Serial
+- **Library**: `<BluetoothSerial.h>`
+- **Pattern**: Classic Bluetooth SPP between two ESP32 boards
+- **Features**: Serial-like communication over Bluetooth
+- **Example**: Bluetooth Serial Bridge
+
+### CoAP (Constrained Application Protocol)
+- **Library**: `<coap.h>` or `<coap-simple.h>`
+- **Pattern**: RESTful IoT protocol (GET/PUT/POST/DELETE)
+- **Features**: Resource discovery, confirmable/non-confirmable messages
+- **Examples**: CoAP Client/Server, DIP Switch to 8 LEDs
+
+### MQTT (Message Queuing Telemetry Transport)
+- **Library**: `<PubSubClient.h>`
+- **Pattern**: Publish/Subscribe messaging via broker
+- **Features**: Topic-based routing, QoS levels
+- **Example**: MQTT ESP32
 
 ---
 
@@ -192,8 +268,9 @@ No build step or Node.js environment is required. You can host this static web a
 │   ├── remote-control.js # Simulator-side MQTT bridge for remote control
 │   ├── remote.js       # Phone-side MQTT client
 │   ├── components/     # Component definitions (boards, LEDs, sensors, etc.)
+│   ├── libraries/      # Arduino library simulation plugins (38+ libraries)
 │   └── utils.js        # Shared helpers
-├── Examples/           # Example project JSON files
+├── Examples/           # 108+ example project JSON files
 ├── circuits/            # Circuit JSON data used by examples
 ├── projects/
 │   └── saved/           # User-exported/saved project JSON snapshots

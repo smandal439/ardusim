@@ -1246,6 +1246,182 @@ defComp({
     ctx.restore();
   }
 });
+/* -------------------- LCD 20x4 (I2C Backpack - Large Realistic Design) ------------------ */
+defComp({
+  id: 'lcd2004_i2c',
+  name: 'LCD 20x4 (I2C)',
+  category: 'Output',
+  icon: '🖥️',
+  desc: '20x4 character LCD display with integrated PCF8574 I2C daughterboard adapter',
+  width: 210,
+  height: 110,
+  defaultProps: { address: '0x27' },
+  interactive: [
+    { field: 'address', label: 'I2C Address', type: 'text' },
+  ],
+  pins: [
+    { id: 'gnd', label: 'GND', type: PIN_TYPE.GND, x: 60, y: 110, side: 'bottom' },
+    { id: 'vcc', label: 'VCC', type: PIN_TYPE.POWER, x: 85, y: 110, side: 'bottom' },
+    { id: 'sda', label: 'SDA', type: PIN_TYPE.DIGITAL, x: 110, y: 110, side: 'bottom' },
+    { id: 'scl', label: 'SCL', type: PIN_TYPE.DIGITAL, x: 135, y: 110, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const rs = inst.runtimeState || {};
+    const line1 = (rs.line1 !== undefined ? rs.line1 : (inst.props.line1 || '')).padEnd(20, ' ').substring(0, 20);
+    const line2 = (rs.line2 !== undefined ? rs.line2 : (inst.props.line2 || '')).padEnd(20, ' ').substring(0, 20);
+    const line3 = (rs.line3 !== undefined ? rs.line3 : (inst.props.line3 || '')).padEnd(20, ' ').substring(0, 20);
+    const line4 = (rs.line4 !== undefined ? rs.line4 : (inst.props.line4 || '')).padEnd(20, ' ').substring(0, 20);
+    const powered = Boolean(rs.powered);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // 1. Main Display PCB (FR4 Dark Green Mask)
+    ctx.fillStyle = '#0a3020';
+    roundRect(ctx, 0, 0, 210, 90, 4);
+    ctx.fill();
+
+    // Corner Mounting Holes with Gold Annular Rings
+    const screwHoles = [[6, 6], [204, 6], [6, 84], [204, 84]];
+    screwHoles.forEach(([hx, hy]) => {
+      ctx.fillStyle = '#c8a452';
+      ctx.beginPath(); ctx.arc(hx, hy, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#05180f';
+      ctx.beginPath(); ctx.arc(hx, hy, 2, 0, Math.PI * 2); ctx.fill();
+    });
+
+    // 2. Metal Enclosure Bezel
+    const bezelX = 10, bezelY = 5, bezelW = 190, bezelH = 70;
+    ctx.fillStyle = '#1e2224';
+    roundRect(ctx, bezelX, bezelY, bezelW, bezelH, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#3a3f44';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Stamped Metal Bezel Clamps
+    ctx.fillStyle = '#121517';
+    [[bezelX + 40, bezelY - 1], [bezelX + 144, bezelY - 1], [bezelX + 40, bezelY + bezelH - 2], [bezelX + 144, bezelY + bezelH - 2]].forEach(([tx, ty]) => {
+      ctx.fillRect(tx, ty, 8, 3.5);
+    });
+
+    // 3. LCD Active Matrix Glass (HD44780 Backlight)
+    const glassX = 16, glassY = 10, glassW = 178, glassH = 58;
+    if (powered) {
+      const grad = ctx.createLinearGradient(glassX, glassY, glassX, glassY + glassH);
+      grad.addColorStop(0, '#a5db3b');
+      grad.addColorStop(1, '#81b827');
+      ctx.fillStyle = grad;
+    } else {
+      ctx.fillStyle = '#23301a';
+    }
+    ctx.fillRect(glassX, glassY, glassW, glassH);
+
+    // Inner Glass Shadow
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(glassX + 0.5, glassY + 0.5, glassW - 1, glassH - 1);
+
+    // 4. Character Cells (4 rows x 20 cols)
+    const cellW = 7.5, cellH = 12, startX = 20, gap = 8.4;
+    const row1Y = 12, row2Y = 24, row3Y = 36, row4Y = 48;
+    ctx.fillStyle = powered ? 'rgba(0, 0, 0, 0.055)' : 'rgba(255, 255, 255, 0.025)';
+    for (let c = 0; c < 20; c++) {
+      ctx.fillRect(startX + c * gap, row1Y, cellW, cellH);
+      ctx.fillRect(startX + c * gap, row2Y, cellW, cellH);
+      ctx.fillRect(startX + c * gap, row3Y, cellW, cellH);
+      ctx.fillRect(startX + c * gap, row4Y, cellW, cellH);
+    }
+
+    // 5. Active Text Segments
+    ctx.font = 'bold 10px "JetBrains Mono", monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+
+    if (powered) {
+      ctx.fillStyle = 'rgba(20, 35, 10, 0.25)';
+      for (let i = 0; i < 20; i++) {
+        ctx.fillText(line1[i], startX + i * gap + 0.5, row1Y + 2);
+        ctx.fillText(line2[i], startX + i * gap + 0.5, row2Y + 2);
+        ctx.fillText(line3[i], startX + i * gap + 0.5, row3Y + 2);
+        ctx.fillText(line4[i], startX + i * gap + 0.5, row4Y + 2);
+      }
+      ctx.fillStyle = '#11220a';
+    } else {
+      ctx.fillStyle = '#2c3d23';
+    }
+
+    for (let i = 0; i < 20; i++) {
+      ctx.fillText(line1[i], startX + i * gap, row1Y + 1.5);
+      ctx.fillText(line2[i], startX + i * gap, row2Y + 1.5);
+      ctx.fillText(line3[i], startX + i * gap, row3Y + 1.5);
+      ctx.fillText(line4[i], startX + i * gap, row4Y + 1.5);
+    }
+
+    // 6. I2C Daughterboard (Piggyback PCB)
+    const bpX = 40, bpY = 84, bpW = 130, bpH = 20;
+    ctx.fillStyle = '#0f2744';
+    roundRect(ctx, bpX, bpY, bpW, bpH, 2.5);
+    ctx.fill();
+    ctx.strokeStyle = '#1e4878';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // PCF8574 Expander IC
+    ctx.fillStyle = '#1c1c1c';
+    ctx.fillRect(bpX + 6, bpY + 4, 18, 12);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.font = '5.5px "JetBrains Mono", monospace';
+    ctx.fillText('PCF8574', bpX + 7, bpY + 8);
+    ctx.fillStyle = '#444';
+    ctx.beginPath(); ctx.arc(bpX + 9, bpY + 6.5, 0.8, 0, Math.PI * 2); ctx.fill();
+
+    // Contrast Trimpot
+    ctx.fillStyle = '#1d4ed8';
+    roundRect(ctx, bpX + 105, bpY + 3, 12, 12, 1.5);
+    ctx.fill();
+    ctx.fillStyle = '#eab308';
+    ctx.beginPath(); ctx.arc(bpX + 111, bpY + 9, 3.2, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#854d0e';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(bpX + 108.5, bpY + 9); ctx.lineTo(bpX + 113.5, bpY + 9);
+    ctx.moveTo(bpX + 111, bpY + 6.5); ctx.lineTo(bpX + 111, bpY + 11.5);
+    ctx.stroke();
+
+    // Backlight Jumper
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(bpX + 88, bpY + 4.5, 8, 10);
+    ctx.fillStyle = '#eab308';
+    ctx.fillRect(bpX + 89.5, bpY + 3, 1.5, 1.5);
+    ctx.fillRect(bpX + 93, bpY + 3, 1.5, 1.5);
+
+    // Silkscreen Pin Labels
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.font = '6px "JetBrains Mono", sans-serif';
+    ctx.fillText('GND', bpX + 17, bpY + 13);
+    ctx.fillText('VCC', bpX + 42, bpY + 13);
+    ctx.fillText('SDA', bpX + 67, bpY + 13);
+    ctx.fillText('SCL', bpX + 92, bpY + 13);
+
+    // 7. 4-Pin Header
+    ctx.fillStyle = '#181818';
+    roundRect(ctx, 53, 104, 89, 6, 1);
+    ctx.fill();
+
+    const pinXs = [60, 85, 110, 135];
+    pinXs.forEach(px => {
+      ctx.fillStyle = '#c8a452';
+      ctx.beginPath(); ctx.arc(px, 100, 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffd066';
+      ctx.fillRect(px - 1.2, 104, 2.4, 6);
+    });
+
+    if (inst.selected) drawSelectionRect(ctx, -4, -4, 218, 118);
+    ctx.restore();
+  }
+});
 /*---------------------------------OLED 128x64 (SSD1306, I2C)----------------------------- */
 
 /* --------------------- OLED 128x64 SSD1306 (Realistic Design) ------------------ */

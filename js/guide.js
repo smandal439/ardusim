@@ -1404,6 +1404,890 @@ void loop(){
 };
 
 /* ═══════════════════════════════════════════════════════════════
+   LIBRARY REFERENCE DATA
+   Each entry documents an Arduino library supported by ArduSim:
+   what it does, include directive, key API functions, and example code.
+   ═══════════════════════════════════════════════════════════════ */
+
+const GUIDE_LIBRARIES = [
+  /* ── CORE ── */
+  {
+    id: 'wire',
+    name: 'Wire (I2C)',
+    icon: '🔗',
+    category: 'Core',
+    include: '<Wire.h>',
+    desc: 'I2C communication library for master/slave data exchange. Used to connect LCDs, sensors, RTC modules, and other I2C peripherals.',
+    api: [
+      { fn: 'Wire.begin()', desc: 'Join I2C bus as master (or slave with address)' },
+      { fn: 'Wire.beginTransmission(addr)', desc: 'Start transmission to device at addr' },
+      { fn: 'Wire.write(val)', desc: 'Write a byte to the buffer' },
+      { fn: 'Wire.endTransmission()', desc: 'Send buffer and stop transmission' },
+      { fn: 'Wire.requestFrom(addr, qty)', desc: 'Request qty bytes from device at addr' },
+      { fn: 'Wire.read()', desc: 'Read next byte from buffer' },
+      { fn: 'Wire.available()', desc: 'Number of bytes available to read' },
+    ],
+    code: `#include <Wire.h>
+
+void setup() {
+  Wire.begin();
+  Serial.begin(9600);
+
+  // Scan for I2C devices
+  for (byte addr = 1; addr < 127; addr++) {
+    Wire.beginTransmission(addr);
+    if (Wire.endTransmission() == 0) {
+      Serial.print("Found device at 0x");
+      Serial.println(addr, HEX);
+    }
+  }
+}
+
+void loop() {}`,
+    exampleId: null,
+  },
+  {
+    id: 'spi',
+    name: 'SPI',
+    icon: '🔗',
+    category: 'Core',
+    include: '<SPI.h>',
+    desc: 'Serial Peripheral Interface library for high-speed synchronous data transfer. Used with SD cards, displays, and RF modules.',
+    api: [
+      { fn: 'SPI.begin()', desc: 'Initialize SPI bus' },
+      { fn: 'SPI.beginTransaction(settings)', desc: 'Configure clock speed and mode' },
+      { fn: 'SPI.transfer(val)', desc: 'Send/receive one byte' },
+      { fn: 'SPI.endTransaction()', desc: 'Release the SPI bus' },
+    ],
+    code: `#include <SPI.h>
+
+void setup() {
+  SPI.begin();
+  Serial.begin(9600);
+  Serial.println("SPI initialized");
+}
+
+void loop() {
+  byte data = SPI.transfer(0x42);
+  Serial.print("Received: 0x");
+  Serial.println(data, HEX);
+  delay(1000);
+}`,
+    exampleId: null,
+  },
+  {
+    id: 'eeprom',
+    name: 'EEPROM',
+    icon: '💾',
+    category: 'Core',
+    include: '<EEPROM.h>',
+    desc: 'Read and write persistent data to simulated EEPROM (512 bytes). Data survives between simulation runs.',
+    api: [
+      { fn: 'EEPROM.read(addr)', desc: 'Read one byte from address' },
+      { fn: 'EEPROM.write(addr, val)', desc: 'Write one byte to address' },
+      { fn: 'EEPROM.update(addr, val)', desc: 'Write only if value differs' },
+      { fn: 'EEPROM.get(addr, data)', desc: 'Read any type from address' },
+      { fn: 'EEPROM.put(addr, data)', desc: 'Write any type to address' },
+    ],
+    code: `#include <EEPROM.h>
+
+void setup() {
+  Serial.begin(9600);
+
+  // Write a value
+  EEPROM.write(0, 42);
+  Serial.println("Wrote 42 to address 0");
+
+  // Read it back
+  byte val = EEPROM.read(0);
+  Serial.print("Read from address 0: ");
+  Serial.println(val);
+}
+
+void loop() {}`,
+    exampleId: null,
+  },
+
+  /* ── DISPLAY ── */
+  {
+    id: 'liquidcrystal',
+    name: 'LiquidCrystal',
+    icon: '🖥️',
+    category: 'Display',
+    include: '<LiquidCrystal.h>',
+    desc: 'Control HD44780 character LCD displays (16x2, 20x4) via parallel interface.',
+    api: [
+      { fn: 'lcd.begin(cols, rows)', desc: 'Initialize display dimensions' },
+      { fn: 'lcd.clear()', desc: 'Clear display and reset cursor' },
+      { fn: 'lcd.setCursor(col, row)', desc: 'Move cursor to position' },
+      { fn: 'lcd.print(text)', desc: 'Print text at cursor position' },
+      { fn: 'lcd.write(byte)', desc: 'Write a custom character' },
+      { fn: 'lcd.noDisplay() / lcd.display()', desc: 'Turn display off/on' },
+    ],
+    code: `#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+void setup() {
+  lcd.begin(16, 2);
+  lcd.print("Hello, World!");
+  lcd.setCursor(0, 1);
+  lcd.print("ArduSim LCD");
+}
+
+void loop() {}`,
+    exampleId: null,
+  },
+  {
+    id: 'liquidcrystal_i2c',
+    name: 'LiquidCrystal_I2C',
+    icon: '🖥️',
+    category: 'Display',
+    include: '<LiquidCrystal_I2C.h>',
+    desc: 'Control HD44780 LCD displays via I2C backpack (PCF8574). Supports 16x2 and 20x4 displays.',
+    api: [
+      { fn: 'lcd.init() / lcd.begin()', desc: 'Initialize the LCD' },
+      { fn: 'lcd.clear()', desc: 'Clear display' },
+      { fn: 'lcd.setCursor(col, row)', desc: 'Set cursor position (0-indexed)' },
+      { fn: 'lcd.print(text)', desc: 'Print text at cursor' },
+      { fn: 'lcd.backlight() / lcd.noBacklight()', desc: 'Toggle backlight' },
+      { fn: 'lcd.createChar(loc, charmap)', desc: 'Create custom character (8 max)' },
+    ],
+    code: `#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// 16x2 LCD at address 0x27
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+void setup() {
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("Hello from I2C!");
+  lcd.setCursor(0, 1);
+  lcd.print("16x2 LCD Demo");
+}
+
+void loop() {}`,
+    exampleId: 'lcd_i2c',
+  },
+  {
+    id: 'adafruit_ssd1306',
+    name: 'Adafruit SSD1306',
+    icon: '🖥️',
+    category: 'Display',
+    include: '<Adafruit_SSD1306.h>',
+    desc: 'Drive SSD1306-based 128x64 OLED displays over I2C or SPI.',
+    api: [
+      { fn: 'display.begin(SSD1306_SWITCHCAPVCC, addr)', desc: 'Initialize OLED (0x3C or 0x3D)' },
+      { fn: 'display.clearDisplay()', desc: 'Clear the buffer' },
+      { fn: 'display.display()', desc: 'Send buffer to screen' },
+      { fn: 'display.drawPixel(x, y, color)', desc: 'Draw a single pixel' },
+      { fn: 'display.setTextSize(n)', desc: 'Set text size (1-4)' },
+      { fn: 'display.setTextColor(color)', desc: 'Set text color' },
+      { fn: 'display.setCursor(x, y)', desc: 'Set text cursor' },
+      { fn: 'display.print(text)', desc: 'Print text to buffer' },
+    ],
+    code: `#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+void setup() {
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 0);
+  display.println("OLED Display");
+  display.println("128x64 SSD1306");
+  display.display();
+}
+
+void loop() {}`,
+    exampleId: 'oled_ssd1306',
+  },
+
+  /* ── SENSORS ── */
+  {
+    id: 'dht',
+    name: 'DHT',
+    icon: '🌡️',
+    category: 'Sensors',
+    include: '<DHT.h>',
+    desc: 'Read temperature and humidity from DHT11 and DHT22 sensors.',
+    api: [
+      { fn: 'DHT pin(type)', desc: 'Create sensor object on pin with type (DHT11/DHT22)' },
+      { fn: 'dht.begin()', desc: 'Initialize sensor' },
+      { fn: 'dht.readTemperature()', desc: 'Read temperature in Celsius' },
+      { fn: 'dht.readHumidity()', desc: 'Read humidity percentage' },
+      { fn: 'dht.readHeatIndex()', desc: 'Calculate heat index' },
+    ],
+    code: `#include <DHT.h>
+
+#define DHTPIN 2
+#define DHTTYPE DHT11
+
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+}
+
+void loop() {
+  float temp = dht.readTemperature();
+  float hum = dht.readHumidity();
+  Serial.print("Temp: "); Serial.print(temp); Serial.print(" C  ");
+  Serial.print("Hum: "); Serial.print(hum); Serial.println(" %");
+  delay(2000);
+}`,
+    exampleId: 'temperature',
+  },
+  {
+    id: 'newping',
+    name: 'NewPing',
+    icon: '📡',
+    category: 'Sensors',
+    include: '<NewPing.h>',
+    desc: 'Ultrasonic sensor library for HC-SR04. Provides accurate distance measurement with multi-ping and median filtering.',
+    api: [
+      { fn: 'NewPing(trigger, echo, maxDist)', desc: 'Create sensor object' },
+      { fn: 'sonar.ping_cm()', desc: 'Get distance in centimeters' },
+      { fn: 'sonar.ping_in()', desc: 'Get distance in inches' },
+      { fn: 'sonar.ping_median(iterations)', desc: 'Median-filtered ping' },
+    ],
+    code: `#include <NewPing.h>
+
+#define TRIGGER_PIN 9
+#define ECHO_PIN 10
+#define MAX_DISTANCE 200
+
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  delay(500);
+  int dist = sonar.ping_cm();
+  Serial.print("Distance: ");
+  Serial.print(dist);
+  Serial.println(" cm");
+}`,
+    exampleId: 'ultrasonic',
+  },
+
+  /* ── ACTUATORS ── */
+  {
+    id: 'servo',
+    name: 'Servo',
+    icon: '⚙️',
+    category: 'Actuators',
+    include: '<Servo.h>',
+    desc: 'Control servo motors (SG90, MG996R, etc.) via PWM. Supports angles from 0° to 180°.',
+    api: [
+      { fn: 'servo.attach(pin)', desc: 'Attach servo to pin' },
+      { fn: 'servo.write(angle)', desc: 'Set angle (0-180°)' },
+      { fn: 'servo.writeMicroseconds(us)', desc: 'Set pulse width (500-2400μs)' },
+      { fn: 'servo.read()', desc: 'Read current angle' },
+      { fn: 'servo.attached()', desc: 'Check if attached' },
+      { fn: 'servo.detach()', desc: 'Detach from pin' },
+    ],
+    code: `#include <Servo.h>
+
+Servo myServo;
+int pos = 0;
+
+void setup() {
+  myServo.attach(9);
+}
+
+void loop() {
+  for (pos = 0; pos <= 180; pos++) {
+    myServo.write(pos);
+    delay(15);
+  }
+  for (pos = 180; pos >= 0; pos--) {
+    myServo.write(pos);
+    delay(15);
+  }
+}`,
+    exampleId: 'servo_sweep',
+  },
+  {
+    id: 'stepper',
+    name: 'Stepper',
+    icon: '⚙️',
+    category: 'Actuators',
+    include: '<Stepper.h>',
+    desc: 'Control stepper motors like the 28BYJ-48 with ULN2003 driver board.',
+    api: [
+      { fn: 'Stepper(steps, pin1, pin2, pin3, pin4)', desc: 'Create stepper with pin connections' },
+      { fn: 'stepper.setSpeed(rpm)', desc: 'Set rotation speed' },
+      { fn: 'stepper.step(steps)', desc: 'Move number of steps (+ clockwise, - counter-clockwise)' },
+    ],
+    code: `#include <Stepper.h>
+
+#define STEPS_PER_REV 2048
+
+Stepper myStepper(STEPS_PER_REV, 8, 10, 9, 11);
+
+void setup() {
+  myStepper.setSpeed(10);  // 10 RPM
+  Serial.begin(9600);
+}
+
+void loop() {
+  myStepper.step(STEPS_PER_REV);
+  Serial.println("One revolution CW");
+  delay(500);
+}`,
+    exampleId: 'stepper_motor',
+  },
+
+  /* ── WIRELESS ── */
+  {
+    id: 'wifi',
+    name: 'WiFi',
+    icon: '📶',
+    category: 'Wireless',
+    include: '<WiFi.h>',
+    desc: 'Wi-Fi connectivity for ESP32. Connect to networks and create access points.',
+    api: [
+      { fn: 'WiFi.begin(ssid, pass)', desc: 'Connect to Wi-Fi network' },
+      { fn: 'WiFi.status()', desc: 'Get connection status (WL_CONNECTED)' },
+      { fn: 'WiFi.localIP()', desc: 'Get assigned IP address' },
+      { fn: 'WiFi.macAddress()', desc: 'Get MAC address' },
+      { fn: 'WiFi.mode(mode)', desc: 'Set mode (WIFI_STA, WIFI_AP, WIFI_AP_STA)' },
+    ],
+    code: `#include <WiFi.h>
+
+const char* ssid = "YourSSID";
+const char* password = "YourPassword";
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\\nConnected!");
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+}
+
+void loop() {}`,
+    exampleId: null,
+  },
+  {
+    id: 'espnow',
+    name: 'ESP-NOW',
+    icon: '📡',
+    category: 'Wireless',
+    include: ['<esp_now.h>', '<WiFi.h>'],
+    desc: 'Peer-to-peer wireless communication between ESP32 boards without a router. Fast, low-power, ideal for sensor networks.',
+    api: [
+      { fn: 'esp_now_init()', desc: 'Initialize ESP-NOW' },
+      { fn: 'esp_now_register_send_cb(fn)', desc: 'Register send callback' },
+      { fn: 'esp_now_register_recv_cb(fn)', desc: 'Register receive callback' },
+      { fn: 'esp_now_add_peer(&peerInfo)', desc: 'Add a peer device' },
+      { fn: 'esp_now_send(addr, data, len)', desc: 'Send data to peer' },
+    ],
+    code: `#include <esp_now.h>
+#include <WiFi.h>
+
+uint8_t receiverMAC[] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0x02};
+
+void OnDataSent(const uint8_t *mac, esp_now_send_status_t status) {
+  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Send OK" : "Send FAIL");
+}
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.mode(WIFI_STA);
+  esp_now_init();
+  esp_now_register_send_cb(OnDataSent);
+  Serial.println("ESP-NOW Sender ready");
+}
+
+void loop() {
+  int data = 42;
+  esp_now_send(receiverMAC, (uint8_t *)&data, sizeof(data));
+  delay(1000);
+}`,
+    exampleId: 'espnow_sender',
+  },
+  {
+    id: 'zigbee',
+    name: 'Zigbee',
+    icon: '📡',
+    category: 'Wireless',
+    include: '<Zigbee.h>',
+    desc: 'Zigbee mesh networking for IoT. Supports Coordinator/End Device architecture with short addresses, channels, and PAN IDs.',
+    api: [
+      { fn: 'Zigbee.begin(channel, panId)', desc: 'Initialize Zigbee network' },
+      { fn: 'Zigbee.send(addr, data, len)', desc: 'Send data to a node' },
+      { fn: 'Zigbee.onReceive(callback)', desc: 'Register receive callback' },
+      { fn: 'Zigbee.onSend(callback)', desc: 'Register send status callback' },
+      { fn: 'Zigbee.getNodeAddress()', desc: 'Get this node short address' },
+      { fn: 'Zigbee.getPanId()', desc: 'Get PAN ID' },
+      { fn: 'Zigbee.getChannel()', desc: 'Get current channel' },
+      { fn: 'Zigbee.ping(destAddr)', desc: 'Ping a remote node' },
+    ],
+    code: `#include <Zigbee.h>
+
+uint16_t endDeviceAddr = 0x0001;
+
+void onSendStatus(int status) {
+  Serial.println(status == 0 ? "Send OK" : "Send FAIL");
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(2, OUTPUT);
+
+  Zigbee.begin(11, 0x1234);
+  Zigbee.onSend(onSendStatus);
+
+  Serial.print("Address: 0x");
+  Serial.println(Zigbee.getNodeAddress(), HEX);
+}
+
+void loop() {
+  int data = 42;
+  Zigbee.send(endDeviceAddr, (uint8_t *)&data, sizeof(data));
+  digitalWrite(2, HIGH);
+  delay(50);
+  digitalWrite(2, LOW);
+  delay(2000);
+}`,
+    exampleId: 'zigbee_sender_receiver',
+  },
+  {
+    id: 'bluetoothserial',
+    name: 'BluetoothSerial',
+    icon: '📶',
+    category: 'Wireless',
+    include: '<BluetoothSerial.h>',
+    desc: 'Classic Bluetooth SPP (Serial Port Profile) for ESP32. Serial-like communication between two Bluetooth devices.',
+    api: [
+      { fn: 'SerialBT.begin(name)', desc: 'Start Bluetooth with device name' },
+      { fn: 'SerialBT.available()', desc: 'Check if data available' },
+      { fn: 'SerialBT.read()', desc: 'Read incoming byte' },
+      { fn: 'SerialBT.write(data)', desc: 'Send data' },
+      { fn: 'SerialBT.print(text)', desc: 'Send text' },
+      { fn: 'SerialBT.println(text)', desc: 'Send text with newline' },
+    ],
+    code: `#include <BluetoothSerial.h>
+
+BluetoothSerial SerialBT;
+
+void setup() {
+  Serial.begin(115200);
+  SerialBT.begin("ArduSim_BT");
+  Serial.println("Bluetooth started!");
+}
+
+void loop() {
+  if (SerialBT.available()) {
+    char c = SerialBT.read();
+    Serial.print("Received: ");
+    Serial.println(c);
+    SerialBT.print("Echo: ");
+    SerialBT.println(c);
+  }
+}`,
+    exampleId: 'bluetooth_serial_bridge',
+  },
+
+  /* ── IOT PROTOCOLS ── */
+  {
+    id: 'pubsubclient',
+    name: 'PubSubClient (MQTT)',
+    icon: '📬',
+    category: 'IoT',
+    include: '<PubSubClient.h>',
+    desc: 'MQTT publish/subscribe client for lightweight IoT messaging. Connect to brokers like HiveMQ, Mosquitto, or cloud services.',
+    api: [
+      { fn: 'client.setServer(server, port)', desc: 'Set MQTT broker address' },
+      { fn: 'client.setCallback(callback)', desc: 'Set message callback' },
+      { fn: 'client.connect(clientId)', desc: 'Connect to broker' },
+      { fn: 'client.publish(topic, payload)', desc: 'Publish message to topic' },
+      { fn: 'client.subscribe(topic)', desc: 'Subscribe to topic' },
+      { fn: 'client.loop()', desc: 'Process incoming messages' },
+    ],
+    code: `#include <WiFi.h>
+#include <PubSubClient.h>
+
+const char* mqtt_server = "broker.hivemq.com";
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message on "); Serial.println(topic);
+}
+
+void setup() {
+  Serial.begin(115200);
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(callback);
+  // Connect WiFi first, then client.connect("ArduSim")
+  // client.subscribe("arduim/test");
+}
+
+void loop() {
+  client.loop();
+}`,
+    exampleId: 'mqtt_esp32',
+  },
+  {
+    id: 'coap',
+    name: 'CoAP',
+    icon: '🌐',
+    category: 'IoT',
+    include: '<coap.h>',
+    desc: 'Constrained Application Protocol for resource-constrained IoT devices. RESTful API with GET/PUT/POST/DELETE methods.',
+    api: [
+      { fn: 'coap.begin()', desc: 'Initialize CoAP client' },
+      { fn: 'coap.get(server, uri)', desc: 'GET request' },
+      { fn: 'coap.put(server, uri, payload)', desc: 'PUT request' },
+      { fn: 'coap.post(server, uri, payload)', desc: 'POST request' },
+      { fn: 'coap.delete(server, uri)', desc: 'DELETE request' },
+      { fn: 'coap.loop()', desc: 'Process CoAP messages' },
+    ],
+    code: `#include <coap.h>
+
+CoapClient client;
+
+void setup() {
+  Serial.begin(115200);
+  client.begin();
+  Serial.println("CoAP Client ready");
+}
+
+void loop() {
+  client.loop();
+  delay(1000);
+}`,
+    exampleId: 'coap_client',
+  },
+  {
+    id: 'httpclient',
+    name: 'HTTPClient',
+    icon: '🌐',
+    category: 'IoT',
+    include: '<HTTPClient.h>',
+    desc: 'Make HTTP requests (GET, POST, PUT, DELETE) from ESP32. Useful for REST APIs and web services.',
+    api: [
+      { fn: 'http.begin(url)', desc: 'Set request URL' },
+      { fn: 'http.GET()', desc: 'Send GET request' },
+      { fn: 'http.POST(data)', desc: 'Send POST request' },
+      { fn: 'http.getString()', desc: 'Get response body as string' },
+      { fn: 'http.end()', desc: 'Free resources' },
+    ],
+    code: `#include <WiFi.h>
+#include <HTTPClient.h>
+
+void setup() {
+  Serial.begin(115200);
+  // Connect WiFi first
+}
+
+void loop() {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin("http://httpbin.org/get");
+    int code = http.GET();
+    if (code > 0) {
+      Serial.println(http.getString());
+    }
+    http.end();
+  }
+  delay(5000);
+}`,
+    exampleId: null,
+  },
+  {
+    id: 'webserver',
+    name: 'WebServer',
+    icon: '🌐',
+    category: 'IoT',
+    include: '<WebServer.h>',
+    desc: 'Create a web server on ESP32. Serve HTML pages, handle REST endpoints, and build web dashboards.',
+    api: [
+      { fn: 'server.begin()', desc: 'Start the web server' },
+      { fn: 'server.on(uri, handler)', desc: 'Register route handler' },
+      { fn: 'server.handleClient()', desc: 'Process incoming requests' },
+      { fn: 'server.send(code, type, content)', desc: 'Send HTTP response' },
+    ],
+    code: `#include <WiFi.h>
+#include <WebServer.h>
+
+WebServer server(80);
+
+void handleRoot() {
+  server.send(200, "text/html", "<h1>ArduSim Web Server</h1>");
+}
+
+void setup() {
+  Serial.begin(115200);
+  // Connect WiFi first
+  server.on("/", handleRoot);
+  server.begin();
+}
+
+void loop() {
+  server.handleClient();
+}`,
+    exampleId: null,
+  },
+
+  /* ── AUDIO ── */
+  {
+    id: 'i2s',
+    name: 'I2S',
+    icon: '🔊',
+    category: 'Audio',
+    include: '<driver/i2s.h>',
+    desc: 'Inter-IC Sound interface for ESP32. Play audio through I2S DACs and amplifiers like MAX98357A.',
+    api: [
+      { fn: 'i2s_driver_install()', desc: 'Install I2S driver' },
+      { fn: 'i2s_set_pin()', desc: 'Configure I2S pins' },
+      { fn: 'i2s_write()', desc: 'Write audio data to I2S' },
+    ],
+    code: `#include <driver/i2s.h>
+
+void setup() {
+  Serial.begin(115200);
+  i2s_config_t i2s_config = {
+    .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
+    .sample_rate = 44100,
+    .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
+  };
+  i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
+  Serial.println("I2S initialized");
+}
+
+void loop() {}`,
+    exampleId: 'esp32_i2s_music_player',
+  },
+
+  /* ── MISC ── */
+  {
+    id: 'arduinojson',
+    name: 'ArduinoJson',
+    icon: '📄',
+    category: 'Utility',
+    include: '<ArduinoJson.h>',
+    desc: 'Parse and serialize JSON data. Essential for IoT APIs, configuration, and data exchange.',
+    api: [
+      { fn: 'deserializeJson(doc, json)', desc: 'Parse JSON string' },
+      { fn: 'serializeJson(doc, buffer)', desc: 'Serialize to JSON string' },
+      { fn: 'doc["key"]', desc: 'Access JSON values' },
+      { fn: 'doc["key"] = value', desc: 'Set JSON values' },
+    ],
+    code: `#include <ArduinoJson.h>
+
+void setup() {
+  Serial.begin(9600);
+
+  StaticJsonDocument<200> doc;
+  doc["sensor"] = "temp";
+  doc["value"] = 23.5;
+  doc["unit"] = "C";
+
+  char buffer[200];
+  serializeJson(doc, buffer);
+  Serial.println(buffer);
+}
+
+void loop() {}`,
+    exampleId: null,
+  },
+  {
+    id: 'tinygps',
+    name: 'TinyGPS++',
+    icon: '🛰️',
+    category: 'Utility',
+    include: '<TinyGPS++.h>',
+    desc: 'Parse GPS NMEA sentences from NEO-6M and other GPS modules. Extracts location, altitude, speed, and satellite data.',
+    api: [
+      { fn: 'gps.encode(c)', desc: 'Feed character from GPS serial' },
+      { fn: 'gps.location.isValid()', desc: 'Check if location is valid' },
+      { fn: 'gps.location.lat()', desc: 'Get latitude' },
+      { fn: 'gps.location.lng()', desc: 'Get longitude' },
+      { fn: 'gps.altitude.meters()', desc: 'Get altitude in meters' },
+      { fn: 'gps.satellites.value()', desc: 'Get satellite count' },
+    ],
+    code: `#include <TinyGPS++.h>
+
+TinyGPSPlus gps;
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  while (Serial.available() > 0) {
+    gps.encode(Serial.read());
+    if (gps.location.isUpdated()) {
+      Serial.print("Lat: "); Serial.println(gps.location.lat(), 6);
+      Serial.print("Lng: "); Serial.println(gps.location.lng(), 6);
+    }
+  }
+}`,
+    exampleId: 'gps_neo_6m_8m_tracker',
+  },
+  {
+    id: 'irremote',
+    name: 'IRremote',
+    icon: '📺',
+    category: 'Utility',
+    include: '<IRremote.h>',
+    desc: 'Send and receive infrared signals. Decode remote control protocols (NEC, Sony, RC5, etc.).',
+    api: [
+      { fn: 'irrecv.decode(&results)', desc: 'Decode incoming IR signal' },
+      { fn: 'irsend.sendNEC(code)', desc: 'Send NEC protocol signal' },
+      { fn: 'irsend.sendSony(code)', desc: 'Send Sony protocol signal' },
+      { fn: 'irrecv.resume()', desc: 'Resume receiving next signal' },
+    ],
+    code: `#include <IRremote.h>
+
+IRrecv irrecv(2);
+decode_results results;
+
+void setup() {
+  Serial.begin(9600);
+  irrecv.enableIRIn();
+}
+
+void loop() {
+  if (irrecv.decode(&results)) {
+    Serial.print("Code: 0x");
+    Serial.println(results.value, HEX);
+    irrecv.resume();
+  }
+}`,
+    exampleId: null,
+  },
+  {
+    id: 'fastled',
+    name: 'FastLED',
+    icon: '🌈',
+    category: 'Output',
+    include: '<FastLED.h>',
+    desc: 'Control addressable LED strips (WS2812B, SK6812, etc.). Extensive color palettes, effects, and animations.',
+    api: [
+      { fn: 'FastLED.addLeds<chip>(leds, n)', desc: 'Add LED strip' },
+      { fn: 'FastLED.setBrightness(n)', desc: 'Set global brightness (0-255)' },
+      { fn: 'leds[i] = CRGB(r,g,b)', desc: 'Set LED color' },
+      { fn: 'fill_rainbow(leds, n, hue)', desc: 'Fill with rainbow' },
+      { fn: 'FastLED.show()', desc: 'Update LEDs' },
+    ],
+    code: `#include <FastLED.h>
+
+#define NUM_LEDS 8
+#define DATA_PIN 6
+
+CRGB leds[NUM_LEDS];
+
+void setup() {
+  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
+  FastLED.setBrightness(50);
+}
+
+void loop() {
+  fill_rainbow(leds, NUM_LEDS, millis() / 10);
+  FastLED.show();
+  delay(30);
+}`,
+    exampleId: 'neopixel_color_cycle',
+  },
+  {
+    id: 'neopixel',
+    name: 'Adafruit NeoPixel',
+    icon: '🌈',
+    category: 'Output',
+    include: '<Adafruit_NeoPixel.h>',
+    desc: 'Control NeoPixel (WS2812B) LED strips and matrices with a simple API.',
+    api: [
+      { fn: 'strip.begin()', desc: 'Initialize strip' },
+      { fn: 'strip.setBrightness(n)', desc: 'Set brightness (0-255)' },
+      { fn: 'strip.setPixelColor(i, r, g, b)', desc: 'Set pixel color' },
+      { fn: 'strip.show()', desc: 'Update strip' },
+      { fn: 'strip.Color(r, g, b)', desc: 'Create color value' },
+    ],
+    code: `#include <Adafruit_NeoPixel.h>
+
+#define NUM_LEDS 8
+#define PIN 6
+
+Adafruit_NeoPixel strip(NUM_LEDS, PIN, NEO_GRB + NEO_KHZ800);
+
+void setup() {
+  strip.begin();
+  strip.setBrightness(50);
+  strip.show();
+}
+
+void loop() {
+  for (int i = 0; i < NUM_LEDS; i++) {
+    strip.setPixelColor(i, strip.Color(255, 0, 0));
+    strip.show();
+    delay(200);
+  }
+}`,
+    exampleId: 'neopixel_color_cycle',
+  },
+  {
+    id: 'mfrc522',
+    name: 'MFRC522',
+    icon: '💳',
+    category: 'Utility',
+    include: '<MFRC522.h>',
+    desc: 'Read and write MIFARE RFID tags using the MFRC522 reader module (13.56 MHz).',
+    api: [
+      { fn: 'mfrc522.PCD_Init()', desc: 'Initialize RFID reader' },
+      { fn: 'mfrc522.PICC_IsNewCardPresent()', desc: 'Check if a card is present' },
+      { fn: 'mfrc522.PICC_ReadCardSerial()', desc: 'Read card UID' },
+      { fn: 'mfrc522.PICC_HaltA()', desc: 'Stop card communication' },
+    ],
+    code: `#include <SPI.h>
+#include <MFRC522.h>
+
+#define SS_PIN 10
+#define RST_PIN 9
+MFRC522 mfrc522(SS_PIN, RST_PIN);
+
+void setup() {
+  Serial.begin(9600);
+  SPI.begin();
+  mfrc522.PCD_Init();
+  Serial.println("RFID Reader ready");
+}
+
+void loop() {
+  if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
+    Serial.print("Card UID: ");
+    for (byte i = 0; i < mfrc522.uid.size; i++) {
+      Serial.print(mfrc522.uid.uidByte[i], HEX);
+    }
+    Serial.println();
+    mfrc522.PICC_HaltA();
+  }
+}`,
+    exampleId: 'rfid_inventory_tracker',
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════
    TUTORIALS / HOW TO USE
    Each guide explains a concept step-by-step and maps to a built-in
    example you can load with one click.
@@ -1823,12 +2707,13 @@ class GuideManager {
     this._activeTab = tab;
     document.querySelectorAll('.guide-tab').forEach(t =>
       t.classList.toggle('active', t.dataset.tab === tab));
-    ['home', 'components', 'tutorials'].forEach(t => {
+    ['home', 'components', 'libraries', 'tutorials'].forEach(t => {
       const pane = document.getElementById(`guide-pane-${t}`);
       if (pane) pane.classList.toggle('active', t === tab);
     });
     if (tab === 'home') this._renderHome();
     if (tab === 'components') this._renderComponents();
+    if (tab === 'libraries') this._renderLibraries();
     if (tab === 'tutorials') this._renderTutorials();
     const body = document.getElementById('guide-body');
     if (body) body.scrollTop = 0;
@@ -2098,6 +2983,134 @@ class GuideManager {
     const placeBtn = root.querySelector('[data-place]');
     if (placeBtn) placeBtn.addEventListener('click', () => {
       this._placeComponent(placeBtn.dataset.place);
+    });
+    const loadBtn = root.querySelector('[data-load]');
+    if (loadBtn) loadBtn.addEventListener('click', () => {
+      this._loadExample(loadBtn.dataset.load);
+    });
+    const copyBtn = root.querySelector('.gc-copy');
+    if (copyBtn) copyBtn.addEventListener('click', () => {
+      const codeEl = root.querySelector('.gc-code code');
+      if (codeEl) this._copyText(codeEl.textContent, copyBtn);
+    });
+  }
+
+  /* ── Libraries ── */
+  _renderLibraries() {
+    const root = document.getElementById('guide-pane-libraries');
+    if (!root) return;
+
+    if (this._selectedLibrary) {
+      this._renderLibraryDetail(root, this._selectedLibrary);
+      return;
+    }
+
+    const categories = {};
+    GUIDE_LIBRARIES.forEach(lib => {
+      if (!categories[lib.category]) categories[lib.category] = [];
+      categories[lib.category].push(lib);
+    });
+
+    const catOrder = ['Core', 'Display', 'Sensors', 'Actuators', 'Wireless', 'IoT', 'Audio', 'Output', 'Utility'];
+
+    let gridHtml = '';
+    catOrder.forEach(cat => {
+      const libs = categories[cat];
+      if (!libs || libs.length === 0) return;
+      gridHtml += `<h3 class="gl-cat-title">${this._esc(cat)}</h3>`;
+      gridHtml += `<div class="gl-grid">`;
+      libs.forEach(lib => {
+        const includeText = Array.isArray(lib.include) ? lib.include.join(', ') : lib.include;
+        gridHtml += `
+          <button class="gl-card" data-lib="${this._esc(lib.id)}">
+            <div class="gl-card-icon">${lib.icon}</div>
+            <div class="gl-card-body">
+              <h4>${this._esc(lib.name)}</h4>
+              <p class="gl-card-include">${this._esc(includeText)}</p>
+              <p class="gl-card-desc">${this._esc(lib.desc.substring(0, 100))}${lib.desc.length > 100 ? '...' : ''}</p>
+            </div>
+          </button>`;
+      });
+      gridHtml += `</div>`;
+    });
+
+    root.innerHTML = `
+      <div class="gt-head">
+        <h2>📚 Arduino Libraries</h2>
+        <p>Complete reference for all Arduino libraries supported by ArduSim. Click any library to see its API, example code, and compatible components.</p>
+        <div class="gl-stats">
+          <span><strong>${GUIDE_LIBRARIES.length}</strong> libraries</span>
+          <span><strong>${catOrder.filter(c => categories[c]).length}</strong> categories</span>
+        </div>
+      </div>
+      ${gridHtml}`;
+
+    root.querySelectorAll('.gl-card').forEach(card => {
+      card.addEventListener('click', () => {
+        this._selectedLibrary = card.dataset.lib;
+        this._renderLibraries();
+      });
+    });
+  }
+
+  _renderLibraryDetail(root, id) {
+    const lib = GUIDE_LIBRARIES.find(l => l.id === id);
+    if (!lib) return;
+
+    const includeText = Array.isArray(lib.include) ? lib.include.join(', ') : lib.include;
+
+    const apiRows = (lib.api || []).map(a => `
+      <tr>
+        <td><code>${this._esc(a.fn)}</code></td>
+        <td>${this._esc(a.desc)}</td>
+      </tr>`).join('');
+
+    root.innerHTML = `
+      <button class="gh-btn gh-btn-ghost gh-btn-sm gc-back">← All libraries</button>
+      <div class="gc-detail">
+        <div class="gc-detail-head">
+          <span class="gc-card-icon gc-card-icon-lg">${lib.icon}</span>
+          <div>
+            <h2>${this._esc(lib.name)}</h2>
+            <span class="gl-lib-cat">${this._esc(lib.category)}</span>
+          </div>
+          <div class="gc-detail-actions">
+            ${lib.exampleId ? `<button class="gh-btn gh-btn-primary gh-btn-sm" data-load="${this._esc(lib.exampleId)}">Load Example</button>` : ''}
+          </div>
+        </div>
+
+        <div class="gc-detail-section">
+          <h3>Description</h3>
+          <p class="gc-long-desc">${this._esc(lib.desc)}</p>
+        </div>
+
+        <div class="gc-detail-section">
+          <h3>Include Directive</h3>
+          <pre class="gc-code"><code>#include ${this._esc(includeText)}</code></pre>
+        </div>
+
+        <div class="gc-detail-section">
+          <h3>API Reference</h3>
+          <div class="gl-api-table-wrap">
+            <table class="gl-api-table">
+              <thead><tr><th>Function</th><th>Description</th></tr></thead>
+              <tbody>${apiRows}</tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="gc-detail-section">
+          <h3>Example Code</h3>
+          <div class="gc-code-wrap">
+            <button class="gh-btn gh-btn-ghost gh-btn-sm gc-copy" title="Copy code">Copy</button>
+            <pre class="gc-code"><code>${this._esc(lib.code.trim())}</code></pre>
+          </div>
+        </div>
+      </div>`;
+
+    root.querySelector('.gc-back').addEventListener('click', () => {
+      this._selectedLibrary = null;
+      this._renderLibraries();
     });
     const loadBtn = root.querySelector('[data-load]');
     if (loadBtn) loadBtn.addEventListener('click', () => {

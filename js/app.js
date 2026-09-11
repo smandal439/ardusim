@@ -592,14 +592,20 @@ class App {
           if (!inst.runtimeState) inst.runtimeState = {};
           inst.runtimeState.line1 = '';
           inst.runtimeState.line2 = '';
+          inst.runtimeState.line3 = '';
+          inst.runtimeState.line4 = '';
         } else if (type === 'lcd_print') {
           if (!inst.runtimeState) inst.runtimeState = {};
           const cursor = (data && data.cursor) || { col: 0, row: 0 };
-          const lineKey = cursor.row === 1 ? 'line2' : 'line1';
+          const is20x4 = inst.type === 'lcd2004_i2c';
+          const cols = is20x4 ? 20 : 16;
+          const maxRow = is20x4 ? 3 : 1;
+          const row = Math.max(0, Math.min(maxRow, cursor.row || 0));
+          const lineKey = 'line' + (row + 1);
           const text = String(data && data.text !== undefined ? data.text : '');
-          const line = String(inst.runtimeState[lineKey] || '').padEnd(16, ' ').slice(0, 16).split('');
-          const col = Math.max(0, Math.min(15, cursor.col || 0));
-          for (let i = 0; i < text.length && col + i < 16; i++) {
+          const line = String(inst.runtimeState[lineKey] || '').padEnd(cols, ' ').slice(0, cols).split('');
+          const col = Math.max(0, Math.min(cols - 1, cursor.col || 0));
+          for (let i = 0; i < text.length && col + i < cols; i++) {
             line[col + i] = text[i];
           }
           inst.runtimeState[lineKey] = line.join('');
@@ -837,14 +843,20 @@ void loop() {
           if (!inst.runtimeState) inst.runtimeState = {};
           inst.runtimeState.line1 = '';
           inst.runtimeState.line2 = '';
+          inst.runtimeState.line3 = '';
+          inst.runtimeState.line4 = '';
         } else if (type === 'lcd_print') {
           if (!inst.runtimeState) inst.runtimeState = {};
           const cursor = (data && data.cursor) || { col: 0, row: 0 };
-          const lineKey = cursor.row === 1 ? 'line2' : 'line1';
+          const is20x4 = inst.type === 'lcd2004_i2c';
+          const cols = is20x4 ? 20 : 16;
+          const maxRow = is20x4 ? 3 : 1;
+          const row = Math.max(0, Math.min(maxRow, cursor.row || 0));
+          const lineKey = 'line' + (row + 1);
           const text = String(data && data.text !== undefined ? data.text : '');
-          const line = String(inst.runtimeState[lineKey] || '').padEnd(16, ' ').slice(0, 16).split('');
-          const col = Math.max(0, Math.min(15, cursor.col || 0));
-          for (let i = 0; i < text.length && col + i < 16; i++) {
+          const line = String(inst.runtimeState[lineKey] || '').padEnd(cols, ' ').slice(0, cols).split('');
+          const col = Math.max(0, Math.min(cols - 1, cursor.col || 0));
+          for (let i = 0; i < text.length && col + i < cols; i++) {
             line[col + i] = text[i];
           }
           inst.runtimeState[lineKey] = line.join('');
