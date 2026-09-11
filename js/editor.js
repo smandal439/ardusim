@@ -195,11 +195,11 @@ void loop() {
         const snippets = [
           {
             label: 'setup', kind: monaco.languages.CompletionItemKind.Snippet, insertTextRules: 4,
-            insertText: 'void setup() {\n\t${1:// Put your setup code here:}\n\n}', documentation: 'Setup function — runs once at start'
+            insertText: 'void setup() {\n\t${1:// Put your setup code here:}\n}', documentation: 'Setup function — runs once at start'
           },
           {
             label: 'loop', kind: monaco.languages.CompletionItemKind.Snippet, insertTextRules: 4,
-            insertText: 'void loop() {\n\t${1:// Put your main code here:}\n\n}', documentation: 'Loop function — runs repeatedly'
+            insertText: 'void loop() {\n\t${1:// Put your main code here:}\n}', documentation: 'Loop function — runs repeatedly'
           },
           {
             label: 'for', kind: monaco.languages.CompletionItemKind.Snippet, insertTextRules: 4,
@@ -209,7 +209,7 @@ void loop() {
             label: 'if', kind: monaco.languages.CompletionItemKind.Snippet, insertTextRules: 4,
             insertText: 'if (${1:condition}) {\n\t${2}\n}'
           },
-          { label: 'Serial.begin', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'Serial.begin(${1:9600});' },
+          { label: 'Serial.begin', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'Serial.begin(${1:115200});' },
           { label: 'Serial.println', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'Serial.println(${1:value});' },
           { label: 'Serial.print', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'Serial.print(${1:value});' },
           { label: 'pinMode', kind: monaco.languages.CompletionItemKind.Function, insertTextRules: 4, insertText: 'pinMode(${1:pin}, ${2:OUTPUT});' },

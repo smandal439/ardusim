@@ -1564,7 +1564,7 @@ void loop() {
 _newProject() {
     // Reset the canvas and editor to a fresh state
     this.canvas?.clearCanvas();
-    this.editor?.setCode('void setup() {\n   // Put your setup code here, to run once when the board starts:\n}\nvoid loop() {\n  // Put your main code here, to run repeatedly indefinitely:\n}');
+    this.editor?.setCode('\n void setup() {\n   // Put your setup code here, to run once when the board starts:\n\n}\nvoid loop() {\n  // Put your main code here, to run repeatedly indefinitely:\n\n}');
     this._board2Code = '';
     const b2ta = document.getElementById('board2-code-textarea');
     if (b2ta) b2ta.value = '';
