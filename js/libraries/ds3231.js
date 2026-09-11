@@ -35,9 +35,28 @@ window.ArduinoLibs['RtcDS3231'] = {
     /* RtcDS3231<TwoWire> Rtc(Wire, 0x68); — with custom address */
     [/RtcDS3231\s*<\s*TwoWire\s*>\s+(\w+)\s*\(\s*Wire\s*,\s*([^)]+)\)\s*;/g, 'var $1 = new _a._RtcDS3231($2);'],
 
-    /* RtcDateTime constructors */
+    /* RtcDateTime type assignments from method calls:
+       RtcDateTime now = Rtc.GetDateTime();  →  var now = Rtc._getDateTime(); */
+    [/RtcDateTime\s+(\w+)\s*=\s*(\w+)\.GetDateTime\s*\(\s*\)\s*;/g, 'var $1 = $2._getDateTime();'],
+
+    /* RtcTemperature type assignments from method calls:
+       RtcTemperature temp = Rtc.GetTemperature();  →  var temp = Rtc._getTemperature(); */
+    [/RtcTemperature\s+(\w+)\s*=\s*(\w+)\.GetTemperature\s*\(\s*\)\s*;/g, 'var $1 = $2._getTemperature();'],
+
+    /* RtcDateTime constructors — bare: RtcDateTime now(2026,9,11,10,30,0); */
     [/RtcDateTime\s+(\w+)\s*\(([^)]*)\)\s*;/g, 'var $1 = new _a._RtcDateTime($2);'],
+
+    /* RtcDateTime without assignment: RtcDateTime now; → var now = {}; */
+    [/RtcDateTime\s+(\w+)\s*;/g, 'var $1 = {};'],
+
+    /* new RtcDateTime(...) expressions */
     [/new\s+RtcDateTime\s*\(([^)]*)\)/g, 'new _a._RtcDateTime($1)'],
+
+    /* RtcTemperature constructors — bare: RtcTemperature t(25.0); */
+    [/RtcTemperature\s+(\w+)\s*\(([^)]*)\)\s*;/g, 'var $1 = new _a._RtcTemperature($2);'],
+
+    /* RtcTemperature without assignment: RtcTemperature temp; → var temp = {}; */
+    [/RtcTemperature\s+(\w+)\s*;/g, 'var $1 = {};'],
 
     /* Method calls */
     [/(\w+)\.Begin\s*\(\)/g, '$1._begin()'],
