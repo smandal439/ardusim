@@ -1833,7 +1833,7 @@ window.loadExamplesFromFiles = async function () {
      'morse_code_using_serial_data','bluetooth_serial_bridge', 'gps_neo_6m_8m_tracker',
     'zigbee_sender_receiver', 'zigbee_sensor_network', 'zigbee_led_control', 
     'serial_plotter_sine_and_triangle','flex_sensor_bending_measurement',
-    'continuous_rotation_servo_control_by_pot'];
+    'continuous_rotation_servo_control_by_pot','ds3231_rtc_clock'];
     
   const sketches = [];
   const cacheBust = '?v=' + Date.now();
