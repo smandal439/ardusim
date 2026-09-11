@@ -2978,15 +2978,40 @@ class DS3231Component extends Component {
     ];
   }
   update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const rs = this.runtimeState;
     const pr = this.props || {};
-    const rs = this.runtimeState || {};
-    rs.hour   = pr.hour   ?? 12;
-    rs.minute = pr.minute ?? 0;
-    rs.second = pr.second ?? 0;
-    rs.day    = pr.day    ?? 1;
-    rs.month  = pr.month  ?? 1;
-    rs.year   = pr.year   ?? 26;
+    if (!rs._initialized) {
+      rs._initialized = true;
+      rs.hour = pr.hour ?? 12;
+      rs.minute = pr.minute ?? 0;
+      rs.second = pr.second ?? 0;
+      rs.day = pr.day ?? 1;
+      rs.month = pr.month ?? 1;
+      rs.year = pr.year ?? 26;
+      rs.temperature = pr.temperature ?? 25.0;
+      rs._lastTick = sim.simTime ?? 0;
+    }
     rs.temperature = pr.temperature ?? 25.0;
+    const now = sim.simTime ?? 0;
+    const elapsed = now - (rs._lastTick || 0);
+    rs._lastTick = now;
+    if (elapsed > 0) {
+      rs.second += Math.floor(elapsed / 1000);
+      while (rs.second >= 60) { rs.second -= 60; rs.minute++; }
+      while (rs.second < 0)  { rs.second += 60; rs.minute--; }
+      while (rs.minute >= 60) { rs.minute -= 60; rs.hour++; }
+      while (rs.minute < 0)  { rs.minute += 60; rs.hour--; }
+      while (rs.hour >= 24)  { rs.hour -= 24; rs.day++; }
+      while (rs.hour < 0)    { rs.hour += 24; rs.day--; }
+      const daysInMonth = [31, (rs.year % 4 === 0 ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      const maxDay = daysInMonth[(rs.month - 1)] || 31;
+      while (rs.day > maxDay) { rs.day -= maxDay; rs.month++; }
+      while (rs.day < 1)      { rs.month--; rs.day += (daysInMonth[(rs.month - 1)] || 31); }
+      while (rs.month > 12) { rs.month -= 12; rs.year++; }
+      while (rs.month < 1)  { rs.month += 12; rs.year--; }
+    }
   }
 }
 
@@ -3009,15 +3034,15 @@ defComp({
     alarm2Hour: 0, alarm2Minute: 0,
     temperature: 25.0,
   },
-  interactive: [
-    { field: 'hour', label: 'Hour', min: 0, max: 23, step: 1, unit: 'h' },
-    { field: 'minute', label: 'Min', min: 0, max: 59, step: 1, unit: 'm' },
-    { field: 'second', label: 'Sec', min: 0, max: 59, step: 1, unit: 's' },
-    { field: 'day', label: 'Day', min: 1, max: 31, step: 1, unit: '' },
-    { field: 'month', label: 'Month', min: 1, max: 12, step: 1, unit: '' },
-    { field: 'year', label: 'Year', min: 0, max: 99, step: 1, unit: '' },
-    { field: 'temperature', label: 'Temp', min: -40, max: 85, step: 0.25, unit: '°C' },
-  ],
+  // interactive: [
+  //   { field: 'hour', label: 'Hour', min: 0, max: 23, step: 1, unit: 'h' },
+  //   { field: 'minute', label: 'Min', min: 0, max: 59, step: 1, unit: 'm' },
+  //   { field: 'second', label: 'Sec', min: 0, max: 59, step: 1, unit: 's' },
+  //   { field: 'day', label: 'Day', min: 1, max: 31, step: 1, unit: '' },
+  //   { field: 'month', label: 'Month', min: 1, max: 12, step: 1, unit: '' },
+  //   { field: 'year', label: 'Year', min: 0, max: 99, step: 1, unit: '' },
+  //   { field: 'temperature', label: 'Temp', min: -40, max: 85, step: 0.25, unit: '°C' },
+  // ],
   pins: [
     { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 14, y: 82, side: 'bottom' },
     { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 30, y: 82, side: 'bottom' },
