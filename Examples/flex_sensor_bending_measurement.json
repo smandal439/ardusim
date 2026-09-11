@@ -1,0 +1,78 @@
+{
+  "id": "flex_sensor_bending_measurement",
+  "name": "flex sensor bending measurement",
+  "icon": "🔧",
+  "desc": "This is a simple example of measuring the bending of a flex sensor using an Arduino. The circuit includes a flex sensor and an Arduino. The code reads the bending values from the flex sensor and prints them to the Serial Monitor.",
+  "tags": [
+    "flex",
+    "sensor",
+    "bending",
+    "measurement"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789143997793_g8lrn",
+        "type": "arduino_uno",
+        "x": 75,
+        "y": 175,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "comp_1789144008551_u7pjb",
+        "type": "flex_sensor",
+        "x": 50,
+        "y": 345,
+        "rotation": 0,
+        "props": {
+          "bend": 4
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1789144020889_0wg4e",
+        "from": {
+          "instId": "comp_1789144008551_u7pjb",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "comp_1789143997793_g8lrn",
+          "pinId": "GND2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789144024234_l8wa7",
+        "from": {
+          "instId": "comp_1789144008551_u7pjb",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "comp_1789143997793_g8lrn",
+          "pinId": "5V"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789144030341_wxsw6",
+        "from": {
+          "instId": "comp_1789144008551_u7pjb",
+          "pinId": "SIG"
+        },
+        "to": {
+          "instId": "comp_1789143997793_g8lrn",
+          "pinId": "A0"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "void setup(){\n  Serial.begin(115200);\n}\nvoid loop(){\n  int bend = analogRead(A0);\n  Serial.print(\"Bend: \");\n  Serial.println(bend);\n  delay(50);\n}"
+}
