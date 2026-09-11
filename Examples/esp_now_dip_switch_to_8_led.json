@@ -2,12 +2,12 @@
   "id": "esp_now_dip_switch_to_8_led",
   "name": "ESP-NOW DIP Switch to 8-LED",
   "icon": "🔧",
-  "desc": "A custom ESP-NOW DIP Switch to 8-LED circuit example.aaaaaaaaaa",
+  "desc": "This example demonstrates how to use ESP-NOW to send the state of a DIP switch from one ESP32 board to another, which controls an array of 8 LEDs. The first ESP32 reads the state of the DIP switch and sends the data wirelessly to the second ESP32, which updates the LED array accordingly. The code for both boards is provided, and the current state of the switches is printed to the Serial Monitor.",
   "tags": [
-    "custom",
-    "circuit",
-    "espnow"
-
+    "espnow",
+    "communication",
+    "dip_switch",
+    "led_array"
   ],
   "circuit": {
     "components": [

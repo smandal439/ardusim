@@ -2,12 +2,11 @@
   "id": "print_binary_data",
   "name": "print binary data",
   "icon": "🔧",
-  "desc": "A custom print binary data circuit example.",
+  "desc": "This example demonstrates how to print binary data using an Arduino. The circuit includes an Arduino Uno, and the code converts a decimal number into its binary representation and prints it to the Serial Monitor. The example also includes a function to format the binary output for better readability. This is useful for understanding how binary data is represented and manipulated in microcontroller programming.",
   "tags": [
-    "custom",
-    "circuit",
+    
     "binary",
-    "data"
+    "data","formatting"
   ],
   "circuit": {
     "components": [

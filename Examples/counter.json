@@ -2,7 +2,7 @@
   "id": "counter",
   "name": "Counter with Button",
   "icon": "🔢",
-  "desc": "Count button presses and show on serial monitor",
+  "desc": "This is a simple example of using a push button to increment a counter displayed on the Serial Monitor with an Arduino. The button is connected to digital pin 2, and each time the button is pressed, the counter increments by one. The built-in LED on pin 13 will blink briefly to indicate that the button has been pressed. The code also sends messages to the Serial Monitor indicating the current count.",
   "tags": [
     "intermediate",
     "counter",

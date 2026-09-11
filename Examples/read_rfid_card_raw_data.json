@@ -2,10 +2,11 @@
   "id": "read_rfid_card_raw_data",
   "name": "Read RFID Card Raw Data",
   "icon": "🔧",
-  "desc": "A custom Read RFID Card Raw Data circuit example.",
+  "desc": "This example demonstrates how to read raw data from an RFID card using an MFRC522 reader and an ESP32. The circuit includes the MFRC522 RFID reader and the ESP32 development board. The code initializes the RFID reader and continuously checks for the presence of an RFID card, printing its UID and other details to the Serial Monitor.",
   "tags": [
     "rfid",
-    "sensor"
+    "sensor",
+    "esp32"
   ],
   "circuit": {
     "components": [

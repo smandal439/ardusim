@@ -2,7 +2,7 @@
   "id": "esp32_i2s_local_radio_player",
   "name": "ESP32 I2S Local Radio Player",
   "icon": "🔧",
-  "desc": "A custom ESP32 I2S Local Radio Player circuit example.",
+  "desc": "This example demonstrates how to use the ESP32's I2S interface to play local audio files on a connected speaker. The circuit includes an ESP32 development board, an audio amplifier, and a speaker. The code reads audio files from the ESP32's storage and outputs them through the I2S interface.",
   "tags": [
     "music",
     "esp32",

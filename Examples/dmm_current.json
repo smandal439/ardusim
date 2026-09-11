@@ -1,8 +1,14 @@
 {
-  "version": "1.1",
-  "savedAt": "2026-08-29T10:00:00.000Z",
+  "id": "dmm_current",
   "name": "DMM Current Measurement",
-  "code": "/*\n * DMM Current Measurement\n * The DMM is placed in series to measure current through an LED.\n * Circuit: 5V → R1 → DMM → LED → GND\n */\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"DMM Current Demo\");\n  Serial.println(\"Current = V / R\");\n}\n\nvoid loop() {\n  delay(1000);\n}",
+  "icon": "🔧",
+  "desc": "This is a simple example of measuring current with a digital multimeter (DMM) using an Arduino. The DMM is placed in series to measure current through an LED. The circuit includes a 5V power source, a resistor, a DMM, an LED, and a ground connection. The code reads the current value from the DMM and prints it to the Serial Monitor.",
+  "tags": [
+    "custom",
+    "circuit",
+    "dmm",
+    "current"
+  ],
   "circuit": {
     "components": [
       {
@@ -10,67 +16,107 @@
         "type": "power_5v",
         "x": 50,
         "y": 100,
-        "width": 30,
-        "height": 30,
-        "props": {},
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {}
       },
       {
         "id": "r1",
         "type": "resistor",
         "x": 120,
         "y": 100,
-        "width": 20,
-        "height": 60,
-        "props": { "value": 220 },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
       },
       {
         "id": "dmm1",
         "type": "multimeter",
         "x": 200,
         "y": 80,
-        "width": 180,
-        "height": 130,
-        "props": { "mode": "A_DC" },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {
+          "mode": "A_DC",
+          "hold": false,
+          "rel": false,
+          "range_auto": true
+        }
       },
       {
         "id": "led1",
         "type": "led",
         "x": 420,
         "y": 100,
-        "width": 30,
-        "height": 60,
-        "props": { "color": "#ff3333", "colorName": "Red" },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
       },
       {
         "id": "gnd1",
         "type": "power_gnd",
         "x": 490,
         "y": 180,
-        "width": 30,
-        "height": 30,
-        "props": {},
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {}
       }
     ],
     "wires": [
-      { "id": "w1", "from": { "instId": "pwr1", "pinId": "vcc" }, "to": { "instId": "r1", "pinId": "p1" }, "color": "#e74c3c", "waypoints": [] },
-      { "id": "w2", "from": { "instId": "r1", "pinId": "p2" }, "to": { "instId": "dmm1", "pinId": "probe_red" }, "color": "#e74c3c", "waypoints": [] },
-      { "id": "w3", "from": { "instId": "dmm1", "pinId": "probe_com" }, "to": { "instId": "led1", "pinId": "anode" }, "color": null, "waypoints": [] },
-      { "id": "w4", "from": { "instId": "led1", "pinId": "cathode" }, "to": { "instId": "gnd1", "pinId": "gnd" }, "color": null, "waypoints": [] }
+      {
+        "id": "w1",
+        "from": {
+          "instId": "pwr1",
+          "pinId": "vcc"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": "#e74c3c",
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "dmm1",
+          "pinId": "probe_red"
+        },
+        "color": "#e74c3c",
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "dmm1",
+          "pinId": "probe_com"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "gnd1",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      }
     ]
-  }
+  },
+  "code": "/*\n * DMM Current Measurement\n * The DMM is placed in series to measure current through an LED.\n * Circuit: 5V → R1 → DMM → LED → GND\n */\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"DMM Current Demo\");\n  Serial.println(\"Current = V / R\");\n}\n\nvoid loop() {\n  delay(1000);\n}"
 }

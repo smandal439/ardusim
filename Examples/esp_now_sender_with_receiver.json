@@ -2,7 +2,7 @@
   "id": "esp_now_sender_with_receiver",
   "name": "ESP-NOW Sender-with-Receiver",
   "icon": "🔧",
-  "desc": "A custom ESP-NOW Sender-with-Receiver circuit example.",
+  "desc": "This example demonstrates how to use ESP-NOW to send data from one ESP32 board (Sender) to another ESP32 board (Receiver). The Sender sends a counter and temperature value every second, while the Receiver receives the data and displays it on an LCD. The code for both boards is provided, and the current state of the data is printed to the Serial Monitor.",
   "tags": [
     "espnow",
     "sender"

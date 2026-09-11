@@ -2,7 +2,7 @@
   "id": "lcd",
   "name": "LCD",
   "icon": "🔧",
-  "desc": "A custom LCD circuit example.",
+  "desc": "This example demonstrates how to use an LCD (Liquid Crystal Display) with an Arduino to display a simple \"Hello, World!\" message. The circuit includes an Arduino Uno and a 16x2 LCD module. The code initializes the LCD, sets the cursor position, and prints the message on the display. The current time in seconds since the program started is also displayed on the second line of the LCD.",
   "tags": [
     "lcd",
     "display",

@@ -2,7 +2,7 @@
   "id": "ultrasonic_distance_pulsein",
   "name": "Ultrasonic Distance pulseIn",
   "icon": "🔧",
-  "desc": "A custom Ultrasonic Distance pulseIn circuit example.",
+  "desc": "This is a simple example of measuring distance using an ultrasonic sensor (HC-SR04) with an Arduino. The circuit includes an ultrasonic sensor, an LED, and a resistor. The code uses the pulseIn function to measure the duration of the echo signal and calculates the distance based on that duration. The distance is then printed to the Serial Monitor.",
   "tags": [
     "ultrasonic",
     "distance",

@@ -2,7 +2,7 @@
   "id": "lm35_temperature_sensor",
   "name": "LM35 Temperature Sensor",
   "icon": "🔧",
-  "desc": "A custom LM35 Temperature Sensor circuit example.",
+  "desc": "This example demonstrates how to use an LM35 Temperature Sensor with an Arduino. The circuit includes an Arduino Uno and an LM35 temperature sensor. The code reads the analog voltage from the sensor and converts it to a temperature value in Celsius and Fahrenheit.",
   "tags": [
     "temperature",
     "sensor",

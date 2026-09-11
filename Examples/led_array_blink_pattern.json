@@ -2,10 +2,8 @@
   "id": "led_array_blink_pattern",
   "name": "led array blink pattern",
   "icon": "🔧",
-  "desc": "A custom led array blink pattern circuit example.",
+  "desc": "This example demonstrates how to create a custom LED array blink pattern using an Arduino. The circuit includes an Arduino Uno and an array of LEDs. The code controls the LEDs to create various blinking patterns.",
   "tags": [
-    "custom",
-    "circuit",
     "neopixel",
     "led array"
   ],

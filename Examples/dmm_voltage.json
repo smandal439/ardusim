@@ -1,8 +1,12 @@
 {
-  "version": "1.1",
-  "savedAt": "2026-08-29T10:00:00.000Z",
+  "id": "dmm_voltage",
   "name": "DMM Voltage Measurement",
-  "code": "/*\n * DMM Voltage Measurement\n * Use a multimeter to measure voltage across an LED circuit.\n * The DMM is connected in parallel across the resistor.\n */\n\nvoid setup() {\n  pinMode(13, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"DMM Voltage Demo\");\n}\n\nvoid loop() {\n  digitalWrite(13, HIGH);\n  Serial.println(\"LED ON — measure voltage across R1\");\n  delay(2000);\n  digitalWrite(13, LOW);\n  Serial.println(\"LED OFF\");\n  delay(2000);\n}",
+  "icon": "🔧",
+  "desc": "This is a simple example of measuring voltage with a digital multimeter (DMM) using an Arduino. The DMM is connected in parallel to measure the voltage across an LED. The circuit includes a 5V power source, a resistor, a DMM, an LED, and a ground connection. The code reads the voltage value from the DMM and prints it to the Serial Monitor.",
+  "tags": [
+    "dmm",
+    "voltage"
+  ],
   "circuit": {
     "components": [
       {
@@ -10,56 +14,114 @@
         "type": "arduino_uno",
         "x": 200,
         "y": 80,
-        "width": 230,
-        "height": 150,
-        "props": { "label": "UNO" },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
       },
       {
         "id": "led1",
         "type": "led",
         "x": 130,
         "y": 100,
-        "width": 30,
-        "height": 60,
-        "props": { "color": "#ff3333", "colorName": "Red" },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
       },
       {
         "id": "r1",
         "type": "resistor",
         "x": 130,
         "y": 220,
-        "width": 20,
-        "height": 60,
-        "props": { "value": 220 },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
       },
       {
         "id": "dmm1",
         "type": "multimeter",
         "x": 400,
         "y": 80,
-        "width": 180,
-        "height": 130,
-        "props": { "mode": "V_DC" },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {
+          "mode": "V_DC",
+          "hold": false,
+          "rel": false,
+          "range_auto": true
+        }
       }
     ],
     "wires": [
-      { "id": "w1", "from": { "instId": "b1", "pinId": "D13" }, "to": { "instId": "led1", "pinId": "anode" }, "color": null, "waypoints": [] },
-      { "id": "w2", "from": { "instId": "led1", "pinId": "cathode" }, "to": { "instId": "r1", "pinId": "p1" }, "color": null, "waypoints": [] },
-      { "id": "w3", "from": { "instId": "r1", "pinId": "p2" }, "to": { "instId": "b1", "pinId": "GND1" }, "color": null, "waypoints": [] },
-      { "id": "w4", "from": { "instId": "dmm1", "pinId": "probe_red" }, "to": { "instId": "r1", "pinId": "p1" }, "color": "#e74c3c", "waypoints": [] },
-      { "id": "w5", "from": { "instId": "dmm1", "pinId": "probe_com" }, "to": { "instId": "r1", "pinId": "p2" }, "color": "#333333", "waypoints": [] }
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "dmm1",
+          "pinId": "probe_red"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": "#e74c3c",
+        "waypoints": []
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "dmm1",
+          "pinId": "probe_com"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "color": "#333333",
+        "waypoints": []
+      }
     ]
-  }
+  },
+  "code": "/*\n * DMM Voltage Measurement\n * Use a multimeter to measure voltage across an LED circuit.\n * The DMM is connected in parallel across the resistor.\n */\n\nvoid setup() {\n  pinMode(13, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"DMM Voltage Demo\");\n}\n\nvoid loop() {\n  digitalWrite(13, HIGH);\n  Serial.println(\"LED ON — measure voltage across R1\");\n  delay(2000);\n  digitalWrite(13, LOW);\n  Serial.println(\"LED OFF\");\n  delay(2000);\n}"
 }

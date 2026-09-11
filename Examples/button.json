@@ -2,7 +2,7 @@
   "id": "button",
   "name": "Button Input",
   "icon": "🔘",
-  "desc": "Read a push button and control an LED",
+  "desc": "This is a simple example of using a push button to control an LED with an Arduino. The button is connected to digital pin 2, and the built-in LED on pin 13 will turn on when the button is pressed and turn off when the button is released. The code also sends messages to the Serial Monitor indicating the button's state.",
   "tags": [
     "beginner",
     "input",

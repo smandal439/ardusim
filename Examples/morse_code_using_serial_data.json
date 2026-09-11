@@ -2,10 +2,11 @@
   "id": "morse_code_using_serial_data",
   "name": "MORSE CODE USING SERIAL DATA",
   "icon": "🔧",
-  "desc": "A custom MORSE CODE USING SERIAL DATA circuit example.",
+  "desc": "This example demonstrates how to use an Arduino to convert serial data into Morse code and flash it using an LED. The circuit includes an Arduino Uno and an LED connected to pin 13. The code reads characters from the Serial Monitor, converts them into Morse code, and flashes the LED accordingly. Dots are represented by short flashes, and dashes are represented by longer flashes. Spaces between letters and words are also handled appropriately.",
   "tags": [
-    "custom",
-    "circuit"
+    "morse code",
+    "serial communication",
+    "led"
   ],
   "circuit": {
     "components": [

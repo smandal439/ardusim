@@ -2,7 +2,7 @@
   "id": "blink",  
   "name": "Blink LED",
   "icon": "🔴",
-  "desc": "blink led",
+  "desc": "This is a simple example of blinking an LED using an Arduino. The built-in LED on pin 13 will turn on for one second, then turn off for one second, repeatedly. The code also sends messages to the Serial Monitor indicating the LED's state.",
   "tags": [
     "beginner",
     "output",

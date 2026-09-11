@@ -1,8 +1,13 @@
 {
-  "version": "1.1",
-  "savedAt": "2026-08-23T10:39:16.414Z",
+  "id": "multi_colour_led_blink",
   "name": "multi colour led blink",
-  "code": "void setup() {\r\n// setup code\r\n  pinMode(0, OUTPUT);\r\n  pinMode(1, OUTPUT);\r\n  pinMode(2, OUTPUT);\r\n  pinMode(3, OUTPUT);\r\n  pinMode(4, OUTPUT);\r\n  pinMode(5, OUTPUT);\r\n}\r\nvoid loop() {\r\n// loop code\r\n  digitalWrite(0, HIGH);\r\n  digitalWrite(1, HIGH);\r\n  digitalWrite(2, HIGH);\r\n  digitalWrite(3, HIGH);\r\n  digitalWrite(4, HIGH);\r\n  digitalWrite(5, HIGH);\r\n  delay(5000);\r\n  digitalWrite(0, LOW);\r\n  digitalWrite(1, LOW);\r\n  digitalWrite(3, LOW);\r\n  digitalWrite(2, LOW);\r\n  digitalWrite(4, LOW);\r\n  digitalWrite(5, LOW);\r\n  delay(1000);\r\n}",
+  "icon": "🔧",
+  "desc": "This example demonstrates how to create a multi-color LED blink pattern using an Arduino. The circuit includes an Arduino Uno and multiple LEDs of different colors (Red, Green, Blue, Yellow, Orange, White). The code controls the LEDs to turn on and off in a specific sequence, creating a blinking effect with different colors.",
+  "tags": [
+    "led",
+    "blinking",
+    "multi-color"
+  ],
   "circuit": {
     "components": [
       {
@@ -10,242 +15,142 @@
         "type": "arduino_uno",
         "x": 85,
         "y": 25,
-        "width": 230,
-        "height": 150,
+        "rotation": 0,
         "props": {
           "label": "UNO"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "comp_1787479900960_a0f5q",
         "type": "led",
         "x": 105,
         "y": 250,
-        "width": 30,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "color": "#ff3333",
           "colorName": "Red"
-        },
-        "runtimeState": {
-          "val": 1,
-          "lit": true,
-          "brightness": 0.928976919549213,
-          "current_mA": 12.244897959183673,
-          "overload": false,
-          "blown": false,
-          "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "comp_1787479900960_khqv2",
         "type": "resistor",
         "x": 110,
         "y": 330,
-        "width": 20,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Î©"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "comp_1787480583271_ow2q0",
         "type": "led_green",
         "x": 175,
         "y": 245,
-        "width": 30,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "color": "#33ff66",
           "colorName": "Green"
-        },
-        "runtimeState": {
-          "val": 1,
-          "lit": true,
-          "brightness": 0.928976919549213,
-          "current_mA": 12.244897959183673,
-          "overload": false,
-          "blown": false,
-          "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "comp_1787480635156_480d3",
         "type": "led_blue",
         "x": 240,
         "y": 245,
-        "width": 30,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "color": "#3399ff",
           "colorName": "Blue"
-        },
-        "runtimeState": {
-          "val": 1,
-          "lit": true,
-          "brightness": 0.928976919549213,
-          "current_mA": 12.244897959183673,
-          "overload": false,
-          "blown": false,
-          "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "comp_1787480641338_2thon",
         "type": "led_yellow",
         "x": 295,
         "y": 245,
-        "width": 30,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "color": "#ffee33",
           "colorName": "Yellow"
-        },
-        "runtimeState": {
-          "val": 1,
-          "lit": true,
-          "brightness": 0.928976919549213,
-          "current_mA": 12.244897959183673,
-          "overload": false,
-          "blown": false,
-          "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "comp_1787480645176_jnb9p",
         "type": "led_orange",
         "x": 350,
         "y": 240,
-        "width": 30,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "color": "#ff8833",
           "colorName": "Orange"
-        },
-        "runtimeState": {
-          "val": 1,
-          "lit": true,
-          "brightness": 0.928976919549213,
-          "current_mA": 12.244897959183673,
-          "overload": false,
-          "blown": false,
-          "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "comp_1787480649869_wa50q",
         "type": "led_white",
         "x": 400,
         "y": 240,
-        "width": 30,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "color": "#ffffff",
           "colorName": "White"
-        },
-        "runtimeState": {
-          "val": 1,
-          "lit": true,
-          "brightness": 0.928976919549213,
-          "current_mA": 12.244897959183673,
-          "overload": false,
-          "blown": false,
-          "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "comp_1787480669456_bgwwq",
         "type": "resistor",
         "x": 180,
         "y": 330,
-        "width": 20,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Î©"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "comp_1787480671586_do3e3",
         "type": "resistor",
         "x": 240,
         "y": 330,
-        "width": 20,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Î©"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "comp_1787480673408_8d9ph",
         "type": "resistor",
         "x": 300,
         "y": 325,
-        "width": 20,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Î©"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "comp_1787480675180_u2znz",
         "type": "resistor",
         "x": 355,
         "y": 330,
-        "width": 20,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Î©"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "comp_1787480677178_4uwr8",
         "type": "resistor",
         "x": 405,
         "y": 330,
-        "width": 20,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Î©"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       }
     ],
     "wires": [
@@ -542,5 +447,6 @@
         ]
       }
     ]
-  }
+  },
+  "code": "void setup() {\r\n// setup code\r\n  pinMode(0, OUTPUT);\r\n  pinMode(1, OUTPUT);\r\n  pinMode(2, OUTPUT);\r\n  pinMode(3, OUTPUT);\r\n  pinMode(4, OUTPUT);\r\n  pinMode(5, OUTPUT);\r\n}\r\nvoid loop() {\r\n// loop code\r\n  digitalWrite(0, HIGH);\r\n  digitalWrite(1, HIGH);\r\n  digitalWrite(2, HIGH);\r\n  digitalWrite(3, HIGH);\r\n  digitalWrite(4, HIGH);\r\n  digitalWrite(5, HIGH);\r\n  delay(5000);\r\n  digitalWrite(0, LOW);\r\n  digitalWrite(1, LOW);\r\n  digitalWrite(3, LOW);\r\n  digitalWrite(2, LOW);\r\n  digitalWrite(4, LOW);\r\n  digitalWrite(5, LOW);\r\n  delay(1000);\r\n}"
 }

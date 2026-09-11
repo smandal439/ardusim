@@ -2,7 +2,7 @@
   "id": "7408_test_with_logic_analyzer",
   "name": "7408 test with logic analyzer",
   "icon": "🔧",
-  "desc": "A custom 7408 test with logic analyzer circuit example.",
+  "desc": "This is a simple test of the 7408 IC using a logic analyzer to observe the output. The 7408 is a quad 2-input AND gate IC. In this test, we will use two channels of a function generator to provide input signals to the AND gate and observe the output on the logic analyzer.",
   "tags": [
     "custom",
     "circuit"

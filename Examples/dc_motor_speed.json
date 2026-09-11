@@ -2,7 +2,7 @@
   "id": "dc_motor_speed",
   "name": "DC Motor Speed",
   "icon": "🔧",
-  "desc": "A custom DC Motor Speed circuit example.",
+  "desc": "This is a simple example of controlling the speed of a DC motor using a potentiometer and PWM (Pulse Width Modulation) with an Arduino. The potentiometer is connected to analog pin A0, and the motor is connected to digital pin 9. By turning the potentiometer, you can adjust the speed of the motor. The code reads the potentiometer value, maps it to a PWM value, and writes it to the motor pin. The current potentiometer value and corresponding motor speed are also printed to the Serial Monitor.",
   "tags": [
     "motor",
     "speed",

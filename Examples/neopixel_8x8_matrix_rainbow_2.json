@@ -2,7 +2,7 @@
   "id": "neopixel_8x8_matrix_rainbow_2",
   "name": "NeoPixel 8x8 Matrix Rainbow 2",
   "icon": "🔧",
-  "desc": "A custom NeoPixel 8x8 Matrix Rainbow 2 circuit example.",
+  "desc": "This example demonstrates how to create a vibrant rainbow pattern on an 8x8 NeoPixel matrix using an Arduino. The circuit includes an Arduino Uno and an 8x8 NeoPixel matrix. The code generates a scrolling rainbow gradient across the matrix, creating a visually appealing effect. The brightness of the matrix can be adjusted in the code to save power and protect your eyes.",
   "tags": [
     "neopixel",
     "rainbow",

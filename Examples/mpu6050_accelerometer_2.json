@@ -2,11 +2,11 @@
   "id": "mpu6050_accelerometer_2",
   "name": "MPU6050 Accelerometer 2",
   "icon": "🔧",
-  "desc": "A custom MPU6050 Accelerometer 2 circuit example.",
+  "desc": "This example demonstrates how to use an MPU6050 Accelerometer and Gyroscope sensor with an Arduino. The circuit includes an Arduino Uno and an MPU6050 sensor. The code reads the accelerometer and gyroscope data from the sensor and prints the values to the Serial Monitor.",
   "tags": [
     "accelerometer",
     "gyroscope",
-    "sensor"
+    "sensor","MPU6050"
   ],
   "circuit": {
     "components": [

@@ -1,8 +1,12 @@
 {
-  "version": "1.1",
-  "savedAt": "2026-08-29T10:00:00.000Z",
-  "name": "DMM Resistance Check",
-  "code": "/*\n * DMM Resistance Check\n * Use the multimeter in resistance mode to measure a resistor.\n * Connect the DMM probes across the resistor.\n */\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"DMM Resistance Demo\");\n  Serial.println(\"Connect DMM across R1 to measure\");\n}\n\nvoid loop() {\n  delay(1000);\n}",
+  "id": "dmm_resistance",
+  "name": "DMM Resistance Measurement",
+  "icon": "🔧",
+  "desc": "This is a simple example of measuring resistance with a digital multimeter (DMM) using an Arduino. The circuit includes two resistors and a DMM. The code reads the resistance values from the DMM and prints them to the Serial Monitor.",
+  "tags": [
+    "dmm",
+    "resistance"
+  ],
   "circuit": {
     "components": [
       {
@@ -10,55 +14,104 @@
         "type": "resistor",
         "x": 130,
         "y": 100,
-        "width": 20,
-        "height": 60,
-        "props": { "value": 470 },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {
+          "value": 470,
+          "unit": "Ω"
+        }
       },
       {
         "id": "r2",
         "type": "resistor",
         "x": 200,
         "y": 100,
-        "width": 20,
-        "height": 60,
-        "props": { "value": 1000 },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {
+          "value": 1000,
+          "unit": "Ω"
+        }
       },
       {
         "id": "dmm1",
         "type": "multimeter",
         "x": 100,
         "y": 200,
-        "width": 180,
-        "height": 130,
-        "props": { "mode": "RES" },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {
+          "mode": "RES",
+          "hold": false,
+          "rel": false,
+          "range_auto": true
+        }
       },
       {
         "id": "dmm2",
         "type": "multimeter",
         "x": 300,
         "y": 200,
-        "width": 180,
-        "height": 130,
-        "props": { "mode": "CONT" },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "rotation": 0,
+        "props": {
+          "mode": "CONT",
+          "hold": false,
+          "rel": false,
+          "range_auto": true
+        }
       }
     ],
     "wires": [
-      { "id": "w1", "from": { "instId": "r1", "pinId": "p1" }, "to": { "instId": "dmm1", "pinId": "probe_red" }, "color": "#e74c3c", "waypoints": [] },
-      { "id": "w2", "from": { "instId": "r1", "pinId": "p2" }, "to": { "instId": "dmm1", "pinId": "probe_com" }, "color": "#333333", "waypoints": [] },
-      { "id": "w3", "from": { "instId": "r2", "pinId": "p1" }, "to": { "instId": "dmm2", "pinId": "probe_red" }, "color": "#e74c3c", "waypoints": [] },
-      { "id": "w4", "from": { "instId": "r2", "pinId": "p2" }, "to": { "instId": "dmm2", "pinId": "probe_com" }, "color": "#333333", "waypoints": [] }
+      {
+        "id": "w1",
+        "from": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "dmm1",
+          "pinId": "probe_red"
+        },
+        "color": "#e74c3c",
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "dmm1",
+          "pinId": "probe_com"
+        },
+        "color": "#333333",
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "r2",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "dmm2",
+          "pinId": "probe_red"
+        },
+        "color": "#e74c3c",
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "r2",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "dmm2",
+          "pinId": "probe_com"
+        },
+        "color": "#333333",
+        "waypoints": []
+      }
     ]
-  }
+  },
+  "code": "/*\n * DMM Resistance Check\n * Use the multimeter in resistance mode to measure a resistor.\n * Connect the DMM probes across the resistor.\n */\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"DMM Resistance Demo\");\n  Serial.println(\"Connect DMM across R1 to measure\");\n}\n\nvoid loop() {\n  delay(1000);\n}"
 }

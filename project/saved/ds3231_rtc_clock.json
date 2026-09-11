@@ -1,16 +1,11 @@
 {
   "id": "ds3231_rtc_clock",
   "name": "DS3231 RTC Clock",
-  "icon": "🕐",
-  "desc": "Read real-time clock data from a DS3231 module over I2C and display time + temperature on the Serial Monitor",
+  "icon": "🔧",
+  "desc": "A custom DS3231 RTC Clock circuit example.",
   "tags": [
-    "beginner",
-    "rtc",
-    "ds3231",
-    "i2c",
-    "clock",
-    "time",
-    "temperature"
+    "custom",
+    "circuit"
   ],
   "circuit": {
     "components": [

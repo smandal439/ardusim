@@ -1,8 +1,12 @@
 {
-  "version": "1.1",
-  "savedAt": "2026-08-24T09:34:16.865Z",
+  "id": "traffic_light",
   "name": "Traffic Light",
-  "code": "/*\n * Traffic Light Simulator\n * Red=12, Yellow=11, Green=10\n */\n\nint redPin    = 12;\nint yellowPin = 11;\nint greenPin  = 10;\n\nvoid allOff() {\n  digitalWrite(redPin,    LOW);\n  digitalWrite(yellowPin, LOW);\n  digitalWrite(greenPin,  LOW);\n}\n\nvoid setup() {\n  pinMode(redPin,    OUTPUT);\n  pinMode(yellowPin, OUTPUT);\n  pinMode(greenPin,  OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Traffic light started\");\n}\n\nvoid loop() {\n  // Red\n  allOff();\n  digitalWrite(redPin, HIGH);\n  Serial.println(\"RED - STOP\");\n  delay(3000);\n\n  // Red + Yellow (prepare to go)\n  digitalWrite(yellowPin, HIGH);\n  delay(1000);\n\n  // Green\n  allOff();\n  digitalWrite(greenPin, HIGH);\n  Serial.println(\"GREEN - GO\");\n  delay(3000);\n\n  // Yellow\n  allOff();\n  digitalWrite(yellowPin, HIGH);\n  Serial.println(\"YELLOW - SLOW DOWN\");\n  delay(1000);\n}",
+  "icon": "🔧",
+  "desc": "This example demonstrates how to control a traffic light using an Arduino. The circuit includes an Arduino Uno and three LEDs representing the red, yellow, and green lights of a traffic signal. The code cycles through the lights in a typical traffic light sequence, with appropriate delays for each light. This example is useful for understanding basic timing and control of outputs in microcontroller programming.",
+  "tags": [
+    "traffic",
+    "light"
+  ],
   "circuit": {
     "components": [
       {
@@ -10,104 +14,76 @@
         "type": "arduino_uno",
         "x": -65,
         "y": 285,
-        "width": 230,
-        "height": 150,
+        "rotation": 0,
         "props": {
           "label": "UNO"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "red",
         "type": "led",
         "x": 200,
         "y": 220,
-        "width": 30,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "color": "#ff3333",
           "colorName": "Red"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "yel",
         "type": "led",
         "x": 270,
         "y": 220,
-        "width": 30,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "color": "#ffee33",
           "colorName": "Yellow"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "grn",
         "type": "led",
         "x": 330,
         "y": 220,
-        "width": 30,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "color": "#33ff66",
           "colorName": "Green"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "rr",
         "type": "resistor",
         "x": 205,
         "y": 345,
-        "width": 20,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Î©"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "ry",
         "type": "resistor",
         "x": 275,
         "y": 345,
-        "width": 20,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Î©"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "rg",
         "type": "resistor",
         "x": 335,
         "y": 325,
-        "width": 20,
-        "height": 60,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Î©"
-        },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        }
       }
     ],
     "wires": [
@@ -252,5 +228,6 @@
         "waypoints": []
       }
     ]
-  }
+  },
+  "code": "/*\n * Traffic Light Simulator\n * Red=12, Yellow=11, Green=10\n */\n\nint redPin    = 12;\nint yellowPin = 11;\nint greenPin  = 10;\n\nvoid allOff() {\n  digitalWrite(redPin,    LOW);\n  digitalWrite(yellowPin, LOW);\n  digitalWrite(greenPin,  LOW);\n}\n\nvoid setup() {\n  pinMode(redPin,    OUTPUT);\n  pinMode(yellowPin, OUTPUT);\n  pinMode(greenPin,  OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Traffic light started\");\n}\n\nvoid loop() {\n  // Red\n  allOff();\n  digitalWrite(redPin, HIGH);\n  Serial.println(\"RED - STOP\");\n  delay(3000);\n\n  // Red + Yellow (prepare to go)\n  digitalWrite(yellowPin, HIGH);\n  delay(1000);\n\n  // Green\n  allOff();\n  digitalWrite(greenPin, HIGH);\n  Serial.println(\"GREEN - GO\");\n  delay(3000);\n\n  // Yellow\n  allOff();\n  digitalWrite(yellowPin, HIGH);\n  Serial.println(\"YELLOW - SLOW DOWN\");\n  delay(1000);\n}"
 }
