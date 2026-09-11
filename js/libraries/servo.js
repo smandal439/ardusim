@@ -24,14 +24,24 @@ window.ArduinoLibs['Servo'] = {
 
   runtime: function(self) {
     return {
-      servoAttach: function(varName, pin) { /* tracked by canvas */ },
+      servoAttach: function(varName, pin) {
+        if (varName && typeof varName === 'object') varName._servoPin = pin;
+      },
       servoWrite: function(varName, angle) {
         if (varName && varName._ssId) {
           var ch = self._softSerial && self._softSerial[varName._ssId];
           if (ch) { self._serialLog('[SoftwareSerial] write(' + angle + ')\n', 'data'); }
           return;
         }
-        self._emitEvent('servo', { angle: Math.max(0, Math.min(180, angle)) });
+        angle = Math.max(0, Math.min(180, Number(angle) || 0));
+        self._emitEvent('servo', { angle: angle });
+        var pin = (varName && varName._servoPin) || null;
+        if (pin !== null) {
+          var pwm = Math.round((angle / 180) * 255);
+          var key = 'pin_' + pin;
+          self.pinStates[key] = pwm;
+          self._emitPinChange(key, pwm);
+        }
       },
       servoWriteMs: function(varName, us) { /* advanced */ },
       servoRead: function(varName) { return 90; },
