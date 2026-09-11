@@ -21,7 +21,9 @@
         "y": 100,
         "width": 230,
         "height": 150,
-        "props": { "label": "UNO" },
+        "props": {
+          "label": "UNO"
+        },
         "runtimeState": {},
         "selected": false,
         "rotation": 0
@@ -71,7 +73,7 @@
         "height": 60,
         "props": {
           "value": 220,
-          "unit": "\u03a9"
+          "unit": "Ω"
         },
         "runtimeState": {},
         "selected": false,
@@ -81,54 +83,96 @@
     "wires": [
       {
         "id": "w1",
-        "from": { "instId": "b1", "pinId": "5V" },
-        "to": { "instId": "rtc1", "pinId": "VCC" },
+        "from": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "rtc1",
+          "pinId": "VCC"
+        },
         "color": null,
         "waypoints": []
       },
       {
         "id": "w2",
-        "from": { "instId": "rtc1", "pinId": "GND" },
-        "to": { "instId": "b1", "pinId": "GND1" },
+        "from": {
+          "instId": "rtc1",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
         "color": null,
         "waypoints": []
       },
       {
         "id": "w3",
-        "from": { "instId": "b1", "pinId": "A5" },
-        "to": { "instId": "rtc1", "pinId": "SCL" },
+        "from": {
+          "instId": "b1",
+          "pinId": "A5"
+        },
+        "to": {
+          "instId": "rtc1",
+          "pinId": "SCL"
+        },
         "color": null,
         "waypoints": []
       },
       {
         "id": "w4",
-        "from": { "instId": "b1", "pinId": "A4" },
-        "to": { "instId": "rtc1", "pinId": "SDA" },
+        "from": {
+          "instId": "b1",
+          "pinId": "A4"
+        },
+        "to": {
+          "instId": "rtc1",
+          "pinId": "SDA"
+        },
         "color": null,
         "waypoints": []
       },
       {
         "id": "w5",
-        "from": { "instId": "b1", "pinId": "D13" },
-        "to": { "instId": "led1", "pinId": "anode" },
+        "from": {
+          "instId": "b1",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
         "color": null,
         "waypoints": []
       },
       {
         "id": "w6",
-        "from": { "instId": "led1", "pinId": "cathode" },
-        "to": { "instId": "r1", "pinId": "p1" },
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
         "color": null,
         "waypoints": []
       },
       {
         "id": "w7",
-        "from": { "instId": "r1", "pinId": "p2" },
-        "to": { "instId": "b1", "pinId": "GND1" },
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
         "color": null,
         "waypoints": []
       }
     ]
   },
-  "code": "/*\n * DS3231 RTC Clock\n *\n * Wiring:\n *   DS3231 VCC -> 5V\n *   DS3231 GND -> GND\n *   DS3231 SCL -> A5\n *   DS3231 SDA -> A4\n *   LED anode  -> D13 (via 220\u03a9 resistor)\n *\n * Reads time and temperature from the DS3231 every second.\n * LED on D13 toggles each second as a visual heartbeat.\n * Use the interactive sliders on the DS3231 to set the initial time.\n */\n\n#include <Wire.h>\n#include <RtcDS3231.h>\n\nRtcDS3231<TwoWire> Rtc(Wire);\n\nconst int LED_PIN = 13;\nbool ledState = false;\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(LED_PIN, OUTPUT);\n\n  Rtc.Begin();\n\n  // Uncomment the next line to set time from compile timestamp:\n  // Rtc.SetDateTime(RtcDateTime(__DATE__, __TIME__));\n\n  RtcDateTime now = Rtc.GetDateTime();\n  if (!now.IsValid()) {\n    Serial.println(\"RTC lost power — setting time from compile date\");\n    Rtc.SetDateTime(RtcDateTime(__DATE__, __TIME__));\n  }\n\n  Serial.println(\"DS3231 RTC Clock started\");\n  Serial.println(\"-----------------------------\");\n}\n\nvoid loop() {\n  RtcDateTime now = Rtc.GetDateTime();\n\n  // Format: HH:MM:SS\n  if (now.Hour() < 10) Serial.print(\"0\");\n  Serial.print(now.Hour());\n  Serial.print(\":\");\n  if (now.Minute() < 10) Serial.print(\"0\");\n  Serial.print(now.Minute());\n  Serial.print(\":\");\n  if (now.Second() < 10) Serial.print(\"0\");\n  Serial.print(now.Second());\n\n  // Date: DD/MM/YYYY\n  Serial.print(\"  \");\n  if (now.Day() < 10) Serial.print(\"0\");\n  Serial.print(now.Day());\n  Serial.print(\"/\");\n  if (now.Month() < 10) Serial.print(\"0\");\n  Serial.print(now.Month());\n  Serial.print(\"/20\");\n  if (now.Year() < 10) Serial.print(\"0\");\n  Serial.print(now.Year());\n\n  // Temperature\n  RtcTemperature temp = Rtc.GetTemperature();\n  Serial.print(\"  \");\n  Serial.print(temp.AsFloatDegC(), 1);\n  Serial.println(\" C\");\n\n  // Blink LED every second\n  ledState = !ledState;\n  digitalWrite(LED_PIN, ledState ? HIGH : LOW);\n\n  delay(1000);\n}"
+  "code": "/*\n * DS3231 RTC Clock\n *\n * Wiring:\n *   DS3231 VCC -> 5V\n *   DS3231 GND -> GND\n *   DS3231 SCL -> A5\n *   DS3231 SDA -> A4\n *   LED anode  -> D13 (via 220Ω resistor)\n *\n * Reads time and temperature from the DS3231 every second.\n * LED on D13 toggles each second as a visual heartbeat.\n * Use the interactive sliders on the DS3231 to set the initial time.\n */\n\n#include <Wire.h>\n#include <RtcDS3231.h>\n\nRtcDS3231<TwoWire> Rtc(Wire);\n\nconst int LED_PIN = 13;\nbool ledState = false;\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(LED_PIN, OUTPUT);\n\n  Rtc.Begin();\n\n  // Uncomment the next line to set time from compile timestamp:\n  // Rtc.SetDateTime(RtcDateTime(__DATE__, __TIME__));\n\n  RtcDateTime now = Rtc.GetDateTime();\n  if (!now.IsValid()) {\n    Serial.println(\"RTC lost power — setting time from compile date\");\n    Rtc.SetDateTime(RtcDateTime(__DATE__, __TIME__));\n  }\n\n  Serial.println(\"DS3231 RTC Clock started\");\n  Serial.println(\"-----------------------------\");\n}\n\nvoid loop() {\n  RtcDateTime now = Rtc.GetDateTime();\n\n  // Format: HH:MM:SS\n  if (now.Hour() < 10) Serial.print(\"0\");\n  Serial.print(now.Hour());\n  Serial.print(\":\");\n  if (now.Minute() < 10) Serial.print(\"0\");\n  Serial.print(now.Minute());\n  Serial.print(\":\");\n  if (now.Second() < 10) Serial.print(\"0\");\n  Serial.print(now.Second());\n\n  // Date: DD/MM/YYYY\n  Serial.print(\"  \");\n  if (now.Day() < 10) Serial.print(\"0\");\n  Serial.print(now.Day());\n  Serial.print(\"/\");\n  if (now.Month() < 10) Serial.print(\"0\");\n  Serial.print(now.Month());\n  Serial.print(\"/\");\n  Serial.print(now.Year());\n\n  // Temperature\n  RtcTemperature temp = Rtc.GetTemperature();\n  Serial.print(\"  \");\n  Serial.print(temp.AsFloatDegC(), 1);\n  Serial.println(\" C\");\n\n  // Blink LED every second\n  ledState = !ledState;\n  digitalWrite(LED_PIN, ledState ? HIGH : LOW);\n\n  delay(1000);\n}"
 }
