@@ -1,0 +1,127 @@
+{
+  "id": "continuous_rotation_servo_control_by_pot",
+  "name": "Continuous Rotation Servo control by pot",
+  "icon": "🔧",
+  "desc": "A custom Continuous Rotation Servo control by pot circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 100,
+        "y": 120,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "sv1",
+        "type": "servo_continuous",
+        "x": 420,
+        "y": 130,
+        "rotation": 0,
+        "props": {
+          "speed": 0
+        }
+      },
+      {
+        "id": "comp_1789151197820_7iv4z",
+        "type": "potentiometer",
+        "x": 10,
+        "y": 230,
+        "rotation": 0,
+        "props": {
+          "value": 512,
+          "maxValue": 1023,
+          "resistance": 10000
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "D9"
+        },
+        "to": {
+          "instId": "sv1",
+          "pinId": "signal"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789150819267_s3dkh",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "sv1",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789150995752_td8k4",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "sv1",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789151202406_yd3e8",
+        "from": {
+          "instId": "comp_1789151197820_7iv4z",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789151204630_hft9m",
+        "from": {
+          "instId": "comp_1789151197820_7iv4z",
+          "pinId": "vcc"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789151206830_uboc8",
+        "from": {
+          "instId": "comp_1789151197820_7iv4z",
+          "pinId": "wiper"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "A0"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "#include <Servo.h>\n\nServo myservo;  // Create servo object to control a 360-degree servo\nint potpin = A0;  // Analog pin connected to the potentiometer\nint val;    // Variable to read the value from the analog pin\n\nvoid setup() {\n  myservo.attach(9);  // Attaches the servo on pin 9 to the servo object\n}\n\nvoid loop() {\n  val = analogRead(potpin);            // Reads the potentiometer value (0 to 1023)\n  val = map(val, 0, 1023, 0, 180);     // Scales it to use with the servo (0 to 180)\n  myservo.write(val);                  // Sets the servo speed and direction\n  delay(15);                           // Waits for the servo to get there\n}\n"
+}
