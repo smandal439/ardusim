@@ -84,7 +84,7 @@ window.ArduinoLibs['RtcDS3231'] = {
 
   constants: {
     DS3231_ADDRESS: 0x68,
-    DS3231 CENTURY: 0x80,
+    DS3231_CENTURY: 0x80,
     DS3231_Control: 0x0E,
     DS3231_StatusReg: 0x0F,
     DS3231_Temperature: 0x11,
