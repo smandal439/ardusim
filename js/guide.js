@@ -1354,6 +1354,53 @@ void loop(){
 }`,
     exampleId: 'hc05_bluetooth_led',
   },
+
+  ds3231: {
+    id: 'ds3231',
+    name: 'DS3231 RTC Module',
+    icon: '🕐',
+    category: 'Sensors',
+    longDesc: 'DS3231 high-precision RTC (Real-Time Clock) module with battery backup — I2C @ 0x68. Provides year/month/day/hour/minute/second with ±2ppm accuracy, built-in temperature sensor, and two programmable alarms. Time is simulated in real-time during simulation.',
+    use: 'Data logging with timestamps, clocks, scheduled events, alarm systems. Read time with the RTClib or Wire library and print to Serial/LCD.',
+    pins: {
+      VCC: { label: 'VCC', type: 'power', desc: '5V power supply.' },
+      GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+      SCL: { label: 'SCL', type: 'digital', desc: 'I2C clock line — connect to A5 (Uno) or SCL.' },
+      SDA: { label: 'SDA', type: 'digital', desc: 'I2C data line — connect to A4 (Uno) or SDA.' },
+    },
+    props: {
+      hour: 'Initial hour (0–23).',
+      minute: 'Initial minute (0–59).',
+      second: 'Initial second (0–59).',
+      day: 'Initial day (1–31).',
+      month: 'Initial month (1–12).',
+      year: 'Initial year (0–99, represents 2000–2099).',
+      temperature: 'Simulated temperature in °C.',
+    },
+    wiring: 'VCC→5V, GND→GND, SCL→A5, SDA→A4.',
+    code: `#include <Wire.h>
+#include <RtcDS3231.h>
+
+RtcDS3231<TwoWire> Rtc(Wire);
+
+void setup(){
+  Serial.begin(9600);
+  Rtc.Begin();
+  Rtc.SetDateTime(RtcDateTime(__DATE__, __TIME__));
+}
+
+void loop(){
+  RtcDateTime now = Rtc.GetDateTime();
+  Serial.print("Time: ");
+  Serial.print(now.Hour());   Serial.print(":");
+  Serial.print(now.Minute()); Serial.print(":");
+  Serial.println(now.Second());
+
+  float temp = Rtc.GetTemperature().AsFloatDegC();
+  Serial.print("Temp: "); Serial.print(temp); Serial.println(" C");
+  delay(1000);
+}`,
+  },
 };
 
 /* ═══════════════════════════════════════════════════════════════

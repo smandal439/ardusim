@@ -1,7 +1,7 @@
 /**
  * Wire (I2C) Library Plugin for ArduSim
  *
- * Provides I2C simulation with MPU6050 (0x68) register emulation.
+ * Provides I2C simulation with MPU6050 (0x68) and DS3231 (0x68) register emulation.
  * Supports: begin, requestFrom, beginTransmission, endTransmission, write, read, available.
  *
  * Usage in Arduino code:
@@ -46,7 +46,25 @@ window.ArduinoLibs['Wire'] = {
       wireRequestFrom: function(addr, qty) {
         qty = Number(qty) || 0;
         if ((Number(addr) || 0) === 0x68) {
-          self._wireRxQueue = self._mpuReadRegs(self._wireRegPtr ?? 0x3B, qty);
+          /* Dispatch to whichever I2C device at 0x68 is present */
+          const canvas = window.CircuitCanvas;
+          const components = (canvas && Array.isArray(canvas.components)) ? canvas.components : [];
+          const hasMpu   = components.some(c => c.type === 'mpu6050');
+          const hasDs3231 = components.some(c => c.type === 'ds3231');
+          if (hasMpu && !hasDs3231) {
+            self._wireRxQueue = self._mpuReadRegs(self._wireRegPtr ?? 0x3B, qty);
+          } else if (hasDs3231 && !hasMpu) {
+            self._wireRxQueue = self._ds3231ReadRegs(self._wireRegPtr ?? 0x00, qty);
+          } else if (hasMpu && hasDs3231) {
+            /* Both present — use last-used register range to guess intent */
+            if (self._wireRegPtr >= 0x00 && self._wireRegPtr <= 0x13) {
+              self._wireRxQueue = self._ds3231ReadRegs(self._wireRegPtr, qty);
+            } else {
+              self._wireRxQueue = self._mpuReadRegs(self._wireRegPtr ?? 0x3B, qty);
+            }
+          } else {
+            self._wireRxQueue = [];
+          }
         } else {
           self._wireRxQueue = [];
         }

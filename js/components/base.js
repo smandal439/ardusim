@@ -389,7 +389,7 @@ const COMPONENT_CATALOG = [
   { category: 'Input', ids: ['push_button', 'potentiometer', 'joystick', 'keypad_4x4', 'rotary_encoder', 'dip_switch'] },
   { category: 'Actuators', ids: ['servo', 'dc_motor', 'relay', 'stepper_28byj', 'l298n', 'servo_continuous'] },
   { category: 'Audio', ids: ['max98357a', 'speaker_4ohm'] },
-  { category: 'Sensors', ids: ['dht11', 'hcsr04', 'ldr', 'pir', 'mpu6050', 'ir_obstacle', 'flex_sensor', 'thermistor', 'lm35_sensor', 'bme280', 'vl53l0x', 'rc522', 'ir_receiver', 'hc05', 'gps_neo6m'] },
+  { category: 'Sensors', ids: ['dht11', 'hcsr04', 'ldr', 'pir', 'mpu6050', 'ds3231', 'ir_obstacle', 'flex_sensor', 'thermistor', 'lm35_sensor', 'bme280', 'vl53l0x', 'rc522', 'ir_receiver', 'hc05', 'gps_neo6m'] },
   { category: 'Passive', ids: ['resistor', 'capacitor', 'breadboard', 'breadboard_small', 'diode_1n4007'] },
   { category: 'Power', ids: ['power_5v', 'power_gnd', 'mb102_power', 'bench_power_supply'] },
   {

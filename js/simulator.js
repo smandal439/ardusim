@@ -1395,6 +1395,56 @@ class ArduinoSimulator {
     return out;
   }
 
+  /* ══════════════ DS3231 RTC (0x68) register read emulation ══════════════
+     Serves Wire.requestFrom(0x68, n) starting at the register pointer set
+     by a preceding Wire.write(reg). Values come from the placed ds3231
+     component's runtime state (time, date, temperature). */
+  _ds3231ReadRegs(start, qty) {
+    const canvas = window.CircuitCanvas;
+    const inst = (canvas && Array.isArray(canvas.components))
+      ? canvas.components.find(c => c.type === 'ds3231') : null;
+    let hour = 12, minute = 0, second = 0;
+    let day = 1, month = 1, year = 26;
+    let temp = 25.0;
+    if (inst) {
+      const rs = inst.runtimeState || {};
+      const pr = inst.props || {};
+      hour   = rs.hour   ?? pr.hour   ?? 12;
+      minute = rs.minute ?? pr.minute ?? 0;
+      second = rs.second ?? pr.second ?? 0;
+      day    = rs.day    ?? pr.day    ?? 1;
+      month  = rs.month  ?? pr.month  ?? 1;
+      year   = rs.year   ?? pr.year   ?? 26;
+      temp   = rs.temperature ?? pr.temperature ?? 25.0;
+    }
+    const toBCD = (v) => ((Math.floor(v / 10) & 0x0F) << 4) | (Math.floor(v) % 10);
+    const tempInt  = Math.floor(temp);
+    const tempFrac = Math.round((temp - tempInt) * 4); /* 0.25°C steps → 0..3 */
+    const regs = {};
+    /* Time & date registers (DS3231 datasheet Table 3) */
+    regs[0x00] = toBCD(second) & 0x7F;  /* 0x00 = seconds (bit 7 = CH, 0 = running) */
+    regs[0x01] = toBCD(minute);          /* 0x01 = minutes */
+    regs[0x02] = toBCD(hour);            /* 0x02 = hours (24h mode) */
+    regs[0x03] = 1;                      /* 0x03 = day of week (1-7) */
+    regs[0x04] = toBCD(day);             /* 0x04 = date */
+    regs[0x05] = toBCD(month);           /* 0x05 = month + century bit */
+    regs[0x06] = toBCD(year);            /* 0x06 = year (00-99) */
+    /* Alarm 1 registers (0x07-0x0A) — default 0 */
+    regs[0x07] = 0; regs[0x08] = 0; regs[0x09] = 0; regs[0x0A] = 0;
+    /* Alarm 2 registers (0x0B-0x0D) — default 0 */
+    regs[0x0B] = 0; regs[0x0C] = 0; regs[0x0D] = 0;
+    /* Control register 0x0E: INTCN=1 (no square wave), default */
+    regs[0x0E] = 0x04;
+    /* Status register 0x0F */
+    regs[0x0F] = 0x00;
+    /* Temperature registers 0x11-0x12 (signed 8.2 fixed point) */
+    regs[0x11] = tempInt & 0xFF;
+    regs[0x12] = (tempFrac & 0x03) << 6;
+    const out = [];
+    for (let i = 0; i < qty; i++) out.push(regs[(start + i) & 0xFF] || 0);
+    return out;
+  }
+
   /* Pausable sketch delay — records start/duration so pause() can freeze it */
   _delayPromise(realMs) {
     const entry = {

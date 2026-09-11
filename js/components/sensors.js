@@ -2966,6 +2966,309 @@ registerComponent('flex_sensor', FlexSensorComponent);
 registerComponent('thermistor', ThermistorComponent);
 registerComponent('mpu6050', MPU6050Component);
 
+/* ═══════════════════════ DS3231 RTC Class ═══════════════════════ */
+
+class DS3231Component extends Component {
+  getPins() {
+    return [
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 14, y: 82, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 30, y: 82, side: 'bottom' },
+      { id: 'SCL', label: 'SCL', type: PIN_TYPE.DIGITAL, x: 46, y: 82, side: 'bottom' },
+      { id: 'SDA', label: 'SDA', type: PIN_TYPE.DIGITAL, x: 62, y: 82, side: 'bottom' },
+    ];
+  }
+  update(canvas) {
+    const pr = this.props || {};
+    const rs = this.runtimeState || {};
+    rs.hour   = pr.hour   ?? 12;
+    rs.minute = pr.minute ?? 0;
+    rs.second = pr.second ?? 0;
+    rs.day    = pr.day    ?? 1;
+    rs.month  = pr.month  ?? 1;
+    rs.year   = pr.year   ?? 26;
+    rs.temperature = pr.temperature ?? 25.0;
+  }
+}
+
+registerComponent('ds3231', DS3231Component);
+
+/* ═══════════════════════ DS3231 RTC Module (I2C @ 0x68) ═══════════════════════ */
+
+defComp({
+  id: 'ds3231',
+  name: 'DS3231 RTC Module',
+  category: 'Sensors',
+  icon: '🕐',
+  desc: 'DS3231 high-precision RTC module with battery backup — I2C @ 0x68. Provides real-time clock with date, temperature, and two alarms',
+  width: 76,
+  height: 82,
+  defaultProps: {
+    hour: 12, minute: 0, second: 0,
+    day: 1, month: 1, year: 26,
+    alarm1Hour: 0, alarm1Minute: 0, alarm1Second: 0,
+    alarm2Hour: 0, alarm2Minute: 0,
+    temperature: 25.0,
+  },
+  interactive: [
+    { field: 'hour', label: 'Hour', min: 0, max: 23, step: 1, unit: 'h' },
+    { field: 'minute', label: 'Min', min: 0, max: 59, step: 1, unit: 'm' },
+    { field: 'second', label: 'Sec', min: 0, max: 59, step: 1, unit: 's' },
+    { field: 'day', label: 'Day', min: 1, max: 31, step: 1, unit: '' },
+    { field: 'month', label: 'Month', min: 1, max: 12, step: 1, unit: '' },
+    { field: 'year', label: 'Year', min: 0, max: 99, step: 1, unit: '' },
+    { field: 'temperature', label: 'Temp', min: -40, max: 85, step: 0.25, unit: '°C' },
+  ],
+  pins: [
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 14, y: 82, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 30, y: 82, side: 'bottom' },
+    { id: 'SCL', label: 'SCL', type: PIN_TYPE.DIGITAL, x: 46, y: 82, side: 'bottom' },
+    { id: 'SDA', label: 'SDA', type: PIN_TYPE.DIGITAL, x: 62, y: 82, side: 'bottom' },
+  ],
+  step(inst, sim) {
+    if (!sim?.isRunning) return;
+    if (!inst.runtimeState) inst.runtimeState = {};
+
+    const rs = inst.runtimeState;
+    const pr = inst.props || {};
+
+    /* On first tick, seed the RTC from the interactive props or system clock */
+    if (!rs._initialized) {
+      rs._initialized = true;
+      rs.hour = pr.hour ?? 12;
+      rs.minute = pr.minute ?? 0;
+      rs.second = pr.second ?? 0;
+      rs.day = pr.day ?? 1;
+      rs.month = pr.month ?? 1;
+      rs.year = pr.year ?? 26;
+      rs.temperature = pr.temperature ?? 25.0;
+      rs._lastTick = sim.simTime ?? 0;
+      rs.alarm1Enabled = false;
+      rs.alarm2Enabled = false;
+      rs.alarm1Flag = false;
+      rs.alarm2Flag = false;
+      rs.osf = false;
+    }
+
+    /* Advance clock by elapsed sim-time */
+    const now = sim.simTime ?? 0;
+    const elapsed = now - (rs._lastTick || 0);
+    rs._lastTick = now;
+    if (elapsed > 0) {
+      rs.second += Math.floor(elapsed / 1000);
+      while (rs.second >= 60) { rs.second -= 60; rs.minute++; }
+      while (rs.second < 0)  { rs.second += 60; rs.minute--; }
+      while (rs.minute >= 60) { rs.minute -= 60; rs.hour++; }
+      while (rs.minute < 0)  { rs.minute += 60; rs.hour--; }
+      while (rs.hour >= 24)  { rs.hour -= 24; rs.day++; }
+      while (rs.hour < 0)    { rs.hour += 24; rs.day--; }
+      const daysInMonth = [31, (rs.year % 4 === 0 ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      const maxDay = daysInMonth[(rs.month - 1)] || 31;
+      while (rs.day > maxDay) { rs.day -= maxDay; rs.month++; }
+      while (rs.day < 1)      { rs.month--; rs.day += (daysInMonth[(rs.month - 1)] || 31); }
+      while (rs.month > 12) { rs.month -= 12; rs.year++; }
+      while (rs.month < 1)  { rs.month += 12; rs.year--; }
+    }
+
+    /* Check alarm1 (seconds match) */
+    if (rs.alarm1Enabled && !rs.alarm1Flag) {
+      if (rs.second === (pr.alarm1Second ?? 0) &&
+          rs.minute === (pr.alarm1Minute ?? 0) &&
+          rs.hour   === (pr.alarm1Hour ?? 0)) {
+        rs.alarm1Flag = true;
+        self._serialLog('[DS3231] Alarm 1 triggered!\n', 'system');
+      }
+    }
+    /* Check alarm2 (minutes match) */
+    if (rs.alarm2Enabled && !rs.alarm2Flag) {
+      if (rs.minute === (pr.alarm2Minute ?? 0) &&
+          rs.hour   === (pr.alarm2Hour ?? 0)) {
+        rs.alarm2Flag = true;
+        self._serialLog('[DS3231] Alarm 2 triggered!\n', 'system');
+      }
+    }
+  },
+
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const isRunning = !!(sim && sim.isRunning);
+
+    const rs = inst.runtimeState || {};
+    const pr = inst.props || {};
+    const hour   = rs.hour   ?? pr.hour   ?? 12;
+    const minute = rs.minute ?? pr.minute ?? 0;
+    const second = rs.second ?? pr.second ?? 0;
+    const day    = rs.day    ?? pr.day    ?? 1;
+    const month  = rs.month  ?? pr.month  ?? 1;
+    const year   = rs.year   ?? pr.year   ?? 26;
+    const temp   = rs.temperature ?? pr.temperature ?? 25.0;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    /* Helper */
+    const drawRR = (rx, ry, rw, rh, rad) => {
+      ctx.beginPath();
+      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+
+    /* ── 1. PCB Body (blue DS3231 breakout board) ── */
+    ctx.fillStyle = '#0a2240';
+    drawRR(0, 0, 76, 68, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#1a4a7a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    /* Inner border line */
+    ctx.strokeStyle = 'rgba(100, 180, 255, 0.15)';
+    ctx.lineWidth = 0.5;
+    drawRR(2, 2, 72, 64, 3);
+    ctx.stroke();
+
+    /* ── 2. DS3231 IC Chip ── */
+    const icX = 22, icY = 6, icW = 32, icH = 16;
+    ctx.fillStyle = '#181818';
+    drawRR(icX, icY, icW, icH, 1.5);
+    ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 0.4;
+    ctx.stroke();
+
+    /* Pin 1 dot */
+    ctx.fillStyle = '#555';
+    ctx.beginPath(); ctx.arc(icX + 3, icY + 3, 0.8, 0, Math.PI * 2); ctx.fill();
+
+    /* Chip marking */
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = 'bold 3.8px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('DS3231', icX + 16, icY + 9);
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.font = '2.8px monospace';
+    ctx.fillText('MAXIM', icX + 16, icY + 13);
+
+    /* IC pins (SMD pads) */
+    ctx.fillStyle = '#b0b0b0';
+    for (let p = 0; p < 8; p++) {
+      ctx.fillRect(icX + 3 + p * 3.5, icY - 1, 2, 1.5);  // top
+      ctx.fillRect(icX + 3 + p * 3.5, icY + icH - 0.5, 2, 1.5); // bottom
+    }
+
+    /* ── 3. Battery holder (CR2032) ── */
+    ctx.fillStyle = '#888';
+    ctx.beginPath(); ctx.arc(64, 14, 8, 0, Math.PI * 2); ctx.fill();
+    const battGrad = ctx.createRadialGradient(64, 14, 2, 64, 14, 8);
+    battGrad.addColorStop(0, '#ccc');
+    battGrad.addColorStop(0.6, '#999');
+    battGrad.addColorStop(1, '#666');
+    ctx.fillStyle = battGrad;
+    ctx.beginPath(); ctx.arc(64, 14, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#aaa';
+    ctx.font = 'bold 3px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('CR2032', 64, 15);
+
+    /* ── 4. Crystal / oscillator ── */
+    ctx.fillStyle = '#c0c0c0';
+    drawRR(6, 6, 10, 5, 1);
+    ctx.fill();
+    ctx.fillStyle = '#666';
+    ctx.font = '2.5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('32.768', 11, 10);
+
+    /* ── 5. SMD passive components ── */
+    ctx.fillStyle = '#222';
+    [[6, 16], [6, 22], [18, 22], [42, 22]].forEach(([rx, ry]) => {
+      ctx.fillRect(rx, ry, 5, 2.5);
+      ctx.fillStyle = '#999';
+      ctx.fillRect(rx, ry, 0.7, 2.5);
+      ctx.fillRect(rx + 4.3, ry, 0.7, 2.5);
+      ctx.fillStyle = '#222';
+    });
+
+    /* ── 6. Power indicator LED (green) ── */
+    ctx.fillStyle = isRunning ? '#00ff44' : '#223322';
+    ctx.beginPath(); ctx.arc(6, 30, 1.5, 0, Math.PI * 2); ctx.fill();
+    if (isRunning) {
+      ctx.shadowColor = '#00ff44'; ctx.shadowBlur = 4;
+      ctx.fill(); ctx.shadowBlur = 0;
+    }
+
+    /* ── 7. Silkscreen label ── */
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 4.5px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('DS3231', 38, 40);
+    ctx.fillStyle = 'rgba(100,180,255,0.6)';
+    ctx.font = '3px monospace';
+    ctx.fillText('I2C 0x68', 38, 45);
+
+    /* ── 8. Live Time Display Screen ── */
+    ctx.fillStyle = '#050e1a';
+    drawRR(4, 50, 68, 14, 2);
+    ctx.fill();
+    ctx.strokeStyle = isRunning ? 'rgba(0,200,255,0.4)' : 'rgba(40,60,90,0.5)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    const pad2 = (n) => String(Math.floor(n)).padStart(2, '0');
+    const timeStr = `${pad2(hour)}:${pad2(minute)}:${pad2(second)}`;
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 6px "JetBrains Mono", monospace';
+    ctx.fillStyle = isRunning ? '#00e5ff' : '#546e7a';
+    if (isRunning) { ctx.shadowColor = '#00e5ff'; ctx.shadowBlur = 3; }
+    ctx.fillText(timeStr, 38, 60);
+    ctx.shadowBlur = 0;
+
+    const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const dateStr = `${pad2(day)} ${months[(month - 1)] || '???'} 20${pad2(year)}`;
+    ctx.font = '3px "JetBrains Mono", monospace';
+    ctx.fillStyle = isRunning ? '#80cbc4' : '#455a64';
+    ctx.fillText(dateStr, 38, 64);
+
+    /* Temperature readout */
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 3px "JetBrains Mono", monospace';
+    ctx.fillStyle = isRunning ? '#ffab40' : '#455a64';
+    ctx.fillText(`${temp.toFixed(1)}°C`, 70, 56);
+
+    /* ── 9. Pin Headers (bottom) ── */
+    ctx.fillStyle = '#111';
+    drawRR(6, 68, 64, 5, 1); ctx.fill();
+
+    const pinXs = [14, 30, 46, 62];
+    const pinLabels = ['VCC', 'GND', 'SCL', 'SDA'];
+    pinXs.forEach((px, i) => {
+      /* Gold pad */
+      ctx.fillStyle = '#d4af37';
+      ctx.fillRect(px - 1.5, 68.5, 3, 3);
+      /* Silver pin lead */
+      const pinGrad = ctx.createLinearGradient(px - 1, 71, px + 1, 82);
+      pinGrad.addColorStop(0, '#aaa');
+      pinGrad.addColorStop(0.5, '#fff');
+      pinGrad.addColorStop(1, '#666');
+      ctx.fillStyle = pinGrad;
+      ctx.fillRect(px - 0.9, 71, 1.8, 11);
+    });
+
+    /* Pin labels */
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 3.5px monospace';
+    ctx.textAlign = 'center';
+    pinXs.forEach((px, i) => ctx.fillText(pinLabels[i], px, 67));
+
+    /* ── 10. Selection highlight ── */
+    if (inst.selected && typeof drawSelectionRect === 'function') {
+      drawSelectionRect(ctx, -3, -2, 82, 86);
+    }
+
+    ctx.restore();
+  }
+});
+
 /* ═══════════════════════ GPS NEO-6M/8M Module ═══════════════════════ */
 
 defComp({
