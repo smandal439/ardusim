@@ -1,0 +1,54 @@
+{
+  "id": "stm32f746_button",
+  "name": "STM32 Button + LED",
+  "icon": "🔘",
+  "desc": "STM32F746G-DISCO — press an external button on D2 (PG6) to control the on-board green LED LD1 on D13 (PI1)",
+  "tags": [
+    "stm32",
+    "beginner",
+    "input",
+    "button",
+    "LED"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "stm32f746_disco",
+        "x": 200,
+        "y": 80
+      },
+      {
+        "id": "btn1",
+        "type": "push_button",
+        "x": 120,
+        "y": 330
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "btn1",
+          "pinId": "p1"
+        }
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "btn1",
+          "pinId": "p3"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        }
+      }
+    ]
+  },
+  "code": "/*\n * STM32F746G-DISCO Button + Onboard LED\n * Button on D2 (PG6), onboard LED LD1 on D13 (PI1)\n * Uses INPUT_PULLUP so no external resistor needed.\n * Press the button → LD1 turns ON.\n */\n\nint buttonPin = 2;   // D2 = PG6\nint ledPin = 13;     // D13 = PI1 = LD1 (green)\n\nvoid setup() {\n  pinMode(buttonPin, INPUT_PULLUP);\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"STM32F746 button test ready\");\n}\n\nvoid loop() {\n  int state = digitalRead(buttonPin);\n\n  if (state == LOW) {\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"Button PRESSED — LD1 ON\");\n  } else {\n    digitalWrite(ledPin, LOW);\n  }\n\n  delay(50);\n}"
+}

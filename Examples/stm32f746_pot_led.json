@@ -1,0 +1,110 @@
+{
+  "id": "stm32f746_pot_led",
+  "name": "STM32 Potentiometer + LED",
+  "icon": "🎚️",
+  "desc": "STM32F746G-DISCO — read a potentiometer on A0 (PA0) and control LED brightness on D5 (PI0) with PWM",
+  "tags": [
+    "stm32",
+    "beginner",
+    "analog",
+    "sensor",
+    "pwm"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "stm32f746_disco",
+        "x": 200,
+        "y": 80
+      },
+      {
+        "id": "pot1",
+        "type": "potentiometer",
+        "x": 100,
+        "y": 300
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 320,
+        "y": 300
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 320,
+        "y": 380
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "3V3"
+        },
+        "to": {
+          "instId": "pot1",
+          "pinId": "vcc"
+        }
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "pot1",
+          "pinId": "wiper"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "A0"
+        }
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "pot1",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        }
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "b1",
+          "pinId": "D5"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        }
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        }
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND2"
+        }
+      }
+    ]
+  },
+  "code": "/*\n * STM32F746G-DISCO Potentiometer + PWM LED\n * Potentiometer wiper on A0 (PA0, ADC3_IN0)\n * LED on D5 (PI0) with PWM brightness control\n * Note: STM32 uses 12-bit ADC (0-4095)\n */\n\nint potPin = A0;    // A0 = PA0\nint ledPin = 5;     // D5 = PI0 (PWM)\nint potValue = 0;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"STM32F746 potentiometer + PWM LED\");\n}\n\nvoid loop() {\n  potValue = analogRead(potPin);\n\n  // Map 12-bit ADC (0-4095) to 8-bit PWM (0-255)\n  int brightness = map(potValue, 0, 4095, 0, 255);\n  analogWrite(ledPin, brightness);\n\n  Serial.print(\"ADC: \");\n  Serial.print(potValue);\n  Serial.print(\" | PWM: \");\n  Serial.println(brightness);\n\n  delay(100);\n}"
+}
