@@ -1,9 +1,9 @@
-﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   api.js â€” Frontend client for the ArduSim Node backend
+﻿/* ============================================================
+   api.js — Frontend client for the ArduSim Node backend
    Talks to the REST API served by server.js (same origin).
    When the app is opened without the backend (e.g. file://),
    every call falls back gracefully and returns empty results.
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ============================================================ */
 
 'use strict';
 
