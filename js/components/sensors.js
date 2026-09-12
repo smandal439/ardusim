@@ -4416,3 +4416,305 @@ defComp({
     ctx.restore();
   }
 });
+
+
+/* ──────────────────────── YF-S201 Water Flow Sensor ──────────────────────── */
+defComp({
+  id: 'water_flow_sensor',
+  name: 'YF-S201 Water Flow',
+  category: 'Sensors',
+  icon: '💧',
+  desc: 'YF-S201 Hall-effect water flow sensor. Outputs ~450 pulses per litre proportional to flow rate. Operating range 1-30 L/min, 5-12 V.',
+  width: 70,
+  height: 100,
+  defaultProps: { flowRate: 5 },
+  interactive: [
+    { field: 'flowRate', label: 'Flow Rate', min: 0, max: 30, step: 0.1, unit: ' L/min' },
+  ],
+  pins: [
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 20, y: 100, side: 'bottom' },
+    { id: 'SIG', label: 'SIG', type: PIN_TYPE.DIGITAL, x: 35, y: 100, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 50, y: 100, side: 'bottom' },
+  ],
+
+  update(inst, sim, dt) {
+    if (!sim || !sim.isRunning) return;
+    if (!inst.runtimeState) {
+      inst.runtimeState = { phase: 0, pulseHigh: false };
+    }
+    const state = inst.runtimeState;
+    const flowRate = Number(inst.props.flowRate ?? 5);
+
+    // ~450 pulses per litre → pulses per ms = flowRate * 450 / 60000
+    const pulsesPerMs = (flowRate * 450) / 60000;
+    const msPerPulse = pulsesPerMs > 0 ? 1 / pulsesPerMs : Infinity;
+    const halfPeriod = msPerPulse / 2;
+
+    state.phase = (state.phase + dt) % msPerPulse;
+    state.pulseHigh = state.phase < halfPeriod && flowRate > 0;
+  },
+
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const flowRate = Number(inst.props.flowRate ?? 5);
+    const isPowered = sim && sim.isRunning;
+    const pulseHigh = isPowered && (inst.runtimeState?.pulseHigh ?? false);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // 1. Lead wires
+    const pinXs = [20, 35, 50];
+    const wireColors = ['#e53935', '#1e88e5', '#212121'];
+    pinXs.forEach((px, i) => {
+      ctx.strokeStyle = wireColors[i];
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(px, 80);
+      ctx.lineTo(px, 100);
+      ctx.stroke();
+    });
+
+    // 2. Hose barb body (cylindrical shape)
+    const bodyGrad = ctx.createLinearGradient(10, 0, 60, 0);
+    bodyGrad.addColorStop(0, '#b0bec5');
+    bodyGrad.addColorStop(0.3, '#eceff1');
+    bodyGrad.addColorStop(0.5, '#cfd8dc');
+    bodyGrad.addColorStop(0.7, '#eceff1');
+    bodyGrad.addColorStop(1, '#90a4ae');
+    ctx.fillStyle = bodyGrad;
+    roundRect(ctx, 10, 30, 50, 48, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#78909c';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // 3. Inlet / outlet hose barbs
+    [[10, 44, 'left'], [60, 44, 'right']].forEach(([bx, by, side]) => {
+      const barbGrad = ctx.createLinearGradient(bx - 8, by - 6, bx - 8, by + 6);
+      barbGrad.addColorStop(0, '#b0bec5');
+      barbGrad.addColorStop(0.5, '#eceff1');
+      barbGrad.addColorStop(1, '#90a4ae');
+      ctx.fillStyle = barbGrad;
+      roundRect(ctx, bx - 8, by - 6, 10, 12, 2);
+      ctx.fill();
+      ctx.strokeStyle = '#78909c';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+      // Barb ridges
+      for (let r = 0; r < 3; r++) {
+        const ry = by - 4 + r * 4;
+        ctx.strokeStyle = '#90a4ae';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(bx - 7, ry);
+        ctx.lineTo(bx + 0, ry);
+        ctx.stroke();
+      }
+    });
+
+    // 4. Water flow visualization
+    if (isPowered && flowRate > 0) {
+      const flowAlpha = Math.min(1, flowRate / 20);
+      const waterGrad = ctx.createLinearGradient(12, 44, 58, 44);
+      waterGrad.addColorStop(0, `rgba(33,150,243,${flowAlpha * 0.3})`);
+      waterGrad.addColorStop(0.5, `rgba(33,150,243,${flowAlpha * 0.6})`);
+      waterGrad.addColorStop(1, `rgba(33,150,243,${flowAlpha * 0.3})`);
+      ctx.fillStyle = waterGrad;
+      roundRect(ctx, 12, 38, 46, 12, 2);
+      ctx.fill();
+
+      // Animated bubbles
+      const now = sim.time || Date.now();
+      for (let i = 0; i < 4; i++) {
+        const bx = 16 + ((now * 0.03 * flowRate + i * 11) % 40);
+        const by = 41 + Math.sin(now * 0.01 + i) * 2;
+        ctx.fillStyle = `rgba(255,255,255,${flowAlpha * 0.5})`;
+        ctx.beginPath();
+        ctx.arc(bx, by, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // 5. Hall sensor chip
+    ctx.fillStyle = '#263238';
+    roundRect(ctx, 22, 55, 26, 14, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#455a64';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+
+    // 6. Pulse indicator LED
+    ctx.fillStyle = pulseHigh ? '#00e676' : '#1b5e20';
+    ctx.beginPath();
+    ctx.arc(50, 62, 3, 0, Math.PI * 2);
+    ctx.fill();
+    if (pulseHigh) {
+      ctx.fillStyle = 'rgba(0,230,118,0.25)';
+      ctx.beginPath();
+      ctx.arc(50, 62, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 7. Label silkscreen
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = 'bold 4.5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('YF-S201', 35, 64);
+
+    // 8. Flow rate readout
+    ctx.fillStyle = pulseHigh ? '#00e5ff' : '#546e7a';
+    ctx.font = 'bold 5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${flowRate.toFixed(1)} L/min`, 35, 26);
+
+    // Pulse frequency
+    const freq = (flowRate * 450 / 60).toFixed(0);
+    ctx.fillStyle = '#ffc107';
+    ctx.font = '4px monospace';
+    ctx.fillText(`${freq} Hz`, 35, 19);
+
+    if (inst.selected) drawSelectionRect(ctx, 0, 0, 70, 100);
+    ctx.restore();
+  }
+});
+
+registerComponent('water_flow_sensor', class extends Component {});
+
+
+/* ──────────────────────── Load Cell (Strain Gauge) ──────────────────────── */
+defComp({
+  id: 'load_cell',
+  name: 'Load Cell Sensor',
+  category: 'Sensors',
+  icon: '⚖️',
+  desc: 'Strain-gauge load cell (bar type) for weight measurement. Connects to HX711 amplifier. Outputs differential mV signal proportional to applied force.',
+  width: 100,
+  height: 50,
+  defaultProps: { weight: 0, capacity: 5, r0: 1000, sensitivity: 2 },
+  interactive: [
+    { field: 'weight', label: 'Weight', min: 0, max: 50, step: 0.1, unit: ' kg' },
+  ],
+  pins: [
+    { id: 'E+', label: 'E+', type: PIN_TYPE.POWER, x: 15, y: 50, side: 'bottom' },
+    { id: 'E-', label: 'E-', type: PIN_TYPE.GND, x: 35, y: 50, side: 'bottom' },
+    { id: 'A+', label: 'A+', type: PIN_TYPE.ANALOG, x: 65, y: 50, side: 'bottom' },
+    { id: 'A-', label: 'A-', type: PIN_TYPE.ANALOG, x: 85, y: 50, side: 'bottom' },
+  ],
+
+  update(inst, sim, dt) {
+    if (!sim || !sim.isRunning) return;
+    if (!inst.runtimeState) {
+      inst.runtimeState = { signalMV: 0 };
+    }
+    const weight = Number(inst.props.weight ?? 0);
+    const capacity = Number(inst.props.capacity ?? 5);
+    const sensitivity = Number(inst.props.sensitivity ?? 2); // mV/V at full scale
+    const excitation = 5; // assumed 5V excitation
+    const ratio = capacity > 0 ? Math.min(weight / capacity, 1) : 0;
+    inst.runtimeState.signalMV = ratio * sensitivity * excitation;
+  },
+
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const weight = Number(inst.props.weight ?? 0);
+    const capacity = Number(inst.props.capacity ?? 5);
+    const signalMV = inst.runtimeState?.signalMV ?? 0;
+    const isPowered = sim && sim.isRunning;
+    const fillRatio = capacity > 0 ? Math.min(weight / capacity, 1) : 0;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // 1. Metal mounting tabs
+    ctx.fillStyle = '#b0bec5';
+    roundRect(ctx, 0, 18, 100, 14, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#78909c';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // 2. Aluminum beam body
+    const beamGrad = ctx.createLinearGradient(0, 0, 0, 50);
+    beamGrad.addColorStop(0, '#cfd8dc');
+    beamGrad.addColorStop(0.3, '#eceff1');
+    beamGrad.addColorStop(0.6, '#b0bec5');
+    beamGrad.addColorStop(1, '#90a4ae');
+    ctx.fillStyle = beamGrad;
+    roundRect(ctx, 12, 5, 76, 40, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#78909c';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // 3. Central strain gauge area
+    ctx.fillStyle = '#e8eaf6';
+    roundRect(ctx, 32, 12, 36, 26, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#9fa8da';
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+
+    // Strain gauge grid pattern
+    ctx.strokeStyle = '#5c6bc0';
+    ctx.lineWidth = 0.4;
+    for (let i = 0; i < 6; i++) {
+      ctx.beginPath();
+      ctx.moveTo(35 + i * 5.5, 14);
+      ctx.lineTo(35 + i * 5.5, 36);
+      ctx.stroke();
+    }
+    for (let j = 0; j < 5; j++) {
+      ctx.beginPath();
+      ctx.moveTo(34, 16 + j * 5);
+      ctx.lineTo(66, 16 + j * 5);
+      ctx.stroke();
+    }
+
+    // 4. Load indicator (red fill proportional to weight)
+    if (weight > 0) {
+      ctx.fillStyle = `rgba(244,67,54,${fillRatio * 0.6})`;
+      roundRect(ctx, 33, 13, 34 * fillRatio, 24, 1);
+      ctx.fill();
+    }
+
+    // 5. Wire leads (4-wire)
+    const wirePositions = [
+      { px: 15, color: '#e53935' },   // E+ red
+      { px: 35, color: '#000000' },   // E- black
+      { px: 65, color: '#1565c0' },   // A+ blue
+      { px: 85, color: '#ffffff' },   // A- white
+    ];
+    wirePositions.forEach(({ px, color }) => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(px, 45);
+      ctx.lineTo(px, 50);
+      ctx.stroke();
+    });
+
+    // 6. Silkscreen text
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.font = 'bold 4px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('LOAD CELL', 50, 30);
+    ctx.font = '3.5px monospace';
+    ctx.fillText(`${capacity}kg`, 50, 36);
+
+    // 7. Live readout
+    ctx.fillStyle = isPowered ? '#00e5ff' : '#546e7a';
+    ctx.font = 'bold 5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${weight.toFixed(1)} kg`, 50, 3);
+
+    ctx.fillStyle = '#ffc107';
+    ctx.font = '4px monospace';
+    ctx.fillText(`${signalMV.toFixed(2)} mV`, 50, 48);
+
+    if (inst.selected) drawSelectionRect(ctx, 0, 0, 100, 50);
+    ctx.restore();
+  }
+});
+
+registerComponent('load_cell', class extends Component {});

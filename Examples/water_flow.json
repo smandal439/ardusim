@@ -1,0 +1,59 @@
+{
+  "id": "water_flow",
+  "name": "YF-S201 Water Flow Meter",
+  "icon": "💧",
+  "desc": "Measure water flow rate with YF-S201 sensor, blink LED on each pulse, and display L/min on Serial",
+  "tags": ["beginner", "sensor", "water", "flow", "yf-s201"],
+  "code": "volatile unsigned long pulseCount = 0;\nconst float CALIBRATION_FACTOR = 7.5; // Hz per L/min\nconst int FLOW_PIN = 2;\nconst int LED_PIN = 13;\n\nvoid flowPulse() {\n  pulseCount++;\n  digitalWrite(LED_PIN, !digitalRead(LED_PIN));\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(LED_PIN, OUTPUT);\n  pinMode(FLOW_PIN, INPUT_PULLUP);\n  attachInterrupt(digitalPinToInterrupt(FLOW_PIN), flowPulse, RISING);\n  Serial.println(\"YF-S201 Water Flow Meter\");\n  Serial.println(\"========================\");\n}\n\nvoid loop() {\n  unsigned long count;\n  noInterrupts();\n  count = pulseCount;\n  interrupts();\n\n  float flowRate = count / CALIBRATION_FACTOR;\n  float totalML = flowRate * (millis() / 60000.0);\n\n  Serial.print(\"Flow: \");\n  Serial.print(flowRate, 2);\n  Serial.print(\" L/min  |  Total: \");\n  Serial.print(totalML, 1);\n  Serial.println(\" mL\");\n\n  delay(500);\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_uno_water",
+        "type": "arduino_uno",
+        "x": -75,
+        "y": -25,
+        "width": 230,
+        "height": 150,
+        "props": { "label": "UNO" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_flow",
+        "type": "water_flow_sensor",
+        "x": 230,
+        "y": -55,
+        "width": 70,
+        "height": 100,
+        "props": { "flowRate": 5 },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w_vcc",
+        "from": { "instId": "comp_flow", "pinId": "VCC" },
+        "to": { "instId": "comp_uno_water", "pinId": "5V2" },
+        "color": "#F44336",
+        "waypoints": []
+      },
+      {
+        "id": "w_gnd",
+        "from": { "instId": "comp_uno_water", "pinId": "GND3" },
+        "to": { "instId": "comp_flow", "pinId": "GND" },
+        "color": "#424242",
+        "waypoints": []
+      },
+      {
+        "id": "w_sig",
+        "from": { "instId": "comp_flow", "pinId": "SIG" },
+        "to": { "instId": "comp_uno_water", "pinId": "D2" },
+        "color": "#2196F3",
+        "waypoints": []
+      }
+    ]
+  }
+}

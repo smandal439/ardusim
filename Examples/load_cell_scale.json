@@ -1,0 +1,106 @@
+{
+  "id": "load_cell_scale",
+  "name": "Load Cell Weight Scale",
+  "icon": "⚖️",
+  "desc": "Read weight from a 5 kg load cell via HX711 amplifier and display on Serial",
+  "tags": ["intermediate", "sensor", "load cell", "hx711", "weight"],
+  "code": "#include \"HX711.h\"\n\nconst int HX711_DT  = 3;\nconst int HX711_SCK = 2;\n\nHX711 scale(HX711_DT, HX711_SCK);\n\nfloat calibration_factor = 2280.0;\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Load Cell Weight Scale\");\n  Serial.println(\"======================\");\n  Serial.println(\"Tareing...\");\n\n  scale.set_scale(calibration_factor);\n  scale.tare();\n\n  Serial.println(\"Place known weight to calibrate.\");\n}\n\nvoid loop() {\n  float weight = scale.get_units(10);\n\n  if (weight < 0) weight = 0;\n\n  Serial.print(\"Weight: \");\n  Serial.print(weight, 2);\n  Serial.println(\" kg\");\n\n  delay(300);\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_uno_scale",
+        "type": "arduino_uno",
+        "x": -75,
+        "y": -25,
+        "width": 230,
+        "height": 150,
+        "props": { "label": "UNO" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_hx711",
+        "type": "hx711",
+        "x": 250,
+        "y": -50,
+        "width": 80,
+        "height": 80,
+        "props": { "label": "HX711" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_loadcell",
+        "type": "load_cell",
+        "x": 390,
+        "y": -25,
+        "width": 100,
+        "height": 50,
+        "props": { "weight": 0, "capacity": 5 },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w_lc_eplus",
+        "from": { "instId": "comp_loadcell", "pinId": "E+" },
+        "to": { "instId": "comp_hx711", "pinId": "E+" },
+        "color": "#F44336",
+        "waypoints": []
+      },
+      {
+        "id": "w_lc_eminus",
+        "from": { "instId": "comp_loadcell", "pinId": "E-" },
+        "to": { "instId": "comp_hx711", "pinId": "E-" },
+        "color": "#212121",
+        "waypoints": []
+      },
+      {
+        "id": "w_lc_aplus",
+        "from": { "instId": "comp_loadcell", "pinId": "A+" },
+        "to": { "instId": "comp_hx711", "pinId": "A+" },
+        "color": "#1565C0",
+        "waypoints": []
+      },
+      {
+        "id": "w_lc_aminus",
+        "from": { "instId": "comp_loadcell", "pinId": "A-" },
+        "to": { "instId": "comp_hx711", "pinId": "A-" },
+        "color": "#FFFFFF",
+        "waypoints": []
+      },
+      {
+        "id": "w_hx_vcc",
+        "from": { "instId": "comp_hx711", "pinId": "VCC" },
+        "to": { "instId": "comp_uno_scale", "pinId": "5V2" },
+        "color": "#F44336",
+        "waypoints": []
+      },
+      {
+        "id": "w_hx_gnd",
+        "from": { "instId": "comp_uno_scale", "pinId": "GND3" },
+        "to": { "instId": "comp_hx711", "pinId": "GND" },
+        "color": "#424242",
+        "waypoints": []
+      },
+      {
+        "id": "w_hx_dt",
+        "from": { "instId": "comp_hx711", "pinId": "DT" },
+        "to": { "instId": "comp_uno_scale", "pinId": "D3" },
+        "color": "#4CAF50",
+        "waypoints": []
+      },
+      {
+        "id": "w_hx_sck",
+        "from": { "instId": "comp_hx711", "pinId": "SCK" },
+        "to": { "instId": "comp_uno_scale", "pinId": "D2" },
+        "color": "#FF9800",
+        "waypoints": []
+      }
+    ]
+  }
+}

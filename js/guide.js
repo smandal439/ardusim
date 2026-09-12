@@ -1714,6 +1714,26 @@ void loop() {
     code: '#include "HX711.h"\nHX711 scale(3, 2); // DT, SCK\nvoid setup() {\n  Serial.begin(9600);\n  scale.set_scale(2280);\n  scale.tare();\n}\nvoid loop() {\n  Serial.print("Weight: ");\n  Serial.println(scale.get_units(), 1);\n  delay(500);\n}',
   },
 
+  water_flow_sensor: {
+    id: 'water_flow_sensor', name: 'YF-S201 Water Flow', icon: '\u{1f4a7}', category: 'Sensors',
+    longDesc: 'YF-S201 Hall-effect water flow sensor. A hall-effect element inside a pipe generates pulses as water flows past a magnetised rotor. Approximately 450 pulses per litre (F = Q x 7.5 where F is Hz and Q is L/min).',
+    use: 'Measuring water flow rate and total volume in cooling systems, irrigation projects, water meters, and Arduino-based liquid dispensers.',
+    pins: { VCC: { label: 'VCC', type: 'power', desc: '+5 V supply (red wire).' }, SIG: { label: 'SIG', type: 'digital', desc: 'Pulse output — connect to an Arduino interrupt-capable digital pin (e.g. D2).' }, GND: { label: 'GND', type: 'gnd', desc: 'Common ground (black wire).' } },
+    props: { flowRate: 'Current flow rate 0\u201330 L/min.' },
+    wiring: 'VCC \u2192 5 V, GND \u2192 GND, SIG \u2192 D2. Use interrupt pin for accurate pulse counting.',
+    code: 'volatile unsigned long pulseCount = 0;\nconst float CALIBRATION = 7.5; // Hz per L/min\n\nvoid flowPulse() { pulseCount++; }\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(2, INPUT_PULLUP);\n  attachInterrupt(digitalPinToInterrupt(2), flowPulse, RISING);\n}\n\nvoid loop() {\n  unsigned long count;\n  noInterrupts(); count = pulseCount; interrupts();\n  float lpm = count / CALIBRATION;\n  float ml  = lpm * (millis() / 60000.0);\n  Serial.print("Flow: "); Serial.print(lpm);\n  Serial.print(" L/min  Vol: "); Serial.print(ml);\n  Serial.println(" mL");\n  delay(500);\n}',
+  },
+
+  load_cell: {
+    id: 'load_cell', name: 'Load Cell Sensor', icon: '\u2696\ufe0f', category: 'Sensors',
+    longDesc: 'Strain-gauge load cell (bar type) with Wheatstone-bridge output. The four strain gauges produce a differential millivolt signal proportional to the applied force. Connect to an HX711 amplifier for ADC conversion.',
+    use: 'Weighing scales, force measurement, pressure pads, industrial weighing systems, and smart-home weight sensors.',
+    pins: { 'E+': { label: 'E+', type: 'power', desc: 'Excitation + (red wire).' }, 'E-': { label: 'E\u2212', type: 'gnd', desc: 'Excitation \u2212 (black wire).' }, 'A+': { label: 'A+', type: 'analog', desc: 'Signal + (blue wire).' }, 'A-': { label: 'A\u2212', type: 'analog', desc: 'Signal \u2212 (white wire).' } },
+    props: { weight: 'Applied weight 0\u201350 kg.', capacity: 'Maximum capacity (default 5 kg).', sensitivity: 'mV/V at full scale (default 2).' },
+    wiring: 'E+ \u2192 HX711 E+, E\u2212 \u2192 HX711 E\u2212, A+ \u2192 HX711 A+, A\u2212 \u2192 HX711 A\u2212. Power the HX711 from 5 V and use Arduino pins for DT and SCK.',
+    code: '#include "HX711.h"\nHX711 scale(D2, D3); // DT, SCK\n\nvoid setup() {\n  Serial.begin(9600);\n  scale.set_scale(2280);\n  scale.tare();\n}\nvoid loop() {\n  float weight = scale.get_units(10);\n  Serial.print("Weight: ");\n  Serial.print(weight, 1);\n  Serial.println(" kg");\n  delay(300);\n}',
+  },
+
   /* ── PASSIVES ── */
   breadboard_small: {
     id: 'breadboard_small', name: 'Breadboard (Small)', icon: '\u{1f7e6}', category: 'Passive',

@@ -1,0 +1,129 @@
+{
+  "id": "rgb_matrix_demo",
+  "name": "RGB LED Matrix 64x64 Demo",
+  "icon": "💡",
+  "desc": "Display colour gradients, checkerboard, and radar patterns on a Waveshare 64x64 HUB75 RGB LED Matrix via Arduino",
+  "tags": ["advanced", "display", "rgb", "matrix", "hub75"],
+  "code": "// 64x64 HUB75 RGB LED Matrix — test pattern demo\n// Pins: R1=D2, G1=D3, B1=D4, R2=D5, G2=D6, B2=D7\n//        LAT=D8, OE=D9, CLK=D10, A=D11, B=D12, C=D13\n\nconst int PATTERN_COUNT = 3;\nint currentPattern = 0;\nunsigned long lastSwitch = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  for (int pin = 2; pin <= 13; pin++) {\n    pinMode(pin, OUTPUT);\n  }\n  Serial.println(\"RGB Matrix 64x64 Demo\");\n  Serial.println(\"Patterns: Gradient, Checkerboard, Radar\");\n}\n\nvoid loop() {\n  unsigned long now = millis();\n\n  if (now - lastSwitch > 3000) {\n    lastSwitch = now;\n    currentPattern = (currentPattern + 1) % PATTERN_COUNT;\n    Serial.print(\"Pattern: \");\n    Serial.println(currentPattern);\n  }\n\n  // Simulate pattern output via Serial plotter\n  for (int y = 0; y < 64; y += 8) {\n    for (int x = 0; x < 64; x += 8) {\n      int r = 0, g = 0, b = 0;\n      if (currentPattern == 0) {\n        r = map(x, 0, 63, 0, 255);\n        g = map(y, 0, 63, 0, 255);\n        b = map(x, 63, 0, 0, 255);\n      } else if (currentPattern == 1) {\n        bool check = ((x / 8 + y / 8) % 2 == 0);\n        r = check ? 255 : 0;\n        g = check ? 128 : 0;\n        b = check ? 0 : 255;\n      } else {\n        float dist = sqrt(pow(x - 31.5, 2) + pow(y - 31.5, 2));\n        r = (int)(sin(dist * 0.3) * 127 + 128);\n        g = 255 - r;\n        b = x * 4;\n      }\n      Serial.print(r); Serial.print(\\",\");\n      Serial.print(g); Serial.print(\\",\");\n      Serial.print(b); Serial.print(\\",\");\n    }\n  }\n  Serial.println();\n  delay(100);\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_uno_rgb",
+        "type": "arduino_uno",
+        "x": -75,
+        "y": -25,
+        "width": 230,
+        "height": 150,
+        "props": { "label": "UNO" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "comp_matrix",
+        "type": "rgb_matrix_64x64",
+        "x": 250,
+        "y": -70,
+        "width": 140,
+        "height": 140,
+        "props": { "brightness": 80, "testPattern": 1 },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w_m_r1",
+        "from": { "instId": "comp_matrix", "pinId": "R1" },
+        "to": { "instId": "comp_uno_rgb", "pinId": "D2" },
+        "color": "#F44336",
+        "waypoints": []
+      },
+      {
+        "id": "w_m_g1",
+        "from": { "instId": "comp_matrix", "pinId": "G1" },
+        "to": { "instId": "comp_uno_rgb", "pinId": "D3" },
+        "color": "#4CAF50",
+        "waypoints": []
+      },
+      {
+        "id": "w_m_b1",
+        "from": { "instId": "comp_matrix", "pinId": "B1" },
+        "to": { "instId": "comp_uno_rgb", "pinId": "D4" },
+        "color": "#2196F3",
+        "waypoints": []
+      },
+      {
+        "id": "w_m_r2",
+        "from": { "instId": "comp_matrix", "pinId": "R2" },
+        "to": { "instId": "comp_uno_rgb", "pinId": "D5" },
+        "color": "#E91E63",
+        "waypoints": []
+      },
+      {
+        "id": "w_m_g2",
+        "from": { "instId": "comp_matrix", "pinId": "G2" },
+        "to": { "instId": "comp_uno_rgb", "pinId": "D6" },
+        "color": "#8BC34A",
+        "waypoints": []
+      },
+      {
+        "id": "w_m_b2",
+        "from": { "instId": "comp_matrix", "pinId": "B2" },
+        "to": { "instId": "comp_uno_rgb", "pinId": "D7" },
+        "color": "#03A9F4",
+        "waypoints": []
+      },
+      {
+        "id": "w_m_lat",
+        "from": { "instId": "comp_matrix", "pinId": "LAT" },
+        "to": { "instId": "comp_uno_rgb", "pinId": "D8" },
+        "color": "#FF9800",
+        "waypoints": []
+      },
+      {
+        "id": "w_m_oe",
+        "from": { "instId": "comp_matrix", "pinId": "OE" },
+        "to": { "instId": "comp_uno_rgb", "pinId": "D9" },
+        "color": "#9C27B0",
+        "waypoints": []
+      },
+      {
+        "id": "w_m_clk",
+        "from": { "instId": "comp_matrix", "pinId": "CLK" },
+        "to": { "instId": "comp_uno_rgb", "pinId": "D10" },
+        "color": "#795548",
+        "waypoints": []
+      },
+      {
+        "id": "w_m_a",
+        "from": { "instId": "comp_matrix", "pinId": "A" },
+        "to": { "instId": "comp_uno_rgb", "pinId": "D11" },
+        "color": "#FF5722",
+        "waypoints": []
+      },
+      {
+        "id": "w_m_b",
+        "from": { "instId": "comp_matrix", "pinId": "B" },
+        "to": { "instId": "comp_uno_rgb", "pinId": "D12" },
+        "color": "#CDDC39",
+        "waypoints": []
+      },
+      {
+        "id": "w_m_c",
+        "from": { "instId": "comp_matrix", "pinId": "C" },
+        "to": { "instId": "comp_uno_rgb", "pinId": "D13" },
+        "color": "#00BCD4",
+        "waypoints": []
+      },
+      {
+        "id": "w_m_gnd",
+        "from": { "instId": "comp_uno_rgb", "pinId": "GND3" },
+        "to": { "instId": "comp_matrix", "pinId": "GND1" },
+        "color": "#424242",
+        "waypoints": []
+      }
+    ]
+  }
+}
