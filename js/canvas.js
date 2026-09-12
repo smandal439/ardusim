@@ -3702,23 +3702,10 @@ class CircuitCanvas {
         case 'multimeter': {
           const mode = inst.runtimeState.mode || inst.props.mode || 'V_DC';
 
-          // Helper: get best source voltage from a traced net
-          const getNetVoltage = (net) => {
-            if (!net || !net.sources || net.sources.length === 0) return 0;
-            const best = net.sources.sort((a, b) => b.voltage - a.voltage)[0];
-            return best ? best.voltage : 0;
-          };
-          // Helper: check if net has ground
-          const hasGround = (net) => net && net.grounds && net.grounds.length > 0;
-          // Helper: total resistance of a net path
-          const getNetResistance = (net) => {
-            if (!net || !net.sources || net.sources.length === 0) return Infinity;
-            const best = net.sources.sort((a, b) => b.voltage - a.voltage)[0];
-            return best ? (best.resistance || 0) : 0;
-          };
-
-          const redNet = this._tracePinNet(inst.id, 'probe_red');
-          const comNet = this._tracePinNet(inst.id, 'probe_com');
+          // Use ElectricalEngine's solved voltages for accurate readings
+          // (accounts for voltage division through resistors)
+          const vRed = this.engine.getVoltageAtPin(inst.id, 'probe_red');
+          const vCom = this.engine.getVoltageAtPin(inst.id, 'probe_com');
 
           let displayText = '0.000';
           let displayUnit = 'V';
@@ -3727,8 +3714,6 @@ class CircuitCanvas {
 
           switch (mode) {
             case 'V_DC': {
-              const vRed = getNetVoltage(redNet);
-              const vCom = getNetVoltage(comNet);
               const diff = vRed - vCom;
               const absV = Math.abs(diff);
               const sign = diff < 0 ? '-' : '';
@@ -3745,9 +3730,6 @@ class CircuitCanvas {
               break;
             }
             case 'V_AC': {
-              // Simplified: treat same as DC for simulation (AC RMS ≈ DC equivalent in this sim)
-              const vRed = getNetVoltage(redNet);
-              const vCom = getNetVoltage(comNet);
               const rms = Math.abs(vRed - vCom);
               let disp = rms;
               let pfx = '';
@@ -3761,7 +3743,8 @@ class CircuitCanvas {
               break;
             }
             case 'A_DC': {
-              // Current mode: DMM is in series — find V source on red side, GND on COM side
+              const redNet = this._tracePinNet(inst.id, 'probe_red');
+              const comNet = this._tracePinNet(inst.id, 'probe_com');
               const redHasSrc = redNet.sources.length > 0;
               const comHasGnd = comNet.grounds.length > 0;
 
@@ -3794,6 +3777,8 @@ class CircuitCanvas {
               break;
             }
             case 'RES': {
+              const redNet = this._tracePinNet(inst.id, 'probe_red');
+              const comNet = this._tracePinNet(inst.id, 'probe_com');
               const redHasSrc = redNet.sources.length > 0;
               const comHasSrc = comNet.sources.length > 0;
 
@@ -3836,8 +3821,6 @@ class CircuitCanvas {
               break;
             }
             case 'MV_DC': {
-              const vRed = getNetVoltage(redNet);
-              const vCom = getNetVoltage(comNet);
               const diff = (vRed - vCom) * 1000;
               const sign = diff < 0 ? '-' : '';
               displayText = sign + Math.abs(diff).toFixed(1);
@@ -3846,8 +3829,6 @@ class CircuitCanvas {
               break;
             }
             case 'DIODE': {
-              const vRed = getNetVoltage(redNet);
-              const vCom = getNetVoltage(comNet);
               const diff = vRed - vCom;
               if (diff > 0.05 && diff < 3.0) {
                 displayText = diff.toFixed(3);
@@ -3859,9 +3840,7 @@ class CircuitCanvas {
               break;
             }
             case 'A_AC': {
-              const ampNet = this._tracePinNet(inst.id, 'probe_amp');
-              const vAmp = getNetVoltage(ampNet);
-              const vCom = getNetVoltage(comNet);
+              const vAmp = this.engine.getVoltageAtPin(inst.id, 'probe_amp');
               const amps = Math.abs(vAmp - vCom) / 0.01;
               let disp, pfx;
               if (amps >= 1) { disp = amps; pfx = 'A'; }

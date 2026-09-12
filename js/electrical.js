@@ -143,19 +143,20 @@ class ElectricalEngine {
   }
 
   /**
-   * Get internal pin connections for a component (e.g., resistor p1↔p2, switch contacts).
+   * Get internal pin connections for a component (e.g., switch contacts).
    * Returns array of [pinA_key, pinB_key] pairs.
+   * Resistors and capacitors are NOT shorted — they are resistive elements
+   * solved by the nodal analysis in solve().
    */
   _getInternalConnections(inst) {
     const conns = [];
     const key = (pin) => `${inst.id}:${pin}`;
 
     switch (inst.type) {
+      // Resistors and capacitors are NOT shorted here.
+      // They are modeled as conductance edges in the nodal solver.
       case 'resistor':
-        conns.push([key('p1'), key('p2')]);
-        break;
       case 'capacitor':
-        conns.push([key('p1'), key('p2')]);
         break;
       case 'diode_1n4007':
         // Forward-biased: anode → cathode (handled in solve, not graph)
@@ -227,14 +228,14 @@ class ElectricalEngine {
   /* ═══════════════ NET SOLVING ═══════════════ */
 
   /**
-   * Solve the circuit: find voltage sources, grounds, and calculate net voltages.
+   * Solve the circuit using nodal analysis (Gauss-Seidel iteration).
+   * Computes correct voltages for resistive networks including voltage dividers.
    * Call after buildGraph().
    * @param {CircuitCanvas} canvas — canvas instance for pin number resolution
    */
   solve(canvas) {
     const { COMPONENT_DEFS } = window.ArduinoComponents || {};
     this._canvas = canvas || null;
-    const sim = window.ArduinoSim;
 
     // Clear previous solve data
     for (const [, net] of this.nets) {
@@ -244,24 +245,107 @@ class ElectricalEngine {
       net.resistanceToGround = Infinity;
     }
 
-    // Identify voltage sources and grounds from each component
+    // 1. Classify components — identify voltage sources and grounds
     for (const inst of this.components) {
       this._classifyComponent(inst);
     }
 
-    // Resolve voltages: highest source voltage wins, ground = 0V
+    // 2. Build adjacency list from resistive elements (resistors, bulbs, diodes, etc.)
+    //    Each edge connects two nets with a resistance value.
+    const adjacency = new Map(); // netId → [{ net, resistance }]
+    const addEdge = (netA, netB, resistance) => {
+      if (!netA || !netB || netA === netB || resistance <= 0) return;
+      if (!adjacency.has(netA.id)) adjacency.set(netA.id, []);
+      if (!adjacency.has(netB.id)) adjacency.set(netB.id, []);
+      adjacency.get(netA.id).push({ net: netB, resistance });
+      adjacency.get(netB.id).push({ net: netA, resistance });
+    };
+
+    for (const inst of this.components) {
+      const net1 = this.getNetForPin(inst.id, 'p1');
+      const net2 = this.getNetForPin(inst.id, 'p2');
+      if (!net1 || !net2) continue;
+
+      switch (inst.type) {
+        case 'resistor': {
+          const r = (Number(inst.props?.value) || 220)
+            * (inst.props?.unit === 'kΩ' ? 1e3 : inst.props?.unit === 'MΩ' ? 1e6 : 1);
+          addEdge(net1, net2, Math.max(r, 0.01));
+          break;
+        }
+        case 'capacitor':
+          // DC steady-state: capacitor is open circuit (very high resistance)
+          addEdge(net1, net2, 1e9);
+          break;
+        case 'diode_1n4007': {
+          // Simple diode model: ~0.7V forward drop, high reverse resistance
+          // Approximated as a low resistance forward-biased path
+          const v1 = net1.voltage || 0;
+          const v2 = net2.voltage || 0;
+          if (v1 > v2) {
+            addEdge(net1, net2, 10); // forward-biased: low resistance
+          } else {
+            addEdge(net1, net2, 1e9); // reverse-biased: open circuit
+          }
+          break;
+        }
+        case 'bulb_12v':
+          addEdge(net1, net2, 12); // nominal 12Ω filament
+          break;
+        case 'led':
+        case 'led_green':
+        case 'led_blue':
+        case 'led_yellow':
+        case 'led_orange':
+        case 'led_white':
+          // LED: modeled as a forward voltage drop with small resistance
+          addEdge(net1, net2, 20); // ~20Ω effective resistance
+          break;
+      }
+    }
+
+    // 3. Initialize voltages from sources and grounds
+    const fixedNets = new Set();
     for (const [, net] of this.nets) {
-      if (net.grounds.length > 0 && net.sources.length > 0) {
-        // Both source and ground on same net — voltage is source voltage
-        const bestSource = net.sources.sort((a, b) => b.voltage - a.voltage)[0];
-        net.voltage = bestSource.voltage;
-      } else if (net.sources.length > 0) {
-        const bestSource = net.sources.sort((a, b) => b.voltage - a.voltage)[0];
-        net.voltage = bestSource.voltage;
+      if (net.sources.length > 0) {
+        net.voltage = net.sources.sort((a, b) => b.voltage - a.voltage)[0].voltage;
+        fixedNets.add(net.id);
       } else if (net.grounds.length > 0) {
         net.voltage = 0;
+        fixedNets.add(net.id);
       }
-      // Calculate equivalent resistance to ground
+    }
+
+    // 4. Gauss-Seidel iterative relaxation to solve KCL at each free node
+    //    For each free node: V = Σ(V_neighbor / R_neighbor) / Σ(1 / R_neighbor)
+    for (let iter = 0; iter < 200; iter++) {
+      let maxDelta = 0;
+      for (const [netId, net] of this.nets) {
+        if (fixedNets.has(netId)) continue;
+        const neighbors = adjacency.get(netId);
+        if (!neighbors || neighbors.length === 0) continue;
+
+        // KCL: sum of currents leaving this node = 0
+        // Σ (V_net - V_neighbor) / R_neighbor = 0
+        // V_net × Σ(1/R) = Σ(V_neighbor / R)
+        let sumG = 0;
+        let sumVG = 0;
+        for (const { net: neighbor, resistance } of neighbors) {
+          const g = 1 / resistance;
+          sumG += g;
+          sumVG += neighbor.voltage * g;
+        }
+        if (sumG > 0) {
+          const newV = sumVG / sumG;
+          maxDelta = Math.max(maxDelta, Math.abs(newV - net.voltage));
+          net.voltage = newV;
+        }
+      }
+      if (maxDelta < 0.0001) break; // converged
+    }
+
+    // 5. Calculate equivalent resistance to ground for each net
+    for (const [, net] of this.nets) {
       net.resistanceToGround = this._calcResistanceToGround(net);
     }
   }
