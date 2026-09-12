@@ -1,0 +1,31 @@
+{
+  "id": "weather_station_tft",
+  "name": "Weather Station with TFT Display",
+  "icon": "🌈",
+  "desc": "Weather station with BME280, MQ-2 gas sensor, and ILI9341 color TFT display showing a graphical dashboard",
+  "tags": ["advanced", "weather", "sensor", "bme280", "mq2", "gas", "tft", "ili9341", "display", "air quality"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "arduino_uno", "x": 200, "y": 100 },
+      { "id": "s1", "type": "bme280", "x": 620, "y": 80 },
+      { "id": "g1", "type": "mq2_gas", "x": 620, "y": 300 },
+      { "id": "t1", "type": "ili9341", "x": 380, "y": 100 }
+    ],
+    "wires": [
+      { "id": "w1", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "s1", "pinId": "VCC" } },
+      { "id": "w2", "from": { "instId": "s1", "pinId": "GND" }, "to": { "instId": "b1", "pinId": "GND1" } },
+      { "id": "w3", "from": { "instId": "b1", "pinId": "A5" }, "to": { "instId": "s1", "pinId": "SCL" } },
+      { "id": "w4", "from": { "instId": "b1", "pinId": "A4" }, "to": { "instId": "s1", "pinId": "SDA" } },
+      { "id": "w5", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "g1", "pinId": "VCC" } },
+      { "id": "w6", "from": { "instId": "g1", "pinId": "GND" }, "to": { "instId": "b1", "pinId": "GND1" } },
+      { "id": "w7", "from": { "instId": "g1", "pinId": "A0" }, "to": { "instId": "b1", "pinId": "A0" } },
+      { "id": "w8", "from": { "instId": "b1", "pinId": "D10" }, "to": { "instId": "t1", "pinId": "CS" } },
+      { "id": "w9", "from": { "instId": "t1", "pinId": "DC" }, "to": { "instId": "b1", "pinId": "D9" } },
+      { "id": "w10", "from": { "instId": "t1", "pinId": "MOSI" }, "to": { "instId": "b1", "pinId": "D11" } },
+      { "id": "w11", "from": { "instId": "t1", "pinId": "SCK" }, "to": { "instId": "b1", "pinId": "D13" } },
+      { "id": "w12", "from": { "instId": "b1", "pinId": "GND3" }, "to": { "instId": "t1", "pinId": "GND" } },
+      { "id": "w13", "from": { "instId": "t1", "pinId": "VCC" }, "to": { "instId": "b1", "pinId": "5V2" } }
+    ]
+  },
+  "code": "/*\n * Weather Station with TFT Dashboard + Air Quality\n *\n * Wiring:\n *   BME280:  VCC->5V  GND->GND  SCL->A5  SDA->A4\n *   MQ-2:    VCC->5V  GND->GND  A0->A0\n *   ILI9341: VCC->5V  GND->GND  CS->D10  DC->D9  MOSI->D11  SCK->D13\n *\n * Drag the sliders on BME280 and MQ-2 to simulate conditions.\n */\n\n#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_ILI9341.h>\n#include <SimpleBME280.h>\n\n#define TFT_CS 10\n#define TFT_DC 9\n\nAdafruit_ILI9341 tft(TFT_CS, TFT_DC);\nSimpleBME280 bme;\n\nconst int gasPin = A0;\n\n#define NAVY    0x001F\n#define DARKCYAN 0x03EF\n#define CYAN    0x07FF\n#define YELLOW  0xFFE0\n#define GREEN   0x07E0\n#define RED     0xF800\n#define ORANGE  0xFD20\n#define WHITE   0xFFFF\n#define BLACK   0x0000\n#define GRAY    0x8410\n\nvoid drawHeader() {\n  tft.fillScreen(NAVY);\n  tft.drawRect(5, 5, 310, 230, DARKCYAN);\n  tft.drawRect(8, 8, 304, 224, 0x02B0);\n  tft.setTextColor(YELLOW);\n  tft.setTextSize(2);\n  tft.setCursor(20, 18);\n  tft.println(\"Weather Station\");\n  tft.setTextColor(WHITE);\n  tft.setTextSize(1);\n  tft.setCursor(20, 40);\n  tft.println(\"BME280 + MQ-2 Air Quality\");\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  Wire.begin();\n  bme.begin();\n  tft.begin();\n  tft.setRotation(1);\n  drawHeader();\n  Serial.println(\"Weather Station + Air Quality (TFT)\");\n  Serial.println(\"-----------------------------------\");\n}\n\nvoid loop() {\n  float tempC  = bme.readTemperature();\n  float humPct = bme.readHumidity();\n  float presPa = bme.readPressure();\n  int gasRaw   = analogRead(gasPin);\n\n  Serial.print(\"Temp:     \"); Serial.print(tempC, 1); Serial.println(\" C\");\n  Serial.print(\"Humidity: \"); Serial.print(humPct, 1); Serial.println(\" %\");\n  Serial.print(\"Pressure: \"); Serial.print(presPa / 100.0, 1); Serial.println(\" hPa\");\n  Serial.print(\"Air Qual: \"); Serial.print(gasRaw);\n  if (gasRaw < 200) Serial.println(\" (Good)\");\n  else if (gasRaw < 400) Serial.println(\" (Moderate)\");\n  else if (gasRaw < 600) Serial.println(\" (Poor)\");\n  else Serial.println(\" (Hazardous)\");\n  Serial.println(\"-----------------------------------\");\n\n  tft.fillRect(15, 55, 290, 170, NAVY);\n\n  // Temperature\n  tft.setTextColor(CYAN);\n  tft.setTextSize(1);\n  tft.setCursor(20, 65);\n  tft.print(\"TEMPERATURE\");\n  tft.setTextColor(WHITE);\n  tft.setTextSize(3);\n  tft.setCursor(20, 80);\n  tft.print(tempC, 1);\n  tft.setTextSize(2);\n  tft.print(\" C\");\n\n  // Humidity\n  tft.setTextColor(CYAN);\n  tft.setTextSize(1);\n  tft.setCursor(200, 65);\n  tft.print(\"HUMIDITY\");\n  tft.setTextColor(WHITE);\n  tft.setTextSize(3);\n  tft.setCursor(200, 80);\n  tft.print((int)humPct);\n  tft.setTextSize(2);\n  tft.print(\" %\");\n\n  // Pressure\n  tft.setTextColor(CYAN);\n  tft.setTextSize(1);\n  tft.setCursor(20, 120);\n  tft.print(\"PRESSURE\");\n  tft.setTextColor(WHITE);\n  tft.setTextSize(3);\n  tft.setCursor(20, 135);\n  tft.print((int)(presPa / 100.0));\n  tft.setTextSize(2);\n  tft.print(\" hPa\");\n\n  // Air Quality\n  tft.setTextColor(ORANGE);\n  tft.setTextSize(1);\n  tft.setCursor(200, 120);\n  tft.print(\"AIR QUALITY\");\n\n  uint16_t gasColor;\n  const char* gasLabel;\n  if (gasRaw < 200) { gasColor = GREEN; gasLabel = \"GOOD\"; }\n  else if (gasRaw < 400) { gasColor = YELLOW; gasLabel = \"MODERATE\"; }\n  else if (gasRaw < 600) { gasColor = ORANGE; gasLabel = \"POOR\"; }\n  else { gasColor = RED; gasLabel = \"HAZARDOUS\"; }\n\n  tft.setTextColor(gasColor);\n  tft.setTextSize(3);\n  tft.setCursor(200, 135);\n  tft.print(gasRaw);\n\n  tft.setTextSize(2);\n  tft.setCursor(200, 165);\n  tft.print(gasLabel);\n\n  // Gas level bar\n  tft.drawRect(20, 180, 280, 16, GRAY);\n  int barW = map(gasRaw, 0, 1023, 0, 278);\n  tft.fillRect(21, 181, barW, 14, gasColor);\n\n  delay(2000);\n}"
+}

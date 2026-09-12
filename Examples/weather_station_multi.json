@@ -1,0 +1,37 @@
+{
+  "id": "weather_station_multi",
+  "name": "Multi-Sensor Weather Station",
+  "icon": "🌍",
+  "desc": "Full weather station with BME280 (temp/humidity/pressure), DHT11 (backup temp/humidity), LDR (light level), MQ-2 (air quality), and LCD 20x4 display",
+  "tags": ["intermediate", "weather", "sensor", "bme280", "dht11", "ldr", "mq2", "gas", "lcd", "i2c", "air quality"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "arduino_uno", "x": 200, "y": 100 },
+      { "id": "s1", "type": "bme280", "x": 580, "y": 80 },
+      { "id": "d1", "type": "dht11", "x": 580, "y": 250 },
+      { "id": "l1", "type": "ldr", "x": 580, "y": 400 },
+      { "id": "g1", "type": "mq2_gas", "x": 380, "y": 400 },
+      { "id": "lcd1", "type": "lcd2040_i2c", "x": 170, "y": 340 }
+    ],
+    "wires": [
+      { "id": "w1", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "s1", "pinId": "VCC" } },
+      { "id": "w2", "from": { "instId": "s1", "pinId": "GND" }, "to": { "instId": "b1", "pinId": "GND1" } },
+      { "id": "w3", "from": { "instId": "b1", "pinId": "A5" }, "to": { "instId": "s1", "pinId": "SCL" } },
+      { "id": "w4", "from": { "instId": "b1", "pinId": "A4" }, "to": { "instId": "s1", "pinId": "SDA" } },
+      { "id": "w5", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "d1", "pinId": "vcc" } },
+      { "id": "w6", "from": { "instId": "d1", "pinId": "gnd" }, "to": { "instId": "b1", "pinId": "GND1" } },
+      { "id": "w7", "from": { "instId": "b1", "pinId": "D2" }, "to": { "instId": "d1", "pinId": "data" } },
+      { "id": "w8", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "l1", "pinId": "vcc" } },
+      { "id": "w9", "from": { "instId": "l1", "pinId": "gnd" }, "to": { "instId": "b1", "pinId": "GND1" } },
+      { "id": "w10", "from": { "instId": "l1", "pinId": "ao" }, "to": { "instId": "b1", "pinId": "A1" } },
+      { "id": "w11", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "g1", "pinId": "VCC" } },
+      { "id": "w12", "from": { "instId": "g1", "pinId": "GND" }, "to": { "instId": "b1", "pinId": "GND1" } },
+      { "id": "w13", "from": { "instId": "g1", "pinId": "A0" }, "to": { "instId": "b1", "pinId": "A0" } },
+      { "id": "w14", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "lcd1", "pinId": "vcc" } },
+      { "id": "w15", "from": { "instId": "lcd1", "pinId": "gnd" }, "to": { "instId": "b1", "pinId": "GND1" } },
+      { "id": "w16", "from": { "instId": "lcd1", "pinId": "scl" }, "to": { "instId": "b1", "pinId": "A5" } },
+      { "id": "w17", "from": { "instId": "lcd1", "pinId": "sda" }, "to": { "instId": "b1", "pinId": "A4" } }
+    ]
+  },
+  "code": "/*\n * Multi-Sensor Weather Station with Air Quality\n *\n * Wiring:\n *   BME280:  VCC->5V  GND->GND  SCL->A5  SDA->A4\n *   DHT11:   VCC->5V  GND->GND  DAT->D2\n *   LDR:     VCC->5V  GND->GND  AO->A1\n *   MQ-2:    VCC->5V  GND->GND  A0->A0\n *   LCD 20x4: VCC->5V  GND->GND  SCL->A5  SDA->A4\n *\n * Drag the sliders on each sensor to simulate conditions.\n */\n\n#include <Wire.h>\n#include <SimpleBME280.h>\n#include <LiquidCrystal_I2C.h>\n\nSimpleBME280 bme;\nLiquidCrystal_I2C lcd(0x27, 20, 4);\n\nconst int gasPin = A0;\nconst int ldrPin = A1;\nconst int dhtPin = 2;\n\nint readDHTTemp() {\n  float v = sensorValue('dht11', 'temperature');\n  if (v >= 0) return (int)v;\n  return 25;\n}\n\nint readDHTHum() {\n  float v = sensorValue('dht11', 'humidity');\n  if (v >= 0) return (int)v;\n  return 60;\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  Wire.begin();\n  bme.begin();\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"Multi Weather Station\");\n  lcd.setCursor(0, 1);\n  lcd.print(\"Initializing...\");\n  delay(1500);\n  lcd.clear();\n  Serial.println(\"Multi-Sensor Weather Station + Air Quality\");\n  Serial.println(\"==========================================\");\n}\n\nvoid loop() {\n  float bmeTemp  = bme.readTemperature();\n  float bmeHum   = bme.readHumidity();\n  float bmePres  = bme.readPressure();\n  int dhtTemp    = readDHTTemp();\n  int dhtHum     = readDHTHum();\n  int lightLevel = analogRead(ldrPin);\n  int gasRaw     = analogRead(gasPin);\n\n  Serial.print(\"BME Temp:  \"); Serial.print(bmeTemp, 1); Serial.println(\" C\");\n  Serial.print(\"BME Hum:   \"); Serial.print(bmeHum, 1); Serial.println(\" %\");\n  Serial.print(\"BME Pres:  \"); Serial.print(bmePres / 100.0, 1); Serial.println(\" hPa\");\n  Serial.print(\"DHT Temp:  \"); Serial.print(dhtTemp); Serial.println(\" C\");\n  Serial.print(\"DHT Hum:   \"); Serial.print(dhtHum); Serial.println(\" %\");\n  Serial.print(\"Light:     \"); Serial.print(lightLevel); Serial.println(\" lx\");\n  Serial.print(\"Air Qual:  \"); Serial.print(gasRaw);\n  if (gasRaw < 200) Serial.println(\" (Good)\");\n  else if (gasRaw < 400) Serial.println(\" (Moderate)\");\n  else if (gasRaw < 600) Serial.println(\" (Poor)\");\n  else Serial.println(\" (Hazardous)\");\n  Serial.println(\"==========================================\");\n\n  // LCD Line 1: BME280 Temperature & Humidity\n  lcd.setCursor(0, 0);\n  lcd.print(\"T:\");\n  lcd.print(bmeTemp, 1);\n  lcd.print((char)223);\n  lcd.print(\"C H:\");\n  lcd.print((int)bmeHum);\n  lcd.print(\"%     \");\n\n  // LCD Line 2: Pressure & Light\n  lcd.setCursor(0, 1);\n  lcd.print(\"P:\");\n  lcd.print((int)(bmePres / 100.0));\n  lcd.print(\"hPa L:\");\n  lcd.print(lightLevel);\n  lcd.print(\"    \");\n\n  // LCD Line 3: DHT11 readings\n  lcd.setCursor(0, 2);\n  lcd.print(\"DHT:\");\n  lcd.print(dhtTemp);\n  lcd.print((char)223);\n  lcd.print(\"C \");\n  lcd.print(dhtHum);\n  lcd.print(\"%    \");\n\n  // LCD Line 4: Air Quality\n  lcd.setCursor(0, 3);\n  lcd.print(\"Air:\");\n  lcd.print(gasRaw);\n  lcd.print(\" \");\n  if (gasRaw < 200) lcd.print(\"[GOOD]     \");\n  else if (gasRaw < 400) lcd.print(\"[MODERATE] \");\n  else if (gasRaw < 600) lcd.print(\"[POOR]     \");\n  else lcd.print(\"[HAZARDOUS]\");\n\n  delay(2000);\n}"
+}

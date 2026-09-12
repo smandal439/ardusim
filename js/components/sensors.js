@@ -2966,6 +2966,32 @@ registerComponent('flex_sensor', FlexSensorComponent);
 registerComponent('thermistor', ThermistorComponent);
 registerComponent('mpu6050', MPU6050Component);
 
+class MQ2GasComponent extends Component {
+  getPins() {
+    return [
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 90, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 24, y: 90, side: 'bottom' },
+      { id: 'D0', label: 'D0', type: PIN_TYPE.DIGITAL, x: 44, y: 90, side: 'bottom' },
+      { id: 'A0', label: 'A0', type: PIN_TYPE.ANALOG, x: 58, y: 90, side: 'bottom' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const gasLevel = this.runtimeState?.gasLevel ?? this.props.gasLevel ?? 0;
+    const threshold = this.props.threshold ?? 500;
+    this.runtimeState.gasLevel = gasLevel;
+
+    const a0Pin = this.getConnectedPinNum('A0');
+    if (a0Pin !== null) sim.pinStates[`pin_${a0Pin}`] = gasLevel;
+
+    const d0Pin = this.getConnectedPinNum('D0');
+    if (d0Pin !== null) sim.pinStates[`pin_${d0Pin}`] = gasLevel > threshold ? 1 : 0;
+  }
+}
+
+registerComponent('mq2_gas', MQ2GasComponent);
+
 /* ═══════════════════════ DS3231 RTC Class ═══════════════════════ */
 
 class DS3231Component extends Component {
@@ -3759,3 +3785,271 @@ defComp({
 //     ctx.restore();
 //   }
 // });
+
+/* ═══════════════════════ MQ-2 Gas/Smoke Sensor Module ═══════════════════════ */
+
+defComp({
+  id: 'mq2_gas',
+  name: 'MQ-2 Gas Sensor',
+  category: 'Sensors',
+  icon: '💨',
+  desc: 'MQ-2 combustible gas & smoke sensor module - detects LPG, propane, hydrogen, methane, alcohol, CO, and smoke. Analog (A0) + Digital (D0) output with LM393 comparator',
+  width: 68,
+  height: 90,
+  defaultProps: { gasLevel: 0, threshold: 500 },
+  interactive: [
+    { field: 'gasLevel', label: 'Gas', min: 0, max: 1023, step: 1, unit: '' },
+    { field: 'threshold', label: 'Thresh', min: 0, max: 1023, step: 1, unit: '' },
+  ],
+  pins: [
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 90, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 24, y: 90, side: 'bottom' },
+    { id: 'D0', label: 'D0', type: PIN_TYPE.DIGITAL, x: 44, y: 90, side: 'bottom' },
+    { id: 'A0', label: 'A0', type: PIN_TYPE.ANALOG, x: 58, y: 90, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const gasLevel = (inst.runtimeState && inst.runtimeState.gasLevel !== undefined)
+      ? inst.runtimeState.gasLevel
+      : (inst.props.gasLevel ?? 0);
+    const threshold = inst.props.threshold ?? 500;
+    const isAboveThreshold = gasLevel > threshold;
+    const isRunning = !!(sim && sim.isRunning);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const drawRR = (rx, ry, rw, rh, rad) => {
+      ctx.beginPath();
+      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+
+    // 1. Dark Blue PCB Body
+    const pcbGrad = ctx.createLinearGradient(0, 0, 68, 74);
+    pcbGrad.addColorStop(0, '#0c1a3a');
+    pcbGrad.addColorStop(0.5, '#122850');
+    pcbGrad.addColorStop(1, '#0a1530');
+    ctx.fillStyle = pcbGrad;
+    drawRR(0, 0, 68, 74, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#1e3d6e';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // PCB inner border
+    ctx.strokeStyle = 'rgba(100, 180, 255, 0.1)';
+    ctx.lineWidth = 0.5;
+    drawRR(2, 2, 64, 70, 3);
+    ctx.stroke();
+
+    // Corner mounting holes
+    [[5, 5], [63, 5]].forEach(([hx, hy]) => {
+      ctx.fillStyle = '#060e1c';
+      ctx.beginPath(); ctx.arc(hx, hy, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#c5a059';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    });
+
+    // 2. MQ-2 Gas Sensing Element (Metal Can with Mesh)
+    const sensorCX = 34, sensorCY = 22;
+
+    // Sensor can outer shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.beginPath(); ctx.arc(sensorCX + 1, sensorCY + 1, 16, 0, Math.PI * 2); ctx.fill();
+
+    // Metallic can body
+    const canGrad = ctx.createRadialGradient(sensorCX - 4, sensorCY - 4, 2, sensorCX, sensorCY, 16);
+    canGrad.addColorStop(0, '#e0e0e0');
+    canGrad.addColorStop(0.3, '#c0c0c0');
+    canGrad.addColorStop(0.7, '#999999');
+    canGrad.addColorStop(1, '#666666');
+    ctx.fillStyle = canGrad;
+    ctx.beginPath(); ctx.arc(sensorCX, sensorCY, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Mesh grille pattern (cross-hatch)
+    ctx.save();
+    ctx.beginPath(); ctx.arc(sensorCX, sensorCY, 11, 0, Math.PI * 2); ctx.clip();
+    ctx.strokeStyle = 'rgba(180, 190, 200, 0.4)';
+    ctx.lineWidth = 0.5;
+    for (let i = -14; i <= 14; i += 3) {
+      ctx.beginPath(); ctx.moveTo(sensorCX + i - 14, sensorCY - 14); ctx.lineTo(sensorCX + i + 14, sensorCY + 14); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sensorCX + i + 14, sensorCY - 14); ctx.lineTo(sensorCX + i - 14, sensorCY + 14); ctx.stroke();
+    }
+
+    // Central SnO2 sensing core
+    const coreGrad = ctx.createRadialGradient(sensorCX - 1, sensorCY - 1, 0, sensorCX, sensorCY, 5);
+    coreGrad.addColorStop(0, isAboveThreshold ? '#ff8a65' : '#8d6e63');
+    coreGrad.addColorStop(1, isAboveThreshold ? '#bf360c' : '#4e342e');
+    ctx.fillStyle = coreGrad;
+    ctx.beginPath(); ctx.arc(sensorCX, sensorCY, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    ctx.restore();
+
+    // Gas detection glow when above threshold
+    if (isAboveThreshold && isRunning) {
+      ctx.save();
+      ctx.shadowColor = '#ff5722';
+      ctx.shadowBlur = 10;
+      ctx.strokeStyle = 'rgba(255, 87, 34, 0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(sensorCX, sensorCY, 16, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
+
+    // Sensor label
+    ctx.fillStyle = '#888';
+    ctx.font = 'bold 3.5px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('MQ-2', sensorCX, sensorCY + 1);
+
+    // 3. LM393 Comparator IC
+    ctx.fillStyle = '#1a1a1a';
+    drawRR(6, 38, 16, 8, 1);
+    ctx.fill();
+    ctx.fillStyle = '#555';
+    ctx.font = '2.5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('LM393', 14, 43);
+
+    // IC pins
+    ctx.fillStyle = '#b0b0b0';
+    for (let i = 0; i < 4; i++) {
+      ctx.fillRect(7 + i * 3, 36, 1.5, 1.5);
+      ctx.fillRect(7 + i * 3, 46, 1.5, 1.5);
+    }
+
+    // 4. Power LED (green)
+    ctx.fillStyle = isRunning ? '#00ff44' : '#223322';
+    ctx.beginPath(); ctx.arc(52, 38, 2, 0, Math.PI * 2); ctx.fill();
+    if (isRunning) {
+      ctx.save();
+      ctx.shadowColor = '#00ff44'; ctx.shadowBlur = 4;
+      ctx.fill(); ctx.restore();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '2px sans-serif';
+    ctx.fillText('PWR', 52, 44);
+
+    // 5. D0 Status LED (red when gas exceeds threshold)
+    ctx.fillStyle = isAboveThreshold ? '#ff3333' : '#441111';
+    ctx.beginPath(); ctx.arc(52, 50, 2, 0, Math.PI * 2); ctx.fill();
+    if (isAboveThreshold) {
+      ctx.save();
+      ctx.shadowColor = '#ff3333'; ctx.shadowBlur = 5;
+      ctx.fill(); ctx.restore();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '2px sans-serif';
+    ctx.fillText('D0', 52, 56);
+
+    // 6. SMD passive components
+    ctx.fillStyle = '#222';
+    [[6, 48], [28, 38], [28, 44]].forEach(([rx, ry]) => {
+      ctx.fillRect(rx, ry, 4, 2);
+      ctx.fillStyle = '#aaa';
+      ctx.fillRect(rx, ry, 0.6, 2);
+      ctx.fillRect(rx + 3.4, ry, 0.6, 2);
+      ctx.fillStyle = '#222';
+    });
+
+    // 7. Silkscreen labels
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 4px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('MQ-2 GAS SENSOR', 34, 44);
+
+    // Gas type labels
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '2.5px monospace';
+    ctx.fillText('LPG CO CH4 SMOKE', 34, 50);
+
+    // 8. Gas Level HUD Panel
+    ctx.fillStyle = '#050e1a';
+    drawRR(4, 56, 60, 12, 2);
+    ctx.fill();
+    ctx.strokeStyle = isRunning ? 'rgba(0, 200, 255, 0.3)' : 'rgba(40, 60, 90, 0.5)';
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+
+    // Gas level bar
+    const barX = 8, barY = 60, barW = 48, barH = 4;
+    ctx.fillStyle = '#1a2a3a';
+    drawRR(barX, barY, barW, barH, barH / 2);
+    ctx.fill();
+
+    const pct = Math.min(1, gasLevel / 1023);
+    if (pct > 0.01) {
+      const barColor = pct > 0.6 ? '#ff5722' : pct > 0.3 ? '#ff9800' : '#4caf50';
+      const grad = ctx.createLinearGradient(barX, 0, barX + pct * barW, 0);
+      grad.addColorStop(0, barColor + '88');
+      grad.addColorStop(1, barColor);
+      ctx.fillStyle = grad;
+      drawRR(barX, barY, Math.max(barH, pct * barW), barH, barH / 2);
+      ctx.fill();
+    }
+
+    // Thumb dot
+    const thumbX = barX + pct * barW;
+    ctx.fillStyle = '#e0e0e0';
+    ctx.beginPath(); ctx.arc(thumbX, barY + barH / 2, 2.5, 0, Math.PI * 2); ctx.fill();
+
+    // Value readout
+    ctx.fillStyle = isRunning ? '#00e5ff' : '#546e7a';
+    ctx.font = 'bold 5px "JetBrains Mono", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(gasLevel, 8, 68);
+
+    ctx.fillStyle = isRunning ? 'rgba(0,229,255,0.6)' : '#455a64';
+    ctx.font = '3px "JetBrains Mono", monospace';
+    ctx.fillText('ppm', 32, 68);
+
+    // Threshold indicator
+    ctx.fillStyle = isAboveThreshold ? '#ff5722' : '#607d8b';
+    ctx.font = '3px monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(isAboveThreshold ? 'ALERT!' : 'SAFE', 60, 68);
+
+    // 9. Pin Header Labels & Leads
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 3.5px monospace';
+    ctx.textAlign = 'center';
+    const pinLabels = ['VCC', 'GND', 'D0', 'A0'];
+    const pinXs = [10, 24, 44, 58];
+
+    // Black pin header base
+    ctx.fillStyle = '#111';
+    drawRR(4, 74, 60, 4, 1);
+    ctx.fill();
+
+    pinXs.forEach((px, i) => {
+      ctx.fillText(pinLabels[i], px, 73);
+
+      // Gold pad
+      ctx.fillStyle = '#d4af37';
+      ctx.fillRect(px - 1.5, 74.5, 3, 2.5);
+
+      // Metallic pin lead
+      const pinGrad = ctx.createLinearGradient(px - 0.8, 77, px + 0.8, 77);
+      pinGrad.addColorStop(0, '#aaa');
+      pinGrad.addColorStop(0.5, '#fff');
+      pinGrad.addColorStop(1, '#666');
+      ctx.fillStyle = pinGrad;
+      ctx.fillRect(px - 0.8, 77, 1.6, 13);
+    });
+
+    // Selection highlight
+    if (inst.selected && typeof drawSelectionRect === 'function') {
+      drawSelectionRect(ctx, -4, -4, 76, 98);
+    }
+
+    ctx.restore();
+  }
+});

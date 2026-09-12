@@ -1,0 +1,29 @@
+{
+  "id": "weather_station_simple",
+  "name": "Simple Weather Station with Air Quality",
+  "icon": "🌤️",
+  "desc": "Read temperature, humidity, pressure from BME280 and air quality from MQ-2 gas sensor, displayed on LCD 16x2 I2C",
+  "tags": ["beginner", "weather", "sensor", "bme280", "mq2", "gas", "lcd", "i2c", "air quality"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "arduino_uno", "x": 200, "y": 100 },
+      { "id": "s1", "type": "bme280", "x": 580, "y": 100 },
+      { "id": "g1", "type": "mq2_gas", "x": 580, "y": 320 },
+      { "id": "lcd1", "type": "lcd1602_i2c", "x": 200, "y": 310 }
+    ],
+    "wires": [
+      { "id": "w1", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "s1", "pinId": "VCC" } },
+      { "id": "w2", "from": { "instId": "s1", "pinId": "GND" }, "to": { "instId": "b1", "pinId": "GND1" } },
+      { "id": "w3", "from": { "instId": "b1", "pinId": "A5" }, "to": { "instId": "s1", "pinId": "SCL" } },
+      { "id": "w4", "from": { "instId": "b1", "pinId": "A4" }, "to": { "instId": "s1", "pinId": "SDA" } },
+      { "id": "w5", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "g1", "pinId": "VCC" } },
+      { "id": "w6", "from": { "instId": "g1", "pinId": "GND" }, "to": { "instId": "b1", "pinId": "GND1" } },
+      { "id": "w7", "from": { "instId": "g1", "pinId": "A0" }, "to": { "instId": "b1", "pinId": "A0" } },
+      { "id": "w8", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "lcd1", "pinId": "vcc" } },
+      { "id": "w9", "from": { "instId": "lcd1", "pinId": "gnd" }, "to": { "instId": "b1", "pinId": "GND1" } },
+      { "id": "w10", "from": { "instId": "lcd1", "pinId": "scl" }, "to": { "instId": "b1", "pinId": "A5" } },
+      { "id": "w11", "from": { "instId": "lcd1", "pinId": "sda" }, "to": { "instId": "b1", "pinId": "A4" } }
+    ]
+  },
+  "code": "/*\n * Simple Weather Station with Air Quality\n *\n * Wiring:\n *   BME280:  VCC->5V  GND->GND  SCL->A5  SDA->A4\n *   MQ-2:    VCC->5V  GND->GND  A0->A0\n *   LCD I2C: VCC->5V  GND->GND  SCL->A5  SDA->A4\n *\n * Drag the Temp / Hum / hPa sliders on the BME280\n * and the Gas slider on the MQ-2 to simulate conditions.\n */\n\n#include <Wire.h>\n#include <SimpleBME280.h>\n#include <LiquidCrystal_I2C.h>\n\nSimpleBME280 bme;\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nconst int gasPin = A0;\n\nvoid setup() {\n  Serial.begin(115200);\n  Wire.begin();\n  bme.begin();\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"Weather Station\");\n  lcd.setCursor(0, 1);\n  lcd.print(\"Initializing...\");\n  delay(1500);\n  lcd.clear();\n  Serial.println(\"Simple Weather Station + Air Quality\");\n  Serial.println(\"-------------------------------------\");\n}\n\nvoid loop() {\n  float tempC   = bme.readTemperature();\n  float humPct  = bme.readHumidity();\n  float presPa  = bme.readPressure();\n  int gasRaw    = analogRead(gasPin);\n\n  Serial.print(\"Temp:      \");\n  Serial.print(tempC, 1);\n  Serial.println(\" C\");\n\n  Serial.print(\"Humidity:  \");\n  Serial.print(humPct, 1);\n  Serial.println(\" %\");\n\n  Serial.print(\"Pressure:  \");\n  Serial.print(presPa / 100.0, 1);\n  Serial.println(\" hPa\");\n\n  Serial.print(\"Air Qual:  \");\n  Serial.print(gasRaw);\n  Serial.print(\" (\");\n  if (gasRaw < 200) Serial.print(\"Good\");\n  else if (gasRaw < 400) Serial.print(\"Moderate\");\n  else if (gasRaw < 600) Serial.print(\"Poor\");\n  else Serial.print(\"Hazardous\");\n  Serial.println(\")\");\n\n  Serial.println(\"-------------------------------------\");\n\n  // Line 1: Temp and Humidity\n  lcd.setCursor(0, 0);\n  lcd.print(\"T:\");\n  lcd.print(tempC, 1);\n  lcd.print((char)223);\n  lcd.print(\"C H:\");\n  lcd.print((int)humPct);\n  lcd.print(\"%  \");\n\n  // Line 2: Pressure and Air Quality\n  lcd.setCursor(0, 1);\n  lcd.print(\"P:\");\n  lcd.print((int)(presPa / 100.0));\n  lcd.print(\"h Q:\");\n  if (gasRaw < 200) lcd.print(\"Good \");\n  else if (gasRaw < 400) lcd.print(\"Mod  \");\n  else if (gasRaw < 600) lcd.print(\"Poor \");\n  else lcd.print(\"HIGH!\");\n\n  delay(2000);\n}"
+}
