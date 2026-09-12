@@ -181,6 +181,14 @@ class ElectricalEngine {
         }
         break;
       }
+      case 'multimeter': {
+        // In current mode, the multimeter is a short circuit (0Ω) — probes are connected
+        const mode = inst.runtimeState?.mode || inst.props?.mode || 'V_DC';
+        if (mode === 'A_DC' || mode === 'A_AC') {
+          conns.push([key('probe_red'), key('probe_com')]);
+        }
+        break;
+      }
       case 'breadboard':
       case 'breadboard_small': {
         // Breadboard groups: rows a-e share a rail, rows f-j share a rail

@@ -3743,34 +3743,44 @@ class CircuitCanvas {
               break;
             }
             case 'A_DC': {
-              const redNet = this._tracePinNet(inst.id, 'probe_red');
-              const comNet = this._tracePinNet(inst.id, 'probe_com');
-              const redHasSrc = redNet.sources.length > 0;
-              const redHasGnd = redNet.grounds.length > 0;
-              const comHasSrc = comNet.sources.length > 0;
-              const comHasGnd = comNet.grounds.length > 0;
+              // In current mode, probe_red and probe_com are shorted (same net).
+              // Compute current using KCL: I = Σ(V_net - V_neighbor) / R for all resistors on this net.
+              const probeNet = this.engine.getNetForPin(inst.id, 'probe_red');
+              if (!probeNet || probeNet.voltage === 0) {
+                displayText = '0.000';
+                displayUnit = 'mA';
+                break;
+              }
+              const vNet = probeNet.voltage;
+              let totalCurrent = 0;
 
-              let voltage = 0;
-              let totalR = 0;
-              let reversed = false;
+              for (const comp of this.components) {
+                const net1 = this.engine.getNetForPin(comp.id, 'p1');
+                const net2 = this.engine.getNetForPin(comp.id, 'p2');
+                if (!net1 || !net2) continue;
+                if (net1 !== probeNet && net2 !== probeNet) continue;
 
-              if (redHasSrc && comHasGnd) {
-                // Normal: red→source, com→ground
-                const best = redNet.sources.sort((a, b) => b.voltage - a.voltage)[0];
-                voltage = best.voltage || 0;
-                totalR = (best.resistance || 0) + ((comNet.grounds[0]?.resistance) || 0);
-              } else if (redHasGnd && comHasSrc) {
-                // Reversed: red→ground, com→source — negative current
-                const best = comNet.sources.sort((a, b) => b.voltage - a.voltage)[0];
-                voltage = best.voltage || 0;
-                totalR = ((redNet.grounds[0]?.resistance) || 0) + (best.resistance || 0);
-                reversed = true;
+                let r = 0;
+                switch (comp.type) {
+                  case 'resistor':
+                    r = (Number(comp.props?.value) || 220)
+                      * (comp.props?.unit === 'kΩ' ? 1e3 : comp.props?.unit === 'MΩ' ? 1e6 : 1);
+                    break;
+                  case 'bulb_12v': r = 12; break;
+                  case 'led': case 'led_green': case 'led_blue':
+                  case 'led_yellow': case 'led_orange': case 'led_white': r = 20; break;
+                  case 'diode_1n4007': r = 10; break;
+                  default: continue;
+                }
+                if (r <= 0) continue;
+
+                const otherNet = net1 === probeNet ? net2 : net1;
+                totalCurrent += (vNet - otherNet.voltage) / r;
               }
 
-              if (totalR > 0 && voltage > 0) {
-                const amps = voltage / totalR;
-                const absA = Math.abs(amps);
-                const sign = reversed ? '-' : '';
+              {
+                const absA = Math.abs(totalCurrent);
+                const sign = totalCurrent < 0 ? '-' : '';
                 let disp, pfx;
                 if (absA >= 1) { disp = absA; pfx = 'A'; }
                 else if (absA >= 0.001) { disp = absA * 1000; pfx = 'mA'; }
@@ -3778,9 +3788,6 @@ class CircuitCanvas {
                 const decimals = disp >= 100 ? 1 : 3;
                 displayText = sign + disp.toFixed(decimals);
                 displayUnit = pfx;
-              } else {
-                displayText = '0.000';
-                displayUnit = 'mA';
               }
               displayMode = 'DC';
               break;
@@ -4195,6 +4202,15 @@ class CircuitCanvas {
           queue.push({ instId: inst.id, pinId: 'com', resistance: current.resistance });
         } else if (current.pinId === 'nc' && !relayOn) {
           queue.push({ instId: inst.id, pinId: 'com', resistance: current.resistance });
+        }
+      }
+
+      // 4b0. Multimeter pass-through in current mode (probe_red ↔ probe_com, 0Ω)
+      if (inst.type === 'multimeter') {
+        const mmMode = inst.runtimeState?.mode || inst.props?.mode || 'V_DC';
+        if (mmMode === 'A_DC' || mmMode === 'A_AC') {
+          const otherPin = current.pinId === 'probe_red' ? 'probe_com' : 'probe_red';
+          queue.push({ instId: inst.id, pinId: otherPin, resistance: current.resistance });
         }
       }
 
