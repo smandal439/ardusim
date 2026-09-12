@@ -3744,7 +3744,8 @@ class CircuitCanvas {
             }
             case 'A_DC': {
               // In current mode, probe_red and probe_com are shorted (same net).
-              // Compute current using KCL: I = Σ(V_net - V_neighbor) / R for all resistors on this net.
+              // Measure current flowing OUT of the COM side through resistors.
+              // COM side wire group = all pins connected to probe_com via wires only.
               const probeNet = this.engine.getNetForPin(inst.id, 'probe_red');
               if (!probeNet || probeNet.voltage === 0) {
                 displayText = '0.000';
@@ -3752,13 +3753,35 @@ class CircuitCanvas {
                 break;
               }
               const vNet = probeNet.voltage;
-              let totalCurrent = 0;
 
+              // BFS from probe_com through wires only (not through meter's internal short)
+              const comGroup = new Set();
+              const wireQueue = [`${inst.id}:probe_com`];
+              const wireVisited = new Set();
+              while (wireQueue.length > 0) {
+                const key = wireQueue.shift();
+                if (wireVisited.has(key)) continue;
+                wireVisited.add(key);
+                comGroup.add(key);
+                const [cInstId, cPinId] = key.split(':');
+                for (const w of this.wires) {
+                  let ni, np;
+                  if (w.from.instId === cInstId && w.from.pinId === cPinId) { ni = w.to.instId; np = w.to.pinId; }
+                  else if (w.to.instId === cInstId && w.to.pinId === cPinId) { ni = w.from.instId; np = w.from.pinId; }
+                  else continue;
+                  wireQueue.push(`${ni}:${np}`);
+                }
+              }
+
+              // Sum currents through resistors with one pin in comGroup and one outside
+              let totalCurrent = 0;
               for (const comp of this.components) {
                 const net1 = this.engine.getNetForPin(comp.id, 'p1');
                 const net2 = this.engine.getNetForPin(comp.id, 'p2');
                 if (!net1 || !net2) continue;
-                if (net1 !== probeNet && net2 !== probeNet) continue;
+                const inCom1 = comGroup.has(`${comp.id}:p1`);
+                const inCom2 = comGroup.has(`${comp.id}:p2`);
+                if (inCom1 === inCom2) continue; // both in or both out
 
                 let r = 0;
                 switch (comp.type) {
@@ -3774,8 +3797,10 @@ class CircuitCanvas {
                 }
                 if (r <= 0) continue;
 
-                const otherNet = net1 === probeNet ? net2 : net1;
-                totalCurrent += (vNet - otherNet.voltage) / r;
+                // Current from outside into comGroup = (V_outside - V_net) / R
+                // Current from comGroup to outside = (V_net - V_outside) / R
+                const outsideNet = inCom1 ? net2 : net1;
+                totalCurrent += (vNet - outsideNet.voltage) / r;
               }
 
               {
