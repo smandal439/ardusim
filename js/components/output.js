@@ -2551,3 +2551,186 @@ class BuzzerComponent extends Component {
   }
 }
 registerComponent('buzzer', BuzzerComponent);
+
+
+defComp({
+  id: 'rgb_matrix_64x64',
+  name: 'RGB LED Matrix 64x64 (HUB75)',
+  category: 'Displays',
+  icon: '💡',
+  desc: 'Waveshare 64x64 RGB Full-Color LED Matrix Panel with HUB75 interface, adjustable brightness, and live pixel framebuffer simulation',
+  width: 140,
+  height: 140,
+  defaultProps: { 
+    brightness: 80, 
+    testPattern: 1 
+  },
+  interactive: [
+    { field: 'brightness', label: 'Brightness', min: 0, max: 100, step: 1, unit: '%' },
+    { field: 'testPattern', label: 'Test Mode', min: 0, max: 3, step: 1, unit: '' },
+  ],
+  pins: [
+    // HUB75 Standard 16-pin connector layout mapped across the bottom
+    { id: 'R1', label: 'R1', type: PIN_TYPE.DIGITAL, x: 10, y: 132, side: 'bottom' },
+    { id: 'G1', label: 'G1', type: PIN_TYPE.DIGITAL, x: 18, y: 132, side: 'bottom' },
+    { id: 'B1', label: 'B1', type: PIN_TYPE.DIGITAL, x: 26, y: 132, side: 'bottom' },
+    { id: 'GND1', label: 'GND', type: PIN_TYPE.GND, x: 34, y: 132, side: 'bottom' },
+    { id: 'R2', label: 'R2', type: PIN_TYPE.DIGITAL, x: 42, y: 132, side: 'bottom' },
+    { id: 'G2', label: 'G2', type: PIN_TYPE.DIGITAL, x: 50, y: 132, side: 'bottom' },
+    { id: 'B2', label: 'B2', type: PIN_TYPE.DIGITAL, x: 58, y: 132, side: 'bottom' },
+    { id: 'GND2', label: 'GND', type: PIN_TYPE.GND, x: 66, y: 132, side: 'bottom' },
+    { id: 'A', label: 'A', type: PIN_TYPE.DIGITAL, x: 74, y: 132, side: 'bottom' },
+    { id: 'B', label: 'B', type: PIN_TYPE.DIGITAL, x: 82, y: 132, side: 'bottom' },
+    { id: 'C', label: 'C', type: PIN_TYPE.DIGITAL, x: 90, y: 132, side: 'bottom' },
+    { id: 'D', label: 'D', type: PIN_TYPE.DIGITAL, x: 98, y: 132, side: 'bottom' },
+    { id: 'E', label: 'E', type: PIN_TYPE.DIGITAL, x: 106, y: 132, side: 'bottom' },
+    { id: 'LAT', label: 'LAT', type: PIN_TYPE.DIGITAL, x: 114, y: 132, side: 'bottom' },
+    { id: 'OE', label: 'OE', type: PIN_TYPE.DIGITAL, x: 122, y: 132, side: 'bottom' },
+    { id: 'CLK', label: 'CLK', type: PIN_TYPE.DIGITAL, x: 130, y: 132, side: 'bottom' },
+  ],
+
+  update(inst, sim, dt) {
+    if (!sim?.isRunning) return;
+
+    // Initialize runtime framebuffer and state
+    if (!inst.runtimeState) {
+      const buffer = new Uint32Array(64 * 64);
+      inst.runtimeState = {
+        framebuffer: buffer,
+        powered: true,
+        lastUpdate: 0
+      };
+    }
+
+    const state = inst.runtimeState;
+    const brightness = (inst.props.brightness ?? 80) / 100;
+    const pattern = inst.props.testPattern ?? 1;
+
+    // Generate procedural test patterns if no custom HUB75 driver data is streaming
+    const now = sim.time ?? Date.now();
+    if (!state.lastUpdate || now - state.lastUpdate >= 50) {
+      state.lastUpdate = now;
+      const buf = state.framebuffer;
+
+      for (let y = 0; y < 64; y++) {
+        for (let x = 0; x < 64; x++) {
+          let r = 0, g = 0, b = 0;
+
+          if (pattern === 1) {
+            // Color gradient / ramp
+            r = Math.floor((x / 63) * 255 * brightness);
+            g = Math.floor((y / 63) * 255 * brightness);
+            b = Math.floor(((63 - x) / 63) * 255 * brightness);
+          } else if (pattern === 2) {
+            // Checkerboard
+            const check = ((Math.floor(x / 8) + Math.floor(y / 8)) % 2 === 0);
+            r = check ? Math.floor(255 * brightness) : 0;
+            g = check ? Math.floor(128 * brightness) : 0;
+            b = check ? 0 : Math.floor(255 * brightness);
+          } else if (pattern === 3) {
+            // Concentric circles / radar
+            const cx = 31.5, cy = 31.5;
+            const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+            const wave = Math.sin(dist * 0.3 - (now * 0.005)) * 127 + 128;
+            r = Math.floor(wave * brightness);
+            g = Math.floor((255 - wave) * brightness);
+            b = Math.floor((x * 4) * brightness);
+          }
+
+          // Pack into RGBA integer format for canvas ImageData
+          buf[y * 64 + x] = (255 << 24) | (b << 16) | (g << 8) | r;
+        }
+      }
+    }
+  },
+
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const brightness = (inst.props.brightness ?? 80) / 100;
+    const isPowered = sim?.isRunning ? (inst.runtimeState?.powered ?? true) : false;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // 1. Black PCB Body & Outer Frame
+    ctx.fillStyle = '#111822';
+    roundRect(ctx, 0, 0, 140, 126, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#2d3748';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Mounting holes in corners
+    const holes = [[8, 8], [132, 8], [8, 118], [132, 118]];
+    holes.forEach(([hx, hy]) => {
+      ctx.fillStyle = '#0d1117';
+      ctx.beginPath();
+      ctx.arc(hx, hy, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#d4af37'; // Gold washer ring
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    // 2. LED Matrix Screen Bezel (Inner dark container)
+    ctx.fillStyle = '#05070a';
+    roundRect(ctx, 14, 12, 112, 102, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#1a202c';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // 3. Render 64x64 Pixel Display Area (96x96 pixels centered at x=22, y=15)
+    const displayX = 22;
+    const displayY = 15;
+    const displaySize = 96;
+    const pixelSize = displaySize / 64;
+
+    if (isPowered && inst.runtimeState?.framebuffer) {
+      const buf = inst.runtimeState.framebuffer;
+      
+      // Draw grid LEDs with subtle pitch spacing for realistic LED appearance
+      for (let py = 0; py < 64; py++) {
+        for (let px = 0; px < 64; px++) {
+          const val = buf[py * 64 + px];
+          const r = val & 0xff;
+          const g = (val >> 8) & 0xff;
+          const b = (val >> 16) & 0xff;
+
+          if (r > 5 || g > 5 || b > 5) {
+            ctx.fillStyle = `rgb(${r},${g},${b})`;
+            ctx.fillRect(displayX + px * pixelSize, displayY + py * pixelSize, pixelSize - 0.2, pixelSize - 0.2);
+          } else {
+            // Unlit LED dot
+            ctx.fillStyle = '#11151c';
+            ctx.fillRect(displayX + px * pixelSize, displayY + py * pixelSize, pixelSize - 0.2, pixelSize - 0.2);
+          }
+        }
+      }
+    } else {
+      // Unpowered dark screen
+      ctx.fillStyle = '#020305';
+      ctx.fillRect(displayX, displayY, displaySize, displaySize);
+    }
+
+    // 4. Panel Header & Silk Screen Text
+    ctx.fillStyle = '#718096';
+    ctx.font = 'bold 4px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('WAVESHARE 64x64 RGB MATRIX', 18, 122);
+    ctx.textAlign = 'right';
+    ctx.fillText('HUB75', 122, 122);
+
+    // 5. Bottom Pin Header Connector Block (IDC 2x8 representation)
+    ctx.fillStyle = '#1a202c';
+    roundRect(ctx, 6, 124, 128, 8, 1);
+    ctx.fill();
+
+    // Selection Highlight
+    if (inst.selected && typeof drawSelectionRect === 'function') {
+      drawSelectionRect(ctx, -2, -2, 144, 138);
+    }
+
+    ctx.restore();
+  }
+});

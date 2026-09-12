@@ -1,0 +1,15 @@
+{
+  "id": "esp32_hub75_matrixpaneli2s_dma",
+  "name": "ESP32-HUB75-MatrixPanelI2S-DMA",
+  "icon": "🔧",
+  "desc": "A custom ESP32-HUB75-MatrixPanelI2S-DMA circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [],
+    "wires": []
+  },
+  "code": "#include <ESP32-HUB75-MatrixPanelI2S-DMA.h>\n\n// Panel configuration for 64x64 HUB75\nconst int PANEL_WIDTH = 64;\nconst int PANEL_HEIGHT = 64;\n\n// Matrix object\nMatrixPanel_I2S_DMA *dma_display = nullptr;\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Configure panel parameters\n  HUB75_I2S_CFG mxconfig(\n    PANEL_WIDTH,   // Module width\n    PANEL_HEIGHT,  // Module height\n    1              // Chain length\n  );\n\n  // Optional: Custom pin overrides if needed (defaults match standard wiring)\n  // mxconfig.gpio.r1 = 25;\n  // mxconfig.gpio.g1 = 27;\n  // ...\n\n  // Initialize display with DMA support\n  dma_display = new MatrixPanel_I2S_DMA(mxconfig);\n  dma_display->begin();\n  dma_display->setBrightness8(60); // Set brightness (0-255)\n  dma_display->clearScreen();\n}\n\nvoid loop() {\n  // Draw basic shapes and text\n  dma_display->clearScreen();\n\n  // Draw colorful border\n  dma_display->drawRect(0, 0, 64, 64, dma_display->color4bit(15, 0, 0)); // Red border\n  dma_display->drawRect(1, 1, 62, 62, dma_display->color4bit(0, 15, 0)); // Green inner border\n\n  // Display scrolling text\n  dma_display->setTextSize(1);\n  dma_display->setTextColor(dma_display->color4bit(15, 15, 15)); // White text\n  dma_display->setCursor(8, 28);\n  dma_display->print(\"WAVESHARE\");\n\n  delay(2000);\n\n  // Fill screen with flashing primary colors\n  dma_display->fillRect(10, 10, 44, 44, dma_display->color4bit(0, 0, 15)); // Blue box\n  delay(1000);\n}"
+}
