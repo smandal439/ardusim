@@ -4327,107 +4327,120 @@ class CircuitCanvas {
     return false;
   }
 
-  // Measure total resistance along the shortest resistive path between two pins
+  // Measure equivalent resistance between two pins, handling parallel paths correctly
   _measureResistanceBetween(startInstId, startPinId, targetInstId, targetPinId) {
-    const queue = [{ instId: startInstId, pinId: startPinId, resistance: 0 }];
-    const visited = new Set();
-    while (queue.length > 0) {
-      const current = queue.shift();
-      const nodeKey = `${current.instId}:${current.pinId}`;
-      if (visited.has(nodeKey)) continue;
-      visited.add(nodeKey);
-
-      // Check if we reached the target pin
-      if (current.instId === targetInstId && current.pinId === targetPinId) {
-        return current.resistance;
-      }
-
-      const inst = this.components.find(c => c.id === current.instId);
-      if (!inst) continue;
-
-      // Resistor pass-through — add resistance
+    // Helper: get resistance value for a component
+    const getResistance = (inst) => {
       if (inst.type === 'resistor') {
-        const rVal = (Number(inst.props && inst.props.value) || 220) * (inst.props.unit === 'kΩ' ? 1e3 : inst.props.unit === 'MΩ' ? 1e6 : 1);
-        const otherPin = current.pinId === 'p1' ? 'p2' : 'p1';
-        queue.push({ instId: inst.id, pinId: otherPin, resistance: current.resistance + rVal });
-        // Also skip past the resistor to the next connected component
-        for (const wire of this.wires) {
-          if (wire.from.instId === inst.id && wire.from.pinId === otherPin) {
-            queue.push({ instId: wire.to.instId, pinId: wire.to.pinId, resistance: current.resistance + rVal });
-          } else if (wire.to.instId === inst.id && wire.to.pinId === otherPin) {
-            queue.push({ instId: wire.from.instId, pinId: wire.from.pinId, resistance: current.resistance + rVal });
-          }
-        }
-        continue;
+        return (Number(inst.props && inst.props.value) || 220)
+          * (inst.props.unit === 'kΩ' ? 1e3 : inst.props.unit === 'MΩ' ? 1e6 : 1);
       }
+      if (inst.type === 'diode_1n4007') return 0.7;
+      if (inst.type === 'bulb_12v') return 12;
+      return 0;
+    };
 
-      // Diode pass-through (forward biased only: anode → cathode)
-      if (inst.type === 'diode_1n4007' && current.pinId === 'anode') {
-        queue.push({ instId: inst.id, pinId: 'cathode', resistance: current.resistance + 0.7 });
+    // Build adjacency list: pinKey → [{ pinKey, resistance }]
+    const adj = new Map();
+    const addEdge = (a, b, r) => {
+      if (!adj.has(a)) adj.set(a, []);
+      if (!adj.has(b)) adj.set(b, []);
+      adj.get(a).push({ key: b, r });
+      adj.get(b).push({ key: a, r });
+    };
+
+    // Register all component pins
+    for (const inst of this.components) {
+      const { COMPONENT_DEFS } = window.ArduinoComponents || {};
+      const def = COMPONENT_DEFS && COMPONENT_DEFS[inst.type];
+      if (!def || !def.pins) continue;
+      for (const pin of def.pins) {
+        adj.set(`${inst.id}:${pin.id}`, []);
       }
+    }
 
-      // Breadboard internal connectivity
-      if (inst.type === 'breadboard' || inst.type === 'breadboard_small') {
+    // Wire edges (zero resistance)
+    for (const w of this.wires) {
+      addEdge(`${w.from.instId}:${w.from.pinId}`, `${w.to.instId}:${w.to.pinId}`, 0);
+    }
+
+    // Internal pass-through for non-resistor components (zero resistance)
+    for (const inst of this.components) {
+      if (inst.type === 'resistor') continue; // handled separately
+      const key = (pin) => `${inst.id}:${pin}`;
+      if (inst.type === 'push_button') {
+        const pressed = inst.runtimeState && inst.runtimeState.pressed;
+        if (pressed) { addEdge(key('p1'), key('p3'), 0); addEdge(key('p2'), key('p4'), 0); }
+        else { addEdge(key('p1'), key('p2'), 0); addEdge(key('p3'), key('p4'), 0); }
+      } else if (inst.type === 'relay') {
+        const on = inst.runtimeState && inst.runtimeState.active;
+        addEdge(key('com'), key(on ? 'no' : 'nc'), 0);
+      } else if (inst.type === 'breadboard' || inst.type === 'breadboard_small') {
         const defs = window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS;
         const def = defs && defs[inst.type];
         if (def) {
-          const myGroup = window._breadboardGetGroup(current.pinId);
-          if (myGroup) {
-            for (const otherPin of def.pins) {
-              if (otherPin.id === current.pinId) continue;
-              const otherGroup = window._breadboardGetGroup(otherPin.id);
-              if (otherGroup === myGroup) {
-                queue.push({ instId: inst.id, pinId: otherPin.id, resistance: current.resistance });
-              }
-            }
+          const groups = {};
+          for (const pin of def.pins) {
+            const g = window._breadboardGetGroup && window._breadboardGetGroup(pin.id);
+            if (g) { if (!groups[g]) groups[g] = []; groups[g].push(pin.id); }
+          }
+          for (const pinIds of Object.values(groups)) {
+            for (let i = 1; i < pinIds.length; i++) addEdge(key(pinIds[0]), key(pinIds[i]), 0);
           }
         }
-      }
-
-      // Push button pass-through
-      if (inst.type === 'push_button') {
-        const isPressed = inst.runtimeState && inst.runtimeState.pressed;
-        if (current.pinId === 'p1') queue.push({ instId: inst.id, pinId: 'p2', resistance: current.resistance });
-        if (current.pinId === 'p2') queue.push({ instId: inst.id, pinId: 'p1', resistance: current.resistance });
-        if (current.pinId === 'p3') queue.push({ instId: inst.id, pinId: 'p4', resistance: current.resistance });
-        if (current.pinId === 'p4') queue.push({ instId: inst.id, pinId: 'p3', resistance: current.resistance });
-        if (isPressed) {
-          if (current.pinId === 'p1' || current.pinId === 'p2') {
-            queue.push({ instId: inst.id, pinId: 'p3', resistance: current.resistance });
-            queue.push({ instId: inst.id, pinId: 'p4', resistance: current.resistance });
-          } else {
-            queue.push({ instId: inst.id, pinId: 'p1', resistance: current.resistance });
-            queue.push({ instId: inst.id, pinId: 'p2', resistance: current.resistance });
-          }
-        }
-      }
-
-      // Relay pass-through
-      if (inst.type === 'relay') {
-        const relayOn = !!(inst.runtimeState && inst.runtimeState.active);
-        if (current.pinId === 'com') queue.push({ instId: inst.id, pinId: relayOn ? 'no' : 'nc', resistance: current.resistance });
-        else if (current.pinId === 'no' && relayOn) queue.push({ instId: inst.id, pinId: 'com', resistance: current.resistance });
-        else if (current.pinId === 'nc' && !relayOn) queue.push({ instId: inst.id, pinId: 'com', resistance: current.resistance });
-      }
-
-      // 12V Bulb pass-through (anode → cathode, 12Ω nominal)
-      if (inst.type === 'bulb_12v' && current.pinId === 'anode') {
-        queue.push({ instId: inst.id, pinId: 'cathode', resistance: current.resistance + 12 });
-      }
-      if (inst.type === 'bulb_12v' && current.pinId === 'cathode') {
-        queue.push({ instId: inst.id, pinId: 'anode', resistance: current.resistance + 12 });
-      }
-
-      // Traverse connected wires
-      for (const wire of this.wires) {
-        if (wire.from.instId === current.instId && wire.from.pinId === current.pinId) {
-          queue.push({ instId: wire.to.instId, pinId: wire.to.pinId, resistance: current.resistance });
-        } else if (wire.to.instId === current.instId && wire.to.pinId === current.pinId) {
-          queue.push({ instId: wire.from.instId, pinId: wire.from.pinId, resistance: current.resistance });
-        }
+      } else if (inst.type === 'led' || inst.type === 'led_green' || inst.type === 'led_blue'
+        || inst.type === 'led_yellow' || inst.type === 'led_orange' || inst.type === 'led_white') {
+        addEdge(key('anode'), key('cathode'), 20);
+      } else if (inst.type === 'bulb_12v') {
+        addEdge(key('anode'), key('cathode'), 12);
+      } else if (inst.type === 'diode_1n4007') {
+        addEdge(key('anode'), key('cathode'), 0.7);
       }
     }
-    return Infinity; // no path found
+
+    // Resistor edges (with resistance value)
+    for (const inst of this.components) {
+      if (inst.type !== 'resistor') continue;
+      const r = getResistance(inst);
+      addEdge(`${inst.id}:p1`, `${inst.id}:p2`, Math.max(r, 0.01));
+    }
+
+    const startKey = `${startInstId}:${startPinId}`;
+    const targetKey = `${targetInstId}:${targetPinId}`;
+
+    if (!adj.has(startKey) || !adj.has(targetKey)) return Infinity;
+
+    // Find all simple paths from start to target using DFS, collect path resistances
+    const pathResistances = [];
+    const maxPaths = 200; // safety limit
+
+    const dfs = (currentKey, visited, totalR) => {
+      if (pathResistances.length >= maxPaths) return;
+      if (currentKey === targetKey) {
+        pathResistances.push(totalR);
+        return;
+      }
+      const neighbors = adj.get(currentKey);
+      if (!neighbors) return;
+      for (const { key: nextKey, r } of neighbors) {
+        if (visited.has(nextKey)) continue;
+        visited.add(nextKey);
+        dfs(nextKey, visited, totalR + r);
+        visited.delete(nextKey);
+      }
+    };
+
+    const visited = new Set([startKey]);
+    dfs(startKey, visited, 0);
+
+    if (pathResistances.length === 0) return Infinity;
+
+    // Combine all path resistances using parallel formula
+    let totalConductance = 0;
+    for (const r of pathResistances) {
+      if (r > 0) totalConductance += 1 / r;
+    }
+    return totalConductance > 0 ? 1 / totalConductance : Infinity;
   }
 
   _getWireTarget(instId, pinId) {

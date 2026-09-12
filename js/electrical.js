@@ -546,56 +546,75 @@ class ElectricalEngine {
   }
 
   /**
-   * Measure resistance between two pins (BFS through resistive components).
+   * Measure equivalent resistance between two pins, handling parallel paths correctly.
+   * Finds all simple paths and combines them using the parallel formula.
    */
   measureResistance(startInstId, startPinId, endInstId, endPinId) {
-    const queue = [{ instId: startInstId, pinId: startPinId, resistance: 0 }];
-    const visited = new Set();
+    const adj = new Map();
+    const addEdge = (a, b, r) => {
+      if (!adj.has(a)) adj.set(a, []);
+      if (!adj.has(b)) adj.set(b, []);
+      adj.get(a).push({ key: b, r });
+      adj.get(b).push({ key: a, r });
+    };
 
-    while (queue.length > 0) {
-      const current = queue.shift();
-      const nodeKey = `${current.instId}:${current.pinId}`;
-      if (visited.has(nodeKey)) continue;
-      visited.add(nodeKey);
+    // Wire edges (zero resistance)
+    for (const wire of this.wires) {
+      addEdge(`${wire.from.instId}:${wire.from.pinId}`, `${wire.to.instId}:${wire.to.pinId}`, 0);
+    }
 
-      if (current.instId === endInstId && current.pinId === endPinId) {
-        return current.resistance;
-      }
-
-      // Follow wires
-      for (const wire of this.wires) {
-        if (wire.from.instId === current.instId && wire.from.pinId === current.pinId) {
-          queue.push({ instId: wire.to.instId, pinId: wire.to.pinId, resistance: current.resistance });
-        } else if (wire.to.instId === current.instId && wire.to.pinId === current.pinId) {
-          queue.push({ instId: wire.from.instId, pinId: wire.from.pinId, resistance: current.resistance });
-        }
-      }
-
-      // Follow component internals (resistors add resistance)
-      const inst = this.components.find(c => c.id === current.instId);
-      if (inst) {
-        const conns = this._getInternalConnections(inst);
-        for (const [a, b] of conns) {
-          const [aInst, aPin] = a.split(':');
-          const [bInst, bPin] = b.split(':');
-          let nextPin = null;
-          if (aInst === current.instId && aPin === current.pinId) nextPin = { instId: bInst, pinId: bPin };
-          if (bInst === current.instId && bPin === current.pinId) nextPin = { instId: aInst, pinId: aPin };
-          if (!nextPin) continue;
-
-          let addedR = 0;
-          if (inst.type === 'resistor') {
-            addedR = (Number(inst.props?.value) || 220) * (inst.props?.unit === 'kΩ' ? 1e3 : inst.props?.unit === 'MΩ' ? 1e6 : 1);
-          } else if (inst.type === 'diode_1n4007') {
-            addedR = 0.7; // forward voltage drop
-          } else if (inst.type === 'bulb_12v') {
-            addedR = 12; // nominal filament resistance
-          }
-          queue.push({ instId: nextPin.instId, pinId: nextPin.pinId, resistance: current.resistance + addedR });
-        }
+    // Component internal edges
+    for (const inst of this.components) {
+      const key = (pin) => `${inst.id}:${pin}`;
+      if (inst.type === 'resistor') {
+        const r = (Number(inst.props?.value) || 220)
+          * (inst.props?.unit === 'kΩ' ? 1e3 : inst.props?.unit === 'MΩ' ? 1e6 : 1);
+        addEdge(key('p1'), key('p2'), Math.max(r, 0.01));
+      } else if (inst.type === 'diode_1n4007') {
+        addEdge(key('anode'), key('cathode'), 0.7);
+      } else if (inst.type === 'bulb_12v') {
+        addEdge(key('anode'), key('cathode'), 12);
+      } else if (inst.type === 'led' || inst.type === 'led_green' || inst.type === 'led_blue'
+        || inst.type === 'led_yellow' || inst.type === 'led_orange' || inst.type === 'led_white') {
+        addEdge(key('anode'), key('cathode'), 20);
+      } else if (inst.type === 'push_button') {
+        const pressed = inst.runtimeState?.pressed;
+        if (pressed) { addEdge(key('p1'), key('p3'), 0); addEdge(key('p2'), key('p4'), 0); }
+        else { addEdge(key('p1'), key('p2'), 0); addEdge(key('p3'), key('p4'), 0); }
+      } else if (inst.type === 'relay') {
+        const on = inst.runtimeState?.active;
+        addEdge(key('com'), key(on ? 'no' : 'nc'), 0);
       }
     }
-    return Infinity; // no path found
+
+    const startKey = `${startInstId}:${startPinId}`;
+    const endKey = `${endInstId}:${endPinId}`;
+    if (!adj.has(startKey) || !adj.has(endKey)) return Infinity;
+
+    // DFS to find all simple paths, collect their resistances
+    const pathResistances = [];
+    const dfs = (currentKey, visited, totalR) => {
+      if (pathResistances.length >= 200) return;
+      if (currentKey === endKey) { pathResistances.push(totalR); return; }
+      const neighbors = adj.get(currentKey);
+      if (!neighbors) return;
+      for (const { key: nextKey, r } of neighbors) {
+        if (visited.has(nextKey)) continue;
+        visited.add(nextKey);
+        dfs(nextKey, visited, totalR + r);
+        visited.delete(nextKey);
+      }
+    };
+    dfs(startKey, new Set([startKey]), 0);
+
+    if (pathResistances.length === 0) return Infinity;
+
+    // Parallel combination: 1/R_total = Σ(1/Ri)
+    let totalConductance = 0;
+    for (const r of pathResistances) {
+      if (r > 0) totalConductance += 1 / r;
+    }
+    return totalConductance > 0 ? 1 / totalConductance : Infinity;
   }
 
   /**
