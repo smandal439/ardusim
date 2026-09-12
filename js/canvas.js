@@ -3743,13 +3743,34 @@ class CircuitCanvas {
               break;
             }
             case 'A_DC': {
-              const diffV = vRed - vCom;
-              const totalR = this._measureResistanceBetween(inst.id, 'probe_red', inst.id, 'probe_com');
+              const redNet = this._tracePinNet(inst.id, 'probe_red');
+              const comNet = this._tracePinNet(inst.id, 'probe_com');
+              const redHasSrc = redNet.sources.length > 0;
+              const redHasGnd = redNet.grounds.length > 0;
+              const comHasSrc = comNet.sources.length > 0;
+              const comHasGnd = comNet.grounds.length > 0;
 
-              if (totalR < Infinity && totalR > 0) {
-                const amps = diffV / totalR;
+              let voltage = 0;
+              let totalR = 0;
+              let reversed = false;
+
+              if (redHasSrc && comHasGnd) {
+                // Normal: red→source, com→ground
+                const best = redNet.sources.sort((a, b) => b.voltage - a.voltage)[0];
+                voltage = best.voltage || 0;
+                totalR = (best.resistance || 0) + ((comNet.grounds[0]?.resistance) || 0);
+              } else if (redHasGnd && comHasSrc) {
+                // Reversed: red→ground, com→source — negative current
+                const best = comNet.sources.sort((a, b) => b.voltage - a.voltage)[0];
+                voltage = best.voltage || 0;
+                totalR = ((redNet.grounds[0]?.resistance) || 0) + (best.resistance || 0);
+                reversed = true;
+              }
+
+              if (totalR > 0 && voltage > 0) {
+                const amps = voltage / totalR;
                 const absA = Math.abs(amps);
-                const sign = amps < 0 ? '-' : '';
+                const sign = reversed ? '-' : '';
                 let disp, pfx;
                 if (absA >= 1) { disp = absA; pfx = 'A'; }
                 else if (absA >= 0.001) { disp = absA * 1000; pfx = 'mA'; }
