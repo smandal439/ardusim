@@ -1828,7 +1828,7 @@ window.loadExamplesFromFiles = async function () {
     'esp32_i2s_local_radio_player', 'lcd', 'read_rfid_card_raw_data', 'lcd_print_remotely',
     'rfid_inventory_tracker', 'shift_resister_circuit', '7408_test_with_logic_analyzer',
     'espnow_sender', 'espnow_receiver', 'nano_blink', 'coap_client', 'coap_dip_switch_to_8_led', 
-    'coap_simple_server',
+    'coap_simple_server','ds3231_rtc_clock_sync_with_ntp',
     'espnow_led_control','two_lcd', 'esp_now_dip_switch_to_8_led', 'dip_switch_and_led_array',
      'morse_code_using_serial_data','bluetooth_serial_bridge', 'gps_neo_6m_8m_tracker',
     'zigbee_sender_receiver', 'zigbee_sensor_network', 'zigbee_led_control', 

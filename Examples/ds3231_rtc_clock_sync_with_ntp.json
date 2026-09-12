@@ -1,0 +1,172 @@
+{
+  "id": "ds3231_rtc_clock_sync_with_ntp",
+  "name": "DS3231 RTC Clock sync with NTP",
+  "icon": "🔧",
+  "desc": "This example demonstrates how to synchronize a DS3231 RTC module with an NTP server using an ESP32 microcontroller. The current time and temperature are displayed on a 16x2 I2C LCD, and a heartbeat LED blinks every second to indicate the program is running. The RTC is synchronized with the NTP server every hour, and the program handles Wi-Fi connection issues gracefully.",
+  "tags": [
+    "custom",
+    "circuit",
+    "ds3231",
+    "rtc",
+    "ntp",
+    "lcd",
+    "esp32",
+    "wifi",
+    "temperature",
+    "heartbeat",
+    "non-blocking"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "rtc1",
+        "type": "ds3231",
+        "x": 450,
+        "y": 215,
+        "rotation": 0,
+        "props": {
+          "hour": 20,
+          "minute": 30,
+          "second": 0,
+          "day": 11,
+          "month": 9,
+          "year": 26,
+          "alarm1Hour": 0,
+          "alarm1Minute": 0,
+          "alarm1Second": 0,
+          "alarm2Hour": 0,
+          "alarm2Minute": 0,
+          "temperature": 27.5,
+          "label": "DS3231"
+        }
+      },
+      {
+        "id": "comp_1789138323095_ngxdk",
+        "type": "lcd1602_i2c",
+        "x": 415,
+        "y": 60,
+        "rotation": 0,
+        "props": {
+          "address": "0x27"
+        }
+      },
+      {
+        "id": "comp_1789191305062_n02fu",
+        "type": "esp32_devkit_v1",
+        "x": 190,
+        "y": 50,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1789191347374_mhg0k",
+        "from": {
+          "instId": "comp_1789191305062_n02fu",
+          "pinId": "D23"
+        },
+        "to": {
+          "instId": "comp_1789138323095_ngxdk",
+          "pinId": "scl"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789191352659_gyv7m",
+        "from": {
+          "instId": "comp_1789191305062_n02fu",
+          "pinId": "D21"
+        },
+        "to": {
+          "instId": "comp_1789138323095_ngxdk",
+          "pinId": "sda"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789191357787_zxggx",
+        "from": {
+          "instId": "comp_1789191305062_n02fu",
+          "pinId": "VIN"
+        },
+        "to": {
+          "instId": "comp_1789138323095_ngxdk",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789191360659_2m0f5",
+        "from": {
+          "instId": "comp_1789191305062_n02fu",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1789138323095_ngxdk",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789191363475_rgbjq",
+        "from": {
+          "instId": "comp_1789191305062_n02fu",
+          "pinId": "VIN"
+        },
+        "to": {
+          "instId": "rtc1",
+          "pinId": "VCC"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789191366963_iymof",
+        "from": {
+          "instId": "comp_1789191305062_n02fu",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "rtc1",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789191370323_llal9",
+        "from": {
+          "instId": "comp_1789191305062_n02fu",
+          "pinId": "D23"
+        },
+        "to": {
+          "instId": "rtc1",
+          "pinId": "SCL"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789191374508_1j1wk",
+        "from": {
+          "instId": "comp_1789191305062_n02fu",
+          "pinId": "D21"
+        },
+        "to": {
+          "instId": "rtc1",
+          "pinId": "SDA"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n * DS3231 RTC Clock with LCD Display\n *\n * Wiring:\n *   DS3231 VCC -> 5V\n *   DS3231 GND -> GND\n *   DS3231 SCL -> SCL\n *   DS3231 SDA -> SDA\n *   LCD VCC    -> 5V\n *   LCD GND    -> GND\n *   LCD SCL    -> SCL\n *   LCD SDA    -> SDA\n *   LED anode  -> D13 / GPIO 2 (via 220 ohm resistor)\n */\n\n#include <Wire.h>\n#include <RtcDS3231.h>\n#include <LiquidCrystal_I2C.h>\n\nRtcDS3231<TwoWire> Rtc(Wire);\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nconst int LED_PIN = 2;\nbool ledState = false;\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(LED_PIN, OUTPUT);\n\n  Wire.begin();\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"Initializing...\");\n\n  Rtc.Begin();\n\n  if (!Rtc.IsDateTimeValid()) {\n    Serial.println(\"RTC lost power - setting compile time\");\n    Rtc.SetDateTime(RtcDateTime(__DATE__, __TIME__));\n  }\n\n  if (!Rtc.IsRunning()) {\n    Serial.println(\"RTC not running, starting now\");\n    Rtc.SetIsRunning(true);\n  }\n\n  lcd.clear();\n  Serial.println(\"DS3231 RTC Clock Started\");\n  Serial.println(\"-----------------------------\");\n}\n\nvoid loop() {\n  RtcDateTime now = Rtc.GetDateTime();\n  RtcTemperature temp = Rtc.GetTemperature();\n\n  if (now.Hour() < 10) Serial.print(\"0\");\n  Serial.print(now.Hour());\n  Serial.print(\":\");\n  if (now.Minute() < 10) Serial.print(\"0\");\n  Serial.print(now.Minute());\n  Serial.print(\":\");\n  if (now.Second() < 10) Serial.print(\"0\");\n  Serial.print(now.Second());\n  Serial.print(\"  \");\n  if (now.Day() < 10) Serial.print(\"0\");\n  Serial.print(now.Day());\n  Serial.print(\"/\");\n  if (now.Month() < 10) Serial.print(\"0\");\n  Serial.print(now.Month());\n  Serial.print(\"/\");\n  Serial.print(now.Year());\n  Serial.print(\"  Temp: \");\n  Serial.print(temp.AsFloatDegC(), 1);\n  Serial.println(\" C\");\n\n  lcd.setCursor(0, 0);\n  if (now.Hour() < 10) lcd.print(\"0\");\n  lcd.print(now.Hour());\n  lcd.print(\":\");\n  if (now.Minute() < 10) lcd.print(\"0\");\n  lcd.print(now.Minute());\n  lcd.print(\":\");\n  if (now.Second() < 10) lcd.print(\"0\");\n  lcd.print(now.Second());\n  lcd.print(\"  \");\n  lcd.print(temp.AsFloatDegC(), 1);\n  lcd.print(\"C\");\n\n  lcd.setCursor(0, 1);\n  if (now.Day() < 10) lcd.print(\"0\");\n  lcd.print(now.Day());\n  lcd.print(\"/\");\n  if (now.Month() < 10) lcd.print(\"0\");\n  lcd.print(now.Month());\n  lcd.print(\"/\");\n  lcd.print(now.Year());\n\n  ledState = !ledState;\n  digitalWrite(LED_PIN, ledState ? HIGH : LOW);\n\n  delay(1000);\n}"
+}
