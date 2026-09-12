@@ -1,13 +1,13 @@
-/* ═══════════════════════════════════════════ArduSim════════════
-   ArduSim — Arduino Online Simulator
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•ArduSimâ•â•â•â•â•â•â•â•â•â•â•â•
+   ArduSim â€” Arduino Online Simulator
    CSS Design System & Component Styles
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ── Google Fonts loaded via HTML ── */
+/* â”€â”€ Google Fonts loaded via HTML â”€â”€ */
 
-/* ── CSS Custom Properties ── */
+/* â”€â”€ CSS Custom Properties â”€â”€ */
 :root {
-  /* Colors — Dark Theme */
+  /* Colors â€” Dark Theme */
   --bg-root:        #0d1117;
   --bg-panel:       #161b22;
   --bg-panel-alt:   #1c2128;
@@ -105,7 +105,7 @@ body.light-theme {
   --shadow-glow:    0 0 20px rgba(0, 151, 156, 0.2);
 }
 
-/* ── Reset & Base ── */
+/* â”€â”€ Reset & Base â”€â”€ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
@@ -147,7 +147,7 @@ kbd {
   color: var(--text-primary);
 }
 
-/* ═══════════════ HEADER ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• HEADER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .header {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -432,7 +432,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   flex-shrink: 0;
 }
 
-/* ═══════════════ STATUS BAR ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• STATUS BAR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .sim-statusbar {
   position: fixed;
   top: var(--hdr-height);
@@ -472,7 +472,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 #compile-status.error { color: var(--stop-color); }
 #compile-status.warn  { color: var(--warn-color); }
 
-/* ═══════════════ MAIN LAYOUT ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MAIN LAYOUT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .main-layout {
   position: fixed;
   top: calc(var(--hdr-height) + var(--statusbar-h));
@@ -485,7 +485,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 /* When the bottom panel is collapsed, let the workspace fill the freed space */
 body.bottom-collapsed .main-layout { bottom: 32px; }
 
-/* ═══════════════ PANELS ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PANELS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .panel {
   display: flex;
   flex-direction: column;
@@ -498,7 +498,7 @@ body.bottom-collapsed .main-layout { bottom: 32px; }
 .panel-canvas    { flex: 1; min-width: 300px; }
 .panel-components { width: var(--panel-comp-w); flex-shrink: 0; border-left: 1px solid var(--border); }
 
-/* ═══════════════ VIEW FOCUS MODES ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• VIEW FOCUS MODES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 body.view-code .panel-canvas,
 body.view-code .panel-components,
 body.view-code .bottom-panel,
@@ -525,7 +525,7 @@ body.view-serial .bottom-panel {
   bottom: 0;
 }
 
-/* ═══════════════ CANVAS FULLSCREEN MODE ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CANVAS FULLSCREEN MODE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 body.canvas-fullscreen .header,
 body.canvas-fullscreen .sim-statusbar,
 body.canvas-fullscreen .bottom-panel,
@@ -626,7 +626,7 @@ body.view-serial #resizer-bottom { display: none; }
 .panel-icon-btn.btn-danger:hover { background: rgba(218, 54, 51, 0.15); color: var(--stop-color); }
 .panel-icon-btn svg { transition: transform var(--trans-fast); }
 
-/* ═══════════════ CODE EDITOR ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CODE EDITOR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .editor-container {
   flex: 1;
   overflow: hidden;
@@ -647,7 +647,7 @@ body.view-serial #resizer-bottom { display: none; }
   flex-shrink: 0;
 }
 
-/* ═══════════════ EDITOR ERROR PANEL ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• EDITOR ERROR PANEL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .editor-error-panel {
   flex-shrink: 0;
   background: linear-gradient(135deg, #3d1214 0%, #2d0c0e 100%);
@@ -705,7 +705,7 @@ body.view-serial #resizer-bottom { display: none; }
   color: #fff;
 }
 
-/* ═══════════════ CIRCUIT CANVAS ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CIRCUIT CANVAS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .canvas-wrapper {
   flex: 1;
   position: relative;
@@ -806,7 +806,7 @@ body.view-serial #resizer-bottom { display: none; }
   pointer-events: none;
 }
 
-/* ═══════════════ COMPONENT LIBRARY ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• COMPONENT LIBRARY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .component-search-box {
   display: flex;
   align-items: center;
@@ -981,7 +981,7 @@ body.view-serial #resizer-bottom { display: none; }
 .comp-item:hover .comp-add-btn { opacity: 1; }
 .comp-add-btn:hover { background: var(--accent); color: #fff; }
 
-/* ═══════════════ BOTTOM PANEL ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• BOTTOM PANEL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .bottom-panel {
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -1053,7 +1053,7 @@ body.view-serial #resizer-bottom { display: none; }
 }
 .tab-pane.active { display: flex; }
 
-/* ═══════════════ SERIAL MONITOR ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SERIAL MONITOR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .serial-toolbar {
   display: flex;
   align-items: center;
@@ -1195,7 +1195,7 @@ body.view-serial #resizer-bottom { display: none; }
 .serial-input:focus { border-color: var(--border-focus); }
 .serial-input::placeholder { color: var(--text-muted); }
 
-/* ═══════════════ OUTPUT / DEBUG ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• OUTPUT / DEBUG â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .output-title {
   font-size: 11px;
   font-weight: 600;
@@ -1226,7 +1226,7 @@ body.view-serial #resizer-bottom { display: none; }
 .output-line.warn { color: var(--warn-color); }
 .output-line.system  { color: var(--text-muted); font-style: italic; }
 
-/* ═══════════════ OSCILLOSCOPE ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• OSCILLOSCOPE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .osc-toolbar {
   display: flex;
   align-items: center;
@@ -1259,7 +1259,7 @@ body.view-serial #resizer-bottom { display: none; }
   background: var(--serial-bg);
 }
 
-/* ── Logic Analyzer Toolbar ── */
+/* â”€â”€ Logic Analyzer Toolbar â”€â”€ */
 .la-toolbar {
   display: flex;
   flex-direction: column;
@@ -1299,7 +1299,7 @@ body.view-serial #resizer-bottom { display: none; }
   white-space: nowrap;
 }
 
-/* ═══════════════ PIN MONITOR ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PIN MONITOR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .pin-monitor-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -1374,7 +1374,7 @@ body.view-serial #resizer-bottom { display: none; }
 .pin-row.pin-high .pin-bar-fill { background: var(--wire-high); }
 .pin-row.pin-pwm .pin-bar-fill  { background: var(--wire-pwm); }
 
-/* ═══════════════ MODALS ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1445,7 +1445,7 @@ body.view-serial #resizer-bottom { display: none; }
   border-top: 1px solid var(--border);
 }
 
-/* ═══════════════ LIBRARY TOOLBAR (Examples & Saved Projects) ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LIBRARY TOOLBAR (Examples & Saved Projects) â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .library-toolbar {
   display: flex;
   flex-direction: column;
@@ -1703,7 +1703,7 @@ body.view-serial #resizer-bottom { display: none; }
 .prop-input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
 .prop-input option { background: var(--bg-input); color: var(--text-primary); }
 
-/* Enhanced properties modal — component description & pin config */
+/* Enhanced properties modal â€” component description & pin config */
 .props-info { margin-bottom: 6px; }
 .props-desc { display: flex; gap: 12px; align-items: flex-start; }
 .props-comp-icon {
@@ -1761,7 +1761,7 @@ body.view-serial #resizer-bottom { display: none; }
   margin-bottom: 10px;
 }
 
-/* ═══════════════ CONFIRM DIALOG ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CONFIRM DIALOG â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .confirm-overlay {
   position: fixed;
   inset: 0;
@@ -1809,7 +1809,7 @@ body.view-serial #resizer-bottom { display: none; }
   margin-top: 4px;
 }
 
-/* ═══════════════ CANVAS CONTEXT MENU ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CANVAS CONTEXT MENU â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .canvas-context-menu {
   position: fixed;
   background: var(--bg-panel);
@@ -1878,7 +1878,7 @@ body.view-serial #resizer-bottom { display: none; }
   box-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
 }
 
-/* ═══════════════ TOAST NOTIFICATIONS ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TOAST NOTIFICATIONS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .toast-container {
   position: fixed;
   top: calc(var(--hdr-height) + var(--statusbar-h) + 12px);
@@ -1922,7 +1922,7 @@ body.view-serial #resizer-bottom { display: none; }
 .toast.info .toast-icon    { color: var(--serial-info); }
 .toast-msg { line-height: 1.4; }
 
-/* ═══════════════ PIN TOOLTIP ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PIN TOOLTIP â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .pin-tooltip {
   position: fixed;
   z-index: 260;
@@ -1957,7 +1957,7 @@ body.view-serial #resizer-bottom { display: none; }
 .pin-tip-row b.pin-tip-high { color: var(--run-color); }
 .pin-tip-row b.pin-tip-low  { color: var(--stop-color); }
 
-/* ═══════════════ LOADING ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LOADING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .loading-overlay {
   position: fixed;
   inset: 0;
@@ -2010,13 +2010,13 @@ body.view-serial #resizer-bottom { display: none; }
   font-weight: 600;
 }
 
-/* ═══════════════ SCROLLBARS ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SCROLLBARS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 ::-webkit-scrollbar        { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track  { background: transparent; }
 ::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-/* ═══════════════ ANIMATIONS ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• ANIMATIONS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @keyframes fadeIn    { from { opacity: 0 } to { opacity: 1 } }
 @keyframes slideUp   { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes slideInRight { from { opacity: 0; transform: translateX(40px) } to { opacity: 1; transform: translateX(0) } }
@@ -2027,7 +2027,7 @@ body.view-serial #resizer-bottom { display: none; }
   50%      { box-shadow: 0 0 12px rgba(35, 165, 89, 1), 0 0 24px rgba(35, 165, 89, 0.6); opacity: 0.85; }
 }
 
-/* ═══════════════ RESPONSIVE ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RESPONSIVE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 900px) {
   :root {
     --panel-editor-w: 380px;
@@ -2043,7 +2043,7 @@ body.view-serial #resizer-bottom { display: none; }
   .project-name-wrapper { display: none; }
 }
 
-/* ═══════════════ GUIDE OVERLAY (Home / Components / Tutorials) ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• GUIDE OVERLAY (Home / Components / Tutorials) â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .guide-overlay {
   position: fixed;
   inset: 0;
@@ -2584,9 +2584,9 @@ body.view-serial #resizer-bottom { display: none; }
   .gc-detail-actions { margin-left: 0; }
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   MOBILE RESPONSIVE — Bottom Navigation Bar
-   ══════════════════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   MOBILE RESPONSIVE â€” Bottom Navigation Bar
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .mobile-nav {
   display: none;
   position: fixed;
@@ -2638,9 +2638,9 @@ body.view-serial #resizer-bottom { display: none; }
   color: var(--stop-color);
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   MOBILE RESPONSIVE — Bottom Sheet
-   ══════════════════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   MOBILE RESPONSIVE â€” Bottom Sheet
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .bottom-sheet-overlay {
   display: none;
   position: fixed;
@@ -2718,9 +2718,9 @@ body.view-serial #resizer-bottom { display: none; }
   overscroll-behavior: contain;
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   TABLET BREAKPOINT (768px – 1024px)
-   ══════════════════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   TABLET BREAKPOINT (768px â€“ 1024px)
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 1024px) {
   :root {
     --panel-editor-w: 340px;
@@ -2730,9 +2730,9 @@ body.view-serial #resizer-bottom { display: none; }
   .project-name-wrapper { max-width: 140px; }
 }
 
-/* ══════════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MOBILE BREAKPOINT (< 768px)
-   ══════════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 768px) {
   /* --- Variables --- */
   :root {
@@ -2965,9 +2965,9 @@ body.view-serial #resizer-bottom { display: none; }
   ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 3px; }
 }
 
-/* ══════════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    SMALL PHONE BREAKPOINT (< 480px)
-   ══════════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 480px) {
   .header { height: 42px; padding: 0 6px; }
   .hdr-btn { padding: 5px 6px; font-size: 10px; }
@@ -2980,7 +2980,7 @@ body.view-serial #resizer-bottom { display: none; }
   .panel-canvas .panel-title { font-size: 10px; }
 }
 
-/* ═══════════════ DSO FULLSCREEN OVERLAY ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DSO FULLSCREEN OVERLAY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .dso-fullscreen-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -3116,7 +3116,7 @@ canvas {
   }
 }
 
-/* ═══════════════ DSO STATUS BAR ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DSO STATUS BAR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .dso-fs-statusbar {
   display: flex;
   align-items: center;
@@ -3141,7 +3141,7 @@ canvas {
   font-style: italic;
 }
 
-/* ═══════════════ DSO TOGGLE BUTTON ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DSO TOGGLE BUTTON â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .dso-fs-btn-toggle {
   position: relative;
 }
@@ -3151,7 +3151,7 @@ canvas {
   border-color: #00979c;
 }
 
-/* ═══════════════ DSO HELP OVERLAY ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DSO HELP OVERLAY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .dso-help-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -3267,7 +3267,7 @@ canvas {
   }
 }
 
-/* ═══════════════ DSO STATUSBAR RESPONSIVE ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DSO STATUSBAR RESPONSIVE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 900px) {
   .dso-fs-statusbar {
     gap: 8px;
@@ -3374,5 +3374,51 @@ canvas {
 }
 #board2-code-textarea:focus {
   outline: none;
+}
+
+
+/* ══════════════════════ COMPILE BUTTON ══════════════════════ */
+.btn-compile {
+  position: relative;
+}
+.btn-compile::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.btn-compile:hover::after {
+  opacity: 1;
+}
+.btn-compile.compiling {
+  animation: compile-pulse 1s ease-in-out infinite;
+}
+@keyframes compile-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Download hex button */
+.btn-download-hex {
+  display: none;
+  margin-left: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-download-hex:hover {
+  background: var(--accent-hover, #007a7e);
 }
 

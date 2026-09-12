@@ -1,9 +1,10 @@
-{
+﻿{
   "name": "ardusim",
   "version": "1.0.0",
-  "description": "ArduSim — Arduino Online Simulator with a Node.js backend (static serving + project sync)",
+  "description": "ArduSim â€” Arduino Online Simulator with a Node.js backend (static serving + project sync)",
   "main": "server.js",
   "scripts": {
+    "setup-compilers": "node setup-compilers.js",
     "start": "node server.js",
     "dev": "node --watch server.js",
     "test": "vitest run"
@@ -28,3 +29,4 @@
     "vitest": "^3.1.1"
   }
 }
+

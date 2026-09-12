@@ -1,9 +1,9 @@
-/* ═══════════════════════════════════════════════════════
-   api.js — Frontend client for the ArduSim Node backend
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   api.js â€” Frontend client for the ArduSim Node backend
    Talks to the REST API served by server.js (same origin).
    When the app is opened without the backend (e.g. file://),
    every call falls back gracefully and returns empty results.
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 'use strict';
 
@@ -49,6 +49,30 @@ const ArduSimApi = {
   saveProject(p)   { return this._req('POST', '/projects', p); },
   deleteProject(id){ return this._req('DELETE', '/projects/' + encodeURIComponent(id)); },
   listExamples()   { return this._req('GET', '/examples'); },
+
+  // Server-side Arduino compilation
+  async compileSketch(code, board) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 35000);
+    try {
+      const res = await fetch(this.base + '/compile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, board }),
+        signal: ctrl.signal,
+      });
+      clearTimeout(timer);
+      return await res.json();
+    } catch (e) {
+      clearTimeout(timer);
+      throw e;
+    }
+  },
+
+  // Check compiler toolchain availability
+  async getCompilerStatus() {
+    return this._req('GET', '/compiler-status');
+  },
 };
 
 window.ArduSimApi = ArduSimApi;

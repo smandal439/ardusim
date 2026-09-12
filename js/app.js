@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 class App {
   constructor() {
@@ -66,7 +66,7 @@ class App {
 
       this._initMobile();
 
-      this._updateStatus('Ready — press Run to start simulation');
+      this._updateStatus('Ready â€” press Run to start simulation');
       this._updateCompileStatus('Ready');
       this._hideLoadingOverlay();
     } catch (err) {
@@ -88,7 +88,7 @@ class App {
     }
   }
 
-  /* ══════════════════════ GLOBAL ERROR HANDLING ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• GLOBAL ERROR HANDLING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _initErrorHandlers() {
     window.addEventListener('error', (e) => {
       console.error('[ArduSim] Uncaught error:', e.error || e.message);
@@ -118,7 +118,7 @@ class App {
     this._hideLoadingOverlay();
   }
 
-  /* ══════════════════════ UI BINDING ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• UI BINDING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _bindUi() {
     const get = id => document.getElementById(id);
 
@@ -176,7 +176,9 @@ class App {
     exportBtn?.addEventListener('click', () => this.exportImage());
     formatBtn?.addEventListener('click', () => this.formatCode());
     verifyBtn?.addEventListener('click', () => this.verify());
-    // Logo click → go to home page
+    const compileHexBtn = get('btn-compile-hex');
+    compileHexBtn?.addEventListener('click', () => this.compileReal());
+    // Logo click â†’ go to home page
     document.querySelector('.header-logo')?.addEventListener('click', () => {
       window.location.href = '/';
     });
@@ -355,7 +357,7 @@ class App {
     if (projectNameEl) {
       projectNameEl.addEventListener('input', (e) => {
         this._projectName = (e.target.value || 'Untitled Project').trim() || 'Untitled Project';
-        document.title = `${this._projectName} — ArduSim`;
+        document.title = `${this._projectName} â€” ArduSim`;
         window.StorageManager?.markDirty();
       });
       projectNameEl.addEventListener('blur', () => {
@@ -364,6 +366,11 @@ class App {
     }
 
     // Global keyboard shortcuts
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        this.compileReal();
+        return;
+      }
     document.addEventListener('keydown', (e) => {
       // Don't intercept when user is typing in an input or code editor
       const tag = document.activeElement?.tagName;
@@ -420,7 +427,7 @@ class App {
     });
   }
 
-  /* ══════════════════════ CANVAS INIT ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CANVAS INIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _initCanvas() {
     const canvasEl = document.getElementById('circuit-canvas');
     const wrapperEl = document.getElementById('canvas-wrapper');
@@ -442,14 +449,14 @@ class App {
           item.classList.toggle('placing', placing && item.dataset.type === type);
         });
       };
-      // Initial sync — if already in placing mode from a previous session
+      // Initial sync â€” if already in placing mode from a previous session
       this.canvas.onPlacingChanged(this.canvas.placingType != null);
       this.canvas.onContextMenu = (inst, x, y) => this._showContextMenu(inst, x, y);
       this._refreshCanvasSummary();
     }
   }
 
-  /* ══════════════════════ BOARD SELECTOR ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• BOARD SELECTOR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _initBoardSelector() {
     const settings = window.StorageManager?.loadSettings?.() || {};
     const board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano'].includes(settings.board) ? settings.board : 'arduino_uno';
@@ -467,7 +474,7 @@ class App {
   }
 
   // Sync sim.board (and the board selector UI) with the board actually placed
-  // on the canvas, so LED_BUILTIN / A0–A5 map to the right pins.
+  // on the canvas, so LED_BUILTIN / A0â€“A5 map to the right pins.
   _syncBoardFromCanvas() {
     const active = this._getActiveBoardType();
     if (this.sim.board !== active) {
@@ -495,11 +502,11 @@ class App {
       this._loadExampleCircuit('blink');
       this.showToast(`${boardName} starter circuit loaded`, 'success');
     } else {
-      this.showToast(`Board set to ${boardName} — existing wiring assumes the previous board`, 'info');
+      this.showToast(`Board set to ${boardName} â€” existing wiring assumes the previous board`, 'info');
     }
   }
 
-  /* ══════════════════════ SERIAL INIT ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SERIAL INIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _initSerial() {
     if (window.SerialMonitorClass) {
       this.serial = new window.SerialMonitorClass();
@@ -508,7 +515,7 @@ class App {
     }
   }
 
-  /* ══════════════════════ OUTPUT / DEBUG INIT ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• OUTPUT / DEBUG INIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _initOutput() {
     if (window.OutputPanelClass) {
       this.output = new window.OutputPanelClass();
@@ -517,7 +524,7 @@ class App {
     }
   }
 
-  /* ══════════════════════ DUAL-BOARD SUPPORT ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DUAL-BOARD SUPPORT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _initSim2() {
     if (window.ArduinoSimulator) {
       this.sim2 = new window.ArduinoSimulator();
@@ -543,7 +550,7 @@ class App {
     };
 
     this.sim2.onStart = () => {
-      this.output?.log('[Board2] Compile OK — running', 'success');
+      this.output?.log('[Board2] Compile OK â€” running', 'success');
     };
 
     this.sim2.onPinChange = (pinKey, value) => {
@@ -566,7 +573,7 @@ class App {
       if (!this.canvas) return;
       const insts = this.canvas.components || [];
 
-      // LCD display events (16×2 parallel and I2C/PCF8574 versions)
+      // LCD display events (16Ã—2 parallel and I2C/PCF8574 versions)
       for (const inst of insts) {
         if (inst.type !== 'lcd1602' && inst.type !== 'lcd1602_i2c') continue;
 
@@ -687,7 +694,7 @@ class App {
 
   _getDefaultBoard2Code() {
     return `/*
- * ArduSim — Board 2 (Receiver)
+ * ArduSim â€” Board 2 (Receiver)
  * This board runs on the secondary ESP32.
  * Both boards run simultaneously when you click "Run".
  */
@@ -720,7 +727,7 @@ void loop() {
 }`;
   }
 
-  /* ══════════════════════ SIMULATOR EVENTS ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SIMULATOR EVENTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _attachSimulatorEvents() {
     // Buffer serial output per-simulator so [Board] tag appears once per line
     this._serialBuf1 = '';
@@ -752,7 +759,7 @@ void loop() {
       this._setRunningState(true);
       this._updateCompileStatus(this.sim2 && this.sim2.isRunning ? 'Running (2 boards)' : 'Running');
       this._updateStatus('Simulation running');
-      this.output?.log('Compile OK — running simulation', 'success');
+      this.output?.log('Compile OK â€” running simulation', 'success');
       // Start remote control bridge
       if (this.remote && this.sim.sessionId) {
         this.remote.start(this.sim.sessionId);
@@ -781,12 +788,12 @@ void loop() {
       this._updatePinMonitor();
       const simTimeEl = document.getElementById('sim-time');
       const fpsEl     = document.getElementById('sim-fps');
-      if (simTimeEl) simTimeEl.textContent = `⏱ ${(simTime / 1000).toFixed(2)}s`;
+      if (simTimeEl) simTimeEl.textContent = `â± ${(simTime / 1000).toFixed(2)}s`;
       if (fpsEl)     fpsEl.textContent     = `${fps} FPS`;
       const laStatus = document.getElementById('la-status');
       if (laStatus && this.la && !this.la.paused) {
         const samples = this.la.channels.reduce((n, ch) => n + (this.la.data[ch.pin]?.length || 0), 0);
-        laStatus.textContent = `Running · ${samples} samples`;
+        laStatus.textContent = `Running Â· ${samples} samples`;
       }
     };
 
@@ -815,7 +822,7 @@ void loop() {
       if (!this.canvas) return;
       const insts = this.canvas.components || [];
 
-      // LCD display events (16×2 parallel and I2C/PCF8574 versions)
+      // LCD display events (16Ã—2 parallel and I2C/PCF8574 versions)
       for (const inst of insts) {
         if (inst.type !== 'lcd1602' && inst.type !== 'lcd1602_i2c') continue;
 
@@ -825,7 +832,7 @@ void loop() {
           const sclPin = this.canvas._getConnectedPinNum(inst.id, 'scl');
           if (sdaPin === null || sclPin === null) continue;
 
-          // Route by I2C address — only handle events for this LCD's address
+          // Route by I2C address â€” only handle events for this LCD's address
           if (data && data.addr != null) {
             const raw = String(inst.props && inst.props.address || '0x27').trim();
             const instAddr = raw.startsWith('0x') || raw.startsWith('0X')
@@ -866,18 +873,18 @@ void loop() {
         }
       }
 
-      // OLED (SSD1306 I2C) display events — maintains a 128×64 framebuffer
+      // OLED (SSD1306 I2C) display events â€” maintains a 128Ã—64 framebuffer
       for (const inst of insts) {
         if (inst.type !== 'oled_ssd1306') continue;
 
-        // SDA/SCL wiring check — skip if not wired to a board
+        // SDA/SCL wiring check â€” skip if not wired to a board
         if (this.canvas._getConnectedPinNum) {
           const sdaPin = this.canvas._getConnectedPinNum(inst.id, 'sda');
           const sclPin = this.canvas._getConnectedPinNum(inst.id, 'scl');
           if (sdaPin === null || sclPin === null) continue;
         }
 
-        // Address-based routing — skip if event addr doesn't match this OLED
+        // Address-based routing â€” skip if event addr doesn't match this OLED
         if (data && data.addr != null) {
           const raw = String(inst.props && inst.props.address || '0x3C').trim();
           const instAddr = raw.startsWith('0x') || raw.startsWith('0X')
@@ -984,14 +991,14 @@ void loop() {
             fillHalf(y0, y1, x0, x1, x2);
             fillHalf(y1, y2, x1, x2, x0);
           } else if (op === 'dim') {
-            // Dim is a brightness hint — ignore for now
+            // Dim is a brightness hint â€” ignore for now
           } else if (op === 'contrast') {
-            // Contrast — ignore for simulation
+            // Contrast â€” ignore for simulation
           }
         }
       }
 
-      // TFT (ILI9341 240×320 SPI) display events — maintains a 320×240 RGB framebuffer
+      // TFT (ILI9341 240Ã—320 SPI) display events â€” maintains a 320Ã—240 RGB framebuffer
       for (const inst of insts) {
         if (inst.type !== 'ili9341') continue;
         const FB_W = 320, FB_H = 240;
@@ -1224,8 +1231,8 @@ void loop() {
         }
       }
 
-      // NeoPixel / FastLED strip events — map strip LEDs onto placed WS2812B
-      // components in placement order (led[0] → first neopixel, etc.)
+      // NeoPixel / FastLED strip events â€” map strip LEDs onto placed WS2812B
+      // components in placement order (led[0] â†’ first neopixel, etc.)
       if (type === 'fastled_show' && data && Array.isArray(data.leds)) {
         const npInsts = insts.filter(i => i.type === 'neopixel' || i.type === 'neopixel_strip' || i.type === 'neopixel_ring' || i.type === 'neopixel_8x8_matrix');
         const brightness = Math.max(0, Math.min(255, Number(data.brightness != null ? data.brightness : 255) || 0));
@@ -1261,15 +1268,15 @@ void loop() {
     };
   }
 
-  /* ══════════════════════ RUN / STOP / PAUSE ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RUN / STOP / PAUSE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   async run() {
     if (!this.editor) return;
     const code = this.editor.getCode();
     this._syncBoardFromCanvas();
-    this._updateCompileStatus('Compiling…');
+    this._updateCompileStatus('Compilingâ€¦');
     this._updateStatus('Compiling sketch');
-    this.serial?.log('Compiling sketch…', 'system');
-    this.output?.log('Compiling sketch…', 'system');
+    this.serial?.log('Compiling sketchâ€¦', 'system');
+    this.output?.log('Compiling sketchâ€¦', 'system');
     if (this.editor) this.editor.clearErrors();
 
     this.sim.stop();
@@ -1278,7 +1285,7 @@ void loop() {
 
     // Compile Board 1 first (compile only, don't block)
     this._setRunningState(true);
-    this._updateCompileStatus('Compiling…');
+    this._updateCompileStatus('Compilingâ€¦');
     let result1;
     try {
       result1 = await this.sim.compile(code);
@@ -1297,7 +1304,7 @@ void loop() {
     if (!result1 || !result1.ok) {
       this._setRunningState(false);
       this._updateCompileStatus('Board 1 compile failed');
-      this.output?.log('Board 1 compile failed — see the error message below', 'error');
+      this.output?.log('Board 1 compile failed â€” see the error message below', 'error');
       return;
     }
 
@@ -1314,7 +1321,7 @@ void loop() {
           hasBoard2 = true;
           this.output?.log('[Board2] Compile OK', 'success');
         } else {
-          this.output?.log('[Board2] Compile failed — only Board 1 running', 'warn');
+          this.output?.log('[Board2] Compile failed â€” only Board 1 running', 'warn');
         }
       } catch (err) {
         console.error('[ArduSim] Board 2 compile error:', err);
@@ -1322,10 +1329,10 @@ void loop() {
       }
     }
 
-    // Both compiled — run them in parallel (don't await)
+    // Both compiled â€” run them in parallel (don't await)
     this._updateCompileStatus(hasBoard2 ? 'Running (2 boards)' : 'Running');
     this._updateStatus('Simulation running');
-    this.output?.log('Compile OK — running simulation' + (hasBoard2 ? ' (2 boards)' : ''), 'success');
+    this.output?.log('Compile OK â€” running simulation' + (hasBoard2 ? ' (2 boards)' : ''), 'success');
 
     // Reset state for Board 1
     this.sim.simTime = 0;
@@ -1407,19 +1414,19 @@ void loop() {
     this.editor?.formatCode();
   }
 
-  /* ══════════════════════ PROJECT NAME ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PROJECT NAME â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   getProjectName() {
     return this._projectName || 'Untitled Project';
   }
 
   _setProjectName(name) {
     this._projectName = name || 'Untitled Project';
-    document.title = `${this._projectName} — ArduSim`;
+    document.title = `${this._projectName} â€” ArduSim`;
     const el = document.getElementById('project-name');
     if (el) el.value = this._projectName;
   }
 
-  /* ══════════════════════ SAVE / DOWNLOAD / LOAD / SHARE ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SAVE / DOWNLOAD / LOAD / SHARE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   saveProject() {
     const code = this.editor?.getCode() || '';
     const board2Code = this._getBoard2Code();
@@ -1467,7 +1474,7 @@ void loop() {
     window.StorageManager?.shareUrl(code, circuitData, board2Code);
   }
 
-  /* ══════════════════════ SAVED PROJECTS ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SAVED PROJECTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   async _syncProjectsFromServer() {
     try {
       const result = await window.StorageManager?.syncFromServer?.();
@@ -1477,7 +1484,7 @@ void loop() {
         this.showToast(`Synced ${result.merged} project(s) from server`, 'info');
       }
     } catch (e) {
-      // Backend offline — the app simply continues with local storage
+      // Backend offline â€” the app simply continues with local storage
     }
   }
 
@@ -1503,7 +1510,7 @@ void loop() {
       : projects;
 
     if (!filtered.length) {
-      list.innerHTML = `<div class="saved-empty">No saved projects match “${esc(this._savedQuery)}”.</div>`;
+      list.innerHTML = `<div class="saved-empty">No saved projects match â€œ${esc(this._savedQuery)}â€.</div>`;
       return;
     }
 
@@ -1517,7 +1524,7 @@ void loop() {
           <div class="saved-project-thumb"><img alt="" loading="lazy"></div>
           <div class="saved-project-info">
             <strong class="saved-project-name">${name}</strong>
-            <span class="saved-project-meta">${compCount} components · ${wireCount} wires · ${esc(date)}</span>
+            <span class="saved-project-meta">${compCount} components Â· ${wireCount} wires Â· ${esc(date)}</span>
             <span class="saved-project-actions">
               <button class="hdr-btn hdr-btn-ghost saved-load" data-id="${esc(p.id)}">Open</button>
               <button class="hdr-btn hdr-btn-ghost saved-download" data-id="${esc(p.id)}" title="Download as JSON file">Download</button>
@@ -1575,7 +1582,7 @@ _newProject() {
     if (codeEl) codeEl.focus();
   }
 
-  /* ══════════════════════ AUTO-SAVE ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• AUTO-SAVE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _triggerAutoSave() {
     if (!this._autoSaveDebounced) {
       this._autoSaveDebounced = window.Utils?.debounce((code, circuit, b2) => {
@@ -1591,7 +1598,7 @@ _newProject() {
     this._autoSaveDebounced(code, circuit, board2Code);
   }
 
-  /* ══════════════════════ COMPONENT LIBRARY ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• COMPONENT LIBRARY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _renderComponentLibrary() {
     const container = document.getElementById('components-container');
     if (!container || !window.ArduinoComponents?.COMPONENT_CATALOG) return;
@@ -1614,7 +1621,7 @@ _newProject() {
         item.className = 'comp-item comp-dropdown';
         item.dataset.type = dd.id;
         item.title = dd.desc || dd.label;
-        item.innerHTML = `<span class="comp-icon">${this._escHtml(dd.icon || '🔧')}</span><span class="comp-info"><span class="comp-name">${this._escHtml(dd.label)}</span><span class="comp-desc">${this._escHtml(dd.desc || '')}</span></span><span class="comp-dropdown-arrow">▾</span>`;
+        item.innerHTML = `<span class="comp-icon">${this._escHtml(dd.icon || 'ðŸ”§')}</span><span class="comp-info"><span class="comp-name">${this._escHtml(dd.label)}</span><span class="comp-desc">${this._escHtml(dd.desc || '')}</span></span><span class="comp-dropdown-arrow">â–¾</span>`;
 
         const menu = document.createElement('div');
         menu.className = 'comp-dropdown-menu';
@@ -1632,7 +1639,7 @@ _newProject() {
             item.classList.remove('open');
             if (this.canvas) {
               this.canvas.startPlacing(v.id);
-              this.showToast(`${v.name} selected — click on canvas to place`, 'info');
+              this.showToast(`${v.name} selected â€” click on canvas to place`, 'info');
             }
           });
           menu.appendChild(btn);
@@ -1660,12 +1667,12 @@ _newProject() {
         item.className = 'comp-item';
         item.dataset.type = id;
         item.title = def.desc || def.name;
-        const shortDesc = (def.desc || '').length > 42 ? def.desc.slice(0, 42) + '…' : (def.desc || '');
-        item.innerHTML = `<span class="comp-icon">${this._escHtml(def.icon || '🔧')}</span><span class="comp-info"><span class="comp-name">${this._escHtml(def.name)}</span>${shortDesc ? `<span class="comp-desc">${this._escHtml(shortDesc)}</span>` : ''}</span>`;
+        const shortDesc = (def.desc || '').length > 42 ? def.desc.slice(0, 42) + 'â€¦' : (def.desc || '');
+        item.innerHTML = `<span class="comp-icon">${this._escHtml(def.icon || 'ðŸ”§')}</span><span class="comp-info"><span class="comp-name">${this._escHtml(def.name)}</span>${shortDesc ? `<span class="comp-desc">${this._escHtml(shortDesc)}</span>` : ''}</span>`;
         item.addEventListener('click', () => {
           if (this.canvas) {
             this.canvas.startPlacing(id);
-            this.showToast(`${def.name} selected — click on canvas to place`, 'info');
+            this.showToast(`${def.name} selected â€” click on canvas to place`, 'info');
           }
         });
         // Hover tooltip showing full description
@@ -1717,7 +1724,7 @@ _newProject() {
     });
   }
 
-  /* ══════════════════════ CANVAS SUMMARY ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CANVAS SUMMARY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _refreshCanvasSummary() {
     const compEl = document.getElementById('canvas-comp-count');
     const wireEl = document.getElementById('canvas-wire-count');
@@ -1728,7 +1735,7 @@ _newProject() {
     if (wireEl) wireEl.textContent = `${nw} wire${nw !== 1 ? 's' : ''}`;
   }
 
-  /* ══════════════════════ RESTORE PROJECT ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RESTORE PROJECT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _restoreProject() {
     const project = window.StorageManager?.autoLoad?.();
     if (project) {
@@ -1765,7 +1772,7 @@ _newProject() {
     }
   }
 
-  /* ══════════════════════ RUNNING STATE ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RUNNING STATE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _setRunningState(running) {
     this.isRunning = running;
     const runBtn   = document.getElementById('btn-run');
@@ -1791,7 +1798,7 @@ _newProject() {
     }
   }
 
-  /* ══════════════════════ PIN MONITOR ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PIN MONITOR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _updatePinMonitor() {
     const grid = document.getElementById('pin-monitor-grid');
     if (!grid || !this.sim) return;
@@ -1813,7 +1820,7 @@ _newProject() {
       const mode = this.sim.pinModes[pinKey];
       if (valEl) {
         if (val === undefined || val === null) {
-          valEl.textContent = '—';
+          valEl.textContent = 'â€”';
           row.classList.remove('pin-high', 'pin-pwm');
         } else if (val <= 1) {
           valEl.textContent = val ? 'HIGH' : 'LOW';
@@ -1830,7 +1837,7 @@ _newProject() {
         barEl.style.width = `${pct}%`;
       }
       if (modeEl) {
-        modeEl.textContent = mode || '—';
+        modeEl.textContent = mode || 'â€”';
       }
     });
   }
@@ -1846,13 +1853,13 @@ _newProject() {
       { key: 'pin_6',  label: 'D6~' }, { key: 'pin_7',  label: 'D7' },
       { key: 'pin_8',  label: 'D8' },  { key: 'pin_9',  label: 'D9~' },
       { key: 'pin_10', label: 'D10~'},  { key: 'pin_11', label: 'D11~'},
-      { key: 'pin_12', label: 'D12' }, { key: 'pin_13', label: 'D13 · L' },
+      { key: 'pin_12', label: 'D12' }, { key: 'pin_13', label: 'D13 Â· L' },
       { key: 'pin_14', label: 'A0' },  { key: 'pin_15', label: 'A1' },
       { key: 'pin_16', label: 'A2' },  { key: 'pin_17', label: 'A3' },
       { key: 'pin_18', label: 'A4' },  { key: 'pin_19', label: 'A5' },
     ];
     const pins = esp32 ? [
-      { key: 'pin_2',  label: 'D2 · L' },  { key: 'pin_4',  label: 'D4' },
+      { key: 'pin_2',  label: 'D2 Â· L' },  { key: 'pin_4',  label: 'D4' },
       { key: 'pin_5',  label: 'D5' },      { key: 'pin_12', label: 'D12' },
       { key: 'pin_13', label: 'D13' },     { key: 'pin_14', label: 'D14' },
       { key: 'pin_15', label: 'D15' },     { key: 'pin_16', label: 'D16' },
@@ -1862,12 +1869,12 @@ _newProject() {
       { key: 'pin_25', label: 'D25' },     { key: 'pin_26', label: 'D26' },
       { key: 'pin_27', label: 'D27' },     { key: 'pin_32', label: 'D32' },
       { key: 'pin_33', label: 'D33' },     { key: 'pin_34', label: 'D34' },
-      { key: 'pin_35', label: 'D35' },     { key: 'pin_36', label: 'VP · 36' },
-      { key: 'pin_39', label: 'VN · 39' }, { key: 'pin_1',  label: 'TX0' },
+      { key: 'pin_35', label: 'D35' },     { key: 'pin_36', label: 'VP Â· 36' },
+      { key: 'pin_39', label: 'VN Â· 39' }, { key: 'pin_1',  label: 'TX0' },
       { key: 'pin_3',  label: 'RX0' },
     ] : nano ? [
       ...unoPins,
-      { key: 'pin_20', label: 'A6 · 20' }, { key: 'pin_21', label: 'A7 · 21' },
+      { key: 'pin_20', label: 'A6 Â· 20' }, { key: 'pin_21', label: 'A7 Â· 21' },
     ] : unoPins;
     pins.forEach(pin => {
       const row = document.createElement('div');
@@ -1875,14 +1882,14 @@ _newProject() {
       row.dataset.pin = pin.key;
       row.innerHTML = `
         <span class="pin-label">${pin.label}</span>
-        <span class="pin-mode">—</span>
-        <span class="pin-val">—</span>
+        <span class="pin-mode">â€”</span>
+        <span class="pin-val">â€”</span>
         <div class="pin-bar"><div class="pin-bar-fill"></div></div>`;
       grid.appendChild(row);
     });
   }
 
-  /* ══════════════════════ BEFORE UNLOAD GUARD ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• BEFORE UNLOAD GUARD â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _setupBeforeUnloadGuard() {
     window.addEventListener('beforeunload', (e) => {
       if (window.StorageManager?.isDirty()) {
@@ -1893,7 +1900,7 @@ _newProject() {
     });
   }
 
-  /* ══════════════════════ LOADING OVERLAY ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LOADING OVERLAY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _hideLoadingOverlay() {
     const overlay = document.getElementById('loading-overlay');
     if (!overlay) return;
@@ -1903,7 +1910,7 @@ _newProject() {
     }, 400);
   }
 
-  /* ══════════════════════ THEME ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• THEME â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _toggleTheme(iconDark, iconLight) {
     const body = document.body;
     const isDark = body.classList.contains('dark-theme');
@@ -1929,7 +1936,7 @@ _newProject() {
     if (iconLight) iconLight.classList.toggle('hidden', darkMode);
   }
 
-  /* ══════════════════════ STATUS BAR ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• STATUS BAR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _updateStatus(msg) {
     const el = document.getElementById('sim-status-text');
     if (el) el.textContent = msg;
@@ -1937,10 +1944,10 @@ _newProject() {
 
   _updateCompileStatus(msg) {
     const el = document.getElementById('compile-status');
-    if (el) el.textContent = `● ${msg}`;
+    if (el) el.textContent = `â— ${msg}`;
   }
 
-  /* ══════════════════════ MODALS ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _showModal(modalId) {
     const overlay = document.getElementById('modal-overlay');
     const modal   = document.getElementById(modalId);
@@ -1959,7 +1966,7 @@ _newProject() {
 
     const sim = this.sim;
     if (sim && sim.isRunning && sim.sessionId) {
-      // Simulation is running — show session code
+      // Simulation is running â€” show session code
       idle?.classList.add('hidden');
       active?.classList.remove('hidden');
       const sessionInput = document.getElementById('remote-session-id');
@@ -2010,7 +2017,7 @@ _newProject() {
         }
       });
     } else {
-      // Not running — show idle message
+      // Not running â€” show idle message
       idle?.classList.remove('hidden');
       active?.classList.add('hidden');
     }
@@ -2040,7 +2047,7 @@ _newProject() {
     this._closePropsModal();
   }
 
-  /* ══════════════════════ CONTEXT MENU ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CONTEXT MENU â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _showContextMenu(inst, x, y) {
     this._closeContextMenu();
     const menu = document.getElementById('canvas-context-menu');
@@ -2119,7 +2126,7 @@ _newProject() {
     if (menu) { menu.classList.add('hidden'); menu.classList.remove('active'); }
   }
 
-  /* ══════════════════════ HEADER DROPDOWNS ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• HEADER DROPDOWNS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _closeHeaderDropdowns() {
     document.querySelectorAll('.hdr-dropdown.open').forEach(dd => {
       dd.classList.remove('open');
@@ -2134,7 +2141,7 @@ _newProject() {
     });
   }
 
-  /* ══════════════════════ PANEL TOGGLES ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PANEL TOGGLES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _togglePanel(panelId, button, collapseTitle, expandTitle) {
     const panel = document.getElementById(panelId);
     if (!panel) return;
@@ -2200,7 +2207,7 @@ _newProject() {
     }
   }
 
-  /* ══════════════════════ VIEW FOCUS MODES ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• VIEW FOCUS MODES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _setView(view) {
     // Exit canvas fullscreen if active
     document.body.classList.remove('canvas-fullscreen');
@@ -2267,7 +2274,7 @@ _newProject() {
     }
   }
 
-  /* ══════════════════════ DEFAULT LAYOUT ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DEFAULT LAYOUT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _initDefaultLayout() {
     const LS_KEY = 'ardusim-layout';
     let saved = {};
@@ -2283,7 +2290,7 @@ _newProject() {
     }
   }
 
-  /* ══════════════════════ PANEL RESIZERS ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PANEL RESIZERS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _initResizers() {
     const LS_KEY = 'ardusim-layout';
     let saved = {};
@@ -2403,15 +2410,15 @@ _newProject() {
     if (button) button.textContent = paused ? 'Resume' : 'Pause';
   }
 
-  /* ══════════════════════ VERIFY ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• VERIFY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   async verify() {
     if (!this.editor) return;
     const code = this.editor.getCode();
     this._syncBoardFromCanvas();
-    this._updateCompileStatus('Verifying…');
+    this._updateCompileStatus('Verifyingâ€¦');
     this._updateStatus('Verifying sketch');
-    this.serial?.log('Verifying sketch…', 'system');
-    this.output?.log('Verifying sketch…', 'system');
+    this.serial?.log('Verifying sketchâ€¦', 'system');
+    this.output?.log('Verifying sketchâ€¦', 'system');
     if (this.editor) this.editor.clearErrors();
 
     let result;
@@ -2426,10 +2433,10 @@ _newProject() {
       return false;
     }
     if (result.ok) {
-      this._updateCompileStatus('Verified ✓');
+      this._updateCompileStatus('Verified âœ“');
       this._updateStatus('Verification succeeded');
-      this.output?.log('✓ Sketch verified — no errors found', 'success');
-      this.showToast('✓ Sketch verified — no errors found!', 'success');
+      this.output?.log('âœ“ Sketch verified â€” no errors found', 'success');
+      this.showToast('âœ“ Sketch verified â€” no errors found!', 'success');
       return true;
     }
 
@@ -2441,14 +2448,14 @@ _newProject() {
     return false;
   }
 
-  /* ══════════════════════ OSCILLOSCOPE ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• OSCILLOSCOPE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _initOscilloscope() {
     const oscCanvas = document.getElementById('oscilloscope-canvas');
     if (!oscCanvas || !window.OscilloscopeClass) return;
     this.osc = new window.OscilloscopeClass(oscCanvas);
   }
 
-  /* ══════════════════════ DSO FULLSCREEN ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DSO FULLSCREEN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   openDSOFullscreen(comp) {
     if (!window.DSOFullscreen) return;
     if (!this._dsoFS) {
@@ -2461,7 +2468,7 @@ _newProject() {
     if (this._dsoFS) this._dsoFS.close();
   }
 
-  /* ══════════════════════ LOGIC ANALYZER ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LOGIC ANALYZER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _initLogicAnalyzer() {
     const laCanvas = document.getElementById('logic-analyzer-canvas');
     if (!laCanvas || !window.LogicAnalyzerClass) return;
@@ -2470,7 +2477,7 @@ _newProject() {
     if (statusEl) statusEl.textContent = 'Ready';
   }
 
-  /* ══════════════════════ SERIAL PLOTTER ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SERIAL PLOTTER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _initPlotter() {
     const plotterCanvas = document.getElementById('plotter-canvas');
     if (!plotterCanvas || !window.SerialPlotterClass) return;
@@ -2485,7 +2492,7 @@ _newProject() {
     });
   }
 
-  /* ══════════════════════ EXAMPLES ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• EXAMPLES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   async _renderExamples() {
     const container = document.getElementById('examples-grid');
     if (!container) return;
@@ -2554,7 +2561,7 @@ _newProject() {
       item.type = 'button';
       const thumb = window.CircuitThumbnail?.render(example.circuit, 260, 150);
       item.innerHTML = `
-        <div class="example-thumb">${thumb ? `<img src="${thumb}" alt="" loading="lazy">` : `<span class="example-thumb-icon">${example.icon || '📄'}</span>`}</div>
+        <div class="example-thumb">${thumb ? `<img src="${thumb}" alt="" loading="lazy">` : `<span class="example-thumb-icon">${example.icon || 'ðŸ“„'}</span>`}</div>
         <div class="example-info">
           <strong>${this._escHtml(example.name)}</strong>
           <span class="example-desc">${this._escHtml(example.desc)}</span>
@@ -2611,7 +2618,7 @@ _newProject() {
   _loadExampleCircuit(key) {
     if (!this.canvas) return;
 
-    // Data-driven circuit (serialized project data) — most examples use this
+    // Data-driven circuit (serialized project data) â€” most examples use this
     if (key && typeof key === 'object' && Array.isArray(key.components)) {
       this.canvas.deserialize(key);
       this._syncBoardFromCanvas();
@@ -2639,7 +2646,7 @@ _newProject() {
     }
   }
 
-  /* ══════════════════════ PROPERTIES MODAL ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PROPERTIES MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   openPropsModal(comp) {
     this._propsComp = comp;
     const title   = document.getElementById('modal-props-title');
@@ -2670,10 +2677,10 @@ _newProject() {
       : '';
     infoBlock.innerHTML = `
       <div class="props-desc">
-        <span class="props-comp-icon">${this._escHtml(def ? def.icon : '🔧')}</span>
+        <span class="props-comp-icon">${this._escHtml(def ? def.icon : 'ðŸ”§')}</span>
         <div>
           <p class="props-desc-text">${esc(g.longDesc || def?.desc || '')}</p>
-          <button type="button" class="gh-btn gh-btn-ghost gh-btn-sm props-ref-btn">Open full reference →</button>
+          <button type="button" class="gh-btn gh-btn-ghost gh-btn-sm props-ref-btn">Open full reference â†’</button>
         </div>
       </div>
       ${pinsPreview ? `<div class="props-pins"><span class="props-pins-label">Pins</span><div class="props-pins-list">${pinsPreview}</div></div>` : ''}
@@ -2825,7 +2832,7 @@ _newProject() {
     this._propsComp = null;
   }
 
-  /* ══════════════════════ TOAST STACK ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TOAST STACK â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   showToast(msg, type = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -2833,10 +2840,10 @@ _newProject() {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
 
-    const icons = { success: '✓', error: '✕', warn: '⚠', info: 'ℹ' };
+    const icons = { success: 'âœ“', error: 'âœ•', warn: 'âš ', info: 'â„¹' };
     const icon = document.createElement('span');
     icon.className = 'toast-icon';
-    icon.textContent = icons[type] || 'ℹ';
+    icon.textContent = icons[type] || 'â„¹';
     const text = document.createElement('span');
     text.className = 'toast-msg';
     text.textContent = String(msg);
@@ -2858,7 +2865,7 @@ _newProject() {
     }
   }
 
-  /* ══════════════════════ MOBILE SUPPORT ══════════════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MOBILE SUPPORT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _initMobile() {
     this._isMobile = window.matchMedia('(max-width: 768px)').matches;
     this._openSheet = null;
@@ -3062,3 +3069,6 @@ if (document.readyState === 'loading') {
 } else {
   window.App.init();
 }
+
+
+

@@ -1,11 +1,11 @@
-/* ═══════════════════════════════════════════════════════
-   server.js — ArduSim Node.js backend (zero external deps)
-   • Serves the frontend (static files) from the project root
-   • REST API for the Saved Projects library (SQLite via node:sqlite)
-   • API for the bundled Examples library
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   server.js â€” ArduSim Node.js backend (zero external deps)
+   â€¢ Serves the frontend (static files) from the project root
+   â€¢ REST API for the Saved Projects library (SQLite via node:sqlite)
+   â€¢ API for the bundled Examples library
 
    Run:  node server.js   (then open http://localhost:3000)
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 'use strict';
 
@@ -18,6 +18,7 @@ const path  = require('node:path');
 const os    = require('node:os');
 const crypto = require('node:crypto');
 const { DatabaseSync } = require('node:sqlite');
+const { compileSketch, checkToolchains } = require('./compiler/compile');
 
 const ROOT      = __dirname;
 const DATA_DIR  = path.join(ROOT, 'data');
@@ -27,7 +28,7 @@ const HOST      = process.env.HOST || '0.0.0.0';
 const MAX_BODY  = 2 * 1024 * 1024; // 2 MB request limit
 const MAX_PROJECTS = 1000;
 
-/* ── Rate limiting (in-memory, per IP) ── */
+/* â”€â”€ Rate limiting (in-memory, per IP) â”€â”€ */
 const _rateBuckets = new Map();
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX_WRITE = 30; // max POST/DELETE per window
@@ -43,7 +44,7 @@ function checkRateLimit(ip) {
   return bucket.count <= RATE_MAX_WRITE;
 }
 
-/* ── SQLite storage ── */
+/* â”€â”€ SQLite storage â”€â”€ */
 fs.mkdirSync(DATA_DIR, { recursive: true });
 const db = new DatabaseSync(DB_FILE);
 db.exec('PRAGMA journal_mode=WAL;');
@@ -92,7 +93,7 @@ function rowToProject(row) {
   };
 }
 
-/* ── Helpers ── */
+/* â”€â”€ Helpers â”€â”€ */
 function sendJson(res, status, data) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
@@ -165,7 +166,7 @@ function readExamples() {
     .filter(Boolean);
 }
 
-/* ── Static file serving ── */
+/* â”€â”€ Static file serving â”€â”€ */
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js':   'text/javascript; charset=utf-8',
@@ -230,7 +231,7 @@ function serveStatic(req, res, urlPath) {
   });
 }
 
-/* ── Routing ── */
+/* â”€â”€ Routing â”€â”€ */
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || HOST}`);
   const pathname = url.pathname;
@@ -305,6 +306,35 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/api/examples' && method === 'GET') {
     return sendJson(res, 200, { examples: readExamples() });
   }
+  // Server-side Arduino compilation
+  if (pathname === '/api/compile' && method === 'POST') {
+    if (!checkRateLimit(clientIp)) {
+      return sendJson(res, 429, { error: 'Rate limit exceeded. Try again later.' });
+    }
+    try {
+      const body = await readJsonBody(req);
+      const code = typeof body.code === 'string' ? body.code : '';
+      const boardType = typeof body.board === 'string' ? body.board : 'arduino_uno';
+      if (!code.trim()) {
+        return sendJson(res, 400, { ok: false, error: 'No code provided' });
+      }
+      const validBoards = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1'];
+      if (!validBoards.includes(boardType)) {
+        return sendJson(res, 400, { ok: false, error: 'Invalid board type. Valid: ' + validBoards.join(', ') });
+      }
+      const result = await compileSketch(code, boardType);
+      return sendJson(res, result.ok ? 200 : 400, result);
+    } catch (e) {
+      return sendJson(res, 500, { ok: false, error: 'Compilation error: ' + (e.message || String(e)) });
+    }
+  }
+
+  // Check compiler toolchain availability
+  if (pathname === '/api/compiler-status' && method === 'GET') {
+    const status = checkToolchains();
+    return sendJson(res, 200, { toolchains: status });
+  }
+
 
   // Unknown /api route
   if (pathname.startsWith('/api/')) {
@@ -326,6 +356,8 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`▶ ArduSim server running at http://${HOST}:${PORT}`);
+  console.log(`â–¶ ArduSim server running at http://${HOST}:${PORT}`);
   console.log(`  DB: ${DB_FILE}`);
 });
+
+

@@ -1,4 +1,4 @@
-# Dependencies
+﻿# Dependencies
 node_modules/
 
 # Local server database
@@ -6,3 +6,11 @@ data/
 
 # Logs
 *.log
+# Compiler toolchains and temp files
+compiler/toolchains/
+compiler/.tmp/
+*.hex
+*.elf
+*.o
+*.map
+
