@@ -477,22 +477,22 @@ void loop(){
     exampleId: 'joystick_led',
   },
 
-  keypad: {
-    id: 'keypad',
+  keypad_4x4: {
+    id: 'keypad_4x4',
     name: '4\u00d74 Matrix Keypad',
     icon: '\u2328\ufe0f',
     category: 'Input',
     longDesc: 'A 16-button matrix keypad organized into 4 rows and 4 columns. Pressing a key creates a contact between its row and column lines, allowing 16 inputs using only 8 digital pins.',
     use: 'PIN/passcode entry, menu navigation, numerical input panels. Driven using the Arduino Keypad library.',
     pins: {
-      r1: { label: 'R1', type: 'digital', desc: 'Row 1 output/input scan pin.' },
-      r2: { label: 'R2', type: 'digital', desc: 'Row 2 output/input scan pin.' },
-      r3: { label: 'R3', type: 'digital', desc: 'Row 3 output/input scan pin.' },
-      r4: { label: 'R4', type: 'digital', desc: 'Row 4 output/input scan pin.' },
-      c1: { label: 'C1', type: 'digital', desc: 'Column 1 scan pin.' },
-      c2: { label: 'C2', type: 'digital', desc: 'Column 2 scan pin.' },
-      c3: { label: 'C3', type: 'digital', desc: 'Column 3 scan pin.' },
-      c4: { label: 'C4', type: 'digital', desc: 'Column 4 scan pin.' },
+      R1: { label: 'R1', type: 'digital', desc: 'Row 1 output/input scan pin.' },
+      R2: { label: 'R2', type: 'digital', desc: 'Row 2 output/input scan pin.' },
+      R3: { label: 'R3', type: 'digital', desc: 'Row 3 output/input scan pin.' },
+      R4: { label: 'R4', type: 'digital', desc: 'Row 4 output/input scan pin.' },
+      C1: { label: 'C1', type: 'digital', desc: 'Column 1 scan pin.' },
+      C2: { label: 'C2', type: 'digital', desc: 'Column 2 scan pin.' },
+      C3: { label: 'C3', type: 'digital', desc: 'Column 3 scan pin.' },
+      C4: { label: 'C4', type: 'digital', desc: 'Column 4 scan pin.' },
     },
     props: {
       activeKey: 'Active key coordinate state { row, col } when pressed.',
@@ -728,17 +728,17 @@ void loop(){
     exampleId: 'pir_alarm',
   },
 
-  lm35: {
-    id: 'lm35',
+  lm35_sensor: {
+    id: 'lm35_sensor',
     name: 'LM35 Temperature Sensor',
     icon: '🌡️',
     category: 'Sensors',
     longDesc: 'A precision analog centigrade temperature sensor. Output voltage is linearly proportional to Celsius temperature at 10 mV/\u00b0C, eliminating the need for complex calibration code.',
     use: 'Measuring ambient temperature. Read the output pin with analogRead() and scale the voltage value to calculate degrees Celsius.',
     pins: {
-      vcc: { label: 'VCC', type: 'power', desc: 'Power supply \u2014 5 V.' },
-      out: { label: 'OUT', type: 'analog', desc: 'Analog voltage output (10 mV/\u00b0C) \u2014 connect to A0\u2013A5.' },
-      gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Power supply — 5 V.' },
+      OUT: { label: 'OUT', type: 'analog', desc: 'Analog voltage output (10 mV/°C) — connect to A0–A5.' },
+      GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
     },
     props: {
       temp: 'Simulated ambient temperature in \u00b0C (default 25\u00b0C).',
@@ -1472,7 +1472,7 @@ void loop() {
 }`,
     exampleId: 'vl53l0x_proximity_sensor',
   },
-  BME280: {
+  bme280: {
     id: 'bme280',
     name: 'BME280 Environmental Sensor',
     icon: '🌤️',
@@ -1491,95 +1491,551 @@ void loop() {
       humidity: 'Simulated humidity in % (default 50%).',
     },
     wiring: 'VCC→3.3V/5V, GND→GND, SDA→A4, SCL→A5.',
-    code: `/*
- * Simple Weather Station with Air Quality
- *
- * Wiring:
- *   BME280:  VCC->5V  GND->GND  SCL->A5  SDA->A4
- *   MQ-2:    VCC->5V  GND->GND  A0->A0
- *   LCD I2C: VCC->5V  GND->GND  SCL->A5  SDA->A4
- *
- * Drag the Temp / Hum / hPa sliders on the BME280
- * and the Gas slider on the MQ-2 to simulate conditions.
- */
-
-#include <Wire.h>
+    code: `#include <Wire.h>
 #include <SimpleBME280.h>
-#include <LiquidCrystal_I2C.h>
 
 SimpleBME280 bme;
-LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-const int gasPin = A0;
+#define SEALEVELPRESSURE_HPA (1013.25)
 
 void setup() {
   Serial.begin(115200);
   Wire.begin();
   bme.begin();
-  lcd.init();
-  lcd.backlight();
-  lcd.setCursor(0, 0);
-  lcd.print("Weather Station");
-  lcd.setCursor(0, 1);
-  lcd.print("Initializing...");
-  delay(1500);
-  lcd.clear();
-  Serial.println("Simple Weather Station + Air Quality");
-  Serial.println("-------------------------------------");
+  Serial.println("SimpleBME280 Altimeter");
+  Serial.println("----------------------");
 }
 
 void loop() {
   float tempC   = bme.readTemperature();
-  float humPct  = bme.readHumidity();
   float presPa  = bme.readPressure();
-  int gasRaw    = analogRead(gasPin);
+  float altM    = bme.readAltitude(SEALEVELPRESSURE_HPA);
 
   Serial.print("Temp:      ");
   Serial.print(tempC, 1);
   Serial.println(" C");
 
-  Serial.print("Humidity:  ");
-  Serial.print(humPct, 1);
-  Serial.println(" %");
-
   Serial.print("Pressure:  ");
   Serial.print(presPa / 100.0, 1);
   Serial.println(" hPa");
 
-  Serial.print("Air Qual:  ");
-  Serial.print(gasRaw);
-  Serial.print(" (");
-  if (gasRaw < 200) Serial.print("Good");
-  else if (gasRaw < 400) Serial.print("Moderate");
-  else if (gasRaw < 600) Serial.print("Poor");
-  else Serial.print("Hazardous");
-  Serial.println(")");
+  Serial.print("Altitude:  ");
+  Serial.print(altM, 1);
+  Serial.println(" m");
 
-  Serial.println("-------------------------------------");
-
-  // Line 1: Temp and Humidity
-  lcd.setCursor(0, 0);
-  lcd.print("T:");
-  lcd.print(tempC, 1);
-  lcd.print((char)223);
-  lcd.print("C H:");
-  lcd.print((int)humPct);
-  lcd.print("%  ");
-
-  // Line 2: Pressure and Air Quality
-  lcd.setCursor(0, 1);
-  lcd.print("P:");
-  lcd.print((int)(presPa / 100.0));
-  lcd.print("h Q:");
-  if (gasRaw < 200) lcd.print("Good ");
-  else if (gasRaw < 400) lcd.print("Mod  ");
-  else if (gasRaw < 600) lcd.print("Poor ");
-  else lcd.print("HIGH!");
-
+  Serial.println("----------------------");
   delay(2000);
 }`,
-    exampleId: 'weather_station_multi',
+    exampleId: 'simplebme280_altitude',
   },
+
+  /* ── LED COLOR VARIANTS ── */
+  led_green: {
+    id: 'led_green', name: 'LED (Green)', icon: '\u{1f7e2}', category: 'Output',
+    longDesc: 'Green light-emitting diode. Identical electrical characteristics to a standard LED — always pair with a 220\u03a9 series resistor.',
+    use: 'Same as a regular LED but provides a green indicator colour. Use for status lights, traffic-light simulations, or any circuit where green is preferred.',
+    pins: { anode: { label: '+', type: 'pwm', desc: 'Anode (+). Connect to a digital/PWM pin through a 220\u03a9 resistor.' }, cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode (\u2212). Connect to GND.' } },
+    props: { color: 'LED colour hex code (default #33ff66).', colorName: 'Human-readable colour name.' },
+    wiring: 'Digital pin \u2192 220\u03a9 resistor \u2192 LED anode(+); cathode(\u2212) \u2192 GND.',
+    code: 'void setup() { pinMode(13, OUTPUT); }\nvoid loop() {\n  digitalWrite(13, HIGH); delay(500);\n  digitalWrite(13, LOW);  delay(500);\n}',
+  },
+
+  led_blue: {
+    id: 'led_blue', name: 'LED (Blue)', icon: '\u{1f535}', category: 'Output',
+    longDesc: 'Blue light-emitting diode. Typical forward voltage ~3.0 V (higher than red/green). Always use a series resistor.',
+    use: 'Indicator LED where blue light is needed. Blue LEDs have a slightly higher forward voltage (~3 V) than red/green (~2 V).',
+    pins: { anode: { label: '+', type: 'pwm', desc: 'Anode (+). Connect to digital/PWM pin via resistor.' }, cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode (\u2212). Connect to GND.' } },
+    props: { color: 'LED colour hex code (default #3399ff).', colorName: 'Human-readable colour name.' },
+    wiring: 'Digital pin \u2192 220\u03a9 resistor \u2192 LED anode(+); cathode(\u2212) \u2192 GND.',
+    code: 'void setup() { pinMode(13, OUTPUT); }\nvoid loop() {\n  digitalWrite(13, HIGH); delay(500);\n  digitalWrite(13, LOW);  delay(500);\n}',
+  },
+
+  led_yellow: {
+    id: 'led_yellow', name: 'LED (Yellow)', icon: '\u{1f7e1}', category: 'Output',
+    longDesc: 'Yellow light-emitting diode. Forward voltage ~2.1 V. Pair with a 220\u03a9 series resistor.',
+    use: 'Status indicators, warning lights, traffic-light simulations.',
+    pins: { anode: { label: '+', type: 'pwm', desc: 'Anode (+). Connect to digital/PWM pin via resistor.' }, cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode (\u2212). Connect to GND.' } },
+    props: { color: 'LED colour hex code (default #ffee33).', colorName: 'Human-readable colour name.' },
+    wiring: 'Digital pin \u2192 220\u03a9 resistor \u2192 LED anode(+); cathode(\u2212) \u2192 GND.',
+    code: 'void setup() { pinMode(13, OUTPUT); }\nvoid loop() {\n  digitalWrite(13, HIGH); delay(500);\n  digitalWrite(13, LOW);  delay(500);\n}',
+  },
+
+  led_orange: {
+    id: 'led_orange', name: 'LED (Orange)', icon: '\u{1f7e0}', category: 'Output',
+    longDesc: 'Orange light-emitting diode. Forward voltage ~2.0 V. Pair with a 220\u03a9 series resistor.',
+    use: 'Warning indicators, temperature status, traffic-light simulations.',
+    pins: { anode: { label: '+', type: 'pwm', desc: 'Anode (+). Connect to digital/PWM pin via resistor.' }, cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode (\u2212). Connect to GND.' } },
+    props: { color: 'LED colour hex code (default #ff8833).', colorName: 'Human-readable colour name.' },
+    wiring: 'Digital pin \u2192 220\u03a9 resistor \u2192 LED anode(+); cathode(\u2212) \u2192 GND.',
+    code: 'void setup() { pinMode(13, OUTPUT); }\nvoid loop() {\n  digitalWrite(13, HIGH); delay(500);\n  digitalWrite(13, LOW);  delay(500);\n}',
+  },
+
+  led_white: {
+    id: 'led_white', name: 'LED (White)', icon: '\u26aa', category: 'Output',
+    longDesc: 'White light-emitting diode. Forward voltage ~3.0\u20133.5 V (highest among common LEDs). Always use a series resistor.',
+    use: 'General illumination, backlighting, indicator where white light is needed.',
+    pins: { anode: { label: '+', type: 'pwm', desc: 'Anode (+). Connect to digital/PWM pin via resistor.' }, cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode (\u2212). Connect to GND.' } },
+    props: { color: 'LED colour hex code (default #ffffff).', colorName: 'Human-readable colour name.' },
+    wiring: 'Digital pin \u2192 220\u03a9 resistor \u2192 LED anode(+); cathode(\u2212) \u2192 GND.',
+    code: 'void setup() { pinMode(13, OUTPUT); }\nvoid loop() {\n  digitalWrite(13, HIGH); delay(500);\n  digitalWrite(13, LOW);  delay(500);\n}',
+  },
+
+  /* ── OUTPUT / DISPLAYS ── */
+  lcd2004_i2c: {
+    id: 'lcd2004_i2c', name: 'LCD 20x4 (I2C)', icon: '\u{1f5a5}\ufe0f', category: 'Output',
+    longDesc: 'A 20-character \u00d7 4-line character LCD display with an integrated PCF8574 I2C backpack. Uses only 2 data pins (SDA, SCL) instead of the usual 6+ parallel pins.',
+    use: 'Display text, sensor readings, menus, and debug information. Controlled via the Wire and LiquidCrystal_I2C libraries.',
+    pins: { gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' }, vcc: { label: 'VCC', type: 'power', desc: '5 V power supply.' }, sda: { label: 'SDA', type: 'digital', desc: 'I2C data \u2014 connect to A4 (Uno) or SDA pin.' }, scl: { label: 'SCL', type: 'digital', desc: 'I2C clock \u2014 connect to A5 (Uno) or SCL pin.' } },
+    props: { address: 'I2C address (default 0x27).' },
+    wiring: 'VCC\u21925V, GND\u2192GND, SDA\u2192A4, SCL\u2192A5.',
+    code: '#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\nLiquidCrystal_I2C lcd(0x27, 20, 4);\nvoid setup() {\n  lcd.init(); lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print("Hello, World!");\n}\nvoid loop() {}',
+  },
+
+  neopixel: {
+    id: 'neopixel', name: 'WS2812B NeoPixel', icon: '\u{1f4a0}', category: 'Output',
+    longDesc: 'A single WS2812B addressable RGB LED. Each pixel can display any of 16.7 million colours. Data is sent on a single wire using a precise timing protocol (handled by the Adafruit NeoPixel library).',
+    use: 'RGB status indicators, colour-mixing experiments, building blocks for larger NeoPixel arrays.',
+    pins: { VCC: { label: 'VCC', type: 'power', desc: '5 V power supply.' }, DOUT: { label: 'DOut', type: 'digital', desc: 'Data output (for chaining additional pixels).' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' } },
+    props: { r: 'Red channel (0\u2013255).', g: 'Green channel (0\u2013255).', b: 'Blue channel (0\u2013255).', brightness: 'Global brightness (0\u2013255).' },
+    wiring: 'VCC\u21925V, GND\u2192GND, DIN\u2192digital pin (e.g. D6).',
+    code: '#include <Adafruit_NeoPixel.h>\nAdafruit_NeoPixel strip(1, 6, NEO_GRB + NEO_KHZ800);\nvoid setup() { strip.begin(); strip.show(); }\nvoid loop() {\n  strip.setPixelColor(0, 255, 0, 0);\n  strip.show(); delay(500);\n  strip.setPixelColor(0, 0, 255, 0);\n  strip.show(); delay(500);\n}',
+  },
+
+  neopixel_ring: {
+    id: 'neopixel_ring', name: 'NeoPixel Ring (12 LED)', icon: '\u{1f9ff}', category: 'Output',
+    longDesc: 'A circular ring of 12 WS2812B addressable RGB LEDs. All pixels are daisy-chained on a single data wire. Includes DIN for input and DOUT for cascading to additional rings or strips.',
+    use: 'Clock displays, colour wheels, status rings, wearable projects, ambient lighting.',
+    pins: { VCC: { label: 'VCC', type: 'power', desc: '5 V power supply.' }, DIN: { label: 'DIN', type: 'digital', desc: 'Data input from Arduino.' }, DOUT: { label: 'DOut', type: 'digital', desc: 'Data output for chaining.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' } },
+    props: { numPixels: 'Number of pixels (default 12).', r: 'Red channel (0\u2013255).', g: 'Green channel (0\u2013255).', b: 'Blue channel (0\u2013255).', brightness: 'Global brightness (0\u2013255).' },
+    wiring: 'VCC\u21925V, GND\u2192GND, DIN\u2192digital pin (e.g. D6).',
+    code: '#include <Adafruit_NeoPixel.h>\nAdafruit_NeoPixel ring(12, 6, NEO_GRB + NEO_KHZ800);\nvoid setup() { ring.begin(); ring.show(); }\nvoid loop() {\n  for (int i = 0; i < 12; i++) {\n    ring.clear();\n    ring.setPixelColor(i, ring.Color(255, 0, 0));\n    ring.show(); delay(100);\n  }\n}',
+  },
+
+  neopixel_8x8_matrix: {
+    id: 'neopixel_8x8_matrix', name: '8x8 NeoPixel Matrix', icon: '\u{1f533}', category: 'Output',
+    longDesc: 'An 8\u00d78 (64-pixel) WS2812B addressable RGB LED matrix panel. Single-wire serial control with cascaded DOUT line. 24-bit colour depth per pixel with adjustable global brightness.',
+    use: 'Low-resolution displays, scrolling text, simple animations, pixel art, IoT dashboards.',
+    pins: { '5V': { label: '5V', type: 'power', desc: '5 V power supply.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' }, DIN: { label: 'DIN', type: 'digital', desc: 'Data input from Arduino.' }, DOUT: { label: 'DOUT', type: 'digital', desc: 'Data output for chaining.' } },
+    props: { brightness: 'Global brightness multiplier (0.1\u20131.0).' },
+    wiring: '5V\u21925V, GND\u2192GND, DIN\u2192digital pin (e.g. D6).',
+    code: '#include <Adafruit_NeoMatrix.h>\nAdafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, 6,\n  NEO_MATRIX_TOP + NEO_MATRIX_LEFT + NEO_MATRIX_ROWS,\n  NEO_GRB + NEO_KHZ800);\nvoid setup() {\n  matrix.begin();\n  matrix.setBrightness(80);\n  matrix.drawPixel(3, 3, matrix.Color(255, 0, 0));\n  matrix.show();\n}\nvoid loop() {}',
+  },
+
+  rgb_matrix_64x64: {
+    id: 'rgb_matrix_64x64', name: 'RGB LED Matrix 64x64 (HUB75)', icon: '\u{1f4a1}', category: 'Output',
+    longDesc: 'A 64\u00d764 full-colour RGB LED matrix panel with HUB75 interface. Supports adjustable brightness, test patterns, and live pixel framebuffer simulation. Driven via the RGB Matrix Panel or DirectFB libraries.',
+    use: 'Large-format LED displays, digital signage, scrolling text, image display, video playback.',
+    pins: {
+      R1: { label: 'R1', type: 'digital', desc: 'Red data, upper half.' }, G1: { label: 'G1', type: 'digital', desc: 'Green data, upper half.' }, B1: { label: 'B1', type: 'digital', desc: 'Blue data, upper half.' }, GND1: { label: 'GND', type: 'gnd', desc: 'Ground, upper half.' },
+      R2: { label: 'R2', type: 'digital', desc: 'Red data, lower half.' }, G2: { label: 'G2', type: 'digital', desc: 'Green data, lower half.' }, B2: { label: 'B2', type: 'digital', desc: 'Blue data, lower half.' }, GND2: { label: 'GND', type: 'gnd', desc: 'Ground, lower half.' },
+      A: { label: 'A', type: 'digital', desc: 'Row address bit 0.' }, B: { label: 'B', type: 'digital', desc: 'Row address bit 1.' }, C: { label: 'C', type: 'digital', desc: 'Row address bit 2.' }, D: { label: 'D', type: 'digital', desc: 'Row address bit 3.' }, E: { label: 'E', type: 'digital', desc: 'Row address bit 4 (64-row panels only).' },
+      LAT: { label: 'LAT', type: 'digital', desc: 'Latch / strobe pin.' }, OE: { label: 'OE', type: 'digital', desc: 'Output enable (active LOW).' }, CLK: { label: 'CLK', type: 'digital', desc: 'Shift clock.' },
+    },
+    props: { brightness: 'Panel brightness 0\u2013100%.', testPattern: 'Built-in test pattern 0\u20133.' },
+    wiring: 'HUB75 16-pin connector: R1,G1,B1,GND1,R2,G2,B2,GND2,A,B,C,D,E,LAT,OE,CLK \u2192 Arduino digital pins via level shifter.',
+    code: '#include <Adafruit_GFX.h>\n#include <RGBmatrixPanel.h>\n#define CLK 11  #define LAT 10\n#define OE 9   #define A A0\n#define B A1   #define C A2\n#define D A3\nRGBmatrixPanel matrix(A,B,C,D,CLK,LAT,OE, false, 64);\nvoid setup() {\n  matrix.begin();\n  matrix.drawPixel(10, 10, matrix.Color333(7, 0, 0));\n}\nvoid loop() {}',
+  },
+
+  /* ── ACTUATORS ── */
+  stepper_28byj: {
+    id: 'stepper_28byj', name: '28BYJ-48 Stepper', icon: '\u2699\ufe0f', category: 'Actuators',
+    longDesc: 'A 5 V 4-phase unipolar stepper motor with built-in ULN2003-style driver coils. 2048 steps per revolution (5.625\u00b0/step). Low power, widely used in robotics and CNC projects.',
+    use: 'Precise angular positioning, slow-speed rotation, robotics actuators, pan-tilt mechanisms.',
+    pins: { IN1: { label: 'IN1', type: 'digital', desc: 'Phase A \u2014 connect to a digital pin.' }, IN2: { label: 'IN2', type: 'digital', desc: 'Phase B \u2014 connect to a digital pin.' }, IN3: { label: 'IN3', type: 'digital', desc: 'Phase C \u2014 connect to a digital pin.' }, IN4: { label: 'IN4', type: 'digital', desc: 'Phase D \u2014 connect to a digital pin.' } },
+    props: { angle: 'Current shaft angle in degrees (read-only, updated by simulation).' },
+    wiring: 'IN1\u2192D8, IN2\u2192D9, IN3\u2192D10, IN4\u2192D11.',
+    code: '#include <Stepper.h>\nStepper motor(2048, 8, 10, 9, 11);\nvoid setup() {\n  motor.setSpeed(10);\n  motor.step(2048);  // one full revolution\n}\nvoid loop() {}',
+  },
+
+  /* ── AUDIO ── */
+  max98357a: {
+    id: 'max98357a', name: 'MAX98357A I2S Amp', icon: '\u{1f50a}', category: 'Audio',
+    longDesc: 'A 3.2 W monaural Class-D I2S audio amplifier with digital input, flexible gain control (3\u201315 dB), and BTL differential output. Converts I2S digital audio to analog speaker output.',
+    use: 'Driving speakers from I2S-capable microcontrollers (ESP32, Teensy). Ideal for audio playback, voice synthesis, and sound effects.',
+    pins: {
+      out_p: { label: 'OUT+', type: 'signal', desc: 'Positive speaker output.' }, out_n: { label: 'OUT\u2212', type: 'signal', desc: 'Negative speaker output.' },
+      lrc: { label: 'LRC', type: 'signal', desc: 'Left/Right clock (Word Select).' }, bclk: { label: 'BCLK', type: 'signal', desc: 'Bit clock.' }, din: { label: 'DIN', type: 'signal', desc: 'Serial data in.' },
+      gain: { label: 'GAIN', type: 'signal', desc: 'Gain select (see properties).' }, sd: { label: 'SD', type: 'signal', desc: 'Shutdown (active LOW = on).' },
+      gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' }, vin: { label: 'VIN', type: 'power', desc: '2.5\u20135.5 V power supply.' },
+    },
+    props: { gain: 'Gain: 3dB, 6dB, 9dB, 12dB (default), 15dB.', channel_mode: 'Channel: left, right, stereo_mix (default).' },
+    wiring: 'VIN\u21925V, GND\u2192GND, DIN\u2192I2C data, BCLK\u2192I2C clock, LRC\u2192word select, OUT+/OUT\u2212\u2192speaker.',
+    code: '// ESP32 I2S example\n#include <driver/i2s.h>\ni2s_config_t i2s_config = {\n  .mode = I2S_MODE_MASTER | I2S_MODE_TX,\n  .sample_rate = 44100,\n  .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,\n  .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,\n  .communication_format = I2S_COMM_FORMAT_STAND_I2S,\n  .dma_buf_count = 8, .dma_buf_len = 64,\n};\nvoid setup() {\n  i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);\n}',
+  },
+
+  speaker_4ohm: {
+    id: 'speaker_4ohm', name: 'Dynamic Speaker', icon: '\u{1f50a}', category: 'Audio',
+    longDesc: 'A dynamic loudspeaker with differential BTL inputs. Real-time cone excursion animation, RMS power calculation, and acoustic wave visualisation.',
+    use: 'Audio output for projects with amplifiers (MAX98357A, PAM8403, etc.). Connects to amplifier output, not directly to Arduino pins.',
+    pins: { pos: { label: '+', type: 'signal', desc: 'Positive terminal.' }, neg: { label: '\u2212', type: 'signal', desc: 'Negative terminal.' } },
+    props: { impedance: 'Speaker impedance in ohms (default 4).', power_rating: 'Max RMS power in watts (default 3.0).' },
+    wiring: 'Connect to amplifier output (e.g. MAX98357A OUT+/OUT\u2212). Do NOT connect directly to Arduino pins.',
+    code: '// Speaker needs an amplifier — see MAX98357A example.',
+  },
+
+  /* ── SENSORS ── */
+  mpu6050: {
+    id: 'mpu6050', name: 'MPU6050 6-Axis IMU', icon: '\u{1f9ed}', category: 'Sensors',
+    longDesc: 'GY-521 MPU-6050 module combining a 3-axis gyroscope and 3-axis accelerometer with a 16-bit ADC. Communicates via I2C. Features live 3D orientation visualisation.',
+    use: 'Motion tracking, tilt detection, gesture recognition, self-balancing robots, drone stabilisation.',
+    pins: { VCC: { label: 'VCC', type: 'power', desc: '3.3 V or 5 V power.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' }, SCL: { label: 'SCL', type: 'digital', desc: 'I2C clock \u2192 A5 (Uno).' }, SDA: { label: 'SDA', type: 'digital', desc: 'I2C data \u2192 A4 (Uno).' } },
+    props: { accelX: 'Simulated accel X (\u22122048 to 2047).', accelY: 'Simulated accel Y (\u22122048 to 2047).', accelZ: 'Simulated accel Z (\u22122048 to 2047).' },
+    wiring: 'VCC\u21923.3V, GND\u2192GND, SDA\u2192A4, SCL\u2192A5.',
+    code: '#include <Wire.h>\nvoid setup() {\n  Wire.begin();\n  Serial.begin(9600);\n  Wire.beginTransmission(0x68);\n  Wire.write(0x6B); Wire.write(0); // wake up\n  Wire.endTransmission(true);\n}\nvoid loop() {\n  Wire.beginTransmission(0x68);\n  Wire.write(0x3B); Wire.endTransmission(false);\n  Wire.requestFrom(0x68, 14, true);\n  int16_t ax = Wire.read()<<8 | Wire.read();\n  Serial.println(ax); delay(100);\n}',
+  },
+
+  ir_receiver: {
+    id: 'ir_receiver', name: 'IR Receiver TSOP4838', icon: '\u{1f4f1}', category: 'Sensors',
+    longDesc: 'TSOP4838 38 kHz infrared receiver module. Demodulates IR remote-control signals (NEC, RC5, Sony SIRC, etc.) and outputs a digital pulse train for decoding.',
+    use: 'Remote control decoding, wireless data reception, home automation input.',
+    pins: { OUT: { label: 'OUT', type: 'digital', desc: 'Demodulated digital output \u2192 digital pin.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' }, VCC: { label: 'VCC', type: 'power', desc: '5 V power supply.' } },
+    props: { code: 'Last decoded IR code (read-only).' },
+    wiring: 'VCC\u21925V, GND\u2192GND, OUT\u2192D2.',
+    code: '#include <IRremote.h>\nIRrecv receiver(2);\ndecode_results results;\nvoid setup() { Serial.begin(9600); receiver.enableIRIn(); }\nvoid loop() {\n  if (receiver.decode(&results)) {\n    Serial.println(results.value, HEX);\n    receiver.resume();\n  }\n}',
+  },
+
+  gps_neo6m: {
+    id: 'gps_neo6m', name: 'GPS NEO-6M/8M', icon: '\u{1f6f0}\ufe0f', category: 'Sensors',
+    longDesc: 'NEO-6M/8M GPS module with TinyGPS++ simulation. Provides latitude, longitude, altitude, satellite count, ground speed, and time via UART NMEA stream.',
+    use: 'Location tracking, navigation, geo-fencing, time synchronisation, vehicle tracking.',
+    pins: { VCC: { label: 'VCC', type: 'power', desc: '3.3 V or 5 V power.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' }, TX: { label: 'TX', type: 'digital', desc: 'GPS TX \u2192 Arduino RX (soft or hardware serial).' }, RX: { label: 'RX', type: 'digital', desc: 'GPS RX \u2192 Arduino TX.' } },
+    props: { latitude: 'Simulated latitude (\u221290 to 90).', longitude: 'Simulated longitude (\u2212180 to 180).', altitude: 'Simulated altitude in metres (\u2212500 to 9000).', satellites: 'Simulated satellite count (0\u201320).', baudRate: 'UART baud rate (default 9600).' },
+    wiring: 'VCC\u21925V, GND\u2192GND, TX\u2192D2 (SoftwareSerial RX), RX\u2192D3 (SoftwareSerial TX).',
+    code: '#include <SoftwareSerial.h>\n#include <TinyGPS++.h>\nSoftwareSerial gpsSerial(2, 3);\nTinyGPSPlus gps;\nvoid setup() {\n  Serial.begin(9600);\n  gpsSerial.begin(9600);\n}\nvoid loop() {\n  while (gpsSerial.available()) gps.encode(gpsSerial.read());\n  if (gps.location.isUpdated()) {\n    Serial.print("Lat: "); Serial.println(gps.location.lat(), 6);\n    Serial.print("Lng: "); Serial.println(gps.location.lng(), 6);\n  }\n}',
+  },
+
+  mq2_gas: {
+    id: 'mq2_gas', name: 'MQ-2 Gas Sensor', icon: '\u{1f4a8}', category: 'Sensors',
+    longDesc: 'MQ-2 combustible gas and smoke sensor module. Detects LPG, propane, hydrogen, methane, alcohol, CO, and smoke. Provides both analog (A0) and digital (D0) output via LM393 comparator.',
+    use: 'Gas leak detection, fire alarm systems, air quality monitoring, industrial safety.',
+    pins: { VCC: { label: 'VCC', type: 'power', desc: '5 V power supply.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' }, D0: { label: 'D0', type: 'digital', desc: 'Digital output (HIGH when threshold exceeded).' }, A0: { label: 'A0', type: 'analog', desc: 'Analog output (0\u20131023 proportional to gas concentration).' } },
+    props: { gasLevel: 'Simulated gas level (0\u20131023).', threshold: 'Digital output threshold (0\u20131023).' },
+    wiring: 'VCC\u21925V, GND\u2192GND, A0\u2192A0, D0\u2192D2.',
+    code: 'void setup() { Serial.begin(9600); }\nvoid loop() {\n  int gas = analogRead(A0);\n  Serial.print("Gas: "); Serial.println(gas);\n  delay(500);\n}',
+  },
+
+  hx711: {
+    id: 'hx711', name: 'HX711 Load Cell Amp', icon: '\u2696\ufe0f', category: 'Sensors',
+    longDesc: 'HX711 24-bit ADC amplifier for load cells. Uses a bit-bang serial protocol (DT/SCK pins). Compatible with standard Arduino HX711 libraries. Simulates real weight and tare offset.',
+    use: 'Precision weighing scales, force measurement, industrial weighing, kitchen scales.',
+    pins: { VCC: { label: 'VCC', type: 'power', desc: '5 V power supply.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' }, DT: { label: 'DT', type: 'digital', desc: 'Data pin \u2192 Arduino digital pin.' }, SCK: { label: 'SCK', type: 'digital', desc: 'Serial clock \u2192 Arduino digital pin.' } },
+    props: { weight: 'Simulated weight in grams (0\u201350000).', tareOffset: 'Tare offset in grams (\u221250000 to 50000).' },
+    wiring: 'VCC\u21925V, GND\u2192GND, DT\u2192D3, SCK\u2192D2.',
+    code: '#include "HX711.h"\nHX711 scale(3, 2); // DT, SCK\nvoid setup() {\n  Serial.begin(9600);\n  scale.set_scale(2280);\n  scale.tare();\n}\nvoid loop() {\n  Serial.print("Weight: ");\n  Serial.println(scale.get_units(), 1);\n  delay(500);\n}',
+  },
+
+  /* ── PASSIVES ── */
+  breadboard_small: {
+    id: 'breadboard_small', name: 'Breadboard (Small)', icon: '\u{1f7e6}', category: 'Passive',
+    longDesc: '170 tie-point mini breadboard with 16 columns split into upper (a\u2013e) and lower (f\u2013j) halves plus 4 power rails. Ideal for DIP IC circuits and small prototypes.',
+    use: 'Prototyping circuits without soldering. Each column of 5 holes is electrically connected. Upper and lower halves are separate (bridged across the centre channel by DIP ICs).',
+    pins: { rp: { label: '+', type: 'power', desc: 'Top positive power rail.' }, rn: { label: '\u2212', type: 'gnd', desc: 'Top negative power rail.' }, bp: { label: '+', type: 'power', desc: 'Bottom positive power rail.' }, bn: { label: '\u2212', type: 'gnd', desc: 'Bottom negative power rail.' } },
+    props: {},
+    wiring: 'Place components across the centre channel. Connect power rails to VCC and GND.',
+    code: '// Breadboard is passive — no code needed.',
+  },
+
+  /* ── POWER ── */
+  mb102_power: {
+    id: 'mb102_power', name: 'MB102 Power Supply', icon: '\u26a1', category: 'Power',
+    longDesc: 'MB102 breadboard power supply module with DC barrel jack and USB input. Dual AMS1117 regulators provide switchable 3.3 V / 5 V output to top and bottom breadboard rails independently.',
+    use: 'Powering breadboard circuits. Plug into the breadboard power rails or connect via pin headers.',
+    pins: {
+      vcc_t: { label: 'VCC_TOP', type: 'power', desc: 'Top rail positive output.' }, gnd_t: { label: 'GND_TOP', type: 'gnd', desc: 'Top rail ground.' },
+      aux_gnd: { label: 'GND', type: 'gnd', desc: 'Auxiliary ground.' }, aux_3v3: { label: '3.3V', type: 'power', desc: '3.3 V auxiliary output.' }, aux_5v: { label: '5V', type: 'power', desc: '5 V auxiliary output.' },
+      vcc_b: { label: 'VCC_BOT', type: 'power', desc: 'Bottom rail positive output.' }, gnd_b: { label: 'GND_BOT', type: 'gnd', desc: 'Bottom rail ground.' },
+    },
+    props: { powered: 'Power switch (0=off, 1=on).', topVoltage: 'Top rail voltage: OFF, 3.3V, or 5V.', bottomVoltage: 'Bottom rail voltage: OFF, 3.3V, or 5V.' },
+    wiring: 'Plug directly onto breadboard power rails, or wire VCC/GND pins to your circuit.',
+    code: '// Power module is passive — no code needed.',
+  },
+
+  bench_power_supply: {
+    id: 'bench_power_supply', name: 'Benchtop PSU', icon: '\u{1f39b}\ufe0f', category: 'Power',
+    longDesc: 'Dual-rail bench power supply with a fixed 5 V/5 A output plus adjustable split \u00b10\u201332 V / 0\u20135 A rails. POS = +V, NEG = \u2212V, GND = 0 V centre tap. Ideal for op-amp circuits and high-current loads.',
+    use: 'Lab power for circuits needing symmetric \u00b1V supplies, motor drivers, high-current loads, and test benches.',
+    pins: { VCC_5V: { label: '5V', type: 'power', desc: 'Fixed 5 V output.' }, GND_5V: { label: '5V GND', type: 'gnd', desc: 'Ground for 5 V rail.' }, POS: { label: '+V', type: 'power', desc: 'Positive adjustable output.' }, GND: { label: 'GND', type: 'gnd', desc: 'Centre-tap ground (0 V).' }, NEG: { label: '\u2212V', type: 'power', desc: 'Negative adjustable output.' } },
+    props: { powered: 'Power switch (0/1).', outputEnabled: 'Output enable (0/1).', voltageSet: 'Voltage per rail (0\u201332 V).', currentLimit: 'Current limit per rail (0\u20135 A).' },
+    wiring: 'POS \u2192 circuit +V, GND \u2192 circuit ground, NEG \u2192 circuit \u2212V. Connect 5V for logic supply.',
+    code: '// Bench supply is passive \u2014 no code needed. Connect to your circuit.',
+  },
+
+  /* ── COMMUNICATION ── */
+  wifi_module: {
+    id: 'wifi_module', name: 'Wi-Fi Module', icon: '\u{1f4f6}', category: 'Communication',
+    longDesc: 'Simulated Wi-Fi module for connecting the Arduino to a virtual wireless network. Configure SSID and password in properties. Enables MQTT, HTTP, and WebSocket communication in simulation.',
+    use: 'IoT projects, remote monitoring, cloud dashboards, MQTT messaging, OTA updates simulation.',
+    pins: {},
+    props: { ssid: 'Wi-Fi network name (SSID).', password: 'Wi-Fi password.' },
+    wiring: 'No physical wiring — configure SSID and password in the properties panel.',
+    code: '// WiFi on ESP8266/ESP32 — use WiFi.h or ESP8266WiFi.h libraries.',
+  },
+
+  /* ── DIGITAL ICs ── */
+  ic_555: {
+    id: 'ic_555', name: '555 Timer IC', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: 'NE555 precision timer IC. Operates in astable (oscillator), monostable (one-shot), or bistable (flip-flop) mode. Automatically detects connected R1, R2, and C values to calculate frequency.',
+    use: 'Pulse generation, PWM, timing delays, LED flashers, tone generators, clock sources.',
+    pins: {
+      GND: { label: '1', type: 'gnd', desc: 'Pin 1 \u2014 Ground.' }, TRIG: { label: '2', type: 'digital', desc: 'Pin 2 \u2014 Trigger (starts timing cycle when < VCC/3).' },
+      OUT: { label: '3', type: 'digital', desc: 'Pin 3 \u2014 Output (HIGH during timing).' }, RST: { label: '4', type: 'digital', desc: 'Pin 4 \u2014 Reset (active LOW).' },
+      VCC: { label: '8', type: 'power', desc: 'Pin 8 \u2014 Supply voltage (4.5\u201316 V).' }, DIS: { label: '7', type: 'digital', desc: 'Pin 7 \u2014 Discharge (discharges timing capacitor).' },
+      THR: { label: '6', type: 'digital', desc: 'Pin 6 \u2014 Threshold (> 2\u00d7VCC/3 resets output).' }, CV: { label: '5', type: 'signal', desc: 'Pin 5 \u2014 Control voltage (optional bypass capacitor).' },
+    },
+    props: { mode: 'Operating mode: astable, monostable, bistable.', frequency: 'Oscillation frequency in Hz (astable mode).', dutyCycle: 'Duty cycle percentage (astable mode).' },
+    wiring: 'VCC\u21925\u201315V, GND\u2192GND. R1, R2, C connect externally to set timing.',
+    code: '// 555 timer is a standalone IC — no Arduino code needed.\n// It generates pulses autonomously based on R1, R2, C values.',
+  },
+
+  ic_74hc00: {
+    id: 'ic_74hc00', name: '74HC00 Quad NAND', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: 'Quad 2-input NAND gate. Each gate outputs LOW only when both inputs are HIGH. Four independent gates in a single 14-pin DIP package.',
+    use: 'Digital logic circuits, SR latches, pulse shaping, signal inversion, glue logic.',
+    pins: {
+      A1: { label: '1A', type: 'digital', desc: 'Gate 1 input A.' }, B1: { label: '1B', type: 'digital', desc: 'Gate 1 input B.' }, Y1: { label: '1Y', type: 'digital', desc: 'Gate 1 output.' },
+      A2: { label: '2A', type: 'digital', desc: 'Gate 2 input A.' }, B2: { label: '2B', type: 'digital', desc: 'Gate 2 input B.' }, Y2: { label: '2Y', type: 'digital', desc: 'Gate 2 output.' },
+      A3: { label: '3A', type: 'digital', desc: 'Gate 3 input A.' }, B3: { label: '3B', type: 'digital', desc: 'Gate 3 input B.' }, Y3: { label: '3Y', type: 'digital', desc: 'Gate 3 output.' },
+      A4: { label: '4A', type: 'digital', desc: 'Gate 4 input A.' }, B4: { label: '4B', type: 'digital', desc: 'Gate 4 input B.' }, Y4: { label: '4Y', type: 'digital', desc: 'Gate 4 output.' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage (2\u20136 V).' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+    },
+    props: {},
+    wiring: 'VCC\u21925V, GND\u2192GND. Inputs/outputs connect to digital pins.',
+    code: '// Logic gates are combinational \u2014 no code needed.',
+  },
+
+  ic_74hc04: {
+    id: 'ic_74hc04', name: '74HC04 Hex NOT', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: 'Hex inverter with 6 independent NOT gates. Each output is the logical inverse of its input.',
+    use: 'Signal inversion, oscillator circuits (with crystal), level shifting, clock generation.',
+    pins: {
+      A1: { label: '1', type: 'digital', desc: 'Gate 1 input.' }, Y1: { label: '2', type: 'digital', desc: 'Gate 1 output (inverted).' },
+      A2: { label: '3', type: 'digital', desc: 'Gate 2 input.' }, Y2: { label: '4', type: 'digital', desc: 'Gate 2 output (inverted).' },
+      A3: { label: '5', type: 'digital', desc: 'Gate 3 input.' }, Y3: { label: '6', type: 'digital', desc: 'Gate 3 output (inverted).' },
+      A4: { label: '9', type: 'digital', desc: 'Gate 4 input.' }, Y4: { label: '8', type: 'digital', desc: 'Gate 4 output (inverted).' },
+      A5: { label: '11', type: 'digital', desc: 'Gate 5 input.' }, Y5: { label: '10', type: 'digital', desc: 'Gate 5 output (inverted).' },
+      A6: { label: '13', type: 'digital', desc: 'Gate 6 input.' }, Y6: { label: '12', type: 'digital', desc: 'Gate 6 output (inverted).' },
+      VCC: { label: '14', type: 'power', desc: 'Supply voltage.' }, GND: { label: '7', type: 'gnd', desc: 'Ground.' },
+    },
+    props: {},
+    wiring: 'VCC\u21925V, GND\u2192GND. Connect inputs to digital pins.',
+    code: '// NOT gates are combinational \u2014 no code needed.',
+  },
+
+  ic_74hc08: {
+    id: 'ic_74hc08', name: '74HC08 Quad AND', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: 'Quad 2-input AND gate. Output is HIGH only when both inputs are HIGH.',
+    use: 'Enable gating, address decoding, conditional logic, safety interlocks.',
+    pins: {
+      A1: { label: '1A', type: 'digital', desc: 'Gate 1 input A.' }, B1: { label: '1B', type: 'digital', desc: 'Gate 1 input B.' }, Y1: { label: '1Y', type: 'digital', desc: 'Gate 1 output.' },
+      A2: { label: '2A', type: 'digital', desc: 'Gate 2 input A.' }, B2: { label: '2B', type: 'digital', desc: 'Gate 2 input B.' }, Y2: { label: '2Y', type: 'digital', desc: 'Gate 2 output.' },
+      A3: { label: '3A', type: 'digital', desc: 'Gate 3 input A.' }, B3: { label: '3B', type: 'digital', desc: 'Gate 3 input B.' }, Y3: { label: '3Y', type: 'digital', desc: 'Gate 3 output.' },
+      A4: { label: '4A', type: 'digital', desc: 'Gate 4 input A.' }, B4: { label: '4B', type: 'digital', desc: 'Gate 4 input B.' }, Y4: { label: '4Y', type: 'digital', desc: 'Gate 4 output.' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+    },
+    props: {},
+    wiring: 'VCC\u21925V, GND\u2192GND.',
+    code: '// AND gates are combinational \u2014 no code needed.',
+  },
+
+  ic_74hc32: {
+    id: 'ic_74hc32', name: '74HC32 Quad OR', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: 'Quad 2-input OR gate. Output is HIGH when either or both inputs are HIGH.',
+    use: 'Signal combining, interrupt merging, alarm logic, fallback circuits.',
+    pins: {
+      A1: { label: '1A', type: 'digital', desc: 'Gate 1 input A.' }, B1: { label: '1B', type: 'digital', desc: 'Gate 1 input B.' }, Y1: { label: '1Y', type: 'digital', desc: 'Gate 1 output.' },
+      A2: { label: '2A', type: 'digital', desc: 'Gate 2 input A.' }, B2: { label: '2B', type: 'digital', desc: 'Gate 2 input B.' }, Y2: { label: '2Y', type: 'digital', desc: 'Gate 2 output.' },
+      A3: { label: '3A', type: 'digital', desc: 'Gate 3 input A.' }, B3: { label: '3B', type: 'digital', desc: 'Gate 3 input B.' }, Y3: { label: '3Y', type: 'digital', desc: 'Gate 3 output.' },
+      A4: { label: '4A', type: 'digital', desc: 'Gate 4 input A.' }, B4: { label: '4B', type: 'digital', desc: 'Gate 4 input B.' }, Y4: { label: '4Y', type: 'digital', desc: 'Gate 4 output.' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+    },
+    props: {},
+    wiring: 'VCC\u21925V, GND\u2192GND.',
+    code: '// OR gates are combinational \u2014 no code needed.',
+  },
+
+  ic_74hc595: {
+    id: 'ic_74hc595', name: '74HC595 Shift Reg', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: '8-bit serial-in parallel-out shift register with output latch. Data is shifted in via SER/SRCLK and latched to outputs via RCLK. Enables 8+ outputs using only 3 Arduino pins.',
+    use: 'Expanding digital outputs, driving LED matrices, 7-segment displays, relay arrays.',
+    pins: {
+      QA: { label: 'Q0', type: 'digital', desc: 'Parallel output Q0 (bit 0).' },
+      QB: { label: 'Q1', type: 'digital', desc: 'Parallel output Q1.' }, QC: { label: 'Q2', type: 'digital', desc: 'Q2.' }, QD: { label: 'Q3', type: 'digital', desc: 'Q3.' },
+      QE: { label: 'Q4', type: 'digital', desc: 'Q4.' }, QF: { label: 'Q5', type: 'digital', desc: 'Q5.' }, QG: { label: 'Q6', type: 'digital', desc: 'Q6.' }, QH: { label: 'Q7', type: 'digital', desc: 'Q7 (bit 7).' },
+      SER: { label: 'SER', type: 'digital', desc: 'Serial data input.' }, SRCLK: { label: 'SRCLK', type: 'digital', desc: 'Shift register clock (shift on rising edge).' },
+      RCLK: { label: 'RCLK', type: 'digital', desc: 'Latch clock (latch outputs on rising edge).' },
+      OE: { label: '/OE', type: 'digital', desc: 'Output enable (active LOW).' }, SRCLR: { label: '/RST', type: 'digital', desc: 'Shift register clear (active LOW).' },
+      QHn: { label: "Q7'", type: 'digital', desc: 'Serial output (for cascading).' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+    },
+    props: {},
+    wiring: 'SER\u2192D11, SRCLK\u2192D12, RCLK\u2192D13, OE\u2192GND, VCC\u21925V, GND\u2192GND.',
+    code: 'const int dataPin = 11, clockPin = 12, latchPin = 13;\nvoid shiftOutByte(byte val) {\n  digitalWrite(latchPin, LOW);\n  shiftOut(dataPin, clockPin, MSBFIRST, val);\n  digitalWrite(latchPin, HIGH);\n}\nvoid setup() {\n  pinMode(dataPin, OUTPUT);\n  pinMode(clockPin, OUTPUT);\n  pinMode(latchPin, OUTPUT);\n  shiftOutByte(0b10101010);\n}\nvoid loop() {}',
+  },
+
+  ic_74hc138: {
+    id: 'ic_74hc138', name: '74HC138 Decoder', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: '3-to-8 line decoder/demultiplexer. Activates one of 8 active-LOW outputs based on a 3-bit binary address on A0\u2013A2. Three enable pins (G1, G2A, G2B) control activation.',
+    use: 'Memory chip selection, address decoding, I/O expansion, 1-of-8 demultiplexing.',
+    pins: {
+      A0: { label: 'A0', type: 'digital', desc: 'Address bit 0 (LSB).' }, A1: { label: 'A1', type: 'digital', desc: 'Address bit 1.' }, A2: { label: 'A2', type: 'digital', desc: 'Address bit 2 (MSB).' },
+      G1: { label: 'G1', type: 'digital', desc: 'Enable (active HIGH).' }, G2A: { label: 'G2A', type: 'digital', desc: 'Enable (active LOW).' }, G2B: { label: 'G2B', type: 'digital', desc: 'Enable (active LOW).' },
+      Y0: { label: 'Y0', type: 'digital', desc: 'Output 0 (active LOW, selected when address=0).' },
+      Y1: { label: 'Y1', type: 'digital', desc: 'Output 1.' }, Y2: { label: 'Y2', type: 'digital', desc: 'Output 2.' }, Y3: { label: 'Y3', type: 'digital', desc: 'Output 3.' },
+      Y4: { label: 'Y4', type: 'digital', desc: 'Output 4.' }, Y5: { label: 'Y5', type: 'digital', desc: 'Output 5.' }, Y6: { label: 'Y6', type: 'digital', desc: 'Output 6.' }, Y7: { label: 'Y7', type: 'digital', desc: 'Output 7.' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+    },
+    props: {},
+    wiring: 'VCC\u21925V, GND\u2192GND, A0\u2013A2\u2192Arduino pins, G1\u21925V, G2A/G2B\u2192GND.',
+    code: '// Address lines A0\u2013A2 select which Y output goes LOW.\nconst int A0 = 2, A1 = 3, A2 = 4;\nvoid setup() {\n  for (int i = 2; i <= 4; i++) pinMode(i, OUTPUT);\n}\nvoid loop() {\n  for (int addr = 0; addr < 8; addr++) {\n    digitalWrite(A0, addr & 1);\n    digitalWrite(A1, (addr >> 1) & 1);\n    digitalWrite(A2, (addr >> 2) & 1);\n    delay(500);\n  }\n}',
+  },
+
+  ic_74hc245: {
+    id: 'ic_74hc245', name: '74HC245 Bus Xcvr', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: 'Octal bus transceiver with 3-state outputs. Bidirectional 8-bit data buffer. Direction controlled by DIR pin (A\u2192B or B\u2192A). /OE enables or high-impedances all outputs.',
+    use: 'Bus isolation, bidirectional level translation, memory interfacing, I/O buffering.',
+    pins: {
+      DIR: { label: 'DIR', type: 'digital', desc: 'Direction: HIGH = A\u2192B, LOW = B\u2192A.' },
+      A1: { label: 'A1', type: 'digital', desc: 'Port A bit 1.' }, A2: { label: 'A2', type: 'digital', desc: 'A2.' }, A3: { label: 'A3', type: 'digital', desc: 'A3.' },
+      A4: { label: 'A4', type: 'digital', desc: 'A4.' }, A5: { label: 'A5', type: 'digital', desc: 'A5.' }, A6: { label: 'A6', type: 'digital', desc: 'A6.' },
+      A7: { label: 'A7', type: 'digital', desc: 'A7.' }, A8: { label: 'A8', type: 'digital', desc: 'A8.' },
+      B1: { label: 'B1', type: 'digital', desc: 'Port B bit 1.' }, B2: { label: 'B2', type: 'digital', desc: 'B2.' }, B3: { label: 'B3', type: 'digital', desc: 'B3.' },
+      B4: { label: 'B4', type: 'digital', desc: 'B4.' }, B5: { label: 'B5', type: 'digital', desc: 'B5.' }, B6: { label: 'B6', type: 'digital', desc: 'B6.' },
+      B7: { label: 'B7', type: 'digital', desc: 'B7.' }, B8: { label: 'B8', type: 'digital', desc: 'B8.' },
+      OE: { label: '/OE', type: 'digital', desc: 'Output enable (active LOW).' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+    },
+    props: {},
+    wiring: 'VCC\u21925V, GND\u2192GND, /OE\u2192GND (always enabled), DIR\u2192digital pin.',
+    code: '// Bus transceiver is combinational — set DIR pin HIGH or LOW.',
+  },
+
+  ic_74hc74: {
+    id: 'ic_74hc74', name: '74HC74 Dual DFF', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: 'Dual D-type positive-edge-triggered flip-flop with preset and clear. Data on D is sampled at the rising edge of CLK and appears on Q.',
+    use: 'Frequency division, data synchronization, edge detection, state machines, toggle circuits.',
+    pins: {
+      D1: { label: 'D1', type: 'digital', desc: 'Flip-flop 1 data input.' }, CLK1: { label: 'CLK1', type: 'digital', desc: 'FF1 clock (positive edge).' },
+      Q1: { label: 'Q1', type: 'digital', desc: 'FF1 output.' }, Q1n: { label: "Q1'", type: 'digital', desc: 'FF1 complementary output.' },
+      PRE1: { label: '/PRE1', type: 'digital', desc: 'FF1 preset (active LOW).' }, CLR1: { label: '/CLR1', type: 'digital', desc: 'FF1 clear (active LOW).' },
+      D2: { label: 'D2', type: 'digital', desc: 'FF2 data input.' }, CLK2: { label: 'CLK2', type: 'digital', desc: 'FF2 clock.' },
+      Q2: { label: 'Q2', type: 'digital', desc: 'FF2 output.' }, Q2n: { label: "Q2'", type: 'digital', desc: 'FF2 complementary output.' },
+      PRE2: { label: '/PRE2', type: 'digital', desc: 'FF2 preset (active LOW).' }, CLR2: { label: '/CLR2', type: 'digital', desc: 'FF2 clear (active LOW).' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+    },
+    props: {},
+    wiring: 'VCC\u21925V, GND\u2192GND, /PRE and /CLR tied HIGH (inactive).',
+    code: '// Connect D to data, CLK to clock signal. Q follows D at each rising CLK edge.',
+  },
+
+  ic_74hc165: {
+    id: 'ic_74hc165', name: '74HC165 PISO', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: '8-bit parallel-in serial-out shift register. Loads 8 parallel inputs on the rising edge of /SHLD, then shifts data out through Q7 on each CLK pulse.',
+    use: 'Expanding digital inputs, reading button matrices, serial-to-parallel data conversion.',
+    pins: {
+      SHLD: { label: '/SHLD', type: 'digital', desc: 'Shift/load (active LOW = load parallel data).' },
+      CLK: { label: 'CLK', type: 'digital', desc: 'Serial clock.' },
+      A: { label: 'A', type: 'digital', desc: 'Parallel input A.' }, B: { label: 'B', type: 'digital', desc: 'Input B (not used, see note).' },
+      E: { label: 'E', type: 'digital', desc: 'Input E.' }, F: { label: 'F', type: 'digital', desc: 'Input F.' },
+      G: { label: 'G', type: 'digital', desc: 'Input G.' }, H: { label: 'H', type: 'digital', desc: 'Input H.' },
+      Q7: { label: 'Q7', type: 'digital', desc: 'Serial output.' }, Q7n: { label: "Q7'", type: 'digital', desc: 'Inverted serial output.' },
+      SER: { label: 'SER', type: 'digital', desc: 'Serial data input (for cascading).' },
+      CLKINH: { label: 'CLKINH', type: 'digital', desc: 'Clock inhibit (active HIGH = clock disabled).' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+    },
+    props: {},
+    wiring: 'VCC\u21925V, GND\u2192GND, /SHLD\u2192digital pin, CLK\u2192digital pin, Q7\u2192Arduino MISO.',
+    code: 'const int loadPin = 7, dataPin = 12, clockPin = 13;\nbyte readInputs() {\n  digitalWrite(loadPin, LOW); delayMicroseconds(5);\n  digitalWrite(loadPin, HIGH);\n  return shiftIn(dataPin, clockPin, MSBFIRST);\n}\nvoid setup() {\n  pinMode(loadPin, OUTPUT);\n  pinMode(dataPin, INPUT);\n  pinMode(clockPin, OUTPUT);\n}\nvoid loop() {\n  byte val = readInputs();\n  Serial.println(val, BIN); delay(200);\n}',
+  },
+
+  ic_74hc193: {
+    id: 'ic_74hc193', name: '74HC193 Counter', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: '4-bit synchronous up/down binary counter with parallel load and master reset. Counts up on CPU rising edge or down on CPD rising edge. Outputs carry (TC_U) and borrow (TC_D) for cascading.',
+    use: 'Event counting, frequency division, address generation, up/down counters, cascaded multi-bit counters.',
+    pins: {
+      CPU: { label: 'CPU', type: 'digital', desc: 'Count up input (rising edge).' }, CPD: { label: 'CPD', type: 'digital', desc: 'Count down input (rising edge).' },
+      PL: { label: '/PL', type: 'digital', desc: 'Parallel load (active LOW).' },
+      TC_U: { label: 'TC_U', type: 'digital', desc: 'Terminal count up (carry, goes HIGH at overflow).' },
+      TC_D: { label: 'TC_D', type: 'digital', desc: 'Terminal count down (borrow, goes HIGH at underflow).' },
+      QA: { label: 'QA', type: 'digital', desc: 'Output A (bit 0, LSB).' }, QB: { label: 'QB', type: 'digital', desc: 'Output B (bit 1).' },
+      A: { label: 'A', type: 'digital', desc: 'Parallel data A (bit 0).' }, B: { label: 'B', type: 'digital', desc: 'Parallel data B (bit 1).' },
+      C: { label: 'C', type: 'digital', desc: 'Parallel data C (bit 2).' }, DD: { label: 'D', type: 'digital', desc: 'Parallel data D (bit 3, MSB).' },
+      CO: { label: 'CO', type: 'digital', desc: 'Output C (bit 2).' }, BO: { label: 'BO', type: 'digital', desc: 'Output D (bit 3).' },
+      MR: { label: 'MR', type: 'digital', desc: 'Master reset (active HIGH).' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+    },
+    props: {},
+    wiring: 'VCC\u21925V, GND\u2192GND, /PL\u2192GND (counting mode), MR\u2192GND (no reset).',
+    code: 'const int cpuPin = 2, countPin = 3;\nvolatile int count = 0;\nvoid setup() {\n  pinMode(cpuPin, INPUT);\n  attachInterrupt(digitalPinToInterrupt(cpuPin), [](){ count++; }, RISING);\n  Serial.begin(9600);\n}\nvoid loop() {\n  Serial.println(count); delay(500);\n}',
+  },
+
+  ic_74hc47: {
+    id: 'ic_74hc47', name: '74HC47 BCD\u21927Seg', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: 'BCD to 7-segment decoder/driver with active-LOW open-collector outputs. Converts 4-bit BCD input (A\u2013D) to 7-segment display signals. Designed for common-anode LED displays.',
+    use: 'Driving 7-segment displays without Arduino code, BCD counters, digital clocks.',
+    pins: {
+      A: { label: 'A', type: 'digital', desc: 'BCD input A (bit 0, LSB).' }, B: { label: 'B', type: 'digital', desc: 'BCD input B (bit 1).' },
+      C: { label: 'C', type: 'digital', desc: 'BCD input C (bit 2).' }, D: { label: 'D', type: 'digital', desc: 'BCD input D (bit 3, MSB).' },
+      LT: { label: '/LT', type: 'digital', desc: 'Lamp test (active LOW \u2014 all segments ON).' },
+      RBI: { label: '/RBI', type: 'digital', desc: 'Ripple blanking input (active LOW).' },
+      BI: { label: '/BI', type: 'digital', desc: 'Blanking input (active LOW \u2014 all segments OFF).' },
+      a: { label: 'a', type: 'digital', desc: 'Segment a output (active LOW).' }, b: { label: 'b', type: 'digital', desc: 'Segment b.' },
+      c: { label: 'c', type: 'digital', desc: 'Segment c.' }, d: { label: 'd', type: 'digital', desc: 'Segment d.' },
+      e: { label: 'e', type: 'digital', desc: 'Segment e.' }, f: { label: 'f', type: 'digital', desc: 'Segment f.' },
+      g: { label: 'g', type: 'digital', desc: 'Segment g.' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+    },
+    props: {},
+    wiring: 'VCC\u21925V, GND\u2192GND, A\u2013D\u2192BCD inputs, a\u2013g\u2192common-anode 7-segment display segments.',
+    code: '// Connect BCD counter outputs to A\u2013D. Segments drive directly — no code needed.',
+  },
+
+  ic_74hc148: {
+    id: 'ic_74hc148', name: '74HC148 Encoder', icon: '\u2b97', category: 'Digital ICs',
+    longDesc: '8-to-3 line priority encoder. Encodes the highest-priority active (LOW) input to a 3-bit binary code. Includes cascading inputs (/EI, /EO, /GS) for multi-chip priority encoding.',
+    use: 'Interrupt prioritisation, keyboard encoding, 8-input to 3-bit compression.',
+    pins: {
+      EI: { label: '/EI', type: 'digital', desc: 'Enable input (active LOW).' },
+      I0: { label: 'I0', type: 'digital', desc: 'Input 0 (highest priority).' }, I1: { label: 'I1', type: 'digital', desc: 'Input 1.' },
+      I2: { label: 'I2', type: 'digital', desc: 'Input 2.' }, I3: { label: 'I3', type: 'digital', desc: 'Input 3.' },
+      I4: { label: 'I4', type: 'digital', desc: 'Input 4.' }, I5: { label: 'I5', type: 'digital', desc: 'Input 5.' },
+      I6: { label: 'I6', type: 'digital', desc: 'Input 6.' }, I7: { label: 'I7', type: 'digital', desc: 'Input 7 (lowest priority).' },
+      A0: { label: 'A0', type: 'digital', desc: 'Binary output bit 0 (LSB).' }, A1: { label: 'A1', type: 'digital', desc: 'Binary output bit 1.' }, A2: { label: 'A2', type: 'digital', desc: 'Binary output bit 2 (MSB).' },
+      EO: { label: '/EO', type: 'digital', desc: 'Enable output (active LOW when no input active).' },
+      GS: { label: '/GS', type: 'digital', desc: 'Group select (active LOW when any input active).' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+    },
+    props: {},
+    wiring: 'VCC\u21925V, GND\u2192GND, /EI\u2192GND (enabled), inputs tied HIGH (inactive).',
+    code: '// Connect 8 active-LOW inputs to I0\u2013I7. Read A0\u2013A2 for binary code of highest active input.',
+  },
+
+  lm741: {
+    id: 'lm741', name: 'LM741 Op-Amp', icon: '\u{1f4d0}', category: 'Digital ICs',
+    longDesc: 'LM741 general-purpose operational amplifier. Differential input (INN/INP) with single-ended output. Can be configured as amplifier, comparator, integrator, or filter.',
+    use: 'Analog signal conditioning, amplifiers, comparators, active filters, signal math circuits.',
+    pins: {
+      INP: { label: '3', type: 'signal', desc: 'Non-inverting input (+).' }, INN: { label: '2', type: 'signal', desc: 'Inverting input (\u2212).' },
+      OUT: { label: '6', type: 'signal', desc: 'Output.' },
+      VCCP: { label: '7', type: 'power', desc: 'Positive supply (+V).' }, VCCN: { label: '4', type: 'gnd', desc: 'Negative supply (\u2212V or GND).' },
+      OFF1: { label: '1', type: 'digital', desc: 'Offset null 1.' }, OFF2: { label: '5', type: 'digital', desc: 'Offset null 2.' },
+      NC: { label: '8', type: 'digital', desc: 'Not connected.' },
+    },
+    props: {},
+    wiring: 'VCCP\u2192+12V, VCCN\u2192\u221212V (or GND for single supply). INP/INN to inputs, OUT to output.',
+    code: '// Op-amp is analog — configure gain with external R1, R2 resistors.\n// Non-inverting: Vout = Vin \u00d7 (1 + R2/R1)',
+  },
+
+  /* ── INSTRUMENTS ── */
+  dso_4ch: {
+    id: 'dso_4ch', name: '2-Ch Digital Oscilloscope', icon: '\u223f', category: 'Instruments',
+    longDesc: '2-channel digital storage oscilloscope with phosphor display, AC/DC coupling, adjustable trigger, auto-measurement, cursors, math channel, and spectrum/XY display modes.',
+    use: 'Visualising voltage waveforms, debugging signal timing, measuring frequency/duty cycle, analysing sensor outputs.',
+    pins: { ch1_in: { label: 'CH1', type: 'signal', desc: 'Channel 1 input.' }, ch2_in: { label: 'CH2', type: 'signal', desc: 'Channel 2 input.' }, gnd: { label: 'GND', type: 'gnd', desc: 'Ground reference for probes.' } },
+    props: { powered: 'Power switch (0/1).', runStop: 'Run/Stop toggle.', timebase: 'Time per division (seconds).', trig_source: 'Trigger source: ch1, ch2.', trig_level: 'Trigger level (V).', ch1_vdiv: 'CH1 Volts/division.', ch2_vdiv: 'CH2 Volts/division.', ch1_coupling: 'CH1 coupling: dc, ac, gnd.', ch2_coupling: 'CH2 coupling: dc, ac, gnd.', dsoMode: 'Display mode: scope, spectrum, xy.' },
+    wiring: 'Connect signal wires to CH1 or CH2 inputs. Connect GND to circuit ground.',
+    code: '// Oscilloscope is a measurement instrument — no Arduino code needed.',
+  },
+
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1625,6 +2081,7 @@ const GUIDE_LIBRARIES = [
   void loop() { } `,
     exampleId: null,
   },
+  
   {
     id: 'spi',
     name: 'SPI',
