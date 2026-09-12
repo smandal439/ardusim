@@ -2158,6 +2158,8 @@ class CircuitCanvas {
     // ESP32 DevKit V1 pin aliases
     const esp32Map = { VP: 36, VN: 39, TX0: 1, RX0: 3, EN: 0 };
     if (pinId in esp32Map) return esp32Map[pinId];
+    // STM32F746G-DISCO: use Arduino D-number directly (D0-D15 → 0-15)
+    if (/^D\d+$/.test(pinId)) return parseInt(pinId.slice(1));
     const n = parseInt(pinId.replace(/[^0-9]/g, ''));
     return isNaN(n) ? 0 : n;
   }

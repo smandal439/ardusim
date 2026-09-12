@@ -258,7 +258,7 @@ class LEDComponent extends Component {
           // Ground is not on cathode net — search all components for ground pins
           for (const comp of engine.components) {
             const t = comp.type;
-            if (t === 'arduino_uno' || t === 'arduino_nano' || t === 'esp32_devkit_v1') {
+            if (t === 'arduino_uno' || t === 'arduino_nano' || t === 'esp32_devkit_v1' || t === 'stm32f746_disco') {
               for (const pid of ['GND1', 'GND2', 'GND_D', 'GND']) {
                 if (engine.measureResistance(this.id, 'cathode', comp.id, pid) < Infinity) {
                   gndInstId = comp.id; gndPinId = pid; break;

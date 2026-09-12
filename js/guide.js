@@ -135,6 +135,40 @@ void loop() {
     exampleId: 'blink',
   },
 
+  stm32f746_disco: {
+    id: 'stm32f746_disco',
+    name: 'STM32F746G-DISCO',
+    icon: '🔌',
+    category: 'Boards',
+    grouped: true,
+    longDesc: 'The STM32F746G Discovery kit features an ARM Cortex-M7 MCU running at 216 MHz with 1 MB Flash and 320 KB SRAM. It has a 4.3" 480x272 TFT LCD, SAI audio codec, USB OTG, Ethernet, and Arduino Uno V3 compatible connectors. The board operates at 3.3V logic. LD1 (green LED on PI1) is the user-controllable LED mapped to D13.',
+    use: 'A powerful ARM development board for graphics, audio, and connectivity projects. Use it for LCD/touchscreen interfaces, audio processing, Ethernet networking, and complex embedded applications.',
+    pins: {
+      'D0–D13': { label: 'D0–D13', type: 'digital', desc: 'Digital I/O pins. D0 (PC7) is USART6_RX, D1 (PC6) is USART6_TX. D3 (PB4) is PWM (TIM3_CH1). D10 (PA8) is SPI2_NSS. D13 (PI1) drives LD1 (user LED).' },
+      'D13': { label: 'D13', type: 'digital', desc: 'Also drives the on-board green LED LD1 (LED_BUILTIN). Connected to PI1 / SPI2_SCK.' },
+      'D14 / D15': { label: 'D14 / D15', type: 'signal', desc: 'I2C bus: D14 (PB9) = SDA, D15 (PB8) = SCL. Primary I2C1 pins.' },
+      'A0–A5': { label: 'A0–A5', type: 'analog', desc: 'Analog input pins (12-bit ADC, 0–4095). A0=PA0 (ADC3_IN0), A1=PF10, A2=PF9, A3=PF8, A4=PF7, A5=PF6.' },
+      '5V': { label: '5V', type: 'power', desc: '5V power rail from USB or VIN.' },
+      '3V3': { label: '3.3V', type: 'power', desc: '3.3V regulated output. All GPIOs are 3.3V logic — do NOT connect 5V signals directly.' },
+      'GND': { label: 'GND', type: 'gnd', desc: 'Common ground.' },
+      'VIN': { label: 'VIN', type: 'power', desc: 'External power input (7-12V via Arduino connector).' },
+      'NRST': { label: 'NRST', type: 'signal', desc: 'MCU reset (active low). Also accessible via B2 reset button.' },
+    },
+    props: { label: 'Board label shown on the canvas.' },
+    wiring: 'Connect outputs to digital pins D0–D15, sensors to analog pins A0–A5. Use 3.3V for powering modules. D14/D15 provide I2C (SDA/SCL). D10–D13 provide SPI (NSS/MOSI/MISO/SCK).',
+    code: `void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);  // D13 = PI1 = LD1
+  Serial.begin(115200);
+}
+void loop() {
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(500);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(500);
+}`,
+    exampleId: 'blink',
+  },
+
   /* ── OUTPUTS ── */
   led: {
     id: 'led',

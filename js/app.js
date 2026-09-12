@@ -452,7 +452,7 @@ class App {
   /* ══════════════════════ BOARD SELECTOR ══════════════════════ */
   _initBoardSelector() {
     const settings = window.StorageManager?.loadSettings?.() || {};
-    const board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano'].includes(settings.board) ? settings.board : 'arduino_uno';
+    const board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco'].includes(settings.board) ? settings.board : 'arduino_uno';
     this.sim.setBoard(board);
     const sel = document.getElementById('board-select');
     if (sel) sel.value = board;
@@ -480,8 +480,8 @@ class App {
   }
 
   _setBoard(board) {
-    const b = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano'].includes(board) ? board : 'arduino_uno';
-    const boardName = b === 'esp32_devkit_v1' ? 'ESP32 DevKit V1' : b === 'arduino_nano' ? 'Arduino Nano' : 'Arduino Uno';
+    const b = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco'].includes(board) ? board : 'arduino_uno';
+    const boardName = b === 'esp32_devkit_v1' ? 'ESP32 DevKit V1' : b === 'arduino_nano' ? 'Arduino Nano' : b === 'stm32f746_disco' ? 'STM32F746G-DISCO' : 'Arduino Uno';
     this.sim.setBoard(b);
     window.StorageManager?.saveSettings?.({ ...(window.StorageManager.loadSettings() || {}), board: b });
 
@@ -490,7 +490,7 @@ class App {
 
     // If the canvas only holds the default starter circuit, reload it for the new board
     const comps = this.canvas?.components || [];
-    const hasOnlyStarterBoard = comps.length === 1 && (comps[0].type === 'arduino_uno' || comps[0].type === 'esp32_devkit_v1' || comps[0].type === 'arduino_nano');
+    const hasOnlyStarterBoard = comps.length === 1 && (comps[0].type === 'arduino_uno' || comps[0].type === 'esp32_devkit_v1' || comps[0].type === 'arduino_nano' || comps[0].type === 'stm32f746_disco');
     if (hasOnlyStarterBoard || comps.length === 0) {
       this._loadExampleCircuit('blink');
       this.showToast(`${boardName} starter circuit loaded`, 'success');
@@ -1839,6 +1839,7 @@ _newProject() {
     grid.innerHTML = '';
     const esp32 = boardType === 'esp32_devkit_v1';
     const nano  = boardType === 'arduino_nano';
+    const stm32 = boardType === 'stm32f746_disco';
     const unoPins = [
       { key: 'pin_0',  label: 'D0' },  { key: 'pin_1',  label: 'D1' },
       { key: 'pin_2',  label: 'D2' },  { key: 'pin_3',  label: 'D3~' },
@@ -1868,6 +1869,17 @@ _newProject() {
     ] : nano ? [
       ...unoPins,
       { key: 'pin_20', label: 'A6 · 20' }, { key: 'pin_21', label: 'A7 · 21' },
+    ] : stm32 ? [
+      { key: 'pin_0',  label: 'D0 · RX' },  { key: 'pin_1',  label: 'D1 · TX' },
+      { key: 'pin_2',  label: 'D2' },  { key: 'pin_3',  label: 'D3~' },
+      { key: 'pin_4',  label: 'D4' },  { key: 'pin_5',  label: 'D5~' },
+      { key: 'pin_6',  label: 'D6~' }, { key: 'pin_7',  label: 'D7' },
+      { key: 'pin_8',  label: 'D8' },  { key: 'pin_9',  label: 'D9~' },
+      { key: 'pin_10', label: 'D10~'},  { key: 'pin_11', label: 'D11~'},
+      { key: 'pin_12', label: 'D12' }, { key: 'pin_13', label: 'D13 · L' },
+      { key: 'pin_14', label: 'A0' },  { key: 'pin_15', label: 'A1' },
+      { key: 'pin_16', label: 'A2' },  { key: 'pin_17', label: 'A3' },
+      { key: 'pin_18', label: 'A4' },  { key: 'pin_19', label: 'A5' },
     ] : unoPins;
     pins.forEach(pin => {
       const row = document.createElement('div');
@@ -2624,7 +2636,8 @@ _newProject() {
     if (lower === 'led_on_13' || lower === 'blink') {
       this.canvas.clearCanvas();
       const boardType = this.sim.board === 'esp32_devkit_v1' ? 'esp32_devkit_v1'
-        : this.sim.board === 'arduino_nano' ? 'arduino_nano' : 'arduino_uno';
+        : this.sim.board === 'arduino_nano' ? 'arduino_nano'
+        : this.sim.board === 'stm32f746_disco' ? 'stm32f746_disco' : 'arduino_uno';
       const board = this.canvas.addComponent(boardType, 200, 100);
       const led   = this.canvas.addComponent('led', 120, 280);
       const res   = this.canvas.addComponent('resistor', 120, 360);

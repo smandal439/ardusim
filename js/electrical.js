@@ -379,8 +379,9 @@ class ElectricalEngine {
     switch (inst.type) {
       case 'arduino_uno':
       case 'arduino_nano':
-      case 'esp32_devkit_v1': {
-        const maxV = inst.type === 'esp32_devkit_v1' ? 3.3 : 5.0;
+      case 'esp32_devkit_v1':
+      case 'stm32f746_disco': {
+        const maxV = (inst.type === 'esp32_devkit_v1' || inst.type === 'stm32f746_disco') ? 3.3 : 5.0;
         const sim = window.ArduinoSim;
 
         // Iterate over all pins on this component that have nets

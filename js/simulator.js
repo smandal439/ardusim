@@ -322,6 +322,16 @@ class ArduinoSimulator {
       js = js.replace(/\bA3\b/g, '35');
       js = js.replace(/\bA4\b/g, '32');
       js = js.replace(/\bA5\b/g, '33');
+    } else if (this.board === 'stm32f746_disco') {
+      // STM32F746G-DISCO: LED on D13 (PI1); analog pins A0-A5 map to
+      // Arduino pin numbers 14-19 (matching the D/A numbering scheme).
+      js = js.replace(/\bLED_BUILTIN\b/g, '13');
+      js = js.replace(/\bA0\b/g, '14');
+      js = js.replace(/\bA1\b/g, '15');
+      js = js.replace(/\bA2\b/g, '16');
+      js = js.replace(/\bA3\b/g, '17');
+      js = js.replace(/\bA4\b/g, '18');
+      js = js.replace(/\bA5\b/g, '19');
     } else if (this.board === 'arduino_nano') {
       // Arduino Nano: ATmega328P, LED on D13, A0-A7 analog pins (A0=14..A7=21)
       js = js.replace(/\bLED_BUILTIN\b/g, '13');
@@ -387,6 +397,8 @@ class ArduinoSimulator {
       ['pulseIn', '_a.pulseIn'],
       ['attachInterrupt', '_a.attachInterrupt'],
       ['detachInterrupt', '_a.detachInterrupt'],
+      ['noInterrupts', '_a.noInterrupts'],
+      ['interrupts', '_a.interrupts'],
       ['randomSeed', '_a.randomSeed'],
       ['random', '_a.random'],
       ['ntpEpoch', '_a.ntpEpoch'],
@@ -555,12 +567,12 @@ class ArduinoSimulator {
                   let arduinoPinNum = null;
                   if (w.from.instId === inst.id && w.from.pinId === cPinId) {
                     const other = canvas.components.find(ci => ci.id === w.to.instId);
-                    if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1')) {
+                    if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1' || other.type === 'stm32f746_disco')) {
                       arduinoPinNum = canvas._pinToNumber(w.to.pinId);
                     }
                   } else if (w.to.instId === inst.id && w.to.pinId === cPinId) {
                     const other = canvas.components.find(ci => ci.id === w.from.instId);
-                    if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1')) {
+                    if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1' || other.type === 'stm32f746_disco')) {
                       arduinoPinNum = canvas._pinToNumber(w.from.pinId);
                     }
                   }
@@ -585,12 +597,12 @@ class ArduinoSimulator {
                 let rPinNum = null;
                 if (w.from.instId === inst.id && w.from.pinId === rPinId) {
                   const other = canvas.components.find(ci => ci.id === w.to.instId);
-                  if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1')) {
+                  if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1' || other.type === 'stm32f746_disco')) {
                     rPinNum = canvas._pinToNumber(w.to.pinId);
                   }
                 } else if (w.to.instId === inst.id && w.to.pinId === rPinId) {
                   const other = canvas.components.find(ci => ci.id === w.from.instId);
-                  if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1')) {
+                  if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1' || other.type === 'stm32f746_disco')) {
                     rPinNum = canvas._pinToNumber(w.from.pinId);
                   }
                 }
@@ -640,6 +652,9 @@ class ArduinoSimulator {
               } else if (board.type === 'esp32_devkit_v1') {
                 const espMap = { 36: 'A0', 39: 'A1', 34: 'A2', 35: 'A3', 32: 'A4', 33: 'A5' };
                 label = espMap[pinNum] || null;
+              } else if (board.type === 'stm32f746_disco') {
+                const stmMap = { 14: 'A0', 15: 'A1', 16: 'A2', 17: 'A3', 18: 'A4', 19: 'A5' };
+                label = stmMap[pinNum] || null;
               }
 
               if (label) {
@@ -858,6 +873,11 @@ class ArduinoSimulator {
         hallRead() { return 0; },
         temperatureRead() { return 25.0; },
         digitalPinToInterrupt(pin) { return Number(pin); },
+        noInterrupts() { /* no-op in simulation */ },
+        interrupts() { /* no-op in simulation */ },
+        /* STM32 ADC/DAC resolution (no-ops in simulation) */
+        analogReadResolution(bits) {},
+        analogWriteResolution(bits) {},
 
       },
 
@@ -865,12 +885,12 @@ class ArduinoSimulator {
       HIGH: 1, LOW: 0,
       INPUT: 'INPUT', OUTPUT: 'OUTPUT', INPUT_PULLUP: 'INPUT_PULLUP',
       RISING: 'RISING', FALLING: 'FALLING', CHANGE: 'CHANGE',
-      A0: this.board === 'esp32_devkit_v1' ? 36 : 14,
-      A1: this.board === 'esp32_devkit_v1' ? 39 : 15,
-      A2: this.board === 'esp32_devkit_v1' ? 34 : 16,
-      A3: this.board === 'esp32_devkit_v1' ? 35 : 17,
-      A4: this.board === 'esp32_devkit_v1' ? 32 : 18,
-      A5: this.board === 'esp32_devkit_v1' ? 33 : 19,
+      A0: this.board === 'esp32_devkit_v1' ? 36 : this.board === 'stm32f746_disco' ? 14 : 14,
+      A1: this.board === 'esp32_devkit_v1' ? 39 : this.board === 'stm32f746_disco' ? 15 : 15,
+      A2: this.board === 'esp32_devkit_v1' ? 34 : this.board === 'stm32f746_disco' ? 16 : 16,
+      A3: this.board === 'esp32_devkit_v1' ? 35 : this.board === 'stm32f746_disco' ? 17 : 17,
+      A4: this.board === 'esp32_devkit_v1' ? 32 : this.board === 'stm32f746_disco' ? 18 : 18,
+      A5: this.board === 'esp32_devkit_v1' ? 33 : this.board === 'stm32f746_disco' ? 19 : 19,
       // Nano-only analog pins (ADC6/ADC7, no digital I/O on real hardware)
       ...(this.board === 'arduino_nano' ? { A6: 20, A7: 21 } : {}),
       LED_BUILTIN: this.board === 'esp32_devkit_v1' ? 2 : 13,
@@ -1514,7 +1534,7 @@ class ArduinoSimulator {
   }
 
   setBoard(board) {
-    this.board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano'].includes(board) ? board : 'arduino_uno';
+    this.board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco'].includes(board) ? board : 'arduino_uno';
   }
 
   /* ── FPS tracking ── */
