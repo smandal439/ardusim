@@ -1,0 +1,125 @@
+{
+  "id": "interrupts_test",
+  "name": "Interrupts test",
+  "icon": "🔧",
+  "desc": "A custom Interrupts test circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789235504205_r24xs",
+        "type": "arduino_uno",
+        "x": 275,
+        "y": 80,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "comp_1789235523035_536p5",
+        "type": "push_button",
+        "x": 585,
+        "y": 85,
+        "rotation": 0,
+        "props": {
+          "pressed": false,
+          "label": "BTN"
+        }
+      },
+      {
+        "id": "comp_1789235531381_p54bv",
+        "type": "led",
+        "x": 530,
+        "y": 135,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "comp_1789235609375_0iydb",
+        "type": "resistor",
+        "x": 535,
+        "y": 220,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1789235564824_2t1fy",
+        "from": {
+          "instId": "comp_1789235504205_r24xs",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "comp_1789235531381_p54bv",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789235589040_j8hmr",
+        "from": {
+          "instId": "comp_1789235504205_r24xs",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "comp_1789235523035_536p5",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789235591955_6bzf3",
+        "from": {
+          "instId": "comp_1789235504205_r24xs",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1789235523035_536p5",
+          "pinId": "p3"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789235616562_lr4nu",
+        "from": {
+          "instId": "comp_1789235609375_0iydb",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1789235531381_p54bv",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789235619225_jslzq",
+        "from": {
+          "instId": "comp_1789235504205_r24xs",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1789235609375_0iydb",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "// Define the physical pins\nconst byte buttonPin = 2; // Pin 2 supports external interrupts on Uno/Nano/Mega\nconst byte ledPin = 13;   // The built-in LED pin\n\n// Any variable modified inside an ISR must be declared as 'volatile'\nvolatile bool ledState = false; \n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  \n  // Use INPUT_PULLUP to keep the pin HIGH until the button pulls it to GND\n  pinMode(buttonPin, INPUT_PULLUP); \n  \n  // Link the pin to our ISR function ('toggleLED') to trigger when the voltage falls\n  attachInterrupt(digitalPinToInterrupt(buttonPin), toggleLED, FALLING);\n}\n\nvoid loop() {\n  // The main loop can perform slow tasks or use delays.\n  // The interrupt will cut through this delay instantly!\n  digitalWrite(ledPin, ledState);\n  delay(5000); \n}\n\n// The Interrupt Service Routine (ISR)\nvoid toggleLED() {\n  ledState = !ledState; // Invert the state of the LED\n}\n"
+}
