@@ -290,8 +290,12 @@ class ArduinoSimulator {
     js = js.replace(/\bfalse\b/g, 'false');
 
     // Strip leftover C storage/qualifier keywords that are invalid JS
-    js = js.replace(/\b(?:static|volatile|extern|register|const)\s+let\b/g, 'let');
-    js = js.replace(/\b(?:static|volatile|extern|register|const)\s+async\b/g, 'async');
+    // Strip C storage/qualifier keywords that may appear before any type
+    js = js.replace(/\b(?:static|volatile|extern|register)\s+(?=async\b)/g, '');
+    js = js.replace(/\b(?:static|volatile|extern|register)\s+(?=\w)/g, '');
+    // Clean const after the above rule may have introduced 'const var' etc.
+    js = js.replace(/\bconst\s+let\b/g, 'let');
+    js = js.replace(/\bconst\s+var\b/g, 'var');
 
     // 7a. Convert C char literals to charCode numbers: '1' → 49, 'A' → 65, '\n' → 10
     // Only single-quoted single characters (not double-quoted strings or multi-char)
