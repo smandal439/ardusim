@@ -236,15 +236,26 @@ class LEDComponent extends Component {
       this.runtimeState.blown = false;
       this.runtimeState._warnedBlown = false;
     } else {
-      // Measure actual path resistance from cathode to ground through the circuit
+      // Measure total path resistance: source→anode + LED internal + cathode→ground
       let pathR = 0;
       const engine = this.engine;
       if (engine) {
+        // Resistance from source to anode (includes series resistor)
+        const srcNet = this.getNet('anode');
+        if (srcNet) {
+          for (const src of srcNet.sources) {
+            if (src.instId) {
+              const r = engine.measureResistance(src.instId, src.pinId, this.id, 'anode');
+              if (r < Infinity) { pathR += r; break; }
+            }
+          }
+        }
+        // Resistance from cathode to ground
         const cathodeNet = this.getNet('cathode');
         if (cathodeNet) {
           for (const gnd of cathodeNet.grounds) {
             const r = engine.measureResistance(this.id, 'cathode', gnd.instId, gnd.pinId);
-            if (r < Infinity) { pathR = r; break; }
+            if (r < Infinity) { pathR += r; break; }
           }
         }
       }

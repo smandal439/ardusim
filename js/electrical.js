@@ -369,7 +369,7 @@ class ElectricalEngine {
     const netOf = (pinId) => this.getNetForPin(inst.id, pinId);
     const addSource = (pinId, type, voltage, rawVal, resistance) => {
       const net = netOf(pinId);
-      if (net) net.sources.push({ type, voltage, rawVal: rawVal ?? 255, resistance: resistance || 0 });
+      if (net) net.sources.push({ type, voltage, rawVal: rawVal ?? 255, resistance: resistance || 0, instId: inst.id, pinId });
     };
     const addGround = (pinId, type, resistance) => {
       const net = netOf(pinId);
