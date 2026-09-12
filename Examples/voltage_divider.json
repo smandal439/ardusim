@@ -1,0 +1,134 @@
+{
+  "id": "voltage_divider",
+  "name": "voltage divider",
+  "icon": "🔧",
+  "desc": "A custom voltage divider circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789219061437_e9m95",
+        "type": "bench_power_supply",
+        "x": 245,
+        "y": 65,
+        "rotation": 0,
+        "props": {
+          "powered": 1,
+          "outputEnabled": 1,
+          "voltageSet": 12,
+          "currentLimit": 2.5,
+          "actualCurrentPos": 0,
+          "actualCurrentNeg": 0,
+          "mode": "CV",
+          "actualCurrent5V": 0
+        }
+      },
+      {
+        "id": "comp_1789219080653_him7h",
+        "type": "resistor",
+        "x": 595,
+        "y": 110,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "comp_1789219082241_1so1v",
+        "type": "resistor",
+        "x": 595,
+        "y": 215,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "comp_1789219091887_6afpq",
+        "type": "multimeter",
+        "x": 630,
+        "y": 80,
+        "rotation": 0,
+        "props": {
+          "mode": "V_DC",
+          "hold": false,
+          "rel": false,
+          "range_auto": true
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1789219102784_y3rzg",
+        "from": {
+          "instId": "comp_1789219061437_e9m95",
+          "pinId": "POS"
+        },
+        "to": {
+          "instId": "comp_1789219080653_him7h",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789219104725_kwpjr",
+        "from": {
+          "instId": "comp_1789219080653_him7h",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "comp_1789219082241_1so1v",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789219107107_prvmg",
+        "from": {
+          "instId": "comp_1789219061437_e9m95",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "comp_1789219082241_1so1v",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789219137332_g6bhp",
+        "from": {
+          "instId": "comp_1789219061437_e9m95",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "comp_1789219091887_6afpq",
+          "pinId": "probe_com"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789219156390_b2nkl",
+        "from": {
+          "instId": "comp_1789219091887_6afpq",
+          "pinId": "probe_red"
+        },
+        "to": {
+          "instId": "comp_1789219082241_1so1v",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "\n void setup() {\n   // Put your setup code here, to run once when the board starts:\n\n}\nvoid loop() {\n  // Put your main code here, to run repeatedly indefinitely:\n\n}"
+}

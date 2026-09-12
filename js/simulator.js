@@ -132,7 +132,7 @@ class ArduinoSimulator {
     const _types = window.CppTypes;
     const _typePat = _types ? _types.getTypePattern() :
       'void|bool|char|int|float|double|long|short|byte|boolean|unsigned|signed|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t|ssize_t';
-    const _fullTypePat = _types ? _types.getFullTypeRegex().source.replace(/^/,'(?:').replace(/$/,'').replace(/\(\?:const\\s\+\)/g,'(?:const\\s+)?').replace(/\(\?:unsigned\\s\+\)/g,'(?:unsigned\\s+)?') : `(?:const\\s+)?(?:unsigned\\s+)?(?:${_typePat})\\s*\\*?\\s*`;
+    const _fullTypePat = _types ? _types.getFullTypeRegex().source.replace(/^/, '(?:').replace(/$/, '').replace(/\(\?:const\\s\+\)/g, '(?:const\\s+)?').replace(/\(\?:unsigned\\s\+\)/g, '(?:unsigned\\s+)?') : `(?:const\\s+)?(?:unsigned\\s+)?(?:${_typePat})\\s*\\*?\\s*`;
 
     js = js.replace(
       new RegExp(`\\b(?:void|int|float|double|long|unsigned|unsigned\\s+long|unsigned\\s+int|unsigned\\s+char|byte|boolean|bool|char\\s*\\*?|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t)\\s+(\\w+)\\s*\\(([^)]*)\\)\\s*\\{`, 'g'),
@@ -246,7 +246,7 @@ class ArduinoSimulator {
     // struct Name varName; → var varName = {};
     js = js.replace(/\bstruct\s+(\w+)\s+(\w+)\s*;/g, 'var $2 = {};');
     // PascalCaseTypeName varName; → var varName = {};  (catches struct/class instances like DataPacket myData;)
-    js = js.replace(/\b([A-Z]\w+)\s+(\w+)\s*;/g, function(match, typeName, varName) {
+    js = js.replace(/\b([A-Z]\w+)\s+(\w+)\s*;/g, function (match, typeName, varName) {
       if (/^(Serial|Wire|SPI|WiFi|WiFiClient|EEPROM|Stream|Print|HardwareSerial|Serial1|Serial2)$/.test(typeName)) return match;
       if (/^(If|Else|For|While|Do|Switch|Case|Return|Function|Var|Let|Const|Import|Export|New|Delete|Try|Catch|Finally|Throw|Async|Await|Yield|Static|Super|With|Debugger|In|Of|This|Void|Typeof|Instanceof|Null|Undefined|True|False|Break|Continue|Default)$/.test(typeName)) return match;
       return 'var ' + varName + ' = {};';
@@ -484,7 +484,7 @@ class ArduinoSimulator {
     js = js.replace(/\bmemcpy\s*\(([^)]+)\)/g, '_a.memcpy($1)');
 
     // StructType varName = { field: value, ... }; → var varName = { field: value, ... };
-    js = js.replace(/\b(\w+)\s+(\w+)\s*=\s*\{/g, function(match, type, name) {
+    js = js.replace(/\b(\w+)\s+(\w+)\s*=\s*\{/g, function (match, type, name) {
       // Skip known keywords, function calls, etc.
       if (/^(var|let|const|function|return|if|else|for|while|do|switch|case|break|continue|new|delete|typeof|instanceof|void|null|undefined|true|false|this|class|extends|import|export|default|try|catch|finally|throw|async|await|yield|static|super|with|debugger|in|of)$/.test(type)) return match;
       return 'var ' + name + ' = {';
@@ -1409,16 +1409,16 @@ class ArduinoSimulator {
     if (inst) {
       const rs = inst.runtimeState || {};
       const pr = inst.props || {};
-      hour   = rs.hour   ?? pr.hour   ?? 12;
+      hour = rs.hour ?? pr.hour ?? 12;
       minute = rs.minute ?? pr.minute ?? 0;
       second = rs.second ?? pr.second ?? 0;
-      day    = rs.day    ?? pr.day    ?? 1;
-      month  = rs.month  ?? pr.month  ?? 1;
-      year   = rs.year   ?? pr.year   ?? 26;
-      temp   = rs.temperature ?? pr.temperature ?? 25.0;
+      day = rs.day ?? pr.day ?? 1;
+      month = rs.month ?? pr.month ?? 1;
+      year = rs.year ?? pr.year ?? 26;
+      temp = rs.temperature ?? pr.temperature ?? 25.0;
     }
     const toBCD = (v) => ((Math.floor(v / 10) & 0x0F) << 4) | (Math.floor(v) % 10);
-    const tempInt  = Math.floor(temp);
+    const tempInt = Math.floor(temp);
     const tempFrac = Math.round((temp - tempInt) * 4); /* 0.25°C steps → 0..3 */
     const regs = {};
     /* Time & date registers (DS3231 datasheet Table 3) */
@@ -1810,33 +1810,29 @@ window.loadExamplesFromFiles = async function () {
     }
   } catch (e) { /* static hosting uses the bundled fallback list */ }
 
-  const files = ['blink', 'esp32_blink', 'fade', 'button', 'potentiometer', 'servo_sweep',
-    'traffic_light', 'counter', 'rainbow_rgb', 'morse', 'temperature', 'ultrasonic',
-    'ultrasonic_distance_pulsein', 'esp32_fade', 'mqtt_esp32', 'lcd_i2c', 'lcd_i2c_display_20x4',
-    'oled_ssd1306',
-    'esp32_server', 'serial_plotter', 'buzzer_melody', 'seg7_counter', 'relay_control',
-    'dc_motor_speed', 'stepper_motor', 'neopixel_color_cycle', 'mpu6050_accel',
-    'ldr_lamp', 'pir_alarm', 'joystick_led', 'esp32_ntp_lcd', 'esp32_ntp_clock_lcd',
-    'ic_nand_test', 'logic_analyzer_test', 'temperature_LCD', 'dmm_current',
-    'dmm_resistance', 'dmm_voltage', 'func_gen_dual', 'func_gen_led', 'remote_control_leds',
-    'remote_servo_control', 'lm35_temperature', 'keypad_interfacing', 'bme280_weather',
-    'bmp280_altitude', 'dso_oscilloscope', 'simplebme280_basic', 'simplebme280_altitude',
-    'simplebme280_altimeter_on_lcd', 'max7219', 'ili9341', 'astable_555', 'neopixel_strip_chase',
-    'ir_obstacle_led','l298n_dc_motor', 'servo_continuous_spin', 'rotary_encoder_counter', 
-    'print_binary_data','dip_switch_binary', 'hc05_bluetooth_led', 'rotary_encoder_servo',
-    'neopixel_8x8_matrix_rainbow_2', 'neopixel_8x8_matrix_rainbow_3',
-     'neopixel_8x8_matrix_rainbow_4',
-    'opamp_741_non_inverting', 'vl53l0x_proximity_sensor', 'esp32_i2s_music_player',
-    'esp32_i2s_local_radio_player', 'lcd', 'read_rfid_card_raw_data', 'lcd_print_remotely',
-    'rfid_inventory_tracker', 'shift_resister_circuit', '7408_test_with_logic_analyzer',
-    'espnow_sender', 'espnow_receiver', 'nano_blink', 'coap_client', 'coap_dip_switch_to_8_led', 
-    'coap_simple_server','ds3231_rtc_clock_sync_with_ntp',
-    'espnow_led_control','two_lcd', 'esp_now_dip_switch_to_8_led', 'dip_switch_and_led_array',
-     'morse_code_using_serial_data','bluetooth_serial_bridge', 'gps_neo_6m_8m_tracker',
-    'zigbee_sender_receiver', 'zigbee_sensor_network', 'zigbee_led_control', 
-    'serial_plotter_sine_and_triangle','flex_sensor_bending_measurement',
-    'continuous_rotation_servo_control_by_pot','ds3231_rtc_clock'];
-    
+  const files = [
+    '7408_test_with_logic_analyzer', 'and_gate', 'astable_555', 'blink', 'bluetooth_serial_bridge', 'bme280_weather',
+    'bmp280_altitude', 'button', 'buzzer_melody', 'coap_client', 'coap_dip_switch_to_8_led', 'coap_simple_server',
+    'continuous_rotation_servo_control_by_pot', 'counter', 'custom_plugin_demo', 'dc_motor_speed', 'dip_switch_and_led_array', 'dip_switch_binary',
+    'dmm_current', 'dmm_resistance', 'dmm_voltage', 'ds3231_rtc_clock', 'ds3231_rtc_clock_sync_with_ntp', 'dso_oscilloscope',
+    'esp32_blink', 'esp32_fade', 'esp32_hub75_matrixpaneli2s_dma', 'esp32_i2s_local_radio_player', 'esp32_i2s_local_radio_player_2', 'esp32_i2s_local_test',
+    'esp32_i2s_music_player', 'esp32_i2s_online_radio_player', 'esp32_ntp_clock_lcd', 'esp32_server', 'esp_now_dip_switch_to_8_led', 'esp_now_sender_with_receiver',
+    'espnow_led_control', 'espnow_receiver', 'espnow_sender', 'fade', 'flex_sensor_bending_measurement', 'func_gen_dual',
+    'func_gen_led', 'gps_neo_6m_8m_tracker', 'hc05_bluetooth_led', 'ic_nand_test', 'ili9341', 'inverting_amplifier',
+    'ir_obstacle_led', 'joystick_led', 'keypad_interfacing', 'l298n_dc_motor', 'lcd', 'lcd_hello_world',
+    'lcd_i2c', 'lcd_i2c_display_20x4', 'lcd_print_remotely', 'ldr_lamp', 'led_array_blink_pattern', 'lm35_temperature',
+    'lm35_temperature_sensor', 'logic_analyzer_test', 'max7219', 'morse', 'morse_code_using_serial_data', 'mpu6050_accel',
+    'mpu6050_accelerometer_2', 'mqtt_esp32', 'multi_colour_led_blink', 'nano_blink', 'neopixel_8x8_matrix_rainbow_2', 'neopixel_8x8_matrix_rainbow_3',
+    'neopixel_8x8_matrix_rainbow_4', 'neopixel_color_cycle', 'neopixel_strip_chase', 'neopixel_strip_color_pattern', 'not_gate_test', 'oled_ssd1306',
+    'opamp_741_non_inverting', 'or_gate', 'pir_alarm', 'plugin_tutorial', 'potentiometer', 'print_binary_data',
+    'rainbow_rgb', 'read_rfid_card_raw_data', 'relay_control', 'remote_control_leds', 'remote_servo_control', 'rfid_inventory_tracker',
+    'rotary_encoder_counter', 'rotary_encoder_servo', 'seg7_counter', 'serial_plotter', 'serial_plotter_sine_and_triangle', 'servo_continuous_spin',
+    'servo_sweep', 'shift_resister_circuit', 'simplebme280_altimeter_on_lcd', 'simplebme280_altitude', 'simplebme280_basic', 'stepper_motor',
+    'temperature', 'traffic_light', 'two_lcd', 'ultrasonic', 'ultrasonic_distance_pulsein', 'vl53l0x_proximity_sensor',
+    'voltage_divider', 'weather_station_multi', 'weather_station_simple', 'weather_station_tft', 'zigbee_led_control',
+    'zigbee_sender_receiver', 'zigbee_sensor_network'
+  ];
+
   const sketches = [];
   const cacheBust = '?v=' + Date.now();
   for (const name of files) {
