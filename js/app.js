@@ -178,7 +178,7 @@ class App {
     verifyBtn?.addEventListener('click', () => this.verify());
     const compileHexBtn = get('btn-compile-hex');
     compileHexBtn?.addEventListener('click', () => this.compileReal());
-    // Logo click â†’ go to home page
+    // Logo click → go to home page
     document.querySelector('.header-logo')?.addEventListener('click', () => {
       window.location.href = '/';
     });
@@ -366,11 +366,6 @@ class App {
     }
 
     // Global keyboard shortcuts
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'r') {
-        e.preventDefault();
-        this.compileReal();
-        return;
-      }
     document.addEventListener('keydown', (e) => {
       // Don't intercept when user is typing in an input or code editor
       const tag = document.activeElement?.tagName;
@@ -382,6 +377,11 @@ class App {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') {
         e.preventDefault();
         this.downloadProject();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        this.compileReal();
         return;
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
@@ -2448,7 +2448,84 @@ _newProject() {
     return false;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• OSCILLOSCOPE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ══════════════════════ SERVER-SIDE COMPILE ══════════════════════ */
+  async compileReal() {
+    if (!this.editor) return;
+    const code = this.editor.getCode();
+    this._syncBoardFromCanvas();
+    const boardType = this.sim.board || 'arduino_uno';
+
+    this._updateCompileStatus('Compiling (.hex)...');
+    this._updateStatus('Compiling sketch to firmware');
+    this.serial?.log('Compiling sketch to .hex firmware (server-side avr-gcc)...', 'system');
+    this.output?.log('Compiling sketch to .hex firmware (server-side avr-gcc)...', 'system');
+    if (this.editor) this.editor.clearErrors();
+
+    try {
+      const result = await window.ArduSimApi.compileSketch(code, boardType);
+
+      if (result.ok) {
+        this._updateCompileStatus('Compiled ✓');
+        this._updateStatus('Compilation succeeded');
+        let sizeMsg = '';
+        if (result.size) {
+          sizeMsg = ` — Flash: ${result.size.flash} bytes (${result.size.flashPercent}%), RAM: ${result.size.ram} bytes (${result.size.ramPercent}%)`;
+          this.output?.log(`Flash: ${result.size.flash} bytes (${result.size.flashPercent}%)`, 'info');
+          this.output?.log(`RAM: ${result.size.ram} bytes (${result.size.ramPercent}%)`, 'info');
+        }
+        this.output?.log(`✓ Compiled successfully${sizeMsg} (${result.duration}ms)`, 'success');
+        this.showToast(`✓ Compiled to .hex firmware!${sizeMsg}`, 'success');
+
+        this._lastCompiledHex = result.hex;
+        this._lastCompiledBoard = boardType;
+
+        this._showHexDownload();
+      } else {
+        this._updateCompileStatus(`Error: ${result.error}`);
+        this._updateStatus('Compilation failed');
+        this.output?.log(`Error: ${result.error}`, 'error');
+        this.showToast(result.error || 'Compilation failed', 'error');
+        if (this.editor && result.errors && result.errors.length > 0) {
+          const firstErr = result.errors[0];
+          if (firstErr.line > 0) {
+            this.editor.showError(firstErr.line, firstErr.message);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[ArduSim] Compile error:', err);
+      this._updateCompileStatus('Compilation failed');
+      this._updateStatus('Compilation failed');
+      const msg = err && err.message ? err.message : String(err);
+      this.output?.log(`Compilation error: ${msg}`, 'error');
+      this.showToast('Compilation failed: ' + msg, 'error');
+    }
+  }
+
+  _showHexDownload() {
+    if (!this._lastCompiledHex) return;
+    const btn = document.getElementById('btn-download-hex');
+    if (btn) {
+      btn.style.display = '';
+      btn.onclick = () => this._downloadHex();
+    }
+  }
+
+  _downloadHex() {
+    if (!this._lastCompiledHex) return;
+    const blob = new Blob([this._lastCompiledHex], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (this._projectName || 'sketch').replace(/[^a-zA-Z0-9_-]/g, '_') + '.hex';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    this.showToast('Downloaded .hex firmware file', 'success');
+  }
+
+  /* ══════════════════════ OSCILLOSCOPE ══════════════════════ */
   _initOscilloscope() {
     const oscCanvas = document.getElementById('oscilloscope-canvas');
     if (!oscCanvas || !window.OscilloscopeClass) return;

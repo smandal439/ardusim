@@ -315,26 +315,24 @@ const server = http.createServer(async (req, res) => {
       const body = await readJsonBody(req);
       const code = typeof body.code === 'string' ? body.code : '';
       const boardType = typeof body.board === 'string' ? body.board : 'arduino_uno';
-      if (!code.trim()) {
-        return sendJson(res, 400, { ok: false, error: 'No code provided' });
-      }
+      if (!code.trim()) return sendJson(res, 400, { error: 'No code provided' });
+      if (code.length > 100 * 1024) return sendJson(res, 400, { error: 'Code too large (max 100KB)' });
       const validBoards = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1'];
       if (!validBoards.includes(boardType)) {
-        return sendJson(res, 400, { ok: false, error: 'Invalid board type. Valid: ' + validBoards.join(', ') });
+        return sendJson(res, 400, { error: 'Invalid board type. Valid: ' + validBoards.join(', ') });
       }
       const result = await compileSketch(code, boardType);
       return sendJson(res, result.ok ? 200 : 400, result);
     } catch (e) {
-      return sendJson(res, 500, { ok: false, error: 'Compilation error: ' + (e.message || String(e)) });
+      return sendJson(res, 500, { error: 'Compilation failed: ' + (e.message || String(e)) });
     }
   }
 
   // Check compiler toolchain availability
   if (pathname === '/api/compiler-status' && method === 'GET') {
     const status = checkToolchains();
-    return sendJson(res, 200, { toolchains: status });
+    return sendJson(res, 200, status);
   }
-
 
   // Unknown /api route
   if (pathname.startsWith('/api/')) {

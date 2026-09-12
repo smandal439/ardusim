@@ -50,7 +50,6 @@ const ArduSimApi = {
   deleteProject(id){ return this._req('DELETE', '/projects/' + encodeURIComponent(id)); },
   listExamples()   { return this._req('GET', '/examples'); },
 
-  // Server-side Arduino compilation
   async compileSketch(code, board) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 35000);
@@ -59,7 +58,7 @@ const ArduSimApi = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, board }),
-        signal: ctrl.signal,
+        signal: ctrl.signal
       });
       clearTimeout(timer);
       return await res.json();
@@ -69,9 +68,17 @@ const ArduSimApi = {
     }
   },
 
-  // Check compiler toolchain availability
   async getCompilerStatus() {
-    return this._req('GET', '/compiler-status');
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3000);
+    try {
+      const res = await fetch(this.base + '/compiler-status', { signal: ctrl.signal });
+      clearTimeout(timer);
+      return await res.json();
+    } catch (e) {
+      clearTimeout(timer);
+      return { toolchains: {} };
+    }
   },
 };
 

@@ -3376,7 +3376,6 @@ canvas {
   outline: none;
 }
 
-
 /* ══════════════════════ COMPILE BUTTON ══════════════════════ */
 .btn-compile {
   position: relative;
@@ -3404,8 +3403,6 @@ canvas {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
-
-/* Download hex button */
 .btn-download-hex {
   display: none;
   margin-left: 8px;
