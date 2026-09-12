@@ -67,6 +67,7 @@ class ElectricalEngine {
     this.nets.clear();
     this.pinToNet.clear();
     this.groundNet = null;
+    this._adjacency = null;
 
     // 1. Union-Find to group connected pins into nets
     const parent = new Map();
@@ -352,6 +353,9 @@ class ElectricalEngine {
       if (maxDelta < 0.0001) break; // converged
     }
 
+    // Store adjacency for getSourceAtPin/hasGroundAtPin traversal
+    this._adjacency = adjacency;
+
     // 5. Calculate equivalent resistance to ground for each net
     for (const [, net] of this.nets) {
       net.resistanceToGround = this._calcResistanceToGround(net);
@@ -537,20 +541,58 @@ class ElectricalEngine {
 
   /**
    * Get the best (highest) voltage source connected to a pin.
+   * Traces through the adjacency (resistive edges) to find sources on
+   * connected nets — needed because resistors are no longer shorted.
    * @returns {{voltage:number, rawVal:number, type:string, resistance:number}|null}
    */
   getSourceAtPin(instId, pinId) {
     const net = this.getNetForPin(instId, pinId);
-    if (!net || net.sources.length === 0) return null;
-    return net.sources.sort((a, b) => b.voltage - a.voltage)[0];
+    if (!net) return null;
+    if (net.sources.length > 0) {
+      return net.sources.sort((a, b) => b.voltage - a.voltage)[0];
+    }
+    if (!this._adjacency || this._adjacency.size === 0) return null;
+    const visited = new Set();
+    const queue = [net];
+    visited.add(net.id);
+    while (queue.length > 0) {
+      const cur = queue.shift();
+      for (const { net: neighbor } of (this._adjacency.get(cur.id) || [])) {
+        if (visited.has(neighbor.id)) continue;
+        visited.add(neighbor.id);
+        if (neighbor.sources.length > 0) {
+          const best = neighbor.sources.sort((a, b) => b.voltage - a.voltage)[0];
+          return { ...best, resistance: best.resistance };
+        }
+        queue.push(neighbor);
+      }
+    }
+    return null;
   }
 
   /**
    * Check if a pin has a ground path.
+   * Traces through the adjacency (resistive edges) to find grounds on
+   * connected nets.
    */
   hasGroundAtPin(instId, pinId) {
     const net = this.getNetForPin(instId, pinId);
-    return net ? net.grounds.length > 0 : false;
+    if (!net) return false;
+    if (net.grounds.length > 0) return true;
+    if (!this._adjacency || this._adjacency.size === 0) return false;
+    const visited = new Set();
+    const queue = [net];
+    visited.add(net.id);
+    while (queue.length > 0) {
+      const cur = queue.shift();
+      for (const { net: neighbor } of (this._adjacency.get(cur.id) || [])) {
+        if (visited.has(neighbor.id)) continue;
+        visited.add(neighbor.id);
+        if (neighbor.grounds.length > 0) return true;
+        queue.push(neighbor);
+      }
+    }
+    return false;
   }
 
   /**
