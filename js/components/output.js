@@ -236,27 +236,66 @@ class LEDComponent extends Component {
       this.runtimeState.blown = false;
       this.runtimeState._warnedBlown = false;
     } else {
-      // Measure total path resistance: source→anode + LED internal + cathode→ground
+      // Measure total path resistance from source to ground through the LED
       let pathR = 0;
       const engine = this.engine;
       if (engine) {
-        // Resistance from source to anode (includes series resistor)
+        // Find the source pin that feeds the anode
+        let srcInstId = null, srcPinId = null;
         const srcNet = this.getNet('anode');
         if (srcNet) {
           for (const src of srcNet.sources) {
-            if (src.instId) {
-              const r = engine.measureResistance(src.instId, src.pinId, this.id, 'anode');
-              if (r < Infinity) { pathR += r; break; }
-            }
+            if (src.instId) { srcInstId = src.instId; srcPinId = src.pinId; break; }
           }
         }
-        // Resistance from cathode to ground
+        // Find a ground pin reachable from the cathode
+        let gndInstId = null, gndPinId = null;
         const cathodeNet = this.getNet('cathode');
-        if (cathodeNet) {
-          for (const gnd of cathodeNet.grounds) {
-            const r = engine.measureResistance(this.id, 'cathode', gnd.instId, gnd.pinId);
-            if (r < Infinity) { pathR += r; break; }
+        if (cathodeNet && cathodeNet.grounds.length > 0) {
+          gndInstId = cathodeNet.grounds[0].instId;
+          gndPinId = cathodeNet.grounds[0].pinId;
+        } else if (engine.components) {
+          // Ground is not on cathode net — search all components for ground pins
+          for (const comp of engine.components) {
+            const t = comp.type;
+            if (t === 'arduino_uno' || t === 'arduino_nano' || t === 'esp32_devkit_v1') {
+              for (const pid of ['GND1', 'GND2', 'GND_D', 'GND']) {
+                if (engine.measureResistance(this.id, 'cathode', comp.id, pid) < Infinity) {
+                  gndInstId = comp.id; gndPinId = pid; break;
+                }
+              }
+            } else if (t === 'power_gnd') {
+              if (engine.measureResistance(this.id, 'cathode', comp.id, 'gnd') < Infinity) {
+                gndInstId = comp.id; gndPinId = 'gnd';
+              }
+            } else if (t === 'battery') {
+              if (engine.measureResistance(this.id, 'cathode', comp.id, 'neg') < Infinity) {
+                gndInstId = comp.id; gndPinId = 'neg';
+              }
+            } else if (t === 'mb102_power') {
+              for (const pid of ['gnd_t', 'gnd_b', 'aux_gnd']) {
+                if (engine.measureResistance(this.id, 'cathode', comp.id, pid) < Infinity) {
+                  gndInstId = comp.id; gndPinId = pid; break;
+                }
+              }
+            } else if (t === 'bench_power_supply') {
+              for (const pid of ['GND', 'GND_5V']) {
+                if (engine.measureResistance(this.id, 'cathode', comp.id, pid) < Infinity) {
+                  gndInstId = comp.id; gndPinId = pid; break;
+                }
+              }
+            }
+            if (gndInstId) break;
           }
+        }
+        // Measure resistance: source→anode + cathode→ground
+        if (srcInstId && srcPinId) {
+          const r1 = engine.measureResistance(srcInstId, srcPinId, this.id, 'anode');
+          if (r1 < Infinity) pathR += r1;
+        }
+        if (gndInstId && gndPinId) {
+          const r2 = engine.measureResistance(this.id, 'cathode', gndInstId, gndPinId);
+          if (r2 < Infinity) pathR += r2;
         }
       }
       const rTotal = Math.max(10, pathR + 25);
