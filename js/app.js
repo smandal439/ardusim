@@ -568,9 +568,9 @@ class App {
 
       // LCD display events (16×2 parallel and I2C/PCF8574 versions)
       for (const inst of insts) {
-        if (inst.type !== 'lcd1602' && inst.type !== 'lcd1602_i2c') continue;
+        if (inst.type !== 'lcd1602' && inst.type !== 'lcd1602_i2c' && inst.type !== 'lcd2004_i2c') continue;
 
-        if (inst.type === 'lcd1602_i2c') {
+        if (inst.type === 'lcd1602_i2c' || inst.type === 'lcd2004_i2c') {
           const sdaPin = this.canvas._getConnectedPinNum(inst.id, 'sda');
           const sclPin = this.canvas._getConnectedPinNum(inst.id, 'scl');
           if (sdaPin === null || sclPin === null) continue;
@@ -817,10 +817,10 @@ void loop() {
 
       // LCD display events (16×2 parallel and I2C/PCF8574 versions)
       for (const inst of insts) {
-        if (inst.type !== 'lcd1602' && inst.type !== 'lcd1602_i2c') continue;
+        if (inst.type !== 'lcd1602' && inst.type !== 'lcd1602_i2c' && inst.type !== 'lcd2004_i2c') continue;
 
         // I2C LCD: skip if SDA or SCL not wired to a board
-        if (inst.type === 'lcd1602_i2c') {
+        if (inst.type === 'lcd1602_i2c' || inst.type === 'lcd2004_i2c') {
           const sdaPin = this.canvas._getConnectedPinNum(inst.id, 'sda');
           const sclPin = this.canvas._getConnectedPinNum(inst.id, 'scl');
           if (sdaPin === null || sclPin === null) continue;

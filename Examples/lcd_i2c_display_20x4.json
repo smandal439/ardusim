@@ -1,0 +1,91 @@
+{
+  "id": "lcd_i2c_display_20x4",
+  "name": "LCD I2C Display 20x4",
+  "icon": "🔧",
+  "desc": "This example demonstrates how to use a 20x4 LCD display with an I2C backpack (PCF8574) to display text and a counter. The wiring is straightforward: connect the LCD's VCC to 5V, GND to GND, SDA to A4, and SCL to A5 on the Arduino Uno. The code initializes the LCD, displays a welcome message, and continuously updates a counter on the second line of the display.",
+  "tags": [
+    
+    "lcd",
+    "i2c",
+    "display"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "comp_1789210695246_l6kq3",
+        "type": "lcd2004_i2c",
+        "x": 450,
+        "y": 105,
+        "rotation": 0,
+        "props": {
+          "address": "0x27"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1789210699796_5ypev",
+        "from": {
+          "instId": "comp_1789210695246_l6kq3",
+          "pinId": "scl"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "SCL"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789210701528_lex84",
+        "from": {
+          "instId": "b1",
+          "pinId": "SDA"
+        },
+        "to": {
+          "instId": "comp_1789210695246_l6kq3",
+          "pinId": "sda"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789210704052_zd6d5",
+        "from": {
+          "instId": "comp_1789210695246_l6kq3",
+          "pinId": "vcc"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "5V2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789210705614_56oam",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND3"
+        },
+        "to": {
+          "instId": "comp_1789210695246_l6kq3",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n * LCD I2C — display text on a 16x2 LCD with a PCF8574 I2C backpack.\n * Wiring: LCD VCC → 5V, GND → GND, SDA → A4, SCL → A5.\n */\n\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nLiquidCrystal_I2C lcd(0x27, 20, 4);\n\nint counter = 0;\n\nvoid setup() {\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"Hello, ArduSim!\");\n  lcd.setCursor(0, 1);\n  lcd.print(\"LCD I2C : 0x27\");\n}\n\nvoid loop() {\n  delay(500);\n  counter++;\n  lcd.setCursor(0, 1);\n  lcd.print(\"Count: \");\n  lcd.print(counter);\n  lcd.print(\"        \");\n}"
+}
