@@ -1601,16 +1601,6 @@ void loop() {
     code: '#include <Adafruit_NeoPixel.h>\nAdafruit_NeoPixel strip(1, 6, NEO_GRB + NEO_KHZ800);\nvoid setup() { strip.begin(); strip.show(); }\nvoid loop() {\n  strip.setPixelColor(0, 255, 0, 0);\n  strip.show(); delay(500);\n  strip.setPixelColor(0, 0, 255, 0);\n  strip.show(); delay(500);\n}',
   },
 
-  neopixel_ring: {
-    id: 'neopixel_ring', name: 'NeoPixel Ring (12 LED)', icon: '\u{1f9ff}', category: 'Output',
-    longDesc: 'A circular ring of 12 WS2812B addressable RGB LEDs. All pixels are daisy-chained on a single data wire. Includes DIN for input and DOUT for cascading to additional rings or strips.',
-    use: 'Clock displays, colour wheels, status rings, wearable projects, ambient lighting.',
-    pins: { VCC: { label: 'VCC', type: 'power', desc: '5 V power supply.' }, DIN: { label: 'DIN', type: 'digital', desc: 'Data input from Arduino.' }, DOUT: { label: 'DOut', type: 'digital', desc: 'Data output for chaining.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' } },
-    props: { numPixels: 'Number of pixels (default 12).', r: 'Red channel (0\u2013255).', g: 'Green channel (0\u2013255).', b: 'Blue channel (0\u2013255).', brightness: 'Global brightness (0\u2013255).' },
-    wiring: 'VCC\u21925V, GND\u2192GND, DIN\u2192digital pin (e.g. D6).',
-    code: '#include <Adafruit_NeoPixel.h>\nAdafruit_NeoPixel ring(12, 6, NEO_GRB + NEO_KHZ800);\nvoid setup() { ring.begin(); ring.show(); }\nvoid loop() {\n  for (int i = 0; i < 12; i++) {\n    ring.clear();\n    ring.setPixelColor(i, ring.Color(255, 0, 0));\n    ring.show(); delay(100);\n  }\n}',
-  },
-
   neopixel_8x8_matrix: {
     id: 'neopixel_8x8_matrix', name: '8x8 NeoPixel Matrix', icon: '\u{1f533}', category: 'Output',
     longDesc: 'An 8\u00d78 (64-pixel) WS2812B addressable RGB LED matrix panel. Single-wire serial control with cascaded DOUT line. 24-bit colour depth per pixel with adjustable global brightness.',
@@ -1772,21 +1762,6 @@ void loop() {
   },
 
   /* ── DIGITAL ICs ── */
-  ic_555: {
-    id: 'ic_555', name: '555 Timer IC', icon: '\u2b97', category: 'Digital ICs',
-    longDesc: 'NE555 precision timer IC. Operates in astable (oscillator), monostable (one-shot), or bistable (flip-flop) mode. Automatically detects connected R1, R2, and C values to calculate frequency.',
-    use: 'Pulse generation, PWM, timing delays, LED flashers, tone generators, clock sources.',
-    pins: {
-      GND: { label: '1', type: 'gnd', desc: 'Pin 1 \u2014 Ground.' }, TRIG: { label: '2', type: 'digital', desc: 'Pin 2 \u2014 Trigger (starts timing cycle when < VCC/3).' },
-      OUT: { label: '3', type: 'digital', desc: 'Pin 3 \u2014 Output (HIGH during timing).' }, RST: { label: '4', type: 'digital', desc: 'Pin 4 \u2014 Reset (active LOW).' },
-      VCC: { label: '8', type: 'power', desc: 'Pin 8 \u2014 Supply voltage (4.5\u201316 V).' }, DIS: { label: '7', type: 'digital', desc: 'Pin 7 \u2014 Discharge (discharges timing capacitor).' },
-      THR: { label: '6', type: 'digital', desc: 'Pin 6 \u2014 Threshold (> 2\u00d7VCC/3 resets output).' }, CV: { label: '5', type: 'signal', desc: 'Pin 5 \u2014 Control voltage (optional bypass capacitor).' },
-    },
-    props: { mode: 'Operating mode: astable, monostable, bistable.', frequency: 'Oscillation frequency in Hz (astable mode).', dutyCycle: 'Duty cycle percentage (astable mode).' },
-    wiring: 'VCC\u21925\u201315V, GND\u2192GND. R1, R2, C connect externally to set timing.',
-    code: '// 555 timer is a standalone IC — no Arduino code needed.\n// It generates pulses autonomously based on R1, R2, C values.',
-  },
-
   ic_74hc00: {
     id: 'ic_74hc00', name: '74HC00 Quad NAND', icon: '\u2b97', category: 'Digital ICs',
     longDesc: 'Quad 2-input NAND gate. Each gate outputs LOW only when both inputs are HIGH. Four independent gates in a single 14-pin DIP package.',
