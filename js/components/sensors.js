@@ -4053,3 +4053,366 @@ defComp({
     ctx.restore();
   }
 });
+
+/* ═══════════════════════ HX711 Load Cell Amplifier ═══════════════════════ */
+
+class HX711Component extends Component {
+  getPins() {
+    return [
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 86, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 24, y: 86, side: 'bottom' },
+      { id: 'DT', label: 'DT', type: PIN_TYPE.DIGITAL, x: 44, y: 86, side: 'bottom' },
+      { id: 'SCK', label: 'SCK', type: PIN_TYPE.DIGITAL, x: 58, y: 86, side: 'bottom' },
+    ];
+  }
+
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const rs = this.runtimeState;
+    if (!rs._initialized) {
+      rs._initialized = true;
+      rs._sckPrev = 0;
+      rs._bitCount = 0;
+      rs._rawValue = 0;
+      rs._dtReady = false;
+      rs._readingDone = true;
+      rs._lastReadTime = 0;
+    }
+    const weight = this.props.weight ?? 0;
+    const tareOffset = this.props.tareOffset ?? 0;
+    const netWeight = Math.max(0, weight + tareOffset);
+    rs._netWeight = netWeight;
+  }
+
+  step(inst, sim) {
+    if (!sim || !sim.isRunning) return;
+    const canvas = window.CircuitCanvas;
+    if (!canvas || !canvas._getConnectedPinNum) return;
+
+    const sckPin = this.getConnectedPinNum('SCK');
+    const dtPin = this.getConnectedPinNum('DT');
+    if (sckPin === null || dtPin === null) return;
+
+    const sckKey = `pin_${sckPin}`;
+    const dtKey = `pin_${dtPin}`;
+
+    const rs = inst.runtimeState;
+    if (!rs._initialized) {
+      rs._initialized = true;
+      rs._sckPrev = 0;
+      rs._bitCount = 0;
+      rs._rawValue = 0;
+      rs._dtReady = false;
+      rs._readingDone = true;
+      rs._lastReadTime = 0;
+    }
+
+    const sckNow = !!sim.pinStates[sckKey];
+    const sckPrev = rs._sckPrev;
+
+    const netWeight = rs._netWeight ?? 0;
+    const rawValue = Math.round(netWeight) & 0xFFFFFF; // 24-bit unsigned
+
+    if (rs._readingDone) {
+      // Wait ~100µs after last read before new data is ready
+      const now = sim.simTime || 0;
+      if (now - rs._lastReadTime > 0.1) {
+        rs._readingDone = false;
+        rs._bitCount = 0;
+        rs._rawValue = rawValue;
+        rs._dtReady = true;
+        sim.pinStates[dtKey] = 0; // DT LOW = data ready
+        sim._emitPinChange(dtKey, 0);
+      }
+    }
+
+    if (!rs._readingDone && !sckPrev && sckNow) {
+      // Rising edge on SCK — shift out next bit
+      const bitIndex = rs._bitCount;
+      if (bitIndex < 24) {
+        const bit = (rs._rawValue >> (23 - bitIndex)) & 1;
+        sim.pinStates[dtKey] = bit;
+        sim._emitPinChange(dtKey, bit);
+        rs._bitCount++;
+      } else if (bitIndex === 24) {
+        // 25th clock pulse — done reading, set gain for next cycle
+        rs._readingDone = true;
+        rs._dtReady = false;
+        rs._lastReadTime = sim.simTime || 0;
+        sim.pinStates[dtKey] = 1; // DT HIGH = not ready
+        sim._emitPinChange(dtKey, 1);
+        rs._bitCount = 0;
+      }
+    }
+
+    rs._sckPrev = sckNow;
+  }
+}
+
+registerComponent('hx711', HX711Component);
+
+defComp({
+  id: 'hx711',
+  name: 'HX711 Load Cell Amplifier',
+  category: 'Sensors',
+  icon: '⚖️',
+  desc: 'HX711 24-bit ADC amplifier for load cells — bit-bang serial protocol (DT/SCK). Compatible with standard Arduino HX711 libraries',
+  width: 72,
+  height: 86,
+  defaultProps: { weight: 0, tareOffset: 0 },
+  interactive: [
+    { field: 'weight', label: 'Weight', min: 0, max: 50000, step: 1, unit: ' g' },
+    { field: 'tareOffset', label: 'Tare', min: -50000, max: 50000, step: 1, unit: ' g' },
+  ],
+  pins: [
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 86, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 24, y: 86, side: 'bottom' },
+    { id: 'DT', label: 'DT', type: PIN_TYPE.DIGITAL, x: 44, y: 86, side: 'bottom' },
+    { id: 'SCK', label: 'SCK', type: PIN_TYPE.DIGITAL, x: 58, y: 86, side: 'bottom' },
+  ],
+  step(inst, sim) {
+    if (!sim || !sim.isRunning) return;
+    const canvas = window.CircuitCanvas;
+    if (!canvas || !canvas._getConnectedPinNum) return;
+
+    const sckPin = canvas._getConnectedPinNum(inst.id, 'SCK');
+    const dtPin = canvas._getConnectedPinNum(inst.id, 'DT');
+    if (sckPin === null || dtPin === null) return;
+
+    const sckKey = `pin_${sckPin}`;
+    const dtKey = `pin_${dtPin}`;
+
+    const rs = inst.runtimeState;
+    if (!rs._initialized) {
+      rs._initialized = true;
+      rs._sckPrev = 0;
+      rs._bitCount = 0;
+      rs._rawValue = 0;
+      rs._dtReady = false;
+      rs._readingDone = true;
+      rs._lastReadTime = 0;
+    }
+
+    const sckNow = !!sim.pinStates[sckKey];
+    const sckPrev = rs._sckPrev;
+
+    const weight = inst.props.weight ?? 0;
+    const tareOffset = inst.props.tareOffset ?? 0;
+    const netWeight = Math.max(0, weight + tareOffset);
+    rs._netWeight = netWeight;
+    const rawValue = Math.round(netWeight) & 0xFFFFFF;
+
+    if (rs._readingDone) {
+      const now = sim.simTime || 0;
+      if (now - rs._lastReadTime > 0.1) {
+        rs._readingDone = false;
+        rs._bitCount = 0;
+        rs._rawValue = rawValue;
+        rs._dtReady = true;
+        sim.pinStates[dtKey] = 0;
+        sim._emitPinChange(dtKey, 0);
+      }
+    }
+
+    if (!rs._readingDone && !sckPrev && sckNow) {
+      const bitIndex = rs._bitCount;
+      if (bitIndex < 24) {
+        const bit = (rs._rawValue >> (23 - bitIndex)) & 1;
+        sim.pinStates[dtKey] = bit;
+        sim._emitPinChange(dtKey, bit);
+        rs._bitCount++;
+      } else if (bitIndex === 24) {
+        rs._readingDone = true;
+        rs._dtReady = false;
+        rs._lastReadTime = sim.simTime || 0;
+        sim.pinStates[dtKey] = 1;
+        sim._emitPinChange(dtKey, 1);
+        rs._bitCount = 0;
+      }
+    }
+
+    rs._sckPrev = sckNow;
+  },
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const weight = inst.props.weight ?? 0;
+    const tareOffset = inst.props.tareOffset ?? 0;
+    const netWeight = Math.max(0, weight + tareOffset);
+    const isRunning = !!(sim && sim.isRunning);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const drawRR = (rx, ry, rw, rh, rad) => {
+      ctx.beginPath();
+      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+
+    // 1. Dark Green PCB
+    const pcbGrad = ctx.createLinearGradient(0, 0, 72, 70);
+    pcbGrad.addColorStop(0, '#0a3d0a');
+    pcbGrad.addColorStop(0.5, '#0d5a0d');
+    pcbGrad.addColorStop(1, '#082e08');
+    ctx.fillStyle = pcbGrad;
+    drawRR(0, 0, 72, 70, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#1a6b1a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // PCB inner border
+    ctx.strokeStyle = 'rgba(100, 200, 100, 0.12)';
+    ctx.lineWidth = 0.5;
+    drawRR(2, 2, 68, 66, 3);
+    ctx.stroke();
+
+    // Corner mounting holes
+    [[5, 5], [67, 5]].forEach(([hx, hy]) => {
+      ctx.fillStyle = '#041a04';
+      ctx.beginPath(); ctx.arc(hx, hy, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#c5a059';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    });
+
+    // 2. HX711 Chip (SOP-16)
+    const chipX = 18, chipY = 12, chipW = 36, chipH = 22;
+    ctx.fillStyle = '#1a1a1a';
+    drawRR(chipX, chipY, chipW, chipH, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // Chip orientation dot
+    ctx.fillStyle = '#555';
+    ctx.beginPath(); ctx.arc(chipX + 4, chipY + 4, 1.5, 0, Math.PI * 2); ctx.fill();
+
+    // Chip label
+    ctx.fillStyle = '#e0e0e0';
+    ctx.font = 'bold 5px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('HX711', chipX + chipW / 2, chipY + chipH / 2 + 2);
+
+    // Chip pin pads (left and right)
+    for (let i = 0; i < 8; i++) {
+      // Left pads
+      ctx.fillStyle = '#c0a040';
+      ctx.fillRect(chipX - 3, chipY + 3 + i * 2.5, 3, 1.5);
+      // Right pads
+      ctx.fillRect(chipX + chipW, chipY + 3 + i * 2.5, 3, 1.5);
+    }
+
+    // 3. Screw terminal block (load cell connector)
+    const termX = 52, termY = 14;
+    ctx.fillStyle = '#1565c0';
+    drawRR(termX, termY, 16, 18, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#0d47a1';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // Terminal screws
+    ['E+', 'E-', 'A-', 'A+'].forEach((label, i) => {
+      const sy = termY + 3 + i * 4;
+      ctx.fillStyle = '#888';
+      ctx.beginPath(); ctx.arc(termX + 8, sy + 1, 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '3px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(label, termX + 5, sy + 2.5);
+    });
+
+    // 4. Passive components
+    // SMD capacitors
+    [[8, 38], [14, 38]].forEach(([cx, cy]) => {
+      ctx.fillStyle = '#5d4037';
+      ctx.fillRect(cx, cy, 4, 2.5);
+      ctx.strokeStyle = '#8d6e63';
+      ctx.lineWidth = 0.3;
+      ctx.strokeRect(cx, cy, 4, 2.5);
+    });
+
+    // SMD resistors
+    [[24, 38], [30, 38]].forEach(([rx, ry]) => {
+      ctx.fillStyle = '#222';
+      ctx.fillRect(rx, ry, 5, 2);
+      ctx.fillStyle = '#888';
+      ctx.font = '2px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('1002', rx + 2.5, ry + 1.5);
+    });
+
+    // 5. LED indicator
+    const ledX = 8, ledY = 50;
+    ctx.fillStyle = isRunning ? '#4caf50' : '#1b5e20';
+    ctx.beginPath(); ctx.arc(ledX, ledY, 2.5, 0, Math.PI * 2); ctx.fill();
+    if (isRunning) {
+      ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
+      ctx.beginPath(); ctx.arc(ledX, ledY, 5, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // 6. Weight readout display
+    ctx.fillStyle = '#000';
+    drawRR(6, 44, 60, 14, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#1a6b1a';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+
+    ctx.fillStyle = isRunning ? '#00e676' : '#2e7d32';
+    ctx.font = 'bold 9px "JetBrains Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(netWeight.toFixed(1), 62, 54);
+
+    ctx.fillStyle = isRunning ? 'rgba(0,230,118,0.6)' : '#1b5e20';
+    ctx.font = '4px "JetBrains Mono", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('g', 64, 54);
+
+    // 7. Pin header labels & leads
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 3.5px monospace';
+    ctx.textAlign = 'center';
+    const pinLabels = ['VCC', 'GND', 'DT', 'SCK'];
+    const pinXs = [10, 24, 44, 58];
+
+    // Black pin header base
+    ctx.fillStyle = '#111';
+    drawRR(4, 70, 60, 4, 1);
+    ctx.fill();
+
+    pinXs.forEach((px, i) => {
+      ctx.fillText(pinLabels[i], px, 69);
+
+      // Gold pad
+      ctx.fillStyle = '#d4af37';
+      ctx.fillRect(px - 1.5, 70.5, 3, 2.5);
+
+      // Metallic pin lead
+      const pinGrad = ctx.createLinearGradient(px - 0.8, 73, px + 0.8, 73);
+      pinGrad.addColorStop(0, '#aaa');
+      pinGrad.addColorStop(0.5, '#fff');
+      pinGrad.addColorStop(1, '#666');
+      ctx.fillStyle = pinGrad;
+      ctx.fillRect(px - 0.8, 73, 1.6, 13);
+    });
+
+    // 8. Silkscreen text
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '3px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('HX711 24-Bit ADC', 6, 40);
+    ctx.fillText('Load Cell Amp', 6, 44);
+
+    // Selection highlight
+    if (inst.selected && typeof drawSelectionRect === 'function') {
+      drawSelectionRect(ctx, -4, -4, 80, 94);
+    }
+
+    ctx.restore();
+  }
+});
