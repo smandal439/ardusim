@@ -188,7 +188,7 @@ async function compileSketch(code, boardType) {
 
   const boardConfig = BOARDS[boardType];
   if (!boardConfig) {
-    return { ok: false, error: Unknown board type: , errors: [], warnings: [], duration: 0 };
+    return { ok: false, error: `Unknown board type: ${boardType}`, errors: [], warnings: [], duration: 0 };
   }
 
   const cacheKey = _cacheKey(code, boardType);
