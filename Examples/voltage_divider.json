@@ -2,10 +2,16 @@
   "id": "voltage_divider",
   "name": "voltage divider",
   "icon": "🔧",
-  "desc": "A custom voltage divider circuit example.",
+  "desc": "A voltage divider is a simple circuit that uses two resistors to divide an input voltage into a lower output voltage. The output voltage is determined by the ratio of the two resistors. This circuit is commonly used to create reference voltages or to scale down voltages for measurement or interfacing with other components.",
   "tags": [
-    "custom",
-    "circuit"
+    "voltage divider",
+    "resistor",
+    "voltage",
+    "circuit",
+    "kvl",
+    "dmm",
+    "multimeter",
+    "power supply"
   ],
   "circuit": {
     "components": [

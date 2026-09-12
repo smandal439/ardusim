@@ -112,13 +112,13 @@ void loop() {
     use: 'Connect output components (LEDs, buzzers, displays) to digital pins and read input components (buttons, sensors, potentiometers) from analog pins. Perfect for compact projects that don\'t need the full size of an Uno.',
     pins: {
       'D0–D13': { label: 'D0–D13', type: 'digital', desc: 'Digital I/O pins. D0 (RX) and D1 (TX) double as the serial port. PWM capable pins are D3, D5, D6, D9, D10 and D11.' },
-      'D13':     { label: 'D13', type: 'digital', desc: 'Also drives the built-in "L" LED (LED_BUILTIN).' },
-      'A0–A5':   { label: 'A0–A5', type: 'analog', desc: 'Analog input pins (10-bit, 0–1023).' },
-      '5V':      { label: '5V', type: 'power', desc: '5 V regulated output for powering external components.' },
-      '3V3':     { label: '3.3V', type: 'power', desc: '3.3 V regulated output for low-voltage modules.' },
-      'VIN':     { label: 'VIN', type: 'power', desc: 'Input voltage to the board (7–12 V via barrel jack).' },
-      'GND':     { label: 'GND', type: 'gnd', desc: 'Common ground — every component must share this reference.' },
-      'RST':     { label: 'RST', type: 'signal', desc: 'Reset line — pulling it low restarts the sketch.' },
+      'D13': { label: 'D13', type: 'digital', desc: 'Also drives the built-in "L" LED (LED_BUILTIN).' },
+      'A0–A5': { label: 'A0–A5', type: 'analog', desc: 'Analog input pins (10-bit, 0–1023).' },
+      '5V': { label: '5V', type: 'power', desc: '5 V regulated output for powering external components.' },
+      '3V3': { label: '3.3V', type: 'power', desc: '3.3 V regulated output for low-voltage modules.' },
+      'VIN': { label: 'VIN', type: 'power', desc: 'Input voltage to the board (7–12 V via barrel jack).' },
+      'GND': { label: 'GND', type: 'gnd', desc: 'Common ground — every component must share this reference.' },
+      'RST': { label: 'RST', type: 'signal', desc: 'Reset line — pulling it low restarts the sketch.' },
     },
     props: { label: 'Board label shown on the canvas.' },
     wiring: 'Place the board, then wire every other component back to it: outputs to digital pins, sensors to analog pins, and always connect a GND rail.',
@@ -1400,6 +1400,185 @@ void loop(){
   Serial.print("Temp: "); Serial.print(temp); Serial.println(" C");
   delay(1000);
 }`,
+    exampleId: 'ds3231_rtc',
+  },
+
+  vl53l0x: {
+    id: 'vl53l0x',
+    name: 'VL53L0X Time-of-Flight Sensor',
+    icon: '📏',
+    category: 'Sensors',
+    longDesc: 'VL53L0X is a time-of-flight distance sensor that measures the distance to an object using laser light. It communicates via I2C and can measure distances from 30mm to 2m with high accuracy.',
+    use: 'Distance measurement, obstacle detection, robotics, and automation. Read distance values using the Wire library or dedicated VL53L0X libraries.',
+    pins: {
+      VCC: { label: 'VCC', type: 'power', desc: '3.3V or 5V power supply.' },
+      GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+      SDA: { label: 'SDA', type: 'digital', desc: 'I2C data line — connect to A4 (Uno) or SDA.' },
+      SCL: { label: 'SCL', type: 'digital', desc: 'I2C clock line — connect to A5 (Uno) or SCL.' },
+    },
+    props: {
+      distance: 'Simulated distance in millimeters (default 100mm).',
+    },
+    wiring: 'VCC→3.3V/5V, GND→GND, SDA→A4, SCL→A5.',
+    code: `#include <Wire.h>
+#include <Adafruit_VL53L0X.h>
+
+Adafruit_VL53L0X lox = Adafruit_VL53L0X();
+
+const int ledClose = 7;
+const int ledFar   = 8;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(ledClose, OUTPUT);
+  pinMode(ledFar, OUTPUT);
+
+  Serial.println("VL53L0X Distance Sensor");
+
+  if (!lox.begin()) {
+    Serial.println(F("Failed to boot VL53L0X!"));
+    // while (1);
+  }
+  Serial.println(F("Sensor ready."));
+}
+
+void loop() {
+  VL53L0X_RangingMeasurementData_t measure;
+  lox.rangingTest(&measure, false);
+
+  if (measure.RangeStatus != 4) {
+    int dist = measure.RangeMilliMeter;
+    Serial.print("Distance: ");
+    Serial.print(dist);
+    Serial.println(" mm");
+
+    if (dist < 100) {
+      digitalWrite(ledClose, HIGH);
+      digitalWrite(ledFar, LOW);
+    } else if (dist < 300) {
+      digitalWrite(ledClose, LOW);
+      digitalWrite(ledFar, HIGH);
+    } else {
+      digitalWrite(ledClose, LOW);
+      digitalWrite(ledFar, LOW);
+    }
+  } else {
+    Serial.println("Out of range");
+    digitalWrite(ledClose, LOW);
+    digitalWrite(ledFar, LOW);
+  }
+
+  delay(100);
+}`,
+    exampleId: 'vl53l0x_proximity_sensor',
+  },
+  BME280: {
+    id: 'bme280',
+    name: 'BME280 Environmental Sensor',
+    icon: '🌤️',
+    category: 'Sensors',
+    longDesc: 'BME280 is a combined humidity, pressure, and temperature sensor. It communicates via I2C and provides accurate measurements for weather monitoring and environmental applications.',
+    use: 'Weather monitoring, indoor climate control, altitude estimation. Read sensor values using the Wire library or dedicated BME280 libraries.',
+    pins: {
+      VCC: { label: 'VCC', type: 'power', desc: '3.3V or 5V power supply.' },
+      GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+      SDA: { label: 'SDA', type: 'digital', desc: 'I2C data line — connect to A4 (Uno) or SDA.' },
+      SCL: { label: 'SCL', type: 'digital', desc: 'I2C clock line — connect to A5 (Uno) or SCL.' },
+    },
+    props: {
+      temperature: 'Simulated temperature in Celsius (default 25°C).',
+      pressure: 'Simulated pressure in hPa (default 1013.25 hPa).',
+      humidity: 'Simulated humidity in % (default 50%).',
+    },
+    wiring: 'VCC→3.3V/5V, GND→GND, SDA→A4, SCL→A5.',
+    code: `/*
+ * Simple Weather Station with Air Quality
+ *
+ * Wiring:
+ *   BME280:  VCC->5V  GND->GND  SCL->A5  SDA->A4
+ *   MQ-2:    VCC->5V  GND->GND  A0->A0
+ *   LCD I2C: VCC->5V  GND->GND  SCL->A5  SDA->A4
+ *
+ * Drag the Temp / Hum / hPa sliders on the BME280
+ * and the Gas slider on the MQ-2 to simulate conditions.
+ */
+
+#include <Wire.h>
+#include <SimpleBME280.h>
+#include <LiquidCrystal_I2C.h>
+
+SimpleBME280 bme;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+const int gasPin = A0;
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  bme.begin();
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("Weather Station");
+  lcd.setCursor(0, 1);
+  lcd.print("Initializing...");
+  delay(1500);
+  lcd.clear();
+  Serial.println("Simple Weather Station + Air Quality");
+  Serial.println("-------------------------------------");
+}
+
+void loop() {
+  float tempC   = bme.readTemperature();
+  float humPct  = bme.readHumidity();
+  float presPa  = bme.readPressure();
+  int gasRaw    = analogRead(gasPin);
+
+  Serial.print("Temp:      ");
+  Serial.print(tempC, 1);
+  Serial.println(" C");
+
+  Serial.print("Humidity:  ");
+  Serial.print(humPct, 1);
+  Serial.println(" %");
+
+  Serial.print("Pressure:  ");
+  Serial.print(presPa / 100.0, 1);
+  Serial.println(" hPa");
+
+  Serial.print("Air Qual:  ");
+  Serial.print(gasRaw);
+  Serial.print(" (");
+  if (gasRaw < 200) Serial.print("Good");
+  else if (gasRaw < 400) Serial.print("Moderate");
+  else if (gasRaw < 600) Serial.print("Poor");
+  else Serial.print("Hazardous");
+  Serial.println(")");
+
+  Serial.println("-------------------------------------");
+
+  // Line 1: Temp and Humidity
+  lcd.setCursor(0, 0);
+  lcd.print("T:");
+  lcd.print(tempC, 1);
+  lcd.print((char)223);
+  lcd.print("C H:");
+  lcd.print((int)humPct);
+  lcd.print("%  ");
+
+  // Line 2: Pressure and Air Quality
+  lcd.setCursor(0, 1);
+  lcd.print("P:");
+  lcd.print((int)(presPa / 100.0));
+  lcd.print("h Q:");
+  if (gasRaw < 200) lcd.print("Good ");
+  else if (gasRaw < 400) lcd.print("Mod  ");
+  else if (gasRaw < 600) lcd.print("Poor ");
+  else lcd.print("HIGH!");
+
+  delay(2000);
+}`,
+    exampleId: 'weather_station_multi',
   },
 };
 
@@ -1427,23 +1606,23 @@ const GUIDE_LIBRARIES = [
       { fn: 'Wire.read()', desc: 'Read next byte from buffer' },
       { fn: 'Wire.available()', desc: 'Number of bytes available to read' },
     ],
-    code: `#include <Wire.h>
+    code: `#include < Wire.h >
 
-void setup() {
-  Wire.begin();
-  Serial.begin(9600);
+    void setup() {
+    Wire.begin();
+    Serial.begin(9600);
 
-  // Scan for I2C devices
-  for (byte addr = 1; addr < 127; addr++) {
-    Wire.beginTransmission(addr);
-    if (Wire.endTransmission() == 0) {
-      Serial.print("Found device at 0x");
-      Serial.println(addr, HEX);
+    // Scan for I2C devices
+    for (byte addr = 1; addr < 127; addr++) {
+      Wire.beginTransmission(addr);
+      if (Wire.endTransmission() == 0) {
+        Serial.print("Found device at 0x");
+        Serial.println(addr, HEX);
+      }
     }
   }
-}
 
-void loop() {}`,
+  void loop() { } `,
     exampleId: null,
   },
   {
@@ -1459,20 +1638,20 @@ void loop() {}`,
       { fn: 'SPI.transfer(val)', desc: 'Send/receive one byte' },
       { fn: 'SPI.endTransaction()', desc: 'Release the SPI bus' },
     ],
-    code: `#include <SPI.h>
+    code: `#include < SPI.h >
 
-void setup() {
-  SPI.begin();
-  Serial.begin(9600);
-  Serial.println("SPI initialized");
-}
+    void setup() {
+    SPI.begin();
+    Serial.begin(9600);
+    Serial.println("SPI initialized");
+  }
 
-void loop() {
+  void loop() {
   byte data = SPI.transfer(0x42);
-  Serial.print("Received: 0x");
-  Serial.println(data, HEX);
-  delay(1000);
-}`,
+    Serial.print("Received: 0x");
+    Serial.println(data, HEX);
+    delay(1000);
+  } `,
     exampleId: null,
   },
   {
@@ -1489,22 +1668,22 @@ void loop() {
       { fn: 'EEPROM.get(addr, data)', desc: 'Read any type from address' },
       { fn: 'EEPROM.put(addr, data)', desc: 'Write any type to address' },
     ],
-    code: `#include <EEPROM.h>
+    code: `#include < EEPROM.h >
 
-void setup() {
-  Serial.begin(9600);
+    void setup() {
+    Serial.begin(9600);
 
-  // Write a value
-  EEPROM.write(0, 42);
-  Serial.println("Wrote 42 to address 0");
+    // Write a value
+    EEPROM.write(0, 42);
+    Serial.println("Wrote 42 to address 0");
 
   // Read it back
   byte val = EEPROM.read(0);
-  Serial.print("Read from address 0: ");
-  Serial.println(val);
-}
+    Serial.print("Read from address 0: ");
+    Serial.println(val);
+  }
 
-void loop() {}`,
+  void loop() { } `,
     exampleId: null,
   },
 
@@ -1524,18 +1703,18 @@ void loop() {}`,
       { fn: 'lcd.write(byte)', desc: 'Write a custom character' },
       { fn: 'lcd.noDisplay() / lcd.display()', desc: 'Turn display off/on' },
     ],
-    code: `#include <LiquidCrystal.h>
+    code: `#include < LiquidCrystal.h >
 
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+    LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
-void setup() {
-  lcd.begin(16, 2);
-  lcd.print("Hello, World!");
-  lcd.setCursor(0, 1);
-  lcd.print("ArduSim LCD");
-}
+  void setup() {
+    lcd.begin(16, 2);
+    lcd.print("Hello, World!");
+    lcd.setCursor(0, 1);
+    lcd.print("ArduSim LCD");
+  }
 
-void loop() {}`,
+  void loop() { } `,
     exampleId: null,
   },
   {
@@ -1553,22 +1732,22 @@ void loop() {}`,
       { fn: 'lcd.backlight() / lcd.noBacklight()', desc: 'Toggle backlight' },
       { fn: 'lcd.createChar(loc, charmap)', desc: 'Create custom character (8 max)' },
     ],
-    code: `#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
+    code: `#include < Wire.h >
+    #include < LiquidCrystal_I2C.h >
 
-// 16x2 LCD at address 0x27
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+    // 16x2 LCD at address 0x27
+    LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-void setup() {
-  lcd.init();
-  lcd.backlight();
-  lcd.setCursor(0, 0);
-  lcd.print("Hello from I2C!");
-  lcd.setCursor(0, 1);
-  lcd.print("16x2 LCD Demo");
-}
+  void setup() {
+    lcd.init();
+    lcd.backlight();
+    lcd.setCursor(0, 0);
+    lcd.print("Hello from I2C!");
+    lcd.setCursor(0, 1);
+    lcd.print("16x2 LCD Demo");
+  }
 
-void loop() {}`,
+  void loop() { } `,
     exampleId: 'lcd_i2c',
   },
   {
@@ -1588,26 +1767,26 @@ void loop() {}`,
       { fn: 'display.setCursor(x, y)', desc: 'Set text cursor' },
       { fn: 'display.print(text)', desc: 'Print text to buffer' },
     ],
-    code: `#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+    code: `#include < Wire.h >
+    #include < Adafruit_GFX.h >
+    #include < Adafruit_SSD1306.h >
 
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+    #define SCREEN_WIDTH 128
+  #define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, & Wire, -1);
 
-void setup() {
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
-  display.println("OLED Display");
-  display.println("128x64 SSD1306");
-  display.display();
-}
+  void setup() {
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0, 0);
+    display.println("OLED Display");
+    display.println("128x64 SSD1306");
+    display.display();
+  }
 
-void loop() {}`,
+  void loop() { } `,
     exampleId: 'oled_ssd1306',
   },
 
@@ -1626,25 +1805,25 @@ void loop() {}`,
       { fn: 'dht.readHumidity()', desc: 'Read humidity percentage' },
       { fn: 'dht.readHeatIndex()', desc: 'Calculate heat index' },
     ],
-    code: `#include <DHT.h>
+    code: `#include < DHT.h >
 
-#define DHTPIN 2
-#define DHTTYPE DHT11
+    #define DHTPIN 2
+  #define DHTTYPE DHT11
 
 DHT dht(DHTPIN, DHTTYPE);
 
-void setup() {
-  Serial.begin(9600);
-  dht.begin();
-}
+  void setup() {
+    Serial.begin(9600);
+    dht.begin();
+  }
 
-void loop() {
+  void loop() {
   float temp = dht.readTemperature();
   float hum = dht.readHumidity();
-  Serial.print("Temp: "); Serial.print(temp); Serial.print(" C  ");
-  Serial.print("Hum: "); Serial.print(hum); Serial.println(" %");
-  delay(2000);
-}`,
+    Serial.print("Temp: "); Serial.print(temp); Serial.print(" C  ");
+    Serial.print("Hum: "); Serial.print(hum); Serial.println(" %");
+    delay(2000);
+  } `,
     exampleId: 'temperature',
   },
   {
@@ -1660,25 +1839,25 @@ void loop() {
       { fn: 'sonar.ping_in()', desc: 'Get distance in inches' },
       { fn: 'sonar.ping_median(iterations)', desc: 'Median-filtered ping' },
     ],
-    code: `#include <NewPing.h>
+    code: `#include < NewPing.h >
 
-#define TRIGGER_PIN 9
-#define ECHO_PIN 10
-#define MAX_DISTANCE 200
+    #define TRIGGER_PIN 9
+  #define ECHO_PIN 10
+  #define MAX_DISTANCE 200
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
-void setup() {
-  Serial.begin(9600);
-}
+  void setup() {
+    Serial.begin(9600);
+  }
 
-void loop() {
-  delay(500);
+  void loop() {
+    delay(500);
   int dist = sonar.ping_cm();
-  Serial.print("Distance: ");
-  Serial.print(dist);
-  Serial.println(" cm");
-}`,
+    Serial.print("Distance: ");
+    Serial.print(dist);
+    Serial.println(" cm");
+  } `,
     exampleId: 'ultrasonic',
   },
 
@@ -1698,25 +1877,25 @@ void loop() {
       { fn: 'servo.attached()', desc: 'Check if attached' },
       { fn: 'servo.detach()', desc: 'Detach from pin' },
     ],
-    code: `#include <Servo.h>
+    code: `#include < Servo.h >
 
-Servo myServo;
+    Servo myServo;
 int pos = 0;
 
-void setup() {
-  myServo.attach(9);
-}
+  void setup() {
+    myServo.attach(9);
+  }
 
-void loop() {
-  for (pos = 0; pos <= 180; pos++) {
-    myServo.write(pos);
-    delay(15);
-  }
-  for (pos = 180; pos >= 0; pos--) {
-    myServo.write(pos);
-    delay(15);
-  }
-}`,
+  void loop() {
+    for (pos = 0; pos <= 180; pos++) {
+      myServo.write(pos);
+      delay(15);
+    }
+    for (pos = 180; pos >= 0; pos--) {
+      myServo.write(pos);
+      delay(15);
+    }
+  } `,
     exampleId: 'servo_sweep',
   },
   {
@@ -1731,22 +1910,22 @@ void loop() {
       { fn: 'stepper.setSpeed(rpm)', desc: 'Set rotation speed' },
       { fn: 'stepper.step(steps)', desc: 'Move number of steps (+ clockwise, - counter-clockwise)' },
     ],
-    code: `#include <Stepper.h>
+    code: `#include < Stepper.h >
 
-#define STEPS_PER_REV 2048
+    #define STEPS_PER_REV 2048
 
 Stepper myStepper(STEPS_PER_REV, 8, 10, 9, 11);
 
-void setup() {
-  myStepper.setSpeed(10);  // 10 RPM
-  Serial.begin(9600);
-}
+  void setup() {
+    myStepper.setSpeed(10);  // 10 RPM
+    Serial.begin(9600);
+  }
 
-void loop() {
-  myStepper.step(STEPS_PER_REV);
-  Serial.println("One revolution CW");
-  delay(500);
-}`,
+  void loop() {
+    myStepper.step(STEPS_PER_REV);
+    Serial.println("One revolution CW");
+    delay(500);
+  } `,
     exampleId: 'stepper_motor',
   },
 
@@ -1765,25 +1944,25 @@ void loop() {
       { fn: 'WiFi.macAddress()', desc: 'Get MAC address' },
       { fn: 'WiFi.mode(mode)', desc: 'Set mode (WIFI_STA, WIFI_AP, WIFI_AP_STA)' },
     ],
-    code: `#include <WiFi.h>
+    code: `#include < WiFi.h >
 
 const char* ssid = "YourSSID";
-const char* password = "YourPassword";
+  const char* password = "YourPassword";
 
-void setup() {
-  Serial.begin(115200);
-  WiFi.begin(ssid, password);
-  Serial.print("Connecting");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+  void setup() {
+    Serial.begin(115200);
+    WiFi.begin(ssid, password);
+    Serial.print("Connecting");
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
+    }
+    Serial.println("\\nConnected!");
+    Serial.print("IP: ");
+    Serial.println(WiFi.localIP());
   }
-  Serial.println("\\nConnected!");
-  Serial.print("IP: ");
-  Serial.println(WiFi.localIP());
-}
 
-void loop() {}`,
+  void loop() { } `,
     exampleId: null,
   },
   {
@@ -1800,28 +1979,28 @@ void loop() {}`,
       { fn: 'esp_now_add_peer(&peerInfo)', desc: 'Add a peer device' },
       { fn: 'esp_now_send(addr, data, len)', desc: 'Send data to peer' },
     ],
-    code: `#include <esp_now.h>
-#include <WiFi.h>
+    code: `#include < esp_now.h >
+    #include < WiFi.h >
 
-uint8_t receiverMAC[] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0x02};
+    uint8_t receiverMAC[] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0x02};
 
-void OnDataSent(const uint8_t *mac, esp_now_send_status_t status) {
-  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Send OK" : "Send FAIL");
-}
+  void OnDataSent(const uint8_t * mac, esp_now_send_status_t status) {
+    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Send OK" : "Send FAIL");
+  }
 
-void setup() {
-  Serial.begin(115200);
-  WiFi.mode(WIFI_STA);
-  esp_now_init();
-  esp_now_register_send_cb(OnDataSent);
-  Serial.println("ESP-NOW Sender ready");
-}
+  void setup() {
+    Serial.begin(115200);
+    WiFi.mode(WIFI_STA);
+    esp_now_init();
+    esp_now_register_send_cb(OnDataSent);
+    Serial.println("ESP-NOW Sender ready");
+  }
 
-void loop() {
+  void loop() {
   int data = 42;
-  esp_now_send(receiverMAC, (uint8_t *)&data, sizeof(data));
-  delay(1000);
-}`,
+    esp_now_send(receiverMAC, (uint8_t *) & data, sizeof(data));
+    delay(1000);
+  } `,
     exampleId: 'espnow_sender',
   },
   {
@@ -1841,33 +2020,33 @@ void loop() {
       { fn: 'Zigbee.getChannel()', desc: 'Get current channel' },
       { fn: 'Zigbee.ping(destAddr)', desc: 'Ping a remote node' },
     ],
-    code: `#include <Zigbee.h>
+    code: `#include < Zigbee.h >
 
-uint16_t endDeviceAddr = 0x0001;
+    uint16_t endDeviceAddr = 0x0001;
 
-void onSendStatus(int status) {
-  Serial.println(status == 0 ? "Send OK" : "Send FAIL");
-}
+  void onSendStatus(int status) {
+    Serial.println(status == 0 ? "Send OK" : "Send FAIL");
+  }
 
-void setup() {
-  Serial.begin(115200);
-  pinMode(2, OUTPUT);
+  void setup() {
+    Serial.begin(115200);
+    pinMode(2, OUTPUT);
 
-  Zigbee.begin(11, 0x1234);
-  Zigbee.onSend(onSendStatus);
+    Zigbee.begin(11, 0x1234);
+    Zigbee.onSend(onSendStatus);
 
-  Serial.print("Address: 0x");
-  Serial.println(Zigbee.getNodeAddress(), HEX);
-}
+    Serial.print("Address: 0x");
+    Serial.println(Zigbee.getNodeAddress(), HEX);
+  }
 
-void loop() {
+  void loop() {
   int data = 42;
-  Zigbee.send(endDeviceAddr, (uint8_t *)&data, sizeof(data));
-  digitalWrite(2, HIGH);
-  delay(50);
-  digitalWrite(2, LOW);
-  delay(2000);
-}`,
+    Zigbee.send(endDeviceAddr, (uint8_t *) & data, sizeof(data));
+    digitalWrite(2, HIGH);
+    delay(50);
+    digitalWrite(2, LOW);
+    delay(2000);
+  } `,
     exampleId: 'zigbee_sender_receiver',
   },
   {
@@ -1885,25 +2064,25 @@ void loop() {
       { fn: 'SerialBT.print(text)', desc: 'Send text' },
       { fn: 'SerialBT.println(text)', desc: 'Send text with newline' },
     ],
-    code: `#include <BluetoothSerial.h>
+    code: `#include < BluetoothSerial.h >
 
-BluetoothSerial SerialBT;
+    BluetoothSerial SerialBT;
 
-void setup() {
-  Serial.begin(115200);
-  SerialBT.begin("ArduSim_BT");
-  Serial.println("Bluetooth started!");
-}
-
-void loop() {
-  if (SerialBT.available()) {
-    char c = SerialBT.read();
-    Serial.print("Received: ");
-    Serial.println(c);
-    SerialBT.print("Echo: ");
-    SerialBT.println(c);
+  void setup() {
+    Serial.begin(115200);
+    SerialBT.begin("ArduSim_BT");
+    Serial.println("Bluetooth started!");
   }
-}`,
+
+  void loop() {
+    if (SerialBT.available()) {
+    char c = SerialBT.read();
+      Serial.print("Received: ");
+      Serial.println(c);
+      SerialBT.print("Echo: ");
+      SerialBT.println(c);
+    }
+  } `,
     exampleId: 'bluetooth_serial_bridge',
   },
 
@@ -1923,28 +2102,28 @@ void loop() {
       { fn: 'client.subscribe(topic)', desc: 'Subscribe to topic' },
       { fn: 'client.loop()', desc: 'Process incoming messages' },
     ],
-    code: `#include <WiFi.h>
-#include <PubSubClient.h>
+    code: `#include < WiFi.h >
+    #include < PubSubClient.h >
 
 const char* mqtt_server = "broker.hivemq.com";
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message on "); Serial.println(topic);
-}
+  void callback(char * topic, byte * payload, unsigned int length) {
+    Serial.print("Message on "); Serial.println(topic);
+  }
 
-void setup() {
-  Serial.begin(115200);
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
-  // Connect WiFi first, then client.connect("ArduSim")
-  // client.subscribe("arduim/test");
-}
+  void setup() {
+    Serial.begin(115200);
+    client.setServer(mqtt_server, 1883);
+    client.setCallback(callback);
+    // Connect WiFi first, then client.connect("ArduSim")
+    // client.subscribe("arduim/test");
+  }
 
-void loop() {
-  client.loop();
-}`,
+  void loop() {
+    client.loop();
+  } `,
     exampleId: 'mqtt_esp32',
   },
   {
@@ -1962,20 +2141,20 @@ void loop() {
       { fn: 'coap.delete(server, uri)', desc: 'DELETE request' },
       { fn: 'coap.loop()', desc: 'Process CoAP messages' },
     ],
-    code: `#include <coap.h>
+    code: `#include < coap.h >
 
-CoapClient client;
+    CoapClient client;
 
-void setup() {
-  Serial.begin(115200);
-  client.begin();
-  Serial.println("CoAP Client ready");
-}
+  void setup() {
+    Serial.begin(115200);
+    client.begin();
+    Serial.println("CoAP Client ready");
+  }
 
-void loop() {
-  client.loop();
-  delay(1000);
-}`,
+  void loop() {
+    client.loop();
+    delay(1000);
+  } `,
     exampleId: 'coap_client',
   },
   {
@@ -1992,26 +2171,26 @@ void loop() {
       { fn: 'http.getString()', desc: 'Get response body as string' },
       { fn: 'http.end()', desc: 'Free resources' },
     ],
-    code: `#include <WiFi.h>
-#include <HTTPClient.h>
+    code: `#include < WiFi.h >
+    #include < HTTPClient.h >
 
-void setup() {
-  Serial.begin(115200);
-  // Connect WiFi first
-}
-
-void loop() {
-  if (WiFi.status() == WL_CONNECTED) {
-    HTTPClient http;
-    http.begin("http://httpbin.org/get");
-    int code = http.GET();
-    if (code > 0) {
-      Serial.println(http.getString());
-    }
-    http.end();
+    void setup() {
+    Serial.begin(115200);
+    // Connect WiFi first
   }
-  delay(5000);
-}`,
+
+  void loop() {
+    if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+      http.begin("http://httpbin.org/get");
+    int code = http.GET();
+      if (code > 0) {
+        Serial.println(http.getString());
+      }
+      http.end();
+    }
+    delay(5000);
+  } `,
     exampleId: null,
   },
   {
@@ -2027,25 +2206,25 @@ void loop() {
       { fn: 'server.handleClient()', desc: 'Process incoming requests' },
       { fn: 'server.send(code, type, content)', desc: 'Send HTTP response' },
     ],
-    code: `#include <WiFi.h>
-#include <WebServer.h>
+    code: `#include < WiFi.h >
+    #include < WebServer.h >
 
-WebServer server(80);
+    WebServer server(80);
 
-void handleRoot() {
-  server.send(200, "text/html", "<h1>ArduSim Web Server</h1>");
-}
+  void handleRoot() {
+    server.send(200, "text/html", "<h1>ArduSim Web Server</h1>");
+  }
 
-void setup() {
-  Serial.begin(115200);
-  // Connect WiFi first
-  server.on("/", handleRoot);
-  server.begin();
-}
+  void setup() {
+    Serial.begin(115200);
+    // Connect WiFi first
+    server.on("/", handleRoot);
+    server.begin();
+  }
 
-void loop() {
-  server.handleClient();
-}`,
+  void loop() {
+    server.handleClient();
+  } `,
     exampleId: null,
   },
 
@@ -2062,20 +2241,20 @@ void loop() {
       { fn: 'i2s_set_pin()', desc: 'Configure I2S pins' },
       { fn: 'i2s_write()', desc: 'Write audio data to I2S' },
     ],
-    code: `#include <driver/i2s.h>
+    code: `#include < driver / i2s.h >
 
-void setup() {
-  Serial.begin(115200);
+    void setup() {
+    Serial.begin(115200);
   i2s_config_t i2s_config = {
     .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
     .sample_rate = 44100,
     .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
-  };
-  i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
-  Serial.println("I2S initialized");
-}
+    };
+    i2s_driver_install(I2S_NUM_0, & i2s_config, 0, NULL);
+    Serial.println("I2S initialized");
+  }
 
-void loop() {}`,
+  void loop() { } `,
     exampleId: 'esp32_i2s_music_player',
   },
 
@@ -2093,22 +2272,22 @@ void loop() {}`,
       { fn: 'doc["key"]', desc: 'Access JSON values' },
       { fn: 'doc["key"] = value', desc: 'Set JSON values' },
     ],
-    code: `#include <ArduinoJson.h>
+    code: `#include < ArduinoJson.h >
 
-void setup() {
-  Serial.begin(9600);
+    void setup() {
+    Serial.begin(9600);
 
-  StaticJsonDocument<200> doc;
-  doc["sensor"] = "temp";
-  doc["value"] = 23.5;
-  doc["unit"] = "C";
+    StaticJsonDocument < 200 > doc;
+    doc["sensor"] = "temp";
+    doc["value"] = 23.5;
+    doc["unit"] = "C";
 
   char buffer[200];
-  serializeJson(doc, buffer);
-  Serial.println(buffer);
-}
+    serializeJson(doc, buffer);
+    Serial.println(buffer);
+  }
 
-void loop() {}`,
+  void loop() { } `,
     exampleId: null,
   },
   {
@@ -2126,23 +2305,23 @@ void loop() {}`,
       { fn: 'gps.altitude.meters()', desc: 'Get altitude in meters' },
       { fn: 'gps.satellites.value()', desc: 'Get satellite count' },
     ],
-    code: `#include <TinyGPS++.h>
+    code: `#include < TinyGPS++.h >
 
-TinyGPSPlus gps;
+    TinyGPSPlus gps;
 
-void setup() {
-  Serial.begin(9600);
-}
-
-void loop() {
-  while (Serial.available() > 0) {
-    gps.encode(Serial.read());
-    if (gps.location.isUpdated()) {
-      Serial.print("Lat: "); Serial.println(gps.location.lat(), 6);
-      Serial.print("Lng: "); Serial.println(gps.location.lng(), 6);
-    }
+  void setup() {
+    Serial.begin(9600);
   }
-}`,
+
+  void loop() {
+    while (Serial.available() > 0) {
+      gps.encode(Serial.read());
+      if (gps.location.isUpdated()) {
+        Serial.print("Lat: "); Serial.println(gps.location.lat(), 6);
+        Serial.print("Lng: "); Serial.println(gps.location.lng(), 6);
+      }
+    }
+  } `,
     exampleId: 'gps_neo_6m_8m_tracker',
   },
   {
@@ -2158,23 +2337,23 @@ void loop() {
       { fn: 'irsend.sendSony(code)', desc: 'Send Sony protocol signal' },
       { fn: 'irrecv.resume()', desc: 'Resume receiving next signal' },
     ],
-    code: `#include <IRremote.h>
+    code: `#include < IRremote.h >
 
-IRrecv irrecv(2);
+    IRrecv irrecv(2);
 decode_results results;
 
-void setup() {
-  Serial.begin(9600);
-  irrecv.enableIRIn();
-}
-
-void loop() {
-  if (irrecv.decode(&results)) {
-    Serial.print("Code: 0x");
-    Serial.println(results.value, HEX);
-    irrecv.resume();
+  void setup() {
+    Serial.begin(9600);
+    irrecv.enableIRIn();
   }
-}`,
+
+  void loop() {
+    if (irrecv.decode(& results)) {
+      Serial.print("Code: 0x");
+      Serial.println(results.value, HEX);
+      irrecv.resume();
+    }
+  } `,
     exampleId: null,
   },
   {
@@ -2191,23 +2370,23 @@ void loop() {
       { fn: 'fill_rainbow(leds, n, hue)', desc: 'Fill with rainbow' },
       { fn: 'FastLED.show()', desc: 'Update LEDs' },
     ],
-    code: `#include <FastLED.h>
+    code: `#include < FastLED.h >
 
-#define NUM_LEDS 8
-#define DATA_PIN 6
+    #define NUM_LEDS 8
+  #define DATA_PIN 6
 
 CRGB leds[NUM_LEDS];
 
-void setup() {
-  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-  FastLED.setBrightness(50);
-}
+  void setup() {
+    FastLED.addLeds < WS2812B, DATA_PIN, GRB > (leds, NUM_LEDS);
+    FastLED.setBrightness(50);
+  }
 
-void loop() {
-  fill_rainbow(leds, NUM_LEDS, millis() / 10);
-  FastLED.show();
-  delay(30);
-}`,
+  void loop() {
+    fill_rainbow(leds, NUM_LEDS, millis() / 10);
+    FastLED.show();
+    delay(30);
+  } `,
     exampleId: 'neopixel_color_cycle',
   },
   {
@@ -2224,26 +2403,26 @@ void loop() {
       { fn: 'strip.show()', desc: 'Update strip' },
       { fn: 'strip.Color(r, g, b)', desc: 'Create color value' },
     ],
-    code: `#include <Adafruit_NeoPixel.h>
+    code: `#include < Adafruit_NeoPixel.h >
 
-#define NUM_LEDS 8
-#define PIN 6
+    #define NUM_LEDS 8
+  #define PIN 6
 
 Adafruit_NeoPixel strip(NUM_LEDS, PIN, NEO_GRB + NEO_KHZ800);
 
-void setup() {
-  strip.begin();
-  strip.setBrightness(50);
-  strip.show();
-}
-
-void loop() {
-  for (int i = 0; i < NUM_LEDS; i++) {
-    strip.setPixelColor(i, strip.Color(255, 0, 0));
+  void setup() {
+    strip.begin();
+    strip.setBrightness(50);
     strip.show();
-    delay(200);
   }
-}`,
+
+  void loop() {
+    for (int i = 0; i < NUM_LEDS; i++) {
+      strip.setPixelColor(i, strip.Color(255, 0, 0));
+      strip.show();
+      delay(200);
+    }
+  } `,
     exampleId: 'neopixel_color_cycle',
   },
   {
@@ -2259,30 +2438,30 @@ void loop() {
       { fn: 'mfrc522.PICC_ReadCardSerial()', desc: 'Read card UID' },
       { fn: 'mfrc522.PICC_HaltA()', desc: 'Stop card communication' },
     ],
-    code: `#include <SPI.h>
-#include <MFRC522.h>
+    code: `#include < SPI.h >
+    #include < MFRC522.h >
 
-#define SS_PIN 10
-#define RST_PIN 9
+    #define SS_PIN 10
+  #define RST_PIN 9
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
-void setup() {
-  Serial.begin(9600);
-  SPI.begin();
-  mfrc522.PCD_Init();
-  Serial.println("RFID Reader ready");
-}
-
-void loop() {
-  if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-    Serial.print("Card UID: ");
-    for (byte i = 0; i < mfrc522.uid.size; i++) {
-      Serial.print(mfrc522.uid.uidByte[i], HEX);
-    }
-    Serial.println();
-    mfrc522.PICC_HaltA();
+  void setup() {
+    Serial.begin(9600);
+    SPI.begin();
+    mfrc522.PCD_Init();
+    Serial.println("RFID Reader ready");
   }
-}`,
+
+  void loop() {
+    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
+      Serial.print("Card UID: ");
+      for (byte i = 0; i < mfrc522.uid.size; i++) {
+        Serial.print(mfrc522.uid.uidByte[i], HEX);
+      }
+      Serial.println();
+      mfrc522.PICC_HaltA();
+    }
+  } `,
     exampleId: 'rfid_inventory_tracker',
   },
 ];
@@ -2311,17 +2490,17 @@ const GUIDE_TUTORIALS = [
     ],
     wiring: 'No wiring required — the built-in Blink circuit is already set up for you.',
     code: `void setup() {
-  pinMode(13, OUTPUT);
-  Serial.begin(9600);
-}
-void loop() {
-  digitalWrite(13, HIGH);
-  Serial.println("LED ON");
-  delay(1000);
-  digitalWrite(13, LOW);
-  Serial.println("LED OFF");
-  delay(1000);
-}`,
+    pinMode(13, OUTPUT);
+    Serial.begin(9600);
+  }
+  void loop() {
+    digitalWrite(13, HIGH);
+    Serial.println("LED ON");
+    delay(1000);
+    digitalWrite(13, LOW);
+    Serial.println("LED OFF");
+    delay(1000);
+  } `,
     exampleId: 'blink',
   },
 
@@ -2341,14 +2520,14 @@ void loop() {
     ],
     wiring: 'D13 → 220 Ω resistor → LED anode(+) ; LED cathode(−) → GND.',
     code: `void setup() {
-  pinMode(13, OUTPUT);
-}
-void loop() {
-  digitalWrite(13, HIGH);
-  delay(1000);
-  digitalWrite(13, LOW);
-  delay(1000);
-}`,
+    pinMode(13, OUTPUT);
+  }
+  void loop() {
+    digitalWrite(13, HIGH);
+    delay(1000);
+    digitalWrite(13, LOW);
+    delay(1000);
+  } `,
     exampleId: 'blink',
   },
 
@@ -2370,15 +2549,15 @@ void loop() {
     code: `int ledPin = 9;
 int brightness = 0;
 int fadeAmount = 5;
-void setup() {
-  pinMode(ledPin, OUTPUT);
-}
-void loop() {
-  analogWrite(ledPin, brightness);
-  brightness += fadeAmount;
-  if (brightness <= 0 || brightness >= 255) fadeAmount = -fadeAmount;
-  delay(30);
-}`,
+  void setup() {
+    pinMode(ledPin, OUTPUT);
+  }
+  void loop() {
+    analogWrite(ledPin, brightness);
+    brightness += fadeAmount;
+    if (brightness <= 0 || brightness >= 255) fadeAmount = -fadeAmount;
+    delay(30);
+  } `,
     exampleId: 'fade',
   },
 
@@ -2398,14 +2577,14 @@ void loop() {
     wiring: 'D2 → button pin 1 ; button pin 3 → GND ; D13 → LED.',
     code: `int buttonPin = 2;
 int ledPin = 13;
-void setup() {
-  pinMode(buttonPin, INPUT_PULLUP);
-  pinMode(ledPin, OUTPUT);
-}
-void loop() {
-  if (digitalRead(buttonPin) == LOW) digitalWrite(ledPin, HIGH);
-  else digitalWrite(ledPin, LOW);
-}`,
+  void setup() {
+    pinMode(buttonPin, INPUT_PULLUP);
+    pinMode(ledPin, OUTPUT);
+  }
+  void loop() {
+    if (digitalRead(buttonPin) == LOW) digitalWrite(ledPin, HIGH);
+    else digitalWrite(ledPin, LOW);
+  } `,
     exampleId: 'button',
   },
 
@@ -2425,13 +2604,13 @@ void loop() {
     ],
     wiring: 'VCC→5V, OUT→A0, GND→GND.',
     code: `void setup() {
-  Serial.begin(9600);
-}
-void loop() {
+    Serial.begin(9600);
+  }
+  void loop() {
   int value = analogRead(A0);
-  Serial.println(value);
-  delay(50);
-}`,
+    Serial.println(value);
+    delay(50);
+  } `,
     exampleId: 'potentiometer',
   },
 
@@ -2450,15 +2629,15 @@ void loop() {
       'The servo arm on the canvas turns in real time.',
     ],
     wiring: 'SIG→D9, +→5V, −→GND.',
-    code: `#include <Servo.h>
-Servo s;
-void setup() {
-  s.attach(9);
-}
-void loop() {
-  for (int a = 0; a <= 180; a++) { s.write(a); delay(10); }
-  for (int a = 180; a >= 0; a--) { s.write(a); delay(10); }
-}`,
+    code: `#include < Servo.h >
+    Servo s;
+  void setup() {
+    s.attach(9);
+  }
+  void loop() {
+    for (int a = 0; a <= 180; a++) { s.write(a); delay(10); }
+    for (int a = 180; a >= 0; a--) { s.write(a); delay(10); }
+  } `,
     exampleId: 'servo_sweep',
   },
 
@@ -2477,18 +2656,18 @@ void loop() {
       'Run it and watch the display update in the simulation.',
     ],
     wiring: 'VCC→5V, GND→GND, SDA→A4 (Uno), SCL→A5 (Uno).',
-    code: `#include <LiquidCrystal_I2C.h>
-LiquidCrystal_I2C lcd(0x27, 16, 2);
-void setup() {
-  lcd.init();
-  lcd.backlight();
-  lcd.print("Hello, I2C!");
-}
-void loop() {
-  lcd.setCursor(0, 1);
-  lcd.print(millis() / 1000);
-  delay(100);
-}`,
+    code: `#include < LiquidCrystal_I2C.h >
+    LiquidCrystal_I2C lcd(0x27, 16, 2);
+  void setup() {
+    lcd.init();
+    lcd.backlight();
+    lcd.print("Hello, I2C!");
+  }
+  void loop() {
+    lcd.setCursor(0, 1);
+    lcd.print(millis() / 1000);
+    delay(100);
+  } `,
     exampleId: 'lcd_i2c',
   },
 
@@ -2507,19 +2686,19 @@ void loop() {
       'Adjust the simulated values in the property panel (right-click the sensor → Properties).',
     ],
     wiring: 'VCC→5V, DAT→D2, GND→GND.',
-    code: `#include <DHT.h>
-DHT dht(2, DHT11);
-void setup() {
-  Serial.begin(9600);
-  dht.begin();
-}
-void loop() {
-  Serial.print("Temp: ");
-  Serial.print(dht.readTemperature());
-  Serial.print(" C  Hum: ");
-  Serial.println(dht.readHumidity());
-  delay(2000);
-}`,
+    code: `#include < DHT.h >
+    DHT dht(2, DHT11);
+  void setup() {
+    Serial.begin(9600);
+    dht.begin();
+  }
+  void loop() {
+    Serial.print("Temp: ");
+    Serial.print(dht.readTemperature());
+    Serial.print(" C  Hum: ");
+    Serial.println(dht.readHumidity());
+    delay(2000);
+  } `,
     exampleId: 'temperature',
   },
 
@@ -2539,18 +2718,18 @@ void loop() {
     ],
     wiring: 'VCC→5V, TRIG→D7, ECHO→D8, GND→GND.',
     code: `void setup() {
-  pinMode(7, OUTPUT);
-  pinMode(8, INPUT);
-  Serial.begin(9600);
-}
-void loop() {
-  digitalWrite(7, LOW);  delayMicroseconds(2);
-  digitalWrite(7, HIGH); delayMicroseconds(10);
-  digitalWrite(7, LOW);
+    pinMode(7, OUTPUT);
+    pinMode(8, INPUT);
+    Serial.begin(9600);
+  }
+  void loop() {
+    digitalWrite(7, LOW); delayMicroseconds(2);
+    digitalWrite(7, HIGH); delayMicroseconds(10);
+    digitalWrite(7, LOW);
   long t = pulseIn(8, HIGH);
-  Serial.print(t / 58.0); Serial.println(" cm");
-  delay(200);
-}`,
+    Serial.print(t / 58.0); Serial.println(" cm");
+    delay(200);
+  } `,
     exampleId: 'ultrasonic',
   },
 
@@ -2569,16 +2748,16 @@ void loop() {
     ],
     wiring: 'Potentiometer optional — this works with any numeric serial output.',
     code: `void setup() {
-  Serial.begin(9600);
-}
-void loop() {
+    Serial.begin(9600);
+  }
+  void loop() {
   float sine = 512 + 400 * sin(millis() / 1000.0);
-  float tri  = (millis() / 10) % 1023;
-  Serial.print(sine);
-  Serial.print(" ");
-  Serial.println(tri);
-  delay(10);
-}`,
+  float tri = (millis() / 10) % 1023;
+    Serial.print(sine);
+    Serial.print(" ");
+    Serial.println(tri);
+    delay(10);
+  } `,
     exampleId: 'serial_plotter',
   },
 
@@ -2597,16 +2776,16 @@ void loop() {
     ],
     wiring: 'R→D9, G→D10, B→D11, −→GND.',
     code: `void setup() {
-  pinMode(9, OUTPUT); pinMode(10, OUTPUT); pinMode(11, OUTPUT);
-}
-void loop() {
-  for (int i = 0; i < 255; i++) {
-    analogWrite(9,  255 - i);   // red falls
-    analogWrite(10, i);         // green rises
-    analogWrite(11, 255 - i);   // blue falls
-    delay(10);
+    pinMode(9, OUTPUT); pinMode(10, OUTPUT); pinMode(11, OUTPUT);
   }
-}`,
+  void loop() {
+    for (int i = 0; i < 255; i++) {
+      analogWrite(9, 255 - i);   // red falls
+      analogWrite(10, i);         // green rises
+      analogWrite(11, 255 - i);   // blue falls
+      delay(10);
+    }
+  } `,
     exampleId: 'rainbow_rgb',
   },
 

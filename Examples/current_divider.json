@@ -1,0 +1,190 @@
+{
+  "id": "current_divider",
+  "name": "current divider",
+  "icon": "🔧",
+  "desc": "A current divider is a circuit that divides the input current into two or more branches. The amount of current in each branch is inversely proportional to the resistance of that branch. This means that the branch with lower resistance will have a higher current, while the branch with higher resistance will have a lower current. The total current entering the circuit is equal to the sum of the currents in each branch.",
+  "tags": [
+    "current divider",
+    "dmm",
+    "multimeter",
+    "resistor",
+    "current",
+    "voltage",
+    "power supply",
+    "kcl"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789219061437_e9m95",
+        "type": "bench_power_supply",
+        "x": 225,
+        "y": 45,
+        "rotation": 0,
+        "props": {
+          "powered": 1,
+          "outputEnabled": 1,
+          "voltageSet": 12,
+          "currentLimit": 2.5,
+          "actualCurrentPos": 0,
+          "actualCurrentNeg": 0,
+          "mode": "CV",
+          "actualCurrent5V": 0
+        }
+      },
+      {
+        "id": "comp_1789219082241_1so1v",
+        "type": "resistor",
+        "x": 685,
+        "y": 100,
+        "rotation": 1,
+        "props": {
+          "value": 1,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "resistor_1789222094014_1qfkt",
+        "type": "resistor",
+        "x": 790,
+        "y": 195,
+        "rotation": 0,
+        "props": {
+          "value": 2,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "multimeter_1789224576115_vny4v",
+        "type": "multimeter",
+        "x": 505,
+        "y": -145,
+        "rotation": 0,
+        "props": {
+          "mode": "A_DC",
+          "hold": false,
+          "rel": false,
+          "range_auto": true
+        }
+      },
+      {
+        "id": "resistor_1789225068527_rgiqn",
+        "type": "resistor",
+        "x": 850,
+        "y": 200,
+        "rotation": 0,
+        "props": {
+          "value": 2,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "multimeter_1789225289196_1hsj7",
+        "type": "multimeter",
+        "x": 710,
+        "y": -115,
+        "rotation": 0,
+        "props": {
+          "mode": "A_DC",
+          "hold": false,
+          "rel": false,
+          "range_auto": true
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1789223651789_gnmah",
+        "from": {
+          "instId": "comp_1789219061437_e9m95",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "resistor_1789222094014_1qfkt",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789225050838_1o1fp",
+        "from": {
+          "instId": "comp_1789219061437_e9m95",
+          "pinId": "POS"
+        },
+        "to": {
+          "instId": "multimeter_1789224576115_vny4v",
+          "pinId": "probe_red"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789225052357_i4p78",
+        "from": {
+          "instId": "multimeter_1789224576115_vny4v",
+          "pinId": "probe_com"
+        },
+        "to": {
+          "instId": "comp_1789219082241_1so1v",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789225072084_w3ybi",
+        "from": {
+          "instId": "resistor_1789222094014_1qfkt",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "resistor_1789225068527_rgiqn",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789225102075_9c2ra",
+        "from": {
+          "instId": "resistor_1789225068527_rgiqn",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1789219082241_1so1v",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789225295064_dqpnk",
+        "from": {
+          "instId": "comp_1789219082241_1so1v",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "multimeter_1789225289196_1hsj7",
+          "pinId": "probe_red"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_1789225297480_0s623",
+        "from": {
+          "instId": "multimeter_1789225289196_1hsj7",
+          "pinId": "probe_com"
+        },
+        "to": {
+          "instId": "resistor_1789222094014_1qfkt",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "\n void setup() {\n   // Put your setup code here, to run once when the board starts:\n\n}\nvoid loop() {\n  // Put your main code here, to run repeatedly indefinitely:\n\n}"
+}

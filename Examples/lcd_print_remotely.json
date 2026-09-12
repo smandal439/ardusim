@@ -2,7 +2,7 @@
   "id": "lcd_print_remotely",
   "name": "LCD PRINT REMOTELY",
   "icon": "🔧",
-  "desc": "A custom LCD PRINT REMOTELY circuit example.",
+  "desc": "A circuit that allows printing text on an LCD display remotely via serial or Bluetooth communication.",
   "tags": [
     "lcd",
     "remote",

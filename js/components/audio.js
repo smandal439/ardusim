@@ -288,26 +288,26 @@ defComp({
     power_rating: 3.0, // Maximum Rated Wattage (W)
   },
 
-  interactive: [
-    {
-      field: 'impedance',
-      label: 'Impedance',
-      type: 'select',
-      options: [
-        { value: 4, label: '4 Ω (3.2W Max @ 5V)' },
-        { value: 8, label: '8 Ω (1.8W Max @ 5V)' },
-        { value: 16, label: '16 Ω' },
-      ],
-    },
-    {
-      field: 'power_rating',
-      label: 'Power Rating',
-      min: 0.5,
-      max: 20.0,
-      step: 0.5,
-      unit: 'W',
-    },
-  ],
+  // interactive: [
+  //   {
+  //     field: 'impedance',
+  //     label: 'Impedance',
+  //     type: 'select',
+  //     options: [
+  //       { value: 4, label: '4 Ω (3.2W Max @ 5V)' },
+  //       { value: 8, label: '8 Ω (1.8W Max @ 5V)' },
+  //       { value: 16, label: '16 Ω' },
+  //     ],
+  //   },
+  //   {
+  //     field: 'power_rating',
+  //     label: 'Power Rating',
+  //     min: 0.5,
+  //     max: 20.0,
+  //     step: 0.5,
+  //     unit: 'W',
+  //   },
+  // ],
 
   pins: [
     { id: 'pos', label: '+', type: PIN_TYPE.SIGNAL, x: 35, y: 100, side: 'bottom' },

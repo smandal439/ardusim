@@ -2,7 +2,7 @@
   "id": "esp32_ntp_clock_lcd",
   "name": "ESP32 NTP Clock (LCD)",
   "icon": "🔧",
-  "desc": "A custom ESP32 NTP Clock (LCD) circuit example.",
+  "desc": "A simple ESP32-based NTP clock that connects to Wi-Fi, fetches the current UTC time from an NTP server, applies the Indian Standard Time (IST) offset, and displays the time in HH:MM:SS format on a 16x2 I2C LCD display.",
   "tags": [
     "esp32",
     "clock",

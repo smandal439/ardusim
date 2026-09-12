@@ -1,11 +1,17 @@
 {
   "id": "continuous_rotation_servo_control_by_pot",
-  "name": "Continuous Rotation Servo control by pot",
+  "name": "Continuous Rotation Servo Control by Potentiometer",
   "icon": "🔧",
-  "desc": "A custom Continuous Rotation Servo control by pot circuit example.",
+  "desc": "A simple circuit that allows you to control the speed and direction of a continuous rotation servo motor using a potentiometer. The potentiometer acts as an analog input, and the Arduino reads its value to determine the servo's speed and direction. Turning the potentiometer in one direction will make the servo rotate clockwise, while turning it in the opposite direction will make it rotate counterclockwise. The speed of rotation is proportional to how far the potentiometer is turned.",
   "tags": [
-    "custom",
-    "circuit"
+    "servo",
+    "potentiometer",
+    "arduino",
+    "continuous rotation",
+    "motor control",
+    "analog input",
+    "speed control",
+    "direction control"
   ],
   "circuit": {
     "components": [
