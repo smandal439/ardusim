@@ -1688,58 +1688,55 @@ defComp({
   category: 'Boards',
   icon: '🔌',
   desc: 'STM32F746NGH6 Cortex-M7 216MHz Discovery board with 4.3" TFT LCD, 3.3V logic',
-  width: 230,
-  height: 340,
+  width: 340,
+  height: 240,
   defaultProps: { label: 'STM32F746' },
   pins: [
-    // ── Left Arduino connector (CN5 / CN7) ──
-    // Analog pins
-    { id: 'A0', label: 'A0', type: PIN_TYPE.ANALOG, x: 14, y: 28, side: 'left' },
-    { id: 'A1', label: 'A1', type: PIN_TYPE.ANALOG, x: 14, y: 43, side: 'left' },
-    { id: 'A2', label: 'A2', type: PIN_TYPE.ANALOG, x: 14, y: 58, side: 'left' },
-    { id: 'A3', label: 'A3', type: PIN_TYPE.ANALOG, x: 14, y: 73, side: 'left' },
-    { id: 'A4', label: 'A4', type: PIN_TYPE.ANALOG, x: 14, y: 88, side: 'left' },
-    { id: 'A5', label: 'A5', type: PIN_TYPE.ANALOG, x: 14, y: 103, side: 'left' },
-    // Digital pins (left column)
-    { id: 'D0',  label: 'D0 (RX)',  type: PIN_TYPE.SIGNAL, x: 14, y: 128, side: 'left' },
-    { id: 'D1',  label: 'D1 (TX)',  type: PIN_TYPE.SIGNAL, x: 14, y: 143, side: 'left' },
-    { id: 'D2',  label: 'D2',       type: PIN_TYPE.DIGITAL, x: 14, y: 158, side: 'left' },
-    { id: 'D3',  label: 'D3~',      type: PIN_TYPE.PWM, x: 14, y: 173, side: 'left' },
-    { id: 'D4',  label: 'D4',       type: PIN_TYPE.DIGITAL, x: 14, y: 188, side: 'left' },
-    { id: 'D5',  label: 'D5~',      type: PIN_TYPE.PWM, x: 14, y: 203, side: 'left' },
-    { id: 'D6',  label: 'D6~',      type: PIN_TYPE.PWM, x: 14, y: 218, side: 'left' },
-    { id: 'D7',  label: 'D7',       type: PIN_TYPE.DIGITAL, x: 14, y: 233, side: 'left' },
-    // Power pins (left bottom)
-    { id: 'GND1', label: 'GND', type: PIN_TYPE.GND, x: 14, y: 258, side: 'left' },
-    { id: 'VIN',  label: 'VIN', type: PIN_TYPE.POWER, x: 14, y: 273, side: 'left' },
-    { id: '5V',   label: '5V',  type: PIN_TYPE.POWER, x: 14, y: 288, side: 'left' },
+    // ── Left Arduino connector (vertical) ──
+    { id: 'A0', label: 'A0',   type: PIN_TYPE.ANALOG,  x: 14, y: 28,  side: 'left' },
+    { id: 'A1', label: 'A1',   type: PIN_TYPE.ANALOG,  x: 14, y: 43,  side: 'left' },
+    { id: 'A2', label: 'A2',   type: PIN_TYPE.ANALOG,  x: 14, y: 58,  side: 'left' },
+    { id: 'A3', label: 'A3',   type: PIN_TYPE.ANALOG,  x: 14, y: 73,  side: 'left' },
+    { id: 'A4', label: 'A4',   type: PIN_TYPE.ANALOG,  x: 14, y: 88,  side: 'left' },
+    { id: 'A5', label: 'A5',   type: PIN_TYPE.ANALOG,  x: 14, y: 103, side: 'left' },
+    { id: 'D0',  label: 'D0 (RX)',  type: PIN_TYPE.SIGNAL,  x: 14, y: 123, side: 'left' },
+    { id: 'D1',  label: 'D1 (TX)',  type: PIN_TYPE.SIGNAL,  x: 14, y: 138, side: 'left' },
+    { id: 'D2',  label: 'D2',       type: PIN_TYPE.DIGITAL, x: 14, y: 153, side: 'left' },
+    { id: 'D3',  label: 'D3~',      type: PIN_TYPE.PWM,     x: 14, y: 168, side: 'left' },
+    { id: 'D4',  label: 'D4',       type: PIN_TYPE.DIGITAL, x: 14, y: 183, side: 'left' },
+    { id: 'D5',  label: 'D5~',      type: PIN_TYPE.PWM,     x: 14, y: 198, side: 'left' },
+    { id: 'D6',  label: 'D6~',      type: PIN_TYPE.PWM,     x: 14, y: 213, side: 'left' },
+    { id: 'GND1', label: 'GND', type: PIN_TYPE.GND,   x: 14, y: 228, side: 'left' },
 
-    // ── Right Arduino connector (CN4 / CN6) ──
-    // Digital pins (right column)
-    { id: 'D8',   label: 'D8',       type: PIN_TYPE.DIGITAL, x: 216, y: 128, side: 'right' },
-    { id: 'D9',   label: 'D9~',      type: PIN_TYPE.PWM, x: 216, y: 143, side: 'right' },
-    { id: 'D10',  label: 'D10~',     type: PIN_TYPE.PWM, x: 216, y: 158, side: 'right' },
-    { id: 'D11',  label: 'D11~',     type: PIN_TYPE.PWM, x: 216, y: 173, side: 'right' },
-    { id: 'D12',  label: 'D12',      type: PIN_TYPE.DIGITAL, x: 216, y: 188, side: 'right' },
-    { id: 'D13',  label: 'D13 · L',  type: PIN_TYPE.DIGITAL, x: 216, y: 203, side: 'right' },
-    // I2C pins
-    { id: 'D14',  label: 'D14 (SDA)', type: PIN_TYPE.SIGNAL, x: 216, y: 228, side: 'right' },
-    { id: 'D15',  label: 'D15 (SCL)', type: PIN_TYPE.SIGNAL, x: 216, y: 243, side: 'right' },
-    // Power pins (right bottom)
-    { id: 'GND2', label: 'GND',  type: PIN_TYPE.GND, x: 216, y: 258, side: 'right' },
-    { id: '3V3',  label: '3.3V', type: PIN_TYPE.POWER, x: 216, y: 273, side: 'right' },
-    { id: 'NRST', label: 'NRST', type: PIN_TYPE.SIGNAL, x: 216, y: 288, side: 'right' },
+    // ── Right Arduino connector (vertical) ──
+    { id: 'D7',  label: 'D7',       type: PIN_TYPE.DIGITAL, x: 326, y: 28,  side: 'right' },
+    { id: 'D8',  label: 'D8',       type: PIN_TYPE.DIGITAL, x: 326, y: 43,  side: 'right' },
+    { id: 'D9',  label: 'D9~',      type: PIN_TYPE.PWM,     x: 326, y: 58,  side: 'right' },
+    { id: 'D10', label: 'D10~',     type: PIN_TYPE.PWM,     x: 326, y: 73,  side: 'right' },
+    { id: 'D11', label: 'D11~',     type: PIN_TYPE.PWM,     x: 326, y: 88,  side: 'right' },
+    { id: 'D12', label: 'D12',      type: PIN_TYPE.DIGITAL, x: 326, y: 103, side: 'right' },
+    { id: 'D13', label: 'D13 · L',  type: PIN_TYPE.DIGITAL, x: 326, y: 123, side: 'right' },
+    { id: 'D14', label: 'D14 (SDA)', type: PIN_TYPE.SIGNAL,  x: 326, y: 143, side: 'right' },
+    { id: 'D15', label: 'D15 (SCL)', type: PIN_TYPE.SIGNAL,  x: 326, y: 158, side: 'right' },
+    { id: 'VIN',  label: 'VIN',  type: PIN_TYPE.POWER, x: 326, y: 178, side: 'right' },
+    { id: '5V',   label: '5V',   type: PIN_TYPE.POWER, x: 326, y: 193, side: 'right' },
+    { id: '3V3',  label: '3.3V', type: PIN_TYPE.POWER, x: 326, y: 208, side: 'right' },
+    { id: 'GND2', label: 'GND',  type: PIN_TYPE.GND,   x: 326, y: 228, side: 'right' },
 
-    // ── Bottom pins (additional morpho) ──
-    { id: 'PB6',  label: 'PB6 (SCL)',  type: PIN_TYPE.SIGNAL, x: 60,  y: 322, side: 'bottom' },
-    { id: 'PB7',  label: 'PB7 (TX1)',  type: PIN_TYPE.SIGNAL, x: 90,  y: 322, side: 'bottom' },
-    { id: 'PA9',  label: 'PA9 (TX1)',  type: PIN_TYPE.SIGNAL, x: 120, y: 322, side: 'bottom' },
-    { id: 'PA10', label: 'PA10 (RX1)', type: PIN_TYPE.SIGNAL, x: 150, y: 322, side: 'bottom' },
-    { id: 'PI11', label: 'PI11 (BTN)', type: PIN_TYPE.SIGNAL, x: 180, y: 322, side: 'bottom' },
+    // ── Bottom edge pins ──
+    { id: 'NRST',  label: 'NRST',  type: PIN_TYPE.SIGNAL, x: 60,  y: 232, side: 'bottom' },
+    { id: 'PB6',   label: 'PB6',   type: PIN_TYPE.SIGNAL, x: 100, y: 232, side: 'bottom' },
+    { id: 'PB7',   label: 'PB7',   type: PIN_TYPE.SIGNAL, x: 140, y: 232, side: 'bottom' },
+    { id: 'PA9',   label: 'PA9',   type: PIN_TYPE.SIGNAL, x: 180, y: 232, side: 'bottom' },
+    { id: 'PA10',  label: 'PA10',  type: PIN_TYPE.SIGNAL, x: 220, y: 232, side: 'bottom' },
+    { id: 'PI11',  label: 'PI11',  type: PIN_TYPE.SIGNAL, x: 260, y: 232, side: 'bottom' },
   ],
+  // Expose LCD area for on-screen rendering by the simulator
+  _lcdBuf: null,
   draw(ctx, inst, sim) {
     const { x, y, width: W, height: H } = inst;
-    const LCD_W = 160, LCD_H = 80;
+    // Large LCD — fills most of the board center
+    const LCD_W = 220, LCD_H = 110;
     const LCD_X = (W - LCD_W) / 2;
     const LCD_Y = 18;
 
@@ -1766,79 +1763,127 @@ defComp({
     roundRect(ctx, 4, 4, W - 8, H - 8, 6);
     ctx.stroke();
 
-    // ── LCD TFT (4.3" black rectangle) ──
-    ctx.fillStyle = '#0a0a0a';
-    roundRect(ctx, LCD_X, LCD_Y, LCD_W, LCD_H, 3);
+    // ── LCD TFT (big 4.3" display) ──
+    ctx.fillStyle = '#080808';
+    roundRect(ctx, LCD_X, LCD_Y, LCD_W, LCD_H, 4);
     ctx.fill();
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = '#444';
     ctx.lineWidth = 1;
-    roundRect(ctx, LCD_X, LCD_Y, LCD_W, LCD_H, 3);
+    roundRect(ctx, LCD_X, LCD_Y, LCD_W, LCD_H, 4);
     ctx.stroke();
 
-    // LCD text
-    ctx.fillStyle = '#2a5a2a';
-    ctx.font = 'bold 7px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('STM32F746G-DISCO', LCD_X + LCD_W / 2, LCD_Y + LCD_H / 2 - 6);
-    ctx.fillStyle = '#1a3a1a';
-    ctx.font = '5px monospace';
-    ctx.fillText('480x272 TFT LCD', LCD_X + LCD_W / 2, LCD_Y + LCD_H / 2 + 6);
-    ctx.fillText('Cortex-M7 216MHz', LCD_X + LCD_W / 2, LCD_Y + LCD_H / 2 + 16);
+    // Inner bezel
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 0.5;
+    roundRect(ctx, LCD_X + 2, LCD_Y + 2, LCD_W - 4, LCD_H - 4, 3);
+    ctx.stroke();
 
-    // ── ST-LINK Section (top) ──
+    // Render TFT framebuffer from ILI9341 library if available
+    const tftBuf = inst.runtimeState && inst.runtimeState.tft;
+    if (tftBuf && tftBuf.pixels) {
+      const FB_W = 480, FB_H = 272;
+      const scaleX = LCD_W / FB_W, scaleY = LCD_H / FB_H;
+      const px = tftBuf.pixels;
+      const screenX = LCD_X + 2, screenY = LCD_Y + 2;
+      const screenW = LCD_W - 4, screenH = LCD_H - 4;
+      for (let fy = 0; fy < FB_H; fy++) {
+        for (let fx = 0; fx < FB_W; fx++) {
+          const idx = (fy * FB_W + fx) * 3;
+          const r = px[idx] || 0, g = px[idx + 1] || 0, b = px[idx + 2] || 0;
+          if (r === 0 && g === 0 && b === 0) continue;
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fillRect(screenX + fx * scaleX, screenY + fy * scaleY, Math.ceil(scaleX), Math.ceil(scaleY));
+        }
+      }
+    } else {
+      // Default idle screen
+      ctx.fillStyle = '#1a4a1a';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('STM32F746G-DISCO', LCD_X + LCD_W / 2, LCD_Y + LCD_H / 2 - 10);
+      ctx.fillStyle = '#0f2f0f';
+      ctx.font = '7px monospace';
+      ctx.fillText('480x272 TFT LCD', LCD_X + LCD_W / 2, LCD_Y + LCD_H / 2 + 4);
+      ctx.fillText('Cortex-M7 216MHz', LCD_X + LCD_W / 2, LCD_Y + LCD_H / 2 + 16);
+      ctx.fillStyle = '#0a1f0a';
+      ctx.font = '6px monospace';
+      ctx.fillText('Use onboard LCD in your sketch!', LCD_X + LCD_W / 2, LCD_Y + LCD_H / 2 + 30);
+    }
+
+    // ── ST-LINK Section (bottom left) ──
     ctx.fillStyle = '#0d1a30';
-    roundRect(ctx, 10, H - 40, 50, 30, 3);
+    roundRect(ctx, 30, H - 28, 55, 20, 3);
     ctx.fill();
     ctx.fillStyle = '#4a6a8a';
     ctx.font = 'bold 5px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('ST-LINK', 35, H - 28);
-    ctx.fillStyle = '#3a5a7a';
-    ctx.font = '4px monospace';
-    ctx.fillText('V2-1', 35, H - 20);
+    ctx.fillText('ST-LINK/V2-1', 57, H - 16);
 
     // ── USB Type-B connector (ST-LINK) ──
     ctx.fillStyle = '#7f8c8d';
-    roundRect(ctx, 20, H - 14, 22, 14, 2);
+    roundRect(ctx, 40, H - 8, 28, 8, 2);
     ctx.fill();
     ctx.fillStyle = '#3a3a3a';
-    roundRect(ctx, 23, H - 11, 16, 8, 1);
+    roundRect(ctx, 44, H - 6, 20, 4, 1);
     ctx.fill();
 
     // ── USB OTG HS connector (bottom right) ──
     ctx.fillStyle = '#7f8c8d';
-    roundRect(ctx, W - 55, H - 14, 30, 14, 2);
+    roundRect(ctx, W - 75, H - 8, 36, 8, 2);
     ctx.fill();
     ctx.fillStyle = '#3a3a3a';
-    roundRect(ctx, W - 51, H - 11, 22, 8, 1);
+    roundRect(ctx, W - 71, H - 6, 28, 4, 1);
     ctx.fill();
     ctx.fillStyle = '#8b949e';
     ctx.font = '4px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('USB OTG', W - 40, H - 2);
+    ctx.fillText('USB OTG', W - 57, H - 1);
+
+    // ── Ethernet RJ45 (top left) ──
+    ctx.fillStyle = '#5a6370';
+    roundRect(ctx, 100, H - 16, 24, 14, 2);
+    ctx.fill();
+    ctx.fillStyle = '#3a4a5a';
+    roundRect(ctx, 103, H - 14, 18, 10, 1);
+    ctx.fill();
+    ctx.fillStyle = '#6a7a8a';
+    ctx.font = '3px monospace';
+    ctx.fillText('ETH', 112, H - 1);
 
     // ── User Button B1 ──
     ctx.fillStyle = '#222';
-    roundRect(ctx, W / 2 - 8, H - 38, 16, 10, 2);
+    roundRect(ctx, 160, H - 20, 18, 10, 2);
     ctx.fill();
     ctx.fillStyle = '#555';
-    roundRect(ctx, W / 2 - 6, H - 36, 12, 6, 1);
+    roundRect(ctx, 162, H - 18, 14, 6, 1);
     ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,0.4)';
     ctx.font = 'bold 4px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('B1', W / 2, H - 41);
+    ctx.fillText('B1', 169, H - 22);
 
     // ── Reset Button B2 ──
     ctx.fillStyle = '#222';
-    roundRect(ctx, W / 2 + 14, H - 38, 16, 10, 2);
+    roundRect(ctx, 186, H - 20, 18, 10, 2);
     ctx.fill();
     ctx.fillStyle = '#555';
-    roundRect(ctx, W / 2 + 16, H - 36, 12, 6, 1);
+    roundRect(ctx, 188, H - 18, 14, 6, 1);
     ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,0.4)';
     ctx.font = 'bold 4px monospace';
-    ctx.fillText('RST', W / 2 + 22, H - 41);
+    ctx.fillText('RST', 195, H - 22);
+
+    // ── LD1 LED (onboard green LED on PI1 = D13) ──
+    const ledCx = W - 30, ledCy = 155;
+    const lit = sim && sim.pinStates && (sim.pinStates.pin_13 || 0) > 0;
+    drawLED_on_board(ctx, ledCx, ledCy, lit ? '#00ff44' : '#224422', 4);
+    ctx.fillStyle = '#8b949e';
+    ctx.font = 'bold 4px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('LD1', ledCx, ledCy + 8);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '3px monospace';
+    ctx.fillText('PI1', ledCx, ledCy - 6);
 
     // ── Left Arduino header strip ──
     const pinsList = inst.pins || this.pins || [];
@@ -1849,7 +1894,9 @@ defComp({
       ctx.shadowColor = 'rgba(0,0,0,0.3)';
       ctx.shadowBlur = 4;
       ctx.fillStyle = '#111';
-      roundRect(ctx, hx, 18, 14, H - 70, 2);
+      const topY = Math.min(...holeYs) - 8;
+      const botY = Math.max(...holeYs) + 8;
+      roundRect(ctx, hx, topY, 14, botY - topY, 2);
       ctx.fill();
       ctx.shadowBlur = 0;
       ctx.strokeStyle = 'rgba(255,255,255,0.06)';
@@ -1898,35 +1945,11 @@ defComp({
       ctx.fillText(pin.label, bx + (pin.side === 'left' ? pw - 2 : 2), pin.y + 1.5);
     }
 
-    // ── Bottom pin labels ──
-    const bottomPins = pinsList.filter(p => p.side === 'bottom');
-    ctx.font = 'bold 4px monospace';
-    ctx.textAlign = 'center';
-    for (const pin of bottomPins) {
-      ctx.fillStyle = '#8b949e';
-      ctx.fillText(pin.label, pin.x, pin.y - 5);
-    }
-
-    // ── Built-in LED (LD1 on PI1 = D13) ──
-    const ledCx = W - 40, ledCy = 115;
-    const lit = sim && sim.pinStates && (sim.pinStates.pin_13 || 0) > 0;
-    drawLED_on_board(ctx, ledCx, ledCy, lit ? '#00ff44' : '#224422', 4);
-    ctx.fillStyle = '#8b949e';
+    // ── Board label ──
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
     ctx.font = 'bold 5px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('LD1', ledCx, ledCy + 10);
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.font = '4px monospace';
-    ctx.fillText('PI1', ledCx, ledCy - 6);
-
-    // ── Board label on PCB ──
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.font = 'bold 6px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('STM32F746NGH6', W / 2, LCD_Y + LCD_H + 14);
-    ctx.fillStyle = 'rgba(255,255,255,0.08)';
-    ctx.font = '4px monospace';
-    ctx.fillText('Cortex-M7 · 1MB Flash · 320KB RAM', W / 2, LCD_Y + LCD_H + 22);
+    ctx.fillText('STM32F746NGH6 · Cortex-M7 · 1MB Flash · 320KB RAM', W / 2, H - 3);
 
     ctx.restore();
   }

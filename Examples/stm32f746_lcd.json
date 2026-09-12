@@ -1,0 +1,25 @@
+{
+  "id": "stm32f746_lcd",
+  "name": "STM32 Onboard LCD",
+  "icon": "🖥️",
+  "desc": "STM32F746G-DISCO — draw graphics and text on the onboard 4.3\" 480x272 TFT LCD using Adafruit_GFX",
+  "tags": [
+    "stm32",
+    "display",
+    "tft",
+    "graphics",
+    "beginner"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "stm32f746_disco",
+        "x": 200,
+        "y": 80
+      }
+    ],
+    "wires": []
+  },
+  "code": "/*\n * STM32F746G-DISCO Onboard LCD Demo\n * Draws shapes, text, and colours on the 4.3\" 480x272 TFT.\n * No external wiring needed — uses the built-in LCD.\n * Uses Adafruit_GFX / Adafruit_ILI9341 API.\n */\n\n#include <SPI.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_ILI9341.h>\n\n// STM32 F746 onboard LCD — CS/DC/RST are directly wired to the FMC\n// In ArduSim, the library writes directly to the board's LCD.\nAdafruit_ILI9341 tft(10, 9, 8); // CS, DC, RST (dummy pins — onboard)\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"STM32F746G-DISCO LCD demo\");\n\n  tft.begin();\n  tft.setRotation(1); // landscape\n\n  // Fill screen with dark blue\n  tft.fillScreen(ILI9341_NAVY);\n\n  // Draw title\n  tft.setTextColor(ILI9341_YELLOW);\n  tft.setTextSize(3);\n  tft.setCursor(20, 10);\n  tft.println(\"STM32F746G-DISCO\");\n\n  tft.setTextColor(ILI9341_WHITE);\n  tft.setTextSize(2);\n  tft.setCursor(20, 50);\n  tft.println(\"Onboard 4.3 inch TFT LCD\");\n  tft.println(\"480 x 272 pixels\");\n\n  // Draw coloured rectangles\n  tft.fillRect(20, 100, 120, 60, ILI9341_RED);\n  tft.fillRect(160, 100, 120, 60, ILI9341_GREEN);\n  tft.fillRect(300, 100, 120, 60, ILI9341_BLUE);\n\n  // Labels on rectangles\n  tft.setTextColor(ILI9341_WHITE);\n  tft.setTextSize(2);\n  tft.setCursor(50, 120);  tft.print(\"RED\");\n  tft.setCursor(190, 120); tft.print(\"GREEN\");\n  tft.setCursor(325, 120); tft.print(\"BLUE\");\n\n  // Draw circles\n  tft.drawCircle(100, 220, 30, ILI9341_CYAN);\n  tft.fillCircle(240, 220, 30, ILI9341_MAGENTA);\n  tft.drawRoundRect(340, 190, 80, 60, 10, ILI9341_ORANGE);\n\n  // Draw diagonal lines\n  for (int i = 0; i < 4; i++) {\n    tft.drawLine(0, 260 - i * 10, 480, 270 - i * 5, ILI9341_WHITE);\n  }\n\n  Serial.println(\"LCD demo complete.\");\n}\n\nvoid loop() {\n  // Pulse the backlight colour\n  static int hue = 0;\n  hue += 5;\n  if (hue > 360) hue = 0;\n  delay(100);\n}"
+}

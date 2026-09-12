@@ -992,9 +992,11 @@ void loop() {
       }
 
       // TFT (ILI9341 240×320 SPI) display events — maintains a 320×240 RGB framebuffer
+      // Also supports STM32F746G-DISCO onboard LCD (480×272 framebuffer)
       for (const inst of insts) {
-        if (inst.type !== 'ili9341') continue;
-        const FB_W = 320, FB_H = 240;
+        if (inst.type !== 'ili9341' && inst.type !== 'stm32f746_disco') continue;
+        const FB_W = inst.type === 'stm32f746_disco' ? 480 : 320;
+        const FB_H = inst.type === 'stm32f746_disco' ? 272 : 240;
         const tft = inst.runtimeState.tft || (inst.runtimeState.tft = {
           power: false,
           pixels: new Uint8Array(FB_W * FB_H * 3),

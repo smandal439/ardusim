@@ -1852,7 +1852,7 @@ window.loadExamplesFromFiles = async function () {
     'rainbow_rgb', 'read_rfid_card_raw_data', 'relay_control', 'remote_control_leds', 'remote_servo_control', 'rfid_inventory_tracker',
     'rotary_encoder_counter', 'rotary_encoder_servo', 'seg7_counter', 'serial_plotter', 'serial_plotter_sine_and_triangle', 'servo_continuous_spin',
     'servo_sweep', 'shift_resister_circuit', 'simplebme280_altimeter_on_lcd', 'simplebme280_altitude', 'simplebme280_basic',     'stepper_motor',
-    'stm32f746_blink', 'stm32f746_button', 'stm32f746_pot_led',
+    'stm32f746_blink', 'stm32f746_button', 'stm32f746_lcd', 'stm32f746_pot_led',
     'temperature', 'traffic_light', 'two_lcd', 'ultrasonic', 'ultrasonic_distance_pulsein', 'vl53l0x_proximity_sensor',
     'voltage_divider', 'weather_station_multi', 'weather_station_simple', 'weather_station_tft', 'zigbee_led_control',
     'zigbee_sender_receiver', 'zigbee_sensor_network'
