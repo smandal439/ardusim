@@ -21,6 +21,12 @@ window.ArduinoLibs['Zigbee'] = {
     // Zigbee.begin(channel) → _a.zigbeeBegin(channel)
     [/\bZigbee\.begin\s*\(\s*(\d+)\s*\)/g, '_a.zigbeeBegin($1)'],
 
+    // Zigbee.send with (uint8_t*)& cast and sizeof: Zigbee.send(addr, (uint8_t *)&data, sizeof(data))
+    [/\bZigbee\.send\s*\(\s*(\w+)\s*,\s*\(uint8_t\s*\*\)\s*&(\w+)\s*,\s*sizeof\s*\(\s*\2\s*\)\s*\)/g, '_a.zigbeeSend($1, $2)'],
+
+    // Zigbee.send with (uint8_t*)& cast: Zigbee.send(addr, (uint8_t *)&data, len)
+    [/\bZigbee\.send\s*\(\s*(\w+)\s*,\s*\(uint8_t\s*\*\)\s*&(\w+)\s*,\s*(\w+)\s*\)/g, '_a.zigbeeSend($1, $2, $3)'],
+
     // Zigbee.send(destAddr, data, len) → _a.zigbeeSend(destAddr, data, len)
     [/\bZigbee\.send\s*\(\s*(\w+)\s*,\s*(\w+)\s*,\s*(\w+)\s*\)/g, '_a.zigbeeSend($1, $2, $3)'],
 
