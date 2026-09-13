@@ -35,6 +35,19 @@
           "line1": "Hello, I2C!    ",
           "line2": "Addr: 0x27      "
         }
+      },
+      {
+        "id": "wifi_hotspot_1",
+        "type": "wifi_module",
+        "x": 480,
+        "y": 40,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSimNet",
+          "password": "simulator",
+          "channel": 6,
+          "ipAddress": "192.168.1.1"
+        }
       }
     ],
     "wires": [

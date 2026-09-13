@@ -22,6 +22,19 @@
         "props": {
           "label": "ESP32"
         }
+      },
+      {
+        "id": "wifi_hotspot_1",
+        "type": "wifi_module",
+        "x": 250,
+        "y": 0,
+        "rotation": 0,
+        "props": {
+          "ssid": "YOUR_WIFI_SSID",
+          "password": "YOUR_WIFI_PASSWORD",
+          "channel": 6,
+          "ipAddress": "192.168.1.1"
+        }
       }
     ],
     "wires": []

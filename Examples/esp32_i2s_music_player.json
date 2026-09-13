@@ -51,78 +51,175 @@
         "type": "push_button",
         "x": 120,
         "y": 440
+      },
+      {
+        "id": "wifi_hotspot_1",
+        "type": "wifi_module",
+        "x": 530,
+        "y": 30,
+        "rotation": 0,
+        "props": {
+          "ssid": "YOUR_WIFI_SSID",
+          "password": "YOUR_WIFI_PASS",
+          "channel": 6,
+          "ipAddress": "192.168.1.1"
+        }
       }
     ],
     "wires": [
       {
         "id": "w_bclk",
-        "from": { "instId": "esp", "pinId": "D26" },
-        "to": { "instId": "amp", "pinId": "bclk" }
+        "from": {
+          "instId": "esp",
+          "pinId": "D26"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "bclk"
+        }
       },
       {
         "id": "w_lrc",
-        "from": { "instId": "esp", "pinId": "D25" },
-        "to": { "instId": "amp", "pinId": "lrc" }
+        "from": {
+          "instId": "esp",
+          "pinId": "D25"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "lrc"
+        }
       },
       {
         "id": "w_din",
-        "from": { "instId": "esp", "pinId": "D22" },
-        "to": { "instId": "amp", "pinId": "din" }
+        "from": {
+          "instId": "esp",
+          "pinId": "D22"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "din"
+        }
       },
       {
         "id": "w_5v",
-        "from": { "instId": "esp", "pinId": "VIN" },
-        "to": { "instId": "amp", "pinId": "vin" }
+        "from": {
+          "instId": "esp",
+          "pinId": "VIN"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "vin"
+        }
       },
       {
         "id": "w_gnd",
-        "from": { "instId": "esp", "pinId": "GND2" },
-        "to": { "instId": "amp", "pinId": "gnd" }
+        "from": {
+          "instId": "esp",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "gnd"
+        }
       },
       {
         "id": "w_sd",
-        "from": { "instId": "amp", "pinId": "sd" },
-        "to": { "instId": "amp", "pinId": "gnd" }
+        "from": {
+          "instId": "amp",
+          "pinId": "sd"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "gnd"
+        }
       },
       {
         "id": "w_out_p",
-        "from": { "instId": "amp", "pinId": "out_p" },
-        "to": { "instId": "spk", "pinId": "pos" }
+        "from": {
+          "instId": "amp",
+          "pinId": "out_p"
+        },
+        "to": {
+          "instId": "spk",
+          "pinId": "pos"
+        }
       },
       {
         "id": "w_out_n",
-        "from": { "instId": "amp", "pinId": "out_n" },
-        "to": { "instId": "spk", "pinId": "neg" }
+        "from": {
+          "instId": "amp",
+          "pinId": "out_n"
+        },
+        "to": {
+          "instId": "spk",
+          "pinId": "neg"
+        }
       },
       {
         "id": "w_btn_play",
-        "from": { "instId": "esp", "pinId": "D2" },
-        "to": { "instId": "btn_play", "pinId": "p1" }
+        "from": {
+          "instId": "esp",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "btn_play",
+          "pinId": "p1"
+        }
       },
       {
         "id": "w_btn_play_gnd",
-        "from": { "instId": "btn_play", "pinId": "p3" },
-        "to": { "instId": "esp", "pinId": "GND1" }
+        "from": {
+          "instId": "btn_play",
+          "pinId": "p3"
+        },
+        "to": {
+          "instId": "esp",
+          "pinId": "GND1"
+        }
       },
       {
         "id": "w_btn_next",
-        "from": { "instId": "esp", "pinId": "D3" },
-        "to": { "instId": "btn_next", "pinId": "p1" }
+        "from": {
+          "instId": "esp",
+          "pinId": "D3"
+        },
+        "to": {
+          "instId": "btn_next",
+          "pinId": "p1"
+        }
       },
       {
         "id": "w_btn_next_gnd",
-        "from": { "instId": "btn_next", "pinId": "p3" },
-        "to": { "instId": "esp", "pinId": "GND1" }
+        "from": {
+          "instId": "btn_next",
+          "pinId": "p3"
+        },
+        "to": {
+          "instId": "esp",
+          "pinId": "GND1"
+        }
       },
       {
         "id": "w_btn_prev",
-        "from": { "instId": "esp", "pinId": "D4" },
-        "to": { "instId": "btn_prev", "pinId": "p1" }
+        "from": {
+          "instId": "esp",
+          "pinId": "D4"
+        },
+        "to": {
+          "instId": "btn_prev",
+          "pinId": "p1"
+        }
       },
       {
         "id": "w_btn_prev_gnd",
-        "from": { "instId": "btn_prev", "pinId": "p3" },
-        "to": { "instId": "esp", "pinId": "GND1" }
+        "from": {
+          "instId": "btn_prev",
+          "pinId": "p3"
+        },
+        "to": {
+          "instId": "esp",
+          "pinId": "GND1"
+        }
       }
     ]
   },

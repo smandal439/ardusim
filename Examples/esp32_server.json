@@ -35,6 +35,19 @@
         "type": "potentiometer",
         "x": 520,
         "y": 300
+      },
+      {
+        "id": "wifi_hotspot_1",
+        "type": "wifi_module",
+        "x": 480,
+        "y": 40,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSimNet",
+          "password": "simulator",
+          "channel": 6,
+          "ipAddress": "192.168.1.1"
+        }
       }
     ],
     "wires": [

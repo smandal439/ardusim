@@ -79,6 +79,19 @@
           "pressed": false,
           "label": "BTN"
         }
+      },
+      {
+        "id": "wifi_hotspot_1",
+        "type": "wifi_module",
+        "x": 530,
+        "y": 30,
+        "rotation": 0,
+        "props": {
+          "ssid": "YOUR_WIFI_SSID",
+          "password": "YOUR_WIFI_PASS",
+          "channel": 6,
+          "ipAddress": "192.168.1.1"
+        }
       }
     ],
     "wires": [
