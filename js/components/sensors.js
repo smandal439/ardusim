@@ -3024,7 +3024,11 @@ class DS3231Component extends Component {
     const elapsed = now - (rs._lastTick || 0);
     rs._lastTick = now;
     if (elapsed > 0) {
-      rs.second += Math.floor(elapsed / 1000);
+      rs._accMs = (rs._accMs || 0) + elapsed;
+      var secToAdd = (rs._accMs / 1000) | 0;
+      if (secToAdd > 0) {
+        rs._accMs -= secToAdd * 1000;
+        rs.second += secToAdd;
       while (rs.second >= 60) { rs.second -= 60; rs.minute++; }
       while (rs.second < 0)  { rs.second += 60; rs.minute--; }
       while (rs.minute >= 60) { rs.minute -= 60; rs.hour++; }
