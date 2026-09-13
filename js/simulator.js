@@ -1333,6 +1333,18 @@ class ArduinoSimulator {
     this._resumeAudio();
     const runId = ++this._runSeq;
     const { keys, vals, fn } = this._compiledCtx;
+    // FreeRTOS dual-core state — ensure initialized for _startExecution path
+    this._freertosTasks = { 0: [], 1: [] };
+    this._freertosTaskRegistry = {};
+    this._freertosQueues = [];
+    this._freertosSemaphores = [];
+    this._freertosEventGroups = [];
+    this._freertosCurrentTask = {};
+    this._freertosCurrentCore = 0;
+    this._freertosCriticalSection = 0;
+    this._freertosSuspended = false;
+    this._freertosSuspendCount = 0;
+    window._freertosTaskRegistry = this._freertosTaskRegistry;
 
     this._serialLog('[ArduSim] Simulation started\n', 'system');
     if (this.onStart) this.onStart();
