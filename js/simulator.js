@@ -979,7 +979,7 @@ class ArduinoSimulator {
             const c = canvas.components[i];
             if (c.type !== 'wifi_module') continue;
             if (c.props && c.props.ssid === ssid) {
-              return { ssid: c.props.ssid, password: c.props.password, channel: c.props.channel || 6, ipAddress: c.props.ipAddress || '192.168.4.1' };
+              return { ssid: c.props.ssid, password: c.props.password, channel: c.props.channel || 6, ipAddress: c.props.ipAddress || '192.168.4.1', security: c.props.security || 'WPA2-PSK' };
             }
           }
           return null;
@@ -989,6 +989,15 @@ class ArduinoSimulator {
           if (parts.length !== 4) return '192.168.4.105';
           parts[3] = '105';
           return parts.join('.');
+        },
+        _securityToAuthType(security) {
+          if (!security || security === 'OPEN') return 0;
+          if (security === 'WEP') return 1;
+          if (security === 'WPA-PSK') return 2;
+          if (security === 'WPA2-PSK') return 3;
+          if (security === 'WPA/WPA2-PSK') return 4;
+          if (security === 'WPA3-PSK') return 5;
+          return 3;
         },
         begin(ssid, pass) {
           const hotspot = this._findHotspot(ssid);
@@ -1027,29 +1036,57 @@ class ArduinoSimulator {
         softAP(ssid) { self._serialLog(`[ESP32 Wi-Fi] SoftAP "${ssid}" started\n`, 'system'); },
         setAutoConnect() { },
         reconnect() { self._serialLog('[ESP32 Wi-Fi] Reconnected\n', 'system'); },
-        RSSI() {
+        RSSI(idx) {
+          if (idx !== undefined && idx !== null) {
+            const scan = self._wifiScanResults || [];
+            if (idx >= 0 && idx < scan.length) return scan[idx].rssi;
+            return 0;
+          }
           if (!self._wifiConnected || !self._wifiSSID) return 0;
           const hotspot = this._findHotspot(self._wifiSSID);
           if (!hotspot) return -90;
-          const txPower = hotspot.txPower || 20;
-          const baseRssi = txPower - 40;
-          return baseRssi + Math.round(Math.sin(Date.now() / 3000) * 3);
+          return (hotspot.txPower || 20) - 40 + Math.round(Math.sin(Date.now() / 3000) * 3);
         },
         scanNetworks() {
           const canvas = window.CircuitCanvas;
-          if (!canvas || !Array.isArray(canvas.components)) return 0;
-          let count = 0;
           self._wifiScanResults = [];
-          for (let i = 0; i < canvas.components.length; i++) {
-            const c = canvas.components[i];
+          if (!canvas || !Array.isArray(canvas.components)) return 0;
+          for (let j = 0; j < canvas.components.length; j++) {
+            const c = canvas.components[j];
             if (c.type === 'wifi_module' && c.props) {
-              count++;
-              self._wifiScanResults.push(c.props.ssid || '');
+              self._wifiScanResults.push({
+                ssid: c.props.ssid || '',
+                rssi: -40 + Math.round(Math.sin(Date.now() / 3000 + j) * 3),
+                channel: c.props.channel || 6,
+                authType: this._securityToAuthType(c.props.security),
+              });
             }
           }
-          return count;
+          return self._wifiScanResults.length;
         },
-        SSID() { return self._wifiSSID || ''; },
+        SSID(idx) {
+          if (idx !== undefined && idx !== null) {
+            const scan = self._wifiScanResults || [];
+            if (idx >= 0 && idx < scan.length) return scan[idx].ssid;
+            return '';
+          }
+          return self._wifiSSID || '';
+        },
+        channel(idx) {
+          if (idx !== undefined && idx !== null) {
+            const scan = self._wifiScanResults || [];
+            if (idx >= 0 && idx < scan.length) return scan[idx].channel;
+            return 0;
+          }
+          if (!self._wifiConnected || !self._wifiSSID) return 0;
+          const hotspot = this._findHotspot(self._wifiSSID);
+          return hotspot ? hotspot.channel : 0;
+        },
+        encryptionType(idx) {
+          const scan = self._wifiScanResults || [];
+          if (idx >= 0 && idx < scan.length) return scan[idx].authType;
+          return 0;
+        },
       },
       /* ESP32 Wi-Fi client + MQTT (PubSubClient).
          When the MQTT.js library is loaded (index.html), this also publishes
