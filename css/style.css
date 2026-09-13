@@ -1878,6 +1878,43 @@ body.view-serial #resizer-bottom { display: none; }
   box-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
 }
 
+.wire-style-group {
+  display: flex;
+  gap: 4px;
+  padding: 4px 8px 8px 8px;
+}
+
+.wire-style-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+  outline: none;
+}
+
+.wire-style-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.wire-style-btn.active {
+  background: rgba(0, 229, 255, 0.15);
+  color: #00e5ff;
+  border-color: #00e5ff;
+  box-shadow: 0 0 6px rgba(0, 229, 255, 0.3);
+}
+
 /* ═══════════════ TOAST NOTIFICATIONS ═══════════════ */
 .toast-container {
   position: fixed;

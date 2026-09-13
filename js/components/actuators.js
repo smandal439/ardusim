@@ -2150,9 +2150,342 @@ class Stepper28BYJComponent extends Component {
   }
 }
 
+/* ─── TB6600 STEPPER MOTOR DRIVER ─── */
+defComp({
+  id: 'tb6600',
+  name: 'TB6600 Stepper Driver',
+  category: 'Actuators',
+  icon: '🔧',
+  desc: 'TB6600 4A 9~42V stepper motor driver — pulse/direction control, 16 micro-step modes, up to 4A output',
+  width: 90,
+  height: 100,
+  defaultProps: { microstep: 16, currentMA: 1500, enabled: true },
+  pins: [
+    { id: 'PUL', label: 'PUL', type: PIN_TYPE.DIGITAL, x: 14, y: 100, side: 'bottom' },
+    { id: 'DIR', label: 'DIR', type: PIN_TYPE.DIGITAL, x: 32, y: 100, side: 'bottom' },
+    { id: 'ENA', label: 'ENA', type: PIN_TYPE.DIGITAL, x: 50, y: 100, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 68, y: 100, side: 'bottom' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 14, y: 0, side: 'top' },
+    { id: 'A+', label: 'A+', type: PIN_TYPE.SIGNAL, x: 36, y: 0, side: 'top' },
+    { id: 'A-', label: 'A-', type: PIN_TYPE.SIGNAL, x: 50, y: 0, side: 'top' },
+    { id: 'B+', label: 'B+', type: PIN_TYPE.SIGNAL, x: 64, y: 0, side: 'top' },
+    { id: 'B-', label: 'B-', type: PIN_TYPE.SIGNAL, x: 78, y: 0, side: 'top' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const enabled = inst.runtimeState?.enabled ?? inst.props.enabled;
+    const stepPos = inst.runtimeState?.position ?? 0;
+    const activePhase = inst.runtimeState?.phase ?? 0;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const drawRR = (rx, ry, rw, rh, rad = 2) => {
+      if (typeof roundRect === 'function') {
+        roundRect(ctx, rx, ry, rw, rh, rad);
+      } else {
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+        else ctx.rect(rx, ry, rw, rh);
+      }
+    };
+
+    // 1. PCB Body (Green FR4)
+    const pcbGrad = ctx.createLinearGradient(0, 6, 90, 94);
+    pcbGrad.addColorStop(0, '#0d6b3a');
+    pcbGrad.addColorStop(0.5, '#0a5a2e');
+    pcbGrad.addColorStop(1, '#074a22');
+    ctx.fillStyle = pcbGrad;
+    drawRR(0, 6, 90, 88, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#063d1a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // PCB silkscreen border
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 0.6;
+    drawRR(2, 8, 86, 84, 2);
+    ctx.stroke();
+
+    // Corner mounting holes
+    [[6, 12], [84, 12], [6, 88], [84, 88]].forEach(([hx, hy]) => {
+      ctx.fillStyle = '#c8a452';
+      ctx.beginPath(); ctx.arc(hx, hy, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#042e12';
+      ctx.beginPath(); ctx.arc(hx, hy, 1.5, 0, Math.PI * 2); ctx.fill();
+    });
+
+    // 2. TB6600 Driver IC (QFP-28 Package)
+    const icX = 28, icY = 22, icW = 34, icH = 28;
+    const icGrad = ctx.createLinearGradient(icX, icY, icX + icW, icY);
+    icGrad.addColorStop(0, '#1a1a1a');
+    icGrad.addColorStop(0.5, '#2a2a2a');
+    icGrad.addColorStop(1, '#1a1a1a');
+    ctx.fillStyle = icGrad;
+    drawRR(icX, icY, icW, icH, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // IC Pin 1 notch
+    ctx.fillStyle = '#444';
+    ctx.beginPath(); ctx.arc(icX + 4, icY + 4, 1.2, 0, Math.PI * 2); ctx.fill();
+
+    // IC Label
+    ctx.fillStyle = '#e0e0e0';
+    ctx.font = 'bold 6px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('TB6600', icX + icW / 2, icY + 14);
+
+    ctx.font = '4px "Courier New", monospace';
+    ctx.fillStyle = '#888';
+    ctx.fillText('STEPPER DRIVER', icX + icW / 2, icY + 22);
+
+    // IC gull-wing leads (top & bottom)
+    ctx.fillStyle = '#b0bec5';
+    for (let p = 0; p < 7; p++) {
+      ctx.fillRect(icX + 3 + p * 4.5, icY - 2, 1.5, 2);
+      ctx.fillRect(icX + 3 + p * 4.5, icY + icH, 1.5, 2);
+    }
+    // IC side leads
+    for (let p = 0; p < 4; p++) {
+      ctx.fillRect(icX - 2, icY + 3 + p * 6, 2, 1.5);
+      ctx.fillRect(icX + icW, icY + 3 + p * 6, 2, 1.5);
+    }
+
+    // 3. DIP Switch Block (Microstep Settings)
+    const dipX = 8, dipY = 24;
+    ctx.fillStyle = '#1c1c1c';
+    drawRR(dipX, dipY, 14, 12, 1);
+    ctx.fill();
+    ctx.fillStyle = '#f5c518';
+    drawRR(dipX + 1, dipY + 2, 3, 3, 0.5);
+    ctx.fill();
+    ctx.fillStyle = '#ccc';
+    ctx.font = 'bold 2.5px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('SW1', dipX + 7, dipY - 1);
+
+    // DIP switch toggles
+    const ms = inst.props.microstep || 16;
+    const dipSettings = [
+      ms >= 2, ms >= 4, ms >= 8, ms >= 16
+    ];
+    for (let i = 0; i < 4; i++) {
+      const swOn = dipSettings[i];
+      ctx.fillStyle = '#333';
+      ctx.fillRect(dipX + 2, dipY + 3 + i * 2.2, 10, 1.8);
+      ctx.fillStyle = swOn ? '#ff6b35' : '#888';
+      ctx.fillRect(dipX + (swOn ? 7 : 2), dipY + 3.3 + i * 2.2, 4, 1.2);
+    }
+
+    // 4. Current Adjustment Potentiometer
+    const potX = 72, potY = 26;
+    const potGrad = ctx.createRadialGradient(potX, potY + 4, 2, potX, potY + 4, 8);
+    potGrad.addColorStop(0, '#d4af37');
+    potGrad.addColorStop(0.7, '#b8960f');
+    potGrad.addColorStop(1, '#8a6e08');
+    ctx.fillStyle = potGrad;
+    ctx.beginPath(); ctx.arc(potX, potY + 4, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#6e5611';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // Potentiometer screw slot
+    ctx.strokeStyle = '#4a3a08';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(potX - 3, potY + 4); ctx.lineTo(potX + 3, potY + 4); ctx.stroke();
+
+    ctx.fillStyle = '#aaa';
+    ctx.font = '2.5px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('CURR', potX, potY + 14);
+
+    // 5. Electrolytic Capacitors
+    [[10, 52], [80, 52]].forEach(([cx, cy]) => {
+      const capGrad = ctx.createRadialGradient(cx - 1, cy - 1, 1, cx, cy, 5);
+      capGrad.addColorStop(0, '#444');
+      capGrad.addColorStop(0.7, '#1a1a1a');
+      capGrad.addColorStop(1, '#050505');
+      ctx.fillStyle = capGrad;
+      ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#8a929a';
+      ctx.beginPath(); ctx.arc(cx, cy, 3.5, 0, Math.PI * 2); ctx.fill();
+    });
+
+    // 6. Screw Terminal Blocks (Top: Motor & Power)
+    const drawTerminal = (tx, ty, tw, th, labels, positions) => {
+      const tGrad = ctx.createLinearGradient(tx, ty, tx, ty + th);
+      tGrad.addColorStop(0, '#1d8142');
+      tGrad.addColorStop(0.5, '#156131');
+      tGrad.addColorStop(1, '#0e4221');
+      ctx.fillStyle = tGrad;
+      drawRR(tx, ty, tw, th, 1.5);
+      ctx.fill();
+      ctx.strokeStyle = '#0a3218';
+      ctx.lineWidth = 0.6;
+      ctx.stroke();
+
+      positions.forEach((sx, i) => {
+        // Screw head
+        const scrGrad = ctx.createRadialGradient(sx - 0.3, ty + 5, 0, sx, ty + 5, 2.5);
+        scrGrad.addColorStop(0, '#e0e0e0');
+        scrGrad.addColorStop(0.6, '#999');
+        scrGrad.addColorStop(1, '#555');
+        ctx.fillStyle = scrGrad;
+        ctx.beginPath(); ctx.arc(sx, ty + 5, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(sx - 1.5, ty + 5); ctx.lineTo(sx + 1.5, ty + 5); ctx.stroke();
+
+        // Label
+        if (labels && labels[i]) {
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 3px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(labels[i], sx, ty - 1);
+        }
+      });
+    };
+
+    // Top terminals: VCC, A+, A-, B+, B-
+    drawTerminal(2, 18, 86, 10, ['VCC', 'A+', 'A-', 'B+', 'B-'], [14, 30, 46, 62, 78]);
+
+    // 7. Bottom Header Pins (PUL, DIR, ENA, GND)
+    ctx.fillStyle = '#151515';
+    drawRR(6, 88, 76, 6, 1);
+    ctx.fill();
+
+    [14, 32, 50, 68].forEach(px => {
+      ctx.fillStyle = '#d4af37';
+      ctx.fillRect(px - 1.2, 89, 2.4, 4);
+      ctx.strokeStyle = '#a0a0a0';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(px, 93); ctx.lineTo(px, 100); ctx.stroke();
+    });
+
+    // 8. Top Leads
+    [14, 36, 50, 64, 78].forEach(px => {
+      ctx.strokeStyle = '#a0a0a0';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(px, 18); ctx.lineTo(px, 6); ctx.stroke();
+    });
+
+    // 9. Status LEDs
+    // Power LED (Green)
+    ctx.fillStyle = '#222';
+    drawRR(56, 58, 5, 3, 0.8);
+    ctx.fill();
+    ctx.fillStyle = '#00ff66';
+    ctx.beginPath(); ctx.arc(58.5, 59.5, 1, 0, Math.PI * 2); ctx.fill();
+
+    // Enable LED (Blue when enabled)
+    ctx.fillStyle = '#222';
+    drawRR(68, 58, 5, 3, 0.8);
+    ctx.fill();
+    ctx.fillStyle = enabled ? '#3399ff' : '#223';
+    ctx.beginPath(); ctx.arc(70.5, 59.5, 1, 0, Math.PI * 2); ctx.fill();
+    if (enabled) {
+      ctx.save();
+      ctx.shadowColor = '#3399ff';
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(70.5, 59.5, 0.6, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    // 10. Microstep & Current Labels
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 3.5px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('TB6600', 45, 72);
+    ctx.font = '3px "Courier New", monospace';
+    ctx.fillStyle = '#aaffcc';
+    ctx.fillText(`1/${ms} STEP`, 45, 78);
+    ctx.fillText(`${inst.props.currentMA}mA`, 45, 83);
+
+    // 11. Pin Labels (Bottom)
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.font = 'bold 3.5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('PUL', 14, 86);
+    ctx.fillText('DIR', 32, 86);
+    ctx.fillText('ENA', 50, 86);
+    ctx.fillText('GND', 68, 86);
+
+    // LED labels
+    ctx.font = '2.5px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('PWR', 58.5, 64);
+    ctx.fillText('EN', 70.5, 64);
+
+    if (inst.selected && typeof drawSelectionRect === 'function') {
+      drawSelectionRect(ctx, -2, 2, 94, 102);
+    }
+
+    ctx.restore();
+  }
+});
+
+class TB6600Component extends Component {
+  getPins() {
+    return [
+      { id: 'PUL', label: 'PUL', type: PIN_TYPE.DIGITAL, x: 14, y: 100, side: 'bottom' },
+      { id: 'DIR', label: 'DIR', type: PIN_TYPE.DIGITAL, x: 32, y: 100, side: 'bottom' },
+      { id: 'ENA', label: 'ENA', type: PIN_TYPE.DIGITAL, x: 50, y: 100, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 68, y: 100, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 14, y: 0, side: 'top' },
+      { id: 'A+', label: 'A+', type: PIN_TYPE.SIGNAL, x: 36, y: 0, side: 'top' },
+      { id: 'A-', label: 'A-', type: PIN_TYPE.SIGNAL, x: 50, y: 0, side: 'top' },
+      { id: 'B+', label: 'B+', type: PIN_TYPE.SIGNAL, x: 64, y: 0, side: 'top' },
+      { id: 'B-', label: 'B-', type: PIN_TYPE.SIGNAL, x: 78, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+
+    const readPin = (id) => {
+      const pn = this.getConnectedPinNum(id);
+      return pn !== null ? ((sim.pinStates[`pin_${pn}`] || 0) > 0 ? 1 : 0) : 0;
+    };
+
+    const pul = readPin('PUL');
+    const dir = readPin('DIR');
+    const ena = readPin('ENA');
+
+    const enabled = ena === 1 || !this.getConnectedPinNum('ENA');
+    this.runtimeState.enabled = enabled;
+
+    if (!enabled) {
+      this.runtimeState.phase = 0;
+      return;
+    }
+
+    const ms = this.props.microstep || 16;
+    const stepAngle = 1.8 / ms;
+    const prevPul = this.runtimeState._lastPul ?? 0;
+
+    // Detect rising edge on PUL
+    if (pul === 1 && prevPul === 0) {
+      const dirSign = dir === 1 ? 1 : -1;
+      this.runtimeState.position = (this.runtimeState.position ?? 0) + dirSign;
+      this.runtimeState.angle = (this.runtimeState.angle ?? 0) + dirSign * stepAngle;
+    }
+    this.runtimeState._lastPul = pul;
+
+    // Determine active coil phase based on step position
+    const pos = ((this.runtimeState.position ?? 0) % 4 + 4) % 4;
+    this.runtimeState.phase = pos;
+  }
+}
+
 registerComponent('servo', ServoComponent);
 registerComponent('servo_continuous', ServoContinuousComponent);
 registerComponent('relay', RelayComponent);
 registerComponent('dc_motor', DCMotorComponent);
 registerComponent('l298n', L298NComponent);
 registerComponent('stepper_28byj', Stepper28BYJComponent);
+registerComponent('tb6600', TB6600Component);

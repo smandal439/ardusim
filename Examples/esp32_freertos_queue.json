@@ -1,0 +1,24 @@
+{
+  "id": "esp32_freertos_queue",
+  "name": "ESP32 FreeRTOS Queue (Producer/Consumer)",
+  "icon": "🔗",
+  "desc": "FreeRTOS queue demo: Core 0 produces sensor readings and sends them via a queue to Core 1, which processes and displays them on Serial",
+  "tags": [
+    "esp32",
+    "freertos",
+    "queue",
+    "intermediate"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "esp32_devkit_v1",
+        "x": 200,
+        "y": 100
+      }
+    ],
+    "wires": []
+  },
+  "code": "/*\n * ESP32 FreeRTOS Queue - Producer / Consumer\n *\n * Core 0 (Producer): Reads a simulated analog value\n *   every 500ms and sends it through a FreeRTOS queue.\n *\n * Core 1 (Consumer): Waits on the queue, receives\n *   the reading, classifies it (Low / Medium / High),\n *   and prints it to Serial.\n *\n * Demonstrates:\n *   - xQueueCreate / xQueueSend / xQueueReceive\n *   - xTaskCreatePinnedToCore\n *   - vTaskDelay\n */\n\n#include <freertos/FreeRTOS.h>\n#include <freertos/task.h>\n#include <freertos/queue.h>\n\n// Queue can hold up to 10 values\nQueueHandle_t sensorQueue;\n\n// Producer task (Core 0)\nvoid producerTask(void *pvParameters) {\n  int sampleId = 0;\n  while (true) {\n    // Simulate a sensor reading (0-4095)\n    int reading = analogRead(A0);\n\n    // Send to queue (wait up to 10 ticks if full)\n    if (xQueueSend(sensorQueue, reading, 10) == pdPASS) {\n      Serial.print(\"[Core 0] Produced #\");\n      Serial.print(sampleId++);\n      Serial.print(\" -> \");\n      Serial.println(reading);\n    } else {\n      Serial.println(\"[Core 0] Queue full, dropped sample\");\n    }\n\n    vTaskDelay(500);\n  }\n}\n\n// Consumer task (Core 1)\nvoid consumerTask(void *pvParameters) {\n  while (true) {\n    // Block until data arrives (wait up to 1000 ticks)\n    var received = xQueueReceive(sensorQueue, NULL, 1000);\n    if (received != null) {\n      var level = \"UNKNOWN\";\n      if (received < 1024)       level = \"LOW\";\n      else if (received < 3072)  level = \"MEDIUM\";\n      else                       level = \"HIGH\";\n\n      Serial.print(\"[Core 1] Received: \");\n      Serial.print(received);\n      Serial.print(\"  Level: \");\n      Serial.println(level);\n    } else {\n      Serial.println(\"[Core 1] Queue timeout - no data\");\n    }\n  }\n}\n\nvoid setup() {\n  Serial.begin(9600);\n  Serial.println(\"FreeRTOS Queue Demo\");\n  Serial.println(\"===================\");\n\n  // Create the queue (holds 10 items)\n  sensorQueue = xQueueCreate(10, 4);\n  if (sensorQueue == NULL) {\n    Serial.println(\"ERROR: Failed to create queue!\");\n    return;\n  }\n\n  // Producer on Core 0\n  xTaskCreatePinnedToCore(\n    producerTask,\n    \"Producer\",\n    2048,\n    NULL,\n    1,\n    NULL,\n    0\n  );\n\n  // Consumer on Core 1\n  xTaskCreatePinnedToCore(\n    consumerTask,\n    \"Consumer\",\n    2048,\n    NULL,\n    1,\n    NULL,\n    1\n  );\n\n  Serial.println(\"Producer & Consumer tasks started.\");\n}\n\nvoid loop() {\n  vTaskDelay(1000);\n}"
+}

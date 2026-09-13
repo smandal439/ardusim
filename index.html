@@ -832,6 +832,27 @@
                     <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1m0 1.2a5.8 5.8 0 1 1 0 11.6V2.2z" />
                 </svg> Auto (Sim State)
             </button>
+            <div class="ctx-separator"></div>
+            <div class="ctx-section-title">Wire Style</div>
+            <div class="wire-style-group" id="wire-style-group">
+                <button class="wire-style-btn" id="ctx-wire-orthogonal" role="menuitem" title="Right-angle orthogonal routing">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M1 14h12v-1H2V2h10V1H1z"/>
+                        <path d="M1 1h1v12H1zm14 14h-1V3h1z"/>
+                    </svg> Orthogonal
+                </button>
+                <button class="wire-style-btn" id="ctx-wire-bezier" role="menuitem" title="Smooth Bezier curve routing">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M1 14C5 14 5 2 15 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg> Bezier
+                </button>
+            </div>
+            <button class="ctx-item" id="ctx-wire-reset-route" role="menuitem" title="Reset to auto-route">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/>
+                    <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/>
+                </svg> Reset Route
+            </button>
         </div>
         <div class="ctx-separator"></div>
         <button class="ctx-item ctx-item-danger" id="ctx-delete" role="menuitem">
@@ -1072,6 +1093,7 @@
     <script src="js/libraries/adafruit_gfx.js?v=20260904-1"></script>
     <script src="js/libraries/softwareserial.js?v=20260904-1"></script>
     <script src="js/libraries/stepper.js?v=20260904-1"></script>
+    <script src="js/libraries/tb6600.js?v=20260913-1"></script>
     <script src="js/libraries/newping.js?v=20260904-1"></script>
     <script src="js/libraries/irremote.js?v=20260904-1"></script>
     <script src="js/libraries/fastled.js?v=20260904-1"></script>
@@ -1087,6 +1109,7 @@
     <script src="js/libraries/coap_simple.js?v=20260910-1"></script>
     <script src="js/libraries/bluetoothserial.js?v=20260910-1"></script>
     <script src="js/libraries/zigbee.js?v=20260911-1"></script>
+    <script src="js/libraries/freertos.js?v=20260913-1"></script>
     <script src="js/libraries/serial.js?v=20260905-1"></script>
     <script src="js/libraries/ds3231.js?v=20260911-1"></script>
     <script src="js/simulator.js?v=20260905-8"></script>

@@ -69,6 +69,7 @@ const STATIC_ASSETS = [
   'js/libraries/neopixel.js',
   'js/libraries/fastled.js',
   'js/libraries/stepper.js',
+  'js/libraries/tb6600.js',
   'js/libraries/softwareserial.js',
   'js/libraries/newping.js',
   'js/libraries/mfrc522.js',
@@ -82,6 +83,7 @@ const STATIC_ASSETS = [
   'js/libraries/sevensegment.js',
   'js/libraries/cpp_types.js',
   'js/libraries/ds3231.js',
+  'js/libraries/freertos.js',
   'favicon.ico',
 ].map(p => BASE + p);
 

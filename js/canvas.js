@@ -47,7 +47,7 @@ class CircuitCanvas {
 
     /* State */
     this.components = [];  // { id, type, x, y, props, runtimeState, selected, rotation }
-    this.wires = [];  // { id, from:{instId,pinId}, to:{instId,pinId}, color, waypoints:[] }
+    this.wires = [];  // { id, from:{instId,pinId}, to:{instId,pinId}, color, waypoints:[], routeStyle:'orthogonal'|'bezier', bezierCtrl:{c1:{x,y},c2:{x,y}} }
     this.selected = null;
     this.selectedWire = null;
     this._hasStandalonePower = false;
@@ -410,7 +410,49 @@ class CircuitCanvas {
         if (this._segHitsRect(a.x, a.y, b.x, b.y, r)) penalty++;
       }
     }
+    // Penalize wire-to-wire crossings using cached segments (no recursion)
+    if (this._wireSegCache) {
+      for (const wSegs of this._wireSegCache) {
+        if (!wSegs || wSegs.length < 2) continue;
+        for (let i = 1; i < pts.length - 1; i++) {
+          for (let j = 0; j < wSegs.length - 1; j++) {
+            if (this._segHitsSeg(pts[i].x, pts[i].y, pts[i+1].x, pts[i+1].y, wSegs[j].x, wSegs[j].y, wSegs[j+1].x, wSegs[j+1].y)) {
+              penalty += 0.5;
+            }
+          }
+        }
+      }
+    }
     return { penalty, bends: pts.length - 2, len };
+  }
+
+  _buildWireSegCache() {
+    this._wireSegCache = [];
+    for (const w of this.wires) {
+      const p1 = this._getPinWorldPos(w.from.instId, w.from.pinId);
+      const p2 = this._getPinWorldPos(w.to.instId, w.to.pinId);
+      if (!p1 || !p2) continue;
+      if (w.waypoints && w.waypoints.length > 0) {
+        this._wireSegCache.push([p1, ...w.waypoints.map(wp => ({ x: wp.x, y: wp.y })), p2]);
+      } else if (w.routeStyle === 'bezier' && w.bezierCtrl) {
+        this._wireSegCache.push(this._sampleBezier(p1, w.bezierCtrl.c1, w.bezierCtrl.c2, p2, 16));
+      } else {
+        const d1 = this._getPinExitDir(w.from.instId, w.from.pinId);
+        const d2 = this._getPinExitDir(w.to.instId, w.to.pinId);
+        const STUB = 24;
+        const s1 = { x: p1.x + d1.x * STUB, y: p1.y + d1.y * STUB };
+        const s2 = d2 && (d2.x || d2.y) ? { x: p2.x + d2.x * STUB, y: p2.y + d2.y * STUB } : { x: p2.x, y: p2.y };
+        this._wireSegCache.push([p1, s1, s2, p2]);
+      }
+    }
+  }
+
+  _segHitsSeg(ax, ay, bx, by, cx, cy, dx, dy) {
+    const denom = (dx - cx) * (by - ay) - (bx - ax) * (dy - cy);
+    if (Math.abs(denom) < 0.001) return false;
+    const t = ((cx - ax) * (by - ay) - (bx - ax) * (cy - ay)) / denom;
+    const u = ((cx - ax) * (dy - cy) - (dx - cx) * (cy - ay)) / denom;
+    return t > 0.01 && t < 0.99 && u > 0.01 && u < 0.99;
   }
 
   _laneCandidates(a, b, hint) {
@@ -418,14 +460,19 @@ class CircuitCanvas {
     const xLanes = [], yLanes = [];
     push(xLanes, (a.x + b.x) / 2); push(xLanes, a.x - 30); push(xLanes, a.x + 30);
     push(xLanes, b.x - 30); push(xLanes, b.x + 30);
+    push(xLanes, a.x - 60); push(xLanes, a.x + 60);
+    push(xLanes, b.x - 60); push(xLanes, b.x + 60);
     push(yLanes, (a.y + b.y) / 2); push(yLanes, a.y - 30); push(yLanes, a.y + 30);
     push(yLanes, b.y - 30); push(yLanes, b.y + 30);
+    push(yLanes, a.y - 60); push(yLanes, a.y + 60);
+    push(yLanes, b.y - 60); push(yLanes, b.y + 60);
     if (hint) { push(xLanes, hint.x); push(yLanes, hint.y); }
     return { xLanes, yLanes };
   }
 
   // Build an orthogonal polyline from pin1 (p1, exiting along d1) to pin2 (p2, exiting d2).
   _routePath(p1, d1, p2, d2, hint) {
+    this._buildWireSegCache();
     const STUB = 24;
     const s1 = { x: p1.x + d1.x * STUB, y: p1.y + d1.y * STUB };
     const s2 = d2 && (d2.x || d2.y) ? { x: p2.x + d2.x * STUB, y: p2.y + d2.y * STUB } : { x: p2.x, y: p2.y };
@@ -470,14 +517,55 @@ class CircuitCanvas {
     const p1 = this._getPinWorldPos(wire.from.instId, wire.from.pinId);
     const p2 = this._getPinWorldPos(wire.to.instId, wire.to.pinId);
     if (!p1 || !p2) return null;
+
+    if (wire.routeStyle === 'bezier') {
+      const d1 = this._getPinExitDir(wire.from.instId, wire.from.pinId);
+      const d2 = this._getPinExitDir(wire.to.instId, wire.to.pinId);
+      const ctrl = wire.bezierCtrl || this._autoBezierCtrl(p1, d1, p2, d2);
+      return { type: 'bezier', p1, c1: ctrl.c1, c2: ctrl.c2, p2 };
+    }
+
     if (wire.waypoints && Array.isArray(wire.waypoints) && wire.waypoints.length > 0) {
-      return [p1, ...wire.waypoints.map(wp => ({ x: wp.x, y: wp.y })), p2];
+      return { type: 'orthogonal', pts: [p1, ...wire.waypoints.map(wp => ({ x: wp.x, y: wp.y })), p2] };
     }
     const d1 = this._getPinExitDir(wire.from.instId, wire.from.pinId);
     const d2 = this._getPinExitDir(wire.to.instId, wire.to.pinId);
     const off = this._wireOffsets && this._wireOffsets[wire.id];
     const hint = off && Number.isFinite(off.hx) ? { x: off.hx, y: off.hy } : null;
-    return this._routePath(p1, d1, p2, d2, hint);
+    return { type: 'orthogonal', pts: this._routePath(p1, d1, p2, d2, hint) };
+  }
+
+  _autoBezierCtrl(p1, d1, p2, d2) {
+    const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    const scale = Math.max(40, dist * 0.4);
+    return {
+      c1: { x: p1.x + d1.x * scale, y: p1.y + d1.y * scale },
+      c2: { x: p2.x + d2.x * scale, y: p2.y + d2.y * scale }
+    };
+  }
+
+  _sampleBezier(p1, c1, c2, p2, steps) {
+    steps = steps || 20;
+    const pts = [];
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const u = 1 - t;
+      pts.push({
+        x: u * u * u * p1.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * p2.x,
+        y: u * u * u * p1.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * p2.y
+      });
+    }
+    return pts;
+  }
+
+  _distToBezier(px, py, p1, c1, c2, p2) {
+    const samples = this._sampleBezier(p1, c1, c2, p2, 24);
+    let minDist = Infinity;
+    for (let i = 0; i < samples.length - 1; i++) {
+      const d = this._distToSegment(px, py, samples[i].x, samples[i].y, samples[i + 1].x, samples[i + 1].y);
+      if (d < minDist) minDist = d;
+    }
+    return minDist;
   }
 
   _drawWires(ctx) {
@@ -504,22 +592,34 @@ class CircuitCanvas {
         else color = val > 0 ? '#cc3333' : '#2266aa';
       }
 
-      const pts = this._wirePath(wire);
-      if (pts) this._drawWire(ctx, pts, color, isSelected, wire);
+      const pathData = this._wirePath(wire);
+      if (pathData) this._drawWire(ctx, pathData, color, isSelected, wire);
     }
 
-    // Active wire preview
+    // Active wire preview (always orthogonal during wiring)
     if (this.mode === 'wiring' && this.wiringFrom && this.wireMouse) {
       const p1 = { x: this.wiringFrom.wx, y: this.wiringFrom.wy };
       const d1 = this._getPinExitDir(this.wiringFrom.instId, this.wiringFrom.pinId);
       const pts = this._routePath(p1, d1, this.wireMouse, null, this.wireMouse);
-      this._drawWire(ctx, pts, '#00e5ff', true, null);
+      this._drawWire(ctx, { type: 'orthogonal', pts }, '#00e5ff', true, null);
     }
   }
 
-  _drawWire(ctx, pts, color, highlighted, wire) {
-    if (!pts || pts.length < 2) return;
+  _drawWire(ctx, pathData, color, highlighted, wire) {
+    if (!pathData) return;
     ctx.save();
+
+    if (pathData.type === 'bezier') {
+      this._drawBezierWire(ctx, pathData, color, highlighted, wire);
+    } else {
+      this._drawOrthogonalWire(ctx, pathData.pts, color, highlighted, wire);
+    }
+
+    ctx.restore();
+  }
+
+  _drawOrthogonalWire(ctx, pts, color, highlighted, wire) {
+    if (!pts || pts.length < 2) return;
 
     // Selection glow behind wire
     if (highlighted) {
@@ -565,9 +665,63 @@ class CircuitCanvas {
         ctx.strokeRect(wp.x - sz, wp.y - sz, sz * 2, sz * 2);
       }
     }
+  }
 
-    ctx.restore();
+  _drawBezierWire(ctx, data, color, highlighted, wire) {
+    const { p1, c1, c2, p2 } = data;
 
+    // Selection glow behind wire
+    if (highlighted) {
+      ctx.strokeStyle = 'rgba(0,229,255,0.25)';
+      ctx.lineWidth = 8 / this.zoom;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, p2.x, p2.y);
+      ctx.stroke();
+    }
+
+    // Main wire stroke
+    ctx.strokeStyle = highlighted ? '#00e5ff' : color;
+    ctx.lineWidth = highlighted ? 3 / this.zoom : 2 / this.zoom;
+    ctx.lineCap = 'round';
+    if (highlighted) {
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = 6;
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, p2.x, p2.y);
+    ctx.stroke();
+
+    // Junction dots at the pins
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = highlighted ? '#00e5ff' : color;
+    ctx.beginPath(); ctx.arc(p1.x, p1.y, 3 / this.zoom, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(p2.x, p2.y, 3 / this.zoom, 0, Math.PI * 2); ctx.fill();
+
+    // Draw control point handles on selected bezier wire
+    if (highlighted && wire) {
+      const sz = 4 / this.zoom;
+
+      // Control arm lines
+      ctx.strokeStyle = 'rgba(0,229,255,0.4)';
+      ctx.lineWidth = 1 / this.zoom;
+      ctx.setLineDash([4 / this.zoom, 4 / this.zoom]);
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y); ctx.lineTo(c1.x, c1.y);
+      ctx.moveTo(p2.x, p2.y); ctx.lineTo(c2.x, c2.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Control point handles
+      ctx.fillStyle = '#00e5ff';
+      ctx.strokeStyle = '#0d1117';
+      ctx.lineWidth = 1.5 / this.zoom;
+      ctx.beginPath(); ctx.arc(c1.x, c1.y, sz, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(c2.x, c2.y, sz, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
   }
 
   // ─── Interactive on-canvas controls (sliders for sensors / potentiometer) ───
@@ -1072,7 +1226,7 @@ class CircuitCanvas {
     this._onChanged();
   }
 
-  addWire(fromInstId, fromPinId, toInstId, toPinId, color = null, waypoints = []) {
+  addWire(fromInstId, fromPinId, toInstId, toPinId, color = null, waypoints = [], opts = {}) {
     // Never allow a pin to be wired to itself
     if (fromInstId === toInstId && fromPinId === toPinId) return null;
 
@@ -1089,7 +1243,9 @@ class CircuitCanvas {
       from: { instId: fromInstId, pinId: fromPinId },
       to: { instId: toInstId, pinId: toPinId },
       color: color || null,
-      waypoints: Array.isArray(waypoints) ? waypoints.map(wp => ({ x: wp.x, y: wp.y })) : []
+      waypoints: Array.isArray(waypoints) ? waypoints.map(wp => ({ x: wp.x, y: wp.y })) : [],
+      routeStyle: opts.routeStyle || 'orthogonal',
+      bezierCtrl: opts.bezierCtrl || null,
     };
     this.wires.push(wire);
     this._onChanged();
@@ -1101,6 +1257,33 @@ class CircuitCanvas {
     if (!wire) return;
     this._pushHistory();
     wire.color = color || null;
+    this._onChanged();
+  }
+
+  setWireStyle(wireId, style) {
+    const wire = this.wires.find(w => w.id === wireId);
+    if (!wire || wire.routeStyle === style) return;
+    this._pushHistory();
+    wire.routeStyle = style;
+    if (style === 'bezier' && !wire.bezierCtrl) {
+      const p1 = this._getPinWorldPos(wire.from.instId, wire.from.pinId);
+      const p2 = this._getPinWorldPos(wire.to.instId, wire.to.pinId);
+      const d1 = this._getPinExitDir(wire.from.instId, wire.from.pinId);
+      const d2 = this._getPinExitDir(wire.to.instId, wire.to.pinId);
+      if (p1 && p2) wire.bezierCtrl = this._autoBezierCtrl(p1, d1, p2, d2);
+    }
+    if (style === 'orthogonal') {
+      wire.waypoints = [];
+    }
+    this._onChanged();
+  }
+
+  resetWireRoute(wireId) {
+    const wire = this.wires.find(w => w.id === wireId);
+    if (!wire) return;
+    this._pushHistory();
+    wire.waypoints = [];
+    wire.bezierCtrl = null;
     this._onChanged();
   }
 
@@ -1217,7 +1400,7 @@ class CircuitCanvas {
 
     for (const w of selWires) {
       const nf = idMap[w.from.instId], nt = idMap[w.to.instId];
-      if (nf && nt) this.addWire(nf, w.from.pinId, nt, w.to.pinId, w.color, w.waypoints);
+      if (nf && nt) this.addWire(nf, w.from.pinId, nt, w.to.pinId, w.color, w.waypoints, { routeStyle: w.routeStyle, bezierCtrl: w.bezierCtrl });
     }
 
     this.selected = dupes[dupes.length - 1] || null;
@@ -1289,7 +1472,7 @@ class CircuitCanvas {
       const newFromId = idMap[origWire.from.instId];
       const newToId = idMap[origWire.to.instId];
       if (!newFromId || !newToId) continue;
-      this.addWire(newFromId, origWire.from.pinId, newToId, origWire.to.pinId, origWire.color, origWire.waypoints);
+      this.addWire(newFromId, origWire.from.pinId, newToId, origWire.to.pinId, origWire.color, origWire.waypoints, { routeStyle: origWire.routeStyle, bezierCtrl: origWire.bezierCtrl });
     }
 
     this.selected = pastedComps[pastedComps.length - 1] || null;
@@ -1576,24 +1759,47 @@ class CircuitCanvas {
         this.selected = null;
 
         const wire = wireDetail.wire;
-        const p1 = this._getPinWorldPos(wire.from.instId, wire.from.pinId);
-        const p2 = this._getPinWorldPos(wire.to.instId, wire.to.pinId);
 
-        // If wire doesn't have waypoints yet, initialize them from current polyline
-        if ((!wire.waypoints || wire.waypoints.length === 0) && wireDetail.pts && wireDetail.pts.length > 2) {
-          wire.waypoints = wireDetail.pts.slice(1, -1).map(p => ({ x: Math.round(p.x), y: Math.round(p.y) }));
+        // Bezier control point drag
+        if (wireDetail.bezierCtrl >= 0 && wire.routeStyle === 'bezier') {
+          this.mode = 'wiredrag';
+          this.draggingWire = {
+            wireId: wire.id,
+            bezierCtrl: wireDetail.bezierCtrl,
+            handleIdx: -1,
+            segIdx: -1,
+            startWorld: { x: world.x, y: world.y },
+            initialBezierCtrl: wire.bezierCtrl ? {
+              c1: { x: wire.bezierCtrl.c1.x, y: wire.bezierCtrl.c1.y },
+              c2: { x: wire.bezierCtrl.c2.x, y: wire.bezierCtrl.c2.y }
+            } : null,
+            moved: false
+          };
+          this.canvas.style.cursor = 'grabbing';
+          return;
         }
 
-        const currentPts = this._wirePath(wire) || wireDetail.pts;
+        // If orthogonal wire doesn't have waypoints yet, initialize them from current polyline
+        if (wire.routeStyle !== 'bezier' && (!wire.waypoints || wire.waypoints.length === 0) && wireDetail.pathData && wireDetail.pathData.pts && wireDetail.pathData.pts.length > 2) {
+          wire.waypoints = wireDetail.pathData.pts.slice(1, -1).map(p => ({ x: Math.round(p.x), y: Math.round(p.y) }));
+        }
+
+        const pathData = this._wirePath(wire);
+        const currentPts = pathData ? (pathData.type === 'bezier' ? [pathData.p1, pathData.c1, pathData.c2, pathData.p2] : pathData.pts) : (wireDetail.pathData ? wireDetail.pathData.pts : null);
 
         this.mode = 'wiredrag';
         this.draggingWire = {
           wireId: wire.id,
           handleIdx: wireDetail.handleIdx,
           segIdx: wireDetail.segIdx,
+          bezierCtrl: -1,
           startWorld: { x: world.x, y: world.y },
           initialWaypoints: (wire.waypoints || []).map(p => ({ x: p.x, y: p.y })),
-          pts: currentPts.map(p => ({ x: p.x, y: p.y })),
+          initialBezierCtrl: wire.bezierCtrl ? {
+            c1: { x: wire.bezierCtrl.c1.x, y: wire.bezierCtrl.c1.y },
+            c2: { x: wire.bezierCtrl.c2.x, y: wire.bezierCtrl.c2.y }
+          } : null,
+          pts: currentPts ? currentPts.map(p => ({ x: p.x, y: p.y })) : [],
           moved: false
         };
         this.canvas.style.cursor = 'grabbing';
@@ -1673,13 +1879,53 @@ class CircuitCanvas {
       const wire = this.wires.find(w => w.id === this.draggingWire.wireId);
       if (!wire) return;
 
+      this.draggingWire.moved = true;
+      const snapX = this._snap(world.x);
+      const snapY = this._snap(world.y);
+
+      // Case 0: Dragging a bezier control point
+      if (this.draggingWire.bezierCtrl >= 0 && wire.routeStyle === 'bezier') {
+        if (!wire.bezierCtrl) {
+          const p1 = this._getPinWorldPos(wire.from.instId, wire.from.pinId);
+          const p2 = this._getPinWorldPos(wire.to.instId, wire.to.pinId);
+          const d1 = this._getPinExitDir(wire.from.instId, wire.from.pinId);
+          const d2 = this._getPinExitDir(wire.to.instId, wire.to.pinId);
+          wire.bezierCtrl = this._autoBezierCtrl(p1, d1, p2, d2);
+        }
+        const ctrlIdx = this.draggingWire.bezierCtrl;
+        if (ctrlIdx === 0) {
+          wire.bezierCtrl.c1.x = snapX;
+          wire.bezierCtrl.c1.y = snapY;
+        } else {
+          wire.bezierCtrl.c2.x = snapX;
+          wire.bezierCtrl.c2.y = snapY;
+        }
+        this._render();
+        return;
+      }
+
       const p1 = this._getPinWorldPos(wire.from.instId, wire.from.pinId);
       const p2 = this._getPinWorldPos(wire.to.instId, wire.to.pinId);
       if (!p1 || !p2) return;
 
-      this.draggingWire.moved = true;
-      const snapX = this._snap(world.x);
-      const snapY = this._snap(world.y);
+      // Case 0b: Dragging a bezier wire segment (not a control point)
+      if (wire.routeStyle === 'bezier' && this.draggingWire.handleIdx < 0 && this.draggingWire.bezierCtrl < 0) {
+        if (!wire.bezierCtrl) {
+          const d1 = this._getPinExitDir(wire.from.instId, wire.from.pinId);
+          const d2 = this._getPinExitDir(wire.to.instId, wire.to.pinId);
+          wire.bezierCtrl = this._autoBezierCtrl(p1, d1, p2, d2);
+        }
+        const dx = snapX - this.draggingWire.startWorld.x;
+        const dy = snapY - this.draggingWire.startWorld.y;
+        if (this.draggingWire.initialBezierCtrl) {
+          wire.bezierCtrl.c1.x = this.draggingWire.initialBezierCtrl.c1.x + dx;
+          wire.bezierCtrl.c1.y = this.draggingWire.initialBezierCtrl.c1.y + dy;
+          wire.bezierCtrl.c2.x = this.draggingWire.initialBezierCtrl.c2.x + dx;
+          wire.bezierCtrl.c2.y = this.draggingWire.initialBezierCtrl.c2.y + dy;
+        }
+        this._render();
+        return;
+      }
 
       // Case 1: Dragging an existing waypoint handle directly
       if (this.draggingWire.handleIdx >= 0 && wire.waypoints && wire.waypoints[this.draggingWire.handleIdx]) {
@@ -2081,26 +2327,53 @@ class CircuitCanvas {
     let best = null;
 
     for (const wire of [...this.wires].reverse()) {
-      const pts = this._wirePath(wire);
-      if (!pts || pts.length < 2) continue;
+      const pathData = this._wirePath(wire);
+      if (!pathData) continue;
 
-      // Check waypoint handles if wire has waypoints
-      if (wire.waypoints && Array.isArray(wire.waypoints)) {
-        for (let j = 0; j < wire.waypoints.length; j++) {
-          const wp = wire.waypoints[j];
-          const dist = Math.hypot(wx - wp.x, wy - wp.y);
-          if (dist <= threshold + 4) {
-            return { wire, pts, segIdx: -1, handleIdx: j, dist };
+      if (pathData.type === 'bezier') {
+        const { p1, c1, c2, p2 } = pathData;
+
+        // Check control point handles on selected bezier wire
+        if (this.selectedWire && this.selectedWire.id === wire.id) {
+          const distC1 = Math.hypot(wx - c1.x, wy - c1.y);
+          if (distC1 <= threshold + 4) {
+            return { wire, pathData, segIdx: -1, handleIdx: -1, bezierCtrl: 0, dist: distC1 };
+          }
+          const distC2 = Math.hypot(wx - c2.x, wy - c2.y);
+          if (distC2 <= threshold + 4) {
+            return { wire, pathData, segIdx: -1, handleIdx: -1, bezierCtrl: 1, dist: distC2 };
           }
         }
-      }
 
-      // Check segments
-      for (let i = 0; i < pts.length - 1; i++) {
-        const d = this._distToSegment(wx, wy, pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y);
+        // Check distance to bezier curve
+        const d = this._distToBezier(wx, wy, p1, c1, c2, p2);
         if (d <= threshold) {
           if (!best || d < best.dist) {
-            best = { wire, pts, segIdx: i, handleIdx: -1, dist: d };
+            best = { wire, pathData, segIdx: 0, handleIdx: -1, bezierCtrl: -1, dist: d };
+          }
+        }
+      } else {
+        const pts = pathData.pts;
+        if (!pts || pts.length < 2) continue;
+
+        // Check waypoint handles if wire has waypoints
+        if (wire.waypoints && Array.isArray(wire.waypoints)) {
+          for (let j = 0; j < wire.waypoints.length; j++) {
+            const wp = wire.waypoints[j];
+            const dist = Math.hypot(wx - wp.x, wy - wp.y);
+            if (dist <= threshold + 4) {
+              return { wire, pathData, segIdx: -1, handleIdx: j, bezierCtrl: -1, dist };
+            }
+          }
+        }
+
+        // Check segments
+        for (let i = 0; i < pts.length - 1; i++) {
+          const d = this._distToSegment(wx, wy, pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y);
+          if (d <= threshold) {
+            if (!best || d < best.dist) {
+              best = { wire, pathData, segIdx: i, handleIdx: -1, bezierCtrl: -1, dist: d };
+            }
           }
         }
       }
@@ -2284,7 +2557,12 @@ class CircuitCanvas {
         color: (typeof w.color === 'string' && w.color.length > 0) ? w.color : null,
         waypoints: Array.isArray(w.waypoints)
           ? w.waypoints.filter(p => p && Number.isFinite(p.x) && Number.isFinite(p.y)).map(p => ({ x: Number(p.x), y: Number(p.y) }))
-          : []
+          : [],
+        routeStyle: (w.routeStyle === 'bezier') ? 'bezier' : 'orthogonal',
+        bezierCtrl: (w.bezierCtrl && w.bezierCtrl.c1 && w.bezierCtrl.c2) ? {
+          c1: { x: Number(w.bezierCtrl.c1.x) || 0, y: Number(w.bezierCtrl.c1.y) || 0 },
+          c2: { x: Number(w.bezierCtrl.c2.x) || 0, y: Number(w.bezierCtrl.c2.y) || 0 }
+        } : null,
       }));
       this.selected = null;
       this.selectedWire = null;
@@ -2303,7 +2581,15 @@ class CircuitCanvas {
         rotation: c.rotation,
         props: c.props,
       })),
-      wires: this.wires,
+      wires: this.wires.map(w => ({
+        id: w.id,
+        from: w.from,
+        to: w.to,
+        color: w.color || null,
+        waypoints: w.waypoints || [],
+        routeStyle: w.routeStyle || 'orthogonal',
+        bezierCtrl: w.bezierCtrl || null,
+      })),
     };
   }
 
@@ -2352,7 +2638,12 @@ class CircuitCanvas {
         color: (typeof w.color === 'string' && w.color.length > 0) ? w.color : null,
         waypoints: Array.isArray(w.waypoints)
           ? w.waypoints.filter(p => p && Number.isFinite(p.x) && Number.isFinite(p.y)).map(p => ({ x: Number(p.x), y: Number(p.y) }))
-          : []
+          : [],
+        routeStyle: (w.routeStyle === 'bezier') ? 'bezier' : 'orthogonal',
+        bezierCtrl: (w.bezierCtrl && w.bezierCtrl.c1 && w.bezierCtrl.c2) ? {
+          c1: { x: Number(w.bezierCtrl.c1.x) || 0, y: Number(w.bezierCtrl.c1.y) || 0 },
+          c2: { x: Number(w.bezierCtrl.c2.x) || 0, y: Number(w.bezierCtrl.c2.y) || 0 }
+        } : null,
       }))
       .filter(w => {
         if (w.from.instId === w.to.instId && w.from.pinId === w.to.pinId) return false;

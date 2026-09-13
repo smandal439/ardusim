@@ -101,6 +101,10 @@ class ArduinoSimulator {
     if (typeof code !== 'string') code = '';
     // Store active plugins for buildContext() to use (avoids re-scanning)
     this._activePlugins = this._getActivePlugins(code);
+    // Initialize FreeRTOS task registry BEFORE plugins run, so transpile rules
+    // that register task functions have somewhere to write to.
+    if (!this._freertosTaskRegistry) this._freertosTaskRegistry = {};
+    window._freertosTaskRegistry = this._freertosTaskRegistry;
     let js = code;
 
     // Remove comments temporarily for processing, then restore
@@ -902,9 +906,18 @@ class ArduinoSimulator {
       ILI9341_BLACK: 0x0000, ILI9341_WHITE: 0xFFFF, ILI9341_RED: 0xF800,
       ILI9341_GREEN: 0x07E0, ILI9341_BLUE: 0x001F, ILI9341_CYAN: 0x07FF,
       ILI9341_MAGENTA: 0xF81F, ILI9341_YELLOW: 0xFFE0, ILI9341_ORANGE: 0xFD20,
-      ILI9341_DARKGREEN: 0x03E0, ILI9341_DARKGREY: 0x7BEF, ILI9341_NAVY: 0x000F,
+      ILI9341_DARKGREEN: 0x03E0,       ILI9341_DARKGREY: 0x7BEF, ILI9341_NAVY: 0x000F,
       ILI9341_MAROON: 0x7800, ILI9341_PURPLE: 0x780F, ILI9341_OLIVE: 0x7BE0,
       ILI9341_LIGHTGREY: 0xC618, ILI9341_DARKCYAN: 0x03EF,
+      // FreeRTOS constants
+      APP_CPU_NUM: 0, PRO_CPU_NUM: 1,
+      tskIDLE_PRIORITY: 0,
+      configMAX_PRIORITIES: 25,
+      portMAX_DELAY: 0xFFFFFFFF,
+      portTICK_PERIOD_MS: 1,
+      pdTRUE: 1, pdFALSE: 0,
+      pdPASS: 1, pdFAIL: 0,
+      errQUEUE_FULL: 0, errQUEUE_EMPTY: 0,
 
       /* Servo/LCD class stubs */
       Servo: function () { return {}; },
@@ -1166,6 +1179,8 @@ class ArduinoSimulator {
       this._compiledFn = fn;
       this._compiledCtx = { keys, vals, fn };
       this._compiledJs = js;
+      const aIdx = keys.indexOf('_a');
+      if (aIdx !== -1) this._a = vals[aIdx];
       return { ok: true, compiledJs: js };
     } catch (err) {
       const friendly = this._friendlyError(err && err.message ? err.message : String(err), err);
@@ -1195,6 +1210,18 @@ class ArduinoSimulator {
     this._fps = 0;
     this._loopCount = 0;
     this._iterSinceDelay = 0;
+    // FreeRTOS dual-core state — reset on each run
+    this._freertosTasks = { 0: [], 1: [] };
+    this._freertosTaskRegistry = {};
+    this._freertosQueues = [];
+    this._freertosSemaphores = [];
+    this._freertosEventGroups = [];
+    this._freertosCurrentTask = {};
+    this._freertosCurrentCore = 0;
+    this._freertosCriticalSection = 0;
+    this._freertosSuspended = false;
+    this._freertosSuspendCount = 0;
+    window._freertosTaskRegistry = this._freertosTaskRegistry;
     // Reset ESP-NOW bus for this board
     if (window._espnowBus) {
       // Remove this board's entry so it can re-register
@@ -1235,23 +1262,39 @@ class ArduinoSimulator {
       // Run setup once
       await setup();
 
-      // Run loop repeatedly
-      while (this.isRunning && runId === this._runSeq) {
-        if (this.isPaused) {
-          await new Promise(resolve => { this._resumeResolve = resolve; });
+      // Check if FreeRTOS tasks were registered during setup()
+      const hasFreertosTasks = (this._freertosTasks[0].length + this._freertosTasks[1].length) > 0;
+
+      if (hasFreertosTasks) {
+        // Register loop() as a task on Core 1 if no tasks exist on Core 1
+        if (this._freertosTasks[1].length === 0) {
+          this._freertosTaskRegistry['__loop_task'] = loop;
+          this._a.xTaskCreatePinnedToCore(loop, 'loopTask', 8192, null, 1, null, 1);
         }
-        this._iterSinceDelay++;
-        // Infinite-loop guard: yield if no delay has been called in many iterations
-        if (this._iterSinceDelay > this._MAX_TIGHT_ITERS) {
-          this._iterSinceDelay = 0;
+        // Start FreeRTOS scheduler
+        this._serialLog('[FreeRTOS] Starting scheduler on 2 cores\n', 'system');
+        if (this._a._freertosScheduler) {
+          await this._a._freertosScheduler();
+        }
+      } else {
+        // Run loop repeatedly (original behavior)
+        while (this.isRunning && runId === this._runSeq) {
+          if (this.isPaused) {
+            await new Promise(resolve => { this._resumeResolve = resolve; });
+          }
+          this._iterSinceDelay++;
+          // Infinite-loop guard: yield if no delay has been called in many iterations
+          if (this._iterSinceDelay > this._MAX_TIGHT_ITERS) {
+            this._iterSinceDelay = 0;
+            this.simTime += 1;
+            await new Promise(r => setTimeout(r, 1));
+          }
+          await loop();
+          this._loopCount++;
+          // Yield to UI thread every iteration — advance simTime so millis() progresses
           this.simTime += 1;
-          await new Promise(r => setTimeout(r, 1));
+          await new Promise(r => setTimeout(r, 0));
         }
-        await loop();
-        this._loopCount++;
-        // Yield to UI thread every iteration — advance simTime so millis() progresses
-        this.simTime += 1;
-        await new Promise(r => setTimeout(r, 0));
       }
     } catch (err) {
       if (err && err.message !== 'SIMULATION_STOPPED') {
@@ -1292,6 +1335,18 @@ class ArduinoSimulator {
     this._resumeAudio();
     const runId = ++this._runSeq;
     const { keys, vals, fn } = this._compiledCtx;
+    // FreeRTOS dual-core state — ensure initialized for _startExecution path
+    this._freertosTasks = { 0: [], 1: [] };
+    this._freertosTaskRegistry = {};
+    this._freertosQueues = [];
+    this._freertosSemaphores = [];
+    this._freertosEventGroups = [];
+    this._freertosCurrentTask = {};
+    this._freertosCurrentCore = 0;
+    this._freertosCriticalSection = 0;
+    this._freertosSuspended = false;
+    this._freertosSuspendCount = 0;
+    window._freertosTaskRegistry = this._freertosTaskRegistry;
 
     this._serialLog('[ArduSim] Simulation started\n', 'system');
     if (this.onStart) this.onStart();
@@ -1305,20 +1360,38 @@ class ArduinoSimulator {
       try {
         const { setup, loop } = fn(...vals);
         await setup();
-        while (self.isRunning && runId === self._runSeq) {
-          if (self.isPaused) {
-            await new Promise(resolve => { self._resumeResolve = resolve; });
+
+        // Check if FreeRTOS tasks were registered during setup()
+        const hasFreertosTasks = (self._freertosTasks[0].length + self._freertosTasks[1].length) > 0;
+
+        if (hasFreertosTasks) {
+          // Register loop() as a task on Core 1 if no tasks exist on Core 1
+          if (self._freertosTasks[1].length === 0) {
+            self._freertosTaskRegistry['__loop_task'] = loop;
+            self._a.xTaskCreatePinnedToCore(loop, 'loopTask', 8192, null, 1, null, 1);
           }
-          self._iterSinceDelay++;
-          if (self._iterSinceDelay > self._MAX_TIGHT_ITERS) {
-            self._iterSinceDelay = 0;
+          // Start FreeRTOS scheduler — runs both cores concurrently
+          self._serialLog('[FreeRTOS] Starting scheduler on 2 cores\n', 'system');
+          if (self._a._freertosScheduler) {
+            await self._a._freertosScheduler();
+          }
+        } else {
+          // Original behavior — single-threaded loop
+          while (self.isRunning && runId === self._runSeq) {
+            if (self.isPaused) {
+              await new Promise(resolve => { self._resumeResolve = resolve; });
+            }
+            self._iterSinceDelay++;
+            if (self._iterSinceDelay > self._MAX_TIGHT_ITERS) {
+              self._iterSinceDelay = 0;
+              self.simTime += 1;
+              await new Promise(r => setTimeout(r, 1));
+            }
+            await loop();
+            self._loopCount++;
             self.simTime += 1;
-            await new Promise(r => setTimeout(r, 1));
+            await new Promise(r => setTimeout(r, 0));
           }
-          await loop();
-          self._loopCount++;
-          self.simTime += 1;
-          await new Promise(r => setTimeout(r, 0));
         }
       } catch (err) {
         if (err && err.message !== 'SIMULATION_STOPPED') {
@@ -1819,7 +1892,7 @@ window.loadExamplesFromFiles = async function () {
     'bmp280_altitude', 'button', 'buzzer_melody', 'coap_client', 'coap_dip_switch_to_8_led', 'coap_simple_server',
     'continuous_rotation_servo_control_by_pot', 'counter', 'custom_plugin_demo', 'dc_motor_speed', 'dip_switch_and_led_array', 'dip_switch_binary',
     'dmm_current', 'dmm_resistance', 'dmm_voltage', 'ds3231_rtc_clock', 'ds3231_rtc_clock_sync_with_ntp', 'dso_oscilloscope',
-    'esp32_blink', 'esp32_fade', 'esp32_hub75_matrixpaneli2s_dma', 'esp32_i2s_local_radio_player', 'esp32_i2s_local_radio_player_2', 'esp32_i2s_local_test',
+    'esp32_blink', 'esp32_dual_core_blink', 'esp32_fade', 'esp32_hub75_matrixpaneli2s_dma', 'esp32_i2s_local_radio_player', 'esp32_i2s_local_radio_player_2', 'esp32_i2s_local_test',
     'esp32_i2s_music_player', 'esp32_i2s_online_radio_player', 'esp32_ntp_clock_lcd', 'esp32_server', 'esp_now_dip_switch_to_8_led', 'esp_now_sender_with_receiver',
     'espnow_led_control', 'espnow_receiver', 'espnow_sender', 'fade', 'flex_sensor_bending_measurement', 'func_gen_dual',
     'func_gen_led', 'gps_neo_6m_8m_tracker', 'hc05_bluetooth_led', 'ic_nand_test', 'ili9341', 'inverting_amplifier',
