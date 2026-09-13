@@ -3,7 +3,7 @@
  *
  * Provides WiFi simulation.
  * Supports: begin, localIP, softAPIP, status, disconnect, mode, softAP, reconnect,
- *           RSSI, SSID, channel, encryptionType, scanNetworks.
+ *           RSSI, SSID, BSSIDstr, channel, encryptionType, scanNetworks.
  *
  * WiFi.begin(ssid, password) searches the canvas for a wifi_module (Wi-Fi Hotspot)
  * component with matching SSID. Connection succeeds only if the hotspot exists and
@@ -45,6 +45,8 @@ window.ArduinoLibs['WiFi'] = {
     [/\bWiFi\.channel\s*\(/g, '_a.wifiChannel('],
     // WiFi.encryptionType(i) → _a.wifiEncryptionType(i)
     [/\bWiFi\.encryptionType\s*\(/g, '_a.wifiEncryptionType('],
+    // WiFi.BSSIDstr(i) → _a.wifiBSSIDstr(i)
+    [/\bWiFi\.BSSIDstr\s*\(/g, '_a.wifiBSSIDstr('],
   ],
 
   constants: {
@@ -94,6 +96,16 @@ window.ArduinoLibs['WiFi'] = {
       var dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
       var rssi = txPower - (20 * Math.log10(dist / 10));
       return Math.max(-95, Math.min(-30, Math.round(rssi)));
+    }
+
+    function _genBSSID(id) {
+      var hash = 0;
+      var str = String(id);
+      for (var i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+      }
+      var h = (hash >>> 0).toString(16).padStart(8, '0');
+      return '02:' + h.slice(0, 2) + ':' + h.slice(2, 4) + ':' + h.slice(4, 6) + ':00:01';
     }
 
     function _clientIpFromGateway(gw) {
@@ -189,6 +201,7 @@ window.ArduinoLibs['WiFi'] = {
               rssi: rssi,
               channel: c.props.channel || 6,
               authType: _securityToAuthType(c.props.security),
+              bssid: _genBSSID(c.id),
             });
           }
         }
@@ -219,6 +232,12 @@ window.ArduinoLibs['WiFi'] = {
         var scan = self._wifiScanResults || [];
         if (idx >= 0 && idx < scan.length) return scan[idx].authType;
         return 0;
+      },
+
+      wifiBSSIDstr: function(idx) {
+        var scan = self._wifiScanResults || [];
+        if (idx >= 0 && idx < scan.length) return scan[idx].bssid || '00:00:00:00:00:00';
+        return '00:00:00:00:00:00';
       },
     };
   },

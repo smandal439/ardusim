@@ -979,10 +979,42 @@ class ArduinoSimulator {
             const c = canvas.components[i];
             if (c.type !== 'wifi_module') continue;
             if (c.props && c.props.ssid === ssid) {
-              return { ssid: c.props.ssid, password: c.props.password, channel: c.props.channel || 6, ipAddress: c.props.ipAddress || '192.168.4.1', security: c.props.security || 'WPA2-PSK' };
+              return {
+                ssid: c.props.ssid, password: c.props.password,
+                channel: c.props.channel || 6, ipAddress: c.props.ipAddress || '192.168.4.1',
+                security: c.props.security || 'WPA2-PSK', txPower: c.props.txPower ?? 20,
+                x: c.x, y: c.y, width: c.width || 80, height: c.height || 80,
+              };
             }
           }
           return null;
+        },
+        _getBoardCenter() {
+          const canvas = window.CircuitCanvas;
+          if (!canvas || !Array.isArray(canvas.components)) return null;
+          for (let i = 0; i < canvas.components.length; i++) {
+            const c = canvas.components[i];
+            if (c.type === 'esp32_devkit_v1') {
+              return { x: c.x + (c.width || 120) / 2, y: c.y + (c.height || 120) / 2 };
+            }
+          }
+          return null;
+        },
+        _calcRSSI(txPower, boardCx, boardCy, apX, apY, apW, apH) {
+          const dx = (apX + apW / 2) - boardCx;
+          const dy = (apY + apH / 2) - boardCy;
+          const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+          const rssi = txPower - (20 * Math.log10(dist / 10));
+          return Math.max(-95, Math.min(-30, Math.round(rssi)));
+        },
+        _genBSSID(id) {
+          let hash = 0;
+          const str = String(id);
+          for (let i = 0; i < str.length; i++) {
+            hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+          }
+          const h = (hash >>> 0).toString(16).padStart(8, '0');
+          return '02:' + h.slice(0, 2) + ':' + h.slice(2, 4) + ':' + h.slice(4, 6) + ':00:01';
         },
         _clientIpFromGateway(gw) {
           const parts = gw.split('.');
@@ -1045,20 +1077,29 @@ class ArduinoSimulator {
           if (!self._wifiConnected || !self._wifiSSID) return 0;
           const hotspot = this._findHotspot(self._wifiSSID);
           if (!hotspot) return -90;
-          return (hotspot.txPower || 20) - 40 + Math.round(Math.sin(Date.now() / 3000) * 3);
+          const board = this._getBoardCenter();
+          if (!board) return -50;
+          return this._calcRSSI(hotspot.txPower || 20, board.x, board.y,
+                                hotspot.x, hotspot.y, hotspot.width, hotspot.height);
         },
         scanNetworks() {
           const canvas = window.CircuitCanvas;
           self._wifiScanResults = [];
           if (!canvas || !Array.isArray(canvas.components)) return 0;
+          const board = this._getBoardCenter();
           for (let j = 0; j < canvas.components.length; j++) {
             const c = canvas.components[j];
-            if (c.type === 'wifi_module' && c.props) {
+            if (c.type === 'wifi_module' && c.props && !c.props.hidden) {
+              const rssi = board
+                ? this._calcRSSI(c.props.txPower ?? 20, board.x, board.y,
+                                 c.x, c.y, c.width || 80, c.height || 80)
+                : -40;
               self._wifiScanResults.push({
                 ssid: c.props.ssid || '',
-                rssi: -40 + Math.round(Math.sin(Date.now() / 3000 + j) * 3),
+                rssi: rssi,
                 channel: c.props.channel || 6,
                 authType: this._securityToAuthType(c.props.security),
+                bssid: this._genBSSID(c.id),
               });
             }
           }
@@ -1086,6 +1127,11 @@ class ArduinoSimulator {
           const scan = self._wifiScanResults || [];
           if (idx >= 0 && idx < scan.length) return scan[idx].authType;
           return 0;
+        },
+        BSSIDstr(idx) {
+          const scan = self._wifiScanResults || [];
+          if (idx >= 0 && idx < scan.length) return scan[idx].bssid || '00:00:00:00:00:00';
+          return '00:00:00:00:00:00';
         },
       },
       /* ESP32 Wi-Fi client + MQTT (PubSubClient).
