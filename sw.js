@@ -33,7 +33,7 @@ const STATIC_ASSETS = [
   'js/guide.js',
   'js/sharing.js',
   'js/safetyChecker.js',
-  'js/communication.js',
+  'js/components/communication.js',
   'js/dsp.js',
   'js/dso-fullscreen.js',
   'js/components/audio.js',
