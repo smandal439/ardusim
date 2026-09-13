@@ -24,7 +24,7 @@ defComp({
     { field: 'ssid',      label: 'Wi-Fi SSID',   type: 'text' },
     { field: 'password',  label: 'Password',     type: 'text' },
     { field: 'channel',   label: 'Channel',      type: 'number', min: 1, max: 13, step: 1 },
-    { field: 'security',  label: 'Security',     type: 'select', options: ['WPA2-PSK', 'OPEN'] },
+    { field: 'security',  label: 'Security',     type: 'select', options: [{ value: 'WPA2-PSK', label: 'WPA2-PSK' }, { value: 'OPEN', label: 'OPEN' }] },
     { field: 'ipAddress', label: 'Gateway IP',   type: 'text' },
     { field: 'txPower',   label: 'TX Power dBm', type: 'number', min: 0, max: 20, step: 1 },
     { field: 'hidden',    label: 'Hide SSID',    type: 'boolean' },
