@@ -3029,6 +3029,7 @@ class DS3231Component extends Component {
       if (secToAdd > 0) {
         rs._accMs -= secToAdd * 1000;
         rs.second += secToAdd;
+      }
       while (rs.second >= 60) { rs.second -= 60; rs.minute++; }
       while (rs.second < 0)  { rs.second += 60; rs.minute--; }
       while (rs.minute >= 60) { rs.minute -= 60; rs.hour++; }
@@ -3109,7 +3110,12 @@ defComp({
     const elapsed = now - (rs._lastTick || 0);
     rs._lastTick = now;
     if (elapsed > 0) {
-      rs.second += Math.floor(elapsed / 1000);
+      rs._accMs = (rs._accMs || 0) + elapsed;
+      var secToAdd = (rs._accMs / 1000) | 0;
+      if (secToAdd > 0) {
+        rs._accMs -= secToAdd * 1000;
+        rs.second += secToAdd;
+      }
       while (rs.second >= 60) { rs.second -= 60; rs.minute++; }
       while (rs.second < 0)  { rs.second += 60; rs.minute--; }
       while (rs.minute >= 60) { rs.minute -= 60; rs.hour++; }
@@ -3130,7 +3136,8 @@ defComp({
           rs.minute === (pr.alarm1Minute ?? 0) &&
           rs.hour   === (pr.alarm1Hour ?? 0)) {
         rs.alarm1Flag = true;
-        self._serialLog('[DS3231] Alarm 1 triggered!\n', 'system');
+        const sim2 = window.ArduinoSim;
+        if (sim2 && sim2._serialLog) sim2._serialLog('[DS3231] Alarm 1 triggered!\n', 'system');
       }
     }
     /* Check alarm2 (minutes match) */
@@ -3138,7 +3145,8 @@ defComp({
       if (rs.minute === (pr.alarm2Minute ?? 0) &&
           rs.hour   === (pr.alarm2Hour ?? 0)) {
         rs.alarm2Flag = true;
-        self._serialLog('[DS3231] Alarm 2 triggered!\n', 'system');
+        const sim3 = window.ArduinoSim;
+        if (sim3 && sim3._serialLog) sim3._serialLog('[DS3231] Alarm 2 triggered!\n', 'system');
       }
     }
   },
