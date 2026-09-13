@@ -1,0 +1,155 @@
+{
+ "id": "ir_obstacle_led",
+  "name": "IR Obstacle Sensor LED Alert",
+  "icon": "📡",
+  "desc": "IR obstacle sensor triggers LED when an object is detected",
+  "tags": ["sensor", "ir", "led", "beginner"],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 100,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "ir1",
+        "type": "ir_obstacle",
+        "x": 200,
+        "y": -40,
+        "rotation": 0,
+        "props": {
+          "detected": 0
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 370,
+        "y": 120,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 375,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "ir1",
+          "pinId": "OUT"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": {
+          "c1": {
+            "x": 238.30121446306836,
+            "y": 97.93923898991622
+          },
+          "c2": {
+            "x": 137.30121446306836,
+            "y": 63.95711302971037
+          }
+        }
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "b1",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789313975437_vwcl6",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789313980925_91mom",
+        "from": {
+          "instId": "ir1",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "5V2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789313983558_aumv6",
+        "from": {
+          "instId": "ir1",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND3"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "code": "int sensorPin = 2;\nint ledPin = 13;\n\nvoid setup() {\n  pinMode(sensorPin, INPUT);\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n}\n\nvoid loop() {\n  int state = digitalRead(sensorPin);\n  if (state == LOW) {\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"Obstacle detected!\");\n  } else {\n    digitalWrite(ledPin, LOW);\n    Serial.println(\"Clear\");\n  }\n  delay(100);\n}"
+}
