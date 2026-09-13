@@ -65,10 +65,35 @@ window.ArduinoLibs['WiFi'] = {
         var c = canvas.components[i];
         if (c.type !== 'wifi_module') continue;
         if (c.props && c.props.ssid === ssid) {
-          return { ssid: c.props.ssid, password: c.props.password, channel: c.props.channel || 6, ipAddress: c.props.ipAddress || '192.168.4.1', security: c.props.security || 'WPA2-PSK' };
+          return {
+            ssid: c.props.ssid, password: c.props.password,
+            channel: c.props.channel || 6, ipAddress: c.props.ipAddress || '192.168.4.1',
+            security: c.props.security || 'WPA2-PSK', txPower: c.props.txPower ?? 20,
+            x: c.x, y: c.y, width: c.width || 80, height: c.height || 80,
+          };
         }
       }
       return null;
+    }
+
+    function _getBoardCenter() {
+      var canvas = window.CircuitCanvas;
+      if (!canvas || !Array.isArray(canvas.components)) return null;
+      for (var i = 0; i < canvas.components.length; i++) {
+        var c = canvas.components[i];
+        if (c.type === 'esp32_devkit_v1') {
+          return { x: c.x + (c.width || 120) / 2, y: c.y + (c.height || 120) / 2 };
+        }
+      }
+      return null;
+    }
+
+    function _calcRSSI(txPower, boardCx, boardCy, apX, apY, apW, apH) {
+      var dx = (apX + apW / 2) - boardCx;
+      var dy = (apY + apH / 2) - boardCy;
+      var dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+      var rssi = txPower - (20 * Math.log10(dist / 10));
+      return Math.max(-95, Math.min(-30, Math.round(rssi)));
     }
 
     function _clientIpFromGateway(gw) {
@@ -141,20 +166,27 @@ window.ArduinoLibs['WiFi'] = {
         if (!self._wifiConnected || !self._wifiSSID) return 0;
         var hotspot = _findHotspot(self._wifiSSID);
         if (!hotspot) return -90;
-        var txPower = hotspot.txPower || 20;
-        return (txPower - 40) + Math.round(Math.sin(Date.now() / 3000) * 3);
+        var board = _getBoardCenter();
+        if (!board) return -50;
+        return _calcRSSI(hotspot.txPower || 20, board.x, board.y,
+                         hotspot.x, hotspot.y, hotspot.width, hotspot.height);
       },
 
       wifiScanNetworks: function() {
         var canvas = window.CircuitCanvas;
         self._wifiScanResults = [];
         if (!canvas || !Array.isArray(canvas.components)) return 0;
+        var board = _getBoardCenter();
         for (var j = 0; j < canvas.components.length; j++) {
           var c = canvas.components[j];
           if (c.type === 'wifi_module' && c.props && !c.props.hidden) {
+            var rssi = board
+              ? _calcRSSI(c.props.txPower ?? 20, board.x, board.y,
+                          c.x, c.y, c.width || 80, c.height || 80)
+              : -40;
             self._wifiScanResults.push({
               ssid: c.props.ssid || '',
-              rssi: -40 + Math.round(Math.sin(Date.now() / 3000 + j) * 3),
+              rssi: rssi,
               channel: c.props.channel || 6,
               authType: _securityToAuthType(c.props.security),
             });
