@@ -1,0 +1,23 @@
+{
+  "id": "stm32f746_blink",
+  "name": "STM32F746 Onboard LED",
+  "icon": "🔌",
+  "desc": "STM32F746G-DISCO — blink the on-board green LED LD1 on PI1 (D13 / LED_BUILTIN) with no wiring needed",
+  "tags": [
+    "stm32",
+    "beginner",
+    "LED"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "stm32f746_disco",
+        "x": 200,
+        "y": 100
+      }
+    ],
+    "wires": []
+  },
+  "code": "/*\n * STM32F746G-DISCO Onboard LED Blink\n * The Discovery board has a green LED LD1 on PI1.\n * LED_BUILTIN is mapped to D13 (pin 13) automatically.\n * No external wiring required — just press Run!\n */\n\nvoid setup() {\n  pinMode(LED_BUILTIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"STM32F746 onboard LED blink started\");\n}\n\nvoid loop() {\n  digitalWrite(LED_BUILTIN, HIGH);\n  Serial.println(\"LD1 ON\");\n  delay(500);\n\n  digitalWrite(LED_BUILTIN, LOW);\n  Serial.println(\"LD1 OFF\");\n  delay(500);\n}"
+}
