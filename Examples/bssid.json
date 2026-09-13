@@ -1,0 +1,90 @@
+{
+  "id": "bssid",
+  "name": "BSSID",
+  "icon": "🔧",
+  "desc": "A custom BSSID circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789326314274_7v7p5",
+        "type": "esp32_devkit_v1",
+        "x": 95,
+        "y": 50,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32"
+        }
+      },
+      {
+        "id": "comp_1789326328066_phyb0",
+        "type": "wifi_module",
+        "x": 360,
+        "y": 95,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_Network",
+          "password": "password123",
+          "channel": 6,
+          "ipAddress": "192.168.4.1",
+          "txPower": 20,
+          "security": "WPA2-PSK",
+          "hidden": false
+        }
+      },
+      {
+        "id": "comp_1789326329121_eow21",
+        "type": "wifi_module",
+        "x": 665,
+        "y": 70,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_Network",
+          "password": "password123",
+          "channel": 6,
+          "ipAddress": "192.168.4.1",
+          "txPower": 20,
+          "security": "WPA2-PSK",
+          "hidden": false
+        }
+      },
+      {
+        "id": "comp_1789326329691_wazxr",
+        "type": "wifi_module",
+        "x": 435,
+        "y": 340,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_Network",
+          "password": "password123",
+          "channel": 6,
+          "ipAddress": "192.168.4.1",
+          "txPower": 20,
+          "security": "WPA2-PSK",
+          "hidden": false
+        }
+      },
+      {
+        "id": "comp_1789326330116_a6201",
+        "type": "wifi_module",
+        "x": 695,
+        "y": 325,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_Network",
+          "password": "password123",
+          "channel": 6,
+          "ipAddress": "192.168.4.1",
+          "txPower": 20,
+          "security": "WPA2-PSK",
+          "hidden": false
+        }
+      }
+    ],
+    "wires": []
+  },
+  "code": "#include <WiFi.h>\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Set WiFi to station mode and disconnect from any network\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println(\"Setup completed.\");\n}\n\nvoid loop() {\n  Serial.println(\"Starting Wi-Fi scan...\");\n\n  // WiFi.scanNetworks returns the number of networks found\n  int n = WiFi.scanNetworks();\n  Serial.println(\"Scan complete.\");\n\n  if (n == 0) {\n    Serial.println(\"No networks found.\");\n  } else {\n    Serial.print(n);\n    Serial.println(\" networks found:\");\n    Serial.println(\"-----------------------------------------------------------------------\");\n    Serial.printf(\"%-30s | %-17s | %-4s | %-4s\\n\", \"SSID\", \"BSSID\", \"RSSI\", \"CH\");\n    Serial.println(\"-----------------------------------------------------------------------\");\n    \n    for (int i = 0; i < n; ++i) {\n      // Print SSID, BSSID, RSSI, and Channel number\n      Serial.printf(\"%-30s | %-17s | %-4d | %-4d\\n\", \n                    WiFi.SSID(i).c_str(), \n                    WiFi.BSSIDstr(i).c_str(), \n                    WiFi.RSSI(i), \n                    WiFi.channel(i));\n      delay(10);\n    }\n  }\n  Serial.println(\"-----------------------------------------------------------------------\\n\");\n\n  // Wait 10 seconds before scanning again\n  delay(10000);\n}\n"
+}

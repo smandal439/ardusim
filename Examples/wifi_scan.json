@@ -12,7 +12,7 @@
       {
         "id": "comp_1789323845329_x8tv8",
         "type": "esp32_devkit_v1",
-        "x": 200,
+        "x": 305,
         "y": 35,
         "rotation": 0,
         "props": {
@@ -22,32 +22,32 @@
       {
         "id": "comp_1789323854365_06dji",
         "type": "wifi_module",
-        "x": 475,
-        "y": 45,
+        "x": 210,
+        "y": 50,
         "rotation": 0,
         "props": {
           "ssid": "ArduSim_Network1",
           "password": "password123",
           "channel": 6,
-          "ipAddress": "192.168.4.1",
+          "ipAddress": "192.168.6.1",
           "txPower": 20,
-          "security": "undefined",
-          "hidden": false
+          "security": "WPA2-PSK",
+          "hidden": true
         }
       },
       {
         "id": "comp_1789323856263_45ckm",
         "type": "wifi_module",
-        "x": 470,
-        "y": 200,
+        "x": 180,
+        "y": 195,
         "rotation": 0,
         "props": {
           "ssid": "ArduSim_Network3",
           "password": "password123",
           "channel": 6,
-          "ipAddress": "192.168.4.1",
+          "ipAddress": "192.168.7.1",
           "txPower": 20,
-          "security": "undefined",
+          "security": "WPA2-PSK",
           "hidden": false
         }
       },
@@ -55,23 +55,23 @@
         "id": "comp_1789323857296_0kv9n",
         "type": "wifi_module",
         "x": 580,
-        "y": 135,
+        "y": 180,
         "rotation": 0,
         "props": {
           "ssid": "ArduSim_Network4",
           "password": "password123",
           "channel": 6,
-          "ipAddress": "192.168.4.1",
+          "ipAddress": "192.168.5.1",
           "txPower": 20,
-          "security": "undefined",
+          "security": "WPA2-PSK",
           "hidden": false
         }
       },
       {
         "id": "comp_1789323858249_c1m3x",
         "type": "wifi_module",
-        "x": 585,
-        "y": 10,
+        "x": 540,
+        "y": 35,
         "rotation": 0,
         "props": {
           "ssid": "ArduSim_Network2",
@@ -79,7 +79,7 @@
           "channel": 6,
           "ipAddress": "192.168.4.1",
           "txPower": 20,
-          "security": "undefined",
+          "security": "WPA2-PSK",
           "hidden": false
         }
       }
