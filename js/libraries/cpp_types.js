@@ -91,6 +91,22 @@ window.CppTypes = {
     'i2s_comm_format_t',
   ],
 
+  // ── FreeRTOS types ──
+  freertos: [
+    'TaskFunction_t',
+    'TickType_t',
+    'BaseType_t',
+    'UBaseType_t',
+    'TaskHandle_t',
+    'QueueHandle_t',
+    'SemaphoreHandle_t',
+    'EventGroupHandle_t',
+    'TimerHandle_t',
+    'portMUX_TYPE',
+    'StaticTask_t',
+    'StackType_t',
+  ],
+
   // ── Additional types recognized by the type pattern (for parameter/variable stripping) ──
   additional: [
     'CoapPacket',
@@ -133,6 +149,7 @@ window.CppTypes = {
       ...this.primitives,
       ...this.fixedWidth,
       ...this.espIdf,
+      ...(this.freertos || []),
       ...(this.additional || []),
     ];
     // Sort longest-first so 'unsigned int' matches before 'int'
@@ -167,6 +184,7 @@ window.CppTypes = {
     return this.primitives.includes(n) ||
            this.fixedWidth.includes(n) ||
            this.arduino.includes(n) ||
-           this.espIdf.includes(n);
+           this.espIdf.includes(n) ||
+           (this.freertos && this.freertos.includes(n));
   },
 };

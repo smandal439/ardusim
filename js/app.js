@@ -2058,6 +2058,9 @@ _newProject() {
     const itemRotate  = document.getElementById('ctx-rotate');
     const itemWireAuto = document.getElementById('ctx-wire-auto');
     const wirePalette = document.getElementById('wire-palette');
+    const itemWireOrthogonal = document.getElementById('ctx-wire-orthogonal');
+    const itemWireBezier = document.getElementById('ctx-wire-bezier');
+    const itemWireResetRoute = document.getElementById('ctx-wire-reset-route');
 
     const cleanup = () => this._closeContextMenu();
 
@@ -2089,6 +2092,29 @@ _newProject() {
           if (wireObj) {
             this.canvas?.setWireColor(wireObj.id, null);
           }
+          cleanup();
+        };
+      }
+
+      // Wire style toggle
+      const currentStyle = wireObj ? (wireObj.routeStyle || 'orthogonal') : 'orthogonal';
+      if (itemWireOrthogonal) {
+        itemWireOrthogonal.classList.toggle('active', currentStyle === 'orthogonal');
+        itemWireOrthogonal.onclick = () => {
+          if (wireObj) this.canvas?.setWireStyle(wireObj.id, 'orthogonal');
+          cleanup();
+        };
+      }
+      if (itemWireBezier) {
+        itemWireBezier.classList.toggle('active', currentStyle === 'bezier');
+        itemWireBezier.onclick = () => {
+          if (wireObj) this.canvas?.setWireStyle(wireObj.id, 'bezier');
+          cleanup();
+        };
+      }
+      if (itemWireResetRoute) {
+        itemWireResetRoute.onclick = () => {
+          if (wireObj) this.canvas?.resetWireRoute(wireObj.id);
           cleanup();
         };
       }
