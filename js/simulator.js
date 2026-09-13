@@ -995,12 +995,14 @@ class ArduinoSimulator {
           if (!hotspot) {
             self._wifiConnected = false;
             self._wifiClientIP = null;
+            self._wifiSSID = null;
             self._serialLog(`[ESP32 Wi-Fi] SSID not found: "${ssid}"\n`, 'system');
             return;
           }
           if (hotspot.password !== pass) {
             self._wifiConnected = false;
             self._wifiClientIP = null;
+            self._wifiSSID = null;
             self._serialLog(`[ESP32 Wi-Fi] Wrong password for "${ssid}"\n`, 'system');
             return;
           }
@@ -1009,13 +1011,14 @@ class ArduinoSimulator {
           setTimeout(() => {
             self._wifiConnected = true;
             self._wifiClientIP = clientIP;
+            self._wifiSSID = ssid;
             self._serialLog('[ESP32 Wi-Fi] Connected! IP: ' + clientIP + '\n', 'system');
           }, Math.max(50, 800 / self.speed));
         },
         localIP() { return self._wifiClientIP || '0.0.0.0'; },
         softAPIP() { return '192.168.4.1'; },
         status() { return self._wifiConnected ? 3 : 6; },
-        disconnect() { self._wifiConnected = false; },
+        disconnect() { self._wifiConnected = false; self._wifiSSID = null; },
         mode() { },
         macAddress() {
           const idx = self.boardIndex || 0;
@@ -1024,6 +1027,29 @@ class ArduinoSimulator {
         softAP(ssid) { self._serialLog(`[ESP32 Wi-Fi] SoftAP "${ssid}" started\n`, 'system'); },
         setAutoConnect() { },
         reconnect() { self._serialLog('[ESP32 Wi-Fi] Reconnected\n', 'system'); },
+        RSSI() {
+          if (!self._wifiConnected || !self._wifiSSID) return 0;
+          const hotspot = this._findHotspot(self._wifiSSID);
+          if (!hotspot) return -90;
+          const txPower = hotspot.txPower || 20;
+          const baseRssi = txPower - 40;
+          return baseRssi + Math.round(Math.sin(Date.now() / 3000) * 3);
+        },
+        scanNetworks() {
+          const canvas = window.CircuitCanvas;
+          if (!canvas || !Array.isArray(canvas.components)) return 0;
+          let count = 0;
+          self._wifiScanResults = [];
+          for (let i = 0; i < canvas.components.length; i++) {
+            const c = canvas.components[i];
+            if (c.type === 'wifi_module' && c.props) {
+              count++;
+              self._wifiScanResults.push(c.props.ssid || '');
+            }
+          }
+          return count;
+        },
+        SSID() { return self._wifiSSID || ''; },
       },
       /* ESP32 Wi-Fi client + MQTT (PubSubClient).
          When the MQTT.js library is loaded (index.html), this also publishes

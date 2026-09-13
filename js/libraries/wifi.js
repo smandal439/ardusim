@@ -41,6 +41,12 @@ window.ArduinoLibs['WiFi'] = {
     [/\bWiFi\.softAP\s*\(/g, '_a.wifiSoftAP('],
     // WiFi.reconnect() → _a.wifiReconnect()
     [/\bWiFi\.reconnect\s*\(/g, '_a.wifiReconnect('],
+    // WiFi.RSSI() → _a.wifiRSSI()
+    [/\bWiFi\.RSSI\s*\(\s*\)/g, '_a.wifiRSSI()'],
+    // WiFi.scanNetworks() → _a.wifiScanNetworks()
+    [/\bWiFi\.scanNetworks\s*\(\s*\)/g, '_a.wifiScanNetworks()'],
+    // WiFi.SSID() → _a.wifiSSID()
+    [/\bWiFi\.SSID\s*\(\s*\)/g, '_a.wifiSSID()'],
   ],
 
   constants: { WL_CONNECTED: 3, WL_IDLE_STATUS: 0, WL_NO_SSID_AVAIL: 1, WL_SCAN_COMPLETED: 2, WL_CONNECT_FAILED: 4, WL_CONNECTION_LOST: 5, WL_DISCONNECTED: 6, WIFI_STA: 1, WIFI_AP: 2, WIFI_AP_STA: 3 },
@@ -80,12 +86,14 @@ window.ArduinoLibs['WiFi'] = {
         if (!hotspot) {
           self._wifiConnected = false;
           self._wifiClientIP = null;
+          self._wifiSSID = null;
           self._serialLog('[ESP32 Wi-Fi] SSID not found: "' + ssid + '"\n', 'system');
           return;
         }
         if (hotspot.password !== pass) {
           self._wifiConnected = false;
           self._wifiClientIP = null;
+          self._wifiSSID = null;
           self._serialLog('[ESP32 Wi-Fi] Wrong password for "' + ssid + '"\n', 'system');
           return;
         }
@@ -94,6 +102,7 @@ window.ArduinoLibs['WiFi'] = {
         setTimeout(function() {
           self._wifiConnected = true;
           self._wifiClientIP = clientIP;
+          self._wifiSSID = ssid;
           self._serialLog('[ESP32 Wi-Fi] Connected! IP: ' + clientIP + '\n', 'system');
         }, Math.max(50, 800 / self.speed));
       },
@@ -102,6 +111,7 @@ window.ArduinoLibs['WiFi'] = {
       wifiStatus: function() { return self._wifiConnected ? 3 : 6; },
       wifiDisconnect: function() {
         self._wifiConnected = false;
+        self._wifiSSID = null;
         self._serialLog('[ESP32 Wi-Fi] Disconnected\n', 'system');
       },
       wifiReconnect: function() { self._serialLog('[ESP32 Wi-Fi] Reconnected\n', 'system'); },
@@ -109,6 +119,31 @@ window.ArduinoLibs['WiFi'] = {
       wifiSoftAP: function(ssid, pass) {
         self._serialLog('[ESP32 Wi-Fi] SoftAP "' + ssid + '" started\n', 'system');
       },
+      wifiRSSI: function() {
+        if (!self._wifiConnected || !self._wifiSSID) return 0;
+        var hotspot = _findHotspot(self._wifiSSID);
+        if (!hotspot) return -90;
+        var txPower = hotspot.txPower || 20;
+        var baseRssi = txPower - 40;
+        return baseRssi + Math.round((Math.sin(Date.now() / 3000) * 3));
+      },
+      wifiScanNetworks: function() {
+        var canvas = window.CircuitCanvas;
+        if (!canvas || !Array.isArray(canvas.components)) return 0;
+        var count = 0;
+        for (var i = 0; i < canvas.components.length; i++) {
+          if (canvas.components[i].type === 'wifi_module') count++;
+        }
+        self._wifiScanResults = [];
+        for (var j = 0; j < canvas.components.length; j++) {
+          var c = canvas.components[j];
+          if (c.type === 'wifi_module' && c.props) {
+            self._wifiScanResults.push(c.props.ssid || '');
+          }
+        }
+        return count;
+      },
+      wifiSSID: function() { return self._wifiSSID || ''; },
     };
   },
 };
