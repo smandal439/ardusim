@@ -151,7 +151,7 @@ window.ArduinoLibs['WiFi'] = {
         if (!canvas || !Array.isArray(canvas.components)) return 0;
         for (var j = 0; j < canvas.components.length; j++) {
           var c = canvas.components[j];
-          if (c.type === 'wifi_module' && c.props) {
+          if (c.type === 'wifi_module' && c.props && !c.props.hidden) {
             self._wifiScanResults.push({
               ssid: c.props.ssid || '',
               rssi: -40 + Math.round(Math.sin(Date.now() / 3000 + j) * 3),

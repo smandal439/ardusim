@@ -204,11 +204,18 @@ defComp({
 
     // --- OLED Screen Display Content ---
     // SSID
-    ctx.fillStyle = isRunning ? '#00d2ff' : 'rgba(255,255,255,0.3)';
-    ctx.font = 'bold 10px monospace';
-    ctx.textAlign = 'center';
-    const displaySsid = ssid.length > 11 ? ssid.slice(0, 10) + '…' : ssid;
-    ctx.fillText(displaySsid, w / 2, 40);
+    if (inst.props.hidden && !isRunning) {
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.font = 'bold 10px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('·········', w / 2, 40);
+    } else {
+      ctx.fillStyle = isRunning ? '#00d2ff' : 'rgba(255,255,255,0.3)';
+      ctx.font = 'bold 10px monospace';
+      ctx.textAlign = 'center';
+      const displaySsid = ssid.length > 11 ? ssid.slice(0, 10) + '…' : ssid;
+      ctx.fillText(displaySsid, w / 2, 40);
+    }
 
     // IP Address / Status
     ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
