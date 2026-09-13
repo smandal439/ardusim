@@ -973,11 +973,14 @@ class ArduinoSimulator {
       /* ESP32 Wi-Fi object stub — requires a Wi-Fi Hotspot component on the canvas */
       WiFi: {
         _findHotspot(ssid) {
-          const bus = window._wifiBus;
-          if (!bus || !bus.hotspots) return null;
-          for (const id in bus.hotspots) {
-            const h = bus.hotspots[id];
-            if (h.ssid === ssid) return h;
+          const canvas = window.CircuitCanvas;
+          if (!canvas || !Array.isArray(canvas.components)) return null;
+          for (let i = 0; i < canvas.components.length; i++) {
+            const c = canvas.components[i];
+            if (c.type !== 'wifi_module') continue;
+            if (c.props && c.props.ssid === ssid) {
+              return { ssid: c.props.ssid, password: c.props.password, channel: c.props.channel || 6 };
+            }
           }
           return null;
         },

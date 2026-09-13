@@ -50,14 +50,18 @@ window.ArduinoLibs['WiFi'] = {
   runtime: function(self) {
     /**
      * Find a matching Wi-Fi Hotspot on the canvas.
-     * Returns { ssid, password, channel, simulator } or null.
+     * Searches CircuitCanvas.components directly (avoids timing issues with
+     * the render-loop bus that may not yet be populated during setup()).
      */
     function _findHotspot(ssid) {
-      const bus = window._wifiBus;
-      if (!bus || !bus.hotspots) return null;
-      for (const id in bus.hotspots) {
-        const h = bus.hotspots[id];
-        if (h.ssid === ssid) return h;
+      var canvas = window.CircuitCanvas;
+      if (!canvas || !Array.isArray(canvas.components)) return null;
+      for (var i = 0; i < canvas.components.length; i++) {
+        var c = canvas.components[i];
+        if (c.type !== 'wifi_module') continue;
+        if (c.props && c.props.ssid === ssid) {
+          return { ssid: c.props.ssid, password: c.props.password, channel: c.props.channel || 6 };
+        }
       }
       return null;
     }
