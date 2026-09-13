@@ -665,12 +665,6 @@ window.ArduinoLibs['FreeRTOS'] = {
         return (self._freertosTasks[0].length + self._freertosTasks[1].length) > 0;
       },
 
-      _freertosScheduler: async function() {
-        var core0Done = self._freertosRunCore(0);
-        var core1Done = self._freertosRunCore(1);
-        await Promise.all([core0Done, core1Done]);
-      },
-
       _freertosRunCore: async function(coreId) {
         while (self.isRunning) {
           if (self._freertosSuspended) {
@@ -710,6 +704,13 @@ window.ArduinoLibs['FreeRTOS'] = {
           // (delay promises, queue waits, etc.) to resolve
           await new Promise(function(r) { setTimeout(r, 0); });
         }
+      },
+
+      _freertosScheduler: async function() {
+        var rt = self._a;
+        var core0Done = rt._freertosRunCore(0);
+        var core1Done = rt._freertosRunCore(1);
+        await Promise.all([core0Done, core1Done]);
       },
     };
   },
