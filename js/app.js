@@ -1663,6 +1663,8 @@ _newProject() {
         item.dataset.type = id;
         item.title = def.desc || def.name;
         const shortDesc = (def.desc || '').length > 42 ? def.desc.slice(0, 42) + '…' : (def.desc || '');
+        const searchText = ((def.name || '') + ' ' + (def.desc || '') + ' ' + (def.search || '')).toLowerCase().replace(/[\s\-_]+/g, ' ');
+        item.dataset.search = searchText;
         item.innerHTML = `<span class="comp-icon">${this._escHtml(def.icon || '🔧')}</span><span class="comp-info"><span class="comp-name">${this._escHtml(def.name)}</span>${shortDesc ? `<span class="comp-desc">${this._escHtml(shortDesc)}</span>` : ''}</span>`;
         item.addEventListener('click', () => {
           if (this.canvas) {
@@ -1699,16 +1701,16 @@ _newProject() {
   }
 
   _filterComponents(term) {
-    const query = (term || '').toLowerCase();
+    const query = (term || '').toLowerCase().replace(/[\s\-_]+/g, ' ');
     // Filter regular comp-items
     document.querySelectorAll('.comp-item:not(.comp-dropdown)').forEach(item => {
-      const name = item.textContent.toLowerCase();
-      item.style.display = name.includes(query) ? '' : 'none';
+      const text = item.dataset.search || item.textContent.toLowerCase();
+      item.style.display = text.includes(query) ? '' : 'none';
     });
     // Filter dropdown variant items
     document.querySelectorAll('.comp-dropdown-item').forEach(item => {
-      const name = item.textContent.toLowerCase();
-      item.style.display = name.includes(query) ? '' : 'none';
+      const text = item.dataset.search || item.textContent.toLowerCase();
+      item.style.display = text.includes(query) ? '' : 'none';
     });
     // Show/hide groups based on visible items
     document.querySelectorAll('.comp-group').forEach(group => {
