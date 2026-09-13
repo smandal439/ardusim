@@ -1,0 +1,90 @@
+{
+  "id": "wifi_scan",
+  "name": "wifi scan",
+  "icon": "🔧",
+  "desc": "A custom wifi scan circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789323845329_x8tv8",
+        "type": "esp32_devkit_v1",
+        "x": 200,
+        "y": 35,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32"
+        }
+      },
+      {
+        "id": "comp_1789323854365_06dji",
+        "type": "wifi_module",
+        "x": 475,
+        "y": 45,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_Network1",
+          "password": "password123",
+          "channel": 6,
+          "ipAddress": "192.168.4.1",
+          "txPower": 20,
+          "security": "undefined",
+          "hidden": false
+        }
+      },
+      {
+        "id": "comp_1789323856263_45ckm",
+        "type": "wifi_module",
+        "x": 470,
+        "y": 200,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_Network3",
+          "password": "password123",
+          "channel": 6,
+          "ipAddress": "192.168.4.1",
+          "txPower": 20,
+          "security": "undefined",
+          "hidden": false
+        }
+      },
+      {
+        "id": "comp_1789323857296_0kv9n",
+        "type": "wifi_module",
+        "x": 580,
+        "y": 135,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_Network4",
+          "password": "password123",
+          "channel": 6,
+          "ipAddress": "192.168.4.1",
+          "txPower": 20,
+          "security": "undefined",
+          "hidden": false
+        }
+      },
+      {
+        "id": "comp_1789323858249_c1m3x",
+        "type": "wifi_module",
+        "x": 585,
+        "y": 10,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_Network2",
+          "password": "password123",
+          "channel": 6,
+          "ipAddress": "192.168.4.1",
+          "txPower": 20,
+          "security": "undefined",
+          "hidden": false
+        }
+      }
+    ],
+    "wires": []
+  },
+  "code": "#include <WiFi.h>\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Set WiFi to station mode and disconnect from an AP if it was previously connected\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println(\"Setup done\");\n}\n\nvoid loop() {\n  Serial.println(\"Scanning for networks...\");\n\n  // WiFi.scanNetworks will return the number of networks found\n  int n = WiFi.scanNetworks();\n  Serial.println(\"Scan complete\");\n  \n  if (n == 0) {\n    Serial.println(\"No networks found.\");\n  } else {\n    Serial.print(n);\n    Serial.println(\" networks found:\");\n    \n    for (int i = 0; i < n; ++i) {\n      // Print SSID and RSSI for each network found\n      Serial.print(i + 1);\n      Serial.print(\": \");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(\" (\");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(\" dBm) Channel: \");\n      Serial.print(WiFi.channel(i));\n      \n      // Print Encryption Type\n      Serial.print(\" Encryption: \");\n      switch (WiFi.encryptionType(i)) {\n        case WIFI_AUTH_OPEN:            Serial.println(\"Open\"); break;\n        case WIFI_AUTH_WEP:             Serial.println(\"WEP\"); break;\n        case WIFI_AUTH_WPA_PSK:         Serial.println(\"WPA\"); break;\n        case WIFI_AUTH_WPA2_PSK:        Serial.println(\"WPA2\"); break;\n        case WIFI_AUTH_WPA_WPA2_PSK:   Serial.println(\"WPA/WPA2\"); break;\n        case WIFI_AUTH_WPA3_PSK:        Serial.println(\"WPA3\"); break;\n        default:                        Serial.println(\"Unknown\"); break;\n      }\n      delay(10);\n    }\n  }\n  Serial.println(\"\");\n\n  // Wait 5 seconds before scanning again\n  delay(5000);\n}\n"
+}
