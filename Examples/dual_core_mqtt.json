@@ -1,0 +1,30 @@
+{
+  "id": "dual_core_mqtt",
+  "name": "dual core mqtt",
+  "icon": "🔧",
+  "desc": "Demonstrates dual-core programming on ESP32 with FreeRTOS. Core 0 handles Wi-Fi and MQTT communication, while Core 1 handles fast sensor acquisition and processing. Uses a mutex to safely share data between cores.",
+  "tags": [
+    "esp32",
+    "dual-core",
+    "mqtt",
+    "wifi",
+    "freertos",
+    "multitasking"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789319630699_a76qe",
+        "type": "esp32_devkit_v1",
+        "x": 70,
+        "y": 20,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "code": "#include <WiFi.h>\n#include <PubSubClient.h>\n\n// Wi-Fi and MQTT Broker credentials\nconst char* ssid          = \"YOUR_WIFI_SSID\";\nconst char* password      = \"YOUR_WIFI_PASSWORD\";\nconst char* mqtt_server   = \"broker.hivemq.com\";\nconst int   mqtt_port     = 1883;\nconst char* mqtt_topic    = \"esp32/telemetry\";\n\nWiFiClient espClient;\nPubSubClient mqttClient(espClient);\n\n// Shared resource and mutex handle for thread-safe cross-core communication\nSemaphoreHandle_t dataMutex;\nvolatile int sharedSensorData = 0;\n\n// ==========================================\n// CORE 0 TASK: Wi-Fi & MQTT Communication\n// ==========================================\nvoid taskNetwork(void *pvParameters) {\n  // Initialize Wi-Fi on Core 0\n  WiFi.mode(WIFI_STA);\n  WiFi.begin(ssid, password);\n\n  while (WiFi.status() != WL_CONNECTED) {\n    vTaskDelay(500 / portTICK_PERIOD_MS);\n  }\n\n  mqttClient.setServer(mqtt_server, mqtt_port);\n\n  for (;;) {\n    // Reconnect to MQTT if connection drops\n    if (!mqttClient.connected()) {\n      String clientId = \"ESP32Core0-\" + String(random(0xffff), HEX);\n      if (mqttClient.connect(clientId.c_str())) {\n        mqttClient.publish(\"esp32/status\", \"Core 0 Connected\");\n      } else {\n        vTaskDelay(2000 / portTICK_PERIOD_MS);\n        continue;\n      }\n    }\n\n    mqttClient.loop();\n\n    // Safely retrieve the shared sensor reading from memory\n    int sensorCopy = 0;\n    if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(100)) == pdTRUE) {\n      sensorCopy = sharedSensorData;\n      xSemaphoreGive(dataMutex);\n\n      // Publish payload\n      char payload[32];\n      snprintf(payload, sizeof(payload), \"{\\\"value\\\":%d}\", sensorCopy);\n      mqttClient.publish(mqtt_topic, payload);\n    }\n\n    // Publish telemetry every 1 second\n    vTaskDelay(1000 / portTICK_PERIOD_MS);\n  }\n}\n\n// ==========================================\n// CORE 1 TASK: Fast Sensor Acquisition / Processing\n// ==========================================\nvoid taskSensor(void *pvParameters) {\n  for (;;) {\n    // Simulate high-frequency or timing-sensitive sensor sampling\n    int rawValue = random(100, 500);\n\n    // Safely update the shared global variable\n    if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(100)) == pdTRUE) {\n      sharedSensorData = rawValue;\n      xSemaphoreGive(dataMutex);\n    }\n\n    // Sample sensor every 100ms without being interrupted by Wi-Fi stack operations\n    vTaskDelay(100 / portTICK_PERIOD_MS);\n  }\n}\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Create Mutex for shared data protection across cores\n  dataMutex = xSemaphoreCreateMutex();\n\n  // Pin Network Task to Core 0\n  xTaskCreatePinnedToCore(\n    taskNetwork,    // Task function\n    \"NetworkTask\",  // Task name\n    8192,           // Stack size in bytes (Wi-Fi/MQTT needs ~8KB)\n    NULL,           // Parameter\n    1,              // Priority\n    NULL,           // Task handle\n    0               // Core ID (0)\n  );\n\n  // Pin Sensor Task to Core 1\n  xTaskCreatePinnedToCore(\n    taskSensor,     // Task function\n    \"SensorTask\",   // Task name\n    2048,           // Stack size in bytes\n    NULL,           // Parameter\n    1,              // Priority\n    NULL,           // Task handle\n    1               // Core ID (1)\n  );\n}\n\nvoid loop() {\n  // Delete main Arduino loop task to free resources (tasks manage execution)\n  vTaskDelete(NULL);\n}"
+}
