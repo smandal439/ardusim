@@ -135,7 +135,8 @@ window.ArduinoLibs['RtcDS3231'] = {
       rs.minute = t.minute;
       rs.second = t.second;
       rs._initialized = true;
-      rs._lastTick = (window.ArduinoSim && window.ArduinoSim.simTime) || 0;
+      rs._accMs = 0;
+      rs._lastTick = self.simTime || 0;
     }
 
     /* Local constructors — avoid _a reference (not in scope inside runtime closure) */

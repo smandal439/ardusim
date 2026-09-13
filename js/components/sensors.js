@@ -3020,29 +3020,6 @@ class DS3231Component extends Component {
       rs._lastTick = sim.simTime ?? 0;
     }
     rs.temperature = pr.temperature ?? 25.0;
-    const now = sim.simTime ?? 0;
-    const elapsed = now - (rs._lastTick || 0);
-    rs._lastTick = now;
-    if (elapsed > 0) {
-      rs._accMs = (rs._accMs || 0) + elapsed;
-      var secToAdd = (rs._accMs / 1000) | 0;
-      if (secToAdd > 0) {
-        rs._accMs -= secToAdd * 1000;
-        rs.second += secToAdd;
-      }
-      while (rs.second >= 60) { rs.second -= 60; rs.minute++; }
-      while (rs.second < 0)  { rs.second += 60; rs.minute--; }
-      while (rs.minute >= 60) { rs.minute -= 60; rs.hour++; }
-      while (rs.minute < 0)  { rs.minute += 60; rs.hour--; }
-      while (rs.hour >= 24)  { rs.hour -= 24; rs.day++; }
-      while (rs.hour < 0)    { rs.hour += 24; rs.day--; }
-      const daysInMonth = [31, (rs.year % 4 === 0 ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-      const maxDay = daysInMonth[(rs.month - 1)] || 31;
-      while (rs.day > maxDay) { rs.day -= maxDay; rs.month++; }
-      while (rs.day < 1)      { rs.month--; rs.day += (daysInMonth[(rs.month - 1)] || 31); }
-      while (rs.month > 12) { rs.month -= 12; rs.year++; }
-      while (rs.month < 1)  { rs.month += 12; rs.year--; }
-    }
   }
 }
 
