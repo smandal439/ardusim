@@ -880,8 +880,8 @@ class ArduinoSimulator {
         noInterrupts() { /* no-op in simulation */ },
         interrupts() { /* no-op in simulation */ },
         /* STM32 ADC/DAC resolution (no-ops in simulation) */
-        analogReadResolution(bits) {},
-        analogWriteResolution(bits) {},
+        analogReadResolution(bits) { },
+        analogWriteResolution(bits) { },
 
       },
 
@@ -926,7 +926,7 @@ class ArduinoSimulator {
       ILI9341_BLACK: 0x0000, ILI9341_WHITE: 0xFFFF, ILI9341_RED: 0xF800,
       ILI9341_GREEN: 0x07E0, ILI9341_BLUE: 0x001F, ILI9341_CYAN: 0x07FF,
       ILI9341_MAGENTA: 0xF81F, ILI9341_YELLOW: 0xFFE0, ILI9341_ORANGE: 0xFD20,
-      ILI9341_DARKGREEN: 0x03E0,       ILI9341_DARKGREY: 0x7BEF, ILI9341_NAVY: 0x000F,
+      ILI9341_DARKGREEN: 0x03E0, ILI9341_DARKGREY: 0x7BEF, ILI9341_NAVY: 0x000F,
       ILI9341_MAROON: 0x7800, ILI9341_PURPLE: 0x780F, ILI9341_OLIVE: 0x7BE0,
       ILI9341_LIGHTGREY: 0xC618, ILI9341_DARKCYAN: 0x03EF,
       // FreeRTOS constants
@@ -1299,22 +1299,28 @@ class ArduinoSimulator {
         }
       } else {
         // Run loop repeatedly (original behavior)
+        let _lastLoopTime = performance.now();
         while (this.isRunning && runId === this._runSeq) {
           if (this.isPaused) {
             await new Promise(resolve => { this._resumeResolve = resolve; });
+            _lastLoopTime = performance.now();
           }
           this._iterSinceDelay++;
           // Infinite-loop guard: yield if no delay has been called in many iterations
           if (this._iterSinceDelay > this._MAX_TIGHT_ITERS) {
             this._iterSinceDelay = 0;
-            this.simTime += 1;
             await new Promise(r => setTimeout(r, 1));
+            const _now = performance.now();
+            this.simTime += Math.max(1, Math.round(_now - _lastLoopTime));
+            _lastLoopTime = _now;
           }
           await loop();
           this._loopCount++;
-          // Yield to UI thread every iteration — advance simTime so millis() progresses
-          this.simTime += 1;
+          // Yield to UI thread — advance simTime by actual elapsed ms
           await new Promise(r => setTimeout(r, 0));
+          const _now = performance.now();
+          this.simTime += Math.max(1, Math.round(_now - _lastLoopTime));
+          _lastLoopTime = _now;
         }
       }
     } catch (err) {
@@ -1398,20 +1404,26 @@ class ArduinoSimulator {
           }
         } else {
           // Original behavior — single-threaded loop
+          let _lastLoopTime2 = performance.now();
           while (self.isRunning && runId === self._runSeq) {
             if (self.isPaused) {
               await new Promise(resolve => { self._resumeResolve = resolve; });
+              _lastLoopTime2 = performance.now();
             }
             self._iterSinceDelay++;
             if (self._iterSinceDelay > self._MAX_TIGHT_ITERS) {
               self._iterSinceDelay = 0;
-              self.simTime += 1;
               await new Promise(r => setTimeout(r, 1));
+              const _n2 = performance.now();
+              self.simTime += Math.max(1, Math.round(_n2 - _lastLoopTime2));
+              _lastLoopTime2 = _n2;
             }
             await loop();
             self._loopCount++;
-            self.simTime += 1;
             await new Promise(r => setTimeout(r, 0));
+            const _n2 = performance.now();
+            self.simTime += Math.max(1, Math.round(_n2 - _lastLoopTime2));
+            _lastLoopTime2 = _n2;
           }
         }
       } catch (err) {
@@ -1911,21 +1923,26 @@ window.loadExamplesFromFiles = async function () {
   const files = [
     '7408_test_with_logic_analyzer', 'and_gate', 'astable_555', 'blink', 'bluetooth_serial_bridge', 'bme280_weather',
     'bmp280_altitude', 'button', 'buzzer_melody', 'coap_client', 'coap_dip_switch_to_8_led', 'coap_simple_server',
-    'continuous_rotation_servo_control_by_pot', 'counter', 'custom_plugin_demo', 'dc_motor_speed', 'dip_switch_and_led_array', 'dip_switch_binary',
-    'dmm_current', 'dmm_resistance', 'dmm_voltage', 'ds3231_rtc_clock', 'ds3231_rtc_clock_sync_with_ntp', 'dso_oscilloscope',
-    'esp32_blink', 'esp32_dual_core_blink', 'esp32_fade', 'esp32_hub75_matrixpaneli2s_dma', 'esp32_i2s_local_radio_player', 'esp32_i2s_local_radio_player_2', 'esp32_i2s_local_test',
-    'esp32_i2s_music_player', 'esp32_i2s_online_radio_player', 'esp32_ntp_clock_lcd', 'esp32_server', 'esp_now_dip_switch_to_8_led', 'esp_now_sender_with_receiver',
-    'espnow_led_control', 'espnow_receiver', 'espnow_sender', 'fade', 'flex_sensor_bending_measurement', 'func_gen_dual',
-    'func_gen_led', 'gps_neo_6m_8m_tracker', 'hc05_bluetooth_led', 'ic_nand_test', 'ili9341', 'inverting_amplifier',
-    'ir_obstacle_led', 'joystick_led', 'keypad_interfacing', 'l298n_dc_motor', 'lcd', 'lcd_hello_world',
-    'lcd_i2c', 'lcd_i2c_display_20x4', 'lcd_print_remotely', 'ldr_lamp', 'led_array_blink_pattern', 'lm35_temperature',
+    'continuous_rotation_servo_control_by_pot', 'counter', 'custom_plugin_demo', 'dc_motor_speed', 'dip_switch_and_led_array',
+    'dip_switch_binary', 'dmm_current', 'dmm_resistance', 'dmm_voltage', 'ds3231_rtc_clock', 'ds3231_rtc_clock_sync_with_ntp',
+    'dso_oscilloscope', 'esp32_blink', 'esp32_dual_core_blink', 'esp32_fade', 'esp32_hub75_matrixpaneli2s_dma',
+    'esp32_i2s_local_radio_player', 'esp32_i2s_local_radio_player_2', 'esp32_i2s_local_test', 'esp32_i2s_music_player',
+    'esp32_i2s_online_radio_player', 'esp32_ntp_clock_lcd', 'esp32_server', 'esp_now_dip_switch_to_8_led',
+    'esp_now_sender_with_receiver', 'espnow_led_control', 'espnow_receiver', 'espnow_sender', 'fade',
+    'flex_sensor_bending_measurement', 'func_gen_dual', 'func_gen_led', 'gps_neo_6m_8m_tracker', 'hc05_bluetooth_led',
+    'ic_nand_test', 'ili9341', 'inverting_amplifier', , 'joystick_led', 'keypad_interfacing', 'l298n_dc_motor', 'lcd',
+    'lcd_hello_world', 'lcd_i2c', 'lcd_i2c_display_20x4', 'lcd_print_remotely', 'ldr_lamp', 'led_array_blink_pattern', 'lm35_temperature',
     'lm35_temperature_sensor', 'logic_analyzer_test', 'max7219', 'morse', 'morse_code_using_serial_data', 'mpu6050_accel',
-    'mpu6050_accelerometer_2', 'mqtt_esp32', 'multi_colour_led_blink', 'nano_blink', 'neopixel_8x8_matrix_rainbow_2', 'neopixel_8x8_matrix_rainbow_3',
-    'neopixel_8x8_matrix_rainbow_4', 'neopixel_color_cycle', 'neopixel_strip_chase', 'neopixel_strip_color_pattern', 'not_gate_test', 'oled_ssd1306',
-    'opamp_741_non_inverting', 'or_gate', 'pir_alarm', 'plugin_tutorial', 'potentiometer', 'print_binary_data',
-    'rainbow_rgb', 'read_rfid_card_raw_data', 'relay_control', 'remote_control_leds', 'remote_servo_control', 'rfid_inventory_tracker',
-    'rotary_encoder_counter', 'rotary_encoder_servo', 'seg7_counter', 'serial_plotter', 'serial_plotter_sine_and_triangle', 'servo_continuous_spin',
-    'servo_sweep', 'shift_resister_circuit', 'simplebme280_altimeter_on_lcd', 'simplebme280_altitude', 'simplebme280_basic',     'stepper_motor',
+    'mpu6050_accelerometer_2', 'mqtt_esp32', 'multi_colour_led_blink', 'nano_blink', 'neopixel_8x8_matrix_rainbow_2',
+    'neopixel_8x8_matrix_rainbow_3','neopixel_8x8_matrix_rainbow_4', 'neopixel_color_cycle', 'neopixel_strip_chase', 'neopixel_strip_color_pattern',
+    'not_gate_test', 'oled_ssd1306',    'opamp_741_non_inverting', 'or_gate', 'pir_alarm', 'plugin_tutorial',
+     'potentiometer', 'print_binary_data',
+    'rainbow_rgb', 'read_rfid_card_raw_data', 'relay_control', 'remote_control_leds', 'remote_servo_control',
+    'rfid_inventory_tracker',    'rotary_encoder_counter', 'rotary_encoder_servo', 'seg7_counter', 
+    'serial_plotter', 'serial_plotter_sine_and_triangle',
+    'servo_continuous_spin',
+    'servo_sweep', 'shift_resister_circuit', 'simplebme280_altimeter_on_lcd', 'simplebme280_altitude', 'simplebme280_basic',
+    'stepper_motor',
     'stm32f746_blink', 'stm32f746_button', 'stm32f746_lcd', 'stm32f746_pot_led',
     'temperature', 'traffic_light', 'two_lcd', 'ultrasonic', 'ultrasonic_distance_pulsein', 'vl53l0x_proximity_sensor',
     'voltage_divider', 'weather_station_multi', 'weather_station_simple', 'weather_station_tft', 'zigbee_led_control',
