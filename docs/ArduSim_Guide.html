@@ -1190,6 +1190,158 @@ window.ArduinoLibs['MySensor'] = {
 <tr><td>ArduinoJson</td><td>arduinojson.js</td><td>No</td></tr>
 </table>
 
+<h2 id="wifi-hotspot">17. Wi-Fi Hotspot Module &amp; Wi-Fi Projects</h2>
+
+<h3>17.1 What is the Wi-Fi Hotspot?</h3>
+<p>The Wi-Fi Hotspot component (found in the <strong>Communication</strong> category) is a simulated wireless access point. The ESP32 must match this component's SSID and password to connect to WiFi. <strong>Without this component on the canvas, <code>WiFi.begin()</code> will fail with "SSID not found".</strong></p>
+
+<div class="warn"><strong>Important:</strong> Every WiFi-related project (MQTT, HTTP, NTP, I2S streaming, etc.) requires a Wi-Fi Hotspot component on the canvas. All WiFi examples in the Examples panel already include one.</div>
+
+<h3>17.2 Properties</h3>
+<table>
+<tr><th>Property</th><th>Default</th><th>Description</th></tr>
+<tr><td>SSID</td><td><code>ArduSim_Network</code></td><td>Network name. The ESP32 must use this exact name.</td></tr>
+<tr><td>Password</td><td><code>password123</code></td><td>Network password. The ESP32 must use this exact password.</td></tr>
+<tr><td>Channel</td><td><code>6</code></td><td>Wi-Fi channel (1&ndash;13).</td></tr>
+<tr><td>Security</td><td><code>WPA2-PSK</code></td><td>Encryption type: WPA2-PSK, WPA-PSK, or OPEN.</td></tr>
+<tr><td>Gateway IP</td><td><code>192.168.1.1</code></td><td>Gateway address. The ESP32 gets an IP in this subnet (last octet = 105).</td></tr>
+</table>
+
+<h3>17.3 Quick Start: Connect ESP32 to Wi-Fi</h3>
+<ol>
+<li>Place an <strong>ESP32 DevKit V1</strong> board on the canvas</li>
+<li>Place a <strong>Wi-Fi Hotspot</strong> component (Communication category &rarr; search "wifi")</li>
+<li>Set the hotspot's <strong>SSID</strong> and <strong>Password</strong> in the properties panel</li>
+<li>Write your Arduino code using matching credentials:</li>
+</ol>
+
+<pre>#include &lt;WiFi.h&gt;
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin("ArduSim_Network", "password123");
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("Connected!");
+  Serial.println(WiFi.localIP());
+}
+
+void loop() {}</pre>
+
+<div class="tip"><strong>Tip:</strong> If the hotspot's Gateway IP is <code>192.168.1.1</code>, the ESP32 will be assigned <code>192.168.1.105</code>.</div>
+
+<h3>17.4 Supported WiFi API</h3>
+<table>
+<tr><th>Method</th><th>Description</th></tr>
+<tr><td><code>WiFi.begin(ssid, pass)</code></td><td>Connect to a network. Requires a matching Wi-Fi Hotspot on the canvas.</td></tr>
+<tr><td><code>WiFi.status()</code></td><td>Returns connection status: <code>WL_CONNECTED</code> (3) or <code>WL_DISCONNECTED</code> (6).</td></tr>
+<tr><td><code>WiFi.localIP()</code></td><td>Returns the assigned IP address (from the hotspot's subnet).</td></tr>
+<tr><td><code>WiFi.RSSI()</code></td><td>Returns signal strength in dBm for the connected network.</td></tr>
+<tr><td><code>WiFi.RSSI(i)</code></td><td>Returns RSSI of scanned network at index <code>i</code>.</td></tr>
+<tr><td><code>WiFi.SSID(i)</code></td><td>Returns SSID of scanned network at index <code>i</code>.</td></tr>
+<tr><td><code>WiFi.channel(i)</code></td><td>Returns channel of scanned network at index <code>i</code>.</td></tr>
+<tr><td><code>WiFi.encryptionType(i)</code></td><td>Returns auth type of scanned network at index <code>i</code>.</td></tr>
+<tr><td><code>WiFi.scanNetworks()</code></td><td>Scans for networks. Returns the number of Wi-Fi Hotspot components found.</td></tr>
+<tr><td><code>WiFi.disconnect()</code></td><td>Disconnects from the network.</td></tr>
+<tr><td><code>WiFi.mode(mode)</code></td><td>Set mode: <code>WIFI_STA</code>, <code>WIFI_AP</code>, or <code>WIFI_AP_STA</code>.</td></tr>
+<tr><td><code>WiFi.softAP(ssid, pass)</code></td><td>Start as an access point.</td></tr>
+<tr><td><code>WiFi.macAddress()</code></td><td>Returns the MAC address as a string.</td></tr>
+</table>
+
+<h3>17.5 WiFi Scan Example</h3>
+<p>This example scans for all Wi-Fi Hotspot components on the canvas and prints their details:</p>
+<pre>#include &lt;WiFi.h&gt;
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+
+  Serial.println("Setup done");
+}
+
+void loop() {
+  Serial.println("Scanning for networks...");
+  int n = WiFi.scanNetworks();
+  Serial.println("Scan complete");
+
+  if (n == 0) {
+    Serial.println("No networks found.");
+  } else {
+    Serial.print(n);
+    Serial.println(" networks found:");
+    for (int i = 0; i &lt; n; ++i) {
+      Serial.print(i + 1);
+      Serial.print(": ");
+      Serial.print(WiFi.SSID(i));
+      Serial.print(" (");
+      Serial.print(WiFi.RSSI(i));
+      Serial.print(" dBm) Channel: ");
+      Serial.print(WiFi.channel(i));
+      Serial.print(" Encryption: ");
+      switch (WiFi.encryptionType(i)) {
+        case WIFI_AUTH_OPEN:  Serial.println("Open"); break;
+        case WIFI_AUTH_WPA2_PSK: Serial.println("WPA2"); break;
+        default: Serial.println("Unknown"); break;
+      }
+      delay(10);
+    }
+  }
+  Serial.println("");
+  delay(5000);
+}</pre>
+
+<div class="info"><strong>Note:</strong> Add multiple Wi-Fi Hotspot components to the canvas with different SSIDs to simulate scanning multiple networks.</div>
+
+<h3>17.6 WiFi + MQTT Example</h3>
+<p>Most IoT projects combine WiFi with MQTT. Place a Wi-Fi Hotspot, then connect to MQTT after WiFi:</p>
+<pre>#include &lt;WiFi.h&gt;
+#include &lt;PubSubClient.h&gt;
+
+const char* ssid     = "ArduSim_Network";
+const char* password = "password123";
+const char* mqtt_server = "broker.hivemq.com";
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("WiFi connected");
+
+  client.setServer(mqtt_server, 1883);
+  client.connect("ArduSim_ESP32");
+  if (client.connected()) {
+    client.publish("ardusim/status", "online");
+    Serial.println("MQTT connected");
+  }
+}
+
+void loop() {
+  client.loop();
+}</pre>
+
+<h3>17.7 Troubleshooting</h3>
+<table>
+<tr><th>Issue</th><th>Solution</th></tr>
+<tr><td>"SSID not found" in Serial Monitor</td><td>Place a Wi-Fi Hotspot component on the canvas and set its SSID to match your code.</td></tr>
+<tr><td>"Wrong password" in Serial Monitor</td><td>Check the hotspot's password property matches your code.</td></tr>
+<tr><td>WiFi.status() never returns WL_CONNECTED</td><td>Ensure the hotspot is on the canvas and SSID/password match. Check that the simulation is running.</td></tr>
+<tr><td>WiFi.RSSI() returns 0</td><td>Connect first with WiFi.begin() before reading RSSI.</td></tr>
+<tr><td>WiFi.scanNetworks() returns 0</td><td>Add Wi-Fi Hotspot components to the canvas. Each hotspot counts as a scanned network.</td></tr>
+<tr><td>ESP32 gets wrong IP</td><td>Set the hotspot's Gateway IP property. The ESP32 gets the same subnet with last octet = 105.</td></tr>
+</table>
+
 <h3>16.9 Troubleshooting</h3>
 <table>
 <tr><th>Issue</th><th>Solution</th></tr>

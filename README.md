@@ -227,6 +227,53 @@ The simulator supports multiple wireless communication protocols for multi-board
 - **Features**: Resource discovery, confirmable/non-confirmable messages
 - **Examples**: CoAP Client/Server, DIP Switch to 8 LEDs
 
+### Wi-Fi (Hotspot Required)
+- **Library**: `<WiFi.h>`
+- **Component**: **Wi-Fi Hotspot** (Communication category) — must be placed on the canvas
+- **Pattern**: The ESP32 connects to a Wi-Fi network by matching the hotspot's SSID and password
+- **Features**: Connect/disconnect, RSSI signal strength, network scanning, IP assignment from hotspot subnet
+- **API**:
+  ```cpp
+  #include <WiFi.h>
+  WiFi.begin(ssid, password);      // Connect — hotspot must be on canvas
+  WiFi.status();                   // WL_CONNECTED (3) or WL_DISCONNECTED (6)
+  WiFi.localIP();                  // Assigned IP (from hotspot subnet)
+  WiFi.RSSI();                     // Signal strength (dBm)
+  WiFi.RSSI(i);                    // RSSI of scanned network at index i
+  WiFi.SSID(i);                    // SSID of scanned network at index i
+  WiFi.channel(i);                 // Channel of scanned network at index i
+  WiFi.encryptionType(i);          // Auth type (WIFI_AUTH_WPA2_PSK, etc.)
+  WiFi.scanNetworks();             // Scan — returns number of networks found
+  WiFi.disconnect();               // Disconnect
+  WiFi.mode(WIFI_STA);            // Set station mode
+  WiFi.softAP(ssid, password);    // Start as access point
+  WiFi.macAddress();               // Get MAC address
+  ```
+- **Required Constants**: `WL_CONNECTED`, `WL_DISCONNECTED`, `WIFI_STA`, `WIFI_AP`, `WIFI_AUTH_OPEN`, `WIFI_AUTH_WPA2_PSK`, etc.
+- **Examples**: ESP32 Server, MQTT ESP32, NTP Clock LCD, I2S Radio Player, ESP32 Fade
+
+#### How to Create a Wi-Fi Project
+1. Place an **ESP32 DevKit V1** board on the canvas
+2. Place a **Wi-Fi Hotspot** component (from the Communication category)
+3. Set the hotspot's **SSID** and **Password** in the properties panel
+4. Set the hotspot's **Gateway IP** (default: `192.168.1.1`) — the ESP32 gets an IP in this subnet
+5. In your Arduino code, use matching credentials:
+   ```cpp
+   #include <WiFi.h>
+   void setup() {
+     Serial.begin(115200);
+     WiFi.begin("ArduSimNet", "simulator");
+     while (WiFi.status() != WL_CONNECTED) {
+       delay(500);
+       Serial.print(".");
+     }
+     Serial.println("Connected!");
+     Serial.println(WiFi.localIP());
+   }
+   void loop() {}
+   ```
+6. **Without the hotspot component on the canvas**, `WiFi.begin()` will fail with "SSID not found"
+
 ### MQTT (Message Queuing Telemetry Transport)
 - **Library**: `<PubSubClient.h>`
 - **Pattern**: Publish/Subscribe messaging via broker
