@@ -60,10 +60,18 @@ window.ArduinoLibs['WiFi'] = {
         var c = canvas.components[i];
         if (c.type !== 'wifi_module') continue;
         if (c.props && c.props.ssid === ssid) {
-          return { ssid: c.props.ssid, password: c.props.password, channel: c.props.channel || 6 };
+          return { ssid: c.props.ssid, password: c.props.password, channel: c.props.channel || 6, ipAddress: c.props.ipAddress || '192.168.4.1' };
         }
       }
       return null;
+    }
+
+    /** Generate a client IP in the same subnet as the gateway. */
+    function _clientIpFromGateway(gw) {
+      var parts = gw.split('.');
+      if (parts.length !== 4) return '192.168.4.105';
+      parts[3] = '105';
+      return parts.join('.');
     }
 
     return {
@@ -71,21 +79,25 @@ window.ArduinoLibs['WiFi'] = {
         const hotspot = _findHotspot(ssid);
         if (!hotspot) {
           self._wifiConnected = false;
+          self._wifiClientIP = null;
           self._serialLog('[ESP32 Wi-Fi] SSID not found: "' + ssid + '"\n', 'system');
           return;
         }
         if (hotspot.password !== pass) {
           self._wifiConnected = false;
+          self._wifiClientIP = null;
           self._serialLog('[ESP32 Wi-Fi] Wrong password for "' + ssid + '"\n', 'system');
           return;
         }
+        const clientIP = _clientIpFromGateway(hotspot.ipAddress);
         self._serialLog('[ESP32 Wi-Fi] Connecting to "' + ssid + '"...\n', 'system');
         setTimeout(function() {
           self._wifiConnected = true;
-          self._serialLog('[ESP32 Wi-Fi] Connected! IP: 192.168.1.105\n', 'system');
+          self._wifiClientIP = clientIP;
+          self._serialLog('[ESP32 Wi-Fi] Connected! IP: ' + clientIP + '\n', 'system');
         }, Math.max(50, 800 / self.speed));
       },
-      wifiLocalIP: function() { return '192.168.1.105'; },
+      wifiLocalIP: function() { return self._wifiClientIP || '0.0.0.0'; },
       wifiSoftAPIP: function() { return '192.168.4.1'; },
       wifiStatus: function() { return self._wifiConnected ? 3 : 6; },
       wifiDisconnect: function() {
