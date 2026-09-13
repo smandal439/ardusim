@@ -52,6 +52,9 @@ window.ArduinoLibs['RtcDS3231'] = {
     /* new RtcDateTime(...) expressions */
     [/new\s+RtcDateTime\s*\(([^)]*)\)/g, 'new _a._RtcDateTime($1)'],
 
+    /* Bare RtcDateTime(...) without new (used inline as constructor) */
+    [/(?<![.\w])RtcDateTime\s*\(([^)]*)\)/g, 'new _a._RtcDateTime($1)'],
+
     /* RtcTemperature constructors — bare: RtcTemperature t(25.0); */
     [/RtcTemperature\s+(\w+)\s*\(([^)]*)\)\s*;/g, 'var $1 = new _a._RtcTemperature($2);'],
 
