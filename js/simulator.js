@@ -1179,6 +1179,8 @@ class ArduinoSimulator {
       this._compiledFn = fn;
       this._compiledCtx = { keys, vals, fn };
       this._compiledJs = js;
+      const aIdx = keys.indexOf('_a');
+      if (aIdx !== -1) this._a = vals[aIdx];
       return { ok: true, compiledJs: js };
     } catch (err) {
       const friendly = this._friendlyError(err && err.message ? err.message : String(err), err);
