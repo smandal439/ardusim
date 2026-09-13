@@ -1806,13 +1806,13 @@ void loop() {
 
   /* ── COMMUNICATION ── */
   wifi_module: {
-    id: 'wifi_module', name: 'Wi-Fi Module', icon: '\u{1f4f6}', category: 'Communication',
-    longDesc: 'Simulated Wi-Fi module for connecting the Arduino to a virtual wireless network. Configure SSID and password in properties. Enables MQTT, HTTP, and WebSocket communication in simulation.',
-    use: 'IoT projects, remote monitoring, cloud dashboards, MQTT messaging, OTA updates simulation.',
+    id: 'wifi_module', name: 'Wi-Fi Hotspot', icon: '\u{1f4f6}', category: 'Communication',
+    longDesc: 'Simulated Wi-Fi access point (hotspot). The ESP32 must match this component\'s SSID and password to connect to WiFi. Without this component on the canvas, WiFi.begin() will fail with "SSID not found". Place it on the canvas and configure its SSID and password to enable WiFi connectivity.',
+    use: 'IoT projects, remote monitoring, cloud dashboards, MQTT messaging, HTTP server, WebSocket communication. Required for any WiFi-based project.',
     pins: {},
-    props: { ssid: 'Wi-Fi network name (SSID).', password: 'Wi-Fi password.' },
-    wiring: 'No physical wiring — configure SSID and password in the properties panel.',
-    code: '// WiFi on ESP8266/ESP32 — use WiFi.h or ESP8266WiFi.h libraries.',
+    props: { ssid: 'Wi-Fi network name (SSID). The ESP32 must use this exact name.', password: 'Wi-Fi password. The ESP32 must use this exact password.', channel: 'Wi-Fi channel (1-13).' },
+    wiring: 'No physical wiring — this is a wireless access point. Configure SSID and password in the properties panel, then use WiFi.begin(ssid, password) in your Arduino code.',
+    code: '// Place a Wi-Fi Hotspot component on the canvas.\n// Configure its SSID and password in the properties panel.\n// Then in your Arduino code:\n#include <WiFi.h>\nWiFi.begin("ArduSim_Network", "password123");\nwhile (WiFi.status() != WL_CONNECTED) {\n  delay(500);\n  Serial.print(".");\n}\nSerial.println("Connected!");',
   },
 
   /* ── DIGITAL ICs ── */

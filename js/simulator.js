@@ -970,9 +970,29 @@ class ArduinoSimulator {
       /* Library stubs (instances) */
       Wire: { begin() { }, requestFrom() { return 0; }, beginTransmission() { }, endTransmission() { return 0; }, write() { return 1; }, read() { return 0; }, available() { return 0; } },
       SPI: { begin() { }, transfer() { return 0; }, end() { }, setClockDivider() { }, setBitOrder() { }, setDataMode() { } },
-      /* ESP32 Wi-Fi object stub */
+      /* ESP32 Wi-Fi object stub — requires a Wi-Fi Hotspot component on the canvas */
       WiFi: {
+        _findHotspot(ssid) {
+          const bus = window._wifiBus;
+          if (!bus || !bus.hotspots) return null;
+          for (const id in bus.hotspots) {
+            const h = bus.hotspots[id];
+            if (h.ssid === ssid) return h;
+          }
+          return null;
+        },
         begin(ssid, pass) {
+          const hotspot = this._findHotspot(ssid);
+          if (!hotspot) {
+            self._wifiConnected = false;
+            self._serialLog(`[ESP32 Wi-Fi] SSID not found: "${ssid}"\n`, 'system');
+            return;
+          }
+          if (hotspot.password !== pass) {
+            self._wifiConnected = false;
+            self._serialLog(`[ESP32 Wi-Fi] Wrong password for "${ssid}"\n`, 'system');
+            return;
+          }
           self._serialLog(`[ESP32 Wi-Fi] Connecting to "${ssid}"...\n`, 'system');
           setTimeout(() => {
             self._wifiConnected = true;
@@ -985,7 +1005,6 @@ class ArduinoSimulator {
         disconnect() { self._wifiConnected = false; },
         mode() { },
         macAddress() {
-          // Return a deterministic MAC based on board index
           const idx = self.boardIndex || 0;
           return 'AA:BB:CC:DD:EE:' + String(idx + 1).padStart(2, '0');
         },

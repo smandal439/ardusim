@@ -4,6 +4,10 @@
  * Provides WiFi simulation.
  * Supports: begin, localIP, softAPIP, status, disconnect, mode, softAP, reconnect.
  *
+ * WiFi.begin(ssid, password) searches the canvas for a wifi_module (Wi-Fi Hotspot)
+ * component with matching SSID. Connection succeeds only if the hotspot exists and
+ * the password matches. Without a hotspot on the canvas, WiFi code will not connect.
+ *
  * Usage in Arduino code:
  *   #include <WiFi.h>
  *   WiFi.begin(ssid, password);
@@ -44,8 +48,33 @@ window.ArduinoLibs['WiFi'] = {
   constructor: null,
 
   runtime: function(self) {
+    /**
+     * Find a matching Wi-Fi Hotspot on the canvas.
+     * Returns { ssid, password, channel, simulator } or null.
+     */
+    function _findHotspot(ssid) {
+      const bus = window._wifiBus;
+      if (!bus || !bus.hotspots) return null;
+      for (const id in bus.hotspots) {
+        const h = bus.hotspots[id];
+        if (h.ssid === ssid) return h;
+      }
+      return null;
+    }
+
     return {
       wifiBegin: function(ssid, pass) {
+        const hotspot = _findHotspot(ssid);
+        if (!hotspot) {
+          self._wifiConnected = false;
+          self._serialLog('[ESP32 Wi-Fi] SSID not found: "' + ssid + '"\n', 'system');
+          return;
+        }
+        if (hotspot.password !== pass) {
+          self._wifiConnected = false;
+          self._serialLog('[ESP32 Wi-Fi] Wrong password for "' + ssid + '"\n', 'system');
+          return;
+        }
         self._serialLog('[ESP32 Wi-Fi] Connecting to "' + ssid + '"...\n', 'system');
         setTimeout(function() {
           self._wifiConnected = true;
