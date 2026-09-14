@@ -309,14 +309,14 @@ defComp({
 
   // Hardware Interface Header Pins along the bottom edge
   pins: [
-    { name: '3V3',  x: 8,  y: 98, dir: 'in' },
-    { name: 'GND',  x: 18, y: 98, dir: 'in' },
-    { name: 'SCK',  x: 28, y: 98, dir: 'in' },
-    { name: 'MISO', x: 38, y: 98, dir: 'out' },
-    { name: 'MOSI', x: 48, y: 98, dir: 'in' },
-    { name: 'NSS',  x: 58, y: 98, dir: 'in' },
-    { name: 'DIO0', x: 68, y: 98, dir: 'out' },
-    { name: 'RST',  x: 78, y: 98, dir: 'in' },
+    { id: '3V3',  label: '3V3',  type: 'power',  x: 8,  y: 98, side: 'bottom' },
+    { id: 'GND',  label: 'GND',  type: 'gnd',    x: 18, y: 98, side: 'bottom' },
+    { id: 'SCK',  label: 'SCK',  type: 'signal', x: 28, y: 98, side: 'bottom' },
+    { id: 'MISO', label: 'MISO', type: 'signal', x: 38, y: 98, side: 'bottom' },
+    { id: 'MOSI', label: 'MOSI', type: 'signal', x: 48, y: 98, side: 'bottom' },
+    { id: 'NSS',  label: 'NSS',  type: 'signal', x: 58, y: 98, side: 'bottom' },
+    { id: 'DIO0', label: 'DIO0', type: 'digital', x: 68, y: 98, side: 'bottom' },
+    { id: 'RST',  label: 'RST',  type: 'signal', x: 78, y: 98, side: 'bottom' },
   ],
 
   step(inst, sim) {
