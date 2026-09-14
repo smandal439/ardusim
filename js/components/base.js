@@ -414,7 +414,7 @@ const COMPONENT_CATALOG = [
       ]
     }
   },
-  { category: 'Communication', ids: ['wifi_module'] },
+  { category: 'Communication', ids: ['wifi_module', 'lora_module'] },
   {
     category: 'Instruments',
     ids: ['multimeter', 'func_gen', 'dso_4ch'],
