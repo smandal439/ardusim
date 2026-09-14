@@ -44,8 +44,8 @@
       {
         "id": "comp_1789408394509_94e4i",
         "type": "dip_switch",
-        "x": 75,
-        "y": 155,
+        "x": 80,
+        "y": 145,
         "rotation": 0,
         "props": {
           "switches": 0
@@ -67,9 +67,249 @@
         "waypoints": [],
         "routeStyle": "orthogonal",
         "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410221345_b4ikm",
+        "from": {
+          "instId": "b1",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "comp_1789408394509_94e4i",
+          "pinId": "1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410225006_trqle",
+        "from": {
+          "instId": "b1",
+          "pinId": "D12"
+        },
+        "to": {
+          "instId": "comp_1789408394509_94e4i",
+          "pinId": "2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410227626_aer0e",
+        "from": {
+          "instId": "b1",
+          "pinId": "D14"
+        },
+        "to": {
+          "instId": "comp_1789408394509_94e4i",
+          "pinId": "3"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410229931_igocm",
+        "from": {
+          "instId": "b1",
+          "pinId": "D27"
+        },
+        "to": {
+          "instId": "comp_1789408394509_94e4i",
+          "pinId": "4"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410232409_46v7s",
+        "from": {
+          "instId": "b1",
+          "pinId": "D26"
+        },
+        "to": {
+          "instId": "comp_1789408394509_94e4i",
+          "pinId": "5"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410235215_v0nnb",
+        "from": {
+          "instId": "b1",
+          "pinId": "D25"
+        },
+        "to": {
+          "instId": "comp_1789408394509_94e4i",
+          "pinId": "6"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410237593_jmd2a",
+        "from": {
+          "instId": "b1",
+          "pinId": "D33"
+        },
+        "to": {
+          "instId": "comp_1789408394509_94e4i",
+          "pinId": "7"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410239822_clh89",
+        "from": {
+          "instId": "b1",
+          "pinId": "D32"
+        },
+        "to": {
+          "instId": "comp_1789408394509_94e4i",
+          "pinId": "8"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410257614_1k685",
+        "from": {
+          "instId": "b2",
+          "pinId": "D21"
+        },
+        "to": {
+          "instId": "comp_1789408381607_auwgy",
+          "pinId": "l1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410261599_hq5bu",
+        "from": {
+          "instId": "b2",
+          "pinId": "D19"
+        },
+        "to": {
+          "instId": "comp_1789408381607_auwgy",
+          "pinId": "l2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410265102_6l2f1",
+        "from": {
+          "instId": "b2",
+          "pinId": "D18"
+        },
+        "to": {
+          "instId": "comp_1789408381607_auwgy",
+          "pinId": "l3"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410267625_c4nsg",
+        "from": {
+          "instId": "b2",
+          "pinId": "D5"
+        },
+        "to": {
+          "instId": "comp_1789408381607_auwgy",
+          "pinId": "l4"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410270846_oi5ns",
+        "from": {
+          "instId": "b2",
+          "pinId": "D17"
+        },
+        "to": {
+          "instId": "comp_1789408381607_auwgy",
+          "pinId": "l5"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410273962_hucrj",
+        "from": {
+          "instId": "b2",
+          "pinId": "D16"
+        },
+        "to": {
+          "instId": "comp_1789408381607_auwgy",
+          "pinId": "l6"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410277142_79fx3",
+        "from": {
+          "instId": "b2",
+          "pinId": "D4"
+        },
+        "to": {
+          "instId": "comp_1789408381607_auwgy",
+          "pinId": "l7"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789410280306_qj27t",
+        "from": {
+          "instId": "b2",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "comp_1789408381607_auwgy",
+          "pinId": "l8"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       }
     ]
   },
-  "code": "/*\n* Zigbee Controller — Board 1\n* Sends LED ON/OFF commands when button on D4 is pressed\n* Green LED on D2 indicates command sent\n*/\n\n#include <Zigbee.h>\n\n// LED Driver address\nuint16_t ledDriverAddr = 0x0001;\n\n// Command bytes\n#define CMD_ACK     0xAA\n\nint swPins[] = {13, 12, 14, 27, 26, 25, 33, 32};\n\nuint8_t handleDipSwitches() {\n  uint8_t sw = 0;\n  for (int i = 0; i < 8; i++) {\n    if (digitalRead(swPins[i]) == HIGH) {\n      sw |= (1 << i);\n    }\n  }\n  return sw;\n}\n\n\n// Callback when ACK received\nvoid onDataReceived(uint8_t *data, int len) {\n  if (data[0] == CMD_ACK) {\n    Serial.println(\"[Controller] ACK received from LED Driver!\");\n// Blink green LED to confirm\n    digitalWrite(2, HIGH);\n    delay(100);\n    digitalWrite(2, LOW);\n  }\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n  for (int i = 0; i < 8; i++) {\n    pinMode(swPins[i], INPUT_PULLUP);\n  }\n\n\n// Initialize Zigbee\n  Zigbee.begin(11, 0x1234);\n  Zigbee.onReceive(onDataReceived);\n\n  Serial.println(\"[Controller] Zigbee LED Control ready!\");\n  Serial.print(\"[Controller] Address: 0x\");\n  Serial.println(Zigbee.getNodeAddress(), HEX);\n  Serial.println(\"[Controller] dip_switch toggle remote LED\\n\");\n}\n\nvoid loop() {\n\n  Serial.print(\"[Board 1] DIP: 0b\");\n\n\n  uint8_t data = handleDipSwitches();\n\n// Send command to LED Driver\n  Zigbee.send(ledDriverAddr, &data, 1);\n\n// Blink green LED\n  digitalWrite(2, HIGH);\n  delay(100);\n  digitalWrite(2, LOW);\n\n  delay(10);\n}",
-  "board2Code": "/*\n * Zigbee LED Driver — Board 2\n * Receives ON/OFF commands and toggles yellow LED\n * Sends ACK back to Controller\n */\n\n#include <Zigbee.h>\n\n// Controller address\nuint16_t controllerAddr = 0x0000;\n\n// Command bytes\n#define CMD_LED_ON  0x01\n#define CMD_LED_OFF 0x00\n#define CMD_ACK     0xAA\n\nbool yellowLedState = false;\n\nint Leds[] = {21, 19, 18, 5, 17, 16, 4, 2};\n\nvoid updateLEDs(int val) {\n  for (int i = 0; i < 8; i++) {\n    digitalWrite(Leds[i], (val >> i) & 1);\n  }\n}\n\n// Callback when command received\nvoid onDataReceived(uint8_t *data, int len) {\n  if (len < 1) return;\n\n   updateLEDs(data);\n\n  // Send ACK back to Controller\n  uint8_t ack = CMD_ACK;\n  Zigbee.send(controllerAddr, &ack, 1);\n  Serial.println(\"[LED Driver] ACK sent\");\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n\n  // Initialize Zigbee\n  Zigbee.begin(11, 0x1234);\n  Zigbee.onReceive(onDataReceived);\n\n  Serial.println(\"[LED Driver] Zigbee LED Driver ready!\");\n  Serial.print(\"[LED Driver] Address: 0x\");\n  Serial.println(Zigbee.getNodeAddress(), HEX);\n  Serial.println(\"[LED Driver] Waiting for commands...\\n\");\n}\n\nvoid loop() {\n  delay(100);\n}"
+  "code": "/*\n* Zigbee Controller — Board 1\n* Sends LED ON/OFF commands when button on D4 is pressed\n* Green LED on D2 indicates command sent\n*/\n\n#include <Zigbee.h>\n\n// LED Driver address\nuint16_t ledDriverAddr = 0x0001;\n\n// Command bytes\n#define CMD_ACK     0xAA\n\nint swPins[] = {13, 12, 14, 27, 26, 25, 33, 32};\n\nuint8_t handleDipSwitches() {\n  uint8_t sw = 0;\n  for (int i = 0; i < 8; i++) {\n    if (digitalRead(swPins[i]) == HIGH) {\n      sw |= (1 << i);\n    }\n  }\n  return sw;\n}\n\n\n// Callback when ACK received\nvoid onDataReceived(uint8_t *data, int len) {\n  if (data[0] == CMD_ACK) {\n    Serial.println(\"[Controller] ACK received from LED Driver!\");\n// Blink green LED to confirm\n    digitalWrite(2, HIGH);\n    delay(100);\n    digitalWrite(2, LOW);\n  }\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n  for (int i = 0; i < 8; i++) {\n    pinMode(swPins[i], INPUT_PULLUP);\n  }\n\n\n// Initialize Zigbee\n  Zigbee.begin(11, 0x1234);\n  Zigbee.onReceive(onDataReceived);\n\n  Serial.println(\"[Controller] Zigbee LED Control ready!\");\n  Serial.print(\"[Controller] Address: 0x\");\n  Serial.println(Zigbee.getNodeAddress(), HEX);\n  Serial.println(\"[Controller] dip_switch toggle remote LED\\n\");\n}\n\nvoid loop() {\n\n  Serial.print(\"[Board 1] DIP: 0b\");\n\n\n  uint8_t data = handleDipSwitches();\n\n// Send command to LED Driver\n  Zigbee.send(ledDriverAddr, &data, 1);\n\n// Blink green LED\n  digitalWrite(2, HIGH);\n  delay(100);\n  digitalWrite(2, LOW);\n\n  delay(1000);\n}",
+  "board2Code": "/*\n * Zigbee LED Driver — Board 2\n * Receives ON/OFF commands and toggles yellow LED\n * Sends ACK back to Controller\n */\n\n#include <Zigbee.h>\n\n// Controller address\nuint16_t controllerAddr = 0x0000;\n\n// Command bytes\n#define CMD_LED_ON  0x01\n#define CMD_LED_OFF 0x00\n#define CMD_ACK     0xAA\n\nbool yellowLedState = false;\n\nint Leds[] = {21, 19, 18, 5, 17, 16, 4, 2};\n\nvoid updateLEDs(int val) {\n  for (int i = 0; i < 8; i++) {\n    digitalWrite(Leds[i], (val >> i) & 1);\n  }\n}\n\n// Callback when command received\nvoid onDataReceived(uint8_t *data, int len) {\n  if (len < 1) return;\n\n   updateLEDs(data);\n\n  // Send ACK back to Controller\n  uint8_t ack = CMD_ACK;\n  Zigbee.send(controllerAddr, &ack, 1);\n  Serial.println(\"[LED Driver] ACK sent\");\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n\n  // Initialize Zigbee\n  Zigbee.begin(11, 0x1234);\n  Zigbee.onReceive(onDataReceived);\n\n  Serial.println(\"[LED Driver] Zigbee LED Driver ready!\");\n  Serial.print(\"[LED Driver] Address: 0x\");\n  Serial.println(Zigbee.getNodeAddress(), HEX);\n  Serial.println(\"[LED Driver] Waiting for commands...\\n\");\n}\n\nvoid loop() {\n  delay(1000);\n}"
 }
