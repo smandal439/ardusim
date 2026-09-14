@@ -2536,59 +2536,6 @@ const char* ssid = "YourSSID";
     exampleId: 'zigbee_sender_receiver',
   },
   {
-    id: 'lora',
-    name: 'LoRa',
-    icon: '📻',
-    category: 'Wireless',
-    include: '<LoRa.h>',
-    desc: 'LoRa (Long Range) wireless communication. Low-power, long-range radio with configurable spreading factor, bandwidth, and coding rate. Ideal for IoT sensor networks.',
-    api: [
-      { fn: 'LoRa.begin(freq)', desc: 'Initialize LoRa at frequency (Hz)' },
-      { fn: 'LoRa.setSpreadingFactor(sf)', desc: 'Set spreading factor (6-12)' },
-      { fn: 'LoRa.setSignalBandwidth(bw)', desc: 'Set bandwidth (Hz)' },
-      { fn: 'LoRa.setCodingRate4(cr)', desc: 'Set coding rate (5-8 for 4/5 to 4/8)' },
-      { fn: 'LoRa.setTxPower(power)', desc: 'Set TX power (2-20 dBm)' },
-      { fn: 'LoRa.setSyncWord(word)', desc: 'Set sync word for network isolation' },
-      { fn: 'LoRa.enableCrc()', desc: 'Enable CRC packet checking' },
-      { fn: 'LoRa.beginPacket()', desc: 'Start building a packet' },
-      { fn: 'LoRa.print(data)', desc: 'Write data to packet' },
-      { fn: 'LoRa.endPacket()', desc: 'Send the packet' },
-      { fn: 'LoRa.parsePacket()', desc: 'Check for incoming packet' },
-      { fn: 'LoRa.read()', desc: 'Read incoming byte' },
-      { fn: 'LoRa.packetRssi()', desc: 'Get packet RSSI (signal strength)' },
-      { fn: 'LoRa.packetSnr()', desc: 'Get packet SNR (signal-to-noise ratio)' },
-      { fn: 'LoRa.sleep()', desc: 'Enter sleep mode (low power)' },
-      { fn: 'LoRa.idle()', desc: 'Enter idle mode' },
-    ],
-    code: `#include <LoRa.h>
-
-void setup() {
-  Serial.begin(9600);
-  LoRa.begin(868000000);
-  LoRa.setSpreadingFactor(7);
-  LoRa.setSignalBandwidth(125000);
-  LoRa.setTxPower(14);
-  LoRa.enableCrc();
-}
-
-void loop() {
-  LoRa.beginPacket();
-  LoRa.print("Hello LoRa!");
-  LoRa.endPacket();
-
-  int size = LoRa.parsePacket();
-  if (size) {
-    while (LoRa.available()) {
-      Serial.print((char)LoRa.read());
-    }
-    Serial.print(" RSSI:");
-    Serial.println(LoRa.packetRssi());
-  }
-  delay(1000);
-}`,
-    exampleId: 'lora_sender_receiver',
-  },
-  {
     id: 'bluetoothserial',
     name: 'BluetoothSerial',
     icon: '📶',

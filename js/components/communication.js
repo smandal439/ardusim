@@ -232,3 +232,297 @@ defComp({
     ctx.restore();
   },
 });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LoRa Module Component — RFM95W / SX1276 based LoRa transceiver
+// ══════════════════════════════════════════════════════════════════════════════
+defComp({
+  id: 'lora_module',
+  name: 'LoRa Module',
+  category: 'Communication',
+  icon: '\u{1F4E1}',
+  desc: 'LoRa long-range wireless transceiver (SX1276/RFM95W). Demonstrates spreading factor, bandwidth, coding rate, TX power, RSSI, SNR, and packet airtime.',
+  search: 'lora rfm95 sx1276 long range wireless radio frequency',
+  width: 72,
+  height: 90,
+
+  defaultProps: {
+    frequency: 868000000,
+    spreadingFactor: 7,
+    bandwidth: 125000,
+    codingRate: 5,
+    txPower: 14,
+    syncWord: 0x12,
+    crcEnabled: true,
+  },
+
+  interactive: [
+    {
+      field: 'frequency', label: 'Frequency', type: 'select',
+      options: [
+        { value: 433000000, label: '433 MHz (Asia)' },
+        { value: 868000000, label: '868 MHz (Europe)' },
+        { value: 915000000, label: '915 MHz (US/AU)' },
+        { value: 923000000, label: '923 MHz (Asia)' },
+      ],
+    },
+    { field: 'spreadingFactor', label: 'Spreading Factor', type: 'select',
+      options: [
+        { value: 6,  label: 'SF6  (Fast, Short Range)' },
+        { value: 7,  label: 'SF7  (Default)' },
+        { value: 8,  label: 'SF8' },
+        { value: 9,  label: 'SF9' },
+        { value: 10, label: 'SF10' },
+        { value: 11, label: 'SF11' },
+        { value: 12, label: 'SF12  (Slow, Max Range)' },
+      ],
+    },
+    { field: 'bandwidth', label: 'Bandwidth', type: 'select',
+      options: [
+        { value: 7800,   label: '7.8 kHz' },
+        { value: 10400,  label: '10.4 kHz' },
+        { value: 15600,  label: '15.6 kHz' },
+        { value: 20800,  label: '20.8 kHz' },
+        { value: 31250,  label: '31.25 kHz' },
+        { value: 41700,  label: '41.7 kHz' },
+        { value: 62500,  label: '62.5 kHz' },
+        { value: 125000, label: '125 kHz (Default)' },
+        { value: 250000, label: '250 kHz' },
+        { value: 500000, label: '500 kHz' },
+      ],
+    },
+    { field: 'codingRate', label: 'Coding Rate', type: 'select',
+      options: [
+        { value: 5, label: '4/5 (Min Overhead)' },
+        { value: 6, label: '4/6' },
+        { value: 7, label: '4/7' },
+        { value: 8, label: '4/8 (Max Redundancy)' },
+      ],
+    },
+    { field: 'txPower', label: 'TX Power (dBm)', type: 'number', min: 2, max: 20, step: 1 },
+    { field: 'syncWord', label: 'Sync Word (hex)', type: 'number', min: 0, max: 255, step: 1 },
+    { field: 'crcEnabled', label: 'CRC Enabled', type: 'boolean' },
+  ],
+
+  pins: [],
+
+  step(inst, sim) {
+    const isRunning = !!(sim && sim.isRunning);
+
+    if (isRunning) {
+      if (!inst._state) {
+        inst._state = { lastTxTime: 0, lastRxTime: 0, txCount: 0, rxCount: 0 };
+      }
+
+      // Update LoRa bus node position for RSSI calculation
+      if (window._loraBus && window._loraBus.nodes) {
+        var nodeIdx = sim.boardIndex || 0;
+        if (window._loraBus.nodes[nodeIdx]) {
+          window._loraBus.nodes[nodeIdx].x = inst.x + inst.width / 2;
+          window._loraBus.nodes[nodeIdx].y = inst.y + inst.height / 2;
+        }
+      }
+    }
+  },
+
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const w = inst.width || 72;
+    const h = inst.height || 90;
+    const isRunning = !!(sim && sim.isRunning);
+    const state = inst._state || { lastTxTime: 0, lastRxTime: 0, txCount: 0, rxCount: 0 };
+    const isTxActive = isRunning && (Date.now() - state.lastTxTime < 200);
+    const isRxActive = isRunning && (Date.now() - state.lastRxTime < 200);
+
+    const freq = inst.props.frequency || 868000000;
+    const sf = inst.props.spreadingFactor || 7;
+    const bw = inst.props.bandwidth || 125000;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const drawRR = (rx, ry, rw, rh, rad) => {
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+
+    // --- Drop Shadow ---
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    drawRR(3, 5, w - 2, h - 2, 6);
+    ctx.fill();
+
+    // --- Main PCB Housing ---
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+    bgGrad.addColorStop(0, '#1a3a2a');
+    bgGrad.addColorStop(0.5, '#0f2820');
+    bgGrad.addColorStop(1, '#091a14');
+    ctx.fillStyle = bgGrad;
+    drawRR(1, 3, w - 2, h - 4, 6);
+    ctx.fill();
+
+    // PCB border
+    ctx.strokeStyle = 'rgba(0, 200, 120, 0.2)';
+    ctx.lineWidth = 1;
+    drawRR(1, 3, w - 2, h - 4, 6);
+    ctx.stroke();
+
+    // --- Antenna (Helical Spring Style) ---
+    ctx.strokeStyle = '#8a8a8a';
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round';
+    const antX = w / 2;
+    const antBaseY = 8;
+    const antTopY = -6;
+
+    // Antenna base mount
+    ctx.fillStyle = '#555';
+    ctx.fillRect(antX - 4, antBaseY - 2, 8, 4);
+
+    // Helical antenna coil
+    ctx.beginPath();
+    const coils = 4;
+    const coilHeight = antBaseY - antTopY;
+    for (let i = 0; i <= coils * 20; i++) {
+      const t = i / (coils * 20);
+      const cy = antBaseY - 2 - t * coilHeight;
+      const cx = antX + Math.sin(t * coils * Math.PI * 2) * 3;
+      if (i === 0) ctx.moveTo(cx, cy);
+      else ctx.lineTo(cx, cy);
+    }
+    ctx.stroke();
+
+    // Antenna tip
+    ctx.fillStyle = '#aaa';
+    ctx.beginPath();
+    ctx.arc(antX, antTopY, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // --- LoRa Chip (SX1276) ---
+    const chipX = 12;
+    const chipY = 28;
+    const chipW = w - 24;
+    const chipH = 22;
+
+    // Chip body
+    ctx.fillStyle = '#1a1a1a';
+    drawRR(chipX, chipY, chipW, chipH, 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 0.5;
+    drawRR(chipX, chipY, chipW, chipH, 2);
+    ctx.stroke();
+
+    // Chip label
+    ctx.fillStyle = isRunning ? '#00cc66' : 'rgba(255,255,255,0.4)';
+    ctx.font = 'bold 6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('SX1276', chipX + chipW / 2, chipY + 9);
+    ctx.font = '5px monospace';
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillText('LoRa', chipX + chipW / 2, chipY + 16);
+
+    // Chip pin markers (top)
+    for (let i = 0; i < 5; i++) {
+      ctx.fillStyle = '#c0a000';
+      ctx.fillRect(chipX + 4 + i * ((chipW - 8) / 4) - 1, chipY - 2, 2, 3);
+    }
+    // Chip pin markers (bottom)
+    for (let i = 0; i < 5; i++) {
+      ctx.fillStyle = '#c0a000';
+      ctx.fillRect(chipX + 4 + i * ((chipW - 8) / 4) - 1, chipY + chipH - 1, 2, 3);
+    }
+
+    // --- Status LEDs ---
+    const ledY = 56;
+    const ledR = 2.5;
+
+    // PWR LED (Green)
+    ctx.fillStyle = isRunning ? '#2ecc71' : '#223322';
+    ctx.beginPath();
+    ctx.arc(14, ledY, ledR, 0, Math.PI * 2);
+    ctx.fill();
+    if (isRunning) {
+      ctx.fillStyle = 'rgba(46, 204, 113, 0.3)';
+      ctx.beginPath();
+      ctx.arc(14, ledY, ledR + 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // TX LED (Red)
+    ctx.fillStyle = isTxActive ? '#ff4444' : '#332222';
+    ctx.beginPath();
+    ctx.arc(24, ledY, ledR, 0, Math.PI * 2);
+    ctx.fill();
+    if (isTxActive) {
+      ctx.fillStyle = 'rgba(255, 68, 68, 0.35)';
+      ctx.beginPath();
+      ctx.arc(24, ledY, ledR + 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // RX LED (Blue)
+    ctx.fillStyle = isRxActive ? '#4488ff' : '#222233';
+    ctx.beginPath();
+    ctx.arc(34, ledY, ledR, 0, Math.PI * 2);
+    ctx.fill();
+    if (isRxActive) {
+      ctx.fillStyle = 'rgba(68, 136, 255, 0.35)';
+      ctx.beginPath();
+      ctx.arc(34, ledY, ledR + 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // --- LED Labels ---
+    ctx.font = '4.5px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillText('PWR', 14, ledY + 7);
+    ctx.fillText('TX', 24, ledY + 7);
+    ctx.fillText('RX', 34, ledY + 7);
+
+    // --- OLED Display Area ---
+    const oledX = 6;
+    const oledY = 65;
+    const oledW = w - 12;
+    const oledH = 20;
+
+    ctx.fillStyle = '#050a0e';
+    drawRR(oledX, oledY, oledW, oledH, 3);
+    ctx.fill();
+    ctx.strokeStyle = isRunning ? 'rgba(0, 204, 102, 0.3)' : 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 0.5;
+    drawRR(oledX, oledY, oledW, oledH, 3);
+    ctx.stroke();
+
+    // Display frequency
+    ctx.fillStyle = isRunning ? '#00cc66' : 'rgba(255,255,255,0.2)';
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'center';
+    var freqStr = (freq / 1000000).toFixed(1) + ' MHz';
+    ctx.fillText(freqStr, oledX + oledW / 2, oledY + 9);
+
+    // Display SF and BW
+    ctx.font = '6px monospace';
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillText('SF' + sf + '  BW' + (bw >= 1000 ? (bw / 1000) + 'k' : bw), oledX + oledW / 2, oledY + 17);
+
+    // --- Animated Radio Waves (when TX active) ---
+    if (isTxActive) {
+      const now = Date.now();
+      const wavePhase = (now % 800) / 800;
+      ctx.lineWidth = 1.2;
+      for (let i = 0; i < 3; i++) {
+        const opacity = Math.max(0, 1 - ((wavePhase + i * 0.33) % 1));
+        const radius = 5 + (((wavePhase + i * 0.33) % 1) * 15);
+        ctx.strokeStyle = `rgba(255, 68, 68, ${opacity * 0.7})`;
+        ctx.beginPath();
+        ctx.arc(w / 2, 6, radius, -Math.PI * 0.8, -Math.PI * 0.2);
+        ctx.stroke();
+      }
+    }
+
+    ctx.restore();
+  },
+});
+
