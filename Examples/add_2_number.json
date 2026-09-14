@@ -22,5 +22,5 @@
     ],
     "wires": []
   },
-  "code": "void setup() {\n  Serial.begin(9600);\n  Serial.println(\"Enter two numbers separated by a comma (e.g., 25,15):\");\n}\n\nvoid loop() {\n  if (Serial.available() > 0) {\n    // Read the first integer (stops reading at the comma)\n    int num1 = Serial.parseInt();\n    \n    // Read the second integer (stops reading at the newline or buffer end)\n    int num2 = Serial.parseInt();\n    \n    // Clear trailing characters (like \\r or \\n) from the buffer\n    while (Serial.available() > 0) {\n      Serial.read();\n    }\n\n    int sum = num1 + num2;\n\n    // Display the result\n    Serial.print(\"Sum: \");\n    Serial.println(sum);\n  }\n}"
+  "code": "void setup() {\n  Serial.begin(115200);\n  Serial.println(\"Enter two numbers separated by a comma (e.g., 25,15):\");\n}\n\nvoid loop() {\n  if (Serial.available() > 0) {\n    // Read the first integer (stops reading at the comma)\n    int num1 = Serial.parseInt();\n    \n    // Read the second integer (stops reading at the newline or buffer end)\n    int num2 = Serial.parseInt();\n    \n    // Clear trailing characters (like \\r or \\n) from the buffer\n    while (Serial.available() > 0) {\n      Serial.read();\n    }\n\n    int sum = num1 + num2;\n\n    // Display the result\n    Serial.print(\"Sum: \");\n    Serial.println(sum);\n  }\n}"
 }
