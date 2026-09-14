@@ -13,7 +13,13 @@ class RemoteControl {
     this.connected = false;
     this._onStateUpdate = null; // callback(url, sessionId)
     this._onDisconnect = null;
-    this._broker = 'wss://broker.hivemq.com:8884/mqtt';
+    this._broker = null;
+  }
+
+  _getBrokerUrl() {
+    if (this._broker) return this._broker;
+    const cfg = window.ArduSimMQTT || {};
+    return cfg.url || 'wss://broker.hivemq.com:8884/mqtt';
   }
 
   start(sessionId) {
@@ -24,7 +30,7 @@ class RemoteControl {
     const clientId = `ArduSimRC_${Math.random().toString(36).slice(2, 18)}`;
 
     try {
-      this.client = window.mqtt.connect(this._broker, {
+      this.client = window.mqtt.connect(this._getBrokerUrl(), {
         clientId,
         clean: true,
         connectTimeout: 10000,
@@ -111,21 +117,38 @@ class RemoteControl {
   }
 
   _notifyState() {
-    if (this._onStateUpdate) {
-      const host = window.location.hostname || '127.0.0.1';
-      const port = window.location.port || '3000';
-      const isSecure = window.location.protocol === 'https:';
-      const scheme = isSecure ? 'https' : 'http';
-      const isGitHubPages = host.endsWith('.github.io');
-      const pagePath = isGitHubPages ? '/remote.html' : '/remote';
-      const portStr = (isGitHubPages || !port || port === '80' || port === '443') ? '' : `:${port}`;
-      let basePath = '';
-      if (isGitHubPages) {
-        const segs = window.location.pathname.split('/').filter(Boolean);
-        if (segs.length > 0) basePath = '/' + segs[0];
-      }
-      this._onStateUpdate(`${scheme}://${host}${portStr}${basePath}${pagePath}?session=${this.sessionId}`, this.sessionId);
+    if (!this._onStateUpdate) return;
+    const host = window.location.hostname || '127.0.0.1';
+    const isGitHubPages = host.endsWith('.github.io');
+    const pagePath = isGitHubPages ? '/remote.html' : '/remote';
+    let basePath = '';
+    if (isGitHubPages) {
+      const segs = window.location.pathname.split('/').filter(Boolean);
+      if (segs.length > 0) basePath = '/' + segs[0];
     }
+    const sessionQS = `?session=${this.sessionId}`;
+
+    // If already on HTTPS, use it directly
+    if (window.location.protocol === 'https:') {
+      const port = window.location.port || '443';
+      const portStr = (isGitHubPages || !port || port === '443') ? '' : `:${port}`;
+      this._onStateUpdate(`https://${host}${portStr}${basePath}${pagePath}${sessionQS}`, this.sessionId);
+      return;
+    }
+
+    // On HTTP — fetch /api/host to check if HTTPS is available
+    fetch('/api/host').then(r => r.json()).then(info => {
+      const httpsPort = info.httpsPort;
+      if (httpsPort && httpsPort !== 443) {
+        this._onStateUpdate(`https://${host}:${httpsPort}${basePath}${pagePath}${sessionQS}`, this.sessionId);
+      } else {
+        this._onStateUpdate(`http://${host}${basePath}${pagePath}${sessionQS}`, this.sessionId);
+      }
+    }).catch(() => {
+      const port = window.location.port || '3000';
+      const portStr = (isGitHubPages || !port || port === '3000') ? '' : `:${port}`;
+      this._onStateUpdate(`http://${host}${portStr}${basePath}${pagePath}${sessionQS}`, this.sessionId);
+    });
   }
 
   stop() {

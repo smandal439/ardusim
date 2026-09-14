@@ -438,6 +438,8 @@ class ArduinoSimulator {
       ['hallRead', '_a.hallRead'],
       ['temperatureRead', '_a.temperatureRead'],
       ['digitalPinToInterrupt', '_a.digitalPinToInterrupt'],
+      // C standard library
+      ['snprintf', '_a.snprintf'],
     ];
 
     for (const [orig, mapped] of API) {
@@ -802,6 +804,50 @@ class ArduinoSimulator {
             }
           }
           return dest;
+        },
+
+        /* snprintf(buf, size, fmt, ...) — C standard library formatted print */
+        snprintf(buf, size, fmt) {
+          var args = Array.prototype.slice.call(arguments, 3);
+          var i = 0;
+          var str = String(fmt).replace(/%([-+# 0]*)(\d*)(?:\.(\d+))?([dusfxXeEgGoc%])/g, function(_, flags, width, prec, spec) {
+            if (spec === '%') return '%';
+            var v = args[i++];
+            if (v === undefined) return '';
+            var decimals = prec !== undefined ? Number(prec) : (spec === 'f' ? 6 : undefined);
+            var result;
+            switch (spec) {
+              case 'd': case 'u': result = String(Math.round(Number(v))); break;
+              case 's': result = String(v); break;
+              case 'f': result = Number(v).toFixed(decimals); break;
+              case 'x': result = Math.round(Number(v)).toString(16); break;
+              case 'X': result = Math.round(Number(v)).toString(16).toUpperCase(); break;
+              case 'e': result = Number(v).toExponential(); break;
+              case 'E': result = Number(v).toExponential().toUpperCase(); break;
+              case 'g': result = String(Number(v)); break;
+              case 'G': result = String(Number(v)).toUpperCase(); break;
+              case 'o': result = Math.round(Number(v)).toString(8); break;
+              case 'c': result = String.fromCharCode(v); break;
+              default: result = String(v);
+            }
+            if (width) {
+              var padChar = flags.indexOf('0') !== -1 ? '0' : ' ';
+              while (result.length < Number(width)) {
+                result = flags.indexOf('-') !== -1 ? result + padChar : padChar + result;
+              }
+            }
+            return result;
+          });
+          if (typeof buf === 'object' && buf !== null) {
+            if (Array.isArray(buf)) {
+              var writeLen = Math.min(str.length, (size || buf.length) - 1);
+              for (var j = 0; j < writeLen; j++) buf[j] = str[j];
+              buf[writeLen] = '\0';
+            } else {
+              buf.val = str;
+            }
+          }
+          return str.length;
         },
 
         /* ══════════ ESP32 — LEDC PWM ══════════ */
@@ -1176,6 +1222,7 @@ class ArduinoSimulator {
           }
           const cfg = window.ArduSimMQTT || {};
           const url = cfg.url || 'wss://broker.hivemq.com:8884/mqtt';
+          self._mqttBrokerUrl = url;
           try {
             real = window.mqtt.connect(url, {
               clientId,

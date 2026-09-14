@@ -11,7 +11,7 @@ class ArduSimRemote {
     this.client = null;
     this.sessionId = null;
     this.connected = false;
-    this.broker = 'wss://broker.hivemq.com:8884/mqtt';
+    this.broker = this._getBrokerUrl();
     this.pinUpdateCount = 0;
 
     // Pin name → pinKey mapping
@@ -82,6 +82,18 @@ class ArduSimRemote {
     this._init();
   }
 
+  _getBrokerUrl() {
+    if (typeof window.ArduSimMQTT !== 'undefined' && window.ArduSimMQTT.url) {
+      return window.ArduSimMQTT.url;
+    }
+    const params = new URLSearchParams(window.location.search);
+    const brokerParam = params.get('broker');
+    if (brokerParam) return brokerParam;
+    const input = document.getElementById('broker-url');
+    if (input && input.value.trim()) return input.value.trim();
+    return 'wss://broker.hivemq.com:8884/mqtt';
+  }
+
   _init() {
     // Check URL for session param
     const params = new URLSearchParams(window.location.search);
@@ -125,6 +137,7 @@ class ArduSimRemote {
     if (!id) { input.focus(); return; }
 
     this.sessionId = id;
+    this.broker = this._getBrokerUrl();
     this._setStatus('connecting');
 
     try {

@@ -33,7 +33,10 @@
           "ssid": "YOUR_WIFI_SSID",
           "password": "YOUR_WIFI_PASSWORD",
           "channel": 6,
-          "ipAddress": "192.168.1.1"
+          "ipAddress": "192.168.1.1",
+          "txPower": 20,
+          "security": "WPA2-PSK",
+          "hidden": false
         }
       }
     ],

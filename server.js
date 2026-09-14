@@ -13,6 +13,8 @@ const express = require('express');
 const app = express();
 
 const http  = require('node:http');
+const https = require('node:https');
+const tls   = require('node:tls');
 const fs    = require('node:fs');
 const path  = require('node:path');
 const os    = require('node:os');
@@ -41,6 +43,124 @@ function checkRateLimit(ip) {
   }
   bucket.count++;
   return bucket.count <= RATE_MAX_WRITE;
+}
+
+/* ── Self-signed TLS certificate (zero external deps) ── */
+const CERT_FILE = path.join(DATA_DIR, 'ardusim-cert.pem');
+const KEY_FILE  = path.join(DATA_DIR, 'ardusim-key.pem');
+
+function _derLen(len) {
+  if (len < 0x80) return Buffer.from([len]);
+  if (len < 0x100) return Buffer.from([0x81, len]);
+  return Buffer.from([0x82, (len >> 8) & 0xff, len & 0xff]);
+}
+function _derSeq(...bufs) {
+  const body = Buffer.concat(bufs);
+  return Buffer.concat([Buffer.from([0x30]), _derLen(body.length), body]);
+}
+function _derInt(buf) {
+  if (!buf.length) buf = Buffer.from([0]);
+  if (buf[0] & 0x80) buf = Buffer.concat([Buffer.from([0]), buf]);
+  return Buffer.concat([Buffer.from([0x02]), _derLen(buf.length), buf]);
+}
+function _derBitStr(buf) {
+  return Buffer.concat([Buffer.from([0x03]), _derLen(buf.length + 1), Buffer.from([0]), buf]);
+}
+function _derOid(oidStr) {
+  const parts = oidStr.split('.').map(Number);
+  const enc = [parts[0] * 40 + parts[1]];
+  for (let i = 2; i < parts.length; i++) {
+    let v = parts[i];
+    if (v < 0x80) { enc.push(v); } else {
+      const t = [];
+      while (v > 0) { t.unshift(v & 0x7f); v >>>= 7; }
+      for (let j = 0; j < t.length - 1; j++) enc.push(t[j] | 0x80);
+      enc.push(t[t.length - 1]);
+    }
+  }
+  return Buffer.concat([Buffer.from([0x06]), _derLen(enc.length), Buffer.from(enc)]);
+}
+function _derUtf8(str) {
+  const b = Buffer.from(str, 'utf8');
+  return Buffer.concat([Buffer.from([0x0c]), _derLen(b.length), b]);
+}
+function _derIA5(str) {
+  const b = Buffer.from(str, 'ascii');
+  return Buffer.concat([Buffer.from([0x16]), _derLen(b.length), b]);
+}
+function _derExplicit(tag, buf) {
+  return Buffer.concat([Buffer.from([0xa0 | tag]), _derLen(buf.length), buf]);
+}
+function _derUTCTime(d) {
+  const s = [
+    String(d.getUTCFullYear()).slice(-2),
+    String(d.getUTCMonth() + 1).padStart(2, '0'),
+    String(d.getUTCDate()).padStart(2, '0'),
+    String(d.getUTCHours()).padStart(2, '0'),
+    String(d.getUTCMinutes()).padStart(2, '0'),
+    String(d.getUTCSeconds()).padStart(2, '0'),
+  ].join('') + 'Z';
+  const b = Buffer.from(s, 'ascii');
+  return Buffer.concat([Buffer.from([0x17]), _derLen(b.length), b]);
+}
+
+function ensureTLSCert() {
+  try {
+    if (fs.existsSync(CERT_FILE) && fs.existsSync(KEY_FILE)) {
+      return { cert: fs.readFileSync(CERT_FILE, 'ascii'), key: fs.readFileSync(KEY_FILE, 'ascii') };
+    }
+  } catch (e) { /* regenerate */ }
+
+  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+    publicKeyEncoding: { type: 'spki', format: 'der' },
+    privateKeyEncoding: { type: 'pkcs8', format: 'der' },
+  });
+
+  const serial = crypto.randomBytes(16);
+  const now = new Date();
+  const expiry = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+
+  const name = _derSeq(_derSeq(_derOid('2.5.4.3'), _derUtf8('ArduSim')));
+  const validity = _derSeq(_derUTCTime(now), _derUTCTime(expiry));
+
+  // Subject Alternative Name: DNS:localhost + IP:127.0.0.1
+  const sanDns = Buffer.concat([Buffer.from([0x82]), _derLen(9), Buffer.from('localhost')]);
+  const sanIp  = Buffer.concat([Buffer.from([0x87]), _derLen(4), Buffer.from([127, 0, 0, 1])]);
+  const generalNames = Buffer.concat([Buffer.from([0x30]), _derLen(sanDns.length + sanIp.length), sanDns, sanIp]);
+  const sanExtValue = Buffer.concat([Buffer.from([0x04]), _derLen(generalNames.length), generalNames]);
+  const sanExt = _derSeq(_derOid('2.5.29.17'), sanExtValue);
+
+  const tbsCert = _derSeq(
+    _derExplicit(0, _derInt(Buffer.from([2]))),
+    _derInt(serial),
+    _derSeq(_derOid('1.2.840.113549.1.1.11'), _derSeq()),
+    name, validity, name,
+    publicKey,
+    _derExplicit(3, sanExt),
+  );
+
+  const sig = crypto.createSign('SHA256');
+  sig.update(tbsCert);
+  const signature = sig.sign({ key: privateKey, format: 'der', type: 'pkcs8' });
+
+  const certDer = _derSeq(
+    tbsCert,
+    _derSeq(_derOid('1.2.840.113549.1.1.11'), _derSeq()),
+    _derBitStr(signature),
+  );
+
+  const toPem = (der, label) =>
+    `-----BEGIN ${label}-----\n` + der.toString('base64').match(/.{1,64}/g).join('\n') + `\n-----END ${label}-----\n`;
+
+  const certPem = toPem(certDer, 'CERTIFICATE');
+  const keyPem  = toPem(privateKey, 'PRIVATE KEY');
+
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.writeFileSync(CERT_FILE, certPem);
+  fs.writeFileSync(KEY_FILE, keyPem);
+  console.log('[TLS] Self-signed certificate generated');
+  return { cert: certPem, key: keyPem };
 }
 
 /* ── SQLite storage ── */
@@ -253,7 +373,7 @@ const server = http.createServer(async (req, res) => {
         if (ip !== '127.0.0.1') break;
       }
     } catch (e) { /* fallback to 127.0.0.1 */ }
-    return sendJson(res, 200, { ip: ip, port: Number(PORT) || 3000 });
+    return sendJson(res, 200, { ip: ip, port: Number(PORT) || 3000, httpsPort: Number(HTTPS_PORT) || 3443 });
   }
 
   if (pathname === '/api/projects' && method === 'GET') {
@@ -325,7 +445,45 @@ const server = http.createServer(async (req, res) => {
   return serveStatic(req, res, pathname);
 });
 
+/* ── Start servers ── */
+const HTTPS_PORT = Number(process.env.HTTPS_PORT) || 3443;
+
 server.listen(PORT, HOST, () => {
-  console.log(`▶ ArduSim server running at http://${HOST}:${PORT}`);
-  console.log(`  DB: ${DB_FILE}`);
+  const nets = os.networkInterfaces();
+  let lanIp = '127.0.0.1';
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) { lanIp = net.address; break; }
+    }
+    if (lanIp !== '127.0.0.1') break;
+  }
+  console.log(`\n  ┌──────────────────────────────────────────────┐`);
+  console.log(`  │  ArduSim server running                       │`);
+  console.log(`  │                                                │`);
+  console.log(`  │  Local:   http://localhost:${PORT}               │`);
+  console.log(`  │  Network: http://${lanIp}:${PORT}  │`);
+  console.log(`  │  DB: ${path.basename(DB_FILE).padEnd(38)}│`);
+  console.log(`  └──────────────────────────────────────────────┘`);
+
+  try {
+    const tlsCert = ensureTLSCert();
+    const httpsServer = https.createServer(tlsCert, async (req, res) => {
+      server.emit('request', req, res);
+    });
+    httpsServer.listen(HTTPS_PORT, HOST, () => {
+      console.log(`  ┌──────────────────────────────────────────────┐`);
+      console.log(`  │  HTTPS enabled (self-signed cert)             │`);
+      console.log(`  │                                                │`);
+      console.log(`  │  Local:   https://localhost:${HTTPS_PORT}             │`);
+      console.log(`  │  Network: https://${lanIp}:${HTTPS_PORT}  │`);
+      console.log(`  │                                                │`);
+      console.log(`  │  Remote phone will use HTTPS automatically.   │`);
+      console.log(`  │  Browser will warn about self-signed cert —   │`);
+      console.log(`  │  click "Advanced" → "Proceed" to accept.      │`);
+      console.log(`  └──────────────────────────────────────────────┘\n`);
+    });
+  } catch (e) {
+    console.log(`  [TLS] HTTPS unavailable: ${e.message}`);
+    console.log(`  Remote phone will use HTTP.\n`);
+  }
 });
