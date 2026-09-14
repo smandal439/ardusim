@@ -1,0 +1,75 @@
+{
+  "id": "zigbee_8_led_control",
+  "name": "Zigbee 8 LED Control",
+  "icon": "🔧",
+  "desc": "A custom Zigbee 8 LED Control circuit example.",
+  "tags": [
+    "zigbee",
+    "led",
+    "wireless",
+    "communication"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "esp32_devkit_v1",
+        "x": 250,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "Zigbee Controller"
+        }
+      },
+      {
+        "id": "b2",
+        "type": "esp32_devkit_v1",
+        "x": 445,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "Zigbee LED Driver"
+        }
+      },
+      {
+        "id": "comp_1789408381607_auwgy",
+        "type": "multi_led_array",
+        "x": 630,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "label": "8-LED ARRAY"
+        }
+      },
+      {
+        "id": "comp_1789408394509_94e4i",
+        "type": "dip_switch",
+        "x": 75,
+        "y": 155,
+        "rotation": 0,
+        "props": {
+          "switches": 0
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1789408491571_mg36b",
+        "from": {
+          "instId": "b2",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1789408381607_auwgy",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "code": "/*\n* Zigbee Controller — Board 1\n* Sends LED ON/OFF commands when button on D4 is pressed\n* Green LED on D2 indicates command sent\n*/\n\n#include <Zigbee.h>\n\n// LED Driver address\nuint16_t ledDriverAddr = 0x0001;\n\n// Command bytes\n#define CMD_ACK     0xAA\n\nint swPins[] = {13, 12, 14, 27, 26, 25, 33, 32};\n\nuint8_t handleDipSwitches() {\n  uint8_t sw = 0;\n  for (int i = 0; i < 8; i++) {\n    if (digitalRead(swPins[i]) == HIGH) {\n      sw |= (1 << i);\n    }\n  }\n  return sw;\n}\n\n\n// Callback when ACK received\nvoid onDataReceived(uint8_t *data, int len) {\n  if (data[0] == CMD_ACK) {\n    Serial.println(\"[Controller] ACK received from LED Driver!\");\n// Blink green LED to confirm\n    digitalWrite(2, HIGH);\n    delay(100);\n    digitalWrite(2, LOW);\n  }\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n  for (int i = 0; i < 8; i++) {\n    pinMode(swPins[i], INPUT_PULLUP);\n  }\n\n\n// Initialize Zigbee\n  Zigbee.begin(11, 0x1234);\n  Zigbee.onReceive(onDataReceived);\n\n  Serial.println(\"[Controller] Zigbee LED Control ready!\");\n  Serial.print(\"[Controller] Address: 0x\");\n  Serial.println(Zigbee.getNodeAddress(), HEX);\n  Serial.println(\"[Controller] dip_switch toggle remote LED\\n\");\n}\n\nvoid loop() {\n\n  Serial.print(\"[Board 1] DIP: 0b\");\n\n\n  uint8_t data = handleDipSwitches();\n\n// Send command to LED Driver\n  Zigbee.send(ledDriverAddr, &data, 1);\n\n// Blink green LED\n  digitalWrite(2, HIGH);\n  delay(100);\n  digitalWrite(2, LOW);\n\n  delay(10);\n}",
+  "board2Code": "/*\n * Zigbee LED Driver — Board 2\n * Receives ON/OFF commands and toggles yellow LED\n * Sends ACK back to Controller\n */\n\n#include <Zigbee.h>\n\n// Controller address\nuint16_t controllerAddr = 0x0000;\n\n// Command bytes\n#define CMD_LED_ON  0x01\n#define CMD_LED_OFF 0x00\n#define CMD_ACK     0xAA\n\nbool yellowLedState = false;\n\nint Leds[] = {21, 19, 18, 5, 17, 16, 4, 2};\n\nvoid updateLEDs(int val) {\n  for (int i = 0; i < 8; i++) {\n    digitalWrite(Leds[i], (val >> i) & 1);\n  }\n}\n\n// Callback when command received\nvoid onDataReceived(uint8_t *data, int len) {\n  if (len < 1) return;\n\n   updateLEDs(data);\n\n  // Send ACK back to Controller\n  uint8_t ack = CMD_ACK;\n  Zigbee.send(controllerAddr, &ack, 1);\n  Serial.println(\"[LED Driver] ACK sent\");\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(2, OUTPUT);\n\n  // Initialize Zigbee\n  Zigbee.begin(11, 0x1234);\n  Zigbee.onReceive(onDataReceived);\n\n  Serial.println(\"[LED Driver] Zigbee LED Driver ready!\");\n  Serial.print(\"[LED Driver] Address: 0x\");\n  Serial.println(Zigbee.getNodeAddress(), HEX);\n  Serial.println(\"[LED Driver] Waiting for commands...\\n\");\n}\n\nvoid loop() {\n  delay(100);\n}"
+}
