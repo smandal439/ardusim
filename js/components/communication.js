@@ -241,32 +241,35 @@ defComp({
   name: 'LoRa Module',
   category: 'Communication',
   icon: '\u{1F4E1}',
-  desc: 'LoRa long-range wireless transceiver (SX1276/RFM95W). Demonstrates spreading factor, bandwidth, coding rate, TX power, RSSI, SNR, and packet airtime.',
-  search: 'lora rfm95 sx1276 long range wireless radio frequency',
-  width: 72,
-  height: 90,
+  desc: 'SX1276 / RFM95W LoRa long-range wireless transceiver. Simulates RF parameter matching, Time-on-Air (ToA) calculation, RSSI/SNR path-loss, and SPI bus interface.',
+  search: 'lora rfm95 sx1276 long range wireless radio frequency spi',
+  width: 80,
+  height: 98,
 
   defaultProps: {
     frequency: 868000000,
     spreadingFactor: 7,
     bandwidth: 125000,
-    codingRate: 5,
+    codingRate: 5, // 5 = 4/5, 6 = 4/6, 7 = 4/7, 8 = 4/8
     txPower: 14,
     syncWord: 0x12,
     crcEnabled: true,
+    preambleLen: 8,
+    payloadLen: 16,
   },
 
   interactive: [
     {
-      field: 'frequency', label: 'Frequency', type: 'select',
+      field: 'frequency', label: 'Frequency Band', type: 'select',
       options: [
-        { value: 433000000, label: '433 MHz (Asia)' },
+        { value: 433000000, label: '433 MHz (Asia/EU)' },
         { value: 868000000, label: '868 MHz (Europe)' },
         { value: 915000000, label: '915 MHz (US/AU)' },
         { value: 923000000, label: '923 MHz (Asia)' },
       ],
     },
-    { field: 'spreadingFactor', label: 'Spreading Factor', type: 'select',
+    {
+      field: 'spreadingFactor', label: 'Spreading Factor', type: 'select',
       options: [
         { value: 6,  label: 'SF6  (Fast, Short Range)' },
         { value: 7,  label: 'SF7  (Default)' },
@@ -274,24 +277,23 @@ defComp({
         { value: 9,  label: 'SF9' },
         { value: 10, label: 'SF10' },
         { value: 11, label: 'SF11' },
-        { value: 12, label: 'SF12  (Slow, Max Range)' },
+        { value: 12, label: 'SF12 (Slow, Max Range)' },
       ],
     },
-    { field: 'bandwidth', label: 'Bandwidth', type: 'select',
+    {
+      field: 'bandwidth', label: 'Bandwidth', type: 'select',
       options: [
         { value: 7800,   label: '7.8 kHz' },
-        { value: 10400,  label: '10.4 kHz' },
         { value: 15600,  label: '15.6 kHz' },
-        { value: 20800,  label: '20.8 kHz' },
         { value: 31250,  label: '31.25 kHz' },
-        { value: 41700,  label: '41.7 kHz' },
         { value: 62500,  label: '62.5 kHz' },
         { value: 125000, label: '125 kHz (Default)' },
         { value: 250000, label: '250 kHz' },
         { value: 500000, label: '500 kHz' },
       ],
     },
-    { field: 'codingRate', label: 'Coding Rate', type: 'select',
+    {
+      field: 'codingRate', label: 'Coding Rate', type: 'select',
       options: [
         { value: 5, label: '4/5 (Min Overhead)' },
         { value: 6, label: '4/6' },
@@ -300,43 +302,165 @@ defComp({
       ],
     },
     { field: 'txPower', label: 'TX Power (dBm)', type: 'number', min: 2, max: 20, step: 1 },
-    { field: 'syncWord', label: 'Sync Word (hex)', type: 'number', min: 0, max: 255, step: 1 },
+    { field: 'syncWord', label: 'Sync Word (0x)', type: 'number', min: 0, max: 255, step: 1 },
+    { field: 'payloadLen', label: 'Simulated Payload (Bytes)', type: 'number', min: 1, max: 255, step: 1 },
     { field: 'crcEnabled', label: 'CRC Enabled', type: 'boolean' },
   ],
 
-  pins: [],
+  // Hardware Interface Header Pins along the bottom edge
+  pins: [
+    { name: '3V3',  x: 8,  y: 98, dir: 'in' },
+    { name: 'GND',  x: 18, y: 98, dir: 'in' },
+    { name: 'SCK',  x: 28, y: 98, dir: 'in' },
+    { name: 'MISO', x: 38, y: 98, dir: 'out' },
+    { name: 'MOSI', x: 48, y: 98, dir: 'in' },
+    { name: 'NSS',  x: 58, y: 98, dir: 'in' },
+    { name: 'DIO0', x: 68, y: 98, dir: 'out' },
+    { name: 'RST',  x: 78, y: 98, dir: 'in' },
+  ],
 
   step(inst, sim) {
+    if (!window._loraBus) {
+      window._loraBus = { nodes: {} };
+    }
+
+    // Ensure transmitPacket is always available on the bus (library may have
+    // created the bus first without it).
+    if (!window._loraBus.transmitPacket) {
+      window._loraBus.transmitPacket = function(senderId, payloadHex) {
+        const sender = this.nodes[senderId];
+        if (!sender || !sender.active) return;
+
+        sender.lastTxTime = Date.now();
+        sender.txCount = (sender.txCount || 0) + 1;
+
+        Object.values(this.nodes).forEach((target) => {
+          if (target.id === senderId || !target.active) return;
+
+          const freqMatch = Math.abs(target.frequency - sender.frequency) < 100000;
+          const sfMatch = target.spreadingFactor === sender.spreadingFactor;
+          const bwMatch = target.bandwidth === sender.bandwidth;
+          const syncMatch = target.syncWord === sender.syncWord;
+
+          if (freqMatch && sfMatch && bwMatch && syncMatch) {
+            const dx = sender.x - target.x;
+            const dy = sender.y - target.y;
+            const distMeters = Math.max(1, Math.sqrt(dx * dx + dy * dy) * 0.5);
+            const freqMHz = sender.frequency / 1e6;
+            const fspl = 20 * Math.log10(distMeters) + 20 * Math.log10(freqMHz) - 27.55;
+            const rssi = Math.max(-130, Math.min(-30, Math.round(sender.txPower - fspl)));
+            const snr = Math.max(-20, Math.min(15, parseFloat(((rssi + 110) / 4).toFixed(1))));
+
+            target.lastRxTime = Date.now();
+            target.rxCount = (target.rxCount || 0) + 1;
+            target.lastRxMeta = {
+              from: senderId,
+              payload: payloadHex || 'HELLO LORA',
+              rssi,
+              snr,
+              toa: sender.airtimeMs,
+            };
+
+            if (typeof payloadHex === 'string') {
+              var bytes = [];
+              for (var k = 0; k < payloadHex.length; k++) {
+                bytes.push(payloadHex.charCodeAt(k) & 0xFF);
+              }
+              target._rxBuffer = bytes;
+            } else if (payloadHex instanceof Uint8Array || Array.isArray(payloadHex)) {
+              target._rxBuffer = Array.from(payloadHex);
+            } else {
+              target._rxBuffer = [];
+            }
+            target._lastPacketRssi = rssi;
+            target._lastPacketSnr = snr;
+
+            if (target.inst && target.inst.setPin) {
+              target.inst.setPin('DIO0', 1);
+            }
+          }
+        });
+      };
+    }
+
     const isRunning = !!(sim && sim.isRunning);
 
     if (isRunning) {
       if (!inst._state) {
-        inst._state = { lastTxTime: 0, lastRxTime: 0, txCount: 0, rxCount: 0 };
+        inst._state = {
+          lastTxTime: 0,
+          lastRxTime: 0,
+          txCount: 0,
+          rxCount: 0,
+          lastRxMeta: null,
+        };
       }
 
-      // Update LoRa bus node position for RSSI calculation
-      if (window._loraBus && window._loraBus.nodes) {
-        var nodeIdx = sim.boardIndex || 0;
-        if (window._loraBus.nodes[nodeIdx]) {
-          window._loraBus.nodes[nodeIdx].x = inst.x + inst.width / 2;
-          window._loraBus.nodes[nodeIdx].y = inst.y + inst.height / 2;
-        }
+      // Exact LoRa Time-on-Air (ToA) calculation in milliseconds
+      const sf = Number(inst.props.spreadingFactor) || 7;
+      const bw = Number(inst.props.bandwidth) || 125000;
+      const cr = Number(inst.props.codingRate) || 5;
+      const payloadLen = Number(inst.props.payloadLen) || 16;
+      const preambleLen = Number(inst.props.preambleLen) || 8;
+      const crc = inst.props.crcEnabled !== false ? 1 : 0;
+
+      const tSymbol = (Math.pow(2, sf) / bw) * 1000; // ms per symbol
+      const tPreamble = (preambleLen + 4.25) * tSymbol;
+      
+      const payloadBits = 8 * payloadLen - 4 * sf + 28 + 16 * crc;
+      const bitsPerSymbol = 4 * (sf - (sf >= 11 ? 2 : 0));
+      const payloadSymbols = 8 + Math.max(Math.ceil(payloadBits / bitsPerSymbol) * cr, 0);
+      const airtimeMs = Math.round(tPreamble + (payloadSymbols * tSymbol));
+
+      // Register / update node on the central bus
+      window._loraBus.nodes[inst.id] = {
+        id: inst.id,
+        inst,
+        frequency: Number(inst.props.frequency) || 868000000,
+        spreadingFactor: sf,
+        bandwidth: bw,
+        codingRate: cr,
+        txPower: Number(inst.props.txPower) || 14,
+        syncWord: Number(inst.props.syncWord) ?? 0x12,
+        airtimeMs,
+        active: true,
+        x: inst.x + (inst.width || 80) / 2,
+        y: inst.y + (inst.height || 98) / 2,
+        lastTxTime: inst._state.lastTxTime,
+        lastRxTime: inst._state.lastRxTime,
+        lastRxMeta: inst._state.lastRxMeta,
+        txCount: inst._state.txCount,
+        rxCount: inst._state.rxCount,
+        send: (payload) => window._loraBus.transmitPacket(inst.id, payload),
+      };
+    } else {
+      window._loraBus?.nodes && delete window._loraBus.nodes[inst.id];
+      if (inst._state) {
+        inst._state.lastRxMeta = null;
       }
     }
   },
 
   draw(ctx, inst, sim) {
     const { x, y } = inst;
-    const w = inst.width || 72;
-    const h = inst.height || 90;
+    const w = inst.width || 80;
+    const h = inst.height || 98;
     const isRunning = !!(sim && sim.isRunning);
+    const busNode = window._loraBus?.nodes[inst.id];
     const state = inst._state || { lastTxTime: 0, lastRxTime: 0, txCount: 0, rxCount: 0 };
-    const isTxActive = isRunning && (Date.now() - state.lastTxTime < 200);
-    const isRxActive = isRunning && (Date.now() - state.lastRxTime < 200);
 
-    const freq = inst.props.frequency || 868000000;
-    const sf = inst.props.spreadingFactor || 7;
-    const bw = inst.props.bandwidth || 125000;
+    const lastTxTime = busNode ? busNode.lastTxTime : state.lastTxTime;
+    const lastRxTime = busNode ? busNode.lastRxTime : state.lastRxTime;
+    const airtime = busNode ? busNode.airtimeMs : 36;
+    const lastRxMeta = busNode ? busNode.lastRxMeta : null;
+
+    const isTxActive = isRunning && (Date.now() - lastTxTime < Math.max(250, airtime));
+    const isRxActive = isRunning && (Date.now() - lastRxTime < Math.max(250, airtime));
+
+    const freq = Number(inst.props.frequency) || 868000000;
+    const sf = Number(inst.props.spreadingFactor) || 7;
+    const bw = Number(inst.props.bandwidth) || 125000;
+    const cr = Number(inst.props.codingRate) || 5;
 
     ctx.save();
     ctx.translate(x, y);
@@ -348,181 +472,195 @@ defComp({
     };
 
     // --- Drop Shadow ---
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-    drawRR(3, 5, w - 2, h - 2, 6);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    drawRR(3, 5, w - 2, h - 10, 6);
     ctx.fill();
 
-    // --- Main PCB Housing ---
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-    bgGrad.addColorStop(0, '#1a3a2a');
-    bgGrad.addColorStop(0.5, '#0f2820');
-    bgGrad.addColorStop(1, '#091a14');
+    // --- PCB Base (Dark Emerald Green) ---
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, h - 8);
+    bgGrad.addColorStop(0, '#153828');
+    bgGrad.addColorStop(0.5, '#0b2419');
+    bgGrad.addColorStop(1, '#061710');
     ctx.fillStyle = bgGrad;
-    drawRR(1, 3, w - 2, h - 4, 6);
+    drawRR(0, 0, w, h - 8, 6);
     ctx.fill();
 
-    // PCB border
-    ctx.strokeStyle = 'rgba(0, 200, 120, 0.2)';
+    ctx.strokeStyle = 'rgba(46, 204, 113, 0.25)';
     ctx.lineWidth = 1;
-    drawRR(1, 3, w - 2, h - 4, 6);
+    drawRR(0, 0, w, h - 8, 6);
     ctx.stroke();
 
-    // --- Antenna (Helical Spring Style) ---
-    ctx.strokeStyle = '#8a8a8a';
-    ctx.lineWidth = 1.8;
-    ctx.lineCap = 'round';
+    // --- Helical Spring Antenna ---
     const antX = w / 2;
-    const antBaseY = 8;
-    const antTopY = -6;
+    const antBaseY = 4;
+    const antTopY = -14;
 
-    // Antenna base mount
-    ctx.fillStyle = '#555';
+    // Brass antenna mount socket
+    ctx.fillStyle = '#d4af37';
     ctx.fillRect(antX - 4, antBaseY - 2, 8, 4);
 
-    // Helical antenna coil
+    // Copper helical coil
+    ctx.strokeStyle = '#e67e22';
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round';
     ctx.beginPath();
-    const coils = 4;
-    const coilHeight = antBaseY - antTopY;
-    for (let i = 0; i <= coils * 20; i++) {
-      const t = i / (coils * 20);
-      const cy = antBaseY - 2 - t * coilHeight;
-      const cx = antX + Math.sin(t * coils * Math.PI * 2) * 3;
+    const coils = 5;
+    const coilH = antBaseY - antTopY;
+    for (let i = 0; i <= coils * 16; i++) {
+      const t = i / (coils * 16);
+      const cy = antBaseY - 2 - t * coilH;
+      const cx = antX + Math.sin(t * coils * Math.PI * 2) * 3.5;
       if (i === 0) ctx.moveTo(cx, cy);
       else ctx.lineTo(cx, cy);
     }
     ctx.stroke();
 
-    // Antenna tip
-    ctx.fillStyle = '#aaa';
+    ctx.fillStyle = '#f39c12';
     ctx.beginPath();
     ctx.arc(antX, antTopY, 1.5, 0, Math.PI * 2);
     ctx.fill();
 
-    // --- LoRa Chip (SX1276) ---
-    const chipX = 12;
-    const chipY = 28;
-    const chipW = w - 24;
-    const chipH = 22;
-
-    // Chip body
-    ctx.fillStyle = '#1a1a1a';
-    drawRR(chipX, chipY, chipW, chipH, 2);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-    ctx.lineWidth = 0.5;
-    drawRR(chipX, chipY, chipW, chipH, 2);
-    ctx.stroke();
-
-    // Chip label
-    ctx.fillStyle = isRunning ? '#00cc66' : 'rgba(255,255,255,0.4)';
-    ctx.font = 'bold 6px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('SX1276', chipX + chipW / 2, chipY + 9);
-    ctx.font = '5px monospace';
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.fillText('LoRa', chipX + chipW / 2, chipY + 16);
-
-    // Chip pin markers (top)
-    for (let i = 0; i < 5; i++) {
-      ctx.fillStyle = '#c0a000';
-      ctx.fillRect(chipX + 4 + i * ((chipW - 8) / 4) - 1, chipY - 2, 2, 3);
-    }
-    // Chip pin markers (bottom)
-    for (let i = 0; i < 5; i++) {
-      ctx.fillStyle = '#c0a000';
-      ctx.fillRect(chipX + 4 + i * ((chipW - 8) / 4) - 1, chipY + chipH - 1, 2, 3);
-    }
-
-    // --- Status LEDs ---
-    const ledY = 56;
-    const ledR = 2.5;
-
-    // PWR LED (Green)
-    ctx.fillStyle = isRunning ? '#2ecc71' : '#223322';
-    ctx.beginPath();
-    ctx.arc(14, ledY, ledR, 0, Math.PI * 2);
-    ctx.fill();
-    if (isRunning) {
-      ctx.fillStyle = 'rgba(46, 204, 113, 0.3)';
-      ctx.beginPath();
-      ctx.arc(14, ledY, ledR + 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // TX LED (Red)
-    ctx.fillStyle = isTxActive ? '#ff4444' : '#332222';
-    ctx.beginPath();
-    ctx.arc(24, ledY, ledR, 0, Math.PI * 2);
-    ctx.fill();
-    if (isTxActive) {
-      ctx.fillStyle = 'rgba(255, 68, 68, 0.35)';
-      ctx.beginPath();
-      ctx.arc(24, ledY, ledR + 3, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // RX LED (Blue)
-    ctx.fillStyle = isRxActive ? '#4488ff' : '#222233';
-    ctx.beginPath();
-    ctx.arc(34, ledY, ledR, 0, Math.PI * 2);
-    ctx.fill();
-    if (isRxActive) {
-      ctx.fillStyle = 'rgba(68, 136, 255, 0.35)';
-      ctx.beginPath();
-      ctx.arc(34, ledY, ledR + 3, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // --- LED Labels ---
-    ctx.font = '4.5px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.fillText('PWR', 14, ledY + 7);
-    ctx.fillText('TX', 24, ledY + 7);
-    ctx.fillText('RX', 34, ledY + 7);
-
-    // --- OLED Display Area ---
-    const oledX = 6;
-    const oledY = 65;
-    const oledW = w - 12;
-    const oledH = 20;
-
-    ctx.fillStyle = '#050a0e';
-    drawRR(oledX, oledY, oledW, oledH, 3);
-    ctx.fill();
-    ctx.strokeStyle = isRunning ? 'rgba(0, 204, 102, 0.3)' : 'rgba(255,255,255,0.05)';
-    ctx.lineWidth = 0.5;
-    drawRR(oledX, oledY, oledW, oledH, 3);
-    ctx.stroke();
-
-    // Display frequency
-    ctx.fillStyle = isRunning ? '#00cc66' : 'rgba(255,255,255,0.2)';
-    ctx.font = 'bold 8px monospace';
-    ctx.textAlign = 'center';
-    var freqStr = (freq / 1000000).toFixed(1) + ' MHz';
-    ctx.fillText(freqStr, oledX + oledW / 2, oledY + 9);
-
-    // Display SF and BW
-    ctx.font = '6px monospace';
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.fillText('SF' + sf + '  BW' + (bw >= 1000 ? (bw / 1000) + 'k' : bw), oledX + oledW / 2, oledY + 17);
-
-    // --- Animated Radio Waves (when TX active) ---
-    if (isTxActive) {
+    // --- RF Wave Signal Animation ---
+    if (isTxActive || isRxActive) {
+      const waveColor = isTxActive ? '231, 76, 60' : '52, 152, 219';
       const now = Date.now();
-      const wavePhase = (now % 800) / 800;
-      ctx.lineWidth = 1.2;
+      const wavePhase = (now % 700) / 700;
+      ctx.lineWidth = 1.5;
+
       for (let i = 0; i < 3; i++) {
         const opacity = Math.max(0, 1 - ((wavePhase + i * 0.33) % 1));
-        const radius = 5 + (((wavePhase + i * 0.33) % 1) * 15);
-        ctx.strokeStyle = `rgba(255, 68, 68, ${opacity * 0.7})`;
+        const radius = 4 + (((wavePhase + i * 0.33) % 1) * 16);
+        ctx.strokeStyle = `rgba(${waveColor}, ${opacity * 0.8})`;
         ctx.beginPath();
-        ctx.arc(w / 2, 6, radius, -Math.PI * 0.8, -Math.PI * 0.2);
+        ctx.arc(antX, antTopY, radius, -Math.PI * 0.8, -Math.PI * 0.2);
         ctx.stroke();
       }
     }
 
+    // --- Metal IC Shielding Housing (SX1276) ---
+    const chipX = 10;
+    const chipY = 18;
+    const chipW = w - 20;
+    const chipH = 26;
+
+    ctx.fillStyle = '#222831';
+    drawRR(chipX, chipY, chipW, chipH, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#393e46';
+    ctx.lineWidth = 1;
+    drawRR(chipX, chipY, chipW, chipH, 3);
+    ctx.stroke();
+
+    // Gold castellated solder pads on IC sides
+    ctx.fillStyle = '#d4af37';
+    for (let i = 0; i < 4; i++) {
+      ctx.fillRect(chipX - 2, chipY + 4 + i * 5, 2.5, 3);
+      ctx.fillRect(chipX + chipW - 0.5, chipY + 4 + i * 5, 2.5, 3);
+    }
+
+    // Laser-etched text on IC shield
+    ctx.fillStyle = isRunning ? '#2ecc71' : '#7f8c8d';
+    ctx.font = 'bold 7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('SEMTECH', chipX + chipW / 2, chipY + 10);
+    ctx.font = 'bold 8px monospace';
+    ctx.fillStyle = '#ecf0f1';
+    ctx.fillText('SX1276', chipX + chipW / 2, chipY + 19);
+
+    // --- Diagnostic Status LEDs ---
+    const ledY = 50;
+    const drawLED = (lx, active, colorHex, glowColor, label) => {
+      ctx.fillStyle = active ? colorHex : '#1a2228';
+      ctx.beginPath(); ctx.arc(lx, ledY, 2.5, 0, Math.PI * 2); ctx.fill();
+      if (active) {
+        ctx.fillStyle = glowColor;
+        ctx.beginPath(); ctx.arc(lx, ledY, 4.5, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = '5px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, lx, ledY + 8);
+    };
+
+    drawLED(18, isRunning, '#2ecc71', 'rgba(46, 204, 113, 0.35)', 'PWR');
+    drawLED(40, isTxActive, '#e74c3c', 'rgba(231, 76, 60, 0.4)', 'TX');
+    drawLED(62, isRxActive, '#3498db', 'rgba(52, 152, 219, 0.4)', 'RX');
+
+    // --- Monochrome OLED Screen Glass ---
+    const oledX = 6;
+    const oledY = 62;
+    const oledW = w - 12;
+    const oledH = 24;
+
+    ctx.fillStyle = '#080d12';
+    drawRR(oledX, oledY, oledW, oledH, 3);
+    ctx.fill();
+    ctx.strokeStyle = isRunning ? 'rgba(46, 204, 113, 0.3)' : 'rgba(255, 255, 255, 0.08)';
+    ctx.lineWidth = 0.8;
+    drawRR(oledX, oledY, oledW, oledH, 3);
+    ctx.stroke();
+
+    if (isRunning) {
+      // Line 1: Freq & SF
+      ctx.fillStyle = '#2ecc71';
+      ctx.font = 'bold 7.5px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${(freq / 1e6).toFixed(1)}M`, oledX + 4, oledY + 8);
+
+      ctx.textAlign = 'right';
+      ctx.fillText(`SF${sf} CR4/${cr}`, oledX + oledW - 4, oledY + 8);
+
+      // Line 2: BW & Calculated Airtime
+      ctx.fillStyle = '#3498db';
+      ctx.font = '6.5px monospace';
+      ctx.textAlign = 'left';
+      const bwStr = bw >= 1000 ? `${bw / 1000}kHz` : `${bw}Hz`;
+      ctx.fillText(bwStr, oledX + 4, oledY + 16);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#f39c12';
+      ctx.fillText(`${airtime}ms`, oledX + oledW - 4, oledY + 16);
+
+      // Line 3: Live telemetry (RSSI / Packet counters)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+      ctx.font = '6px monospace';
+      ctx.textAlign = 'center';
+
+      if (lastRxMeta && (Date.now() - lastRxTime < 3000)) {
+        ctx.fillText(`RSSI:${lastRxMeta.rssi} SNR:${lastRxMeta.snr}`, oledX + oledW / 2, oledY + 22);
+      } else {
+        const txC = busNode?.txCount || 0;
+        const rxC = busNode?.rxCount || 0;
+        ctx.fillText(`TX:${txC}  RX:${rxC}  PWR:${inst.props.txPower || 14}dBm`, oledX + oledW / 2, oledY + 22);
+      }
+    } else {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.font = 'bold 7px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('DISCONNECTED', oledX + oledW / 2, oledY + 14);
+    }
+
+    // --- Bottom Gold Connector Pins ---
+    const pinNames = ['3V3', 'GND', 'SCK', 'MISO', 'MOSI', 'NSS', 'DIO0', 'RST'];
+    pinNames.forEach((pName, idx) => {
+      const px = 8 + idx * 10;
+      ctx.fillStyle = '#d4af37';
+      ctx.fillRect(px - 2.5, h - 8, 5, 8);
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.arc(px, h - 4, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pin text
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.font = '5px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(pName, px, h - 9);
+    });
+
     ctx.restore();
   },
 });
+
+
 

@@ -140,10 +140,11 @@ window.ArduinoLibs['LoRa'] = {
 
   runtime: function(self) {
     // ── Shared LoRa bus (global between all simulator instances) ──
+    // The component (communication.js) may have already created the bus with
+    // transmitPacket().  If so, reuse it; otherwise create a minimal bus.
     if (!window._loraBus) {
       window._loraBus = {
         nodes: {},
-        // Shared frequency band — all nodes must be on the same freq to communicate
       };
     }
     var bus = window._loraBus;

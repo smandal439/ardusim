@@ -1,0 +1,78 @@
+{
+  "id": "lora_sender_receiver",
+  "name": "LoRa Sender & Receiver",
+  "icon": "\ud83d\udce1",
+  "desc": "LoRa long-range wireless communication between two Arduino boards. Board 1 (Sender) transmits a counter message every 2 seconds. Board 2 (Receiver) receives and displays the message along with RSSI/SNR signal quality on the Serial Monitor. Demonstrates LoRa SPI configuration, packet TX/RX, and RF signal metrics.",
+  "tags": [
+    "lora",
+    "wireless",
+    "long-range",
+    "sx1276",
+    "rfm95",
+    "spi",
+    "intermediate"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "sender",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 200,
+        "props": {
+          "label": "LoRa Sender"
+        },
+        "rotation": 0
+      },
+      {
+        "id": "lora1",
+        "type": "lora_module",
+        "x": 50,
+        "y": 200,
+        "props": {
+          "frequency": 868000000,
+          "spreadingFactor": 7,
+          "bandwidth": 125000,
+          "codingRate": 5,
+          "txPower": 14,
+          "syncWord": 18,
+          "crcEnabled": true,
+          "preambleLen": 8,
+          "payloadLen": 16
+        },
+        "rotation": 0
+      },
+      {
+        "id": "receiver",
+        "type": "arduino_uno",
+        "x": 600,
+        "y": 200,
+        "props": {
+          "label": "LoRa Receiver"
+        },
+        "rotation": 0
+      },
+      {
+        "id": "lora2",
+        "type": "lora_module",
+        "x": 800,
+        "y": 200,
+        "props": {
+          "frequency": 868000000,
+          "spreadingFactor": 7,
+          "bandwidth": 125000,
+          "codingRate": 5,
+          "txPower": 14,
+          "syncWord": 18,
+          "crcEnabled": true,
+          "preambleLen": 8,
+          "payloadLen": 16
+        },
+        "rotation": 0
+      }
+    ],
+    "wires": []
+  },
+  "code": "/*\n * LoRa Sender — Board 1\n * Sends a counter message every 2 seconds\n * Uses LoRa.h library with SX1276/RFM95W module\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n\n#define SS_PIN   10\n#define RST_PIN  9\n#define DIO0_PIN 2\n\nint counter = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"LoRa Sender Starting...\");\n\n  LoRa.setPins(SS_PIN, RST_PIN, DIO0_PIN);\n\n  if (!LoRa.begin(868E6)) {\n    Serial.println(\"LoRa init failed!\");\n    while (1);\n  }\n\n  LoRa.setSpreadingFactor(7);\n  LoRa.setSignalBandwidth(125000);\n  LoRa.setCodingRate4(5);\n  LoRa.setTxPower(14);\n  LoRa.setSyncWord(0x12);\n  LoRa.enableCrc();\n\n  Serial.println(\"LoRa Sender ready!\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  counter++;\n\n  Serial.print(\"Sending packet #\");\n  Serial.println(counter);\n\n  LoRa.beginPacket();\n  LoRa.print(\"Hello #\");\n  LoRa.print(counter);\n  LoRa.endPacket();\n\n  Serial.println(\"Packet sent!\");\n  Serial.println(\"---\");\n\n  delay(2000);\n}",
+  "board2Code": "/*\n * LoRa Receiver — Board 2\n * Receives packets from the Sender board\n * Displays message content and RSSI/SNR on Serial Monitor\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n\n#define SS_PIN   10\n#define RST_PIN  9\n#define DIO0_PIN 2\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"LoRa Receiver Starting...\");\n\n  LoRa.setPins(SS_PIN, RST_PIN, DIO0_PIN);\n\n  if (!LoRa.begin(868E6)) {\n    Serial.println(\"LoRa init failed!\");\n    while (1);\n  }\n\n  LoRa.setSpreadingFactor(7);\n  LoRa.setSignalBandwidth(125000);\n  LoRa.setCodingRate4(5);\n  LoRa.setSyncWord(0x12);\n  LoRa.enableCrc();\n\n  Serial.println(\"LoRa Receiver ready — waiting for packets...\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  int packetSize = LoRa.parsePacket();\n\n  if (packetSize) {\n    Serial.print(\"Received packet: \");\n\n    String message = \"\";\n    while (LoRa.available()) {\n      message += (char)LoRa.read();\n    }\n    Serial.println(message);\n\n    int rssi = LoRa.packetRssi();\n    float snr = LoRa.packetSnr();\n\n    Serial.print(\"RSSI: \");\n    Serial.print(rssi);\n    Serial.println(\" dBm\");\n\n    Serial.print(\"SNR: \");\n    Serial.print(snr);\n    Serial.println(\" dB\");\n\n    Serial.println(\"---\");\n  }\n}"
+}
