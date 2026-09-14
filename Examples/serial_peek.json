@@ -1,0 +1,28 @@
+{
+  "id": "serial_peek",
+  "name": "Serial Peek Example",
+  "icon": "🔧",
+  "desc": "This example demonstrates how to use the Serial.peek() function to look at the next character in the serial buffer without removing it. The code checks if the next character is a number or text and processes it accordingly, printing the result to the serial monitor.",
+  "tags": [
+    "serial",
+    "peek",
+    "buffer",
+    "arduino"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789405257718_14jh1",
+        "type": "arduino_uno",
+        "x": 25,
+        "y": -60,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "code": "\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Send a number (e.g., 123) or a letter (e.g., abc):\");\n}\n\nvoid loop() {\n  // Check if data is available in the buffer\n  if (Serial.available() > 0) {\n    \n    // Look at the character at the front of the line without removing it\n    char nextChar = Serial.peek(); \n\n    // Check if the peeked character is a number (0 through 9)\n    if (nextChar >= '0' && nextChar <= '9') {\n      // Because it's a number, use parseInt to read the whole number\n      int number = Serial.parseInt(); \n      Serial.print(\"Found a number: \");\n      Serial.println(number);\n    } \n    // If it's not a number, handle it as text\n    else {\n      // Remove it from the buffer using standard read()\n      char textChar = Serial.read(); \n      \n      // Ignore newline or carriage return characters from the serial monitor\n      if (textChar != '\\n' && textChar != '\\r') {\n        Serial.print(\"Found text: \");\n        Serial.println(textChar);\n      }\n    }\n  }\n}\n"
+}
