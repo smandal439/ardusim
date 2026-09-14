@@ -772,6 +772,9 @@ class LogicAnalyzer {
       D14: 14, D15: 15, D16: 16, D17: 17, D18: 18, D19: 19,
       D21: 21, D22: 22, D23: 23, D25: 25, D26: 26, D27: 27,
       D32: 32, D33: 33, D34: 34, D35: 35, D36: 36, D39: 39,
+      'SDA': 18, 'SCL': 19, 'RX (D0)': 0, 'TX (D1)': 1,
+      'SDA (GPIO21)': 21, 'SCL (GPIO22)': 22,
+      'TX0 (GPIO1)': 1, 'RX0 (GPIO3)': 3,
     };
     return map[name] !== undefined ? map[name] : null;
   }
@@ -803,6 +806,37 @@ class LogicAnalyzer {
   togglePause() {
     this.paused = !this.paused;
     return this.paused;
+  }
+
+  setPreset(name) {
+    const presets = {
+      i2c: { pins: ['SCL', 'SDA'], enables: [true, true] },
+      uart: { pins: ['TX (D1)', 'RX (D0)'], enables: [true, true] },
+    };
+    const p = presets[name];
+    if (!p) return;
+    this.clear();
+    this.channels.forEach((ch, i) => {
+      if (i < p.pins.length && p.pins[i]) {
+        ch.pin = p.pins[i];
+        ch.enabled = p.enables[i];
+        if (!this.data[p.pins[i]]) this.data[p.pins[i]] = [];
+      } else {
+        ch.enabled = false;
+      }
+    });
+    this._syncUI();
+  }
+
+  _syncUI() {
+    document.querySelectorAll('.la-ch-select').forEach(sel => {
+      const idx = parseInt(sel.dataset.ch);
+      if (isNaN(idx) || idx >= this.channels.length) return;
+      const ch = this.channels[idx];
+      if (sel.querySelector(`option[value="${ch.pin}"]`)) {
+        sel.value = ch.pin;
+      }
+    });
   }
 
   destroy() {

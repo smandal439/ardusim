@@ -507,6 +507,12 @@
                         <div class="la-ch-group" style="--ch-color:#00e5ff">
                             <span class="la-ch-dot"></span>
                             <label class="serial-label">CH1: <select class="serial-select la-ch-select" data-ch="0">
+                                    <optgroup label="Protocol">
+                                        <option value="SCL">SCL (I2C)</option><option value="SDA">SDA (I2C)</option>
+                                        <option value="TX (D1)">TX (UART)</option><option value="RX (D0)">RX (UART)</option>
+                                        <option value="TX0 (GPIO1)">TX0 (ESP32)</option><option value="RX0 (GPIO3)">RX0 (ESP32)</option>
+                                        <option value="SCL (GPIO22)">SCL (ESP32)</option><option value="SDA (GPIO21)">SDA (ESP32)</option>
+                                    </optgroup>
                                     <optgroup label="Arduino Uno">
                                         <option value="D2" selected>D2</option><option value="D3">D3</option><option value="D4">D4</option>
                                         <option value="D5">D5</option><option value="D6">D6</option><option value="D7">D7</option>
@@ -531,6 +537,12 @@
                         <div class="la-ch-group" style="--ch-color:#ff9800">
                             <span class="la-ch-dot"></span>
                             <label class="serial-label">CH2: <select class="serial-select la-ch-select" data-ch="1">
+                                    <optgroup label="Protocol">
+                                        <option value="SCL">SCL (I2C)</option><option value="SDA">SDA (I2C)</option>
+                                        <option value="TX (D1)">TX (UART)</option><option value="RX (D0)">RX (UART)</option>
+                                        <option value="TX0 (GPIO1)">TX0 (ESP32)</option><option value="RX0 (GPIO3)">RX0 (ESP32)</option>
+                                        <option value="SCL (GPIO22)">SCL (ESP32)</option><option value="SDA (GPIO21)">SDA (ESP32)</option>
+                                    </optgroup>
                                     <optgroup label="Arduino Uno">
                                         <option value="D3" selected>D3</option><option value="D2">D2</option><option value="D4">D4</option>
                                         <option value="D5">D5</option><option value="D6">D6</option><option value="D7">D7</option>
@@ -555,6 +567,12 @@
                         <div class="la-ch-group" style="--ch-color:#4caf50">
                             <span class="la-ch-dot"></span>
                             <label class="serial-label">CH3: <select class="serial-select la-ch-select" data-ch="2">
+                                    <optgroup label="Protocol">
+                                        <option value="SCL">SCL (I2C)</option><option value="SDA">SDA (I2C)</option>
+                                        <option value="TX (D1)">TX (UART)</option><option value="RX (D0)">RX (UART)</option>
+                                        <option value="TX0 (GPIO1)">TX0 (ESP32)</option><option value="RX0 (GPIO3)">RX0 (ESP32)</option>
+                                        <option value="SCL (GPIO22)">SCL (ESP32)</option><option value="SDA (GPIO21)">SDA (ESP32)</option>
+                                    </optgroup>
                                     <optgroup label="Arduino Uno">
                                         <option value="D4" selected>D4</option><option value="D2">D2</option><option value="D3">D3</option>
                                         <option value="D5">D5</option><option value="D6">D6</option><option value="D7">D7</option>
@@ -579,6 +597,12 @@
                         <div class="la-ch-group" style="--ch-color:#ff5722">
                             <span class="la-ch-dot"></span>
                             <label class="serial-label">CH4: <select class="serial-select la-ch-select" data-ch="3">
+                                    <optgroup label="Protocol">
+                                        <option value="SCL">SCL (I2C)</option><option value="SDA">SDA (I2C)</option>
+                                        <option value="TX (D1)">TX (UART)</option><option value="RX (D0)">RX (UART)</option>
+                                        <option value="TX0 (GPIO1)">TX0 (ESP32)</option><option value="RX0 (GPIO3)">RX0 (ESP32)</option>
+                                        <option value="SCL (GPIO22)">SCL (ESP32)</option><option value="SDA (GPIO21)">SDA (ESP32)</option>
+                                    </optgroup>
                                     <optgroup label="Arduino Uno">
                                         <option value="D5" selected>D5</option><option value="D2">D2</option><option value="D3">D3</option>
                                         <option value="D4">D4</option><option value="D6">D6</option><option value="D7">D7</option>
@@ -600,8 +624,130 @@
                                     </optgroup>
                                 </select> </label>
                         </div>
+                        <div class="la-ch-group" style="--ch-color:#ab47bc">
+                            <span class="la-ch-dot"></span>
+                            <label class="serial-label">CH5: <select class="serial-select la-ch-select" data-ch="4">
+                                    <optgroup label="Protocol">
+                                        <option value="SCL">SCL (I2C)</option><option value="SDA">SDA (I2C)</option>
+                                        <option value="TX (D1)">TX (UART)</option><option value="RX (D0)">RX (UART)</option>
+                                        <option value="TX0 (GPIO1)">TX0 (ESP32)</option><option value="RX0 (GPIO3)">RX0 (ESP32)</option>
+                                        <option value="SCL (GPIO22)">SCL (ESP32)</option><option value="SDA (GPIO21)">SDA (ESP32)</option>
+                                    </optgroup>
+                                    <optgroup label="Arduino Uno">
+                                        <option value="D6" selected>D6</option><option value="D2">D2</option><option value="D3">D3</option>
+                                        <option value="D4">D4</option><option value="D5">D5</option><option value="D7">D7</option>
+                                        <option value="D8">D8</option><option value="D9">D9</option><option value="D10">D10</option>
+                                        <option value="D11">D11</option><option value="D12">D12</option><option value="D13">D13</option>
+                                        <option value="A0">A0</option><option value="A1">A1</option><option value="A2">A2</option>
+                                        <option value="A3">A3</option><option value="A4">A4</option><option value="A5">A5</option>
+                                    </optgroup>
+                                    <optgroup label="ESP32 GPIO">
+                                        <option value="GPIO0">GPIO0</option><option value="GPIO2">GPIO2</option><option value="GPIO4">GPIO4</option>
+                                        <option value="GPIO5">GPIO5</option><option value="GPIO12">GPIO12</option><option value="GPIO13">GPIO13</option>
+                                        <option value="GPIO14">GPIO14</option><option value="GPIO15">GPIO15</option><option value="GPIO16">GPIO16</option>
+                                        <option value="GPIO17">GPIO17</option><option value="GPIO18">GPIO18</option><option value="GPIO19">GPIO19</option>
+                                        <option value="GPIO21">GPIO21</option><option value="GPIO22">GPIO22</option><option value="GPIO23">GPIO23</option>
+                                        <option value="GPIO25">GPIO25</option><option value="GPIO26">GPIO26</option><option value="GPIO27">GPIO27</option>
+                                        <option value="GPIO32">GPIO32</option><option value="GPIO33">GPIO33</option>
+                                        <option value="GPIO34">GPIO34</option><option value="GPIO35">GPIO35</option>
+                                        <option value="GPIO36">GPIO36</option><option value="GPIO39">GPIO39</option>
+                                    </optgroup>
+                                </select> </label>
+                        </div>
+                        <div class="la-ch-group" style="--ch-color:#ffee33">
+                            <span class="la-ch-dot"></span>
+                            <label class="serial-label">CH6: <select class="serial-select la-ch-select" data-ch="5">
+                                    <optgroup label="Protocol">
+                                        <option value="SCL">SCL (I2C)</option><option value="SDA">SDA (I2C)</option>
+                                        <option value="TX (D1)">TX (UART)</option><option value="RX (D0)">RX (UART)</option>
+                                        <option value="TX0 (GPIO1)">TX0 (ESP32)</option><option value="RX0 (GPIO3)">RX0 (ESP32)</option>
+                                        <option value="SCL (GPIO22)">SCL (ESP32)</option><option value="SDA (GPIO21)">SDA (ESP32)</option>
+                                    </optgroup>
+                                    <optgroup label="Arduino Uno">
+                                        <option value="D7" selected>D7</option><option value="D2">D2</option><option value="D3">D3</option>
+                                        <option value="D4">D4</option><option value="D5">D5</option><option value="D6">D6</option>
+                                        <option value="D8">D8</option><option value="D9">D9</option><option value="D10">D10</option>
+                                        <option value="D11">D11</option><option value="D12">D12</option><option value="D13">D13</option>
+                                        <option value="A0">A0</option><option value="A1">A1</option><option value="A2">A2</option>
+                                        <option value="A3">A3</option><option value="A4">A4</option><option value="A5">A5</option>
+                                    </optgroup>
+                                    <optgroup label="ESP32 GPIO">
+                                        <option value="GPIO0">GPIO0</option><option value="GPIO2">GPIO2</option><option value="GPIO4">GPIO4</option>
+                                        <option value="GPIO5">GPIO5</option><option value="GPIO12">GPIO12</option><option value="GPIO13">GPIO13</option>
+                                        <option value="GPIO14">GPIO14</option><option value="GPIO15">GPIO15</option><option value="GPIO16">GPIO16</option>
+                                        <option value="GPIO17">GPIO17</option><option value="GPIO18">GPIO18</option><option value="GPIO19">GPIO19</option>
+                                        <option value="GPIO21">GPIO21</option><option value="GPIO22">GPIO22</option><option value="GPIO23">GPIO23</option>
+                                        <option value="GPIO25">GPIO25</option><option value="GPIO26">GPIO26</option><option value="GPIO27">GPIO27</option>
+                                        <option value="GPIO32">GPIO32</option><option value="GPIO33">GPIO33</option>
+                                        <option value="GPIO34">GPIO34</option><option value="GPIO35">GPIO35</option>
+                                        <option value="GPIO36">GPIO36</option><option value="GPIO39">GPIO39</option>
+                                    </optgroup>
+                                </select> </label>
+                        </div>
+                        <div class="la-ch-group" style="--ch-color:#e91e63">
+                            <span class="la-ch-dot"></span>
+                            <label class="serial-label">CH7: <select class="serial-select la-ch-select" data-ch="6">
+                                    <optgroup label="Protocol">
+                                        <option value="SCL">SCL (I2C)</option><option value="SDA">SDA (I2C)</option>
+                                        <option value="TX (D1)">TX (UART)</option><option value="RX (D0)">RX (UART)</option>
+                                        <option value="TX0 (GPIO1)">TX0 (ESP32)</option><option value="RX0 (GPIO3)">RX0 (ESP32)</option>
+                                        <option value="SCL (GPIO22)">SCL (ESP32)</option><option value="SDA (GPIO21)">SDA (ESP32)</option>
+                                    </optgroup>
+                                    <optgroup label="Arduino Uno">
+                                        <option value="D8" selected>D8</option><option value="D2">D2</option><option value="D3">D3</option>
+                                        <option value="D4">D4</option><option value="D5">D5</option><option value="D6">D6</option>
+                                        <option value="D7">D7</option><option value="D9">D9</option><option value="D10">D10</option>
+                                        <option value="D11">D11</option><option value="D12">D12</option><option value="D13">D13</option>
+                                        <option value="A0">A0</option><option value="A1">A1</option><option value="A2">A2</option>
+                                        <option value="A3">A3</option><option value="A4">A4</option><option value="A5">A5</option>
+                                    </optgroup>
+                                    <optgroup label="ESP32 GPIO">
+                                        <option value="GPIO0">GPIO0</option><option value="GPIO2">GPIO2</option><option value="GPIO4">GPIO4</option>
+                                        <option value="GPIO5">GPIO5</option><option value="GPIO12">GPIO12</option><option value="GPIO13">GPIO13</option>
+                                        <option value="GPIO14">GPIO14</option><option value="GPIO15">GPIO15</option><option value="GPIO16">GPIO16</option>
+                                        <option value="GPIO17">GPIO17</option><option value="GPIO18">GPIO18</option><option value="GPIO19">GPIO19</option>
+                                        <option value="GPIO21">GPIO21</option><option value="GPIO22">GPIO22</option><option value="GPIO23">GPIO23</option>
+                                        <option value="GPIO25">GPIO25</option><option value="GPIO26">GPIO26</option><option value="GPIO27">GPIO27</option>
+                                        <option value="GPIO32">GPIO32</option><option value="GPIO33">GPIO33</option>
+                                        <option value="GPIO34">GPIO34</option><option value="GPIO35">GPIO35</option>
+                                        <option value="GPIO36">GPIO36</option><option value="GPIO39">GPIO39</option>
+                                    </optgroup>
+                                </select> </label>
+                        </div>
+                        <div class="la-ch-group" style="--ch-color:#76ff03">
+                            <span class="la-ch-dot"></span>
+                            <label class="serial-label">CH8: <select class="serial-select la-ch-select" data-ch="7">
+                                    <optgroup label="Protocol">
+                                        <option value="SCL">SCL (I2C)</option><option value="SDA">SDA (I2C)</option>
+                                        <option value="TX (D1)">TX (UART)</option><option value="RX (D0)">RX (UART)</option>
+                                        <option value="TX0 (GPIO1)">TX0 (ESP32)</option><option value="RX0 (GPIO3)">RX0 (ESP32)</option>
+                                        <option value="SCL (GPIO22)">SCL (ESP32)</option><option value="SDA (GPIO21)">SDA (ESP32)</option>
+                                    </optgroup>
+                                    <optgroup label="Arduino Uno">
+                                        <option value="D13" selected>D13</option><option value="D2">D2</option><option value="D3">D3</option>
+                                        <option value="D4">D4</option><option value="D5">D5</option><option value="D6">D6</option>
+                                        <option value="D7">D7</option><option value="D8">D8</option><option value="D9">D9</option>
+                                        <option value="D10">D10</option><option value="D11">D11</option><option value="D12">D12</option>
+                                        <option value="A0">A0</option><option value="A1">A1</option><option value="A2">A2</option>
+                                        <option value="A3">A3</option><option value="A4">A4</option><option value="A5">A5</option>
+                                    </optgroup>
+                                    <optgroup label="ESP32 GPIO">
+                                        <option value="GPIO0">GPIO0</option><option value="GPIO2">GPIO2</option><option value="GPIO4">GPIO4</option>
+                                        <option value="GPIO5">GPIO5</option><option value="GPIO12">GPIO12</option><option value="GPIO13">GPIO13</option>
+                                        <option value="GPIO14">GPIO14</option><option value="GPIO15">GPIO15</option><option value="GPIO16">GPIO16</option>
+                                        <option value="GPIO17">GPIO17</option><option value="GPIO18">GPIO18</option><option value="GPIO19">GPIO19</option>
+                                        <option value="GPIO21">GPIO21</option><option value="GPIO22">GPIO22</option><option value="GPIO23">GPIO23</option>
+                                        <option value="GPIO25">GPIO25</option><option value="GPIO26">GPIO26</option><option value="GPIO27">GPIO27</option>
+                                        <option value="GPIO32">GPIO32</option><option value="GPIO33">GPIO33</option>
+                                        <option value="GPIO34">GPIO34</option><option value="GPIO35">GPIO35</option>
+                                        <option value="GPIO36">GPIO36</option><option value="GPIO39">GPIO39</option>
+                                    </optgroup>
+                                </select> </label>
+                        </div>
                     </div>
                     <div class="la-toolbar-row">
+                        <button class="serial-btn la-preset-btn" id="btn-la-i2c" title="Set CH1=SCL, CH2=SDA">I2C</button>
+                        <button class="serial-btn la-preset-btn" id="btn-la-uart" title="Set CH1=TX, CH2=RX">UART</button>
                         <label class="serial-label">Time/div: <select class="serial-select" id="la-timebase">
                                 <option value="50">50ms</option><option value="100">100ms</option>
                                 <option value="200" selected>200ms</option><option value="500">500ms</option>

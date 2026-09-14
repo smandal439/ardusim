@@ -266,6 +266,18 @@ class App {
         this.la?.setChannel(idx, e.target.value);
       });
     });
+    document.getElementById('btn-la-i2c')?.addEventListener('click', () => {
+      this.la?.setPreset('i2c');
+      const statusEl = document.getElementById('la-status');
+      if (statusEl) statusEl.textContent = 'I2C preset: SCL + SDA';
+      setTimeout(() => { if (statusEl) statusEl.textContent = 'Running'; }, 1500);
+    });
+    document.getElementById('btn-la-uart')?.addEventListener('click', () => {
+      this.la?.setPreset('uart');
+      const statusEl = document.getElementById('la-status');
+      if (statusEl) statusEl.textContent = 'UART preset: TX + RX';
+      setTimeout(() => { if (statusEl) statusEl.textContent = 'Running'; }, 1500);
+    });
 
     // Modal close
     document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', () => {
