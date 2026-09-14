@@ -1299,7 +1299,9 @@ void loop() {
     if (!result1 || !result1.ok) {
       this._setRunningState(false);
       this._updateCompileStatus('Board 1 compile failed');
-      this.output?.log('Board 1 compile failed — see the error message below', 'error');
+      const errMsg = result1 && result1.error ? result1.error : 'Unknown compile error';
+      this.output?.log('Board 1 compile failed:', 'error');
+      this.output?.log(errMsg, 'error');
       return;
     }
 
