@@ -1300,8 +1300,10 @@ void loop() {
       this._setRunningState(false);
       this._updateCompileStatus('Board 1 compile failed');
       const errMsg = result1 && result1.error ? result1.error : 'Unknown compile error';
+      const rawMsg = result1 && result1.rawError ? result1.rawError : '';
       this.output?.log('Board 1 compile failed:', 'error');
       this.output?.log(errMsg, 'error');
+      if (rawMsg && rawMsg !== errMsg) this.output?.log('Raw: ' + rawMsg, 'error');
       return;
     }
 

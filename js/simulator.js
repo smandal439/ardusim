@@ -1345,6 +1345,7 @@ class ArduinoSimulator {
       if (aIdx !== -1) this._a = vals[aIdx];
       return { ok: true, compiledJs: js };
     } catch (err) {
+      console.error('[ArduSim] compile error:', err);
       const friendly = this._friendlyError(err && err.message ? err.message : String(err), err);
       return { ok: false, error: friendly, rawError: err && err.message ? err.message : String(err) };
     }
