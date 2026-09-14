@@ -1205,6 +1205,8 @@ class ArduinoSimulator {
         let real = null;       // real MQTT.js client
         let realReady = false; // real broker connected
         const pendingSubs = new Set();
+        let customHost = null;
+        let customPort = null;
 
         const deliver = (topic, payload) => {
           if (!cb) return;
@@ -1221,7 +1223,23 @@ class ArduinoSimulator {
             return;
           }
           const cfg = window.ArduSimMQTT || {};
-          const url = cfg.url || 'wss://broker.hivemq.com:8884/mqtt';
+          let url = cfg.url;
+          if (!url) {
+            // Build URL from setServer() host/port
+            const host = customHost || 'broker.hivemq.com';
+            const port = customPort || 1883;
+            // If page is HTTPS, must use WSS (mixed-content blocks ws://)
+            const isSecure = window.location.protocol === 'https:';
+            let wsPort, scheme;
+            if (isSecure || port === 8884 || port === 8883) {
+              wsPort = 8884; scheme = 'wss';
+            } else if (port === 8084) {
+              wsPort = 8084; scheme = 'wss';
+            } else {
+              wsPort = 8000; scheme = 'ws';
+            }
+            url = `${scheme}://${host}:${wsPort}/mqtt`;
+          }
           self._mqttBrokerUrl = url;
           try {
             real = window.mqtt.connect(url, {
@@ -1263,6 +1281,8 @@ class ArduinoSimulator {
 
         return {
           setServer(host, port) {
+            customHost = host;
+            customPort = port;
             self._serialLog(`[MQTT] Broker ${host}:${port}\n`, 'system');
           },
           setCallback(callback) { cb = callback; },
@@ -1304,7 +1324,13 @@ class ArduinoSimulator {
           },
           publish(topic, payload) {
             const t = String(topic);
-            const msg = String(payload);
+            let msg;
+            if (Array.isArray(payload)) {
+              // char[] buffer — join chars and strip trailing null terminators
+              msg = payload.join('').replace(/\0+$/, '');
+            } else {
+              msg = String(payload);
+            }
             self._serialLog(`[MQTT] Publish "${t}" → ${msg}\n`, 'system');
             if (real) {
               try {
