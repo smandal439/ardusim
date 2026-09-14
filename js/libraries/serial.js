@@ -139,8 +139,39 @@ window.ArduinoLibs['Serial'] = {
       serialAvailable: function() { return self.serialInputBuffer.length; },
       serialWrite: function(val) { self._serialLog(String.fromCharCode(val), 'data'); },
       serialFlush: function() { },
-      serialParseInt: function() { return 0; },
-      serialParseFloat: function() { return 0.0; },
+      serialParseInt: function() {
+        var buf = self.serialInputBuffer;
+        var i = 0;
+        while (i < buf.length && !((buf[i] >= '0' && buf[i] <= '9') || buf[i] === '-' || buf[i] === '+')) i++;
+        if (i >= buf.length) return 0;
+        var start = i;
+        if (buf[i] === '-' || buf[i] === '+') i++;
+        while (i < buf.length && buf[i] >= '0' && buf[i] <= '9') i++;
+        var num = parseInt(self.serialInputBuffer.slice(start, i).join(''), 10);
+        self.serialInputBuffer = self.serialInputBuffer.slice(i);
+        return isNaN(num) ? 0 : num;
+      },
+      serialParseFloat: function() {
+        var buf = self.serialInputBuffer;
+        var i = 0;
+        while (i < buf.length && !((buf[i] >= '0' && buf[i] <= '9') || buf[i] === '-' || buf[i] === '+' || buf[i] === '.')) i++;
+        if (i >= buf.length) return 0.0;
+        var start = i;
+        if (buf[i] === '-' || buf[i] === '+') i++;
+        while (i < buf.length && buf[i] >= '0' && buf[i] <= '9') i++;
+        if (i < buf.length && buf[i] === '.') {
+          i++;
+          while (i < buf.length && buf[i] >= '0' && buf[i] <= '9') i++;
+        }
+        if (i < buf.length && (buf[i] === 'e' || buf[i] === 'E')) {
+          i++;
+          if (i < buf.length && (buf[i] === '+' || buf[i] === '-')) i++;
+          while (i < buf.length && buf[i] >= '0' && buf[i] <= '9') i++;
+        }
+        var num = parseFloat(self.serialInputBuffer.slice(start, i).join(''));
+        self.serialInputBuffer = self.serialInputBuffer.slice(i);
+        return isNaN(num) ? 0.0 : num;
+      },
       serialPeek: function() {
         return self.serialInputBuffer.length > 0 ? self.serialInputBuffer[0].charCodeAt(0) : -1;
       },
