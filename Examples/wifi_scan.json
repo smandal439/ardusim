@@ -2,10 +2,12 @@
   "id": "wifi_scan",
   "name": "wifi scan",
   "icon": "🔧",
-  "desc": "A custom wifi scan circuit example.",
+  "desc": "This example demonstrates how to scan for available WiFi networks using an ESP32. The code initializes the WiFi in station mode, performs a scan, and prints the SSID, RSSI, channel, and encryption type of each detected network to the serial monitor.",
   "tags": [
-    "custom",
-    "circuit"
+    "wifi",
+    "scan",
+    "esp32",
+    "network"
   ],
   "circuit": {
     "components": [

@@ -1,11 +1,13 @@
 {
-  "id": "bssid",
+  "id": "wifi_bssid",
   "name": "BSSID",
   "icon": "🔧",
-  "desc": "A custom BSSID circuit example.",
+  "desc": "This example demonstrates how to scan for available WiFi networks using an ESP32 and print the BSSID (MAC address) of each detected network to the serial monitor. The code initializes the WiFi in station mode, performs a scan, and displays the SSID, BSSID, RSSI, and channel of each network.",
   "tags": [
-    "custom",
-    "circuit"
+    "wifi",
+    "bssid",
+    "esp32",
+    "network"
   ],
   "circuit": {
     "components": [
