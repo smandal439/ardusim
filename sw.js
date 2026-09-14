@@ -83,6 +83,7 @@ const STATIC_ASSETS = [
   'js/libraries/sevensegment.js',
   'js/libraries/cpp_types.js',
   'js/libraries/ds3231.js',
+  'js/libraries/hx711.js',
   'js/libraries/freertos.js',
   'favicon.ico',
 ].map(p => BASE + p);
