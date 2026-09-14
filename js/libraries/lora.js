@@ -20,8 +20,12 @@ window.ArduinoLibs['LoRa'] = {
   includes: ['<LoRa.h>'],
 
   transpile: [
+    // LoRa.setPins(ssPin, rstPin, dio0Pin) → (no-op, simulated SPI)
+    [/\bLoRa\.setPins\s*\([^)]*\)/g, '/* LoRa.setPins() - simulated */'],
+
     // LoRa.begin(freq) → _a.loraBegin(freq)
-    [/\bLoRa\.begin\s*\(\s*(\d+(?:\.\d+)?)\s*\)/g, '_a.loraBegin($1)'],
+    // Also handles scientific notation like 868E6, 915E6
+    [/\bLoRa\.begin\s*\(\s*(\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*\)/g, '_a.loraBegin($1)'],
 
     // LoRa.setSpreadingFactor(sf) → _a.loraSetSpreadingFactor(sf)
     [/\bLoRa\.setSpreadingFactor\s*\(\s*(\d+)\s*\)/g, '_a.loraSetSpreadingFactor($1)'],
