@@ -71,7 +71,24 @@
         "rotation": 0
       }
     ],
-    "wires": []
+    "wires": [
+      {"id":"w_sck1","from":{"instId":"lora1","pinId":"SCK"},"to":{"instId":"sender","pinId":"D13"},"color":"#00bcd4","waypoints":[]},
+      {"id":"w_miso1","from":{"instId":"lora1","pinId":"MISO"},"to":{"instId":"sender","pinId":"D12"},"color":"#4caf50","waypoints":[]},
+      {"id":"w_mosi1","from":{"instId":"lora1","pinId":"MOSI"},"to":{"instId":"sender","pinId":"D11"},"color":"#ff9800","waypoints":[]},
+      {"id":"w_nss1","from":{"instId":"lora1","pinId":"NSS"},"to":{"instId":"sender","pinId":"D10"},"color":"#e91e63","waypoints":[]},
+      {"id":"w_dio1","from":{"instId":"lora1","pinId":"DIO0"},"to":{"instId":"sender","pinId":"D2"},"color":"#9c27b0","waypoints":[]},
+      {"id":"w_rst1","from":{"instId":"lora1","pinId":"RST"},"to":{"instId":"sender","pinId":"D9"},"color":"#f44336","waypoints":[]},
+      {"id":"w_3v3_1","from":{"instId":"lora1","pinId":"3V3"},"to":{"instId":"sender","pinId":"3V3"},"color":"#f44336","waypoints":[]},
+      {"id":"w_gnd1","from":{"instId":"lora1","pinId":"GND"},"to":{"instId":"sender","pinId":"GND1"},"color":"#333333","waypoints":[]},
+      {"id":"w_sck2","from":{"instId":"lora2","pinId":"SCK"},"to":{"instId":"receiver","pinId":"D13"},"color":"#00bcd4","waypoints":[]},
+      {"id":"w_miso2","from":{"instId":"lora2","pinId":"MISO"},"to":{"instId":"receiver","pinId":"D12"},"color":"#4caf50","waypoints":[]},
+      {"id":"w_mosi2","from":{"instId":"lora2","pinId":"MOSI"},"to":{"instId":"receiver","pinId":"D11"},"color":"#ff9800","waypoints":[]},
+      {"id":"w_nss2","from":{"instId":"lora2","pinId":"NSS"},"to":{"instId":"receiver","pinId":"D10"},"color":"#e91e63","waypoints":[]},
+      {"id":"w_dio2","from":{"instId":"lora2","pinId":"DIO0"},"to":{"instId":"receiver","pinId":"D2"},"color":"#9c27b0","waypoints":[]},
+      {"id":"w_rst2","from":{"instId":"lora2","pinId":"RST"},"to":{"instId":"receiver","pinId":"D9"},"color":"#f44336","waypoints":[]},
+      {"id":"w_3v3_2","from":{"instId":"lora2","pinId":"3V3"},"to":{"instId":"receiver","pinId":"3V3"},"color":"#f44336","waypoints":[]},
+      {"id":"w_gnd2","from":{"instId":"lora2","pinId":"GND"},"to":{"instId":"receiver","pinId":"GND1"},"color":"#333333","waypoints":[]}
+    ]
   },
   "code": "/*\n * LoRa Sender — Board 1\n * Sends a counter message every 2 seconds\n * Uses LoRa.h library with SX1276/RFM95W module\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n\n#define SS_PIN   10\n#define RST_PIN  9\n#define DIO0_PIN 2\n\nint counter = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"LoRa Sender Starting...\");\n\n  LoRa.setPins(SS_PIN, RST_PIN, DIO0_PIN);\n\n  if (!LoRa.begin(868E6)) {\n    Serial.println(\"LoRa init failed!\");\n    while (1);\n  }\n\n  LoRa.setSpreadingFactor(7);\n  LoRa.setSignalBandwidth(125000);\n  LoRa.setCodingRate4(5);\n  LoRa.setTxPower(14);\n  LoRa.setSyncWord(0x12);\n  LoRa.enableCrc();\n\n  Serial.println(\"LoRa Sender ready!\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  counter++;\n\n  Serial.print(\"Sending packet #\");\n  Serial.println(counter);\n\n  LoRa.beginPacket();\n  LoRa.print(\"Hello #\");\n  LoRa.print(counter);\n  LoRa.endPacket();\n\n  Serial.println(\"Packet sent!\");\n  Serial.println(\"---\");\n\n  delay(2000);\n}",
   "board2Code": "/*\n * LoRa Receiver — Board 2\n * Receives packets from the Sender board\n * Displays message content and RSSI/SNR on Serial Monitor\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n\n#define SS_PIN   10\n#define RST_PIN  9\n#define DIO0_PIN 2\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"LoRa Receiver Starting...\");\n\n  LoRa.setPins(SS_PIN, RST_PIN, DIO0_PIN);\n\n  if (!LoRa.begin(868E6)) {\n    Serial.println(\"LoRa init failed!\");\n    while (1);\n  }\n\n  LoRa.setSpreadingFactor(7);\n  LoRa.setSignalBandwidth(125000);\n  LoRa.setCodingRate4(5);\n  LoRa.setSyncWord(0x12);\n  LoRa.enableCrc();\n\n  Serial.println(\"LoRa Receiver ready — waiting for packets...\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  int packetSize = LoRa.parsePacket();\n\n  if (packetSize) {\n    Serial.print(\"Received packet: \");\n\n    String message = \"\";\n    while (LoRa.available()) {\n      message += (char)LoRa.read();\n    }\n    Serial.println(message);\n\n    int rssi = LoRa.packetRssi();\n    float snr = LoRa.packetSnr();\n\n    Serial.print(\"RSSI: \");\n    Serial.print(rssi);\n    Serial.println(\" dBm\");\n\n    Serial.print(\"SNR: \");\n    Serial.print(snr);\n    Serial.println(\" dB\");\n\n    Serial.println(\"---\");\n  }\n}"
