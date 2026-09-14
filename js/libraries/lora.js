@@ -42,8 +42,8 @@ window.ArduinoLibs['LoRa'] = {
     // LoRa.setPreambleLength(len) → _a.loraSetPreambleLength(len)
     [/\bLoRa\.setPreambleLength\s*\(\s*(\d+)\s*\)/g, '_a.loraSetPreambleLength($1)'],
 
-    // LoRa.setSyncWord(word) → _a.loraSetSyncWord(word)
-    [/\bLoRa\.setSyncWord\s*\(\s*(\d+)\s*\)/g, '_a.loraSetSyncWord($1)'],
+    // LoRa.setSyncWord(word) → _a.loraSetSyncWord(word) — accepts decimal and hex (0x12)
+    [/\bLoRa\.setSyncWord\s*\(\s*(0[xX][0-9a-fA-F]+|\d+)\s*\)/g, '_a.loraSetSyncWord($1)'],
 
     // LoRa.enableCrc() → _a.loraEnableCrc()
     [/\bLoRa\.enableCrc\s*\(\s*\)/g, '_a.loraEnableCrc()'],

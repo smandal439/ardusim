@@ -33,6 +33,8 @@ window.ArduinoLibs['Serial'] = {
     [/\bSerial\.readBytes\s*\(/g, '_a.serialReadBytes('],
     [/\bSerial\.readBytesUntil\s*\(/g, '_a.serialReadBytesUntil('],
     [/\bSerial\.readLine\s*\(/g, '_a.serialReadLine('],
+    // while (!Serial); → no-op (Serial is always available in simulation)
+    [/while\s*\(\s*!Serial\s*\)\s*;/g, '/* while(!Serial) */'],
     // Also handle Serial1, Serial2 (ESP32 additional UARTs)
     [/\bSerial1\.begin\s*\(/g, '_a.serial1Begin('],
     [/\bSerial1\.print\s*\(/g, '_a.serial1Print('],
