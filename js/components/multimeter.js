@@ -6,7 +6,7 @@
 
 defComp({
   id: 'multimeter',
-  name: 'Digital Multimeter',
+  name: 'Digital Multimeter (DMM)',
   category: 'Instruments',
   icon: '🎛️',
   desc: 'True-RMS 6000-count digital multimeter with fast analog bar graph, continuity beeper, diode test, and auto-ranging',
