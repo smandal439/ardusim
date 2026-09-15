@@ -2065,6 +2065,112 @@ void loop() {
     code: '// Oscilloscope is a measurement instrument — no Arduino code needed.',
   },
 
+  /* ── NEW COMPONENTS ── */
+  bh1750: {
+    id: 'bh1750',
+    name: 'BH1750 Light Sensor',
+    icon: '☀',
+    category: 'Sensors',
+    longDesc: 'BH1750 ambient light intensity sensor module using I2C communication at address 0x23. Digital output in lux (1–65535 lx). Used in automatic lighting systems, weather stations, and light-sensitive projects.',
+    use: 'Automatic lighting, brightness control, environmental monitoring.',
+    pins: {
+      vcc: { label: 'VCC', type: 'power', desc: '3.3V–5V power supply.' },
+      gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock — connect to A5 (Uno) / D22 (ESP32).' },
+      sda: { label: 'SDA', type: 'digital', desc: 'I2C data — connect to A4 (Uno) / D21 (ESP32).' },
+    },
+    wiring: 'VCC→5V, GND→GND, SDA→A4, SCL→A5.',
+    code: `#include <Wire.h>\n#include <BH1750.h>\nBH1750 lightMeter;\nvoid setup(){\n  Wire.begin();\n  lightMeter.begin();\n  Serial.begin(9600);\n}\nvoid loop(){\n  float lux = lightMeter.readLightLevel();\n  Serial.print("Lux: ");\n  Serial.println(lux);\n  delay(1000);\n}`,
+  },
+
+  ina219: {
+    id: 'ina219',
+    name: 'INA219 Power Monitor',
+    icon: '⚡',
+    category: 'Sensors',
+    longDesc: 'INA219 bidirectional current and power monitor module using I2C at address 0x40. Measures bus voltage (0–26V), shunt voltage, current (up to 3.2A), and power.',
+    use: 'Battery monitoring, power consumption analysis, solar projects.',
+    pins: {
+      vcc: { label: 'VCC', type: 'power', desc: '3.3V–5V power supply.' },
+      gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock — connect to A5 (Uno) / D22 (ESP32).' },
+      sda: { label: 'SDA', type: 'digital', desc: 'I2C data — connect to A4 (Uno) / D21 (ESP32).' },
+    },
+    wiring: 'VCC→5V, GND→GND, SDA→A4, SCL→A5.',
+    code: `#include <Wire.h>\n#include <Adafruit_INA219.h>\nAdafruit_INA219 ina219;\nvoid setup(){\n  Serial.begin(9600);\n  ina219.begin();\n}\nvoid loop(){\n  float busVoltage = ina219.getBusVoltage_V();\n  float current = ina219.getCurrent_mA();\n  float power = ina219.getPower_mW();\n  Serial.print("V: "); Serial.print(busVoltage);\n  Serial.print(" I: "); Serial.print(current);\n  Serial.print("mA P: "); Serial.print(power);\n  Serial.println("mW");\n  delay(1000);\n}`,
+  },
+
+  max6675: {
+    id: 'max6675',
+    name: 'MAX6675 Thermocouple',
+    icon: '🔥',
+    category: 'Sensors',
+    longDesc: 'MAX6675 K-type thermocouple-to-digital converter using SPI. Measures 0–1024 °C with 0.25 °C resolution.',
+    use: 'High-temperature measurement, oven control, industrial sensing.',
+    pins: {
+      vcc: { label: 'VCC', type: 'power', desc: '5V power supply.' },
+      gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+      cs: { label: 'CS', type: 'digital', desc: 'Chip select — any digital pin.' },
+      clk: { label: 'CLK', type: 'digital', desc: 'SPI clock — D13 (Uno).' },
+      do: { label: 'DO', type: 'digital', desc: 'SPI data out — D12 (Uno).' },
+    },
+    wiring: 'VCC→5V, GND→GND, CS→D10, CLK→D13, DO→D12.',
+    code: `#include <max6675.h>\nint thermoDO = 12;\nint thermoCS = 10;\nint thermoCLK = 13;\nMAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);\nvoid setup(){\n  Serial.begin(9600);\n}\nvoid loop(){\n  Serial.print("C = ");\n  Serial.println(thermocouple.readCelsius());\n  delay(1000);\n}`,
+  },
+
+  u8g2_oled: {
+    id: 'u8g2_oled',
+    name: 'U8g2 OLED Display',
+    icon: '🖥',
+    category: 'Output',
+    longDesc: 'Monochrome OLED display (128x64 SSD1306/SH1106) controlled via U8g2 library. Supports I2C and SPI.',
+    use: 'Dashboards, status displays, small UI screens.',
+    pins: {
+      vcc: { label: 'VCC', type: 'power', desc: '3.3V / 5V power.' },
+      gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock — connect to A5 (Uno) / D22 (ESP32).' },
+      sda: { label: 'SDA', type: 'digital', desc: 'I2C data — connect to A4 (Uno) / D21 (ESP32).' },
+    },
+    wiring: 'VCC→5V, GND→GND, SDA→A4, SCL→A5.',
+    code: `#include <U8g2lib.h>\nU8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0);\nvoid setup(){\n  u8g2.begin();\n}\nvoid loop(){\n  u8g2.clearBuffer();\n  u8g2.setFont(u8g2_font_ncenB08_tr);\n  u8g2.drawStr(0, 15, "Hello U8g2!");\n  u8g2.sendBuffer();\n  delay(1000);\n}`,
+  },
+
+  tft_display: {
+    id: 'tft_display',
+    name: 'TFT_eSPI Display',
+    icon: '🖥',
+    category: 'Output',
+    longDesc: 'Color TFT display (ILI9341/ST7789, 240x320) controlled via TFT_eSPI library. SPI with high-speed rendering.',
+    use: 'GUIs, graphs, video output, touch interfaces.',
+    pins: {
+      vcc: { label: 'VCC', type: 'power', desc: '3.3V power supply.' },
+      gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+      sck: { label: 'SCK', type: 'digital', desc: 'SPI clock — D13 (Uno).' },
+      mosi: { label: 'MOSI', type: 'digital', desc: 'SPI data — D11 (Uno).' },
+      cs: { label: 'CS', type: 'digital', desc: 'Chip select — D10 (Uno).' },
+    },
+    wiring: 'VCC→3.3V, GND→GND, SCK→D13, MOSI→D11, CS→D10.',
+    code: `#include <TFT_eSPI.h>\nTFT_eSPI tft = TFT_eSPI();\nvoid setup(){\n  tft.init();\n  tft.setRotation(1);\n  tft.fillScreen(TFT_BLACK);\n  tft.setTextColor(TFT_WHITE, TFT_BLACK);\n  tft.setTextSize(2);\n}\nvoid loop(){\n  tft.setCursor(10, 10);\n  tft.println("Hello TFT!");\n  delay(1000);\n}`,
+  },
+
+  sd_card: {
+    id: 'sd_card',
+    name: 'SD Card Module',
+    icon: '💾',
+    category: 'Communication',
+    longDesc: 'SD card reader/writer module using SPI interface. Supports FAT16/FAT32 file systems on micro SD cards up to 32GB.',
+    use: 'Data logging, file storage, configuration backup.',
+    pins: {
+      vcc: { label: 'VCC', type: 'power', desc: '5V power supply.' },
+      gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+      miso: { label: 'MISO', type: 'digital', desc: 'SPI master in slave out — D12 (Uno).' },
+      mosi: { label: 'MOSI', type: 'digital', desc: 'SPI master out slave in — D11 (Uno).' },
+      sck: { label: 'SCK', type: 'digital', desc: 'SPI clock — D13 (Uno).' },
+      cs: { label: 'CS', type: 'digital', desc: 'Chip select — D10 (Uno).' },
+    },
+    wiring: 'VCC→5V, GND→GND, CS→D10, MOSI→D11, MISO→D12, SCK→D13.',
+    code: `#include <SD.h>\n#include <SPI.h>\n#define CS_PIN 10\nvoid setup(){\n  Serial.begin(9600);\n  if(!SD.begin(CS_PIN)){\n    Serial.println("SD init failed!");\n    return;\n  }\n  Serial.println("SD initialized.");\n  File f = SD.open("test.txt", FILE_WRITE);\n  if(f){\n    f.println("Hello SD!");\n    f.close();\n  }\n}\nvoid loop(){}`,
+  },
 };
 
 /* ═══════════════════════════════════════════════════════════════
