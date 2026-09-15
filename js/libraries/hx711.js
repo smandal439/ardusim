@@ -3,7 +3,7 @@
  *
  * Supports the bogde/HX711 Arduino library.
  * Transpiles HX711 constructor and method calls to runtime reads
- * from the placed hx711 component's interactive weight slider.
+ * from the connected load cell via the hx711 component.
  *
  * Typical Arduino code:
  *   #include "HX711.h"
@@ -36,7 +36,11 @@ window.ArduinoLibs['HX711'] = {
       begin: function () { },
       is_ready: function () { return true; },
 
-      set_scale: function (factor) { _scale = factor || 1.0; },
+      set_scale: function (factor) {
+        _scale = factor || 1.0;
+        var inst = _findHx711();
+        if (inst && inst.runtimeState) inst.runtimeState._scale = _scale;
+      },
       get_scale: function () { return _scale; },
 
       set_offset: function (off) { _offset = off || 0; },

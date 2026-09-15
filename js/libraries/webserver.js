@@ -37,6 +37,30 @@ window.ArduinoLibs['WebServer'] = {
         } else {
           self._serialLog('[WebServer] on("' + path + '"): handler is not a function - route ignored\n', 'system');
         }
+        if (!cfg._triggerRoute) {
+          cfg._triggerRoute = function(targetPath) {
+            for (var i = 0; i < cfg.routes.length; i++) {
+              if (cfg.routes[i].path === targetPath) {
+                var route = cfg.routes[i];
+                self._webResp = null;
+                Promise.resolve()
+                  .then(function() { return route.handler(); })
+                  .then(function() {
+                    var resp = self._webResp || { code: 200, type: 'text/plain', content: '' };
+                    self._serialLog('[WebServer] Triggered: ' + route.method + ' ' + route.path + ' -> ' + resp.code + '\n', 'system');
+                    if (resp.type.indexOf('html') !== -1 && resp.content && self._emitWebPage) {
+                      self._emitWebPage({ code: resp.code, type: resp.type, content: resp.content, url: route.path, method: route.method });
+                    }
+                  })
+                  .catch(function(e) {
+                    self._serialLog('[WebServer] Trigger error (' + route.path + '): ' + (e && e.message ? e.message : e) + '\n', 'system');
+                  });
+                return;
+              }
+            }
+            self._serialLog('[WebServer] Route not found: ' + targetPath + '\n', 'system');
+          };
+        }
       },
       serverSend: function(server, code, type, content) {
         self._webResp = { code: Number(code) || 200, type: String(type || ''), content: String(content || '') };
@@ -48,14 +72,16 @@ window.ArduinoLibs['WebServer'] = {
         var now = Date.now();
         if (now - (cfg.lastHit || 0) < 1500) return;
         cfg.lastHit = now;
-        var route = cfg.routes[cfg.reqIdx = ((cfg.reqIdx || 0) % cfg.routes.length)];
-        cfg.reqIdx++;
+        var route = cfg.routes[0];
         self._webResp = null;
         Promise.resolve()
           .then(function() { return route.handler(); })
           .then(function() {
             var resp = self._webResp || { code: 200, type: 'text/html', content: '' };
             self._serialLog('[WebServer] ' + route.method + ' ' + route.path + ' -> ' + resp.code + ' (' + resp.type + ')\n', 'system');
+            if (resp.type.indexOf('html') !== -1 && resp.content && self._emitWebPage) {
+              self._emitWebPage({ code: resp.code, type: resp.type, content: resp.content, url: route.path, method: route.method });
+            }
           })
           .catch(function(e) {
             self._serialLog('[WebServer] ' + route.method + ' ' + route.path + ' handler error: ' + (e && e.message ? e.message : e) + '\n', 'system');

@@ -409,7 +409,11 @@
                     height="13" viewBox="0 0 16 16" fill="currentColor">
                     <path
                         d="M8.235.055a.498.498 0 0 0-.47 0l-7.5 4A.5.5 0 0 0 0 4.5v7a.5.5 0 0 0 .265.445l7.5 4a.498.498 0 0 0 .47 0l7.5-4A.5.5 0 0 0 16 11.5v-7a.5.5 0 0 0-.265-.445z" />
-                </svg> Pin Monitor </button>
+                </svg> Pin Monitor </button> <button class="btm-tab" id="tab-webbrowser" data-tab="webbrowser"> <svg
+                    width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7.5-6.923c-.67.204-1.335.82-1.887 1.855A8 8 0 0 0 1 8c0 .313.04.618.113.912.552 1.035 1.217 1.65 1.887 1.855V15a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm2-1a1 1 0 0 0-1 1v.937l.001.002.06.033A1 1 0 0 0 2 13v.937l-.001.002-.06.033A8 8 0 0 0 8 16a8 8 0 0 0 5.938-2.033l-.06-.033V13a1 1 0 0 0 1-1V4.661l-.001-.002-.06-.033A1 1 0 0 0 13 4V3.346l-.001-.002-.06-.033A8 8 0 0 0 8 1a8 8 0 0 0-5.938 2.033l.06.033V3a1 1 0 0 0-1 1" />
+                </svg> Web Browser </button>
             <div class="btm-tab-spacer"></div> <button class="btm-panel-toggle" id="btn-toggle-bottom"
                 title="Toggle Bottom Panel"> <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"
                     id="bottom-toggle-icon">
@@ -768,6 +772,16 @@
             </div> <!-- Pin Monitor -->
             <div class="tab-pane" id="pane-pins">
                 <div class="pin-monitor-grid" id="pin-monitor-grid"> <!-- Rendered by JS --> </div>
+            </div> <!-- Web Browser -->
+            <div class="tab-pane" id="pane-webbrowser">
+                <div class="webbrowser-toolbar">
+                    <span class="webbrowser-label">URL:</span>
+                    <input type="text" class="webbrowser-url" id="webbrowser-url" readonly value="about:blank" />
+                    <span class="webbrowser-status" id="webbrowser-status">No response</span>
+                    <button class="serial-btn" id="btn-webbrowser-refresh" title="Refresh">↻</button>
+                    <button class="serial-btn" id="btn-webbrowser-clear" title="Clear">Clear</button>
+                </div>
+                <iframe id="webbrowser-iframe" sandbox="allow-same-origin" src="about:blank"></iframe>
             </div>
         </div>
     </div> <!-- ════════════════════════ MODALS ══════════════════════════ -->
@@ -1270,6 +1284,7 @@
     <script src="js/oscilloscope.js?v=20260825-1"></script>
     <script src="js/logic-analyzer.js?v=20260823-1"></script>
     <script src="js/plotter.js?v=20260825-1"></script>
+    <script src="js/web-browser.js?v=20260915-1"></script>
     <script src="js/api.js?v=20260825-2"></script>
     <script src="js/storage.js?v=20260904-1"></script>
     <script src="js/editor.js?v=20260826-4"></script>

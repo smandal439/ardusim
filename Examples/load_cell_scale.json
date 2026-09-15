@@ -2,7 +2,7 @@
   "id": "load_cell_scale",
   "name": "Load Cell Weight Scale",
   "icon": "⚖️",
-  "desc": "Read weight from a 5 kg load cell via HX711 amplifier and display on Serial",
+  "desc": "Read weight from a 5 kg load cell via HX711 amplifier. Wire load cell E+/E-/A+/A- to HX711 inputs, HX711 DT/SCK to Arduino digital pins.",
   "tags": ["intermediate", "sensor", "load cell", "hx711", "weight"],
   "code": "#include \"HX711.h\"\n\nconst int HX711_DT  = 3;\nconst int HX711_SCK = 2;\n\nHX711 scale(HX711_DT, HX711_SCK);\n\nfloat calibration_factor = 2280.0;\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Load Cell Weight Scale\");\n  Serial.println(\"======================\");\n  Serial.println(\"Tareing...\");\n\n  scale.set_scale(calibration_factor);\n  scale.tare();\n\n  Serial.println(\"Place known weight to calibrate.\");\n}\n\nvoid loop() {\n  float weight = scale.get_units(10);\n\n  if (weight < 0) weight = 0;\n\n  Serial.print(\"Weight: \");\n  Serial.print(weight, 2);\n  Serial.println(\" kg\");\n\n  delay(300);\n}",
   "circuit": {
@@ -10,8 +10,8 @@
       {
         "id": "comp_uno_scale",
         "type": "arduino_uno",
-        "x": -75,
-        "y": -25,
+        "x": 100,
+        "y": 100,
         "width": 230,
         "height": 150,
         "props": { "label": "UNO" },
@@ -22,11 +22,11 @@
       {
         "id": "comp_hx711",
         "type": "hx711",
-        "x": 250,
-        "y": -50,
-        "width": 80,
-        "height": 80,
-        "props": { "label": "HX711" },
+        "x": 420,
+        "y": 140,
+        "width": 72,
+        "height": 98,
+        "props": {},
         "runtimeState": {},
         "selected": false,
         "rotation": 0
@@ -34,11 +34,11 @@
       {
         "id": "comp_loadcell",
         "type": "load_cell",
-        "x": 390,
-        "y": -25,
+        "x": 540,
+        "y": 155,
         "width": 100,
         "height": 50,
-        "props": { "weight": 0, "capacity": 5 },
+        "props": { "weight": 2.5, "capacity": 5 },
         "runtimeState": {},
         "selected": false,
         "rotation": 0

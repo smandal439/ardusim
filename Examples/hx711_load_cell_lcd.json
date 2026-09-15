@@ -1,0 +1,146 @@
+{
+  "id": "hx711_load_cell_lcd",
+  "name": "HX711 Load Cell with LCD Display",
+  "icon": "⚖️",
+  "desc": "Digital weighing scale using HX711 + Load Cell + Arduino + LCD1602 I2C. Displays weight in grams on LCD. Wire load cell to HX711, HX711 to Arduino, LCD via I2C.",
+  "tags": ["intermediate", "hx711", "load_cell", "weight", "lcd", "i2c", "scale"],
+  "code": "#include \"HX711.h\"\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\n// HX711 pins\nconst int HX711_DT  = 3;\nconst int HX711_SCK = 2;\n\nHX711 scale(HX711_DT, HX711_SCK);\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nfloat calibration_factor = 2280.0;\nfloat weight = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"Digital Scale\");\n  lcd.setCursor(0, 1);\n  lcd.print(\"Calibrating...\");\n\n  scale.set_scale(calibration_factor);\n  scale.tare();\n\n  delay(1000);\n  lcd.clear();\n  lcd.setCursor(0, 0);\n  lcd.print(\"Weight:\");\n}\n\nvoid loop() {\n  weight = scale.get_units(5);\n  if (weight < 0) weight = 0;\n\n  lcd.setCursor(0, 1);\n  lcd.print(\"                \");\n  lcd.setCursor(0, 1);\n  lcd.print(weight, 1);\n  lcd.print(\" g\");\n\n  Serial.print(\"Weight: \");\n  Serial.print(weight, 1);\n  Serial.println(\" g\");\n\n  delay(300);\n}",
+  "circuit": {
+    "components": [
+      {
+        "id": "uno",
+        "type": "arduino_uno",
+        "x": 50,
+        "y": 80,
+        "width": 230,
+        "height": 150,
+        "props": { "label": "UNO" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "hx1",
+        "type": "hx711",
+        "x": 380,
+        "y": 120,
+        "width": 72,
+        "height": 98,
+        "props": {},
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "lc1",
+        "type": "load_cell",
+        "x": 500,
+        "y": 135,
+        "width": 100,
+        "height": 50,
+        "props": { "weight": 250, "capacity": 5000, "sensitivity": 2 },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "lcd1",
+        "type": "lcd_i2c",
+        "x": 350,
+        "y": 320,
+        "width": 160,
+        "height": 60,
+        "props": { "address": "0x27", "cols": 16, "rows": 2 },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": { "instId": "lc1", "pinId": "E+" },
+        "to": { "instId": "hx1", "pinId": "E+" },
+        "color": "#F44336",
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": { "instId": "lc1", "pinId": "E-" },
+        "to": { "instId": "hx1", "pinId": "E-" },
+        "color": "#212121",
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": { "instId": "lc1", "pinId": "A+" },
+        "to": { "instId": "hx1", "pinId": "A+" },
+        "color": "#1565C0",
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": { "instId": "lc1", "pinId": "A-" },
+        "to": { "instId": "hx1", "pinId": "A-" },
+        "color": "#FFFFFF",
+        "waypoints": []
+      },
+      {
+        "id": "w5",
+        "from": { "instId": "uno", "pinId": "5V" },
+        "to": { "instId": "hx1", "pinId": "VCC" },
+        "color": "#F44336",
+        "waypoints": []
+      },
+      {
+        "id": "w6",
+        "from": { "instId": "hx1", "pinId": "GND" },
+        "to": { "instId": "uno", "pinId": "GND1" },
+        "color": "#424242",
+        "waypoints": []
+      },
+      {
+        "id": "w7",
+        "from": { "instId": "hx1", "pinId": "DT" },
+        "to": { "instId": "uno", "pinId": "D3" },
+        "color": "#4CAF50",
+        "waypoints": []
+      },
+      {
+        "id": "w8",
+        "from": { "instId": "hx1", "pinId": "SCK" },
+        "to": { "instId": "uno", "pinId": "D2" },
+        "color": "#FF9800",
+        "waypoints": []
+      },
+      {
+        "id": "w9",
+        "from": { "instId": "uno", "pinId": "A4" },
+        "to": { "instId": "lcd1", "pinId": "SDA" },
+        "color": "#2196F3",
+        "waypoints": []
+      },
+      {
+        "id": "w10",
+        "from": { "instId": "uno", "pinId": "A5" },
+        "to": { "instId": "lcd1", "pinId": "SCL" },
+        "color": "#9C27B0",
+        "waypoints": []
+      },
+      {
+        "id": "w11",
+        "from": { "instId": "uno", "pinId": "5V2" },
+        "to": { "instId": "lcd1", "pinId": "VCC" },
+        "color": "#F44336",
+        "waypoints": []
+      },
+      {
+        "id": "w12",
+        "from": { "instId": "lcd1", "pinId": "GND" },
+        "to": { "instId": "uno", "pinId": "GND2" },
+        "color": "#424242",
+        "waypoints": []
+      }
+    ]
+  }
+}

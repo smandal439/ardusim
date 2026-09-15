@@ -19,6 +19,7 @@ class ArduinoSimulator {
     this._loopAbortController = null;
     this._loopPromise = null;
     this.onSerial = null;  // callback(text, type)
+    this.onWebPage = null;  // callback({code, type, content, url, method})
     this.onStart = null;  // callback() — fired when the simulation loop actually starts
     this.onPinChange = null;  // callback(pinKey, value)
     this.onError = null;  // callback(err)
@@ -2030,6 +2031,14 @@ class ArduinoSimulator {
     if (this.onEvent) this.onEvent(type, data);
   }
 
+  _emitWebPage(resp) {
+    if (this.onWebPage) this.onWebPage(resp);
+  }
+
+  _emitWebNavigate(path) {
+    if (this.onWebNavigate) this.onWebNavigate(path);
+  }
+
   /* Get human-readable pin name */
   static pinLabel(key) {
     if (!key.startsWith('pin_')) return key;
@@ -2143,32 +2152,29 @@ window.loadExamplesFromFiles = async function () {
   } catch (e) { /* static hosting uses the bundled fallback list */ }
 
   const files = [
-    '7408_test_with_logic_analyzer', 'and_gate', 'astable_555', 'blink', 'bluetooth_serial_bridge', 'bme280_weather',
-    'bmp280_altitude', 'button', 'buzzer_melody', 'coap_client', 'coap_dip_switch_to_8_led', 'coap_simple_server',
-    'continuous_rotation_servo_control_by_pot', 'counter', 'custom_plugin_demo', 'dc_motor_speed', 'dip_switch_and_led_array',
-    'dip_switch_binary', 'dmm_current', 'dmm_resistance', 'dmm_voltage', 'ds3231_rtc_clock', 'ds3231_rtc_clock_sync_with_ntp',
-    'dso_oscilloscope', 'esp32_blink', 'esp32_dual_core_blink', 'esp32_fade', 'esp32_hub75_matrixpaneli2s_dma',
-    'esp32_i2s_local_radio_player', 'esp32_i2s_local_radio_player_2', 'esp32_i2s_local_test', 'esp32_i2s_music_player',
-    'esp32_i2s_online_radio_player', 'esp32_ntp_clock_lcd', 'esp32_server', 'esp_now_dip_switch_to_8_led',
-    'esp_now_sender_with_receiver', 'espnow_led_control', 'espnow_receiver', 'espnow_sender', 'fade',
-    'flex_sensor_bending_measurement', 'func_gen_dual', 'func_gen_led', 'gps_neo_6m_8m_tracker', 'hc05_bluetooth_led',
-    'ic_nand_test', 'ili9341', 'inverting_amplifier', , 'joystick_led', 'keypad_interfacing', 'l298n_dc_motor', 'lcd',
-    'lcd_hello_world', 'lcd_i2c', 'lcd_i2c_display_20x4', 'lcd_print_remotely', 'ldr_lamp', 'led_array_blink_pattern', 'lm35_temperature',
-    'lm35_temperature_sensor', 'logic_analyzer_test', 'max7219', 'morse', 'morse_code_using_serial_data', 'mpu6050_accel',
-    'mpu6050_accelerometer_2', 'mqtt_esp32', 'multi_colour_led_blink', 'nano_blink', 'neopixel_8x8_matrix_rainbow_2',
-    'neopixel_8x8_matrix_rainbow_3','neopixel_8x8_matrix_rainbow_4', 'neopixel_color_cycle', 'neopixel_strip_chase', 'neopixel_strip_color_pattern',
-    'not_gate_test', 'oled_ssd1306',    'opamp_741_non_inverting', 'or_gate', 'pir_alarm', 'plugin_tutorial',
-     'potentiometer', 'print_binary_data',
-    'rainbow_rgb', 'read_rfid_card_raw_data', 'relay_control', 'remote_control_leds', 'remote_servo_control',
-    'rfid_inventory_tracker',    'rotary_encoder_counter', 'rotary_encoder_servo', 'seg7_counter', 
-    'serial_plotter', 'serial_plotter_sine_and_triangle',
-    'servo_continuous_spin',
-    'servo_sweep', 'shift_resister_circuit', 'simplebme280_altimeter_on_lcd', 'simplebme280_altitude', 'simplebme280_basic',
-    'stepper_motor',
-    'stm32f746_blink', 'stm32f746_button', 'stm32f746_lcd', 'stm32f746_pot_led',
-    'temperature', 'traffic_light', 'two_lcd', 'ultrasonic', 'ultrasonic_distance_pulsein', 'vl53l0x_proximity_sensor',
-    'voltage_divider', 'weather_station_multi', 'weather_station_simple', 'weather_station_tft', 'zigbee_led_control',
-    'zigbee_sender_receiver', 'zigbee_sensor_network'
+    '7408_test_with_logic_analyzer', 'add_2_number', 'and_gate', 'astable_555', 'blink', 'bluetooth_serial_bridge',
+    'bme280_weather', 'bmp280_altitude', 'bssid', 'button', 'buzzer_melody', 'coap_client',
+    'coap_dip_switch_to_8_led', 'coap_simple_server', 'continuous_rotation_servo_control_by_pot', 'counter', 'current_divider', 'dc_motor_speed',
+    'dip_switch_and_led_array', 'dip_switch_binary', 'dmm_current', 'dmm_resistance', 'dmm_voltage', 'ds3231_rtc_clock',
+    'ds3231_rtc_clock_sync_with_ntp', 'dso_oscilloscope', 'dual_core_mqtt', 'esp32_blink', 'esp32_dual_core_blink', 'esp32_fade',
+    'esp32_freertos_queue', 'esp32_gpio_control', 'esp32_hub75_matrixpaneli2s_dma', 'esp32_i2s_local_radio_player', 'esp32_i2s_local_radio_player_2', 'esp32_i2s_local_test',
+    'esp32_i2s_music_player', 'esp32_i2s_online_radio_player', 'esp32_mqtt_pub_sub', 'esp32_ntp_clock_lcd', 'esp32_server', 'esp_now_dip_switch_to_8_led',
+    'esp_now_sender_with_receiver', 'espnow_led_control', 'espnow_receiver', 'espnow_sender', 'fade', 'flex_sensor_bending_measurement',
+    'func_gen_dual', 'func_gen_led', 'gps_neo_6m_8m_tracker', 'hc05_bluetooth_led', 'hx711_load_cell', 'hx711_load_cell_lcd',
+    'ic_nand_test', 'ili9341', 'interrupts_test', 'inverting_amplifier', 'ir_obstacle_sensor_led_alert', 'joystick_led',
+    'keypad_interfacing', 'l298n_dc_motor', 'lcd', 'lcd_hello_world', 'lcd_i2c', 'lcd_i2c_display_20x4',
+    'lcd_print_remotely', 'ldr_lamp', 'led_array_blink_pattern', 'lm35_temperature', 'lm35_temperature_sensor', 'load_cell_scale',
+    'logic_analyzer_test', 'lora_sender_receiver', 'max7219', 'morse', 'morse_code_using_serial_data', 'mpu6050_accel',
+    'mpu6050_accelerometer_2', 'multi_colour_led_blink', 'nano_blink', 'neopixel_8x8_matrix_rainbow_2', 'neopixel_8x8_matrix_rainbow_3', 'neopixel_8x8_matrix_rainbow_4',
+    'neopixel_color_cycle', 'neopixel_strip_chase', 'neopixel_strip_color_pattern', 'not_gate_test', 'ntc_thermistor_dc_motor', 'oled_ssd1306',
+    'opamp_741_non_inverting', 'or_gate', 'pir_alarm', 'plugin_tutorial', 'potentiometer', 'print_binary_data',
+    'rainbow_rgb', 'read_rfid_card_raw_data', 'relay_control', 'remote_control_leds', 'remote_servo_control', 'rfid_inventory_tracker',
+    'rgb_matrix_demo', 'rotary_encoder_counter', 'rotary_encoder_servo', 'seg7_counter', 'serial_peek', 'serial_peek_2',
+    'serial_plotter', 'serial_plotter_sine_and_triangle', 'servo_continuous_spin', 'servo_sweep', 'shift_resister_circuit', 'simplebme280_altimeter_on_lcd',
+    'simplebme280_altitude', 'simplebme280_basic', 'stepper_motor', 'stm32f746_blink', 'stm32f746_button', 'stm32f746_lcd',
+    'stm32f746_pot_led', 'temperature', 'traffic_light', 'two_lcd', 'ultrasonic', 'ultrasonic_distance_pulsein',
+    'vl53l0x_proximity_sensor', 'voltage_divider', 'water_flow', 'weather_station_multi', 'weather_station_simple', 'weather_station_tft',
+    'wifi_scan', 'zigbee_8_led_control', 'zigbee_led_control', 'zigbee_sender_receiver', 'zigbee_sensor_network'
   ];
 
   const sketches = [];

@@ -11,6 +11,7 @@ class App {
     this.osc = null;
     this.la = null;
     this.plotter = null;
+    this.webBrowser = null;
     this.isRunning = false;
     this._runEpoch = 0;
     this._pendingRunEpoch = 0;
@@ -45,6 +46,7 @@ class App {
       this._initOscilloscope();
       this._initLogicAnalyzer();
       this._initPlotter();
+      this._initWebBrowser();
       this._attachSimulatorEvents();
       this._renderComponentLibrary();
       this._renderExamples();
@@ -778,6 +780,16 @@ void loop() {
       this._updatePinMonitor();
       // Broadcast pin change to remote clients
       if (this.remote) this.remote.publishPinChange(pinKey, value);
+    };
+
+    this.sim.onWebPage = (resp) => {
+      if (this.webBrowser) this.webBrowser.render(resp);
+    };
+
+    this.sim.onWebNavigate = (path) => {
+      if (this.sim._web && this.sim._web._triggerRoute) {
+        this.sim._web._triggerRoute(path);
+      }
     };
 
     this.sim.onTick = (simTime, fps) => {
@@ -2541,6 +2553,12 @@ _newProject() {
       const paused = this.plotter?.togglePause();
       if (pauseBtn) pauseBtn.textContent = paused ? 'Resume' : 'Pause';
     });
+  }
+
+  /* ══════════════════════ WEB BROWSER ══════════════════════ */
+  _initWebBrowser() {
+    if (!window.WebBrowserClass) return;
+    this.webBrowser = new window.WebBrowserClass();
   }
 
   /* ══════════════════════ EXAMPLES ══════════════════════ */

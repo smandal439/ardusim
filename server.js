@@ -91,6 +91,9 @@ function _derIA5(str) {
 function _derExplicit(tag, buf) {
   return Buffer.concat([Buffer.from([0xa0 | tag]), _derLen(buf.length), buf]);
 }
+function _derNull() {
+  return Buffer.from([0x05, 0x00]);
+}
 function _derUTCTime(d) {
   const s = [
     String(d.getUTCFullYear()).slice(-2),
@@ -134,7 +137,7 @@ function ensureTLSCert() {
   const tbsCert = _derSeq(
     _derExplicit(0, _derInt(Buffer.from([2]))),
     _derInt(serial),
-    _derSeq(_derOid('1.2.840.113549.1.1.11'), _derSeq()),
+    _derSeq(_derOid('1.2.840.113549.1.1.11'), _derNull()),
     name, validity, name,
     publicKey,
     _derExplicit(3, sanExt),
@@ -146,7 +149,7 @@ function ensureTLSCert() {
 
   const certDer = _derSeq(
     tbsCert,
-    _derSeq(_derOid('1.2.840.113549.1.1.11'), _derSeq()),
+    _derSeq(_derOid('1.2.840.113549.1.1.11'), _derNull()),
     _derBitStr(signature),
   );
 

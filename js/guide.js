@@ -1740,11 +1740,11 @@ void loop() {
 
   hx711: {
     id: 'hx711', name: 'HX711 Load Cell Amp', icon: '\u2696\ufe0f', category: 'Sensors',
-    longDesc: 'HX711 24-bit ADC amplifier for load cells. Uses a bit-bang serial protocol (DT/SCK pins). Compatible with standard Arduino HX711 libraries. Simulates real weight and tare offset.',
+    longDesc: 'HX711 24-bit ADC amplifier for load cells. Has load cell input pins (E+/E-/A+/A-) on the left side and Arduino interface pins (VCC/GND/DT/SCK) on the bottom. Weight is read automatically from the connected load cell.',
     use: 'Precision weighing scales, force measurement, industrial weighing, kitchen scales.',
-    pins: { VCC: { label: 'VCC', type: 'power', desc: '5 V power supply.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' }, DT: { label: 'DT', type: 'digital', desc: 'Data pin \u2192 Arduino digital pin.' }, SCK: { label: 'SCK', type: 'digital', desc: 'Serial clock \u2192 Arduino digital pin.' } },
-    props: { weight: 'Simulated weight in grams (0\u201350000).', tareOffset: 'Tare offset in grams (\u221250000 to 50000).' },
-    wiring: 'VCC\u21925V, GND\u2192GND, DT\u2192D3, SCK\u2192D2.',
+    pins: { 'E+': { label: 'E+', type: 'power', desc: 'Excitation + input \u2192 connect to load cell E+.' }, 'E-': { label: 'E\u2212', type: 'gnd', desc: 'Excitation \u2212 input \u2192 connect to load cell E\u2212.' }, 'A+': { label: 'A+', type: 'analog', desc: 'Signal + input \u2192 connect to load cell A+.' }, 'A-': { label: 'A\u2212', type: 'analog', desc: 'Signal \u2212 input \u2192 connect to load cell A\u2212.' }, VCC: { label: 'VCC', type: 'power', desc: '5 V power supply.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' }, DT: { label: 'DT', type: 'digital', desc: 'Data pin \u2192 Arduino digital pin.' }, SCK: { label: 'SCK', type: 'digital', desc: 'Serial clock \u2192 Arduino digital pin.' } },
+    props: {},
+    wiring: 'Load Cell: E+\u2192HX711 E+, E\u2212\u2192HX711 E\u2212, A+\u2192HX711 A+, A\u2212\u2192HX711 A\u2212. Arduino: VCC\u21925V, GND\u2192GND, DT\u2192D3, SCK\u2192D2.',
     code: '#include "HX711.h"\nHX711 scale(3, 2); // DT, SCK\nvoid setup() {\n  Serial.begin(9600);\n  scale.set_scale(2280);\n  scale.tare();\n}\nvoid loop() {\n  Serial.print("Weight: ");\n  Serial.println(scale.get_units(), 1);\n  delay(500);\n}',
   },
 

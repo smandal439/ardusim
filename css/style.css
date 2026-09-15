@@ -3427,3 +3427,42 @@ canvas {
   outline: none;
 }
 
+/* ══════════════════════ WEB BROWSER PANEL ══════════════════════ */
+.webbrowser-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+}
+.webbrowser-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.webbrowser-url {
+  flex: 1;
+  padding: 5px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.webbrowser-status {
+  font-size: 11px;
+  color: var(--text-secondary);
+  min-width: 80px;
+  text-align: center;
+}
+#webbrowser-iframe {
+  width: 100%;
+  height: calc(100% - 38px);
+  border: none;
+  background: #ffffff;
+}
+
