@@ -89,6 +89,19 @@ class WebBrowser {
           window.parent.ArduinoSim._emitWebNavigate(href);
         }
       }, true);
+
+      var win = this.iframe.contentWindow;
+      if (win && !win.__fetchIntercepted) {
+        win.__fetchIntercepted = true;
+        var origFetch = win.fetch.bind(win);
+        win.fetch = function(input, init) {
+          var url = typeof input === 'string' ? input : (input && input.url) || '';
+          if (window.parent && window.parent.ArduinoSim && window.parent.ArduinoSim._emitWebNavigate) {
+            window.parent.ArduinoSim._emitWebNavigate(url);
+          }
+          return Promise.resolve(new Response('OK', { status: 200, headers: { 'Content-Type': 'text/plain' } }));
+        };
+      }
     } catch (e) {
       // cross-origin — ignore
     }

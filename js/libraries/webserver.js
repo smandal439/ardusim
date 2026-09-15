@@ -9,6 +9,7 @@ window.ArduinoLibs['WebServer'] = {
     [/(\w+)\.begin\s*\(\s*\)/g, '_a.serverBegin($1)'],
     [/(\w+)\.on\(/g, '_a.serverOn($1, '],
     [/(\w+)\.send\(/g, '_a.serverSend($1, '],
+    [/(\w+)\.hasArg\(/g, '_a.serverHasArg($1, '],
     [/(\w+)\.arg\(/g, '_a.serverArg($1, '],
     [/(\w+)\.handleClient\(/g, '_a.serverHandleClient($1, '],
   ],
@@ -39,8 +40,19 @@ window.ArduinoLibs['WebServer'] = {
         }
         if (!cfg._triggerRoute) {
           cfg._triggerRoute = function(targetPath) {
+            var cleanPath = targetPath;
+            var params = {};
+            var qIdx = targetPath.indexOf('?');
+            if (qIdx !== -1) {
+              cleanPath = targetPath.substring(0, qIdx);
+              targetPath.substring(qIdx + 1).split('&').forEach(function(pair) {
+                var kv = pair.split('=');
+                if (kv[0]) params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || '');
+              });
+            }
+            cfg._routeParams = params;
             for (var i = 0; i < cfg.routes.length; i++) {
-              if (cfg.routes[i].path === targetPath) {
+              if (cfg.routes[i].path === cleanPath) {
                 var route = cfg.routes[i];
                 self._webResp = null;
                 Promise.resolve()
@@ -65,7 +77,17 @@ window.ArduinoLibs['WebServer'] = {
       serverSend: function(server, code, type, content) {
         self._webResp = { code: Number(code) || 200, type: String(type || ''), content: String(content || '') };
       },
-      serverArg: function(server, name) { return ''; },
+      serverArg: function(server, name) {
+        var cfg = self._web;
+        if (cfg && cfg._routeParams && cfg._routeParams[name] !== undefined) {
+          return cfg._routeParams[name];
+        }
+        return '';
+      },
+      serverHasArg: function(server, name) {
+        var cfg = self._web;
+        return !!(cfg && cfg._routeParams && cfg._routeParams[name] !== undefined);
+      },
       serverHandleClient: function(server) {
         var cfg = self._web;
         if (!cfg || !cfg.routes.length) return;
