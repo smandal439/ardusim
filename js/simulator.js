@@ -370,6 +370,7 @@ class ArduinoSimulator {
     js = js.replace(/\bunsigned\s+short\s+/g, 'var ');
     js = js.replace(/\bunsigned\s+char\s+/g, 'var ');
     js = js.replace(/\bconst\s+char\s*\*\s*/g, 'var ');
+    js = js.replace(/\bconst\s+char\s+/g, 'var ');
     js = js.replace(/\bconst\s+String\s*/g, 'var ');
     js = js.replace(/\bconst\s+int\s+/g, 'var ');
     js = js.replace(/\bconst\s+float\s+/g, 'var ');
