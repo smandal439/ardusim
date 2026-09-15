@@ -121,6 +121,11 @@ class ArduinoSimulator {
     // 2. Remove other preprocessor directives
     js = js.replace(/^[ \t]*#[^\n]*/gm, '');
 
+    // 2b. C++11 raw string literals: R"delim(...)delim" → `...`
+    js = js.replace(/\bR"([a-zA-Z0-9_]*)\(([\s\S]*?)\)\1"/g, (_, delim, content) => {
+      return '`' + content.replace(/\$/g, '\\$').replace(/`/g, '\\`') + '`';
+    });
+
     // 3. Apply #define substitutions (simple word replacement)
     //    Skip function-like macros (e.g. #define FOO(x) ...) but allow
     //    parenthesized constants (e.g. #define SEALEVELPRESSURE_HPA (1013.25)).
@@ -278,6 +283,9 @@ class ArduinoSimulator {
     js = js.replace(/var\s+(\w+)\s*\[\s*\]\s*=\s*\{([^}]*)\}/g, 'var $1 = [$2]');
     // C-style char arrays with string literals: char str[20] = "hi"; / char msg[] = "hi";
     js = js.replace(/let\s+(\w+)\s*\[\s*\d*\s*\]\s*=\s*("[^"]*"|'[^']*')/g, 'let $1 = $2');
+    // const char name[] = "..." / const char name[] = `...` → var name = "..." (after const char → var)
+    js = js.replace(/var\s+(\w+)\s*\[\s*\d*\s*\]\s*=\s*("[^"]*"|'[^']*'|`[^`]*`)/g, 'var $1 = $2');
+    js = js.replace(/let\s+(\w+)\s*\[\s*\d*\s*\]\s*=\s*("[^"]*"|'[^']*'|`[^`]*`)/g, 'let $1 = $2');
     // Pointer declarations: WiFiClient* stream = ... → var stream = ...
     js = js.replace(/\b(\w+)\s*\*\s+(\w+)\s*=/g, 'var $2 =');
     // Re-clean const after pointer rule may have introduced 'const var' or 'const let'
@@ -528,6 +536,11 @@ class ArduinoSimulator {
     js = js.replace(/\b(\w+)\.trim\(\)\s*;/g, function (_, v) { return v + ' = ' + v + '.trim();'; });
     js = js.replace(/\b(\w+)\.toLowerCase\(\)\s*;/g, function (_, v) { return v + ' = ' + v + '.toLowerCase();'; });
     js = js.replace(/\b(\w+)\.toUpperCase\(\)\s*;/g, function (_, v) { return v + ' = ' + v + '.toUpperCase();'; });
+
+    // Arduino String.toInt() → parseInt(str, 10) || 0
+    js = js.replace(/\.toInt\(\)/g, '|0');
+    // Arduino String.toFloat() → parseFloat(str) || 0
+    js = js.replace(/\.toFloat\(\)/g, '*1');
 
     return js;
   }
