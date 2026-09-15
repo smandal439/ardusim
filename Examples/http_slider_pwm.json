@@ -2,10 +2,14 @@
   "id": "http_slider_pwm",
   "name": "http slider pwm",
   "icon": "🔧",
-  "desc": "A custom http slider pwm circuit example.",
+  "desc": "Control an LED's brightness on an ESP32 using a web-based slider. The ESP32 hosts a web page with a slider that sends the selected value to the ESP32, which adjusts the PWM duty cycle accordingly.",
   "tags": [
-    "custom",
-    "circuit"
+    "intermediate",
+    "esp32",
+    "led",
+    "pwm",
+    "http",
+    "slider"
   ],
   "circuit": {
     "components": [
