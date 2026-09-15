@@ -72,7 +72,7 @@ for (const { file, ssid, password } of WIFI_EXAMPLES) {
       ssid: ssid,
       password: password,
       channel: 6,
-      ipAddress: '192.168.1.1',
+      ipAddress: '192.168.4.1',
     },
   };
 

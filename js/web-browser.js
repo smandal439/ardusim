@@ -32,7 +32,15 @@ class WebBrowser {
     this._lastUrl = resp.url || '/';
 
     if (this.addrBar) {
-      this.addrBar.value = 'http://192.168.1.1' + this._lastUrl;
+      var ip = '192.168.4.1';
+      try {
+        var canvas = window.CircuitCanvas;
+        if (canvas && Array.isArray(canvas.components)) {
+          var wifi = canvas.components.find(function (c) { return c.type === 'wifi_module'; });
+          if (wifi && wifi.props && wifi.props.ipAddress) ip = wifi.props.ipAddress;
+        }
+      } catch (_) {}
+      this.addrBar.value = 'http://' + ip + this._lastUrl;
     }
 
     if (this.statusEl) {
