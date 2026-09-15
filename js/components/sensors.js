@@ -4660,3 +4660,614 @@ defComp({
 });
 
 registerComponent('load_cell', class extends Component {});
+
+/* ═══════════════════════ BH1750 Light Intensity Sensor (I2C @ 0x23) ═══════════════════════ */
+
+defComp({
+  id: 'bh1750',
+  name: 'BH1750 Light Sensor',
+  category: 'Sensors',
+  icon: '☀️',
+  desc: 'BH1750 ambient light intensity sensor module (I2C @ 0x23). Digital output in lux, range 1-65535 lx.',
+  width: 54,
+  height: 72,
+  defaultProps: { lux: 400 },
+  interactive: [
+    { field: 'lux', label: 'Lux', min: 0, max: 65535, step: 10, unit: ' lx' },
+  ],
+  pins: [
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 72, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 22, y: 72, side: 'bottom' },
+    { id: 'SCL', label: 'SCL', type: PIN_TYPE.DIGITAL, x: 34, y: 72, side: 'bottom' },
+    { id: 'SDA', label: 'SDA', type: PIN_TYPE.DIGITAL, x: 46, y: 72, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const lux = (inst.runtimeState && inst.runtimeState.lux !== undefined) ? inst.runtimeState.lux : (inst.props.lux ?? 400);
+    const isRunning = !!(sim && sim.isRunning);
+    const pct = Math.min(1, lux / 65535);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const drawRR = (rx, ry, rw, rh, rad) => {
+      ctx.beginPath();
+      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+
+    // 1. Dark blue PCB
+    const pcbGrad = ctx.createLinearGradient(0, 0, 54, 56);
+    pcbGrad.addColorStop(0, '#0c1a3a');
+    pcbGrad.addColorStop(0.5, '#122850');
+    pcbGrad.addColorStop(1, '#0a1530');
+    ctx.fillStyle = pcbGrad;
+    drawRR(0, 0, 54, 56, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#1e3d6e';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // Corner holes
+    [[4, 4], [50, 4]].forEach(([hx, hy]) => {
+      ctx.fillStyle = '#060e1c';
+      ctx.beginPath(); ctx.arc(hx, hy, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#c5a059'; ctx.lineWidth = 0.6; ctx.stroke();
+    });
+
+    // 2. BH1750 IC chip (SOP-5)
+    ctx.fillStyle = '#1a1a1a';
+    drawRR(16, 6, 22, 12, 1);
+    ctx.fill();
+    ctx.fillStyle = '#aaa';
+    ctx.font = 'bold 4px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('BH1750', 27, 14);
+
+    // 3. Photodiode sensor window (golden circle)
+    const sensorGrad = ctx.createRadialGradient(27, 30, 1, 27, 30, 10);
+    sensorGrad.addColorStop(0, isRunning ? `rgba(255,235,120,${0.3 + pct * 0.7})` : '#555');
+    sensorGrad.addColorStop(1, '#222');
+    ctx.fillStyle = sensorGrad;
+    ctx.beginPath(); ctx.arc(27, 30, 10, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 0.8; ctx.stroke();
+
+    // Light rays when running
+    if (pct > 0.05 && isRunning) {
+      ctx.strokeStyle = `rgba(255,240,150,${Math.min(0.9, pct)})`;
+      ctx.lineWidth = 0.8;
+      [[-6, -6], [0, -8], [6, -6]].forEach(([dx, dy]) => {
+        ctx.beginPath(); ctx.moveTo(27 + dx, 30 + dy); ctx.lineTo(27 + dx * 0.4, 30 + dy * 0.4); ctx.stroke();
+      });
+    }
+
+    // 4. I2C pull-up resistors
+    ctx.fillStyle = '#222';
+    [[8, 22], [8, 28]].forEach(([rx, ry]) => {
+      ctx.fillRect(rx, ry, 4, 2);
+      ctx.fillStyle = '#aaa'; ctx.fillRect(rx, ry, 0.7, 2); ctx.fillRect(rx + 3.3, ry, 0.7, 2); ctx.fillStyle = '#222';
+    });
+
+    // 5. Lux readout
+    ctx.fillStyle = '#050e1a';
+    drawRR(4, 40, 46, 10, 2);
+    ctx.fill();
+    ctx.fillStyle = isRunning ? '#00e5ff' : '#546e7a';
+    ctx.font = 'bold 6px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${lux} lx`, 27, 48);
+
+    // 6. Pin labels
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 3px monospace'; ctx.textAlign = 'center';
+    ['VCC', 'GND', 'SCL', 'SDA'].forEach((lbl, i) => ctx.fillText(lbl, 10 + i * 12, 58));
+
+    // Pin leads
+    ctx.fillStyle = '#111'; drawRR(4, 58, 46, 3, 1); ctx.fill();
+    [10, 22, 34, 46].forEach(px => {
+      ctx.fillStyle = '#d4af37'; ctx.fillRect(px - 1.5, 59, 3, 2);
+      const g = ctx.createLinearGradient(px - 0.8, 61, px + 0.8, 61);
+      g.addColorStop(0, '#aaa'); g.addColorStop(0.5, '#fff'); g.addColorStop(1, '#666');
+      ctx.fillStyle = g; ctx.fillRect(px - 0.8, 61, 1.6, 11);
+    });
+
+    if (inst.selected) drawSelectionRect(ctx, -3, -3, 60, 78);
+    ctx.restore();
+  }
+});
+
+class BH1750Component extends Component {
+  getPins() {
+    return [
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 72, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 22, y: 72, side: 'bottom' },
+      { id: 'SCL', label: 'SCL', type: PIN_TYPE.DIGITAL, x: 34, y: 72, side: 'bottom' },
+      { id: 'SDA', label: 'SDA', type: PIN_TYPE.DIGITAL, x: 46, y: 72, side: 'bottom' },
+    ];
+  }
+  update() {
+    this.runtimeState.lux = this.runtimeState.lux ?? this.props.lux ?? 400;
+  }
+}
+registerComponent('bh1750', BH1750Component);
+
+/* ═══════════════════════ INA219 Current/Power Monitor (I2C @ 0x40) ═══════════════════════ */
+
+defComp({
+  id: 'ina219',
+  name: 'INA219 Power Monitor',
+  category: 'Sensors',
+  icon: '⚡',
+  desc: 'INA219 bidirectional current/power monitor module (I2C @ 0x40). Measures bus voltage, shunt voltage, current, and power.',
+  width: 60,
+  height: 78,
+  defaultProps: { voltage: 5.0, current: 100, power: 500 },
+  interactive: [
+    { field: 'voltage', label: 'Voltage', min: 0, max: 26, step: 0.1, unit: ' V' },
+    { field: 'current', label: 'Current', min: 0, max: 800, step: 1, unit: ' mA' },
+    { field: 'power', label: 'Power', min: 0, max: 21000, step: 10, unit: ' mW' },
+  ],
+  pins: [
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 78, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 22, y: 78, side: 'bottom' },
+    { id: 'SCL', label: 'SCL', type: PIN_TYPE.DIGITAL, x: 34, y: 78, side: 'bottom' },
+    { id: 'SDA', label: 'SDA', type: PIN_TYPE.DIGITAL, x: 46, y: 78, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const voltage = (inst.runtimeState && inst.runtimeState.voltage !== undefined) ? inst.runtimeState.voltage : (inst.props.voltage ?? 5.0);
+    const current = (inst.runtimeState && inst.runtimeState.current !== undefined) ? inst.runtimeState.current : (inst.props.current ?? 100);
+    const power = (inst.runtimeState && inst.runtimeState.power !== undefined) ? inst.runtimeState.power : (inst.props.power ?? 500);
+    const isRunning = !!(sim && sim.isRunning);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const drawRR = (rx, ry, rw, rh, rad) => {
+      ctx.beginPath();
+      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+
+    // 1. Blue PCB
+    const pcbGrad = ctx.createLinearGradient(0, 0, 60, 62);
+    pcbGrad.addColorStop(0, '#0c2340');
+    pcbGrad.addColorStop(0.5, '#133863');
+    pcbGrad.addColorStop(1, '#0b1d36');
+    ctx.fillStyle = pcbGrad;
+    drawRR(0, 0, 60, 62, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#2d588c'; ctx.lineWidth = 0.8; ctx.stroke();
+
+    // Corner holes
+    [[4, 4], [56, 4]].forEach(([hx, hy]) => {
+      ctx.fillStyle = '#060f1c';
+      ctx.beginPath(); ctx.arc(hx, hy, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#c5a059'; ctx.lineWidth = 0.6; ctx.stroke();
+    });
+
+    // 2. INA219 IC (SOIC-8)
+    ctx.fillStyle = '#1a1a1a';
+    drawRR(20, 6, 20, 12, 1);
+    ctx.fill();
+    ctx.fillStyle = '#aaa';
+    ctx.font = 'bold 3.5px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('INA219', 30, 14);
+
+    // Shunt resistor (big)
+    ctx.fillStyle = '#444';
+    drawRR(8, 22, 44, 6, 1);
+    ctx.fill();
+    ctx.fillStyle = '#ddd';
+    ctx.font = 'bold 3px monospace';
+    ctx.fillText('0.1Ω SHUNT', 30, 27);
+
+    // 3. Screw terminals
+    ctx.fillStyle = '#1565c0';
+    drawRR(6, 32, 48, 10, 2);
+    ctx.fill();
+    ctx.fillStyle = '#888';
+    ctx.font = '3px monospace';
+    ctx.textAlign = 'center';
+    ['IN+', 'IN-', 'GND', 'VCC'].forEach((lbl, i) => {
+      ctx.fillText(lbl, 12 + i * 12, 39);
+    });
+
+    // 4. Power LED
+    ctx.fillStyle = isRunning ? '#00ff44' : '#223322';
+    ctx.beginPath(); ctx.arc(50, 28, 1.5, 0, Math.PI * 2); ctx.fill();
+    if (isRunning) { ctx.shadowColor = '#00ff44'; ctx.shadowBlur = 4; ctx.fill(); ctx.shadowBlur = 0; }
+
+    // 5. Data display
+    ctx.fillStyle = '#050e1a';
+    drawRR(4, 46, 52, 14, 2);
+    ctx.fill();
+    ctx.strokeStyle = isRunning ? 'rgba(0,200,255,0.3)' : 'rgba(40,60,90,0.5)';
+    ctx.lineWidth = 0.5; ctx.stroke();
+
+    ctx.fillStyle = isRunning ? '#ffab40' : '#546e7a';
+    ctx.font = 'bold 4px "JetBrains Mono", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${voltage.toFixed(1)}V`, 6, 53);
+    ctx.fillStyle = isRunning ? '#00e5ff' : '#546e7a';
+    ctx.fillText(`${current.toFixed(0)}mA`, 6, 58);
+    ctx.fillStyle = isRunning ? '#69f0ae' : '#546e7a';
+    ctx.textAlign = 'right';
+    ctx.fillText(`${power.toFixed(0)}mW`, 54, 55);
+
+    // 6. Pin labels & leads
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 3px monospace'; ctx.textAlign = 'center';
+    ['VCC', 'GND', 'SCL', 'SDA'].forEach((lbl, i) => ctx.fillText(lbl, 10 + i * 12, 64));
+
+    ctx.fillStyle = '#111'; drawRR(4, 64, 52, 3, 1); ctx.fill();
+    [10, 22, 34, 46].forEach(px => {
+      ctx.fillStyle = '#d4af37'; ctx.fillRect(px - 1.5, 65, 3, 2);
+      const g = ctx.createLinearGradient(px - 0.8, 67, px + 0.8, 67);
+      g.addColorStop(0, '#aaa'); g.addColorStop(0.5, '#fff'); g.addColorStop(1, '#666');
+      ctx.fillStyle = g; ctx.fillRect(px - 0.8, 67, 1.6, 11);
+    });
+
+    if (inst.selected) drawSelectionRect(ctx, -3, -3, 66, 84);
+    ctx.restore();
+  }
+});
+
+class INA219Component extends Component {
+  getPins() {
+    return [
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 78, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 22, y: 78, side: 'bottom' },
+      { id: 'SCL', label: 'SCL', type: PIN_TYPE.DIGITAL, x: 34, y: 78, side: 'bottom' },
+      { id: 'SDA', label: 'SDA', type: PIN_TYPE.DIGITAL, x: 46, y: 78, side: 'bottom' },
+    ];
+  }
+  update() {
+    this.runtimeState.voltage = this.runtimeState.voltage ?? this.props.voltage ?? 5.0;
+    this.runtimeState.current = this.runtimeState.current ?? this.props.current ?? 100;
+    this.runtimeState.power = this.runtimeState.power ?? this.props.power ?? 500;
+  }
+}
+registerComponent('ina219', INA219Component);
+
+/* ═══════════════════════ MAX6675 Thermocouple Amplifier (SPI) ═══════════════════════ */
+
+defComp({
+  id: 'max6675',
+  name: 'MAX6675 Thermocouple',
+  category: 'Sensors',
+  icon: '🔥',
+  desc: 'MAX6675 K-type thermocouple-to-digital converter (SPI). Range 0-1024°C, resolution 0.25°C.',
+  width: 64,
+  height: 80,
+  defaultProps: { temperature: 25 },
+  interactive: [
+    { field: 'temperature', label: 'Temp', min: 0, max: 1024, step: 0.25, unit: '°C' },
+  ],
+  pins: [
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 80, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 22, y: 80, side: 'bottom' },
+    { id: 'CS', label: 'CS', type: PIN_TYPE.DIGITAL, x: 34, y: 80, side: 'bottom' },
+    { id: 'CLK', label: 'CLK', type: PIN_TYPE.DIGITAL, x: 46, y: 80, side: 'bottom' },
+    { id: 'DO', label: 'DO', type: PIN_TYPE.DIGITAL, x: 56, y: 80, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const temp = (inst.runtimeState && inst.runtimeState.temperature !== undefined) ? inst.runtimeState.temperature : (inst.props.temperature ?? 25);
+    const isRunning = !!(sim && sim.isRunning);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const drawRR = (rx, ry, rw, rh, rad) => {
+      ctx.beginPath();
+      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+
+    // 1. Dark green PCB
+    const pcbGrad = ctx.createLinearGradient(0, 0, 64, 64);
+    pcbGrad.addColorStop(0, '#0a3d0a');
+    pcbGrad.addColorStop(1, '#082e08');
+    ctx.fillStyle = pcbGrad;
+    drawRR(0, 0, 64, 64, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#1a6b1a'; ctx.lineWidth = 0.8; ctx.stroke();
+
+    // 2. MAX6675 IC (SOIC-8)
+    ctx.fillStyle = '#1a1a1a';
+    drawRR(18, 6, 28, 14, 1.5);
+    ctx.fill();
+    ctx.fillStyle = '#ccc';
+    ctx.font = 'bold 4px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('MAX6675', 32, 15);
+
+    // 3. Screw terminal block (for thermocouple)
+    ctx.fillStyle = '#1565c0';
+    drawRR(6, 24, 20, 16, 2);
+    ctx.fill();
+    ctx.fillStyle = '#888';
+    ctx.font = '3px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('TC+', 12, 33);
+    ctx.fillText('TC-', 24, 33);
+
+    // 4. Temperature readout
+    ctx.fillStyle = '#000';
+    drawRR(4, 46, 56, 14, 2);
+    ctx.fill();
+    ctx.strokeStyle = isRunning ? 'rgba(255,100,0,0.4)' : 'rgba(40,60,40,0.5)';
+    ctx.lineWidth = 0.5; ctx.stroke();
+
+    // Temperature color: blue (cold) to red (hot)
+    const tRatio = Math.min(1, temp / 500);
+    const r = Math.round(tRatio * 255);
+    const b = Math.round((1 - tRatio) * 255);
+
+    ctx.fillStyle = isRunning ? `rgb(${r}, 80, ${b})` : '#546e7a';
+    ctx.font = 'bold 8px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${temp.toFixed(1)}°C`, 32, 56);
+
+    // 5. Passive components
+    ctx.fillStyle = '#222';
+    [[40, 24], [48, 24]].forEach(([rx, ry]) => {
+      ctx.fillRect(rx, ry, 4, 2);
+      ctx.fillStyle = '#aaa'; ctx.fillRect(rx, ry, 0.7, 2); ctx.fillRect(rx + 3.3, ry, 0.7, 2); ctx.fillStyle = '#222';
+    });
+
+    // 6. Power LED
+    ctx.fillStyle = isRunning ? '#ff4444' : '#441111';
+    ctx.beginPath(); ctx.arc(56, 30, 1.5, 0, Math.PI * 2); ctx.fill();
+    if (isRunning) { ctx.shadowColor = '#ff4444'; ctx.shadowBlur = 4; ctx.fill(); ctx.shadowBlur = 0; }
+
+    // 7. Pin labels & leads
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 2.8px monospace'; ctx.textAlign = 'center';
+    ['VCC', 'GND', 'CS', 'CLK', 'DO'].forEach((lbl, i) => ctx.fillText(lbl, 10 + i * 12, 66));
+
+    ctx.fillStyle = '#111'; drawRR(4, 66, 56, 3, 1); ctx.fill();
+    [10, 22, 34, 46, 56].forEach(px => {
+      ctx.fillStyle = '#d4af37'; ctx.fillRect(px - 1.5, 67, 3, 2);
+      const g = ctx.createLinearGradient(px - 0.8, 69, px + 0.8, 69);
+      g.addColorStop(0, '#aaa'); g.addColorStop(0.5, '#fff'); g.addColorStop(1, '#666');
+      ctx.fillStyle = g; ctx.fillRect(px - 0.8, 69, 1.6, 11);
+    });
+
+    if (inst.selected) drawSelectionRect(ctx, -3, -3, 70, 86);
+    ctx.restore();
+  }
+});
+
+class MAX6675Component extends Component {
+  getPins() {
+    return [
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 80, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 22, y: 80, side: 'bottom' },
+      { id: 'CS', label: 'CS', type: PIN_TYPE.DIGITAL, x: 34, y: 80, side: 'bottom' },
+      { id: 'CLK', label: 'CLK', type: PIN_TYPE.DIGITAL, x: 46, y: 80, side: 'bottom' },
+      { id: 'DO', label: 'DO', type: PIN_TYPE.DIGITAL, x: 56, y: 80, side: 'bottom' },
+    ];
+  }
+  update() {
+    this.runtimeState.temperature = this.runtimeState.temperature ?? this.props.temperature ?? 25;
+  }
+}
+registerComponent('max6675', MAX6675Component);
+
+/* ═══════════════════════ U8g2 OLED Display (I2C) ═══════════════════════ */
+
+defComp({
+  id: 'u8g2_oled',
+  name: 'U8g2 OLED Display',
+  category: 'Sensors',
+  icon: '🖥️',
+  desc: 'Monochrome OLED display (128x64 SSD1306/SH1106) via U8g2 library. I2C or SPI interface.',
+  width: 64,
+  height: 50,
+  defaultProps: {},
+  interactive: [],
+  pins: [
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 22, y: 50, side: 'bottom' },
+    { id: 'SCL', label: 'SCL', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'SDA', label: 'SDA', type: PIN_TYPE.DIGITAL, x: 46, y: 50, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const isRunning = !!(sim && sim.isRunning);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const drawRR = (rx, ry, rw, rh, rad) => {
+      ctx.beginPath();
+      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+
+    // 1. OLED module PCB (dark blue)
+    const pcbGrad = ctx.createLinearGradient(0, 0, 64, 38);
+    pcbGrad.addColorStop(0, '#0c1a3a');
+    pcbGrad.addColorStop(1, '#0a1530');
+    ctx.fillStyle = pcbGrad;
+    drawRR(0, 0, 64, 38, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#1e3d6e'; ctx.lineWidth = 0.8; ctx.stroke();
+
+    // 2. OLED display screen (black with active pixel glow)
+    ctx.fillStyle = isRunning ? '#0a0a0a' : '#111';
+    drawRR(4, 3, 56, 24, 2);
+    ctx.fill();
+    ctx.strokeStyle = isRunning ? 'rgba(0,200,255,0.3)' : '#333';
+    ctx.lineWidth = 0.5; ctx.stroke();
+
+    // Display content area
+    if (isRunning) {
+      ctx.fillStyle = 'rgba(0,200,255,0.15)';
+      drawRR(6, 5, 52, 20, 1);
+      ctx.fill();
+
+      // Simulated text lines
+      ctx.fillStyle = 'rgba(0,220,255,0.6)';
+      ctx.font = 'bold 4px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText('U8G2 LIBRARY', 8, 12);
+      ctx.font = '3.5px monospace';
+      ctx.fillText('128x64 OLED', 8, 18);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = 'rgba(0,255,136,0.5)';
+      ctx.fillText('READY', 56, 18);
+    }
+
+    // 3. I2C address label
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '3px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('SSD1306 0x3C', 32, 32);
+
+    // 4. Pin leads
+    ctx.fillStyle = '#111'; drawRR(4, 38, 56, 3, 1); ctx.fill();
+    [10, 22, 34, 46].forEach(px => {
+      ctx.fillStyle = '#d4af37'; ctx.fillRect(px - 1.5, 39, 3, 2);
+      const g = ctx.createLinearGradient(px - 0.8, 41, px + 0.8, 41);
+      g.addColorStop(0, '#aaa'); g.addColorStop(0.5, '#fff'); g.addColorStop(1, '#666');
+      ctx.fillStyle = g; ctx.fillRect(px - 0.8, 41, 1.6, 9);
+    });
+
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 2.8px monospace'; ctx.textAlign = 'center';
+    ['VCC', 'GND', 'SCL', 'SDA'].forEach((lbl, i) => ctx.fillText(lbl, 10 + i * 12, 40));
+
+    if (inst.selected) drawSelectionRect(ctx, -3, -3, 70, 56);
+    ctx.restore();
+  }
+});
+
+class U8g2Component extends Component {
+  getPins() {
+    return [
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 22, y: 50, side: 'bottom' },
+      { id: 'SCL', label: 'SCL', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'SDA', label: 'SDA', type: PIN_TYPE.DIGITAL, x: 46, y: 50, side: 'bottom' },
+    ];
+  }
+  update() {}
+}
+registerComponent('u8g2_oled', U8g2Component);
+
+/* ═══════════════════════ TFT_eSPI Display (SPI) ═══════════════════════ */
+
+defComp({
+  id: 'tft_display',
+  name: 'TFT_eSPI Display',
+  category: 'Sensors',
+  icon: '🖥️',
+  desc: 'Color TFT display (ILI9341/ST7789, 240x320) via TFT_eSPI library. SPI interface with touch support.',
+  width: 72,
+  height: 60,
+  defaultProps: {},
+  interactive: [],
+  pins: [
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 60, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 22, y: 60, side: 'bottom' },
+    { id: 'SCK', label: 'SCK', type: PIN_TYPE.DIGITAL, x: 34, y: 60, side: 'bottom' },
+    { id: 'MOSI', label: 'MOSI', type: PIN_TYPE.DIGITAL, x: 46, y: 60, side: 'bottom' },
+    { id: 'CS', label: 'CS', type: PIN_TYPE.DIGITAL, x: 58, y: 60, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const isRunning = !!(sim && sim.isRunning);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const drawRR = (rx, ry, rw, rh, rad) => {
+      ctx.beginPath();
+      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+
+    // 1. Module PCB (green)
+    const pcbGrad = ctx.createLinearGradient(0, 0, 72, 48);
+    pcbGrad.addColorStop(0, '#0d4218');
+    pcbGrad.addColorStop(1, '#0b3814');
+    ctx.fillStyle = pcbGrad;
+    drawRR(0, 0, 72, 48, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#1a6b1a'; ctx.lineWidth = 0.8; ctx.stroke();
+
+    // 2. TFT display screen (color gradient simulation)
+    const screenGrad = ctx.createLinearGradient(6, 3, 66, 33);
+    if (isRunning) {
+      screenGrad.addColorStop(0, '#1a237e');
+      screenGrad.addColorStop(0.3, '#0d47a1');
+      screenGrad.addColorStop(0.6, '#00695c');
+      screenGrad.addColorStop(1, '#1b5e20');
+    } else {
+      screenGrad.addColorStop(0, '#111');
+      screenGrad.addColorStop(1, '#1a1a1a');
+    }
+    ctx.fillStyle = screenGrad;
+    drawRR(4, 2, 64, 32, 2);
+    ctx.fill();
+    ctx.strokeStyle = isRunning ? 'rgba(0,200,255,0.3)' : '#333';
+    ctx.lineWidth = 0.5; ctx.stroke();
+
+    if (isRunning) {
+      // Simulated display content
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 5px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('TFT_eSPI', 36, 12);
+      ctx.font = '3.5px monospace';
+      ctx.fillText('240x320 ILI9341', 36, 18);
+
+      // Color bars
+      const colors = ['#f44336', '#ff9800', '#ffeb3b', '#4caf50', '#2196f3', '#9c27b0'];
+      colors.forEach((c, i) => {
+        ctx.fillStyle = c;
+        ctx.fillRect(6 + i * 10, 22, 9, 8);
+      });
+    }
+
+    // 3. Module label
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '3px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('TFT 2.4" ILI9341', 36, 42);
+
+    // 4. Pin leads
+    ctx.fillStyle = '#111'; drawRR(4, 48, 64, 3, 1); ctx.fill();
+    [10, 22, 34, 46, 58].forEach(px => {
+      ctx.fillStyle = '#d4af37'; ctx.fillRect(px - 1.5, 49, 3, 2);
+      const g = ctx.createLinearGradient(px - 0.8, 51, px + 0.8, 51);
+      g.addColorStop(0, '#aaa'); g.addColorStop(0.5, '#fff'); g.addColorStop(1, '#666');
+      ctx.fillStyle = g; ctx.fillRect(px - 0.8, 51, 1.6, 9);
+    });
+
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 2.8px monospace'; ctx.textAlign = 'center';
+    ['VCC', 'GND', 'SCK', 'MOSI', 'CS'].forEach((lbl, i) => ctx.fillText(lbl, 10 + i * 12, 49));
+
+    if (inst.selected) drawSelectionRect(ctx, -3, -3, 78, 66);
+    ctx.restore();
+  }
+});
+
+class TFTDisplayComponent extends Component {
+  getPins() {
+    return [
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 60, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 22, y: 60, side: 'bottom' },
+      { id: 'SCK', label: 'SCK', type: PIN_TYPE.DIGITAL, x: 34, y: 60, side: 'bottom' },
+      { id: 'MOSI', label: 'MOSI', type: PIN_TYPE.DIGITAL, x: 46, y: 60, side: 'bottom' },
+      { id: 'CS', label: 'CS', type: PIN_TYPE.DIGITAL, x: 58, y: 60, side: 'bottom' },
+    ];
+  }
+  update() {}
+}
+registerComponent('tft_display', TFTDisplayComponent);

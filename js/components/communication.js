@@ -662,5 +662,130 @@ defComp({
   },
 });
 
+/* ═══════════════════════ SD Card Module (SPI) ═══════════════════════ */
 
+defComp({
+  id: 'sd_card',
+  name: 'SD Card Module',
+  category: 'Communication',
+  icon: '💾',
+  desc: 'SD card reader/writer module (SPI interface). Supports FAT16/FAT32, micro SD up to 32GB.',
+  width: 56,
+  height: 72,
+  defaultProps: {},
+  interactive: [],
+  pins: [
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 72, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 22, y: 72, side: 'bottom' },
+    { id: 'MISO', label: 'MISO', type: PIN_TYPE.DIGITAL, x: 34, y: 72, side: 'bottom' },
+    { id: 'MOSI', label: 'MOSI', type: PIN_TYPE.DIGITAL, x: 46, y: 72, side: 'bottom' },
+    { id: 'SCK', label: 'SCK', type: PIN_TYPE.DIGITAL, x: 16, y: 0, side: 'top' },
+    { id: 'CS', label: 'CS', type: PIN_TYPE.DIGITAL, x: 40, y: 0, side: 'top' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const isRunning = !!(sim && sim.isRunning);
 
+    ctx.save();
+    ctx.translate(x, y);
+
+    const drawRR = (rx, ry, rw, rh, rad) => {
+      ctx.beginPath();
+      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+
+    // 1. Dark blue PCB
+    const pcbGrad = ctx.createLinearGradient(0, 0, 56, 56);
+    pcbGrad.addColorStop(0, '#0c1a3a');
+    pcbGrad.addColorStop(1, '#0a1530');
+    ctx.fillStyle = pcbGrad;
+    drawRR(0, 0, 56, 56, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#1e3d6e'; ctx.lineWidth = 0.8; ctx.stroke();
+
+    // 2. SD card slot (metallic)
+    const slotGrad = ctx.createLinearGradient(6, 6, 50, 30);
+    slotGrad.addColorStop(0, '#b0bec5');
+    slotGrad.addColorStop(0.3, '#eceff1');
+    slotGrad.addColorStop(0.7, '#cfd8dc');
+    slotGrad.addColorStop(1, '#90a4ae');
+    ctx.fillStyle = slotGrad;
+    drawRR(6, 6, 44, 22, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#78909c'; ctx.lineWidth = 0.8; ctx.stroke();
+
+    // SD card insertion slot
+    ctx.fillStyle = '#333';
+    drawRR(10, 10, 36, 14, 2);
+    ctx.fill();
+
+    // 3. Voltage regulator (3.3V)
+    ctx.fillStyle = '#1a1a1a';
+    drawRR(6, 32, 8, 5, 1);
+    ctx.fill();
+    ctx.fillStyle = '#888';
+    ctx.font = '2px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('3.3V', 10, 35);
+
+    // 4. Status LEDs
+    ctx.fillStyle = isRunning ? '#00ff44' : '#223322';
+    ctx.beginPath(); ctx.arc(48, 34, 1.5, 0, Math.PI * 2); ctx.fill();
+    if (isRunning) { ctx.shadowColor = '#00ff44'; ctx.shadowBlur = 3; ctx.fill(); ctx.shadowBlur = 0; }
+
+    // 5. Label
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 4px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('SD CARD', 28, 40);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '2.5px monospace';
+    ctx.fillText('SPI MODULE', 28, 46);
+
+    // 6. Pin labels & leads
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 2.8px monospace'; ctx.textAlign = 'center';
+    ['VCC', 'GND', 'MISO', 'MOSI'].forEach((lbl, i) => ctx.fillText(lbl, 10 + i * 12, 58));
+
+    ctx.fillStyle = '#111'; drawRR(4, 58, 48, 3, 1); ctx.fill();
+    [10, 22, 34, 46].forEach(px => {
+      ctx.fillStyle = '#d4af37'; ctx.fillRect(px - 1.5, 59, 3, 2);
+      const g = ctx.createLinearGradient(px - 0.8, 61, px + 0.8, 61);
+      g.addColorStop(0, '#aaa'); g.addColorStop(0.5, '#fff'); g.addColorStop(1, '#666');
+      ctx.fillStyle = g; ctx.fillRect(px - 0.8, 61, 1.6, 11);
+    });
+
+    // Top pins (SCK, CS)
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 2.8px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('SCK', 16, -4);
+    ctx.fillText('CS', 40, -4);
+
+    ctx.fillStyle = '#111'; drawRR(8, -6, 40, 3, 1); ctx.fill();
+    [16, 40].forEach(px => {
+      ctx.fillStyle = '#d4af37'; ctx.fillRect(px - 1.5, -6, 3, 2);
+      const g = ctx.createLinearGradient(px - 0.8, -4, px + 0.8, -4);
+      g.addColorStop(0, '#aaa'); g.addColorStop(0.5, '#fff'); g.addColorStop(1, '#666');
+      ctx.fillStyle = g; ctx.fillRect(px - 0.8, -4, 1.6, 6);
+    });
+
+    if (inst.selected) drawSelectionRect(ctx, -8, -8, 72, 88);
+    ctx.restore();
+  }
+});
+
+class SDCardComponent extends Component {
+  getPins() {
+    return [
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 10, y: 72, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 22, y: 72, side: 'bottom' },
+      { id: 'MISO', label: 'MISO', type: PIN_TYPE.DIGITAL, x: 34, y: 72, side: 'bottom' },
+      { id: 'MOSI', label: 'MOSI', type: PIN_TYPE.DIGITAL, x: 46, y: 72, side: 'bottom' },
+      { id: 'SCK', label: 'SCK', type: PIN_TYPE.DIGITAL, x: 16, y: 0, side: 'top' },
+      { id: 'CS', label: 'CS', type: PIN_TYPE.DIGITAL, x: 40, y: 0, side: 'top' },
+    ];
+  }
+  update() {}
+}
+registerComponent('sd_card', SDCardComponent);
