@@ -4128,7 +4128,8 @@ defComp({
       }
     }
     rs._weight = weight;
-    rs._netWeight = Math.max(0, weight);
+    var scale = rs._scale || 1;
+    rs._netWeight = Math.max(0, weight * scale);
 
     if (!sim || !sim.isRunning) return;
 

@@ -50,9 +50,9 @@ window.ArduinoLibs['HX711'] = {
         var inst = _findHx711();
         if (inst) {
           var rs = inst.runtimeState || {};
-          var raw = rs._netWeight ?? 0;
-          _tareValue = raw;
-          _offset = raw;
+          var raw = (rs._weight ?? 0) * (_scale || 1);
+          _tareValue = 0;
+          _offset = 0;
         } else {
           _tareValue = 0;
           _offset = 0;
@@ -63,7 +63,7 @@ window.ArduinoLibs['HX711'] = {
         var inst = _findHx711();
         if (!inst) return 0;
         var rs = inst.runtimeState || {};
-        var raw = rs._netWeight ?? 0;
+        var raw = (rs._weight ?? 0) * (_scale || 1);
         return (raw - _offset) / _scale;
       },
 
@@ -71,7 +71,7 @@ window.ArduinoLibs['HX711'] = {
         var inst = _findHx711();
         if (!inst) return 0;
         var rs = inst.runtimeState || {};
-        var raw = rs._netWeight ?? 0;
+        var raw = (rs._weight ?? 0) * (_scale || 1);
         return raw - _offset;
       },
 
@@ -79,7 +79,7 @@ window.ArduinoLibs['HX711'] = {
         var inst = _findHx711();
         if (!inst) return 0;
         var rs = inst.runtimeState || {};
-        return rs._netWeight ?? 0;
+        return (rs._weight ?? 0) * (_scale || 1);
       },
 
       power_down: function () { },
