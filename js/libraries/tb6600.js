@@ -66,6 +66,7 @@ window.ArduinoLibs['TB6600'] = {
           speed: 500,
           enabled: true,
           position: 0,
+          angle: 0,
           microstep: 16,
         };
         self._serialLog('[TB6600] Created PUL=' + pulPin + ' DIR=' + dirPin + ' ENA=' + (enaPin != null ? enaPin : 'none') + '\n', 'system');
@@ -126,6 +127,9 @@ window.ArduinoLibs['TB6600'] = {
           } catch (e) { return; }
 
           d.position += dir;
+          // Calculate angle: 1.8 degrees per full step / microstep
+          var stepAngle = 1.8 / (d.microstep || 16);
+          d.angle = (d.angle || 0) + dir * stepAngle;
         }
 
         self._serialLog('[TB6600] step(' + n + ') -> pos=' + d.position + '\n', 'system');

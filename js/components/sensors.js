@@ -5356,166 +5356,174 @@ registerComponent('ir_led', IRLEDComponent);
 
 
 /* ═══════════════════════════════════════════════════════════════
-   IR REMOTE — handheld remote control with buttons
+   IR REMOTE — handheld remote control with buttons (battery-powered)
    ═══════════════════════════════════════════════════════════════ */
+
+function _irHexToRgb(hex) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return m ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) } : { r: 0, g: 0, b: 0 };
+}
+function lightenColor(hex, amt) {
+  const c = _irHexToRgb(hex);
+  const r = Math.min(255, c.r + amt), g = Math.min(255, c.g + amt), b = Math.min(255, c.b + amt);
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+function darkenColor(hex, amt) {
+  const c = _irHexToRgb(hex);
+  const r = Math.max(0, c.r - amt), g = Math.max(0, c.g - amt), b = Math.max(0, c.b - amt);
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
 
 defComp({
   id: 'ir_remote',
   name: 'IR Remote Control',
   category: 'Input',
   icon: '🎮',
-  desc: 'Infrared remote control with numeric keys and function buttons. Click a button to send its IR code to any IR Receiver on the canvas.',
+  desc: 'Battery-powered infrared remote control. Click any button to send its NEC code to all IR Receivers on the canvas.',
   width: 70,
-  height: 140,
+  height: 130,
   defaultProps: { lastButton: '', code: 0 },
   interactive: [
     { field: 'code', label: 'Last Code', min: 0, max: 65535, step: 1, unit: '' },
   ],
-  pins: [
-    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 18, y: 140, side: 'bottom' },
-    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 50, y: 140, side: 'bottom' },
-  ],
+  pins: [],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
     const lastBtn = inst.runtimeState?.lastButton ?? inst.props.lastButton ?? '';
     ctx.save();
     ctx.translate(x, y);
 
-    // Remote body
-    const bodyGrad = ctx.createLinearGradient(0, 0, 70, 140);
-    bodyGrad.addColorStop(0, '#2a2a2a');
+    // Remote body — dark plastic with subtle texture
+    const bodyGrad = ctx.createLinearGradient(0, 0, 0, 130);
+    bodyGrad.addColorStop(0, '#2c2c2c');
+    bodyGrad.addColorStop(0.3, '#1a1a1a');
     bodyGrad.addColorStop(1, '#111');
     ctx.fillStyle = bodyGrad;
-    roundRect(ctx, 0, 0, 70, 140, 6);
+    roundRect(ctx, 0, 0, 70, 130, 8);
     ctx.fill();
-    ctx.strokeStyle = '#444';
-    ctx.lineWidth = 0.8;
+    ctx.strokeStyle = '#3a3a3a';
+    ctx.lineWidth = 1;
     ctx.stroke();
 
-    // IR window at top
-    ctx.fillStyle = '#220000';
-    roundRect(ctx, 22, 4, 26, 8, 3);
-    ctx.fill();
+    // Top edge bevel
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(8, 1);
+    ctx.lineTo(62, 1);
+    ctx.stroke();
 
-    // Button layout
+    // IR window at top — dark red lens
+    const irGrad = ctx.createRadialGradient(35, 8, 2, 35, 8, 14);
+    irGrad.addColorStop(0, '#440000');
+    irGrad.addColorStop(1, '#1a0000');
+    ctx.fillStyle = irGrad;
+    roundRect(ctx, 20, 3, 30, 10, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#330000';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+
+    // Brand text
+    ctx.fillStyle = '#666';
+    ctx.font = 'bold 3.5px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('ArduSim', 35, 18);
+
+    // Button layout — 7 rows x 3 cols
     const buttons = [
-      { label: 'CH−', code: 0x45, row: 0, col: 0 },
-      { label: 'CH',  code: 0x46, row: 0, col: 1 },
-      { label: 'CH+', code: 0x47, row: 0, col: 2 },
-      { label: 'PREV', code: 0x44, row: 1, col: 0 },
-      { label: 'NEXT', code: 0x40, row: 1, col: 1 },
-      { label: 'PLAY', code: 0x43, row: 1, col: 2 },
-      { label: '−',   code: 0x07, row: 2, col: 0 },
-      { label: '+',   code: 0x15, row: 2, col: 1 },
-      { label: 'EQ',  code: 0x09, row: 2, col: 2 },
-      { label: '0',   code: 0x16, row: 3, col: 1 },
-      { label: '1',   code: 0x0C, row: 4, col: 0 },
-      { label: '2',   code: 0x18, row: 4, col: 1 },
-      { label: '3',   code: 0x5E, row: 4, col: 2 },
-      { label: '4',   code: 0x08, row: 5, col: 0 },
-      { label: '5',   code: 0x1C, row: 5, col: 1 },
-      { label: '6',   code: 0x5A, row: 5, col: 2 },
-      { label: '7',   code: 0x42, row: 6, col: 0 },
-      { label: '8',   code: 0x52, row: 6, col: 1 },
-      { label: '9',   code: 0x4A, row: 6, col: 2 },
+      { label: 'CH\u2212', code: 0x45, row: 0, col: 0, color: '#c62828' },
+      { label: 'CH',  code: 0x46, row: 0, col: 1, color: '#c62828' },
+      { label: 'CH+', code: 0x47, row: 0, col: 2, color: '#c62828' },
+      { label: 'PREV', code: 0x44, row: 1, col: 0, color: '#1565c0' },
+      { label: 'NEXT', code: 0x40, row: 1, col: 1, color: '#1565c0' },
+      { label: 'PLAY', code: 0x43, row: 1, col: 2, color: '#1565c0' },
+      { label: '\u2212',   code: 0x07, row: 2, col: 0, color: '#2e7d32' },
+      { label: '+',   code: 0x15, row: 2, col: 1, color: '#2e7d32' },
+      { label: 'EQ',  code: 0x09, row: 2, col: 2, color: '#2e7d32' },
+      { label: '0',   code: 0x16, row: 3, col: 1, color: '#424242' },
+      { label: '1',   code: 0x0C, row: 4, col: 0, color: '#424242' },
+      { label: '2',   code: 0x18, row: 4, col: 1, color: '#424242' },
+      { label: '3',   code: 0x5E, row: 4, col: 2, color: '#424242' },
+      { label: '4',   code: 0x08, row: 5, col: 0, color: '#424242' },
+      { label: '5',   code: 0x1C, row: 5, col: 1, color: '#424242' },
+      { label: '6',   code: 0x5A, row: 5, col: 2, color: '#424242' },
+      { label: '7',   code: 0x42, row: 6, col: 0, color: '#424242' },
+      { label: '8',   code: 0x52, row: 6, col: 1, color: '#424242' },
+      { label: '9',   code: 0x4A, row: 6, col: 2, color: '#424242' },
     ];
 
-    const btnW = 18, btnH = 14, gapX = 3, gapY = 2;
-    const startX = 5, startY = 18;
+    const btnW = 18, btnH = 13, gapX = 3, gapY = 2;
+    const startX = 5, startY = 22;
 
     buttons.forEach(btn => {
       const bx = startX + btn.col * (btnW + gapX);
       const by = startY + btn.row * (btnH + gapY);
       const isActive = lastBtn === btn.label;
 
-      ctx.fillStyle = isActive ? '#00cc66' : '#333';
-      roundRect(ctx, bx, by, btnW, btnH, 3);
-      ctx.fill();
-      ctx.strokeStyle = isActive ? '#00ff88' : '#555';
-      ctx.lineWidth = 0.5;
-      ctx.stroke();
+      // 3D button effect — pressed looks indented
+      if (isActive) {
+        // Shadow inset (pressed down)
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        roundRect(ctx, bx + 1, by + 1, btnW, btnH, 3);
+        ctx.fill();
+        // Button surface — recessed
+        ctx.fillStyle = btn.color;
+        roundRect(ctx, bx + 1, by + 1, btnW - 1, btnH - 1, 3);
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      } else {
+        // Normal raised button
+        const btnGrad = ctx.createLinearGradient(bx, by, bx, by + btnH);
+        btnGrad.addColorStop(0, lightenColor(btn.color, 30));
+        btnGrad.addColorStop(0.5, btn.color);
+        btnGrad.addColorStop(1, darkenColor(btn.color, 30));
+        ctx.fillStyle = btnGrad;
+        roundRect(ctx, bx, by, btnW, btnH, 3);
+        ctx.fill();
+        // Top highlight edge
+        ctx.strokeStyle = lightenColor(btn.color, 50);
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(bx + 3, by + 1);
+        ctx.lineTo(bx + btnW - 3, by + 1);
+        ctx.stroke();
+        // Bottom shadow edge
+        ctx.strokeStyle = darkenColor(btn.color, 50);
+        ctx.beginPath();
+        ctx.moveTo(bx + 3, by + btnH - 1);
+        ctx.lineTo(bx + btnW - 3, by + btnH - 1);
+        ctx.stroke();
+      }
 
-      ctx.fillStyle = isActive ? '#000' : '#ccc';
+      // Button label
+      ctx.fillStyle = isActive ? '#fff' : '#e0e0e0';
       ctx.font = 'bold 4px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(btn.label, bx + btnW / 2, by + btnH / 2 + 1.5);
     });
 
-    // Last code display
-    const code = inst.runtimeState?.code ?? inst.props.code ?? 0;
-    if (code > 0) {
-      ctx.fillStyle = '#0a0a1a';
-      roundRect(ctx, 10, 130, 50, 7, 2);
-      ctx.fill();
-      ctx.fillStyle = '#00ff88';
-      ctx.font = 'bold 4px monospace';
-      ctx.fillText('0x' + code.toString(16).toUpperCase().padStart(2, '0'), 35, 136);
-    }
+    // Bottom battery compartment indicator
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(ctx, 15, 118, 40, 8, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    ctx.fillStyle = '#555';
+    ctx.font = '3px monospace';
+    ctx.fillText('3V CR2025', 35, 123);
 
-    if (inst.selected) drawSelectionRect(ctx, 0, 0, 70, 140);
+    if (inst.selected) drawSelectionRect(ctx, 0, 0, 70, 130);
     ctx.restore();
-  },
-  // Click handler: detect which button was pressed
-  onClick(inst, mx, my, sim) {
-    const buttons = [
-      { label: 'CH−', code: 0x45, row: 0, col: 0 },
-      { label: 'CH',  code: 0x46, row: 0, col: 1 },
-      { label: 'CH+', code: 0x47, row: 0, col: 2 },
-      { label: 'PREV', code: 0x44, row: 1, col: 0 },
-      { label: 'NEXT', code: 0x40, row: 1, col: 1 },
-      { label: 'PLAY', code: 0x43, row: 1, col: 2 },
-      { label: '−',   code: 0x07, row: 2, col: 0 },
-      { label: '+',   code: 0x15, row: 2, col: 1 },
-      { label: 'EQ',  code: 0x09, row: 2, col: 2 },
-      { label: '0',   code: 0x16, row: 3, col: 1 },
-      { label: '1',   code: 0x0C, row: 4, col: 0 },
-      { label: '2',   code: 0x18, row: 4, col: 1 },
-      { label: '3',   code: 0x5E, row: 4, col: 2 },
-      { label: '4',   code: 0x08, row: 5, col: 0 },
-      { label: '5',   code: 0x1C, row: 5, col: 1 },
-      { label: '6',   code: 0x5A, row: 5, col: 2 },
-      { label: '7',   code: 0x42, row: 6, col: 0 },
-      { label: '8',   code: 0x52, row: 6, col: 1 },
-      { label: '9',   code: 0x4A, row: 6, col: 2 },
-    ];
-
-    const btnW = 18, btnH = 14, gapX = 3, gapY = 2;
-    const startX = 5, startY = 18;
-    const lx = mx - inst.x, ly = my - inst.y;
-
-    for (const btn of buttons) {
-      const bx = startX + btn.col * (btnW + gapX);
-      const by = startY + btn.row * (btnH + gapY);
-      if (lx >= bx && lx <= bx + btnW && ly >= by && ly <= by + btnH) {
-        inst.runtimeState = inst.runtimeState || {};
-        inst.runtimeState.lastButton = btn.label;
-        inst.runtimeState.code = btn.code;
-        inst.props.code = btn.code;
-
-        // Find all ir_receiver instances and update their code
-        if (sim && sim.instances) {
-          sim.instances.forEach(inst2 => {
-            if (inst2.type === 'ir_receiver') {
-              inst2.runtimeState = inst2.runtimeState || {};
-              inst2.runtimeState.code = btn.code;
-              inst2.runtimeState.decoding = true;
-              inst2.props.code = btn.code;
-            }
-          });
-        }
-        return true;
-      }
-    }
-    return false;
   },
 });
 
 class IRRemoteComponent extends Component {
   getPins() {
-    return [
-      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 18, y: 140, side: 'bottom' },
-      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 50, y: 140, side: 'bottom' },
-    ];
+    return [];
   }
   update() {}
 }

@@ -1155,6 +1155,46 @@ class CircuitCanvas {
     return null;
   }
 
+  _hitTestIrRemoteButton(wx, wy) {
+    const defs = window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS;
+    if (!defs) return null;
+    const buttons = [
+      { label: 'CH\u2212', code: 0x45, row: 0, col: 0 },
+      { label: 'CH',  code: 0x46, row: 0, col: 1 },
+      { label: 'CH+', code: 0x47, row: 0, col: 2 },
+      { label: 'PREV', code: 0x44, row: 1, col: 0 },
+      { label: 'NEXT', code: 0x40, row: 1, col: 1 },
+      { label: 'PLAY', code: 0x43, row: 1, col: 2 },
+      { label: '\u2212',   code: 0x07, row: 2, col: 0 },
+      { label: '+',   code: 0x15, row: 2, col: 1 },
+      { label: 'EQ',  code: 0x09, row: 2, col: 2 },
+      { label: '0',   code: 0x16, row: 3, col: 1 },
+      { label: '1',   code: 0x0C, row: 4, col: 0 },
+      { label: '2',   code: 0x18, row: 4, col: 1 },
+      { label: '3',   code: 0x5E, row: 4, col: 2 },
+      { label: '4',   code: 0x08, row: 5, col: 0 },
+      { label: '5',   code: 0x1C, row: 5, col: 1 },
+      { label: '6',   code: 0x5A, row: 5, col: 2 },
+      { label: '7',   code: 0x42, row: 6, col: 0 },
+      { label: '8',   code: 0x52, row: 6, col: 1 },
+      { label: '9',   code: 0x4A, row: 6, col: 2 },
+    ];
+    const btnW = 18, btnH = 14, gapX = 3, gapY = 2;
+    const startX = 5, startY = 18;
+    for (const inst of this.components) {
+      if (inst.type !== 'ir_remote') continue;
+      const lx = wx - inst.x, ly = wy - inst.y;
+      for (const btn of buttons) {
+        const bx = inst.x + startX + btn.col * (btnW + gapX);
+        const by = inst.y + startY + btn.row * (btnH + gapY);
+        if (wx >= bx && wx <= bx + btnW && wy >= by && wy <= by + btnH) {
+          return { inst, btn };
+        }
+      }
+    }
+    return null;
+  }
+
   _updateSliderValue(drag, wx, wy) {
     const { inst, ctrl, rect } = drag;
 
@@ -1748,6 +1788,36 @@ class CircuitCanvas {
           inst.runtimeState.pressedKey = null;
           this._render();
         }, 150);
+        return;
+      }
+
+      // IR Remote button click — press on click, send code to all ir_receiver instances
+      const irRemoteHit = this._hitTestIrRemoteButton(world.x, world.y);
+      if (irRemoteHit) {
+        const { inst, btn } = irRemoteHit;
+        inst.runtimeState = inst.runtimeState || {};
+        if (inst.runtimeState._irReleaseTimer) clearTimeout(inst.runtimeState._irReleaseTimer);
+        inst.runtimeState.lastButton = btn.label;
+        inst.runtimeState.code = btn.code;
+        inst.props.code = btn.code;
+        // Send code to all ir_receiver instances on canvas
+        for (const other of this.components) {
+          if (other.type === 'ir_receiver') {
+            other.runtimeState = other.runtimeState || {};
+            other.runtimeState.code = btn.code;
+            other.runtimeState.decoding = true;
+            other.props.code = btn.code;
+          }
+        }
+        this._selectAll(false);
+        inst.selected = true;
+        this.selected = inst;
+        this._render();
+        // Auto-release button highlight after 200ms
+        inst.runtimeState._irReleaseTimer = setTimeout(() => {
+          inst.runtimeState.lastButton = '';
+          this._render();
+        }, 200);
         return;
       }
 

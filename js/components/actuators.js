@@ -2018,7 +2018,7 @@ class RelayComponent extends Component {
         gain.connect(ctx.destination);
         osc.start();
         osc.stop(ctx.currentTime + 0.05);
-      } catch (e) {}
+      } catch (e) { }
     }
   }
 }
@@ -2483,20 +2483,188 @@ class TB6600Component extends Component {
 }
 
 /* ─── NEMA 17 STEPPER MOTOR ─── */
+// defComp({
+//   id: 'nema17',
+//   name: 'NEMA 17 Stepper',
+//   category: 'Actuators',
+//   icon: '⚙️',
+//   desc: 'NEMA 17 bipolar stepper motor (1.8 deg/step, 0.4 Nm torque). Connect to TB6600 or similar driver via A+, A-, B+, B- wires.',
+//   width: 80,
+//   height: 100,
+//   defaultProps: { angle: 0 },
+//   pins: [
+//     { id: 'A+', label: 'A+', type: PIN_TYPE.SIGNAL, x: 20, y: 100, side: 'bottom' },
+//     { id: 'A-', label: 'A-', type: PIN_TYPE.SIGNAL, x: 40, y: 100, side: 'bottom' },
+//     { id: 'B+', label: 'B+', type: PIN_TYPE.SIGNAL, x: 60, y: 100, side: 'bottom' },
+//     { id: 'B-', label: 'B-', type: PIN_TYPE.SIGNAL, x: 80, y: 100, side: 'bottom' },
+//   ],
+//   draw(ctx, inst, sim) {
+//     const { x, y } = inst;
+//     const angle = inst.runtimeState?.angle ?? inst.props.angle ?? 0;
+//     const rad = (angle * Math.PI) / 180;
+//     const isRunning = !!(sim && sim.isRunning);
+
+//     ctx.save();
+//     ctx.translate(x, y);
+
+//     // Helper for rounded rectangles
+//     const drawRR = (rx, ry, rw, rh, rad = 2) => {
+//       ctx.beginPath();
+//       if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+//       else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+//       else ctx.rect(rx, ry, rw, rh);
+//     };
+
+//     // 1. Motor body (front view - circular face)
+//     const cx = 40, cy = 45;
+
+//     // Outer cylindrical body (metallic silver)
+//     const bodyGrad = ctx.createRadialGradient(cx - 8, cy - 8, 2, cx, cy, 35);
+//     bodyGrad.addColorStop(0, '#e8e8e8');
+//     bodyGrad.addColorStop(0.3, '#c0c0c0');
+//     bodyGrad.addColorStop(0.7, '#888888');
+//     bodyGrad.addColorStop(1, '#555555');
+//     ctx.fillStyle = bodyGrad;
+//     ctx.beginPath();
+//     ctx.arc(cx, cy, 34, 0, Math.PI * 2);
+//     ctx.fill();
+//     ctx.strokeStyle = '#444';
+//     ctx.lineWidth = 1.5;
+//     ctx.stroke();
+
+//     // Front face plate
+//     const faceGrad = ctx.createRadialGradient(cx - 5, cy - 5, 1, cx, cy, 28);
+//     faceGrad.addColorStop(0, '#d0d0d0');
+//     faceGrad.addColorStop(0.5, '#a0a0a0');
+//     faceGrad.addColorStop(1, '#707070');
+//     ctx.fillStyle = faceGrad;
+//     ctx.beginPath();
+//     ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+//     ctx.fill();
+//     ctx.strokeStyle = '#555';
+//     ctx.lineWidth = 0.8;
+//     ctx.stroke();
+
+//     // 2. Mounting holes (4 corners)
+//     const holeRadius = 22;
+//     const holeSize = 3;
+//     [[0, 0], [Math.PI / 2, 0], [Math.PI, 0], [Math.PI * 1.5, 0]].forEach(([rot]) => {
+//       const hx = cx + Math.cos(rot) * holeRadius;
+//       const hy = cy + Math.sin(rot) * holeRadius;
+//       ctx.fillStyle = '#333';
+//       ctx.beginPath();
+//       ctx.arc(hx, hy, holeSize, 0, Math.PI * 2);
+//       ctx.fill();
+//       ctx.strokeStyle = '#666';
+//       ctx.lineWidth = 0.5;
+//       ctx.stroke();
+//     });
+
+//     // 3. Central shaft (D-cut profile)
+//     ctx.save();
+//     ctx.translate(cx, cy);
+//     ctx.rotate(rad);
+
+//     // Shaft base
+//     const shaftGrad = ctx.createRadialGradient(-2, -2, 1, 0, 0, 8);
+//     shaftGrad.addColorStop(0, '#ffffff');
+//     shaftGrad.addColorStop(0.5, '#cccccc');
+//     shaftGrad.addColorStop(1, '#888888');
+//     ctx.fillStyle = shaftGrad;
+//     ctx.beginPath();
+//     ctx.arc(0, 0, 8, 0, Math.PI * 2);
+//     ctx.fill();
+//     ctx.strokeStyle = '#555';
+//     ctx.lineWidth = 1;
+//     ctx.stroke();
+
+//     // D-cut flat
+//     ctx.fillStyle = '#999';
+//     ctx.fillRect(-2, -8, 4, 16);
+
+//     // Shaft tip
+//     ctx.fillStyle = '#aaa';
+//     ctx.beginPath();
+//     ctx.arc(0, 0, 5, 0, Math.PI * 2);
+//     ctx.fill();
+
+//     ctx.restore();
+
+//     // 4. Rotation indicator mark
+//     ctx.save();
+//     ctx.translate(cx, cy);
+//     ctx.rotate(rad);
+//     ctx.fillStyle = '#e53935';
+//     ctx.beginPath();
+//     ctx.arc(20, 0, 2, 0, Math.PI * 2);
+//     ctx.fill();
+//     ctx.restore();
+
+//     // 5. Label
+//     ctx.fillStyle = '#fff';
+//     ctx.font = 'bold 5px "JetBrains Mono", monospace';
+//     ctx.textAlign = 'center';
+//     ctx.fillText('NEMA 17', cx, 82);
+
+//     // 6. Wire leads (4 wires at bottom)
+//     const wireColors = ['#e53935', '#ff9800', '#4caf50', '#2196f3'];
+//     const wireLabels = ['A+', 'A-', 'B+', 'B-'];
+//     const wireXs = [20, 40, 60, 80];
+
+//     wireXs.forEach((wx, i) => {
+//       // Wire insulation
+//       ctx.fillStyle = wireColors[i];
+//       ctx.fillRect(wx - 1.5, 80, 3, 12);
+
+//       // Wire copper end
+//       ctx.fillStyle = '#d4af37';
+//       ctx.fillRect(wx - 1, 90, 2, 4);
+
+//       // Pin label
+//       ctx.fillStyle = '#aaa';
+//       ctx.font = '3px monospace';
+//       ctx.textAlign = 'center';
+//       ctx.fillText(wireLabels[i], wx, 98);
+//     });
+
+//     // 7. Angle display
+//     ctx.fillStyle = 'rgba(0,0,0,0.7)';
+//     drawRR(20, 85, 40, 10, 2);
+//     ctx.fill();
+//     ctx.fillStyle = isRunning ? '#00e5ff' : '#888';
+//     ctx.font = 'bold 5px "JetBrains Mono", monospace';
+//     ctx.textAlign = 'center';
+//     ctx.fillText(Math.round(((angle % 360) + 360) % 360) + ' deg', cx, 92);
+
+//     if (inst.selected) drawSelectionRect(ctx, 2, 2, 76, 100);
+//     ctx.restore();
+//   }
+// });
+
+// Helper for rounded rectangles with fallback
+function drawRoundedRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  if (ctx.roundRect) {
+    ctx.roundRect(x, y, width, height, radius);
+  } else {
+    ctx.rect(x, y, width, height);
+  }
+}
+
 defComp({
   id: 'nema17',
-  name: 'NEMA 17 Stepper',
+  name: 'NEMA 17 Stepper Motor',
   category: 'Actuators',
   icon: '⚙️',
-  desc: 'NEMA 17 bipolar stepper motor (1.8 deg/step, 0.4 Nm torque). Connect to TB6600 or similar driver via A+, A-, B+, B- wires.',
+  desc: 'Bipolar 2-phase NEMA 17 stepper motor (1.8° step angle, 200 steps/rev). Connect to A+, A-, B+, B- coil terminals.',
   width: 80,
   height: 100,
   defaultProps: { angle: 0 },
   pins: [
-    { id: 'A+', label: 'A+', type: PIN_TYPE.SIGNAL, x: 20, y: 100, side: 'bottom' },
-    { id: 'A-', label: 'A-', type: PIN_TYPE.SIGNAL, x: 40, y: 100, side: 'bottom' },
-    { id: 'B+', label: 'B+', type: PIN_TYPE.SIGNAL, x: 60, y: 100, side: 'bottom' },
-    { id: 'B-', label: 'B-', type: PIN_TYPE.SIGNAL, x: 80, y: 100, side: 'bottom' },
+    { id: 'A+', label: 'A+', type: PIN_TYPE.SIGNAL, x: 16, y: 100, side: 'bottom' },
+    { id: 'A-', label: 'A-', type: PIN_TYPE.SIGNAL, x: 32, y: 100, side: 'bottom' },
+    { id: 'B+', label: 'B+', type: PIN_TYPE.SIGNAL, x: 48, y: 100, side: 'bottom' },
+    { id: 'B-', label: 'B-', type: PIN_TYPE.SIGNAL, x: 64, y: 100, side: 'bottom' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -2507,140 +2675,167 @@ defComp({
     ctx.save();
     ctx.translate(x, y);
 
-    // Helper for rounded rectangles
-    const drawRR = (rx, ry, rw, rh, rad = 2) => {
-      ctx.beginPath();
-      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
-      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
-      else ctx.rect(rx, ry, rw, rh);
-    };
+    const cx = 40, cy = 40; // Center of motor faceplate
 
-    // 1. Motor body (front view - circular face)
-    const cx = 40, cy = 45;
-
-    // Outer cylindrical body (metallic silver)
-    const bodyGrad = ctx.createRadialGradient(cx - 8, cy - 8, 2, cx, cy, 35);
-    bodyGrad.addColorStop(0, '#e8e8e8');
-    bodyGrad.addColorStop(0.3, '#c0c0c0');
-    bodyGrad.addColorStop(0.7, '#888888');
-    bodyGrad.addColorStop(1, '#555555');
+    // 1. Black Anodized Aluminum Square Faceplate (NEMA 17 Footprint)
+    const bodyGrad = ctx.createLinearGradient(0, 0, 80, 80);
+    bodyGrad.addColorStop(0, '#2d3238');
+    bodyGrad.addColorStop(0.5, '#1a1d20');
+    bodyGrad.addColorStop(1, '#111315');
     ctx.fillStyle = bodyGrad;
-    ctx.beginPath();
-    ctx.arc(cx, cy, 34, 0, Math.PI * 2);
+    drawRoundedRect(ctx, 4, 4, 72, 72, 6);
     ctx.fill();
-    ctx.strokeStyle = '#444';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#454c54';
+    ctx.lineWidth = 1.2;
     ctx.stroke();
 
-    // Front face plate
-    const faceGrad = ctx.createRadialGradient(cx - 5, cy - 5, 1, cx, cy, 28);
-    faceGrad.addColorStop(0, '#d0d0d0');
-    faceGrad.addColorStop(0.5, '#a0a0a0');
-    faceGrad.addColorStop(1, '#707070');
-    ctx.fillStyle = faceGrad;
+    // Inner bevel frame
+    ctx.strokeStyle = '#0d0e10';
+    ctx.lineWidth = 1;
+    drawRoundedRect(ctx, 6, 6, 68, 68, 4);
+    ctx.stroke();
+
+    // 2. Corner M3 Threaded Mounting Holes
+    const holes = [[12, 12], [68, 12], [12, 68], [68, 68]];
+    holes.forEach(([hx, hy]) => {
+      const ringGrad = ctx.createRadialGradient(hx, hy, 1, hx, hy, 4);
+      ringGrad.addColorStop(0, '#9e9e9e');
+      ringGrad.addColorStop(0.8, '#616161');
+      ringGrad.addColorStop(1, '#212121');
+      ctx.fillStyle = ringGrad;
+      ctx.beginPath();
+      ctx.arc(hx, hy, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // M3 Hole Center
+      ctx.fillStyle = '#0a0a0b';
+      ctx.beginPath();
+      ctx.arc(hx, hy, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // 3. Central Metallic Pilot Boss (22mm circular collar)
+    const bossGrad = ctx.createRadialGradient(cx - 3, cy - 3, 2, cx, cy, 24);
+    bossGrad.addColorStop(0, '#ffffff');
+    bossGrad.addColorStop(0.4, '#d6d6d6');
+    bossGrad.addColorStop(0.8, '#9e9e9e');
+    bossGrad.addColorStop(1, '#616161');
+    ctx.fillStyle = bossGrad;
     ctx.beginPath();
-    ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 22, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#555';
+    ctx.strokeStyle = '#424242';
     ctx.lineWidth = 0.8;
     ctx.stroke();
 
-    // 2. Mounting holes (4 corners)
-    const holeRadius = 22;
-    const holeSize = 3;
-    [[0, 0], [Math.PI / 2, 0], [Math.PI, 0], [Math.PI * 1.5, 0]].forEach(([rot]) => {
-      const hx = cx + Math.cos(rot) * holeRadius;
-      const hy = cy + Math.sin(rot) * holeRadius;
-      ctx.fillStyle = '#333';
+    // Degree Dial Ticks around the pilot boss
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.strokeStyle = '#757575';
+    ctx.lineWidth = 0.8;
+    for (let i = 0; i < 12; i++) {
       ctx.beginPath();
-      ctx.arc(hx, hy, holeSize, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#666';
-      ctx.lineWidth = 0.5;
+      ctx.moveTo(0, -21);
+      ctx.lineTo(0, -18);
       ctx.stroke();
-    });
+      ctx.rotate(Math.PI / 6);
+    }
+    ctx.restore();
 
-    // 3. Central shaft (D-cut profile)
+    // 4. Rotating D-Shaft Assembly
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(rad);
 
-    // Shaft base
-    const shaftGrad = ctx.createRadialGradient(-2, -2, 1, 0, 0, 8);
+    // Shaft base brass bushing
+    ctx.fillStyle = '#b7950b';
+    ctx.beginPath();
+    ctx.arc(0, 0, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Steel D-Cut Shaft
+    const shaftGrad = ctx.createLinearGradient(-7, -7, 7, 7);
     shaftGrad.addColorStop(0, '#ffffff');
-    shaftGrad.addColorStop(0.5, '#cccccc');
-    shaftGrad.addColorStop(1, '#888888');
+    shaftGrad.addColorStop(0.5, '#b0bec5');
+    shaftGrad.addColorStop(1, '#546e7a');
+
     ctx.fillStyle = shaftGrad;
     ctx.beginPath();
-    ctx.arc(0, 0, 8, 0, Math.PI * 2);
+    ctx.arc(0, 0, 7, -Math.PI * 0.4, Math.PI * 0.4, false);
+    ctx.lineTo(3.5, -5);
+    ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = '#555';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#37474f';
+    ctx.lineWidth = 0.8;
     ctx.stroke();
 
-    // D-cut flat
-    ctx.fillStyle = '#999';
-    ctx.fillRect(-2, -8, 4, 16);
-
-    // Shaft tip
-    ctx.fillStyle = '#aaa';
+    // Red direction / orientation mark on shaft
+    ctx.strokeStyle = '#e53935';
+    ctx.lineWidth = 1.8;
     ctx.beginPath();
-    ctx.arc(0, 0, 5, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(6, 0);
+    ctx.stroke();
 
     ctx.restore();
 
-    // 4. Rotation indicator mark
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(rad);
-    ctx.fillStyle = '#e53935';
-    ctx.beginPath();
-    ctx.arc(20, 0, 2, 0, Math.PI * 2);
+    // 5. Digital Angle Telemetry Display Box
+    ctx.fillStyle = '#0a0d12';
+    drawRoundedRect(ctx, 16, 78, 48, 10, 2);
     ctx.fill();
-    ctx.restore();
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
 
-    // 5. Label
-    ctx.fillStyle = '#fff';
+    const normalizedAngle = Math.round(((angle % 360) + 360) % 360);
+    ctx.fillStyle = isRunning ? '#00e676' : '#64748b';
     ctx.font = 'bold 5px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('NEMA 17', cx, 82);
+    ctx.fillText(`${normalizedAngle}°`, cx, 85);
 
-    // 6. Wire leads (4 wires at bottom)
-    const wireColors = ['#e53935', '#ff9800', '#4caf50', '#2196f3'];
+    // 6. JST-XH Connector Housing & Color-Coded Lead Wires
+    const wireXs = [16, 32, 48, 64];
+    const wireColors = ['#e53935', '#1e88e5', '#4caf50', '#212121']; // Standard A+ (Red), A- (Blue), B+ (Green), B- (Black)
     const wireLabels = ['A+', 'A-', 'B+', 'B-'];
-    const wireXs = [20, 40, 60, 80];
+
+    // JST White Connector Base
+    ctx.fillStyle = '#f5f5f5';
+    drawRoundedRect(ctx, 10, 88, 60, 5, 1);
+    ctx.fill();
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
 
     wireXs.forEach((wx, i) => {
-      // Wire insulation
+      // Pin notch inside JST housing
+      ctx.fillStyle = '#9e9e9e';
+      ctx.fillRect(wx - 1, 88.5, 2, 4);
+
+      // Wire insulation lead
       ctx.fillStyle = wireColors[i];
-      ctx.fillRect(wx - 1.5, 80, 3, 12);
+      ctx.fillRect(wx - 1.5, 92, 3, 5);
 
-      // Wire copper end
-      ctx.fillStyle = '#d4af37';
-      ctx.fillRect(wx - 1, 90, 2, 4);
+      // Gold terminal tip at bottom pin boundary
+      const goldGrad = ctx.createLinearGradient(wx - 1, 97, wx + 1, 97);
+      goldGrad.addColorStop(0, '#fbc02d');
+      goldGrad.addColorStop(0.5, '#fff59d');
+      goldGrad.addColorStop(1, '#f57f17');
+      ctx.fillStyle = goldGrad;
+      ctx.fillRect(wx - 1, 97, 2, 3);
 
-      // Pin label
-      ctx.fillStyle = '#aaa';
-      ctx.font = '3px monospace';
+      // Pin Labels
+      ctx.fillStyle = '#90a4ae';
+      ctx.font = 'bold 2.5px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(wireLabels[i], wx, 98);
+      ctx.fillText(wireLabels[i], wx, 87);
     });
 
-    // 7. Angle display
-    ctx.fillStyle = 'rgba(0,0,0,0.7)';
-    drawRR(20, 85, 40, 10, 2);
-    ctx.fill();
-    ctx.fillStyle = isRunning ? '#00e5ff' : '#888';
-    ctx.font = 'bold 5px "JetBrains Mono", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(Math.round(((angle % 360) + 360) % 360) + ' deg', cx, 92);
-
-    if (inst.selected) drawSelectionRect(ctx, 2, 2, 76, 100);
+    if (inst.selected && typeof drawSelectionRect === 'function') {
+      drawSelectionRect(ctx, 0, 0, 80, 102);
+    }
     ctx.restore();
   }
 });
-
 class Nema17Component extends Component {
   getPins() {
     return [
@@ -2652,18 +2847,29 @@ class Nema17Component extends Component {
   }
   update(canvas) {
     const sim = window.ArduinoSim;
-    if (!sim || !sim.pinStates) return;
+    if (!sim) return;
 
-    // Find connected TB6600 driver
-    const tb6600 = this.findConnected('A+', 'tb6600')[0] ||
-                   this.findConnected('A-', 'tb6600')[0] ||
-                   this.findConnected('B+', 'tb6600')[0] ||
-                   this.findConnected('B-', 'tb6600')[0];
+    // Find any TB6600 driver instance and sync angle
+    const cw = window.CircuitCanvas;
+    if (cw && Array.isArray(cw.components)) {
+      for (const comp of cw.components) {
+        if (comp.type === 'tb6600' && comp.runtimeState) {
+          // Sync from TB6600 component's runtimeState
+          this.runtimeState.angle = comp.runtimeState.angle ?? 0;
+          this.runtimeState.position = comp.runtimeState.position ?? 0;
+          return;
+        }
+      }
+    }
 
-    if (tb6600 && tb6600.runtimeState) {
-      // Sync angle from TB6600 driver
-      this.runtimeState.angle = tb6600.runtimeState.angle ?? 0;
-      this.runtimeState.position = tb6600.runtimeState.position ?? 0;
+    // Fallback: check library state
+    if (sim._tb6600s) {
+      for (const id in sim._tb6600s) {
+        const tb = sim._tb6600s[id];
+        this.runtimeState.angle = tb.angle || 0;
+        this.runtimeState.position = tb.position || 0;
+        return;
+      }
     }
   }
 }

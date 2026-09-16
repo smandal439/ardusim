@@ -2,7 +2,7 @@
   "id": "ir_remote_decode",
   "name": "IR Remote Decoder",
   "icon": "🎮",
-  "desc": "Decode IR remote control signals using a TSOP4838 receiver — press buttons on the IR Remote to see the NEC hex codes on the Serial Monitor and blink the built-in LED.",
+  "desc": "Decode IR remote control signals using a TSOP4838 receiver — press buttons on the battery-powered IR Remote to see the NEC hex codes on the Serial Monitor and blink the built-in LED.",
   "tags": ["intermediate", "ir", "remote", "receiver", "nec", "communication"],
   "circuit": {
     "components": [
@@ -15,8 +15,6 @@
       { "id": "w1", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "irrecv1", "pinId": "VCC" } },
       { "id": "w2", "from": { "instId": "b1", "pinId": "GND1" }, "to": { "instId": "irrecv1", "pinId": "GND" } },
       { "id": "w3", "from": { "instId": "b1", "pinId": "D2" }, "to": { "instId": "irrecv1", "pinId": "OUT" } },
-      { "id": "w4", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "irremote1", "pinId": "VCC" } },
-      { "id": "w5", "from": { "instId": "b1", "pinId": "GND1" }, "to": { "instId": "irremote1", "pinId": "GND" } },
       { "id": "w6", "from": { "instId": "b1", "pinId": "D13" }, "to": { "instId": "led1", "pinId": "anode" } },
       { "id": "w7", "from": { "instId": "b1", "pinId": "GND1" }, "to": { "instId": "led1", "pinId": "cathode" } }
     ]
