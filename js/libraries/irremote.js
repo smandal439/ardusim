@@ -9,6 +9,7 @@ window.ArduinoLibs['IRremote'] = {
   includes: ['<IRremote.h>'],
 
   transpile: [
+    [/decode_results\s+(\w+)\s*;/g, 'var $1 = { protocol: 0, value: 0, bits: 0 };'],
     [/IRsend\s+(\w+)\((\d+)\)/g, 'var $1 = _a.irsendNew($2)'],
     [/IRrecv\s+(\w+)\((\d+)\)/g, 'var $1 = _a.irrecvNew($2)'],
     [/(\w+)\.sendNEC\(/g, '_a.irsendNEC($1, '],
@@ -18,7 +19,7 @@ window.ArduinoLibs['IRremote'] = {
     [/(\w+)\.sendRaw\(/g, '_a.irsendRaw($1, '],
     [/(\w+)\.enableIRIn\(\)/g, '_a.irrecvEnableIRIn($1)'],
     [/(\w+)\.resume\(\)/g, '_a.irrecvResume($1)'],
-    [/(\w+)\.decode\((\w+)\)/g, '_a.irrecvDecode($1, $2)'],
+    [/(\w+)\.decode\(&(\w+)\)/g, '_a.irrecvDecode($1, $2)'],
     [/(\w+)\.stopIRSend\(\)/g, '_a.irsendStop($1)'],
   ],
 
