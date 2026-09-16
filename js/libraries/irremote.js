@@ -9,7 +9,7 @@ window.ArduinoLibs['IRremote'] = {
   includes: ['<IRremote.h>'],
 
   transpile: [
-    [/decode_results\s+(\w+)\s*;/g, 'var $1 = { protocol: 0, value: 0, bits: 0 };'],
+    [/decode_results\s+(\w+)\s*;/g, 'var $1 = { protocol: 0, decode_type: "UNKNOWN", value: 0, bits: 0 };'],
     [/IRsend\s+(\w+)\((\d+)\)/g, 'var $1 = _a.irsendNew($2)'],
     [/IRrecv\s+(\w+)\((\d+)\)/g, 'var $1 = _a.irrecvNew($2)'],
     [/(\w+)\.sendNEC\(/g, '_a.irsendNEC($1, '],
@@ -34,7 +34,7 @@ window.ArduinoLibs['IRremote'] = {
       },
       irrecvNew: function(pin) {
         self._irrecv.pin = pin;
-        self._irrecv.results = { protocol: 0, value: 0, bits: 0 };
+        self._irrecv.results = { protocol: 0, decode_type: 'UNKNOWN', value: 0, bits: 0 };
         return { _irId: 'irrecv' };
       },
       irsendNEC: function(obj, data, nbits) {
@@ -66,6 +66,7 @@ window.ArduinoLibs['IRremote'] = {
               c.runtimeState.decoding = false;
               if (results) {
                 results.protocol = 1;
+                results.decode_type = 'NEC';
                 results.value = code;
                 results.bits = 32;
               }
@@ -75,6 +76,7 @@ window.ArduinoLibs['IRremote'] = {
         }
         if (results) {
           results.protocol = 0;
+          results.decode_type = 'UNKNOWN';
           results.value = 0;
           results.bits = 0;
         }
