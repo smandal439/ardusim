@@ -80,11 +80,39 @@ window.ArduinoLibs['Serial'] = {
   },
 
   runtime: function(self) {
+    /* ── UART TX pin helpers — simulate frame on the hardware TX pin ── */
+    function _uartTxPin() {
+      if (self.board === 'esp32_devkit_v1') return 1;  /* GPIO1 = TX0 */
+      return 1; /* Arduino Uno/Nano D1 */
+    }
+    function _uartRxPin() {
+      if (self.board === 'esp32_devkit_v1') return 3;  /* GPIO3 = RX0 */
+      return 0; /* Arduino Uno/Nano D0 */
+    }
+    function _setPin(pin, v) {
+      var k = 'pin_' + pin;
+      if (self.pinStates[k] !== v) { self.pinStates[k] = v; self._emitPinChange(k, v); }
+    }
+    function _uartTxByte(b) {
+      var tx = _uartTxPin();
+      _setPin(tx, 0); /* start bit */
+      for (var i = 0; i < 8; i++) { _setPin(tx, (b >> i) & 1); }
+      _setPin(tx, 1); /* stop bit */
+    }
+    function _uartTxStr(str) {
+      var tx = _uartTxPin();
+      _setPin(tx, 1); /* idle HIGH */
+      for (var i = 0; i < str.length; i++) { _uartTxByte(str.charCodeAt(i) & 0xFF); }
+      _setPin(tx, 1); /* idle HIGH */
+    }
+
     return {
       /* Serial */
       serialBegin: function(baud) {
         self.serialBaud = baud;
         self._serialLog('[Serial] Opened at ' + baud + ' baud\n', 'system');
+        _setPin(_uartTxPin(), 1);
+        _setPin(_uartRxPin(), 1);
       },
       serialPrint: function(val, fmt) {
         var str;
@@ -96,6 +124,7 @@ window.ArduinoLibs['Serial'] = {
           str = val.toFixed(dec);
         } else str = String(val);
         self._serialLog(str, 'data');
+        _uartTxStr(str);
       },
       serialPrintln: function(val, fmt) {
         var str;
@@ -108,6 +137,7 @@ window.ArduinoLibs['Serial'] = {
           str = val.toFixed(dec);
         } else str = String(val);
         self._serialLog(str + '\n', 'data');
+        _uartTxStr(str + '\n');
       },
       serialPrintf: function(fmt) {
         var args = Array.prototype.slice.call(arguments, 1);
@@ -132,6 +162,7 @@ window.ArduinoLibs['Serial'] = {
           }
         });
         self._serialLog(str, 'data');
+        _uartTxStr(str);
       },
       serialRead: function() {
         return self.serialInputBuffer.length > 0
@@ -139,7 +170,7 @@ window.ArduinoLibs['Serial'] = {
           : -1;
       },
       serialAvailable: function() { return self.serialInputBuffer.length; },
-      serialWrite: function(val) { self._serialLog(String.fromCharCode(val), 'data'); },
+      serialWrite: function(val) { self._serialLog(String.fromCharCode(val), 'data'); _uartTxByte(val & 0xFF); },
       serialFlush: function() { },
       serialParseInt: function() {
         var buf = self.serialInputBuffer;
@@ -229,8 +260,8 @@ window.ArduinoLibs['Serial'] = {
         return line.endsWith('\n') ? line.slice(0, -1) : line;
       },
 
-      /* Serial1 (ESP32 UART1) — aliases to same serial buffer for simulation */
-      serial1Begin: function(baud) { self.serialBaud = baud; self._serialLog('[Serial1] Opened at ' + baud + ' baud\n', 'system'); },
+      /* Serial1 (ESP32 UART1) — TX=GPIO9, RX=GPIO10 */
+      serial1Begin: function(baud) { self.serialBaud = baud; self._serialLog('[Serial1] Opened at ' + baud + ' baud\n', 'system'); _setPin(9, 1); _setPin(10, 1); },
       serial1Print: function(val, fmt) {
         var str;
         if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
@@ -241,6 +272,7 @@ window.ArduinoLibs['Serial'] = {
           str = val.toFixed(dec);
         } else str = String(val);
         self._serialLog(str, 'data');
+        _setPin(9, 1); for (var i = 0; i < str.length; i++) { _setPin(9, 0); for (var b = 0; b < 8; b++) { _setPin(9, (str.charCodeAt(i) >> b) & 1); } _setPin(9, 1); }
       },
       serial1Println: function(val, fmt) {
         var str;
@@ -253,6 +285,7 @@ window.ArduinoLibs['Serial'] = {
           str = val.toFixed(dec);
         } else str = String(val);
         self._serialLog(str + '\n', 'data');
+        _setPin(9, 1); var s = str + '\n'; for (var i = 0; i < s.length; i++) { _setPin(9, 0); for (var b = 0; b < 8; b++) { _setPin(9, (s.charCodeAt(i) >> b) & 1); } _setPin(9, 1); }
       },
       serial1Read: function() {
         return self.serialInputBuffer.length > 0
@@ -260,10 +293,10 @@ window.ArduinoLibs['Serial'] = {
           : -1;
       },
       serial1Available: function() { return self.serialInputBuffer.length; },
-      serial1Write: function(val) { self._serialLog(String.fromCharCode(val), 'data'); },
+      serial1Write: function(val) { self._serialLog(String.fromCharCode(val), 'data'); _setPin(9, 0); for (var b = 0; b < 8; b++) { _setPin(9, (val >> b) & 1); } _setPin(9, 1); },
 
-      /* Serial2 (ESP32 UART2) — aliases to same serial buffer for simulation */
-      serial2Begin: function(baud) { self.serialBaud = baud; self._serialLog('[Serial2] Opened at ' + baud + ' baud\n', 'system'); },
+      /* Serial2 (ESP32 UART2) — TX=GPIO16, RX=GPIO17 */
+      serial2Begin: function(baud) { self.serialBaud = baud; self._serialLog('[Serial2] Opened at ' + baud + ' baud\n', 'system'); _setPin(16, 1); _setPin(17, 1); },
       serial2Print: function(val, fmt) {
         var str;
         if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
@@ -274,6 +307,7 @@ window.ArduinoLibs['Serial'] = {
           str = val.toFixed(dec);
         } else str = String(val);
         self._serialLog(str, 'data');
+        _setPin(16, 1); for (var i = 0; i < str.length; i++) { _setPin(16, 0); for (var b = 0; b < 8; b++) { _setPin(16, (str.charCodeAt(i) >> b) & 1); } _setPin(16, 1); }
       },
       serial2Println: function(val, fmt) {
         var str;
@@ -286,6 +320,7 @@ window.ArduinoLibs['Serial'] = {
           str = val.toFixed(dec);
         } else str = String(val);
         self._serialLog(str + '\n', 'data');
+        _setPin(16, 1); var s = str + '\n'; for (var i = 0; i < s.length; i++) { _setPin(16, 0); for (var b = 0; b < 8; b++) { _setPin(16, (s.charCodeAt(i) >> b) & 1); } _setPin(16, 1); }
       },
       serial2Read: function() {
         return self.serialInputBuffer.length > 0
@@ -293,7 +328,7 @@ window.ArduinoLibs['Serial'] = {
           : -1;
       },
       serial2Available: function() { return self.serialInputBuffer.length; },
-      serial2Write: function(val) { self._serialLog(String.fromCharCode(val), 'data'); },
+      serial2Write: function(val) { self._serialLog(String.fromCharCode(val), 'data'); _setPin(16, 0); for (var b = 0; b < 8; b++) { _setPin(16, (val >> b) & 1); } _setPin(16, 1); },
     };
   },
 };

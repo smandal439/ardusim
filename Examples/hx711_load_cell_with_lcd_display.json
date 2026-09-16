@@ -1,0 +1,238 @@
+{
+  "id": "hx711_load_cell_with_lcd_display",
+  "name": "HX711 Load Cell with LCD Display",
+  "icon": "🔧",
+  "desc": "A custom HX711 Load Cell with LCD Display circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "uno",
+        "type": "arduino_uno",
+        "x": 50,
+        "y": 80,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "hx1",
+        "type": "hx711",
+        "x": 380,
+        "y": 120,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "lc1",
+        "type": "load_cell",
+        "x": 500,
+        "y": 135,
+        "rotation": 0,
+        "props": {
+          "weight": 250,
+          "capacity": 5000,
+          "r0": 1000,
+          "sensitivity": 2
+        }
+      },
+      {
+        "id": "comp_1789583954088_q6h6a",
+        "type": "lcd1602_i2c",
+        "x": 255,
+        "y": -60,
+        "rotation": 0,
+        "props": {
+          "address": "0x27"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "lc1",
+          "pinId": "E+"
+        },
+        "to": {
+          "instId": "hx1",
+          "pinId": "E+"
+        },
+        "color": "#F44336",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "lc1",
+          "pinId": "E-"
+        },
+        "to": {
+          "instId": "hx1",
+          "pinId": "E-"
+        },
+        "color": "#212121",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "lc1",
+          "pinId": "A+"
+        },
+        "to": {
+          "instId": "hx1",
+          "pinId": "A+"
+        },
+        "color": "#1565C0",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "lc1",
+          "pinId": "A-"
+        },
+        "to": {
+          "instId": "hx1",
+          "pinId": "A-"
+        },
+        "color": "#FFFFFF",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "uno",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "hx1",
+          "pinId": "VCC"
+        },
+        "color": "#F44336",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "hx1",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "uno",
+          "pinId": "GND1"
+        },
+        "color": "#424242",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w7",
+        "from": {
+          "instId": "hx1",
+          "pinId": "DT"
+        },
+        "to": {
+          "instId": "uno",
+          "pinId": "D3"
+        },
+        "color": "#4CAF50",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w8",
+        "from": {
+          "instId": "hx1",
+          "pinId": "SCK"
+        },
+        "to": {
+          "instId": "uno",
+          "pinId": "D2"
+        },
+        "color": "#FF9800",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789583967603_zgoys",
+        "from": {
+          "instId": "uno",
+          "pinId": "SDA"
+        },
+        "to": {
+          "instId": "comp_1789583954088_q6h6a",
+          "pinId": "sda"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789583969702_11z3r",
+        "from": {
+          "instId": "comp_1789583954088_q6h6a",
+          "pinId": "scl"
+        },
+        "to": {
+          "instId": "uno",
+          "pinId": "SCL"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789583973553_11b8x",
+        "from": {
+          "instId": "uno",
+          "pinId": "5V2"
+        },
+        "to": {
+          "instId": "comp_1789583954088_q6h6a",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789583975177_rbuu3",
+        "from": {
+          "instId": "comp_1789583954088_q6h6a",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "uno",
+          "pinId": "GND3"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "code": "#include \"HX711.h\"\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\n// HX711 pins\nconst int HX711_DT  = 3;\nconst int HX711_SCK = 2;\n\nHX711 scale(HX711_DT, HX711_SCK);\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nfloat calibration_factor = 2280.0;\nfloat weight = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"Digital Scale\");\n  lcd.setCursor(0, 1);\n  lcd.print(\"Calibrating...\");\n\n  scale.set_scale(calibration_factor);\n  scale.tare();\n\n  delay(1000);\n  lcd.clear();\n  lcd.setCursor(0, 0);\n  lcd.print(\"Weight:\");\n}\n\nvoid loop() {\n  weight = scale.get_units(5);\n  if (weight < 0) weight = 0;\n\n  lcd.setCursor(0, 1);\n  lcd.print(\"                \");\n  lcd.setCursor(0, 1);\n  lcd.print(weight, 1);\n  lcd.print(\" kg\");\n\n  Serial.print(\"Weight: \");\n  Serial.print(weight, 1);\n  Serial.println(\" kg\");\n\n  delay(300);\n}"
+}

@@ -1,0 +1,73 @@
+{
+  "id": "ir_remote_lcd",
+  "name": "IR Remote Decoder with LCD",
+  "icon": "📺",
+  "desc": "Decode IR remote control signals using a TSOP4838 receiver and display the hex codes on a 16x2 I2C LCD. Press buttons on the battery-powered IR Remote to see decoded values on the LCD screen.",
+  "tags": ["intermediate", "ir", "remote", "receiver", "nec", "lcd", "display", "communication"],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 80
+      },
+      {
+        "id": "irrecv1",
+        "type": "ir_receiver",
+        "x": 30,
+        "y": 250
+      },
+      {
+        "id": "irremote1",
+        "type": "ir_remote",
+        "x": 300,
+        "y": 320
+      },
+      {
+        "id": "lcd1",
+        "type": "lcd1602_i2c",
+        "x": 420,
+        "y": 150
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": { "instId": "b1", "pinId": "5V" },
+        "to": { "instId": "irrecv1", "pinId": "VCC" }
+      },
+      {
+        "id": "w2",
+        "from": { "instId": "b1", "pinId": "GND1" },
+        "to": { "instId": "irrecv1", "pinId": "GND" }
+      },
+      {
+        "id": "w3",
+        "from": { "instId": "b1", "pinId": "D2" },
+        "to": { "instId": "irrecv1", "pinId": "OUT" }
+      },
+      {
+        "id": "w4",
+        "from": { "instId": "b1", "pinId": "A4" },
+        "to": { "instId": "lcd1", "pinId": "sda" }
+      },
+      {
+        "id": "w5",
+        "from": { "instId": "b1", "pinId": "A5" },
+        "to": { "instId": "lcd1", "pinId": "scl" }
+      },
+      {
+        "id": "w6",
+        "from": { "instId": "b1", "pinId": "5V2" },
+        "to": { "instId": "lcd1", "pinId": "vcc" }
+      },
+      {
+        "id": "w7",
+        "from": { "instId": "b1", "pinId": "GND2" },
+        "to": { "instId": "lcd1", "pinId": "gnd" }
+      }
+    ]
+  },
+  "code": "/*\n * IR Remote Decoder with LCD Display\n * Receives NEC IR codes from a remote control and displays\n * the hex values on a 16x2 I2C LCD.\n *\n * Wiring:\n *   TSOP4838 OUT -> D2\n *   TSOP4838 VCC -> 5V, GND -> GND\n *   LCD I2C SDA -> A4, SCL -> A5\n *   LCD I2C VCC -> 5V, GND -> GND\n *   IR Remote - click any button on the canvas remote to send a code.\n */\n\n#include <IRremote.h>\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nconst int RECV_PIN = 2;\nIRrecv irrecv(RECV_PIN);\ndecode_results results;\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nunsigned long lastCode = 0;\nint pressCount = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  irrecv.enableIRIn();\n  \n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"IR Remote Decoder\");\n  lcd.setCursor(0, 1);\n  lcd.print(\"Press a button...\");\n  \n  Serial.println(\"IR Remote Decoder with LCD ready\");\n  Serial.println(\"Press a button on the remote...\");\n}\n\nvoid loop() {\n  if (irrecv.decode(&results)) {\n    if (results.value != 0xFFFFFFFF) {\n      lastCode = results.value;\n      pressCount++;\n      \n      Serial.print(\"Code: 0x\");\n      Serial.print(results.value, HEX);\n      Serial.print(\"  Protocol: \");\n      Serial.println(results.decode_type);\n      \n      lcd.clear();\n      lcd.setCursor(0, 0);\n      lcd.print(\"Code: 0x\");\n      lcd.print(results.value, HEX);\n      \n      lcd.setCursor(0, 1);\n      lcd.print(\"Presses: \");\n      lcd.print(pressCount);\n      lcd.print(\"  P:");\n      lcd.print(results.decode_type);\n    }\n    irrecv.resume();\n  }\n}"
+}

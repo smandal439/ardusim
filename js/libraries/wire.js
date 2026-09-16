@@ -30,23 +30,53 @@ window.ArduinoLibs['Wire'] = {
   ],
 
   runtime: function(self) {
+    /* ── I2C bus pin helpers ── */
+    function _i2cPins() {
+      if (self.board === 'esp32_devkit_v1') return { sda: 21, scl: 22 };
+      if (self.board === 'stm32f746_disco') return { sda: 18, scl: 19 };
+      return { sda: 18, scl: 19 }; /* Arduino Uno / Nano: A4=18, A5=19 */
+    }
+    function _setSda(v) {
+      const k = 'pin_' + _i2cPins().sda;
+      if (self.pinStates[k] !== v) { self.pinStates[k] = v; self._emitPinChange(k, v); }
+    }
+    function _setScl(v) {
+      const k = 'pin_' + _i2cPins().scl;
+      if (self.pinStates[k] !== v) { self.pinStates[k] = v; self._emitPinChange(k, v); }
+    }
+    function _i2cStart() { _setScl(1); _setSda(1); _setSda(0); _setScl(0); }
+    function _i2cStop()  { _setScl(0); _setSda(0); _setScl(1); _setSda(1); }
+    function _i2cByte(b) {
+      for (var i = 7; i >= 0; i--) { _setScl(0); _setSda((b >> i) & 1); _setScl(1); }
+      _setScl(0); _setSda(1); _setScl(1); _setScl(0);
+    }
+
     return {
-      wireBegin: function() { self._serialLog('[Wire] I2C begin\n', 'system'); },
+      wireBegin: function() {
+        self._serialLog('[Wire] I2C begin\n', 'system');
+        _setSda(1); _setScl(1);
+      },
       wireBeginTransmission: function(addr) {
         self._wireTxAddr = Number(addr) || 0;
+        _i2cStart();
+        _i2cByte((self._wireTxAddr << 1) | 0);
       },
       wireWrite: function(val) {
         if (self._wireTxAddr === 0x68) self._wireRegPtr = Number(val) & 0xFF;
+        _i2cByte(Number(val) & 0xFF);
         return 1;
       },
       wireEndTransmission: function() {
+        _i2cStop();
         self._wireTxAddr = null;
+        _setSda(1); _setScl(1);
         return 0;
       },
       wireRequestFrom: function(addr, qty) {
         qty = Number(qty) || 0;
+        _i2cStart();
+        _i2cByte(((Number(addr) || 0) << 1) | 1);
         if ((Number(addr) || 0) === 0x68) {
-          /* Dispatch to whichever I2C device at 0x68 is present */
           const canvas = window.CircuitCanvas;
           const components = (canvas && Array.isArray(canvas.components)) ? canvas.components : [];
           const hasMpu   = components.some(c => c.type === 'mpu6050');
@@ -56,7 +86,6 @@ window.ArduinoLibs['Wire'] = {
           } else if (hasDs3231 && !hasMpu) {
             self._wireRxQueue = self._ds3231ReadRegs(self._wireRegPtr ?? 0x00, qty);
           } else if (hasMpu && hasDs3231) {
-            /* Both present — use last-used register range to guess intent */
             if (self._wireRegPtr >= 0x00 && self._wireRegPtr <= 0x13) {
               self._wireRxQueue = self._ds3231ReadRegs(self._wireRegPtr, qty);
             } else {
@@ -68,6 +97,12 @@ window.ArduinoLibs['Wire'] = {
         } else {
           self._wireRxQueue = [];
         }
+        for (var i = 0; i < qty; i++) {
+          var byte = (self._wireRxQueue && self._wireRxQueue.length) ? self._wireRxQueue.shift() : 0;
+          _i2cByte(byte);
+        }
+        _i2cStop();
+        _setSda(1); _setScl(1);
         return qty;
       },
       wireRead: function() {
