@@ -1179,8 +1179,8 @@ class CircuitCanvas {
       { label: '8',   code: 0x52, row: 6, col: 1 },
       { label: '9',   code: 0x4A, row: 6, col: 2 },
     ];
-    const btnW = 18, btnH = 14, gapX = 3, gapY = 2;
-    const startX = 5, startY = 18;
+    const btnW = 18, btnH = 13, gapX = 3, gapY = 2;
+    const startX = 5, startY = 22;
     for (const inst of this.components) {
       if (inst.type !== 'ir_remote') continue;
       const lx = wx - inst.x, ly = wy - inst.y;
