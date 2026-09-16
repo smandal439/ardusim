@@ -1,0 +1,37 @@
+{
+  "id": "ina219_solar_tracker",
+  "name": "INA219 Solar Panel Tracker",
+  "icon": "☀",
+  "desc": "Dual LDR sun tracker with INA219 power monitoring — servo follows the brightest light while INA219 measures solar panel output voltage, current and power on an OLED display.",
+  "tags": ["intermediate", "ina219", "solar", "servo", "ldr", "i2c", "tracker", "power"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "arduino_uno", "x": 250, "y": 80 },
+      { "id": "ina219", "type": "ina219", "x": 80, "y": 200 },
+      { "id": "oled1", "type": "oled_ssd1306", "x": 440, "y": 200 },
+      { "id": "servo1", "type": "servo", "x": 80, "y": 380 },
+      { "id": "ldr1", "type": "ldr", "x": 280, "y": 380 },
+      { "id": "ldr2", "type": "ldr", "x": 400, "y": 380 }
+    ],
+    "wires": [
+      { "id": "w1",  "from": { "instId": "b1", "pinId": "5V" },  "to": { "instId": "ina219", "pinId": "VCC" } },
+      { "id": "w2",  "from": { "instId": "b1", "pinId": "GND1" }, "to": { "instId": "ina219", "pinId": "GND" } },
+      { "id": "w3",  "from": { "instId": "b1", "pinId": "A4" },  "to": { "instId": "ina219", "pinId": "SDA" } },
+      { "id": "w4",  "from": { "instId": "b1", "pinId": "A5" },  "to": { "instId": "ina219", "pinId": "SCL" } },
+      { "id": "w5",  "from": { "instId": "b1", "pinId": "5V" },  "to": { "instId": "oled1", "pinId": "vcc" } },
+      { "id": "w6",  "from": { "instId": "b1", "pinId": "GND1" }, "to": { "instId": "oled1", "pinId": "gnd" } },
+      { "id": "w7",  "from": { "instId": "b1", "pinId": "A4" },  "to": { "instId": "oled1", "pinId": "sda" } },
+      { "id": "w8",  "from": { "instId": "b1", "pinId": "A5" },  "to": { "instId": "oled1", "pinId": "scl" } },
+      { "id": "w9",  "from": { "instId": "b1", "pinId": "D9" },  "to": { "instId": "servo1", "pinId": "signal" } },
+      { "id": "w10", "from": { "instId": "b1", "pinId": "5V" },  "to": { "instId": "servo1", "pinId": "vcc" } },
+      { "id": "w11", "from": { "instId": "b1", "pinId": "GND1" }, "to": { "instId": "servo1", "pinId": "gnd" } },
+      { "id": "w12", "from": { "instId": "b1", "pinId": "5V" },  "to": { "instId": "ldr1", "pinId": "vcc" } },
+      { "id": "w13", "from": { "instId": "b1", "pinId": "A0" },  "to": { "instId": "ldr1", "pinId": "a" } },
+      { "id": "w14", "from": { "instId": "b1", "pinId": "GND1" }, "to": { "instId": "ldr1", "pinId": "gnd" } },
+      { "id": "w15", "from": { "instId": "b1", "pinId": "5V" },  "to": { "instId": "ldr2", "pinId": "vcc" } },
+      { "id": "w16", "from": { "instId": "b1", "pinId": "A1" },  "to": { "instId": "ldr2", "pinId": "a" } },
+      { "id": "w17", "from": { "instId": "b1", "pinId": "GND1" }, "to": { "instId": "ldr2", "pinId": "gnd" } }
+    ]
+  },
+  "code": "/*\n * INA219 Solar Panel Tracker\n * Dual-LDR sun tracker with INA219 power monitoring.\n *\n * Wiring:\n *   INA219  — VCC→5V, GND→GND, SDA→A4, SCL→A5\n *   OLED    — VCC→5V, GND→GND, SDA→A4, SCL→A5  (shared I2C bus)\n *   Servo   — SIG→D9,  VCC→5V, GND→GND\n *   LDR (L) — VCC→5V, AO→A0,  GND→GND\n *   LDR (R) — VCC→5V, AO→A1,  GND→GND\n */\n\n#include <Wire.h>\n#include <Servo.h>\n#include <Adafruit_INA219.h>\n#include <Adafruit_SSD1306.h>\n\nAdafruit_INA219 ina219;\nAdafruit_SSD1306 oled(128, 64, &Wire, -1);\nServo trackerServo;\n\nconst int LDR_LEFT  = A0;\nconst int LDR_RIGHT = A1;\nconst int SERVO_PIN = 9;\n\nint servoAngle = 90;\nconst int TOLERANCE = 15;\nconst int STEP      = 2;\n\nvoid setup() {\n  Serial.begin(9600);\n  ina219.begin();\n  oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);\n  trackerServo.attach(SERVO_PIN);\n  trackerServo.write(servoAngle);\n\n  oled.clearDisplay();\n  oled.setTextSize(1);\n  oled.setTextColor(SSD1306_WHITE);\n  oled.setCursor(10, 20);\n  oled.print(\"Solar Tracker\");\n  oled.setCursor(10, 36);\n  oled.print(\"INA219 + Servo\");\n  oled.display();\n  delay(1500);\n}\n\nvoid loop() {\n  int leftVal  = analogRead(LDR_LEFT);\n  int rightVal = analogRead(LDR_RIGHT);\n\n  if (leftVal - rightVal > TOLERANCE) {\n    servoAngle -= STEP;\n  } else if (rightVal - leftVal > TOLERANCE) {\n    servoAngle += STEP;\n  }\n  servoAngle = constrain(servoAngle, 0, 180);\n  trackerServo.write(servoAngle);\n\n  float busVoltage = ina219.getBusVoltage_V();\n  float current    = ina219.getCurrent_mA();\n  float power      = ina219.getPower_mW();\n\n  oled.clearDisplay();\n  oled.setTextSize(1);\n  oled.setTextColor(SSD1306_WHITE);\n\n  oled.setCursor(0, 0);\n  oled.print(\"--- Solar Tracker ---\");\n\n  oled.setCursor(0, 14);\n  oled.print(\"Angle: \");\n  oled.print(servoAngle);\n  oled.print((char)247);\n\n  oled.setCursor(0, 26);\n  oled.print(\"V: \");\n  oled.print(busVoltage, 2);\n  oled.print(\" V\");\n\n  oled.setCursor(0, 36);\n  oled.print(\"I: \");\n  oled.print(current, 1);\n  oled.print(\" mA\");\n\n  oled.setCursor(0, 46);\n  oled.print(\"P: \");\n  oled.print(power, 1);\n  oled.print(\" mW\");\n\n  oled.setCursor(0, 56);\n  oled.print(\"L:\");\n  oled.print(leftVal);\n  oled.print(\" R:\");\n  oled.print(rightVal);\n\n  oled.display();\n\n  Serial.print(\"Angle=\");\n  Serial.print(servoAngle);\n  Serial.print(\" V=\");\n  Serial.print(busVoltage, 2);\n  Serial.print(\" I=\");\n  Serial.print(current, 1);\n  Serial.print(\" P=\");\n  Serial.print(power, 1);\n  Serial.print(\" LDR_L=\");\n  Serial.print(leftVal);\n  Serial.print(\" LDR_R=\");\n  Serial.println(rightVal);\n\n  delay(200);\n}"
+}

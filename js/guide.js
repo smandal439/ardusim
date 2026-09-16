@@ -2098,6 +2098,7 @@ void loop() {
     },
     wiring: 'VCC→5V, GND→GND, SDA→A4, SCL→A5.',
     code: `#include <Wire.h>\n#include <Adafruit_INA219.h>\nAdafruit_INA219 ina219;\nvoid setup(){\n  Serial.begin(9600);\n  ina219.begin();\n}\nvoid loop(){\n  float busVoltage = ina219.getBusVoltage_V();\n  float current = ina219.getCurrent_mA();\n  float power = ina219.getPower_mW();\n  Serial.print("V: "); Serial.print(busVoltage);\n  Serial.print(" I: "); Serial.print(current);\n  Serial.print("mA P: "); Serial.print(power);\n  Serial.println("mW");\n  delay(1000);\n}`,
+    exampleId: 'ina219_solar_tracker',
   },
 
   max6675: {
