@@ -23,15 +23,16 @@ window.ArduinoLibs['IRremote'] = {
     [/(\w+)\.stopIRSend\(\)/g, '_a.irsendStop($1)'],
   ],
 
-  runtime: function(self) {
+  runtime: function(ctx) {
+    var self = ctx || {};
+    self._irsend = self._irsend || {};
+    self._irrecv = self._irrecv || {};
     return {
       irsendNew: function(pin) {
-        self._irsend = self._irsend || {};
         self._irsend.pin = pin;
         return { _irId: 'irsend' };
       },
       irrecvNew: function(pin) {
-        self._irrecv = self._irrecv || {};
         self._irrecv.pin = pin;
         self._irrecv.results = { protocol: 0, value: 0, bits: 0 };
         return { _irId: 'irrecv' };
@@ -62,7 +63,6 @@ window.ArduinoLibs['IRremote'] = {
             var c = canvas.components[i];
             if (c.type === 'ir_receiver' && c.runtimeState && c.runtimeState.decoding) {
               var code = c.runtimeState.code || 0;
-              self._irrecv.results = { protocol: 1, value: code, bits: 32 };
               c.runtimeState.decoding = false;
               if (results) {
                 results.protocol = 1;
