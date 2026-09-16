@@ -5271,3 +5271,252 @@ class TFTDisplayComponent extends Component {
   update() {}
 }
 registerComponent('tft_display', TFTDisplayComponent);
+
+
+/* ═══════════════════════════════════════════════════════════════
+   IR LED — standalone infrared transmitter
+   ═══════════════════════════════════════════════════════════════ */
+
+defComp({
+  id: 'ir_led',
+  name: 'IR LED',
+  category: 'Sensors',
+  icon: '🔴',
+  desc: 'Infrared LED transmitter — emits IR light when driven HIGH. Pairs with the IR Receiver TSOP4838.',
+  width: 30,
+  height: 50,
+  defaultProps: { on: 0 },
+  interactive: [
+    { field: 'on', label: 'State', min: 0, max: 1, step: 1, unit: '' },
+  ],
+  pins: [
+    { id: 'anode', label: '+', type: PIN_TYPE.DIGITAL, x: 10, y: 50, side: 'bottom' },
+    { id: 'cathode', label: '−', type: PIN_TYPE.GND, x: 22, y: 50, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const isOn = !!(inst.runtimeState?.on ?? inst.props.on);
+    ctx.save();
+    ctx.translate(x, y);
+
+    // LED body
+    ctx.fillStyle = isOn ? '#ff2222' : '#660000';
+    ctx.beginPath();
+    ctx.arc(15, 18, 10, 0, Math.PI * 2);
+    ctx.fill();
+    if (isOn) {
+      ctx.shadowColor = '#ff0000';
+      ctx.shadowBlur = 14;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // IR rays
+    if (isOn) {
+      ctx.strokeStyle = 'rgba(255,60,60,0.35)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.arc(15, 18, 14 + i * 4, -0.5, 0.5);
+        ctx.stroke();
+      }
+    }
+
+    // Label
+    ctx.fillStyle = '#aaa';
+    ctx.font = 'bold 4px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('IR', 15, 34);
+
+    // Leads
+    ctx.strokeStyle = '#a0a0a0';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(10, 28); ctx.lineTo(10, 50); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(22, 28); ctx.lineTo(22, 50); ctx.stroke();
+
+    if (inst.selected) drawSelectionRect(ctx, 0, 0, 30, 52);
+    ctx.restore();
+  },
+});
+
+class IRLEDComponent extends Component {
+  getPins() {
+    return [
+      { id: 'anode', label: '+', type: PIN_TYPE.DIGITAL, x: 10, y: 50, side: 'bottom' },
+      { id: 'cathode', label: '−', type: PIN_TYPE.GND, x: 22, y: 50, side: 'bottom' },
+    ];
+  }
+  update(sim) {
+    const anodeState = this.getPin('anode', sim)?.state ?? 0;
+    this.inst.runtimeState = this.inst.runtimeState || {};
+    this.inst.runtimeState.on = anodeState ? 1 : 0;
+  }
+}
+registerComponent('ir_led', IRLEDComponent);
+
+
+/* ═══════════════════════════════════════════════════════════════
+   IR REMOTE — handheld remote control with buttons
+   ═══════════════════════════════════════════════════════════════ */
+
+defComp({
+  id: 'ir_remote',
+  name: 'IR Remote Control',
+  category: 'Input',
+  icon: '🎮',
+  desc: 'Infrared remote control with numeric keys and function buttons. Click a button to send its IR code to any IR Receiver on the canvas.',
+  width: 70,
+  height: 140,
+  defaultProps: { lastButton: '', code: 0 },
+  interactive: [
+    { field: 'code', label: 'Last Code', min: 0, max: 65535, step: 1, unit: '' },
+  ],
+  pins: [
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 18, y: 140, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 50, y: 140, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const lastBtn = inst.runtimeState?.lastButton ?? inst.props.lastButton ?? '';
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Remote body
+    const bodyGrad = ctx.createLinearGradient(0, 0, 70, 140);
+    bodyGrad.addColorStop(0, '#2a2a2a');
+    bodyGrad.addColorStop(1, '#111');
+    ctx.fillStyle = bodyGrad;
+    roundRect(ctx, 0, 0, 70, 140, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // IR window at top
+    ctx.fillStyle = '#220000';
+    roundRect(ctx, 22, 4, 26, 8, 3);
+    ctx.fill();
+
+    // Button layout
+    const buttons = [
+      { label: 'CH−', code: 0x45, row: 0, col: 0 },
+      { label: 'CH',  code: 0x46, row: 0, col: 1 },
+      { label: 'CH+', code: 0x47, row: 0, col: 2 },
+      { label: 'PREV', code: 0x44, row: 1, col: 0 },
+      { label: 'NEXT', code: 0x40, row: 1, col: 1 },
+      { label: 'PLAY', code: 0x43, row: 1, col: 2 },
+      { label: '−',   code: 0x07, row: 2, col: 0 },
+      { label: '+',   code: 0x15, row: 2, col: 1 },
+      { label: 'EQ',  code: 0x09, row: 2, col: 2 },
+      { label: '0',   code: 0x16, row: 3, col: 1 },
+      { label: '1',   code: 0x0C, row: 4, col: 0 },
+      { label: '2',   code: 0x18, row: 4, col: 1 },
+      { label: '3',   code: 0x5E, row: 4, col: 2 },
+      { label: '4',   code: 0x08, row: 5, col: 0 },
+      { label: '5',   code: 0x1C, row: 5, col: 1 },
+      { label: '6',   code: 0x5A, row: 5, col: 2 },
+      { label: '7',   code: 0x42, row: 6, col: 0 },
+      { label: '8',   code: 0x52, row: 6, col: 1 },
+      { label: '9',   code: 0x4A, row: 6, col: 2 },
+    ];
+
+    const btnW = 18, btnH = 14, gapX = 3, gapY = 2;
+    const startX = 5, startY = 18;
+
+    buttons.forEach(btn => {
+      const bx = startX + btn.col * (btnW + gapX);
+      const by = startY + btn.row * (btnH + gapY);
+      const isActive = lastBtn === btn.label;
+
+      ctx.fillStyle = isActive ? '#00cc66' : '#333';
+      roundRect(ctx, bx, by, btnW, btnH, 3);
+      ctx.fill();
+      ctx.strokeStyle = isActive ? '#00ff88' : '#555';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+
+      ctx.fillStyle = isActive ? '#000' : '#ccc';
+      ctx.font = 'bold 4px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(btn.label, bx + btnW / 2, by + btnH / 2 + 1.5);
+    });
+
+    // Last code display
+    const code = inst.runtimeState?.code ?? inst.props.code ?? 0;
+    if (code > 0) {
+      ctx.fillStyle = '#0a0a1a';
+      roundRect(ctx, 10, 130, 50, 7, 2);
+      ctx.fill();
+      ctx.fillStyle = '#00ff88';
+      ctx.font = 'bold 4px monospace';
+      ctx.fillText('0x' + code.toString(16).toUpperCase().padStart(2, '0'), 35, 136);
+    }
+
+    if (inst.selected) drawSelectionRect(ctx, 0, 0, 70, 140);
+    ctx.restore();
+  },
+  // Click handler: detect which button was pressed
+  onClick(inst, mx, my, sim) {
+    const buttons = [
+      { label: 'CH−', code: 0x45, row: 0, col: 0 },
+      { label: 'CH',  code: 0x46, row: 0, col: 1 },
+      { label: 'CH+', code: 0x47, row: 0, col: 2 },
+      { label: 'PREV', code: 0x44, row: 1, col: 0 },
+      { label: 'NEXT', code: 0x40, row: 1, col: 1 },
+      { label: 'PLAY', code: 0x43, row: 1, col: 2 },
+      { label: '−',   code: 0x07, row: 2, col: 0 },
+      { label: '+',   code: 0x15, row: 2, col: 1 },
+      { label: 'EQ',  code: 0x09, row: 2, col: 2 },
+      { label: '0',   code: 0x16, row: 3, col: 1 },
+      { label: '1',   code: 0x0C, row: 4, col: 0 },
+      { label: '2',   code: 0x18, row: 4, col: 1 },
+      { label: '3',   code: 0x5E, row: 4, col: 2 },
+      { label: '4',   code: 0x08, row: 5, col: 0 },
+      { label: '5',   code: 0x1C, row: 5, col: 1 },
+      { label: '6',   code: 0x5A, row: 5, col: 2 },
+      { label: '7',   code: 0x42, row: 6, col: 0 },
+      { label: '8',   code: 0x52, row: 6, col: 1 },
+      { label: '9',   code: 0x4A, row: 6, col: 2 },
+    ];
+
+    const btnW = 18, btnH = 14, gapX = 3, gapY = 2;
+    const startX = 5, startY = 18;
+    const lx = mx - inst.x, ly = my - inst.y;
+
+    for (const btn of buttons) {
+      const bx = startX + btn.col * (btnW + gapX);
+      const by = startY + btn.row * (btnH + gapY);
+      if (lx >= bx && lx <= bx + btnW && ly >= by && ly <= by + btnH) {
+        inst.runtimeState = inst.runtimeState || {};
+        inst.runtimeState.lastButton = btn.label;
+        inst.runtimeState.code = btn.code;
+        inst.props.code = btn.code;
+
+        // Find all ir_receiver instances and update their code
+        if (sim && sim.instances) {
+          sim.instances.forEach(inst2 => {
+            if (inst2.type === 'ir_receiver') {
+              inst2.runtimeState = inst2.runtimeState || {};
+              inst2.runtimeState.code = btn.code;
+              inst2.runtimeState.decoding = true;
+              inst2.props.code = btn.code;
+            }
+          });
+        }
+        return true;
+      }
+    }
+    return false;
+  },
+});
+
+class IRRemoteComponent extends Component {
+  getPins() {
+    return [
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 18, y: 140, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 50, y: 140, side: 'bottom' },
+    ];
+  }
+  update() {}
+}
+registerComponent('ir_remote', IRRemoteComponent);

@@ -1,0 +1,25 @@
+{
+  "id": "ir_remote_decode",
+  "name": "IR Remote Decoder",
+  "icon": "🎮",
+  "desc": "Decode IR remote control signals using a TSOP4838 receiver — press buttons on the IR Remote to see the NEC hex codes on the Serial Monitor and blink the built-in LED.",
+  "tags": ["intermediate", "ir", "remote", "receiver", "nec", "communication"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "arduino_uno", "x": 250, "y": 80 },
+      { "id": "irrecv1", "type": "ir_receiver", "x": 80, "y": 220 },
+      { "id": "irremote1", "type": "ir_remote", "x": 300, "y": 300 },
+      { "id": "led1", "type": "led", "x": 460, "y": 220 }
+    ],
+    "wires": [
+      { "id": "w1", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "irrecv1", "pinId": "VCC" } },
+      { "id": "w2", "from": { "instId": "b1", "pinId": "GND1" }, "to": { "instId": "irrecv1", "pinId": "GND" } },
+      { "id": "w3", "from": { "instId": "b1", "pinId": "D2" }, "to": { "instId": "irrecv1", "pinId": "OUT" } },
+      { "id": "w4", "from": { "instId": "b1", "pinId": "5V" }, "to": { "instId": "irremote1", "pinId": "VCC" } },
+      { "id": "w5", "from": { "instId": "b1", "pinId": "GND1" }, "to": { "instId": "irremote1", "pinId": "GND" } },
+      { "id": "w6", "from": { "instId": "b1", "pinId": "D13" }, "to": { "instId": "led1", "pinId": "anode" } },
+      { "id": "w7", "from": { "instId": "b1", "pinId": "GND1" }, "to": { "instId": "led1", "pinId": "cathode" } }
+    ]
+  },
+  "code": "/*\n * IR Remote Decoder\n * Receives NEC IR codes from a remote control and prints them\n * to the Serial Monitor. The built-in LED (D13) blinks on each press.\n *\n * Wiring:\n *   TSOP4838 OUT \u2192 D2\n *   TSOP4838 VCC \u2192 5V, GND \u2192 GND\n *   IR Remote \u2014 click any button on the canvas remote to send a code.\n */\n\n#include <IRremote.h>\n\nconst int RECV_PIN = 2;\nIRrecv irrecv(RECV_PIN);\ndecode_results results;\n\nvoid setup() {\n  Serial.begin(9600);\n  irrecv.enableIRIn();\n  pinMode(LED_BUILTIN, OUTPUT);\n  Serial.println(\"IR Remote Decoder ready\");\n  Serial.println(\"Press a button on the remote...\");\n}\n\nvoid loop() {\n  if (irrecv.decode(&results)) {\n    Serial.print(\"Code: 0x\");\n    Serial.print(results.value, HEX);\n    Serial.print(\"  Protocol: \");\n    Serial.println(results.decode_type);\n\n    digitalWrite(LED_BUILTIN, HIGH);\n    delay(100);\n    digitalWrite(LED_BUILTIN, LOW);\n\n    irrecv.resume();\n  }\n}"
+}

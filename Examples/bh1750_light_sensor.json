@@ -1,0 +1,127 @@
+{
+  "id": "bh1750_light_sensor",
+  "name": "BH1750 Light Sensor",
+  "icon": "☀️",
+  "desc": "Read ambient light intensity using BH1750 sensor over I2C. Displays lux values on Serial Monitor and controls an LED based on light levels (dim at night, bright in daylight).",
+  "tags": [
+    "sensor",
+    "light",
+    "i2c",
+    "bh1750"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 180,
+        "y": 120,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "s1",
+        "type": "bh1750",
+        "x": 420,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "lux": 400
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 420,
+        "y": 280,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "s1",
+          "pinId": "VCC"
+        },
+        "color": "#cc0000",
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "s1",
+          "pinId": "GND"
+        },
+        "color": "#333333",
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "b1",
+          "pinId": "A5"
+        },
+        "to": {
+          "instId": "s1",
+          "pinId": "SCL"
+        },
+        "color": "#0066ff",
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "b1",
+          "pinId": "A4"
+        },
+        "to": {
+          "instId": "s1",
+          "pinId": "SDA"
+        },
+        "color": "#00cc00",
+        "waypoints": []
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "b1",
+          "pinId": "D9"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": "#ff6600",
+        "waypoints": []
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND"
+        },
+        "color": "#333333",
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n * BH1750 Light Intensity Sensor Example\n *\n * Reads ambient light level in lux and controls an LED.\n * LED brightness adjusts automatically based on light conditions.\n *\n * Wiring:\n *   BH1750 VCC -> Arduino 5V\n *   BH1750 GND -> Arduino GND\n *   BH1750 SCL -> Arduino A5 (SCL)\n *   BH1750 SDA -> Arduino A4 (SDA)\n *   LED anode  -> Arduino D9 (PWM)\n *   LED cathode -> Arduino GND\n *\n * Light Levels Reference:\n *   0 lx       = Complete darkness\n *   10-50 lx   = Dark room\n *   100-200 lx = Living room (dim)\n *   400-500 lx = Office lighting\n *   750-1000 lx = Bright indoor\n *   10000-25000 lx = Overcast day\n *   30000-100000 lx = Direct sunlight\n */\n\n#include <Wire.h>\n#include <BH1750.h>\n\n// Create BH1750 instance\nBH1750 lightSensor;\n\n// LED pin\nconst int LED_PIN = 9;\n\n// Light level thresholds (in lux)\nconst float DARK_THRESHOLD = 50.0;\nconst float DIM_THRESHOLD = 200.0;\nconst float BRIGHT_THRESHOLD = 1000.0;\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"BH1750 Light Sensor Demo\");\n  Serial.println(\"=======================\");\n  \n  // Initialize I2C and sensor\n  Wire.begin();\n  \n  // Begin in continuous high-resolution mode\n  if (lightSensor.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {\n    Serial.println(\"BH1750 initialized successfully!\");\n  } else {\n    Serial.println(\"Error: BH1750 not found!\");\n    while (1);\n  }\n  \n  // Set LED pin\n  pinMode(LED_PIN, OUTPUT);\n  \n  Serial.println();\n  delay(100);\n}\n\nvoid loop() {\n  // Read light level\n  float lux = lightSensor.readLightLevel();\n  \n  // Check for valid reading\n  if (lux < 0) {\n    Serial.println(\"Error reading sensor!\");\n    delay(1000);\n    return;\n  }\n  \n  // Map lux to LED brightness (0-255)\n  // Inverse relationship: darker = brighter LED\n  int ledBrightness;\n  \n  if (lux < DARK_THRESHOLD) {\n    // Very dark - LED at full brightness\n    ledBrightness = 255;\n  } else if (lux < DIM_THRESHOLD) {\n    // Dim lighting - LED moderately bright\n    ledBrightness = map(lux, DARK_THRESHOLD, DIM_THRESHOLD, 255, 128);\n  } else if (lux < BRIGHT_THRESHOLD) {\n    // Normal indoor - LED dim\n    ledBrightness = map(lux, DIM_THRESHOLD, BRIGHT_THRESHOLD, 128, 32);\n  } else {\n    // Bright daylight - LED off or very dim\n    ledBrightness = map(lux, BRIGHT_THRESHOLD, 10000, 32, 0);\n    ledBrightness = constrain(ledBrightness, 0, 32);\n  }\n  \n  // Apply brightness\n  analogWrite(LED_PIN, ledBrightness);\n  \n  // Print to Serial Monitor\n  Serial.print(\"Light: \");\n  Serial.print(lux, 1);\n  Serial.print(\" lx | LED: \");\n  Serial.print(ledBrightness);\n  Serial.print(\"/255 | \");\n  \n  // Print light condition\n  if (lux < DARK_THRESHOLD) {\n    Serial.println(\"DARK - LED ON full\");\n  } else if (lux < DIM_THRESHOLD) {\n    Serial.println(\"DIM - LED medium\");\n  } else if (lux < BRIGHT_THRESHOLD) {\n    Serial.println(\"NORMAL - LED dim\");\n  } else {\n    Serial.println(\"BRIGHT - LED OFF\");\n  }\n  \n  // Update every 500ms\n  delay(500);\n}"
+}

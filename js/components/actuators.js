@@ -2482,6 +2482,192 @@ class TB6600Component extends Component {
   }
 }
 
+/* ─── NEMA 17 STEPPER MOTOR ─── */
+defComp({
+  id: 'nema17',
+  name: 'NEMA 17 Stepper',
+  category: 'Actuators',
+  icon: '⚙️',
+  desc: 'NEMA 17 bipolar stepper motor (1.8 deg/step, 0.4 Nm torque). Connect to TB6600 or similar driver via A+, A-, B+, B- wires.',
+  width: 80,
+  height: 100,
+  defaultProps: { angle: 0 },
+  pins: [
+    { id: 'A+', label: 'A+', type: PIN_TYPE.SIGNAL, x: 20, y: 100, side: 'bottom' },
+    { id: 'A-', label: 'A-', type: PIN_TYPE.SIGNAL, x: 40, y: 100, side: 'bottom' },
+    { id: 'B+', label: 'B+', type: PIN_TYPE.SIGNAL, x: 60, y: 100, side: 'bottom' },
+    { id: 'B-', label: 'B-', type: PIN_TYPE.SIGNAL, x: 80, y: 100, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const angle = inst.runtimeState?.angle ?? inst.props.angle ?? 0;
+    const rad = (angle * Math.PI) / 180;
+    const isRunning = !!(sim && sim.isRunning);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Helper for rounded rectangles
+    const drawRR = (rx, ry, rw, rh, rad = 2) => {
+      ctx.beginPath();
+      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+
+    // 1. Motor body (front view - circular face)
+    const cx = 40, cy = 45;
+
+    // Outer cylindrical body (metallic silver)
+    const bodyGrad = ctx.createRadialGradient(cx - 8, cy - 8, 2, cx, cy, 35);
+    bodyGrad.addColorStop(0, '#e8e8e8');
+    bodyGrad.addColorStop(0.3, '#c0c0c0');
+    bodyGrad.addColorStop(0.7, '#888888');
+    bodyGrad.addColorStop(1, '#555555');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 34, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Front face plate
+    const faceGrad = ctx.createRadialGradient(cx - 5, cy - 5, 1, cx, cy, 28);
+    faceGrad.addColorStop(0, '#d0d0d0');
+    faceGrad.addColorStop(0.5, '#a0a0a0');
+    faceGrad.addColorStop(1, '#707070');
+    ctx.fillStyle = faceGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // 2. Mounting holes (4 corners)
+    const holeRadius = 22;
+    const holeSize = 3;
+    [[0, 0], [Math.PI / 2, 0], [Math.PI, 0], [Math.PI * 1.5, 0]].forEach(([rot]) => {
+      const hx = cx + Math.cos(rot) * holeRadius;
+      const hy = cy + Math.sin(rot) * holeRadius;
+      ctx.fillStyle = '#333';
+      ctx.beginPath();
+      ctx.arc(hx, hy, holeSize, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#666';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    });
+
+    // 3. Central shaft (D-cut profile)
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rad);
+
+    // Shaft base
+    const shaftGrad = ctx.createRadialGradient(-2, -2, 1, 0, 0, 8);
+    shaftGrad.addColorStop(0, '#ffffff');
+    shaftGrad.addColorStop(0.5, '#cccccc');
+    shaftGrad.addColorStop(1, '#888888');
+    ctx.fillStyle = shaftGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // D-cut flat
+    ctx.fillStyle = '#999';
+    ctx.fillRect(-2, -8, 4, 16);
+
+    // Shaft tip
+    ctx.fillStyle = '#aaa';
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+
+    // 4. Rotation indicator mark
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rad);
+    ctx.fillStyle = '#e53935';
+    ctx.beginPath();
+    ctx.arc(20, 0, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 5. Label
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 5px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('NEMA 17', cx, 82);
+
+    // 6. Wire leads (4 wires at bottom)
+    const wireColors = ['#e53935', '#ff9800', '#4caf50', '#2196f3'];
+    const wireLabels = ['A+', 'A-', 'B+', 'B-'];
+    const wireXs = [20, 40, 60, 80];
+
+    wireXs.forEach((wx, i) => {
+      // Wire insulation
+      ctx.fillStyle = wireColors[i];
+      ctx.fillRect(wx - 1.5, 80, 3, 12);
+
+      // Wire copper end
+      ctx.fillStyle = '#d4af37';
+      ctx.fillRect(wx - 1, 90, 2, 4);
+
+      // Pin label
+      ctx.fillStyle = '#aaa';
+      ctx.font = '3px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(wireLabels[i], wx, 98);
+    });
+
+    // 7. Angle display
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    drawRR(20, 85, 40, 10, 2);
+    ctx.fill();
+    ctx.fillStyle = isRunning ? '#00e5ff' : '#888';
+    ctx.font = 'bold 5px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(Math.round(((angle % 360) + 360) % 360) + ' deg', cx, 92);
+
+    if (inst.selected) drawSelectionRect(ctx, 2, 2, 76, 100);
+    ctx.restore();
+  }
+});
+
+class Nema17Component extends Component {
+  getPins() {
+    return [
+      { id: 'A+', label: 'A+', type: PIN_TYPE.SIGNAL, x: 20, y: 100, side: 'bottom' },
+      { id: 'A-', label: 'A-', type: PIN_TYPE.SIGNAL, x: 40, y: 100, side: 'bottom' },
+      { id: 'B+', label: 'B+', type: PIN_TYPE.SIGNAL, x: 60, y: 100, side: 'bottom' },
+      { id: 'B-', label: 'B-', type: PIN_TYPE.SIGNAL, x: 80, y: 100, side: 'bottom' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+
+    // Find connected TB6600 driver
+    const tb6600 = this.findConnected('A+', 'tb6600')[0] ||
+                   this.findConnected('A-', 'tb6600')[0] ||
+                   this.findConnected('B+', 'tb6600')[0] ||
+                   this.findConnected('B-', 'tb6600')[0];
+
+    if (tb6600 && tb6600.runtimeState) {
+      // Sync angle from TB6600 driver
+      this.runtimeState.angle = tb6600.runtimeState.angle ?? 0;
+      this.runtimeState.position = tb6600.runtimeState.position ?? 0;
+    }
+  }
+}
+
 registerComponent('servo', ServoComponent);
 registerComponent('servo_continuous', ServoContinuousComponent);
 registerComponent('relay', RelayComponent);
@@ -2489,3 +2675,4 @@ registerComponent('dc_motor', DCMotorComponent);
 registerComponent('l298n', L298NComponent);
 registerComponent('stepper_28byj', Stepper28BYJComponent);
 registerComponent('tb6600', TB6600Component);
+registerComponent('nema17', Nema17Component);

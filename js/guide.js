@@ -2172,6 +2172,37 @@ void loop() {
     wiring: 'VCC→5V, GND→GND, CS→D10, MOSI→D11, MISO→D12, SCK→D13.',
     code: `#include <SD.h>\n#include <SPI.h>\n#define CS_PIN 10\nvoid setup(){\n  Serial.begin(9600);\n  if(!SD.begin(CS_PIN)){\n    Serial.println("SD init failed!");\n    return;\n  }\n  Serial.println("SD initialized.");\n  File f = SD.open("test.txt", FILE_WRITE);\n  if(f){\n    f.println("Hello SD!");\n    f.close();\n  }\n}\nvoid loop(){}`,
   },
+
+  ir_led: {
+    id: 'ir_led',
+    name: 'IR LED',
+    icon: '\uD83D\uDD34',
+    category: 'Sensors',
+    longDesc: 'Infrared LED transmitter — emits IR light when driven HIGH. Use with a current-limiting resistor (220\u03A9). Pair with an IR Receiver TSOP4838 for wireless communication.',
+    use: 'IR remote control transmitters, obstacle detection, proximity sensors.',
+    pins: {
+      anode: { label: '+', type: 'digital', desc: 'Anode — connect to a digital pin through a 220\u03A9 resistor.' },
+      cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode — connect to GND.' },
+    },
+    wiring: 'Anode\u2192D3 (via 220\u03A9), Cathode\u2192GND.',
+    code: `const int IR_PIN = 3;\nvoid setup(){\n  pinMode(IR_PIN, OUTPUT);\n}\nvoid loop(){\n  digitalWrite(IR_PIN, HIGH);\n  delay(500);\n  digitalWrite(IR_PIN, LOW);\n  delay(500);\n}`,
+  },
+
+  ir_remote: {
+    id: 'ir_remote',
+    name: 'IR Remote Control',
+    icon: '\uD83C\uDFAE',
+    category: 'Input',
+    longDesc: 'Infrared remote control with 19 buttons (CH\u2212/CH/CH+, PREV/NEXT/PLAY, \u2212/+/EQ, 0\u20139). Click any button to send its NEC IR code to all IR Receiver components on the canvas.',
+    use: 'Wireless control of Arduino projects — navigate menus, control servos, toggle LEDs.',
+    pins: {
+      vcc: { label: 'VCC', type: 'power', desc: '3\u20135V power supply.' },
+      gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+    },
+    wiring: 'VCC\u21925V, GND\u2192GND. Pair with IR Receiver TSOP4838 (OUT\u2192D2).',
+    code: `#include <IRremote.h>\nIRrecv irrecv(2);\ndecode_results results;\nvoid setup(){\n  Serial.begin(9600);\n  irrecv.enableIRIn();\n}\nvoid loop(){\n  if (irrecv.decode(&results)) {\n    Serial.println(results.value, HEX);\n    irrecv.resume();\n  }\n}`,
+    exampleId: 'ir_remote_decode',
+  },
 };
 
 /* ═══════════════════════════════════════════════════════════════
