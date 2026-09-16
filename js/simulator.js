@@ -191,6 +191,11 @@ class ArduinoSimulator {
     js = js.replace(new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)\\s*\\[\\s*(?:\\w+)?\\s*\\]`, 'g'), 'let $1 = []');
     // Type name[size] = { ... }; → let name = [ ... ];  (initialized array)
     js = js.replace(new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)\\s*\\[\\s*(?:\\w+)?\\s*\\]\\s*=\\s*\\{([^}]*)\\}`, 'g'), 'let $1 = [$2]');
+    // C++ designated initializers in struct: .field = value → field: value
+    // Must run AFTER Type→let conversion so `let varname = {` is already formed
+    js = js.replace(/^\s+\.(\w+)\s*=\s*/gm, '  $1: ');
+    // Strip C type casts in struct initializers: (i2s_mode_t)(...) → (...)
+    js = js.replace(/\(i2s_mode_t\)\s*/g, '');
 
     // C++ pointer dereference: stream->method() → stream.method()
     js = js.replace(/->/g, '.');
@@ -481,12 +486,6 @@ class ArduinoSimulator {
       }
       return prefix + result;
     });
-    // I2S designated-initializer structs → plain JS objects
-    js = js.replace(/\b(i2s_config_t|i2s_pin_config_t)\s+(\w+)\s*=\s*\{/g, 'var $2 = {');
-    // Designated initializers: only lines starting with whitespace + .field =
-    js = js.replace(/^\s+\.(\w+)\s*=\s*/gm, '  $1: ');
-    // Strip I2S type casts: (i2s_mode_t)(...) → (...)
-    js = js.replace(/\(i2s_mode_t\)\s*/g, '');
 
     // Make delay async
     js = js.replace(/_a\.delay\s*\(/g, 'await _a.delay(');
