@@ -1160,30 +1160,31 @@ class CircuitCanvas {
     if (!defs) return null;
     const buttons = [
       { label: 'CH\u2212', code: 0x45, row: 0, col: 0 },
-      { label: 'CH',  code: 0x46, row: 0, col: 1 },
-      { label: 'CH+', code: 0x47, row: 0, col: 2 },
-      { label: 'PREV', code: 0x44, row: 1, col: 0 },
-      { label: 'NEXT', code: 0x40, row: 1, col: 1 },
-      { label: 'PLAY', code: 0x43, row: 1, col: 2 },
-      { label: '\u2212',   code: 0x07, row: 2, col: 0 },
-      { label: '+',   code: 0x15, row: 2, col: 1 },
-      { label: 'EQ',  code: 0x09, row: 2, col: 2 },
-      { label: '0',   code: 0x16, row: 3, col: 1 },
-      { label: '1',   code: 0x0C, row: 4, col: 0 },
-      { label: '2',   code: 0x18, row: 4, col: 1 },
-      { label: '3',   code: 0x5E, row: 4, col: 2 },
-      { label: '4',   code: 0x08, row: 5, col: 0 },
-      { label: '5',   code: 0x1C, row: 5, col: 1 },
-      { label: '6',   code: 0x5A, row: 5, col: 2 },
-      { label: '7',   code: 0x42, row: 6, col: 0 },
-      { label: '8',   code: 0x52, row: 6, col: 1 },
-      { label: '9',   code: 0x4A, row: 6, col: 2 },
+      { label: 'CH',      code: 0x46, row: 0, col: 1 },
+      { label: 'CH+',     code: 0x47, row: 0, col: 2 },
+      { label: 'PREV',    code: 0x44, row: 1, col: 0 },
+      { label: 'NEXT',    code: 0x40, row: 1, col: 1 },
+      { label: 'PLAY',    code: 0x43, row: 1, col: 2 },
+      { label: '\u2212',  code: 0x07, row: 2, col: 0 },
+      { label: '+',       code: 0x15, row: 2, col: 1 },
+      { label: 'EQ',      code: 0x09, row: 2, col: 2 },
+      { label: '0',       code: 0x16, row: 3, col: 0 },
+      { label: '100+',    code: 0x19, row: 3, col: 1 },
+      { label: '200+',    code: 0x0D, row: 3, col: 2 },
+      { label: '1',       code: 0x0C, row: 4, col: 0 },
+      { label: '2',       code: 0x18, row: 4, col: 1 },
+      { label: '3',       code: 0x5E, row: 4, col: 2 },
+      { label: '4',       code: 0x08, row: 5, col: 0 },
+      { label: '5',       code: 0x1C, row: 5, col: 1 },
+      { label: '6',       code: 0x5A, row: 5, col: 2 },
+      { label: '7',       code: 0x42, row: 6, col: 0 },
+      { label: '8',       code: 0x52, row: 6, col: 1 },
+      { label: '9',       code: 0x4A, row: 6, col: 2 },
     ];
-    const btnW = 18, btnH = 13, gapX = 3, gapY = 2;
-    const startX = 5, startY = 22;
+    const btnW = 17, btnH = 11.5, gapX = 3.5, gapY = 2.5;
+    const startX = 6, startY = 22;
     for (const inst of this.components) {
       if (inst.type !== 'ir_remote') continue;
-      const lx = wx - inst.x, ly = wy - inst.y;
       for (const btn of buttons) {
         const bx = inst.x + startX + btn.col * (btnW + gapX);
         const by = inst.y + startY + btn.row * (btnH + gapY);
@@ -1193,6 +1194,11 @@ class CircuitCanvas {
       }
     }
     return null;
+  }
+
+  _hitTestIrRemoteHover(wx, wy) {
+    const result = this._hitTestIrRemoteButton(wx, wy);
+    return result ? result.inst : null;
   }
 
   _updateSliderValue(drag, wx, wy) {
@@ -2105,10 +2111,24 @@ class CircuitCanvas {
     const pin = this._hitTestPin(world.x, world.y);
     const comp = this._hitTestComp(world.x, world.y);
     const wireDetail = this._hitTestWireDetails(world.x, world.y);
+    const irRemoteHover = this._hitTestIrRemoteHover(world.x, world.y);
+
+    // Update IR Remote hover state
+    for (const inst of this.components) {
+      if (inst.type === 'ir_remote') {
+        const wasHovered = inst.runtimeState?._hovered;
+        inst.runtimeState = inst.runtimeState || {};
+        inst.runtimeState._hovered = (irRemoteHover === inst);
+        if (wasHovered !== inst.runtimeState._hovered) this._render();
+      }
+    }
 
     if (pin) {
       this.canvas.style.cursor = 'crosshair';
       this._showPinTooltip(pin, e);
+    } else if (irRemoteHover) {
+      this.canvas.style.cursor = 'pointer';
+      this._hidePinTooltip();
     } else {
       this._hidePinTooltip();
       if (comp) {

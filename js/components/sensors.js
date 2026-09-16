@@ -5371,146 +5371,381 @@ function darkenColor(hex, amt) {
   return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
 }
 
+// defComp({
+//   id: 'ir_remote',
+//   name: 'IR Remote Control',
+//   category: 'Input',
+//   icon: '🎮',
+//   desc: 'Battery-powered infrared remote control. Click any button to send its NEC code to all IR Receivers on the canvas.',
+//   width: 70,
+//   height: 130,
+//   defaultProps: { lastButton: '', code: 0 },
+//   pins: [],
+//   draw(ctx, inst, sim) {
+//     const { x, y } = inst;
+//     const lastBtn = inst.runtimeState?.lastButton ?? inst.props.lastButton ?? '';
+//     ctx.save();
+//     ctx.translate(x, y);
+
+//     // Remote body — dark plastic with subtle texture
+//     const bodyGrad = ctx.createLinearGradient(0, 0, 0, 130);
+//     bodyGrad.addColorStop(0, '#2c2c2c');
+//     bodyGrad.addColorStop(0.3, '#1a1a1a');
+//     bodyGrad.addColorStop(1, '#111');
+//     ctx.fillStyle = bodyGrad;
+//     roundRect(ctx, 0, 0, 70, 130, 8);
+//     ctx.fill();
+//     ctx.strokeStyle = '#3a3a3a';
+//     ctx.lineWidth = 1;
+//     ctx.stroke();
+
+//     // Top edge bevel
+//     ctx.strokeStyle = '#555';
+//     ctx.lineWidth = 0.5;
+//     ctx.beginPath();
+//     ctx.moveTo(8, 1);
+//     ctx.lineTo(62, 1);
+//     ctx.stroke();
+
+//     // IR window at top — dark red lens
+//     const irGrad = ctx.createRadialGradient(35, 8, 2, 35, 8, 14);
+//     irGrad.addColorStop(0, '#440000');
+//     irGrad.addColorStop(1, '#1a0000');
+//     ctx.fillStyle = irGrad;
+//     roundRect(ctx, 20, 3, 30, 10, 4);
+//     ctx.fill();
+//     ctx.strokeStyle = '#330000';
+//     ctx.lineWidth = 0.5;
+//     ctx.stroke();
+
+//     // Brand text
+//     ctx.fillStyle = '#666';
+//     ctx.font = 'bold 3.5px sans-serif';
+//     ctx.textAlign = 'center';
+//     ctx.fillText('ArduSim', 35, 18);
+
+//     // Button layout — 7 rows x 3 cols
+//     const buttons = [
+//       { label: 'CH\u2212', code: 0x45, row: 0, col: 0, color: '#c62828' },
+//       { label: 'CH',  code: 0x46, row: 0, col: 1, color: '#c62828' },
+//       { label: 'CH+', code: 0x47, row: 0, col: 2, color: '#c62828' },
+//       { label: 'PREV', code: 0x44, row: 1, col: 0, color: '#1565c0' },
+//       { label: 'NEXT', code: 0x40, row: 1, col: 1, color: '#1565c0' },
+//       { label: 'PLAY', code: 0x43, row: 1, col: 2, color: '#1565c0' },
+//       { label: '\u2212',   code: 0x07, row: 2, col: 0, color: '#2e7d32' },
+//       { label: '+',   code: 0x15, row: 2, col: 1, color: '#2e7d32' },
+//       { label: 'EQ',  code: 0x09, row: 2, col: 2, color: '#2e7d32' },
+//       { label: '0',   code: 0x16, row: 3, col: 1, color: '#424242' },
+//       { label: '1',   code: 0x0C, row: 4, col: 0, color: '#424242' },
+//       { label: '2',   code: 0x18, row: 4, col: 1, color: '#424242' },
+//       { label: '3',   code: 0x5E, row: 4, col: 2, color: '#424242' },
+//       { label: '4',   code: 0x08, row: 5, col: 0, color: '#424242' },
+//       { label: '5',   code: 0x1C, row: 5, col: 1, color: '#424242' },
+//       { label: '6',   code: 0x5A, row: 5, col: 2, color: '#424242' },
+//       { label: '7',   code: 0x42, row: 6, col: 0, color: '#424242' },
+//       { label: '8',   code: 0x52, row: 6, col: 1, color: '#424242' },
+//       { label: '9',   code: 0x4A, row: 6, col: 2, color: '#424242' },
+//     ];
+
+//     const btnW = 18, btnH = 13, gapX = 3, gapY = 2;
+//     const startX = 5, startY = 22;
+
+//     buttons.forEach(btn => {
+//       const bx = startX + btn.col * (btnW + gapX);
+//       const by = startY + btn.row * (btnH + gapY);
+//       const isActive = lastBtn === btn.label;
+
+//       // 3D button effect — pressed looks indented
+//       if (isActive) {
+//         // Shadow inset (pressed down)
+//         ctx.fillStyle = 'rgba(0,0,0,0.4)';
+//         roundRect(ctx, bx + 1, by + 1, btnW, btnH, 3);
+//         ctx.fill();
+//         // Button surface — recessed
+//         ctx.fillStyle = btn.color;
+//         roundRect(ctx, bx + 1, by + 1, btnW - 1, btnH - 1, 3);
+//         ctx.fill();
+//         ctx.strokeStyle = '#000';
+//         ctx.lineWidth = 0.8;
+//         ctx.stroke();
+//       } else {
+//         // Normal raised button
+//         const btnGrad = ctx.createLinearGradient(bx, by, bx, by + btnH);
+//         btnGrad.addColorStop(0, lightenColor(btn.color, 30));
+//         btnGrad.addColorStop(0.5, btn.color);
+//         btnGrad.addColorStop(1, darkenColor(btn.color, 30));
+//         ctx.fillStyle = btnGrad;
+//         roundRect(ctx, bx, by, btnW, btnH, 3);
+//         ctx.fill();
+//         // Top highlight edge
+//         ctx.strokeStyle = lightenColor(btn.color, 50);
+//         ctx.lineWidth = 0.5;
+//         ctx.beginPath();
+//         ctx.moveTo(bx + 3, by + 1);
+//         ctx.lineTo(bx + btnW - 3, by + 1);
+//         ctx.stroke();
+//         // Bottom shadow edge
+//         ctx.strokeStyle = darkenColor(btn.color, 50);
+//         ctx.beginPath();
+//         ctx.moveTo(bx + 3, by + btnH - 1);
+//         ctx.lineTo(bx + btnW - 3, by + btnH - 1);
+//         ctx.stroke();
+//       }
+
+//       // Button label
+//       ctx.fillStyle = isActive ? '#fff' : '#e0e0e0';
+//       ctx.font = 'bold 4px sans-serif';
+//       ctx.textAlign = 'center';
+//       ctx.fillText(btn.label, bx + btnW / 2, by + btnH / 2 + 1.5);
+//     });
+
+//     // Bottom battery compartment indicator
+//     ctx.fillStyle = '#1a1a1a';
+//     roundRect(ctx, 15, 118, 40, 8, 2);
+//     ctx.fill();
+//     ctx.strokeStyle = '#333';
+//     ctx.lineWidth = 0.5;
+//     ctx.stroke();
+//     ctx.fillStyle = '#555';
+//     ctx.font = '3px monospace';
+//     ctx.fillText('3V CR2025', 35, 123);
+
+//     if (inst.selected) drawSelectionRect(ctx, 0, 0, 70, 130);
+//     ctx.restore();
+//   },
+// });
+
 defComp({
   id: 'ir_remote',
   name: 'IR Remote Control',
   category: 'Input',
   icon: '🎮',
-  desc: 'Battery-powered infrared remote control. Click any button to send its NEC code to all IR Receivers on the canvas.',
+  desc: 'Battery-powered NEC infrared remote control. Emits IR signals to all canvas IR receivers on button click.',
   width: 70,
-  height: 130,
+  height: 135,
   defaultProps: { lastButton: '', code: 0 },
   pins: [],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
     const lastBtn = inst.runtimeState?.lastButton ?? inst.props.lastButton ?? '';
+    const isTransmitting = Boolean(lastBtn);
+    const isHovered = Boolean(inst.runtimeState?._hovered);
+
+    // Safe roundRect helper fallback
+    const drawRoundRect = (c, rx, ry, rw, rh, rad) => {
+      if (c.roundRect) {
+        c.beginPath();
+        c.roundRect(rx, ry, rw, rh, rad);
+      } else {
+        c.beginPath();
+        c.moveTo(rx + rad, ry);
+        c.arcTo(rx + rw, ry, rx + rw, ry + rh, rad);
+        c.arcTo(rx + rw, ry + rh, rx, ry + rh, rad);
+        c.arcTo(rx, ry + rh, rx, ry, rad);
+        c.arcTo(rx, ry, rx + rw, ry, rad);
+        c.closePath();
+      }
+    };
+
     ctx.save();
     ctx.translate(x, y);
 
-    // Remote body — dark plastic with subtle texture
-    const bodyGrad = ctx.createLinearGradient(0, 0, 0, 130);
-    bodyGrad.addColorStop(0, '#2c2c2c');
-    bodyGrad.addColorStop(0.3, '#1a1a1a');
-    bodyGrad.addColorStop(1, '#111');
+    // --- 1. IR Signal Blast Wave (Active State) ---
+    if (isTransmitting) {
+      ctx.save();
+      ctx.lineWidth = 1.5;
+      for (let r = 8; r <= 22; r += 7) {
+        ctx.strokeStyle = `rgba(255, 40, 80, ${0.8 - r / 30})`;
+        ctx.beginPath();
+        ctx.arc(35, 0, r, Math.PI * 1.25, Math.PI * 1.75);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // --- 2. Body Outer Shadow ---
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 4;
+    ctx.fillStyle = '#111';
+    drawRoundRect(ctx, 0, 0, 70, 135, 10);
+    ctx.fill();
+    ctx.restore();
+
+    // --- 3. Main Body Plastic Gradient ---
+    const bodyGrad = ctx.createLinearGradient(0, 0, 70, 135);
+    bodyGrad.addColorStop(0, '#323232');
+    bodyGrad.addColorStop(0.15, '#222222');
+    bodyGrad.addColorStop(0.85, '#181818');
+    bodyGrad.addColorStop(1, '#0d0d0d');
     ctx.fillStyle = bodyGrad;
-    roundRect(ctx, 0, 0, 70, 130, 8);
+    drawRoundRect(ctx, 0, 0, 70, 135, 10);
     ctx.fill();
-    ctx.strokeStyle = '#3a3a3a';
-    ctx.lineWidth = 1;
+
+    // Outer edge highlight border
+    ctx.strokeStyle = isHovered ? '#6a8fff' : '#444';
+    ctx.lineWidth = isHovered ? 1.2 : 0.8;
     ctx.stroke();
 
-    // Top edge bevel
-    ctx.strokeStyle = '#555';
+    // Hover glow effect
+    if (isHovered && !isTransmitting) {
+      ctx.save();
+      ctx.shadowColor = '#4488ff';
+      ctx.shadowBlur = 10;
+      ctx.strokeStyle = 'rgba(68, 136, 255, 0.3)';
+      ctx.lineWidth = 2;
+      drawRoundRect(ctx, -1, -1, 72, 137, 11);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Inner subtle chamfer groove
+    drawRoundRect(ctx, 2, 2, 66, 131, 8);
+    ctx.strokeStyle = '#111';
     ctx.lineWidth = 0.5;
-    ctx.beginPath();
-    ctx.moveTo(8, 1);
-    ctx.lineTo(62, 1);
     ctx.stroke();
 
-    // IR window at top — dark red lens
-    const irGrad = ctx.createRadialGradient(35, 8, 2, 35, 8, 14);
-    irGrad.addColorStop(0, '#440000');
-    irGrad.addColorStop(1, '#1a0000');
+    // --- 4. Top IR Window (Dark Red Acrylic Lens) ---
+    const irGlow = isTransmitting;
+    const irGrad = ctx.createRadialGradient(35, 6, 1, 35, 6, 14);
+    irGrad.addColorStop(0, irGlow ? '#ff3366' : '#550000');
+    irGrad.addColorStop(0.6, irGlow ? '#aa0022' : '#2a0000');
+    irGrad.addColorStop(1, '#100000');
     ctx.fillStyle = irGrad;
-    roundRect(ctx, 20, 3, 30, 10, 4);
+    drawRoundRect(ctx, 22, 2, 26, 8, 3);
     ctx.fill();
-    ctx.strokeStyle = '#330000';
+    ctx.strokeStyle = irGlow ? '#ff6688' : '#3d0000';
     ctx.lineWidth = 0.5;
     ctx.stroke();
 
-    // Brand text
-    ctx.fillStyle = '#666';
+    // --- 5. Status Indicator LED ---
+    ctx.fillStyle = isTransmitting ? '#ff1744' : '#222';
+    ctx.beginPath();
+    ctx.arc(12, 16, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+    if (isTransmitting) {
+      ctx.shadowColor = '#ff1744';
+      ctx.shadowBlur = 6;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // --- 6. Brand Header ---
+    ctx.fillStyle = '#888';
     ctx.font = 'bold 3.5px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('ArduSim', 35, 18);
+    ctx.fillText('ArduSim', 35, 17);
 
-    // Button layout — 7 rows x 3 cols
+    // --- 7. Button Layout (7 rows x 3 cols) ---
     const buttons = [
-      { label: 'CH\u2212', code: 0x45, row: 0, col: 0, color: '#c62828' },
-      { label: 'CH',  code: 0x46, row: 0, col: 1, color: '#c62828' },
-      { label: 'CH+', code: 0x47, row: 0, col: 2, color: '#c62828' },
-      { label: 'PREV', code: 0x44, row: 1, col: 0, color: '#1565c0' },
-      { label: 'NEXT', code: 0x40, row: 1, col: 1, color: '#1565c0' },
-      { label: 'PLAY', code: 0x43, row: 1, col: 2, color: '#1565c0' },
-      { label: '\u2212',   code: 0x07, row: 2, col: 0, color: '#2e7d32' },
-      { label: '+',   code: 0x15, row: 2, col: 1, color: '#2e7d32' },
-      { label: 'EQ',  code: 0x09, row: 2, col: 2, color: '#2e7d32' },
-      { label: '0',   code: 0x16, row: 3, col: 1, color: '#424242' },
-      { label: '1',   code: 0x0C, row: 4, col: 0, color: '#424242' },
-      { label: '2',   code: 0x18, row: 4, col: 1, color: '#424242' },
-      { label: '3',   code: 0x5E, row: 4, col: 2, color: '#424242' },
-      { label: '4',   code: 0x08, row: 5, col: 0, color: '#424242' },
-      { label: '5',   code: 0x1C, row: 5, col: 1, color: '#424242' },
-      { label: '6',   code: 0x5A, row: 5, col: 2, color: '#424242' },
-      { label: '7',   code: 0x42, row: 6, col: 0, color: '#424242' },
-      { label: '8',   code: 0x52, row: 6, col: 1, color: '#424242' },
-      { label: '9',   code: 0x4A, row: 6, col: 2, color: '#424242' },
+      { label: 'CH\u2212', code: 0x45, row: 0, col: 0, color: '#d32f2f' },
+      { label: 'CH',      code: 0x46, row: 0, col: 1, color: '#d32f2f' },
+      { label: 'CH+',     code: 0x47, row: 0, col: 2, color: '#d32f2f' },
+      { label: 'PREV',    code: 0x44, row: 1, col: 0, color: '#1976d2' },
+      { label: 'NEXT',    code: 0x40, row: 1, col: 1, color: '#1976d2' },
+      { label: 'PLAY',    code: 0x43, row: 1, col: 2, color: '#1976d2' },
+      { label: '\u2212',  code: 0x07, row: 2, col: 0, color: '#388e3c' },
+      { label: '+',       code: 0x15, row: 2, col: 1, color: '#388e3c' },
+      { label: 'EQ',      code: 0x09, row: 2, col: 2, color: '#388e3c' },
+      { label: '0',       code: 0x16, row: 3, col: 0, color: '#424242' },
+      { label: '100+',    code: 0x19, row: 3, col: 1, color: '#e65100' },
+      { label: '200+',    code: 0x0D, row: 3, col: 2, color: '#e65100' },
+      { label: '1',       code: 0x0C, row: 4, col: 0, color: '#424242' },
+      { label: '2',       code: 0x18, row: 4, col: 1, color: '#424242' },
+      { label: '3',       code: 0x5E, row: 4, col: 2, color: '#424242' },
+      { label: '4',       code: 0x08, row: 5, col: 0, color: '#424242' },
+      { label: '5',       code: 0x1C, row: 5, col: 1, color: '#424242' },
+      { label: '6',       code: 0x5A, row: 5, col: 2, color: '#424242' },
+      { label: '7',       code: 0x42, row: 6, col: 0, color: '#424242' },
+      { label: '8',       code: 0x52, row: 6, col: 1, color: '#424242' },
+      { label: '9',       code: 0x4A, row: 6, col: 2, color: '#424242' },
     ];
 
-    const btnW = 18, btnH = 13, gapX = 3, gapY = 2;
-    const startX = 5, startY = 22;
+    const btnW = 17, btnH = 11.5, gapX = 3.5, gapY = 2.5;
+    const startX = 6, startY = 22;
 
-    buttons.forEach(btn => {
+    buttons.forEach((btn) => {
       const bx = startX + btn.col * (btnW + gapX);
       const by = startY + btn.row * (btnH + gapY);
       const isActive = lastBtn === btn.label;
 
-      // 3D button effect — pressed looks indented
       if (isActive) {
-        // Shadow inset (pressed down)
-        ctx.fillStyle = 'rgba(0,0,0,0.4)';
-        roundRect(ctx, bx + 1, by + 1, btnW, btnH, 3);
+        // Pressed / Active state recessed effect
+        ctx.fillStyle = '#0a0a0a';
+        drawRoundRect(ctx, bx, by, btnW, btnH, 3);
         ctx.fill();
-        // Button surface — recessed
+
         ctx.fillStyle = btn.color;
-        roundRect(ctx, bx + 1, by + 1, btnW - 1, btnH - 1, 3);
+        drawRoundRect(ctx, bx + 0.5, by + 0.5, btnW - 1, btnH - 1, 2.5);
         ctx.fill();
-        ctx.strokeStyle = '#000';
+
+        // Glow ring around active button
+        ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 0.8;
         ctx.stroke();
       } else {
         // Normal raised button
         const btnGrad = ctx.createLinearGradient(bx, by, bx, by + btnH);
-        btnGrad.addColorStop(0, lightenColor(btn.color, 30));
-        btnGrad.addColorStop(0.5, btn.color);
-        btnGrad.addColorStop(1, darkenColor(btn.color, 30));
+        btnGrad.addColorStop(0, lightenColor ? lightenColor(btn.color, 25) : btn.color);
+        btnGrad.addColorStop(0.6, btn.color);
+        btnGrad.addColorStop(1, darkenColor ? darkenColor(btn.color, 35) : '#111');
+        
         ctx.fillStyle = btnGrad;
-        roundRect(ctx, bx, by, btnW, btnH, 3);
+        drawRoundRect(ctx, bx, by, btnW, btnH, 3);
         ctx.fill();
-        // Top highlight edge
-        ctx.strokeStyle = lightenColor(btn.color, 50);
+
+        // Top edge reflection line
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
         ctx.lineWidth = 0.5;
         ctx.beginPath();
-        ctx.moveTo(bx + 3, by + 1);
-        ctx.lineTo(bx + btnW - 3, by + 1);
+        ctx.moveTo(bx + 2, by + 1);
+        ctx.lineTo(bx + btnW - 2, by + 1);
         ctx.stroke();
-        // Bottom shadow edge
-        ctx.strokeStyle = darkenColor(btn.color, 50);
+
+        // Bottom shadow border line
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
         ctx.beginPath();
-        ctx.moveTo(bx + 3, by + btnH - 1);
-        ctx.lineTo(bx + btnW - 3, by + btnH - 1);
+        ctx.moveTo(bx + 2, by + btnH - 0.5);
+        ctx.lineTo(bx + btnW - 2, by + btnH - 0.5);
         ctx.stroke();
       }
 
-      // Button label
-      ctx.fillStyle = isActive ? '#fff' : '#e0e0e0';
-      ctx.font = 'bold 4px sans-serif';
+      // Button Label Text
+      ctx.fillStyle = isActive ? '#ffffff' : '#f0f0f0';
+      ctx.font = 'bold 3.8px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(btn.label, bx + btnW / 2, by + btnH / 2 + 1.5);
+      const textOffset = isActive ? 1 : 0.5;
+      ctx.fillText(btn.label, bx + btnW / 2, by + btnH / 2 + textOffset);
     });
 
-    // Bottom battery compartment indicator
-    ctx.fillStyle = '#1a1a1a';
-    roundRect(ctx, 15, 118, 40, 8, 2);
+    // --- 8. Bottom Battery Compartment Hatch & Branding ---
+    ctx.fillStyle = '#141414';
+    drawRoundRect(ctx, 14, 122, 42, 9, 2);
     ctx.fill();
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = '#282828';
     ctx.lineWidth = 0.5;
     ctx.stroke();
-    ctx.fillStyle = '#555';
-    ctx.font = '3px monospace';
-    ctx.fillText('3V CR2025', 35, 123);
 
-    if (inst.selected) drawSelectionRect(ctx, 0, 0, 70, 130);
+    // Grip texture lines on battery door
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 0.5;
+    for (let lx = 18; lx <= 52; lx += 4) {
+      ctx.beginPath();
+      ctx.moveTo(lx, 124);
+      ctx.lineTo(lx, 129);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = '#666';
+    ctx.font = '3px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('CR2025 3V', 35, 128);
+
+    if (inst.selected && typeof drawSelectionRect === 'function') {
+      drawSelectionRect(ctx, 0, 0, 70, 135);
+    }
+    
     ctx.restore();
   },
 });
