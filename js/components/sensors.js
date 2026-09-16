@@ -2470,9 +2470,6 @@ defComp({
   width: 30,
   height: 50,
   defaultProps: { code: 0, decoding: false },
-  interactive: [
-    { field: 'code', label: 'Code', min: 0, max: 65535, step: 1, unit: '' },
-  ],
   pins: [
     { id: 'OUT', label: 'OUT', type: PIN_TYPE.DIGITAL, x: 6, y: 50, side: 'bottom' },
     { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 15, y: 50, side: 'bottom' },
@@ -5383,9 +5380,6 @@ defComp({
   width: 70,
   height: 130,
   defaultProps: { lastButton: '', code: 0 },
-  interactive: [
-    { field: 'code', label: 'Last Code', min: 0, max: 65535, step: 1, unit: '' },
-  ],
   pins: [],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
