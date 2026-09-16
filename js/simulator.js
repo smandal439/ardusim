@@ -187,6 +187,10 @@ class ArduinoSimulator {
     js = js.replace(new RegExp(`\\bconst\\s+((?:unsigned\\s+)?(?:${_typePat}))\\s*\\*?\\s*`, 'g'), '$1 ');
     // char* name[] = { ... } → var name = [ ... ]  (C-style string array)
     js = js.replace(/\bchar\s*\*\s+(\w+)\s*\[\s*\]\s*=\s*\{([^}]*)\}/g, 'var $1 = [$2]');
+    // Type name[size]; → let name = [];  (C-style array declaration)
+    js = js.replace(new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)\\s*\\[\\s*(?:\\w+)?\\s*\\]`, 'g'), 'let $1 = []');
+    // Type name[size] = { ... }; → let name = [ ... ];  (initialized array)
+    js = js.replace(new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)\\s*\\[\\s*(?:\\w+)?\\s*\\]\\s*=\\s*\\{([^}]*)\\}`, 'g'), 'let $1 = [$2]');
 
     // C++ pointer dereference: stream->method() → stream.method()
     js = js.replace(/->/g, '.');
