@@ -56,11 +56,27 @@ window.ArduinoLibs['IRremote'] = {
         self._serialLog('[IRremote] IR receiver enabled\n', 'system');
       },
       irrecvDecode: function(obj, results) {
-        var r = self._irrecv ? self._irrecv.results : { protocol: 0, value: 0, bits: 0 };
+        var canvas = window.CircuitCanvas;
+        if (canvas && Array.isArray(canvas.components)) {
+          for (var i = 0; i < canvas.components.length; i++) {
+            var c = canvas.components[i];
+            if (c.type === 'ir_receiver' && c.runtimeState && c.runtimeState.decoding) {
+              var code = c.runtimeState.code || 0;
+              self._irrecv.results = { protocol: 1, value: code, bits: 32 };
+              c.runtimeState.decoding = false;
+              if (results) {
+                results.protocol = 1;
+                results.value = code;
+                results.bits = 32;
+              }
+              return true;
+            }
+          }
+        }
         if (results) {
-          results.protocol = r.protocol;
-          results.value = r.value;
-          results.bits = r.bits;
+          results.protocol = 0;
+          results.value = 0;
+          results.bits = 0;
         }
         return false;
       },
