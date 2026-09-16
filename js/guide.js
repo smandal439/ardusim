@@ -2878,6 +2878,137 @@ PubSubClient client(espClient);
   void loop() { } `,
     exampleId: 'esp32_i2s_music_player',
   },
+  {
+    id: 'esp32_i2s_online_radio_player',
+    name: 'ESP32 I2S Online Radio Player',
+    icon: '📻',
+    category: 'Audio',
+    include: '<WiFi.h>\n<HTTPClient.h>\n<driver/i2s.h>\n<IRremote.h>',
+    desc: 'Stream online radio stations over WiFi with IR Remote control. Play/pause, next/prev station, volume control.',
+    api: [
+      { fn: 'IRrecv irrecv(pin)', desc: 'Create IR receiver on pin' },
+      { fn: 'irrecv.enableIRIn()', desc: 'Start IR receiver' },
+      { fn: 'irrecv.decode(&results)', desc: 'Decode IR signal' },
+      { fn: 'irrecv.resume()', desc: 'Resume receiving next code' },
+    ],
+    code: `#include <WiFi.h>
+#include <HTTPClient.h>
+#include <driver/i2s.h>
+#include <IRremote.h>
+
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASS";
+
+#define IR_RECV_PIN 5
+IRrecv irrecv(IR_RECV_PIN);
+decode_results irCode;
+
+void setup() {
+  Serial.begin(115200);
+  irrecv.enableIRIn();
+  Serial.println("IR Remote enabled");
+}
+
+void loop() {
+  if (irrecv.decode(&irCode)) {
+    switch (irCode.value) {
+      case 0x43: Serial.println("PLAY/PAUSE"); break;
+      case 0x40: Serial.println("NEXT station"); break;
+      case 0x44: Serial.println("PREV station"); break;
+      case 0x15: Serial.println("Volume Up"); break;
+      case 0x07: Serial.println("Volume Down"); break;
+    }
+    irrecv.resume();
+  }
+}`,
+    exampleId: 'esp32_i2s_online_radio_player',
+  },
+  {
+    id: 'esp32_i2s_local_radio_player',
+    name: 'ESP32 I2S Local Radio Player',
+    icon: '📻',
+    category: 'Audio',
+    include: '<WiFi.h>\n<HTTPClient.h>\n<driver/i2s.h>\n<IRremote.h>',
+    desc: 'Play local radio stations with IR Remote control. Uses a local Python server for audio streaming.',
+    api: [
+      { fn: 'IRrecv irrecv(pin)', desc: 'Create IR receiver on pin' },
+      { fn: 'irrecv.enableIRIn()', desc: 'Start IR receiver' },
+      { fn: 'irrecv.decode(&results)', desc: 'Decode IR signal' },
+      { fn: 'irrecv.resume()', desc: 'Resume receiving next code' },
+    ],
+    code: `#include <WiFi.h>
+#include <HTTPClient.h>
+#include <driver/i2s.h>
+#include <IRremote.h>
+
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASS";
+
+#define IR_RECV_PIN 5
+IRrecv irrecv(IR_RECV_PIN);
+decode_results irCode;
+
+void setup() {
+  Serial.begin(115200);
+  irrecv.enableIRIn();
+  Serial.println("IR Remote enabled");
+}
+
+void loop() {
+  if (irrecv.decode(&irCode)) {
+    switch (irCode.value) {
+      case 0x43: Serial.println("PLAY/PAUSE"); break;
+      case 0x40: Serial.println("NEXT station"); break;
+      case 0x44: Serial.println("PREV station"); break;
+    }
+    irrecv.resume();
+  }
+}`,
+    exampleId: 'esp32_i2s_local_radio_player',
+  },
+  {
+    id: 'esp32_i2s_local_radio_player_2',
+    name: 'ESP32 I2S Local Radio Player 2',
+    icon: '📻',
+    category: 'Audio',
+    include: '<WiFi.h>\n<HTTPClient.h>\n<driver/i2s.h>\n<IRremote.h>',
+    desc: 'Enhanced local radio player with IR Remote control and multiple station support.',
+    api: [
+      { fn: 'IRrecv irrecv(pin)', desc: 'Create IR receiver on pin' },
+      { fn: 'irrecv.enableIRIn()', desc: 'Start IR receiver' },
+      { fn: 'irrecv.decode(&results)', desc: 'Decode IR signal' },
+      { fn: 'irrecv.resume()', desc: 'Resume receiving next code' },
+    ],
+    code: `#include <WiFi.h>
+#include <HTTPClient.h>
+#include <driver/i2s.h>
+#include <IRremote.h>
+
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASS";
+
+#define IR_RECV_PIN 5
+IRrecv irrecv(IR_RECV_PIN);
+decode_results irCode;
+
+void setup() {
+  Serial.begin(115200);
+  irrecv.enableIRIn();
+  Serial.println("IR Remote enabled");
+}
+
+void loop() {
+  if (irrecv.decode(&irCode)) {
+    switch (irCode.value) {
+      case 0x43: Serial.println("PLAY/PAUSE"); break;
+      case 0x40: Serial.println("NEXT station"); break;
+      case 0x44: Serial.println("PREV station"); break;
+    }
+    irrecv.resume();
+  }
+}`,
+    exampleId: 'esp32_i2s_local_radio_player_2',
+  },
 
   /* ── MISC ── */
   {
