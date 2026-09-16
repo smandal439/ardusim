@@ -185,12 +185,14 @@ class ArduinoSimulator {
     js = js.replace(/\bconst\s+async\b/g, 'async');
     // Strip const before type keywords: const int x = 5; → int x = 5;
     js = js.replace(new RegExp(`\\bconst\\s+((?:unsigned\\s+)?(?:${_typePat}))\\s*\\*?\\s*`, 'g'), '$1 ');
-    // char* name[] = { ... } → var name = [ ... ]  (C-style string array)
-    js = js.replace(/\bchar\s*\*\s+(\w+)\s*\[\s*\]\s*=\s*\{([^}]*)\}/g, 'var $1 = [$2]');
-    // Type name[size]; → let name = [];  (C-style array declaration)
-    js = js.replace(new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)\\s*\\[\\s*(?:\\w+)?\\s*\\]`, 'g'), 'let $1 = []');
-    // Type name[size] = { ... }; → let name = [ ... ];  (initialized array)
-    js = js.replace(new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)\\s*\\[\\s*(?:\\w+)?\\s*\\]\\s*=\\s*\\{([^}]*)\\}`, 'g'), 'let $1 = [$2]');
+    // char* name[] = { ... } → var name = [ ... ]  (C-style string array, single or multi-line)
+    js = js.replace(/\bchar\s*\*\s+(\w+)\s*\[\s*\]\s*=\s*\{([\s\S]*?)\}\s*;/g, 'var $1 = [$2]');
+    // char name[] = { ... } → var name = [ ... ]  (after const* stripping removes the *)
+    js = js.replace(/\bchar\s+(\w+)\s*\[\s*\]\s*=\s*\{([\s\S]*?)\}\s*;/g, 'var $1 = [$2]');
+    // Type name[size]; → let name = [];  (C-style array declaration, NOT followed by = {)
+    js = js.replace(new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)\\s*\\[\\s*(?:\\w+)?\\s*\\](?=\\s*[;,)])`, 'g'), 'let $1 = []');
+    // Type name[size] = { ... }; → let name = [ ... ];  (initialized array, single or multi-line)
+    js = js.replace(new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)\\s*\\[\\s*(?:\\w+)?\\s*\\]\\s*=\\s*\\{([\\s\\S]*?)\\}\\s*;`, 'g'), 'let $1 = [$2]');
     // C++ designated initializers in struct: .field = value → field: value
     // Must run AFTER Type→let conversion so `let varname = {` is already formed
     js = js.replace(/^\s+\.(\w+)\s*=\s*/gm, '  $1: ');
