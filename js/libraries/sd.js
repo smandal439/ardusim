@@ -197,13 +197,13 @@ window.ArduinoLibs['SD'] = {
         return { __sdFile: true, _id: id, _name: dirPath, _isDir: true };
       },
       sdOpenNextFile: function(dirObj) {
-        if (!dirObj || !dirObj._id) return { __sdFile: true, _id: 0, _name: '', _notFound: true };
+        if (!dirObj || !dirObj._id) return null;
         var dir = getFile('_dir' + dirObj._id);
-        if (!dir || !dir._isDir) return { __sdFile: true, _id: 0, _name: '', _notFound: true };
-        if (dir._dirIndex >= dir._entries.length) return { __sdFile: true, _id: 0, _name: '', _notFound: true };
+        if (!dir || !dir._isDir) return null;
+        if (dir._dirIndex >= dir._entries.length) return null;
         var fname = dir._entries[dir._dirIndex++];
         var f = files[fname];
-        if (!f) return { __sdFile: true, _id: 0, _name: '', _notFound: true };
+        if (!f) return null;
         var id = nextId++;
         files['_' + id] = f;
         return { __sdFile: true, _id: id, _name: fname, _isDir: false };
