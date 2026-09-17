@@ -1,0 +1,146 @@
+{
+  "id": "interrupts_test",
+  "name": "Interrupts test",
+  "icon": "🔧",
+  "desc": "A custom Interrupts test circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789235504205_r24xs",
+        "type": "arduino_uno",
+        "x": 275,
+        "y": 80,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "comp_1789235531381_p54bv",
+        "type": "led",
+        "x": 530,
+        "y": 135,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "comp_1789235609375_0iydb",
+        "type": "resistor",
+        "x": 535,
+        "y": 220,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "comp_1789665319833_87og5",
+        "type": "func_gen",
+        "x": 660,
+        "y": 40,
+        "rotation": 0,
+        "props": {
+          "powered": 1,
+          "ch1_wave": "square",
+          "ch1_freq": 1,
+          "ch1_amp": 5,
+          "ch1_offset": 2.5,
+          "ch1_phase": 0,
+          "ch1_duty": 50,
+          "ch2_wave": "square",
+          "ch2_freq": 880,
+          "ch2_amp": 3,
+          "ch2_offset": 0,
+          "ch2_phase": 90,
+          "ch2_duty": 50
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1789235564824_2t1fy",
+        "from": {
+          "instId": "comp_1789235504205_r24xs",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "comp_1789235531381_p54bv",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789235616562_lr4nu",
+        "from": {
+          "instId": "comp_1789235609375_0iydb",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1789235531381_p54bv",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789235619225_jslzq",
+        "from": {
+          "instId": "comp_1789235504205_r24xs",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1789235609375_0iydb",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789665332647_2mntr",
+        "from": {
+          "instId": "comp_1789235504205_r24xs",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "comp_1789665319833_87og5",
+          "pinId": "ch1_out"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789665335904_410em",
+        "from": {
+          "instId": "comp_1789235504205_r24xs",
+          "pinId": "GND1"
+        },
+        "to": {
+          "instId": "comp_1789665319833_87og5",
+          "pinId": "ch1_gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "code": "// Define the physical pins\nconst byte buttonPin = 2; // Pin 2 supports external interrupts on Uno/Nano/Mega\nconst byte ledPin = 13;   // The built-in LED pin\n\n// Any variable modified inside an ISR must be declared as 'volatile'\nvolatile bool ledState = false; \n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  \n  // Use INPUT_PULLUP to keep the pin HIGH until the button pulls it to GND\n  pinMode(buttonPin, INPUT_PULLUP); \n  \n  // Link the pin to our ISR function ('toggleLED') to trigger when the voltage falls\n  attachInterrupt(digitalPinToInterrupt(buttonPin), toggleLED, FALLING);\n}\n\nvoid loop() {\n  // The main loop can perform slow tasks or use delays.\n  // The interrupt will cut through this delay instantly!\n  digitalWrite(ledPin, ledState);\n  delay(5000); \n}\n\n// The Interrupt Service Routine (ISR)\nvoid toggleLED() {\n  ledState = !ledState; // Invert the state of the LED\n}\n"
+}

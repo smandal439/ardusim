@@ -1,0 +1,395 @@
+{
+  "id": "esp32_gpio_control_dashboard",
+  "name": "ESP32 GPIO Control Dashboard",
+  "icon": "🔧",
+  "desc": "A simple GPIO control dashboard for ESP32.",
+  "tags": [
+    "esp32",
+    "dashboard",
+    "webserver",
+    "gpio",
+    "http",
+    "led"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "esp32_devkit_v1",
+        "x": 350,
+        "y": 60,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32"
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 55,
+        "y": 105,
+        "rotation": 0,
+        "props": {
+          "color": "#ff0000",
+          "colorName": "Red",
+          "label": "RED"
+        }
+      },
+      {
+        "id": "led2",
+        "type": "led",
+        "x": 120,
+        "y": 105,
+        "rotation": 0,
+        "props": {
+          "color": "#00cc00",
+          "colorName": "Red",
+          "label": "GREEN"
+        }
+      },
+      {
+        "id": "led3",
+        "type": "led",
+        "x": 175,
+        "y": 105,
+        "rotation": 0,
+        "props": {
+          "color": "#0066ff",
+          "colorName": "Red",
+          "label": "BLUE"
+        }
+      },
+      {
+        "id": "led4",
+        "type": "led",
+        "x": 230,
+        "y": 105,
+        "rotation": 0,
+        "props": {
+          "color": "#ffcc00",
+          "colorName": "Red",
+          "label": "YELLOW"
+        }
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 60,
+        "y": 200,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "ohm",
+          "resistance": "220"
+        }
+      },
+      {
+        "id": "r2",
+        "type": "resistor",
+        "x": 125,
+        "y": 195,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "ohm",
+          "resistance": "220"
+        }
+      },
+      {
+        "id": "r3",
+        "type": "resistor",
+        "x": 180,
+        "y": 195,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "ohm",
+          "resistance": "220"
+        }
+      },
+      {
+        "id": "r4",
+        "type": "resistor",
+        "x": 235,
+        "y": 190,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "ohm",
+          "resistance": "220"
+        }
+      },
+      {
+        "id": "wifi_hotspot_1",
+        "type": "wifi_module",
+        "x": 665,
+        "y": 60,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSimNet",
+          "password": "simulator",
+          "channel": 6,
+          "ipAddress": "192.168.1.1",
+          "txPower": 20,
+          "security": "WPA2-PSK",
+          "hidden": false
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 550,
+            "y": 265
+          },
+          {
+            "x": 550,
+            "y": 50
+          },
+          {
+            "x": 70,
+            "y": 50
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 70,
+            "y": 295
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "b1",
+          "pinId": "D4"
+        },
+        "to": {
+          "instId": "led2",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 555,
+            "y": 250
+          },
+          {
+            "x": 555,
+            "y": 51
+          },
+          {
+            "x": 135,
+            "y": 51
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "led2",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r2",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "r2",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 135,
+            "y": 295
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w7",
+        "from": {
+          "instId": "b1",
+          "pinId": "D16"
+        },
+        "to": {
+          "instId": "led3",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 550,
+            "y": 235
+          },
+          {
+            "x": 550,
+            "y": 51
+          },
+          {
+            "x": 190,
+            "y": 51
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w8",
+        "from": {
+          "instId": "led3",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r3",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w9",
+        "from": {
+          "instId": "r3",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 190,
+            "y": 295
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w10",
+        "from": {
+          "instId": "b1",
+          "pinId": "D17"
+        },
+        "to": {
+          "instId": "led4",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 550,
+            "y": 220
+          },
+          {
+            "x": 550,
+            "y": 50
+          },
+          {
+            "x": 245,
+            "y": 50
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w11",
+        "from": {
+          "instId": "led4",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r4",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w12",
+        "from": {
+          "instId": "r4",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 245,
+            "y": 295
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "code": "/*\n * ESP32 GPIO Control Dashboard\n * Serves a web dashboard with toggle switches to control 4 LEDs.\n */\n\n#include <WiFi.h>\n#include <WebServer.h>\n\nconst char* ssid     = \"ArduSimNet\";\nconst char* password = \"simulator\";\n\nint ledPins[] = {2, 4, 16, 17};\nbool ledStates[] = {false, false, false, false};\n\nWebServer server(80);\n\nString buildDashboard() {\n  String html = \"<!DOCTYPE html><html><head>\";\n  html += \"<meta name='viewport' content='width=device-width,initial-scale=1'>\";\n  html += \"<meta http-equiv='refresh' content='2'>\";\n  html += \"<title>ESP32 GPIO Control</title>\";\n  html += \"<style>\";\n  html += \"*{box-sizing:border-box;margin:0;padding:0;}\";\n  html += \"body{font-family:Arial,sans-serif;background:#1a1a2e;color:#e0e0e0;text-align:center;min-height:100vh;padding:30px 20px;}\";\n  html += \"h1{color:#00d4ff;margin-bottom:6px;font-size:24px;}\";\n  html += \"p{color:#888;margin-bottom:24px;font-size:14px;}\";\n  html += \".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;max-width:960px;margin:0 auto;}\";\n  html += \".card{background:#16213e;border-radius:16px;padding:24px 20px;border:1px solid #0f3460;display:flex;flex-direction:column;align-items:center;gap:12px;}\";\n  html += \".dot{width:16px;height:16px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:6px;}\";\n  html += \".name{font-size:18px;font-weight:700;}\";\n  html += \".pin{color:#666;font-size:12px;margin-top:-6px;}\";\n  html += \".sw{position:relative;width:64px;height:34px;margin-top:8px;}\";\n  html += \".sw a{display:block;width:64px;height:34px;border-radius:17px;text-decoration:none;position:relative;transition:background 0.3s;}\";\n  html += \".sw .track{width:64px;height:34px;border-radius:17px;position:relative;}\";\n  html += \".sw .knob{position:absolute;width:28px;height:28px;border-radius:50%;top:3px;transition:left 0.3s,background 0.3s;}\";\n  html += \".sw-on .track{background:#00cc66;}\";\n  html += \".sw-on .knob{left:33px;background:#fff;}\";\n  html += \".sw-off .track{background:#444;}\";\n  html += \".sw-off .knob{left:3px;background:#999;}\";\n  html += \".label{font-size:13px;font-weight:600;margin-top:4px;}\";\n  html += \".label-on{color:#00ff88;}\";\n  html += \".label-off{color:#ff4444;}\";\n  html += \"</style></head><body>\";\n  html += \"<h1>ESP32 GPIO Control Dashboard</h1>\";\n  html += \"<p>Toggle each LED switch on/off</p>\";\n  html += \"<div class='grid'>\";\n\n  String cl = \"#cccccc\";\n  String nm = \"LED\";\n  for (int i = 0; i < 4; i++) {\n    if (i == 0) { cl = \"#ff0000\"; nm = \"RED\"; }\n    if (i == 1) { cl = \"#00cc00\"; nm = \"GREEN\"; }\n    if (i == 2) { cl = \"#0066ff\"; nm = \"BLUE\"; }\n    if (i == 3) { cl = \"#ffcc00\"; nm = \"YELLOW\"; }\n    html += \"<div class='card'>\";\n    html += \"<div class='name'><span class='dot' style='background:\" + cl + \"'></span>\" + nm + \"</div>\";\n    html += \"<div class='pin'>GPIO\" + String(ledPins[i]) + \"</div>\";\n    if (ledStates[i]) {\n      html += \"<div class='sw sw-on'><a href='/led\" + String(i + 1) + \"/off'><div class='track'><div class='knob'></div></div></a></div>\";\n      html += \"<div class='label label-on'>ON</div>\";\n    } else {\n      html += \"<div class='sw sw-off'><a href='/led\" + String(i + 1) + \"/on'><div class='track'><div class='knob'></div></div></a></div>\";\n      html += \"<div class='label label-off'>OFF</div>\";\n    }\n    html += \"</div>\";\n  }\n\n  html += \"</div></body></html>\";\n  return html;\n}\n\nvoid handleRoot() {\n  server.send(200, \"text/html\", buildDashboard());\n}\n\nvoid handleLed1On()  { ledStates[0] = true;  digitalWrite(ledPins[0], HIGH); server.send(200, \"text/plain\", \"LED1 ON\");  Serial.println(\"[GPIO] RED ON\"); }\nvoid handleLed1Off() { ledStates[0] = false; digitalWrite(ledPins[0], LOW);  server.send(200, \"text/plain\", \"LED1 OFF\"); Serial.println(\"[GPIO] RED OFF\"); }\nvoid handleLed2On()  { ledStates[1] = true;  digitalWrite(ledPins[1], HIGH); server.send(200, \"text/plain\", \"LED2 ON\");  Serial.println(\"[GPIO] GREEN ON\"); }\nvoid handleLed2Off() { ledStates[1] = false; digitalWrite(ledPins[1], LOW);  server.send(200, \"text/plain\", \"LED2 OFF\"); Serial.println(\"[GPIO] GREEN OFF\"); }\nvoid handleLed3On()  { ledStates[2] = true;  digitalWrite(ledPins[2], HIGH); server.send(200, \"text/plain\", \"LED3 ON\");  Serial.println(\"[GPIO] BLUE ON\"); }\nvoid handleLed3Off() { ledStates[2] = false; digitalWrite(ledPins[2], LOW);  server.send(200, \"text/plain\", \"LED3 OFF\"); Serial.println(\"[GPIO] BLUE OFF\"); }\nvoid handleLed4On()  { ledStates[3] = true;  digitalWrite(ledPins[3], HIGH); server.send(200, \"text/plain\", \"LED4 ON\");  Serial.println(\"[GPIO] YELLOW ON\"); }\nvoid handleLed4Off() { ledStates[3] = false; digitalWrite(ledPins[3], LOW);  server.send(200, \"text/plain\", \"LED4 OFF\"); Serial.println(\"[GPIO] YELLOW OFF\"); }\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"\\n=== ESP32 GPIO Control Dashboard ===\");\n\n  for (int i = 0; i < 4; i++) {\n    pinMode(ledPins[i], OUTPUT);\n    digitalWrite(ledPins[i], LOW);\n  }\n\n  Serial.println(\"Connecting to Wi-Fi...\");\n  WiFi.begin(ssid, password);\n  while (WiFi.status() != WL_CONNECTED) {\n    delay(300);\n    Serial.print(\".\");\n  }\n  Serial.println();\n  Serial.print(\"IP address: \");\n  Serial.println(WiFi.localIP());\n\n  server.on(\"/\",          handleRoot);\n  server.on(\"/led1/on\",   handleLed1On);\n  server.on(\"/led1/off\",  handleLed1Off);\n  server.on(\"/led2/on\",   handleLed2On);\n  server.on(\"/led2/off\",  handleLed2Off);\n  server.on(\"/led3/on\",   handleLed3On);\n  server.on(\"/led3/off\",  handleLed3Off);\n  server.on(\"/led4/on\",   handleLed4On);\n  server.on(\"/led4/off\",  handleLed4Off);\n\n  server.begin();\n  Serial.println(\"HTTP server started!\");\n}\n\nvoid loop() {\n  server.handleClient();\n  delay(500);\n}"
+}

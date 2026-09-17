@@ -2810,6 +2810,12 @@ class CircuitCanvas {
 
   // Update component display based on simulation state and circuit electrical paths
   updateSimState(pinStates) {
+    if (this._updatingSimState) return;
+    this._updatingSimState = true;
+    try { this._updateSimStateInner(pinStates); } finally { this._updatingSimState = false; }
+  }
+
+  _updateSimStateInner(pinStates) {
     const { getComponentClass } = window.ArduinoComponents;
 
     // Pre-update relay state so buildGraph uses latest active flag
@@ -2830,6 +2836,39 @@ class CircuitCanvas {
     this.engine.buildGraph(this.components, this.wires);
     // Solve electrical graph
     this.engine.solve(this);
+
+    // Feed back solved voltages for Arduino input pins so external signals
+    // (func_gen, sensors, etc.) propagate to pinStates → _emitPinChange → interrupts
+    const sim = window.ArduinoSim;
+    if (sim && this.engine.pinToNet) {
+      const arduinoTypes = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'stm32f746_disco'];
+      for (const inst of this.components) {
+        if (!arduinoTypes.includes(inst.type)) continue;
+        const maxV = (inst.type === 'esp32_devkit_v1' || inst.type === 'stm32f746_disco') ? 3.3 : 5.0;
+        for (const [pinKey, net] of this.engine.pinToNet) {
+          if (!pinKey.startsWith(inst.id + ':')) continue;
+          const pinId = pinKey.slice(inst.id.length + 1);
+          const pinNum = this._pinToNumber(pinId);
+          if (pinNum == null) continue;
+          const mode = sim.pinModes?.[`pin_${pinNum}`];
+          if (mode !== 'INPUT' && mode !== 'INPUT_PULLUP') continue;
+
+          let voltage = net.voltage || 0;
+          if (mode === 'INPUT_PULLUP'
+            && (!net.sources || net.sources.length === 0)
+            && (!net.grounds || net.grounds.length === 0)) {
+            voltage = maxV;
+          }
+          const digitalVal = voltage >= maxV / 2 ? 1 : 0;
+          const key = `pin_${pinNum}`;
+          const currentVal = sim.pinStates?.[key];
+          const defaultVal = mode === 'INPUT_PULLUP' ? 1 : 0;
+          if (digitalVal !== (currentVal ?? defaultVal)) {
+            sim.setPinState(key, digitalVal);
+          }
+        }
+      }
+    }
 
     for (const inst of this.components) {
       // ── Class-based component: delegate to update() ──

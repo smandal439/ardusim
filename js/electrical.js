@@ -398,11 +398,17 @@ class ElectricalEngine {
           } else {
             const pinNum = this._canvas?._pinToNumber?.(pinId);
             if (pinNum != null) {
-              const rawVal = sim?.pinStates?.[`pin_${pinNum}`] || 0;
-              if (rawVal > 0) {
-                addSource(pinId, 'digital', maxV * (rawVal > 1 ? rawVal / 255 : 1), rawVal);
+              const pinMode = sim?.pinModes?.[`pin_${pinNum}`];
+              if (pinMode === 'INPUT' || pinMode === 'INPUT_PULLUP') {
+                // Input pins are passive readers — don't drive the electrical graph.
+                // Their solved voltages are fed back to pinStates in updateSimState.
               } else {
-                addGround(pinId, 'digital_low');
+                const rawVal = sim?.pinStates?.[`pin_${pinNum}`] || 0;
+                if (rawVal > 0) {
+                  addSource(pinId, 'digital', maxV * (rawVal > 1 ? rawVal / 255 : 1), rawVal);
+                } else {
+                  addGround(pinId, 'digital_low');
+                }
               }
             }
           }
@@ -466,8 +472,11 @@ class ElectricalEngine {
         break;
       case 'func_gen': {
         const rs = inst.runtimeState || {};
-        if (rs.ch1_voltage > 0) addSource('ch1_out', 'func_gen', rs.ch1_voltage, 255);
-        if (rs.ch2_voltage > 0) addSource('ch2_out', 'func_gen', rs.ch2_voltage, 255);
+        const powered = inst.props?.powered ?? 1;
+        if (powered) {
+          addSource('ch1_out', 'func_gen', rs.ch1_voltage ?? 0, 255);
+          addSource('ch2_out', 'func_gen', rs.ch2_voltage ?? 0, 255);
+        }
         break;
       }
     }
