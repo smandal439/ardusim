@@ -47,6 +47,10 @@ class ArduinoSimulator {
     this._eeprom = new Uint8Array(512);
     // ESP32 LEDC PWM channel registry: channel → { pin, freq, resolution, maxDuty }
     this._ledcChannels = {};
+    // Interrupt registry: pinNum → { fn, mode }
+    this._interrupts = {};
+    // Previous pin values for edge detection in interrupt firing
+    this._prevPinValues = {};
   }
 
   /* ══════════════ LIBRARY PLUGIN SYSTEM ══════════════ */
@@ -458,7 +462,6 @@ class ArduinoSimulator {
       ['touchRead', '_a.touchRead'],
       ['hallRead', '_a.hallRead'],
       ['temperatureRead', '_a.temperatureRead'],
-      ['digitalPinToInterrupt', '_a.digitalPinToInterrupt'],
       // C standard library
       ['snprintf', '_a.snprintf'],
     ];
@@ -560,7 +563,8 @@ class ArduinoSimulator {
         pinMode(pin, mode) {
           const key = `pin_${pin}`;
           self.pinModes[key] = mode;
-          self._emitPinChange(key, self.pinStates[key] || 0);
+          const val = self.pinStates[key] !== undefined ? self.pinStates[key] : (mode === 'INPUT_PULLUP' ? 1 : 0);
+          self._emitPinChange(key, val);
         },
         digitalWrite(pin, val) {
           const key = `pin_${pin}`;
@@ -1472,6 +1476,7 @@ class ArduinoSimulator {
     this._loopCount = 0;
     this._iterSinceDelay = 0;
     this._interrupts = {};
+    this._prevPinValues = {};
     // FreeRTOS dual-core state — reset on each run
     this._freertosTasks = { 0: [], 1: [] };
     this._freertosTaskRegistry = {};
@@ -1608,6 +1613,8 @@ class ArduinoSimulator {
     this._resumeAudio();
     const runId = ++this._runSeq;
     const { keys, vals, fn } = this._compiledCtx;
+    this._interrupts = {};
+    this._prevPinValues = {};
     // FreeRTOS dual-core state — ensure initialized for _startExecution path
     this._freertosTasks = { 0: [], 1: [] };
     this._freertosTaskRegistry = {};
@@ -2046,6 +2053,27 @@ class ArduinoSimulator {
     // Reset tight-iter counter whenever a pin changes (means the sketch is doing work)
     this._iterSinceDelay = 0;
     if (this.onPinChange) this.onPinChange(key, val);
+    // Fire registered interrupts when pin state matches the trigger mode
+    if (key.startsWith('pin_') && this._interrupts) {
+      const pin = parseInt(key.slice(4));
+      const irq = this._interrupts[pin];
+      if (irq) {
+        const prev = this._prevPinValues[key] !== undefined ? this._prevPinValues[key] : 0;
+        const next = val;
+        let shouldFire = false;
+        if (irq.mode === 'CHANGE') {
+          shouldFire = prev !== next;
+        } else if (irq.mode === 'FALLING') {
+          shouldFire = prev !== 0 && next === 0;
+        } else if (irq.mode === 'RISING') {
+          shouldFire = prev === 0 && next !== 0;
+        }
+        if (shouldFire) {
+          try { irq.fn(); } catch (e) { /* ISR errors are silent */ }
+        }
+      }
+    }
+    this._prevPinValues[key] = val;
   }
 
   _emitError(msg) {
