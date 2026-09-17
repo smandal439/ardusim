@@ -3058,6 +3058,69 @@ void loop() {
       ],
     },
     exampleId: 'esp32_sd_songs_player',
+    guide: [
+      {
+        title: 'Converting MP3 to PCM (Required)',
+        desc: 'The SD Card Songs Player requires raw 16-bit PCM audio. Use <code>ffmpeg</code> (free) to convert any audio file.',
+        code: `# Basic conversion (16-bit, 44100Hz, mono)
+ffmpeg -i input.mp3 -f s16le -ar 44100 -ac 1 output.pcm
+
+# Convert an entire folder (Windows PowerShell)
+Get-ChildItem *.mp3 | ForEach-Object {
+  ffmpeg -i $_.FullName -f s16le -ar 44100 -ac 1 ($_.BaseName + '.pcm')
+}
+
+# Convert an entire folder (Mac/Linux)
+for f in *.mp3; do ffmpeg -i "$f" -f s16le -ar 44100 -ac 1 "${f%.mp3}.pcm"; done
+
+# Convert from FLAC, WAV, OGG, etc.
+ffmpeg -i song.flac -f s16le -ar 44100 -ac 1 song.pcm
+ffmpeg -i song.wav -f s16le -ar 44100 -ac 1 song.pcm
+ffmpeg -i song.ogg -f s16le -ar 44100 -ac 1 song.pcm`,
+      },
+      {
+        title: 'Installing ffmpeg',
+        desc: 'Download from <a href="https://ffmpeg.org/download.html" target="_blank">ffmpeg.org</a> or use a package manager:',
+        code: `# Windows (using winget)
+winget install ffmpeg
+
+# Mac (using Homebrew)
+brew install ffmpeg
+
+# Ubuntu / Debian
+sudo apt install ffmpeg
+
+# Verify installation
+ffmpeg -version`,
+      },
+      {
+        title: 'ffmpeg Flag Reference',
+        desc: 'Key flags used in the conversion commands:',
+        code: `-i input.mp3      Input file
+-f s16le          Output format: signed 16-bit little-endian PCM
+-ar 44100         Sample rate: 44100 Hz
+-ac 1             Channels: 1 (mono)
+-ac 2             Channels: 2 (stereo, if needed)
+-b:a 128k         Audio bitrate (for lossy formats)`,
+      },
+      {
+        title: 'Optional: playlist.txt',
+        desc: 'Create a <code>playlist.txt</code> file to control song order. Upload it alongside your .pcm files. Each line is one filename:',
+        code: `song1.pcm
+song2.pcm
+song3.pcm`,
+      },
+      {
+        title: 'Uploading Files',
+        steps: [
+          'Right-click the SD Card component on the canvas',
+          'Select "Upload files to SD card"',
+          'Select your .pcm files (and optional playlist.txt)',
+          'Press Run to start playback',
+          'Use the IR Remote to control playback',
+        ],
+      },
+    ],
   },
 
   /* ── MISC ── */
@@ -3954,6 +4017,19 @@ class GuideManager {
         </div>
 
         ${propsBlock}
+
+        ${(g.guide && g.guide.length) ? g.guide.map(section => `
+          <div class="gc-detail-section">
+            <h3>${this._esc(section.title)}</h3>
+            ${section.desc ? `<p class="gc-long-desc">${section.desc}</p>` : ''}
+            ${section.steps ? `<ol class="gc-steps">${section.steps.map(s => `<li>${this._esc(s)}</li>`).join('')}</ol>` : ''}
+            ${section.code ? `
+              <div class="gc-code-wrap">
+                <button class="gh-btn gh-btn-ghost gh-btn-sm gc-copy" title="Copy code">Copy</button>
+                <pre class="gc-code"><code>${this._esc(section.code.trim())}</code></pre>
+              </div>` : ''}
+          </div>`).join('') : ''}
+
         ${codeBlock}
       </div>`;
 
