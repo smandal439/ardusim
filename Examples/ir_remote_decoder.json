@@ -1,0 +1,161 @@
+{
+  "id": "ir_remote_decoder",
+  "name": "IR Remote Decoder",
+  "icon": "🔧",
+  "desc": "A custom IR Remote Decoder circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 250,
+        "y": 80,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "irrecv1",
+        "type": "ir_receiver",
+        "x": 530,
+        "y": 130,
+        "rotation": 0,
+        "props": {
+          "code": 70,
+          "decoding": false
+        }
+      },
+      {
+        "id": "irremote1",
+        "type": "ir_remote",
+        "x": 605,
+        "y": 55,
+        "rotation": 0,
+        "props": {
+          "lastButton": "",
+          "code": 70
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 490,
+        "y": 90,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "comp_1789654082902_s4avj",
+        "type": "resistor",
+        "x": 495,
+        "y": 175,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "irrecv1",
+          "pinId": "VCC"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "to": {
+          "instId": "irrecv1",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "b1",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "irrecv1",
+          "pinId": "OUT"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "b1",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789654092259_doyon",
+        "from": {
+          "instId": "comp_1789654082902_s4avj",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789654096169_nyndv",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1789654082902_s4avj",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "code": "/*\n * IR Remote Decoder\n * Receives NEC IR codes from a remote control and prints them\n * to the Serial Monitor. The built-in LED (D13) blinks on each press.\n *\n * Wiring:\n *   TSOP4838 OUT → D2\n *   TSOP4838 VCC → 5V, GND → GND\n *   IR Remote — click any button on the canvas remote to send a code.\n */\n\n#include <IRremote.h>\n\nconst int RECV_PIN = 2;\nIRrecv irrecv(RECV_PIN);\ndecode_results results;\n\nvoid setup() {\n  Serial.begin(115200);\n  irrecv.enableIRIn();\n  pinMode(LED_BUILTIN, OUTPUT);\n  Serial.println(\"IR Remote Decoder ready\");\n  Serial.println(\"Press a button on the remote...\");\n}\n\nvoid loop() {\n  if (irrecv.decode(&results)) {\n    Serial.print(\"Code: 0x\");\n    Serial.print(results.value, HEX);\n    Serial.print(\"  Protocol: \");\n    Serial.println(results.decode_type);\n\n    digitalWrite(LED_BUILTIN, HIGH);\n    delay(100);\n    digitalWrite(LED_BUILTIN, LOW);\n\n    irrecv.resume();\n  }\n}"
+}
