@@ -2121,6 +2121,12 @@ class CircuitCanvas {
         inst.runtimeState._hovered = (irRemoteHover === inst);
         if (wasHovered !== inst.runtimeState._hovered) this._render();
       }
+      if (inst.type === 'sd_card') {
+        const wasHovered = inst.runtimeState?._hovered;
+        inst.runtimeState = inst.runtimeState || {};
+        inst.runtimeState._hovered = (comp === inst);
+        if (wasHovered !== inst.runtimeState._hovered) this._render();
+      }
     }
 
     if (pin) {

@@ -811,8 +811,13 @@ class ArduinoSimulator {
         },
 
         /* Interrupts */
-        attachInterrupt(num, fn, mode) { },
-        detachInterrupt(num) { },
+        attachInterrupt(num, fn, mode) {
+          if (typeof fn !== 'function') return;
+          self._interrupts[num] = { fn, mode };
+        },
+        detachInterrupt(num) {
+          delete self._interrupts[num];
+        },
 
         /* Memory copy (general fallback) */
         memcpy(dest, src, len) {
@@ -1466,6 +1471,7 @@ class ArduinoSimulator {
     this._fps = 0;
     this._loopCount = 0;
     this._iterSinceDelay = 0;
+    this._interrupts = {};
     // FreeRTOS dual-core state — reset on each run
     this._freertosTasks = { 0: [], 1: [] };
     this._freertosTaskRegistry = {};
@@ -2188,7 +2194,7 @@ window.loadExamplesFromFiles = async function () {
     'neopixel_color_cycle', 'neopixel_strip_chase', 'neopixel_strip_color_pattern', 'not_gate_test', 'ntc_thermistor_dc_motor', 'oled_ssd1306',
     'opamp_741_non_inverting', 'or_gate', 'pir_alarm', 'plugin_tutorial', 'potentiometer', 'print_binary_data',
     'rainbow_rgb', 'read_rfid_card_raw_data', 'relay_control', 'remote_control_leds', 'remote_servo_control', 'rfid_inventory_tracker',
-    'rgb_matrix_demo', 'rotary_encoder_counter', 'rotary_encoder_servo', 'seg7_counter', 'serial_peek', 'serial_peek_2',
+    'rgb_matrix_demo', 'rotary_encoder_counter', 'rotary_encoder_servo', 'esp32_sd_songs_player', 'seg7_counter', 'serial_peek', 'serial_peek_2',
     'serial_plotter', 'serial_plotter_sine_and_triangle', 'servo_continuous_spin', 'servo_sweep', 'shift_resister_circuit', 'simplebme280_altimeter_on_lcd',
     'simplebme280_altitude', 'simplebme280_basic', 'stepper_motor', 'stm32f746_blink', 'stm32f746_button', 'stm32f746_lcd',
     'stm32f746_pot_led', 'temperature', 'traffic_light', 'two_lcd', 'ultrasonic', 'ultrasonic_distance_pulsein',
