@@ -2179,9 +2179,37 @@ _newProject() {
       itemRotate?.addEventListener('click', itemRotate._handler, { once: true });
     }
 
-    itemDelete?.removeEventListener('click', itemDelete._handler);
-    itemDelete._handler = () => { this.canvas?.deleteSelected(); cleanup(); };
-    itemDelete?.addEventListener('click', itemDelete._handler, { once: true });
+      itemDelete?.removeEventListener('click', itemDelete._handler);
+      itemDelete._handler = () => { this.canvas?.deleteSelected(); cleanup(); };
+      itemDelete?.addEventListener('click', itemDelete._handler, { once: true });
+
+    // Dynamic component-specific context menu items
+    const existingCustom = menu.querySelectorAll('.ctx-custom-item');
+    existingCustom.forEach(el => el.remove());
+
+    if (inst && inst.type && !isWire) {
+      const def = window.ArduinoComponents?.COMPONENT_DEFS?.[inst.type];
+      if (def && def.contextMenu && def.contextMenu.length > 0) {
+        const divider = document.createElement('div');
+        divider.className = 'ctx-divider ctx-custom-item';
+        divider.style.cssText = 'height:1px;background:rgba(255,255,255,0.15);margin:4px 8px;';
+        menu.appendChild(divider);
+
+        def.contextMenu.forEach(item => {
+          const btn = document.createElement('button');
+          btn.className = 'ctx-item ctx-custom-item';
+          btn.setAttribute('role', 'menuitem');
+          btn.innerHTML = (item.icon ? '<span style="margin-right:6px;">' + item.icon + '</span>' : '') + item.label;
+          btn.onclick = () => {
+            if (typeof item.action === 'function') {
+              item.action(inst);
+            }
+            cleanup();
+          };
+          menu.appendChild(btn);
+        });
+      }
+    }
   }
 
   _closeContextMenu() {

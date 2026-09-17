@@ -113,6 +113,7 @@ window.CppTypes = {
     'IPAddress',
     'WiFiUDP',
     'String',
+    'File',
   ],
 
   // ── Constants that are also type-like ──

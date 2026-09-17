@@ -806,11 +806,14 @@ defComp({
   name: 'Micro SD Card Module',
   category: 'Communication',
   icon: '💾',
-  desc: 'MicroSD card adapter module with SPI interface & onboard 3.3V level conversion.',
+  desc: 'MicroSD card adapter module with SPI interface & onboard 3.3V level conversion. Right-click to upload files to the virtual SD card.',
   width: 60,
   height: 72,
   defaultProps: {
     cardInserted: true
+  },
+  runtimeState: {
+    uploadedFiles: {}
   },
   interactive: [
     {
@@ -819,6 +822,72 @@ defComp({
       bounds: { x: 10, y: 4, width: 40, height: 26 },
       action(inst) {
         inst.props.cardInserted = !inst.props.cardInserted;
+      }
+    }
+  ],
+  contextMenu: [
+    {
+      label: 'Upload files to SD card',
+      icon: '📁',
+      action(inst) {
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = true;
+        input.style.display = 'none';
+        input.onchange = function(e) {
+          var files = e.target.files;
+          if (!files || files.length === 0) return;
+          if (!inst.runtimeState) inst.runtimeState = {};
+          if (!inst.runtimeState.uploadedFiles) inst.runtimeState.uploadedFiles = {};
+          var pending = files.length;
+          for (var i = 0; i < files.length; i++) {
+            (function(file) {
+              var reader = new FileReader();
+              reader.onload = function(ev) {
+                var data = new Uint8Array(ev.target.result);
+                inst.runtimeState.uploadedFiles[file.name] = data;
+                pending--;
+                if (pending === 0) {
+                  if (window.CircuitCanvas && window.CircuitCanvas.render) {
+                    window.CircuitCanvas.render();
+                  }
+                }
+              };
+              reader.readAsArrayBuffer(file);
+            })(files[i]);
+          }
+        };
+        document.body.appendChild(input);
+        input.click();
+        document.body.removeChild(input);
+      }
+    },
+    {
+      label: 'View loaded files',
+      icon: '📋',
+      action(inst) {
+        var uploaded = (inst.runtimeState && inst.runtimeState.uploadedFiles) || {};
+        var names = Object.keys(uploaded);
+        if (names.length === 0) {
+          window._serialLog && window._serialLog('[SD Card] No files loaded. Right-click > "Upload files to SD card" to add files.\n', 'system');
+          return;
+        }
+        window._serialLog && window._serialLog('[SD Card] Loaded files (' + names.length + '):\n', 'system');
+        names.forEach(function(name) {
+          var size = uploaded[name] ? uploaded[name].length : 0;
+          window._serialLog && window._serialLog('  ' + name + ' (' + size + ' bytes)\n', 'data');
+        });
+      }
+    },
+    {
+      label: 'Clear all files',
+      icon: '🗑️',
+      action(inst) {
+        if (inst.runtimeState) inst.runtimeState.uploadedFiles = {};
+        if (window.CircuitCanvas && window.CircuitCanvas.render) {
+          window.CircuitCanvas.render();
+        }
+        window._serialLog && window._serialLog('[SD Card] All files cleared.\n', 'system');
       }
     }
   ],
@@ -975,6 +1044,44 @@ defComp({
       ctx.fillStyle = leadGrad;
       ctx.fillRect(px - 0.8, 63, 1.6, 9);
     });
+
+    // File count badge
+    var uploaded = (inst.runtimeState && inst.runtimeState.uploadedFiles) || {};
+    var fileCount = Object.keys(uploaded).length;
+    if (fileCount > 0) {
+      ctx.fillStyle = '#1a73e8';
+      ctx.beginPath();
+      ctx.arc(54, 4, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 6px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(fileCount), 54, 4);
+      ctx.textBaseline = 'alphabetic';
+
+      // Tooltip on hover
+      if (inst.runtimeState && inst.runtimeState._hovered) {
+        var tooltipY = -10;
+        ctx.fillStyle = 'rgba(0,0,0,0.85)';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(0, tooltipY - 4, 60, fileCount * 8 + 8, 3);
+        else ctx.rect(0, tooltipY - 4, 60, fileCount * 8 + 8);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '6px monospace';
+        ctx.textAlign = 'left';
+        var fileNames = Object.keys(uploaded);
+        for (var fi = 0; fi < Math.min(fileNames.length, 8); fi++) {
+          var fname = fileNames[fi];
+          var fsize = uploaded[fname] ? uploaded[fname].length : 0;
+          ctx.fillText(fname.substring(0, 12) + ' (' + fsize + ')', 4, tooltipY + 4 + fi * 8);
+        }
+        if (fileNames.length > 8) {
+          ctx.fillText('...+' + (fileNames.length - 8) + ' more', 4, tooltipY + 4 + 8 * 8);
+        }
+      }
+    }
 
     if (inst.selected && typeof drawSelectionRect === 'function') {
       drawSelectionRect(ctx, -2, -2, 64, 76);

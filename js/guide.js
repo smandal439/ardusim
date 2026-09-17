@@ -3009,6 +3009,56 @@ void loop() {
 }`,
     exampleId: 'esp32_i2s_local_radio_player_2',
   },
+  {
+    id: 'esp32_sd_songs_player',
+    name: 'ESP32 SD Card Songs Player',
+    icon: '🎵',
+    category: 'Audio',
+    include: '<driver/i2s.h>\n<SD.h>\n<SPI.h>\n<IRremote.h>',
+    desc: 'Play songs from an SD card through a MAX98357A I2S amplifier with IR Remote control. Upload .pcm audio files to the SD Card component, then use the IR Remote to play/pause, next/prev, and control volume.',
+    api: [
+      { fn: 'SD.begin(CS_PIN)', desc: 'Initialize SD card on CS pin' },
+      { fn: 'SD.open(filename, mode)', desc: 'Open a file (FILE_READ or FILE_WRITE)' },
+      { fn: 'SD.exists(filename)', desc: 'Check if a file exists' },
+      { fn: 'file.read()', desc: 'Read one byte from file (returns -1 at end)' },
+      { fn: 'file.read(buf, len)', desc: 'Read len bytes into buffer' },
+      { fn: 'file.available()', desc: 'Bytes remaining to read' },
+      { fn: 'file.size()', desc: 'Total file size in bytes' },
+      { fn: 'file.close()', desc: 'Close the file' },
+      { fn: 'IRrecv irrecv(pin)', desc: 'Create IR receiver on pin' },
+      { fn: 'irrecv.enableIRIn()', desc: 'Start IR receiver' },
+      { fn: 'irrecv.decode(&results)', desc: 'Decode IR signal' },
+      { fn: 'irrecv.resume()', desc: 'Resume receiving next code' },
+    ],
+    pins: {
+      'SD Card → ESP32': [
+        'CS  → D5',
+        'SCK → D18',
+        'MOSI → D23',
+        'MISO → D19',
+        'VCC → VIN (5V)',
+        'GND → GND',
+      ],
+      'MAX98357A → ESP32': [
+        'BCLK → D26',
+        'LRC  → D25',
+        'DIN  → D22',
+        'VIN  → VIN (5V)',
+        'GND  → GND',
+        'SD   → GND (enable)',
+      ],
+      'MAX98357A → Speaker': [
+        'OUT+ → Speaker +',
+        'OUT- → Speaker -',
+      ],
+      'IR Receiver → ESP32': [
+        'OUT → D15',
+        'VCC → VIN (5V)',
+        'GND → GND',
+      ],
+    },
+    exampleId: 'esp32_sd_songs_player',
+  },
 
   /* ── MISC ── */
   {

@@ -47,6 +47,10 @@ class ArduinoSimulator {
     this._eeprom = new Uint8Array(512);
     // ESP32 LEDC PWM channel registry: channel → { pin, freq, resolution, maxDuty }
     this._ledcChannels = {};
+    // Interrupt registry: pinNum → { fn, mode }
+    this._interrupts = {};
+    // Previous pin values for edge detection in interrupt firing
+    this._prevPinValues = {};
   }
 
   /* ══════════════ LIBRARY PLUGIN SYSTEM ══════════════ */
@@ -458,7 +462,6 @@ class ArduinoSimulator {
       ['touchRead', '_a.touchRead'],
       ['hallRead', '_a.hallRead'],
       ['temperatureRead', '_a.temperatureRead'],
-      ['digitalPinToInterrupt', '_a.digitalPinToInterrupt'],
       // C standard library
       ['snprintf', '_a.snprintf'],
     ];
@@ -560,7 +563,8 @@ class ArduinoSimulator {
         pinMode(pin, mode) {
           const key = `pin_${pin}`;
           self.pinModes[key] = mode;
-          self._emitPinChange(key, self.pinStates[key] || 0);
+          const val = self.pinStates[key] !== undefined ? self.pinStates[key] : (mode === 'INPUT_PULLUP' ? 1 : 0);
+          self._emitPinChange(key, val);
         },
         digitalWrite(pin, val) {
           const key = `pin_${pin}`;
@@ -811,8 +815,13 @@ class ArduinoSimulator {
         },
 
         /* Interrupts */
-        attachInterrupt(num, fn, mode) { },
-        detachInterrupt(num) { },
+        attachInterrupt(num, fn, mode) {
+          if (typeof fn !== 'function') return;
+          self._interrupts[num] = { fn, mode };
+        },
+        detachInterrupt(num) {
+          delete self._interrupts[num];
+        },
 
         /* Memory copy (general fallback) */
         memcpy(dest, src, len) {
@@ -1466,6 +1475,8 @@ class ArduinoSimulator {
     this._fps = 0;
     this._loopCount = 0;
     this._iterSinceDelay = 0;
+    this._interrupts = {};
+    this._prevPinValues = {};
     // FreeRTOS dual-core state — reset on each run
     this._freertosTasks = { 0: [], 1: [] };
     this._freertosTaskRegistry = {};
@@ -1602,6 +1613,8 @@ class ArduinoSimulator {
     this._resumeAudio();
     const runId = ++this._runSeq;
     const { keys, vals, fn } = this._compiledCtx;
+    this._interrupts = {};
+    this._prevPinValues = {};
     // FreeRTOS dual-core state — ensure initialized for _startExecution path
     this._freertosTasks = { 0: [], 1: [] };
     this._freertosTaskRegistry = {};
@@ -2040,6 +2053,27 @@ class ArduinoSimulator {
     // Reset tight-iter counter whenever a pin changes (means the sketch is doing work)
     this._iterSinceDelay = 0;
     if (this.onPinChange) this.onPinChange(key, val);
+    // Fire registered interrupts when pin state matches the trigger mode
+    if (key.startsWith('pin_') && this._interrupts) {
+      const pin = parseInt(key.slice(4));
+      const irq = this._interrupts[pin];
+      if (irq) {
+        const prev = this._prevPinValues[key] !== undefined ? this._prevPinValues[key] : 0;
+        const next = val;
+        let shouldFire = false;
+        if (irq.mode === 'CHANGE') {
+          shouldFire = prev !== next;
+        } else if (irq.mode === 'FALLING') {
+          shouldFire = prev !== 0 && next === 0;
+        } else if (irq.mode === 'RISING') {
+          shouldFire = prev === 0 && next !== 0;
+        }
+        if (shouldFire) {
+          try { irq.fn(); } catch (e) { /* ISR errors are silent */ }
+        }
+      }
+    }
+    this._prevPinValues[key] = val;
   }
 
   _emitError(msg) {
@@ -2188,7 +2222,7 @@ window.loadExamplesFromFiles = async function () {
     'neopixel_color_cycle', 'neopixel_strip_chase', 'neopixel_strip_color_pattern', 'not_gate_test', 'ntc_thermistor_dc_motor', 'oled_ssd1306',
     'opamp_741_non_inverting', 'or_gate', 'pir_alarm', 'plugin_tutorial', 'potentiometer', 'print_binary_data',
     'rainbow_rgb', 'read_rfid_card_raw_data', 'relay_control', 'remote_control_leds', 'remote_servo_control', 'rfid_inventory_tracker',
-    'rgb_matrix_demo', 'rotary_encoder_counter', 'rotary_encoder_servo', 'seg7_counter', 'serial_peek', 'serial_peek_2',
+    'rgb_matrix_demo', 'rotary_encoder_counter', 'rotary_encoder_servo', 'esp32_sd_songs_player', 'seg7_counter', 'serial_peek', 'serial_peek_2',
     'serial_plotter', 'serial_plotter_sine_and_triangle', 'servo_continuous_spin', 'servo_sweep', 'shift_resister_circuit', 'simplebme280_altimeter_on_lcd',
     'simplebme280_altitude', 'simplebme280_basic', 'stepper_motor', 'stm32f746_blink', 'stm32f746_button', 'stm32f746_lcd',
     'stm32f746_pot_led', 'temperature', 'traffic_light', 'two_lcd', 'ultrasonic', 'ultrasonic_distance_pulsein',
