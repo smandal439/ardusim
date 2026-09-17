@@ -66,8 +66,6 @@ window.ArduinoLibs['I2S'] = {
             }
           }
         } catch (e) { }
-        var playbackMs = Math.max(1, (Number(len) / 2) / 44100 * 1000 / Math.max(0.01, self.speed));
-        await new Promise(function(resolve) { setTimeout(resolve, playbackMs); });
         return len;
       },
       i2sZeroDma: function(port) { },
