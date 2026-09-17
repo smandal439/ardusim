@@ -14,6 +14,7 @@ window.ArduinoLibs['I2S'] = {
     [/await\s+i2s_write\s*\(([^)]*)\)\s*;/g, 'await _a.i2sWrite($1);'],
     [/i2s_write\s*\(([^)]*)\)\s*;/g, 'await _a.i2sWrite($1);'],
     [/i2s_zero_dma_buffer\s*\(([^)]*)\)\s*;/g, '_a.i2sZeroDma($1);'],
+    [/i2s_set_volume\s*\(([^,)]+)\s*,\s*([^)]+)\)/g, '_a.i2sSetVolume($1, $2);'],
   ],
 
   runtime: function(self) {
@@ -28,16 +29,27 @@ window.ArduinoLibs['I2S'] = {
       },
       i2sWrite: async function(port, buf, len, written, timeout) {
         if (written) written.val = len;
-        self._playI2SAudio(buf, len);
+        var vol = 1.0;
+        try { vol = Math.max(0, Math.min(1, (self._i2sVolume != null ? self._i2sVolume : 80) / 100)); } catch(e) {}
+        self._playI2SAudio(buf, len, { channels: 1, volume: vol });
         try {
           var cc = window.CircuitCanvas;
           if (cc && cc.components && buf) {
             var amp = cc.components.find(function(c) { return c.type === 'max98357a'; });
             if (amp) {
               var sum = 0, count = 0;
-              var samples = Math.min(len / 2, 512);
-              var view = new Int16Array(buf.buffer || buf, buf.byteOffset || 0, samples);
-              for (var i = 0; i < samples; i++) { sum += view[i] * view[i]; count++; }
+              var samples = Math.min(Math.floor(len / 2), 512);
+              var view;
+              if (buf instanceof ArrayBuffer) {
+                view = new Int16Array(buf, 0, samples);
+              } else if (ArrayBuffer.isView(buf)) {
+                view = new Int16Array(buf.buffer, buf.byteOffset, samples);
+              } else if (Array.isArray(buf)) {
+                view = new Int16Array(buf.slice(0, samples));
+              }
+              if (view) {
+                for (var i = 0; i < samples; i++) { sum += view[i] * view[i]; count++; }
+              }
               var rms = count > 0 ? Math.sqrt(sum / count) : 0;
               var dinV = (rms / 32767) * 3.3;
               if (typeof cc._getConnectedPinNum === 'function') {
@@ -54,11 +66,14 @@ window.ArduinoLibs['I2S'] = {
             }
           }
         } catch (e) { }
-        var playbackMs = Math.max(1, (Number(len) / 4) / 44100 * 1000 / Math.max(0.01, self.speed));
+        var playbackMs = Math.max(1, (Number(len) / 2) / 44100 * 1000 / Math.max(0.01, self.speed));
         await new Promise(function(resolve) { setTimeout(resolve, playbackMs); });
         return len;
       },
       i2sZeroDma: function(port) { },
+      i2sSetVolume: function(port, volume) {
+        self._i2sVolume = Math.max(0, Math.min(100, volume));
+      },
     };
   },
 

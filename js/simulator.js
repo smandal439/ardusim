@@ -1963,10 +1963,10 @@ class ArduinoSimulator {
     }
   }
 
-  _playI2SAudio(buf, len) {
+  _playI2SAudio(buf, len, opts) {
     this._resumeAudio();
     const ctx = this._toneCtx;
-    if (!ctx || !buf || len < 4 || ctx.state !== 'running') return;
+    if (!ctx || !buf || len < 2 || ctx.state !== 'running') return;
 
     try {
       let byteView;
@@ -1979,16 +1979,28 @@ class ArduinoSimulator {
       } else {
         return;
       }
-      const sampleCount = Math.floor(byteView.byteLength / 4);
+      const channels = (opts && opts.channels) || 1;
+      const bytesPerSample = channels * 2;
+      const sampleCount = Math.floor(byteView.byteLength / bytesPerSample);
+      if (sampleCount < 1) return;
       const audioBuffer = ctx.createBuffer(2, sampleCount, 44100);
       const left = audioBuffer.getChannelData(0);
       const right = audioBuffer.getChannelData(1);
       const view = new DataView(byteView.buffer, byteView.byteOffset, byteView.byteLength);
-      for (let i = 0; i < sampleCount; i++) {
-        left[i] = view.getInt16(i * 4, true) / 32768;
-        right[i] = view.getInt16(i * 4 + 2, true) / 32768;
+      if (channels === 1) {
+        for (let i = 0; i < sampleCount; i++) {
+          const s = view.getInt16(i * 2, true) / 32768;
+          left[i] = s;
+          right[i] = s;
+        }
+      } else {
+        for (let i = 0; i < sampleCount; i++) {
+          left[i] = view.getInt16(i * bytesPerSample, true) / 32768;
+          right[i] = view.getInt16(i * bytesPerSample + 2, true) / 32768;
+        }
       }
 
+      const vol = (opts && opts.volume != null) ? opts.volume : 1.0;
       const now = ctx.currentTime;
       if (!this._i2sNextAudioTime || this._i2sNextAudioTime < now) {
         this._i2sNextAudioTime = now + 0.02;
@@ -2006,6 +2018,7 @@ class ArduinoSimulator {
         this._i2sOutputGain.connect(this._i2sOutputFilter);
         this._i2sOutputFilter.connect(ctx.destination);
       }
+      this._i2sOutputGain.gain.value = 0.55 * vol;
       source.connect(this._i2sOutputGain);
       source.start(this._i2sNextAudioTime);
       this._i2sNextAudioTime += audioBuffer.duration;
