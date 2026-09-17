@@ -1181,8 +1181,8 @@ class CircuitCanvas {
       { label: '8',       code: 0x52, row: 6, col: 1 },
       { label: '9',       code: 0x4A, row: 6, col: 2 },
     ];
-    const btnW = 17, btnH = 11.5, gapX = 3.5, gapY = 2.5;
-    const startX = 6, startY = 22;
+    const btnW = 29, btnH = 20, gapX = 6, gapY = 4.5;
+    const startX = 10, startY = 38;
     for (const inst of this.components) {
       if (inst.type !== 'ir_remote') continue;
       for (const btn of buttons) {

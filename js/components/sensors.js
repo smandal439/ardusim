@@ -5521,8 +5521,8 @@ defComp({
   category: 'Input',
   icon: '🎮',
   desc: 'Battery-powered NEC infrared remote control. Emits IR signals to all canvas IR receivers on button click.',
-  width: 70,
-  height: 135,
+  width: 120,
+  height: 230,
   defaultProps: { lastButton: '', code: 0 },
   pins: [],
   draw(ctx, inst, sim) {
@@ -5553,11 +5553,11 @@ defComp({
     // --- 1. IR Signal Blast Wave (Active State) ---
     if (isTransmitting) {
       ctx.save();
-      ctx.lineWidth = 1.5;
-      for (let r = 8; r <= 22; r += 7) {
-        ctx.strokeStyle = `rgba(255, 40, 80, ${0.8 - r / 30})`;
+      ctx.lineWidth = 2.5;
+      for (let r = 14; r <= 37; r += 12) {
+        ctx.strokeStyle = `rgba(255, 40, 80, ${0.8 - r / 50})`;
         ctx.beginPath();
-        ctx.arc(35, 0, r, Math.PI * 1.25, Math.PI * 1.75);
+        ctx.arc(60, 0, r, Math.PI * 1.25, Math.PI * 1.75);
         ctx.stroke();
       }
       ctx.restore();
@@ -5566,76 +5566,76 @@ defComp({
     // --- 2. Body Outer Shadow ---
     ctx.save();
     ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetY = 4;
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetY = 7;
     ctx.fillStyle = '#111';
-    drawRoundRect(ctx, 0, 0, 70, 135, 10);
+    drawRoundRect(ctx, 0, 0, 120, 230, 17);
     ctx.fill();
     ctx.restore();
 
     // --- 3. Main Body Plastic Gradient ---
-    const bodyGrad = ctx.createLinearGradient(0, 0, 70, 135);
+    const bodyGrad = ctx.createLinearGradient(0, 0, 120, 230);
     bodyGrad.addColorStop(0, '#323232');
     bodyGrad.addColorStop(0.15, '#222222');
     bodyGrad.addColorStop(0.85, '#181818');
     bodyGrad.addColorStop(1, '#0d0d0d');
     ctx.fillStyle = bodyGrad;
-    drawRoundRect(ctx, 0, 0, 70, 135, 10);
+    drawRoundRect(ctx, 0, 0, 120, 230, 17);
     ctx.fill();
 
     // Outer edge highlight border
     ctx.strokeStyle = isHovered ? '#6a8fff' : '#444';
-    ctx.lineWidth = isHovered ? 1.2 : 0.8;
+    ctx.lineWidth = isHovered ? 2 : 1.4;
     ctx.stroke();
 
     // Hover glow effect
     if (isHovered && !isTransmitting) {
       ctx.save();
       ctx.shadowColor = '#4488ff';
-      ctx.shadowBlur = 10;
+      ctx.shadowBlur = 17;
       ctx.strokeStyle = 'rgba(68, 136, 255, 0.3)';
-      ctx.lineWidth = 2;
-      drawRoundRect(ctx, -1, -1, 72, 137, 11);
+      ctx.lineWidth = 3;
+      drawRoundRect(ctx, -2, -2, 124, 234, 19);
       ctx.stroke();
       ctx.restore();
     }
 
     // Inner subtle chamfer groove
-    drawRoundRect(ctx, 2, 2, 66, 131, 8);
+    drawRoundRect(ctx, 3, 3, 114, 224, 14);
     ctx.strokeStyle = '#111';
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 0.8;
     ctx.stroke();
 
     // --- 4. Top IR Window (Dark Red Acrylic Lens) ---
     const irGlow = isTransmitting;
-    const irGrad = ctx.createRadialGradient(35, 6, 1, 35, 6, 14);
+    const irGrad = ctx.createRadialGradient(60, 10, 2, 60, 10, 24);
     irGrad.addColorStop(0, irGlow ? '#ff3366' : '#550000');
     irGrad.addColorStop(0.6, irGlow ? '#aa0022' : '#2a0000');
     irGrad.addColorStop(1, '#100000');
     ctx.fillStyle = irGrad;
-    drawRoundRect(ctx, 22, 2, 26, 8, 3);
+    drawRoundRect(ctx, 37, 3, 44, 14, 5);
     ctx.fill();
     ctx.strokeStyle = irGlow ? '#ff6688' : '#3d0000';
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 0.8;
     ctx.stroke();
 
     // --- 5. Status Indicator LED ---
     ctx.fillStyle = isTransmitting ? '#ff1744' : '#222';
     ctx.beginPath();
-    ctx.arc(12, 16, 1.5, 0, Math.PI * 2);
+    ctx.arc(20, 27, 2.5, 0, Math.PI * 2);
     ctx.fill();
     if (isTransmitting) {
       ctx.shadowColor = '#ff1744';
-      ctx.shadowBlur = 6;
+      ctx.shadowBlur = 10;
       ctx.fill();
       ctx.shadowBlur = 0;
     }
 
     // --- 6. Brand Header ---
     ctx.fillStyle = '#888';
-    ctx.font = 'bold 3.5px sans-serif';
+    ctx.font = 'bold 6px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('ArduSim', 35, 17);
+    ctx.fillText('ArduSim', 60, 29);
 
     // --- 7. Button Layout (7 rows x 3 cols) ---
     const buttons = [
@@ -5662,8 +5662,8 @@ defComp({
       { label: '9',       code: 0x4A, row: 6, col: 2, color: '#424242' },
     ];
 
-    const btnW = 17, btnH = 11.5, gapX = 3.5, gapY = 2.5;
-    const startX = 6, startY = 22;
+    const btnW = 29, btnH = 20, gapX = 6, gapY = 4.5;
+    const startX = 10, startY = 38;
 
     buttons.forEach((btn) => {
       const bx = startX + btn.col * (btnW + gapX);
@@ -5713,7 +5713,7 @@ defComp({
 
       // Button Label Text
       ctx.fillStyle = isActive ? '#ffffff' : '#f0f0f0';
-      ctx.font = 'bold 3.8px sans-serif';
+      ctx.font = 'bold 6.5px sans-serif';
       ctx.textAlign = 'center';
       const textOffset = isActive ? 1 : 0.5;
       ctx.fillText(btn.label, bx + btnW / 2, by + btnH / 2 + textOffset);
@@ -5721,29 +5721,29 @@ defComp({
 
     // --- 8. Bottom Battery Compartment Hatch & Branding ---
     ctx.fillStyle = '#141414';
-    drawRoundRect(ctx, 14, 122, 42, 9, 2);
+    drawRoundRect(ctx, 24, 207, 72, 15, 3);
     ctx.fill();
     ctx.strokeStyle = '#282828';
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 0.8;
     ctx.stroke();
 
     // Grip texture lines on battery door
     ctx.strokeStyle = '#222';
-    ctx.lineWidth = 0.5;
-    for (let lx = 18; lx <= 52; lx += 4) {
+    ctx.lineWidth = 0.8;
+    for (let lx = 30; lx <= 90; lx += 7) {
       ctx.beginPath();
-      ctx.moveTo(lx, 124);
-      ctx.lineTo(lx, 129);
+      ctx.moveTo(lx, 210);
+      ctx.lineTo(lx, 218);
       ctx.stroke();
     }
 
     ctx.fillStyle = '#666';
-    ctx.font = '3px monospace';
+    ctx.font = '5px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('CR2025 3V', 35, 128);
+    ctx.fillText('CR2025 3V', 60, 216);
 
     if (inst.selected && typeof drawSelectionRect === 'function') {
-      drawSelectionRect(ctx, 0, 0, 70, 135);
+      drawSelectionRect(ctx, 0, 0, 120, 230);
     }
     
     ctx.restore();
