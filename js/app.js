@@ -2882,10 +2882,7 @@ _newProject() {
     const refBtn = body.querySelector('.props-ref-btn');
     if (refBtn) refBtn.addEventListener('click', () => {
       this._closeModal();
-      window.GuideManager?._renderCompDetail?.(
-        document.getElementById('guide-pane-components'),
-        comp.type
-      );
+      window.GuideManager._selectedComp = comp.type;
       window.GuideManager?.open('components');
     });
 

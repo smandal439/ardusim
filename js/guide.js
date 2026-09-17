@@ -3071,7 +3071,7 @@ Get-ChildItem *.mp3 | ForEach-Object {
 }
 
 # Convert an entire folder (Mac/Linux)
-for f in *.mp3; do ffmpeg -i "$f" -f s16le -ar 44100 -ac 1 "${f%.mp3}.pcm"; done
+for f in *.mp3; do ffmpeg -i "$f" -f s16le -ar 44100 -ac 1 "\${f%.mp3}.pcm"; done
 
 # Convert from FLAC, WAV, OGG, etc.
 ffmpeg -i song.flac -f s16le -ar 44100 -ac 1 song.pcm
@@ -3881,7 +3881,11 @@ class GuideManager {
       this._renderCompGrid(root);
     });
 
-    this._renderCompGrid(root);
+    if (this._selectedComp) {
+      this._renderCompDetail(root, this._selectedComp);
+    } else {
+      this._renderCompGrid(root);
+    }
   }
 
   _renderCompGrid(root) {
