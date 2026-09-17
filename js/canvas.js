@@ -3149,12 +3149,10 @@ class CircuitCanvas {
           const pressed = inst.runtimeState.pressed;
           const p1 = this._getConnectedPinNum(inst.id, 'p1');
           const p3 = this._getConnectedPinNum(inst.id, 'p3');
-          if (p1 !== null && window.ArduinoSim && window.ArduinoSim.pinStates) {
-            if (pressed) {
-              window.ArduinoSim.pinStates[`pin_${p1}`] = 0; // pressed → connects to GND → LOW
-            } else {
-              window.ArduinoSim.pinStates[`pin_${p1}`] = 1; // not pressed → INPUT_PULLUP → HIGH
-            }
+          if (p1 !== null && window.ArduinoSim) {
+            const newVal = pressed ? 0 : 1;
+            const curVal = window.ArduinoSim.pinStates ? (window.ArduinoSim.pinStates[`pin_${p1}`] ?? (window.ArduinoSim.pinModes?.[`pin_${p1}`] === 'INPUT_PULLUP' ? 1 : 0)) : 0;
+            if (curVal !== newVal) window.ArduinoSim.setPinState(`pin_${p1}`, newVal);
           }
           break;
         }

@@ -22,6 +22,8 @@ window.ArduinoLibs['SD'] = {
     [/SD\.open\s*\(([^)]+)\)/g, '_a.sdOpen($1)'],
     // SD.exists(filename)
     [/SD\.exists\s*\(([^)]+)\)/g, '_a.sdExists($1)'],
+    // SD.openDir(path)
+    [/SD\.openDir\s*\(([^)]+)\)/g, '_a.sdOpenDir($1)'],
     // dir.openNextFile()
     [/(\w+)\.openNextFile\s*\(\s*\)/g, function(m, v) {
       if (/^(Serial|Wire|SPI|WiFi|client|http|stream|server)$/i.test(v)) return m;

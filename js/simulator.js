@@ -549,6 +549,10 @@ class ArduinoSimulator {
     js = js.replace(/\.toInt\(\)/g, '|0');
     // Arduino String.toFloat() → parseFloat(str) || 0
     js = js.replace(/\.toFloat\(\)/g, '*1');
+    // Arduino String.length() → .length (JS property, not method)
+    js = js.replace(/\.length\(\)/g, '.length');
+    // Arduino String.charAt(n) → [n]
+    js = js.replace(/\.charAt\s*\(([^)]+)\)/g, '[$1]');
 
     return js;
   }
