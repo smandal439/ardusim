@@ -178,32 +178,50 @@ const StorageManager = {
     this.showToast('Project downloaded!', 'success');
   },
 
+  /* ── Load JSZip dynamically with retry ── */
+  _loadJSZip() {
+    if (typeof JSZip !== 'undefined') return Promise.resolve();
+    if (this._jszipLoading) return this._jszipLoading;
+
+    const tryLoad = (src) => new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = s.onerror = () => {
+        // Poll briefly in case onload fires before execution completes
+        let tries = 0;
+        const check = () => {
+          if (typeof JSZip !== 'undefined') return resolve();
+          if (++tries > 20) return reject(new Error('JSZip not defined after load: ' + src));
+          setTimeout(check, 50);
+        };
+        check();
+      };
+      document.head.appendChild(s);
+    });
+
+    this._jszipLoading = (async () => {
+      try {
+        await tryLoad('js/lib/jszip.min.js');
+      } catch (_) {
+        await tryLoad('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+      }
+      this._jszipLoading = null;
+    })();
+
+    return this._jszipLoading;
+  },
+
   /* ── Download project as ZIP file ── */
   async downloadProjectZip(files, circuitData, projectName = 'ArduSim Project', board2Code = '') {
-    // Load JSZip dynamically if not already available
+    try {
+      await this._loadJSZip();
+    } catch (e) {
+      this.showToast('Could not load ZIP library. Please check your connection.', 'error');
+      return;
+    }
     if (typeof JSZip === 'undefined') {
-      try {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement('script');
-          s.src = 'js/lib/jszip.min.js';
-          s.onload = resolve;
-          s.onerror = () => reject(new Error('Failed to load jszip.min.js from local path'));
-          document.head.appendChild(s);
-        });
-      } catch (e1) {
-        try {
-          await new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-            s.onload = resolve;
-            s.onerror = () => reject(new Error('Failed to load JSZip from CDN'));
-            document.head.appendChild(s);
-          });
-        } catch (e2) {
-          this.showToast('Could not load ZIP library. Please check your connection.', 'error');
-          return;
-        }
-      }
+      this.showToast('ZIP library failed to initialize. Please refresh and try again.', 'error');
+      return;
     }
     const zip = new JSZip();
 
