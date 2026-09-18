@@ -180,9 +180,30 @@ const StorageManager = {
 
   /* ── Download project as ZIP file ── */
   async downloadProjectZip(files, circuitData, projectName = 'ArduSim Project', board2Code = '') {
+    // Load JSZip dynamically if not already available
     if (typeof JSZip === 'undefined') {
-      this.showToast('JSZip library not loaded. Please check your connection.', 'error');
-      return;
+      try {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'js/lib/jszip.min.js';
+          s.onload = resolve;
+          s.onerror = () => reject(new Error('Failed to load jszip.min.js from local path'));
+          document.head.appendChild(s);
+        });
+      } catch (e1) {
+        try {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+            s.onload = resolve;
+            s.onerror = () => reject(new Error('Failed to load JSZip from CDN'));
+            document.head.appendChild(s);
+          });
+        } catch (e2) {
+          this.showToast('Could not load ZIP library. Please check your connection.', 'error');
+          return;
+        }
+      }
     }
     const zip = new JSZip();
 
