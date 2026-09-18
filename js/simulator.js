@@ -148,6 +148,39 @@ class ArduinoSimulator {
       'void|bool|char|int|float|double|long|short|byte|boolean|unsigned|signed|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t|ssize_t';
     const _fullTypePat = _types ? _types.getFullTypeRegex().source.replace(/^/, '(?:').replace(/$/, '').replace(/\(\?:const\\s\+\)/g, '(?:const\\s+)?').replace(/\(\?:unsigned\\s\+\)/g, '(?:unsigned\\s+)?') : `(?:const\\s+)?(?:unsigned\\s+)?(?:${_typePat})\\s*\\*?\\s*`;
 
+    // 4a. Pre-scan: track integer-typed variables BEFORE type stripping.
+    const _intTypes = /^(?:unsigned\s+(?:long\s+|int\s+|short\s+|char\s+)|long\s+(?:long\s+|int\s+|long\s+)?|signed\s+(?:long\s+|int\s+|short\s+|char\s+)?|int|short|byte|char|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t|ssize_t)$/;
+    const _intVarNames = new Set();
+    js.replace(
+      new RegExp(`\\b(?:const\\s+)?(${_typePat})\\s+(\\w+)\\s*(?=[=;])`, 'gm'),
+      (_, type, name) => {
+        const normalizedType = type.trim().replace(/\s+/g, ' ');
+        if (_intTypes.test(normalizedType)) {
+          _intVarNames.add(name);
+        }
+        return _;
+      }
+    );
+    // Also capture variables from `for (int i = ...)` loops
+    js.replace(
+      /for\s*\(\s*(?:int|long|short|unsigned|byte|char)\s+(\w+)/g,
+      (_, name) => { _intVarNames.add(name); return _; }
+    );
+
+    // 4a2. Inside integer-return-type functions, replace `return a/b;` with `return _idiv(a,b);`
+    //      Uses the original code (before type stripping) so we can see the return type.
+    js = js.replace(
+      new RegExp(`\\b(int|long|short|unsigned\\s+int|unsigned\\s+long|unsigned\\s+short|unsigned\\s+char|unsigned|byte|char|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t)\\s+(\\w+)\\s*\\(([^)]*)\\)\\s*\\{([\\s\\S]*?)\\}`, 'g'),
+      (match, retType, fnName, params, body) => {
+        // Replace return expr / expr; inside this function body
+        const newBody = body.replace(
+          /\breturn\s+([^;]+?)\s*\/\s*([^;]+?)\s*;/g,
+          'return _idiv($1, $2);'
+        );
+        return `${retType} ${fnName}(${params}) {${newBody}}`;
+      }
+    );
+
     js = js.replace(
       new RegExp(`\\b(?:void|int|float|double|long|unsigned|unsigned\\s+long|unsigned\\s+int|unsigned\\s+char|byte|boolean|bool|char\\s*\\*?|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t)\\s+(\\w+)\\s*\\(([^)]*)\\)\\s*\\{`, 'g'),
       (match, name, params) => {
@@ -173,28 +206,6 @@ class ArduinoSimulator {
     }
 
     // 5. Handle variable declarations (not already transformed)
-    // 5a. Track integer-typed variables for C++ integer division semantics.
-    //     Scans for declarations like `int x`, `long y`, `unsigned int z` etc.
-    //     and records the variable names so division on them uses Math.trunc().
-    const _intTypes = /^(?:unsigned\s+(?:long\s+|int\s+|short\s+|char\s+)|long\s+(?:long\s+|int\s+|long\s+)?|signed\s+(?:long\s+|int\s+|short\s+|char\s+)?|int|short|byte|char|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t|ssize_t)$/;
-    const _intVarNames = new Set();
-    js.replace(
-      new RegExp(`\\b(?:const\\s+)?(${_typePat})\\s+(\\w+)\\s*(?=[=;,)])`, 'gm'),
-      (_, type, name) => {
-        // Normalize: strip leading/trailing spaces and check if it's an integer type
-        const normalizedType = type.trim().replace(/\s+/g, ' ');
-        if (_intTypes.test(normalizedType)) {
-          _intVarNames.add(name);
-        }
-        return _;
-      }
-    );
-    // Also capture variables from `for (int i = ...)` loops
-    js.replace(
-      /for\s*\(\s*(?:int|long|short|unsigned|byte|char)\s+(\w+)/g,
-      (_, name) => { _intVarNames.add(name); return _; }
-    );
-
     // Strip C-style casts: (unsigned char)1 → 1, (long)expr → expr
     js = js.replace(new RegExp(`\\((?:unsigned\\s+char|unsigned\\s+long|unsigned\\s+int|unsigned\\s+short|unsigned|long\\s+long|long|int|short|byte|float|double)\\)\\s*(?=[a-zA-Z0-9_\\(])`, 'g'), '');
     // unsigned char x; → let x;  (MUST be before plain char rule)
@@ -356,8 +367,7 @@ class ArduinoSimulator {
         new RegExp(`\\b(${_intVarPat})\\s*=\\s*(${_tok})\\s*/\\s*(${_tok})\\s*;`, 'g'),
         '$1 = _idiv($2, $3);'
       );
-      // Match: standalone expr / expr inside function calls: func(a / b)
-      // Only replace when both sides are tracked int vars or integer literals
+      // Match: standalone expr / expr inside parentheses: (a / b) or func(a / b)
       js = js.replace(
         new RegExp(`\\((${_tok})\\s*/\\s*(${_tok})\\)`, 'g'),
         '(_idiv($1, $2))'
