@@ -850,6 +850,16 @@ void loop() {
   },
 
   loadFiles(filesObj, activateName) {
+    // Remove files not present in the new set
+    for (const name of Object.keys(this.files)) {
+      if (!(name in filesObj)) {
+        const model = this.files[name].model;
+        delete this.files[name];
+        delete this._fileStates[name];
+        if (model) model.dispose();
+      }
+    }
+
     for (const [name, content] of Object.entries(filesObj)) {
       if (this.files[name]) {
         if (this.files[name].model) {
@@ -874,6 +884,8 @@ void loop() {
         this.activeFile = target;
       }
     }
+    this._renderFileExplorer();
+    this._renderTabs();
   },
 
   _saveFileState(name) {
