@@ -762,10 +762,12 @@ class App {
 
     const fileExplorer = document.getElementById('file-explorer');
     const editorTabs = document.getElementById('editor-tabs');
+    const editorBody = document.getElementById('editor-body');
 
     if (idx === 0) {
       // Switch to Board 1: restore editor content
       if (board2Area) board2Area.style.display = 'none';
+      if (editorBody) editorBody.style.display = '';
       const editorEl = document.getElementById('editor-container');
       if (editorEl) editorEl.style.display = '';
       if (fileExplorer) fileExplorer.style.display = '';
@@ -776,10 +778,7 @@ class App {
     } else {
       // Switch to Board 2: show textarea
       if (board2Area) board2Area.style.display = 'flex';
-      const editorEl = document.getElementById('editor-container');
-      if (editorEl) editorEl.style.display = 'none';
-      if (fileExplorer) fileExplorer.style.display = 'none';
-      if (editorTabs) editorTabs.style.display = 'none';
+      if (editorBody) editorBody.style.display = 'none';
       const textarea = document.getElementById('board2-code-textarea');
       if (textarea) {
         textarea.value = this._board2Code || this._getDefaultBoard2Code();
