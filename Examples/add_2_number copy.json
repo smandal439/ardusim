@@ -1,0 +1,30 @@
+{
+  "id": "add_2_number",
+  "name": "add 2 number",
+  "icon": "🔧",
+  "desc": "A custom add 2 number circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789384133085_xvtgi",
+        "type": "arduino_uno",
+        "x": 265,
+        "y": 35,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": "#include\"addition.h\"\n#include\"subtraction.h\"\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Enter two numbers separated by a comma (e.g., 25,15):\");\n}\n\nvoid loop() {\n  if (Serial.available() > 0) {\n    // Read the first integer (stops reading at the comma)\n    int num1 = Serial.parseInt();\n    \n    // Read the second integer (stops reading at the newline or buffer end)\n    int num2 = Serial.parseInt();\n    \n    // Clear trailing characters (like \\r or \\n) from the buffer\n    while (Serial.available() > 0) {\n      Serial.read();\n    }\n\n    // int sum = num1 + num2;\n    int sum = addition(num1,num2);\n\n    // Display the result\n    Serial.print(\"Sum: \");\n    Serial.println(sum);\n\n    // int sum = num1 + num2;\n    int sub = subtraction(num1,num2);\n\n    // Display the result\n    Serial.print(\"Sub: \");\n    Serial.println(sub);\n  }\n}",
+    "addition.h": "int addition(int a, int b){\r\n  return a+b;\r\n}",
+    "subtraction.h": "int subtraction(int a, int b){\r\n  return a-b;\r\n}"
+  }
+}
