@@ -651,6 +651,48 @@ class App {
     if (board2Btn) {
       board2Btn.addEventListener('click', () => this._switchToBoard(1));
     }
+
+    const textarea = document.getElementById('board2-code-textarea');
+    const highlight = document.getElementById('board2-highlight');
+    const highlightCode = document.getElementById('board2-highlight-code');
+    if (textarea && highlight && highlightCode) {
+      const update = () => { this._highlightBoard2(textarea, highlightCode); };
+      textarea.addEventListener('input', update);
+      textarea.addEventListener('scroll', () => {
+        highlight.scrollTop = textarea.scrollTop;
+        highlight.scrollLeft = textarea.scrollLeft;
+      });
+      update();
+    }
+  }
+
+  _highlightBoard2(textarea, codeEl) {
+    const code = textarea.value;
+    const html = code
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/(\/\/.*$)/gm, '<span class="board2-cmt">$1</span>')
+      .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="board2-cmt">$1</span>')
+      .replace(/(#include\s*[&lt;""][\s\S]*?[&gt;"])/g, '<span class="board2-dir">$1</span>')
+      .replace(/(#define\s+\w+)/g, '<span class="board2-dir">$1</span>')
+      .replace(/\b(void|int|long|float|double|byte|boolean|bool|char|String|unsigned|const|return|if|else|for|while|do|switch|case|break|continue|struct|class|true|false|static|volatile)\b/g, '<span class="board2-kw">$1</span>')
+      .replace(/\b(uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t)\b/g, '<span class="board2-type">$1</span>')
+      .replace(/\b(setup|loop|pinMode|digitalWrite|digitalRead|analogWrite|analogRead|delay|delayMicroseconds|millis|micros|tone|noTone|pulseIn|Serial|WiFi|Wire)\b/g, '<span class="board2-fn">$1</span>')
+      .replace(/\b(\d+\.?\d*[fF]?\b)/g, '<span class="board2-num">$1</span>')
+      .replace(/("[^"]*")/g, '<span class="board2-str">$1</span>');
+    codeEl.innerHTML = html;
+  }
+
+  _setBoard2Code(code) {
+    this._board2Code = code || '';
+    const b2ta = document.getElementById('board2-code-textarea');
+    if (b2ta) b2ta.value = this._board2Code;
+    this._refreshBoard2Highlight();
+  }
+
+  _refreshBoard2Highlight() {
+    const textarea = document.getElementById('board2-code-textarea');
+    const codeEl = document.getElementById('board2-highlight-code');
+    if (textarea && codeEl) this._highlightBoard2(textarea, codeEl);
   }
 
   _switchToBoard(idx) {
@@ -699,6 +741,7 @@ class App {
       if (textarea) {
         textarea.value = this._board2Code || this._getDefaultBoard2Code();
       }
+      this._refreshBoard2Highlight();
     }
   }
 
@@ -1515,9 +1558,7 @@ void loop() {
       } else if (this.editor && project.code) {
         this.editor.loadFiles({ 'sketch.ino': project.code });
       }
-      this._board2Code = project.board2Code || '';
-      const b2ta = document.getElementById('board2-code-textarea');
-      if (b2ta) b2ta.value = this._board2Code;
+      this._setBoard2Code(project.board2Code || '');
       if (this.canvas) this.canvas.deserialize(project.circuit || { components: [], wires: [] });
       this._syncBoardFromCanvas();
       this._setProjectName(project.name || 'Untitled Project');
@@ -1639,11 +1680,9 @@ _newProject() {
     } else {
       this.editor?.setCode(EditorManager.DEFAULT_CODE);
     }
-    this._board2Code = '';
     this._board1FilesCache = null;
     this._board1ActiveFile = null;
-    const b2ta = document.getElementById('board2-code-textarea');
-    if (b2ta) b2ta.value = '';
+    this._setBoard2Code('');
     this._setProjectName('Untitled Project');
     this.output?.log('New project created', 'system');
   }
@@ -1812,9 +1851,7 @@ _newProject() {
       } else if (this.editor && project.code) {
         this.editor.loadFiles({ 'sketch.ino': project.code });
       }
-      this._board2Code = project.board2Code || '';
-      const b2ta = document.getElementById('board2-code-textarea');
-      if (b2ta) b2ta.value = this._board2Code;
+      this._setBoard2Code(project.board2Code || '');
       if (this.canvas) this.canvas.deserialize(project.circuit || { components: [], wires: [] });
       this._syncBoardFromCanvas();
       this._setProjectName(project.name || 'Untitled Project');
@@ -2736,9 +2773,7 @@ _newProject() {
         } else if (this.editor) {
           this.editor.loadFiles({ 'sketch.ino': example.code || '' });
         }
-        this._board2Code = example.board2Code || '';
-        const b2ta = document.getElementById('board2-code-textarea');
-        if (b2ta) b2ta.value = this._board2Code;
+        this._setBoard2Code(example.board2Code || '');
         this._board1FilesCache = null;
         this._board1ActiveFile = null;
         if (example.circuit && this.canvas) this._loadExampleCircuit(example.circuit);
@@ -2780,9 +2815,7 @@ _newProject() {
     } else if (this.editor) {
       this.editor.loadFiles({ 'sketch.ino': ex.code || '' });
     }
-    this._board2Code = ex.board2Code || '';
-    const b2ta = document.getElementById('board2-code-textarea');
-    if (b2ta) b2ta.value = this._board2Code;
+    this._setBoard2Code(ex.board2Code || '');
     this._board1FilesCache = null;
     this._board1ActiveFile = null;
     if (ex.circuit && this.canvas) this._loadExampleCircuit(ex.circuit);

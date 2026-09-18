@@ -3693,8 +3693,11 @@ canvas {
 #board2-code-textarea {
   flex: 1;
   width: 100%;
+  height: 100%;
+  min-height: 0;
   background: #1a1a2e;
-  color: #d4d4d4;
+  color: transparent;
+  caret-color: #d4d4d4;
   border: none;
   border-left: 2px solid transparent;
   padding: 12px 16px;
@@ -3705,6 +3708,12 @@ canvas {
   outline: none;
   tab-size: 2;
   transition: border-color 0.3s ease;
+  overflow: auto;
+  scrollbar-width: thin;
+  white-space: pre;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1;
 }
 #board2-code-textarea:focus {
   border-left-color: var(--accent, #4fc3f7);
@@ -3712,6 +3721,42 @@ canvas {
 #board2-code-textarea:focus {
   outline: none;
 }
+.code-editor-wrapper {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.code-editor-highlight {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  margin: 0;
+  padding: 12px 16px;
+  background: #1a1a2e;
+  color: #d4d4d4;
+  font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  tab-size: 2;
+}
+.code-editor-highlight code {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+/* Syntax colors for board2 highlight */
+.board2-kw { color: #c586c0; }
+.board2-type { color: #4ec9b0; }
+.board2-fn { color: #dcdcaa; }
+.board2-str { color: #ce9178; }
+.board2-num { color: #b5cea8; }
+.board2-cmt { color: #6a9955; font-style: italic; }
+.board2-dir { color: #c586c0; }
+.board2-op { color: #d4d4d4; }
 
 /* ══════════════════════ WEB BROWSER PANEL ══════════════════════ */
 .webbrowser-toolbar {

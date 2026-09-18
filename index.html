@@ -292,7 +292,10 @@
                 </div>
             </div>
             <div id="board2-editor-area" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-                <textarea id="board2-code-textarea" spellcheck="false"></textarea>
+                <div class="code-editor-wrapper">
+                    <pre class="code-editor-highlight" id="board2-highlight" aria-hidden="true"><code id="board2-highlight-code"></code></pre>
+                    <textarea id="board2-code-textarea" spellcheck="false"></textarea>
+                </div>
             </div>
             <div class="editor-footer"> <span id="editor-cursor">Ln 1, Col 1</span> <span id="editor-lang">Arduino
                     C++</span> </div>
