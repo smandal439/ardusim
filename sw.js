@@ -27,7 +27,6 @@ const STATIC_ASSETS = [
   'js/logic-analyzer.js',
   'js/plotter.js',
   'js/storage.js',
-  'js/lib/jszip.min.js',
   'js/api.js',
   'js/utils.js',
   'js/thumbnails.js',

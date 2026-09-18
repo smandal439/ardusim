@@ -47,9 +47,6 @@ const projectGlobals = {
   // Monaco editor
   monaco: 'readonly',
   require: 'readonly',
-
-  // JSZip (CDN)
-  JSZip: 'readonly',
 };
 
 module.exports = [
