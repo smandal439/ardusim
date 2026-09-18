@@ -3061,7 +3061,7 @@ void loop() {
     guide: [
       {
         title: 'Converting MP3 to PCM (Required)',
-        desc: 'The SD Card Songs Player requires raw 16-bit PCM audio. Use <code>ffmpeg</code> (free) to convert any audio file.',
+        desc: 'The SD Card Songs Player requires raw 16-bit PCM audio. Use <code>ffmpeg</code> (free) to convert any audio file. Quick example: <code>ffmpeg -i song.mp3 -f s16le -ar 44100 -ac 1 song.pcm</code>',
         code: `# Basic conversion (16-bit, 44100Hz, mono)
 ffmpeg -i input.mp3 -f s16le -ar 44100 -ac 1 output.pcm
 

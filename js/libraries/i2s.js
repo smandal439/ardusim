@@ -32,6 +32,10 @@ window.ArduinoLibs['I2S'] = {
         var vol = 1.0;
         try { vol = Math.max(0, Math.min(1, (self._i2sVolume != null ? self._i2sVolume : 80) / 100)); } catch(e) {}
         self._playI2SAudio(buf, len, { channels: 1, volume: vol });
+        var sampleRate = self._i2sSampleRate || 44100;
+        var sampleCount = Math.floor(len / 2);
+        var delayMs = Math.max(1, Math.round((sampleCount / sampleRate) * 1000));
+        await new Promise(function(r) { setTimeout(r, delayMs); });
         try {
           var cc = window.CircuitCanvas;
           if (cc && cc.components && buf) {

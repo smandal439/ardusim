@@ -1250,6 +1250,20 @@ void loop() {
         }
       }
 
+      // DFPlayer Mini events
+      if (type === 'dfplayer' && data && data.cmd !== undefined) {
+        const cmd = Number(data.cmd) || 0;
+        const param = Number(data.param) || 0;
+        for (const inst of insts) {
+          if (inst.type === 'dfplayer_mini') {
+            if (window._dfplayerBus && window._dfplayerBus[inst.id]) {
+              window._dfplayerBus[inst.id].processCommand(cmd, param);
+            }
+            break;
+          }
+        }
+      }
+
       // NeoPixel / FastLED strip events — map strip LEDs onto placed WS2812B
       // components in placement order (led[0] → first neopixel, etc.)
       if (type === 'fastled_show' && data && Array.isArray(data.leds)) {

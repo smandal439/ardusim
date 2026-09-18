@@ -1983,7 +1983,8 @@ class ArduinoSimulator {
       const bytesPerSample = channels * 2;
       const sampleCount = Math.floor(byteView.byteLength / bytesPerSample);
       if (sampleCount < 1) return;
-      const audioBuffer = ctx.createBuffer(2, sampleCount, 44100);
+      const sampleRate = this._i2sSampleRate || 44100;
+      const audioBuffer = ctx.createBuffer(2, sampleCount, sampleRate);
       const left = audioBuffer.getChannelData(0);
       const right = audioBuffer.getChannelData(1);
       const view = new DataView(byteView.buffer, byteView.byteOffset, byteView.byteLength);
@@ -2231,7 +2232,7 @@ window.loadExamplesFromFiles = async function () {
     'esp32_i2s_music_player', 'esp32_i2s_online_radio_player', 'esp32_mqtt_pub_sub', 'esp32_ntp_clock_lcd', 'esp32_server', 'esp_now_dip_switch_to_8_led',
     'esp_now_sender_with_receiver', 'espnow_led_control', 'espnow_receiver', 'espnow_sender', 'fade', 'flex_sensor_bending_measurement',
     'func_gen_dual', 'func_gen_led', 'gps_neo_6m_8m_tracker', 'hc05_bluetooth_led', 'hx711_load_cell', 'hx711_load_cell_lcd',
-    'ic_nand_test', 'ili9341', 'ina219_solar_tracker', 'interrupts_test', 'inverting_amplifier', 'ir_obstacle_sensor_led_alert', 'ir_remote_decode', 'joystick_led',
+    'ic_nand_test', 'ili9341', 'ina219_solar_tracker', 'interrupts_test', 'inverting_amplifier',     'ir_obstacle_sensor_led_alert', 'ir_dfplayer_remote', 'ir_remote_decode', 'joystick_led',
     'keypad_interfacing', 'l298n_dc_motor', 'lcd', 'lcd_hello_world', 'lcd_i2c', 'lcd_i2c_display_20x4',
     'lcd_print_remotely', 'ldr_lamp', 'led_array_blink_pattern', 'lm35_temperature', 'lm35_temperature_sensor', 'load_cell_scale',
     'logic_analyzer_test', 'lora_sender_receiver', 'max7219', 'morse', 'morse_code_using_serial_data', 'mpu6050_accel',

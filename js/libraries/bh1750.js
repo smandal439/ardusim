@@ -11,6 +11,13 @@ window.ArduinoLibs['BH1750'] = {
   includes: ['<BH1750.h>'],
 
   transpile: [
+    // BH1750:: enum constants → numeric values
+    [/\bBH1750\s*::\s*CONTINUOUS_HIGH_RES_MODE_2\b/g, '0x11'],
+    [/\bBH1750\s*::\s*CONTINUOUS_HIGH_RES_MODE\b/g, '0x10'],
+    [/\bBH1750\s*::\s*CONTINUOUS_LOW_RES_MODE\b/g, '0x13'],
+    [/\bBH1750\s*::\s*ONE_TIME_HIGH_RES_MODE_2\b/g, '0x21'],
+    [/\bBH1750\s*::\s*ONE_TIME_HIGH_RES_MODE\b/g, '0x20'],
+    [/\bBH1750\s*::\s*ONE_TIME_LOW_RES_MODE\b/g, '0x23'],
     // light.begin(mode)
     [/(\w+)\.begin\s*\(([^)]*)\)/g, function(m, v, a) {
       if (/^(Serial|Wire|SPI|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m;

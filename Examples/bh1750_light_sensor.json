@@ -34,11 +34,23 @@
       {
         "id": "led1",
         "type": "led",
-        "x": 420,
-        "y": 280,
+        "x": 495,
+        "y": 140,
         "rotation": 0,
         "props": {
-          "color": "#ff3333"
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "comp_1789712322627_8umtp",
+        "type": "resistor",
+        "x": 500,
+        "y": 220,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
         }
       }
     ],
@@ -54,7 +66,9 @@
           "pinId": "VCC"
         },
         "color": "#cc0000",
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w2",
@@ -67,7 +81,9 @@
           "pinId": "GND"
         },
         "color": "#333333",
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w3",
@@ -80,7 +96,9 @@
           "pinId": "SCL"
         },
         "color": "#0066ff",
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w4",
@@ -93,7 +111,9 @@
           "pinId": "SDA"
         },
         "color": "#00cc00",
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w5",
@@ -106,7 +126,9 @@
           "pinId": "anode"
         },
         "color": "#ff6600",
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w6",
@@ -119,7 +141,39 @@
           "pinId": "GND"
         },
         "color": "#333333",
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789712325641_0tgbb",
+        "from": {
+          "instId": "comp_1789712322627_8umtp",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789712328297_zge0d",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1789712322627_8umtp",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       }
     ]
   },
