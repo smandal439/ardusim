@@ -916,16 +916,16 @@ defComp({
 
     // ── 6. Status Display ──
     const dispY = 76;
-    const fileNames = Object.keys(uploaded);
+    const allFileNames = Object.keys(uploaded);
     const trackNum = state.currentTrack || 1;
 
     ctx.fillStyle = isPowered ? '#00e5ff' : '#2a3a4a';
     ctx.font = 'bold 7px monospace';
     ctx.textAlign = 'center';
 
-    if (isPlaying && fileNames.length > 0) {
-      var trackIdx = ((trackNum - 1) % fileNames.length);
-      var trackName = fileNames[trackIdx] || 'Track ' + trackNum;
+    if (isPlaying && allFileNames.length > 0) {
+      var trackIdx = ((trackNum - 1) % allFileNames.length);
+      var trackName = allFileNames[trackIdx] || 'Track ' + trackNum;
       var displayName = trackName.replace(/\.[^.]+$/, '');
       if (displayName.length > 12) displayName = displayName.substring(0, 11) + '..';
       ctx.fillText(displayName, W / 2, dispY);
