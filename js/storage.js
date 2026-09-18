@@ -274,8 +274,35 @@ const StorageManager = {
     return (crc ^ 0xFFFFFFFF) >>> 0;
   },
 
-  /* ── Download project as ZIP file ── */
+  /* ── Download project as ZIP file (Arduino IDE compatible) ── */
   async downloadProjectZip(files, circuitData, projectName = 'ArduSim Project', board2Code = '') {
+    // Arduino IDE requires: FolderName/FolderName.ino (names must match)
+    const folderName = projectName.replace(/[^a-zA-Z0-9_\- ]/g, '').replace(/\s+/g, '_').replace(/^_|_$/g, '') || 'ArduSim_Project';
+
+    const allFiles = files || { 'sketch.ino': '' };
+
+    // Find the main .ino file and rename it to match the folder
+    const inoEntries = Object.entries(allFiles).filter(([n]) => n.endsWith('.ino'));
+    const mainInoName = inoEntries.length > 0 ? inoEntries[0][0] : null;
+
+    const zipFiles = [];
+
+    for (const [name, content] of Object.entries(allFiles)) {
+      let zipName;
+      if (name === mainInoName) {
+        zipName = folderName + '.ino';
+      } else {
+        zipName = name;
+      }
+      zipFiles.push({ name: folderName + '/' + zipName, data: content || '' });
+    }
+
+    // If no .ino file existed, create a starter one
+    if (!mainInoName) {
+      zipFiles.push({ name: folderName + '/' + folderName + '.ino', data: 'void setup() {\n}\n\nvoid loop() {\n}\n' });
+    }
+
+    // ArduSim project metadata (Arduino IDE ignores .json files)
     const project = {
       version:  this.VERSION,
       savedAt:  new Date().toISOString(),
@@ -283,20 +310,14 @@ const StorageManager = {
       circuit:  circuitData,
     };
     if (board2Code) project.board2Code = board2Code;
-
-    const allFiles = files || { 'sketch.ino': '' };
-    const zipFiles = [{ name: 'project.json', data: JSON.stringify(project, null, 2) }];
-    for (const [name, content] of Object.entries(allFiles)) {
-      zipFiles.push({ name: 'src/' + name, data: content || '' });
-    }
+    zipFiles.push({ name: folderName + '/project.json', data: JSON.stringify(project, null, 2) });
 
     try {
       const blob = this._createZipBlob(zipFiles);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const safeName = projectName.replace(/[^a-z0-9_\-]/gi, '_').toLowerCase();
-      a.download = `${safeName}_${new Date().toISOString().slice(0, 10)}.zip`;
+      a.download = `${folderName}.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
