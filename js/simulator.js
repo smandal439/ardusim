@@ -173,6 +173,28 @@ class ArduinoSimulator {
     }
 
     // 5. Handle variable declarations (not already transformed)
+    // 5a. Track integer-typed variables for C++ integer division semantics.
+    //     Scans for declarations like `int x`, `long y`, `unsigned int z` etc.
+    //     and records the variable names so division on them uses Math.trunc().
+    const _intTypes = /^(?:unsigned\s+(?:long\s+|int\s+|short\s+|char\s+)|long\s+(?:long\s+|int\s+|long\s+)?|signed\s+(?:long\s+|int\s+|short\s+|char\s+)?|int|short|byte|char|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t|ssize_t)$/;
+    const _intVarNames = new Set();
+    js.replace(
+      new RegExp(`\\b(?:const\\s+)?(${_typePat})\\s+(\\w+)\\s*(?=[=;,)])`, 'gm'),
+      (_, type, name) => {
+        // Normalize: strip leading/trailing spaces and check if it's an integer type
+        const normalizedType = type.trim().replace(/\s+/g, ' ');
+        if (_intTypes.test(normalizedType)) {
+          _intVarNames.add(name);
+        }
+        return _;
+      }
+    );
+    // Also capture variables from `for (int i = ...)` loops
+    js.replace(
+      /for\s*\(\s*(?:int|long|short|unsigned|byte|char)\s+(\w+)/g,
+      (_, name) => { _intVarNames.add(name); return _; }
+    );
+
     // Strip C-style casts: (unsigned char)1 → 1, (long)expr → expr
     js = js.replace(new RegExp(`\\((?:unsigned\\s+char|unsigned\\s+long|unsigned\\s+int|unsigned\\s+short|unsigned|long\\s+long|long|int|short|byte|float|double)\\)\\s*(?=[a-zA-Z0-9_\\(])`, 'g'), '');
     // unsigned char x; → let x;  (MUST be before plain char rule)
@@ -313,9 +335,34 @@ class ArduinoSimulator {
     js = js.replace(/\bsizeof\s*\((\w+)\)/g, '$1.length');
     // Arduino String .c_str() → already a JS string, just strip
     js = js.replace(/\.\s*c_str\s*\(\s*\)/g, '');
-    // Preserve C++ integer division for common clock field calculations.
-    js = js.replace(/\blet\s+(hours|minutes)\s*=\s*([^;\n]+?)\s*\/\s*(\d+)\s*;/g, 'let $1 = Number.parseInt(($2) / $3, 10);');
     js = js.replace(/\bfalse\b/g, 'false');
+
+    // 7b. C++ integer division: wrap division with _idiv() for tracked int variables.
+    //     In C++, `int / int` truncates toward zero; JS floating-point division does not.
+    //     We replace `/` with `_idiv()` in assignments and common expression contexts
+    //     where the left-hand side or operands are known integer-typed variables.
+    if (_intVarNames.size > 0) {
+      // Build a pattern that matches any tracked integer variable name
+      const _intVarPat = Array.from(_intVarNames).map(v => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+      // Token: a variable name (word chars) or a numeric literal (possibly with scientific notation)
+      const _tok = `(?:${_intVarPat}|\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?|\\w+)`;
+      // Match: let/var varName = expr / expr;  (initialization)
+      js = js.replace(
+        new RegExp(`\\b(let|var)\\s+(${_intVarPat})\\s*=\\s*(${_tok})\\s*/\\s*(${_tok})\\s*;`, 'g'),
+        '$1 $2 = _idiv($3, $4);'
+      );
+      // Match: varName = expr / expr;  (assignment to tracked int variable)
+      js = js.replace(
+        new RegExp(`\\b(${_intVarPat})\\s*=\\s*(${_tok})\\s*/\\s*(${_tok})\\s*;`, 'g'),
+        '$1 = _idiv($2, $3);'
+      );
+      // Match: standalone expr / expr inside function calls: func(a / b)
+      // Only replace when both sides are tracked int vars or integer literals
+      js = js.replace(
+        new RegExp(`\\((${_tok})\\s*/\\s*(${_tok})\\)`, 'g'),
+        '(_idiv($1, $2))'
+      );
+    }
 
     // Strip leftover C storage/qualifier keywords that are invalid JS
     // Strip C storage/qualifier keywords that may appear before any type
@@ -818,6 +865,9 @@ class ArduinoSimulator {
           return Math.round((self.simTime - startMs) * 1000);
         },
 
+        /* C++ integer division: truncates toward zero, matching int/int in C++ */
+        _idiv(a, b) { return Math.trunc(a / b); },
+
         /* Interrupts */
         attachInterrupt(num, fn, mode) {
           if (typeof fn !== 'function') return;
@@ -850,7 +900,7 @@ class ArduinoSimulator {
             var decimals = prec !== undefined ? Number(prec) : (spec === 'f' ? 6 : undefined);
             var result;
             switch (spec) {
-              case 'd': case 'u': result = String(Math.round(Number(v))); break;
+              case 'd': case 'u': result = String(Math.trunc(Number(v))); break;
               case 's': result = String(v); break;
               case 'f': result = Number(v).toFixed(decimals); break;
               case 'x': result = Math.round(Number(v)).toString(16); break;
@@ -1404,6 +1454,9 @@ class ArduinoSimulator {
         Object.assign(result, lib.constants);
       }
     }
+
+    // Expose _idiv as a top-level function for integer division (C++ int / int → truncation)
+    result._idiv = result._a._idiv;
 
     return result;
   }

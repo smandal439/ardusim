@@ -1,0 +1,34 @@
+{
+  "id": "math_operations",
+  "name": "Math Operations",
+  "icon": "🔧",
+  "desc": "This example demonstrates how to add, subtract, multiply, divide, and find the modulus of two numbers using an Arduino. The program prompts the user to input two integers separated by a comma, calculates their sum, difference, product, quotient, and modulus, and displays the results on the Serial Monitor. Multi file support is used to separate the arithmetic operations into a different header file for better organization.",
+  "tags": [
+    "arduino",
+    "circuit",
+    "addition",
+    "subtraction",
+    "multiplication",
+    "division",
+    "modulus"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789384133085_xvtgi",
+        "type": "arduino_uno",
+        "x": 265,
+        "y": 35,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": "\n#include\"operation.h\"\n\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Enter two numbers separated by a comma (e.g., 25,15):\");\n}\n\nvoid loop() {\n  if (Serial.available() > 0) {\n// Read the first integer (stops reading at the comma)\n    int num1 = Serial.parseInt();\n\n// Read the second integer (stops reading at the newline or buffer end)\n    int num2 = Serial.parseInt();\n\n// Clear trailing characters (like \\r or \\n) from the buffer\n    while (Serial.available() > 0) {\n      Serial.read();\n    }\n\n    int sum = add(num1,num2);\n// Before (ESP32 only)\n// Serial.printf(\"%d + %d = %d \\n\", num1, num2, sum);\n\n// After (all boards)\n    Serial.print(num1);\n    Serial.print(\" + \");\n    Serial.print(num2);\n    Serial.print(\" = \");\n    Serial.println(sum);\n\n// Display the result\n// Serial.printf(\"%d + %d = %d \\n\", num1, num2, sum);\n\n    int subs = sub(num1,num2);\n\n// Display the result\n// Serial.printf(\"%d - %d = %d \\n\", num1, num2, sub);\n// Before (ESP32 only)\n// Serial.printf(\"%d + %d = %d \\n\", num1, num2, sum);\n\n// After (all boards)\n    Serial.print(num1);\n    Serial.print(\" - \");\n    Serial.print(num2);\n    Serial.print(\" = \");\n    Serial.println(subs);\n\n\n    int multi = mul(num1,num2);\n    Serial.print(num1);\n    Serial.print(\" * \");\n    Serial.print(num2);\n    Serial.print(\" = \");\n    Serial.println(multi);\n\n    int divi = div(num1,num2);\n    Serial.print(num1);\n    Serial.print(\" / \");\n    Serial.print(num2);\n    Serial.print(\" = \");\n    Serial.println(divi);\n\nfloat fdivi = f_div(num1,num2);\n    Serial.print(num1);\n    Serial.print(\" / \");\n    Serial.print(num2);\n    Serial.print(\" = \");\n    Serial.println(fdivi);\n\nint modu = mod(num1,num2);\n    Serial.print(num1);\n    Serial.print(\" * \");\n    Serial.print(num2);\n    Serial.print(\" = \");\n    Serial.println(modu);\n  }\n}",
+    "operation.h": "int add(int a, int b){\r\n  return a+b;\r\n}\r\n\r\nint sub(int a, int b){\r\n  return a-b;\r\n}\r\n\r\nint mul(int a, int b){\r\n  return a*b;\r\n}\r\n\r\nint div(int a, int b){\r\n  return a/b;\r\n}\r\n\r\nfloat f_div(float a, float b){\r\n  return a/b;\r\n}\r\n\r\nint mod(int a, int b){\r\n  return a%b;\r\n}\r\n"
+  }
+}

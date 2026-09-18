@@ -147,7 +147,7 @@ window.ArduinoLibs['Serial'] = {
           if (v === undefined) return '';
           var decimals = prec !== undefined ? Number(prec) : (spec === 'f' ? 6 : undefined);
           switch (spec) {
-            case 'd': case 'u': return String(Math.round(Number(v)));
+            case 'd': case 'u': return String(Math.trunc(Number(v)));
             case 's': return String(v);
             case 'f': return Number(v).toFixed(decimals);
             case 'x': return Math.round(Number(v)).toString(16);
