@@ -1,11 +1,13 @@
 {
-  "id": "add_2_number",
+  "id": "add_2_number_2",
   "name": "add 2 number",
   "icon": "🔧",
-  "desc": "A custom add 2 number circuit example.",
+  "desc": "This example demonstrates how to add and subtract two numbers using an Arduino. The program prompts the user to input two integers separated by a comma, calculates their sum and difference, and displays the results on the Serial Monitor. Multi file support is used to separate the addition and subtraction logic into different header files for better organization.",
   "tags": [
-    "custom",
-    "circuit"
+    "arduino",
+    "circuit",
+    "add",
+    "subtraction"
   ],
   "circuit": {
     "components": [
