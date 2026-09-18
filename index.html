@@ -879,6 +879,26 @@
                     </div>
                 </div>
             </div>
+        </div> <!-- Board Settings Modal -->
+        <div class="modal modal-sm" id="modal-board-settings" role="dialog" aria-modal="true"
+            aria-labelledby="modal-board-title">
+            <div class="modal-header">
+                <h2 id="modal-board-title">Board Settings</h2> <button class="modal-close"
+                    data-modal="modal-board-settings" aria-label="Close">✕</button>
+            </div>
+            <div class="modal-body">
+                <label for="mobile-board-select" style="display:block;margin-bottom:8px;font-weight:600;">Target Board</label>
+                <select id="mobile-board-select" class="hdr-select" style="width:100%;padding:8px;font-size:14px;">
+                    <option value="arduino_uno">Arduino Uno</option>
+                    <option value="esp32_devkit_v1">ESP32 DevKit V1</option>
+                    <option value="arduino_nano">Arduino Nano</option>
+                    <option value="stm32f746_disco">STM32F746G-DISCO</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="hdr-btn hdr-btn-run" id="btn-mobile-board-apply">Apply</button>
+                <button class="hdr-btn hdr-btn-ghost" data-modal="modal-board-settings">Cancel</button>
+            </div>
         </div> <!-- Property Editor -->
         <div class="modal modal-sm" id="modal-props" role="dialog" aria-modal="true"
             aria-labelledby="modal-props-title">

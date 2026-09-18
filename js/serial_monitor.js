@@ -6,6 +6,20 @@
 
 class SerialMonitor {
   constructor() {
+    this._bindAbort = null;
+    this._refreshElements();
+    this.buffer = '';
+    this.lineCount = 0;
+    this.maxLines = 5000;
+    this._pendingFlush = null;
+    this._searchTerm = '';
+    this._allLines = [];
+    this._baudWarned = false;
+
+    this._bind();
+  }
+
+  _refreshElements() {
     this.outputEl   = document.getElementById('serial-output');
     this.inputEl    = document.getElementById('serial-input');
     this.sendBtn    = document.getElementById('btn-serial-send');
@@ -19,33 +33,31 @@ class SerialMonitor {
     this.showHex    = document.getElementById('serial-show-hex');
     this.searchEl   = document.getElementById('serial-search');
     this.lineCountEl = document.getElementById('serial-line-count');
-
-    this.buffer = '';
-    this.lineCount = 0;
-    this.maxLines = 5000;
-    this._pendingFlush = null;
-    this._searchTerm = '';
-    this._allLines = []; // store { text, type } for filtering
-    this._baudWarned = false;
-
-    this._bind();
   }
 
   _bind() {
-    this.sendBtn    && this.sendBtn.addEventListener('click', () => this._sendInput());
-    this.clearBtn   && this.clearBtn.addEventListener('click', () => this.clear());
-    this.exportBtn  && this.exportBtn.addEventListener('click', () => this._export());
-    this.copyBtn    && this.copyBtn.addEventListener('click', () => this._copyAll());
+    if (this._bindAbort) this._bindAbort.abort();
+    this._bindAbort = new AbortController();
+    const opts = { signal: this._bindAbort.signal };
+    this.sendBtn    && this.sendBtn.addEventListener('click', () => this._sendInput(), opts);
+    this.clearBtn   && this.clearBtn.addEventListener('click', () => this.clear(), opts);
+    this.exportBtn  && this.exportBtn.addEventListener('click', () => this._export(), opts);
+    this.copyBtn    && this.copyBtn.addEventListener('click', () => this._copyAll(), opts);
     this.inputEl    && this.inputEl.addEventListener('keydown', e => {
       if (e.key === 'Enter') this._sendInput();
-    });
+    }, opts);
     this.searchEl && this.searchEl.addEventListener('input', e => {
       this._searchTerm = (e.target.value || '').toLowerCase();
       this._applyFilter();
-    });
+    }, opts);
     this.baudSel && this.baudSel.addEventListener('change', () => {
       this._baudWarned = false;
-    });
+    }, opts);
+  }
+
+  rebind() {
+    this._refreshElements();
+    this._bind();
   }
 
   isBaudMismatched() {

@@ -1861,6 +1861,20 @@ _newProject() {
       const fpsEl = document.getElementById('sim-fps');
       if (fpsEl) fpsEl.textContent = '0 FPS';
     }
+    // Update mobile Run button
+    const mobileRunBtn = document.getElementById('mobile-btn-run');
+    if (mobileRunBtn) {
+      mobileRunBtn.classList.toggle('running', running);
+      const label = mobileRunBtn.querySelector('span');
+      const svg = mobileRunBtn.querySelector('svg');
+      if (!running) {
+        if (label) label.textContent = 'Run';
+        if (svg) svg.innerHTML = '<polygon points="5 3 19 12 5 21 5 3" />';
+      } else {
+        if (label) label.textContent = 'Pause';
+        if (svg) svg.innerHTML = '<rect x="5" y="5" width="10" height="10" rx="1" />';
+      }
+    }
   }
 
   /* ══════════════════════ PIN MONITOR ══════════════════════ */
@@ -3086,8 +3100,32 @@ _newProject() {
     document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
 
     if (action === 'run') {
-      this.isRunning ? this.stop() : this.run();
-      btn.classList.toggle('running', this.isRunning);
+      if (this.isRunning) {
+        this.pauseResume();
+        const isPaused = this.sim?.isPaused;
+        btn.classList.toggle('running', !isPaused);
+        const label = btn.querySelector('span');
+        const svg = btn.querySelector('svg');
+        if (isPaused) {
+          if (label) label.textContent = 'Resume';
+          if (svg) svg.innerHTML = '<polygon points="5 3 19 12 5 21 5 3" />';
+        } else {
+          if (label) label.textContent = 'Pause';
+          if (svg) svg.innerHTML = '<rect x="5" y="5" width="10" height="10" rx="1" />';
+        }
+      } else {
+        this.run();
+        btn.classList.toggle('running', this.isRunning);
+        const label = btn.querySelector('span');
+        const svg = btn.querySelector('svg');
+        if (this.isRunning) {
+          if (label) label.textContent = 'Pause';
+          if (svg) svg.innerHTML = '<rect x="5" y="5" width="10" height="10" rx="1" />';
+        } else {
+          if (label) label.textContent = 'Run';
+          if (svg) svg.innerHTML = '<polygon points="5 3 19 12 5 21 5 3" />';
+        }
+      }
       return;
     }
 
@@ -3114,17 +3152,19 @@ _newProject() {
     const overlay = document.getElementById('bottom-sheet-overlay');
     if (!sheet || !overlay) return;
 
-    // Clone content for dynamic sheets
+    // Move actual DOM elements into sheets (preserves event listeners)
     if (sheetId === 'sheet-components') {
       const body = document.getElementById('sheet-components-body');
+      const searchBox = document.querySelector('.component-search-box');
       const container = document.getElementById('components-container');
-      if (body && container && !body.hasChildNodes()) {
-        body.appendChild(container.cloneNode(true));
+      if (body && container) {
+        if (searchBox) body.appendChild(searchBox);
+        body.appendChild(container);
       }
     } else if (sheetId === 'sheet-editor') {
       const body = document.getElementById('sheet-editor-body');
       const editorContainer = document.getElementById('editor-container');
-      if (body && editorContainer && !body.hasChildNodes()) {
+      if (body && editorContainer) {
         body.appendChild(editorContainer);
         if (this.editor?.editor) {
           setTimeout(() => this.editor.editor.layout?.(), 100);
@@ -3133,8 +3173,11 @@ _newProject() {
     } else if (sheetId === 'sheet-serial') {
       const body = document.getElementById('sheet-serial-body');
       const serialPane = document.getElementById('pane-serial');
-      if (body && serialPane && !body.hasChildNodes()) {
-        body.appendChild(serialPane.cloneNode(true));
+      if (body && serialPane) {
+        body.appendChild(serialPane);
+        if (window.SerialMonitor) {
+          setTimeout(() => window.SerialMonitor.rebind(), 50);
+        }
       }
     }
 
@@ -3155,8 +3198,9 @@ _newProject() {
     this._openSheet = null;
     document.body.style.overflow = '';
 
-    // Return editor container to its original position if it was moved
+    // Return moved DOM elements to their original positions
     if (this._isMobile) {
+      // Return editor container
       const editorBody = document.getElementById('sheet-editor-body');
       const editorContainer = document.getElementById('editor-container');
       if (editorBody && editorContainer && editorBody.contains(editorContainer)) {
@@ -3166,6 +3210,29 @@ _newProject() {
           if (this.editor?.editor) {
             setTimeout(() => this.editor.editor.layout?.(), 100);
           }
+        }
+      }
+
+      // Return components search box and container
+      const compBody = document.getElementById('sheet-components-body');
+      if (compBody) {
+        const searchBox = compBody.querySelector('.component-search-box');
+        const container = document.getElementById('components-container');
+        const panelComponents = document.getElementById('panel-components');
+        if (panelComponents) {
+          if (searchBox) panelComponents.appendChild(searchBox);
+          if (container) panelComponents.appendChild(container);
+        }
+      }
+
+      // Return serial pane
+      const serialBody = document.getElementById('sheet-serial-body');
+      const serialPane = document.getElementById('pane-serial');
+      if (serialBody && serialPane && serialBody.contains(serialPane)) {
+        const bottomPanel = document.getElementById('bottom-panel');
+        if (bottomPanel) bottomPanel.appendChild(serialPane);
+        if (window.SerialMonitor) {
+          setTimeout(() => window.SerialMonitor.rebind(), 50);
         }
       }
     }
@@ -3190,7 +3257,7 @@ _newProject() {
         this._newProject();
         break;
       case 'board':
-        // TODO: board settings modal
+        this._showBoardSettings();
         break;
       case 'shortcuts':
         this._showModal('modal-shortcuts');
@@ -3202,6 +3269,29 @@ _newProject() {
         window.open('docs/ArduSim_Guide.html', '_blank');
         break;
     }
+  }
+
+  _showBoardSettings() {
+    const desktopSel = document.getElementById('board-select');
+    const mobileSel = document.getElementById('mobile-board-select');
+    if (mobileSel && desktopSel) {
+      mobileSel.value = desktopSel.value;
+    }
+    const applyBtn = document.getElementById('btn-mobile-board-apply');
+    if (applyBtn) {
+      const handler = () => {
+        if (mobileSel) {
+          this._setBoard(mobileSel.value);
+          if (desktopSel) desktopSel.value = mobileSel.value;
+        }
+        this._hideModal('modal-board-settings');
+        applyBtn.removeEventListener('click', handler);
+      };
+      applyBtn.removeEventListener('click', applyBtn._handler);
+      applyBtn.addEventListener('click', handler);
+      applyBtn._handler = handler;
+    }
+    this._showModal('modal-board-settings');
   }
 }
 
