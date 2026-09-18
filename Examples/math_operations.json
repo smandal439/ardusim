@@ -10,7 +10,8 @@
     "subtraction",
     "multiplication",
     "division",
-    "modulus"
+    "modulus",
+"math"
   ],
   "circuit": {
     "components": [
