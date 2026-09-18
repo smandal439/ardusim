@@ -178,6 +178,54 @@ const StorageManager = {
     this.showToast('Project downloaded!', 'success');
   },
 
+  /* ── Download project as ZIP file ── */
+  async downloadProjectZip(files, circuitData, projectName = 'ArduSim Project', board2Code = '') {
+    if (typeof JSZip === 'undefined') {
+      this.showToast('JSZip library not loaded. Please check your connection.', 'error');
+      return;
+    }
+    const zip = new JSZip();
+
+    // Project metadata
+    const project = {
+      version:  this.VERSION,
+      savedAt:  new Date().toISOString(),
+      name:     projectName,
+      circuit:  circuitData,
+    };
+    if (board2Code) project.board2Code = board2Code;
+
+    // Add project.json with metadata + circuit
+    zip.file('project.json', JSON.stringify(project, null, 2));
+
+    // Add each source file
+    const allFiles = files || { 'sketch.ino': '' };
+    const srcFolder = zip.folder('src');
+    for (const [name, content] of Object.entries(allFiles)) {
+      srcFolder.file(name, content || '');
+    }
+
+    // Generate ZIP and trigger download
+    try {
+      const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safeName = projectName.replace(/[^a-z0-9_\-]/gi, '_').toLowerCase();
+      a.download = `${safeName}_${new Date().toISOString().slice(0, 10)}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      this._lastSavedAt = Date.now();
+      this.markClean();
+      this.showToast('Project downloaded as ZIP!', 'success');
+    } catch (err) {
+      console.error('[StorageManager] ZIP export failed:', err);
+      this.showToast('ZIP export failed: ' + err.message, 'error');
+    }
+  },
+
   downloadExample(files, circuitData, name, description, tags, board2Code = '') {
     const id = name.toLowerCase().trim()
       .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'custom_example';

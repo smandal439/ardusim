@@ -128,6 +128,7 @@ class App {
     const pauseBtn  = get('btn-pause');
     const saveBtn   = get('btn-save');
     const downloadBtn = get('btn-download');
+    const downloadZipBtn = get('btn-download-zip');
     const saveExampleBtn = get('btn-save-example');
     const loadBtn   = get('btn-load');
     const savedProjectsBtn = get('btn-saved-projects');
@@ -169,6 +170,7 @@ class App {
     pauseBtn?.addEventListener('click', () => this.pauseResume());
     saveBtn?.addEventListener('click', () => this.saveProject());
     downloadBtn?.addEventListener('click', () => this.downloadProject());
+    downloadZipBtn?.addEventListener('click', () => this.downloadProjectZip());
     saveExampleBtn?.addEventListener('click', () => this.saveAsExample());
     loadBtn?.addEventListener('click', () => this.loadProject());
     savedProjectsBtn?.addEventListener('click', () => this._openSavedProjects());
@@ -1484,6 +1486,13 @@ void loop() {
     const board2Code = this._getBoard2Code();
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
     window.StorageManager?.downloadProject(files, circuitData, this._projectName, board2Code);
+  }
+
+  downloadProjectZip() {
+    const files = this.editor?.getAllFiles?.() || { 'sketch.ino': '' };
+    const board2Code = this._getBoard2Code();
+    const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
+    window.StorageManager?.downloadProjectZip(files, circuitData, this._projectName, board2Code);
   }
 
   saveAsExample() {
@@ -3252,6 +3261,9 @@ _newProject() {
         break;
       case 'download':
         this.downloadProject();
+        break;
+      case 'download-zip':
+        this.downloadProjectZip();
         break;
       case 'new':
         this._newProject();
