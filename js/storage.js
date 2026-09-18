@@ -5,7 +5,7 @@
 'use strict';
 
 const StorageManager = {
-  VERSION: '1.1',
+  VERSION: '2.0',
   LS_KEY: 'ardusim_project',
   LS_SETTINGS_KEY: 'ardusim_settings',
   LS_SAVED_KEY: 'ardusim_saved_projects',
@@ -36,25 +36,31 @@ const StorageManager = {
   /* ── Version migration ── */
   _migrateProject(project) {
     if (!project || typeof project !== 'object') return null;
-    // v1.0 → v1.1: ensure circuit has components and wires arrays
     if (!project.circuit || typeof project.circuit !== 'object') project.circuit = { components: [], wires: [] };
     if (!Array.isArray(project.circuit.components)) project.circuit.components = [];
     if (!Array.isArray(project.circuit.wires)) project.circuit.wires = [];
-    if (typeof project.code !== 'string') project.code = '';
     if (typeof project.name !== 'string' || !project.name.trim()) project.name = 'Untitled Project';
+
+    // v1.0/v1.1 → v2.0: migrate single code string to files dict
+    if (!project.files || typeof project.files !== 'object' || Object.keys(project.files).length === 0) {
+      const code = typeof project.code === 'string' ? project.code : '';
+      project.files = { 'sketch.ino': code };
+      delete project.code;
+    }
+
     project.version = this.VERSION;
     return project;
   },
 
   /* ── Save project to the Saved Projects library ── */
-  saveToLibrary(code, circuitData, projectName = 'Untitled Project', board2Code = '') {
+  saveToLibrary(files, circuitData, projectName = 'Untitled Project', board2Code = '') {
     const projects = this.getSavedProjects();
     const project = {
       id:       this._genId(),
       version:  this.VERSION,
       savedAt:  new Date().toISOString(),
       name:     projectName,
-      code,
+      files:    files || { 'sketch.ino': '' },
       circuit:  circuitData,
       board2Code,
     };
@@ -67,7 +73,7 @@ const StorageManager = {
       this._lastSavedAt = Date.now();
       this.markClean();
       this.showToast(`"${projectName}" saved to Saved Projects`, 'success');
-      this._pushToServer(project); // fire-and-forget: sync to the Node backend
+      this._pushToServer(project);
       return project;
     } catch (e) {
       this.showToast('Save failed: ' + e.message, 'error');
@@ -147,12 +153,12 @@ const StorageManager = {
   },
 
   /* ── Download project as JSON file ── */
-  downloadProject(code, circuitData, projectName = 'ArduSim Project', board2Code = '') {
+  downloadProject(files, circuitData, projectName = 'ArduSim Project', board2Code = '') {
     const project = {
       version:  this.VERSION,
       savedAt:  new Date().toISOString(),
       name:     projectName,
-      code,
+      files:    files || { 'sketch.ino': '' },
       circuit:  circuitData,
     };
     if (board2Code) project.board2Code = board2Code;
@@ -172,7 +178,7 @@ const StorageManager = {
     this.showToast('Project downloaded!', 'success');
   },
 
-  downloadExample(code, circuitData, name, description, tags, board2Code = '') {
+  downloadExample(files, circuitData, name, description, tags, board2Code = '') {
     const id = name.toLowerCase().trim()
       .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'custom_example';
     const example = {
@@ -182,7 +188,7 @@ const StorageManager = {
       desc: description || `A custom ${name} circuit example.`,
       tags: String(tags || '').split(',').map(tag => tag.trim()).filter(Boolean),
       circuit: circuitData,
-      code,
+      files: files || { 'sketch.ino': '' },
     };
     if (board2Code) example.board2Code = board2Code;
     const json = JSON.stringify(example, null, 2);
@@ -227,11 +233,11 @@ const StorageManager = {
   },
 
   /* ── Save to localStorage (auto-save) ── */
-  autoSave(code, circuitData, projectName = 'Untitled Project', board2Code = '') {
+  autoSave(files, circuitData, projectName = 'Untitled Project', board2Code = '') {
     try {
       const project = {
         version:   this.VERSION,
-        code,
+        files:     files || { 'sketch.ino': '' },
         circuit:   circuitData,
         name:      projectName,
         savedAt:   Date.now(),
@@ -272,9 +278,9 @@ const StorageManager = {
   },
 
   /* ── Share via URL ── */
-  shareUrl(code, circuitData, board2Code = '') {
+  shareUrl(files, circuitData, board2Code = '') {
     try {
-      const data = JSON.stringify({ code, circuit: circuitData, board2Code: board2Code || undefined });
+      const data = JSON.stringify({ files, circuit: circuitData, board2Code: board2Code || undefined });
       // Use btoa with URI encoding for unicode safety
       const compressed = btoa(unescape(encodeURIComponent(data)));
       const url = `${window.location.origin}${window.location.pathname}?project=${compressed}`;

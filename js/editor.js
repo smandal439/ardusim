@@ -11,6 +11,12 @@ const EditorManager = {
   _autoCompileTimer: null,
   _lastCompileCode: '',
 
+  /* ── Multi-file state ── */
+  files: {},
+  activeFile: null,
+  _fileStates: {},
+  _contextTarget: null,
+
   DEFAULT_CODE: `/*
  * ArduSim — Arduino Online Simulator
  * Write your Arduino sketch below.
@@ -468,7 +474,7 @@ void loop() {
     if (!container) return;
 
     this.editor = monaco.editor.create(container, {
-      value: this.DEFAULT_CODE,
+      value: '',
       language: 'arduino',
       theme: 'arduino-dark',
       fontSize: 15,
@@ -512,7 +518,7 @@ void loop() {
       this._saveTimer = setTimeout(() => {
         if (window.CircuitCanvas && window.StorageManager && window.App) {
           const projectName = window.App.getProjectName ? window.App.getProjectName() : 'Untitled Project';
-          window.StorageManager.autoSave(this.getCode(), window.CircuitCanvas.serialize(), projectName);
+          window.StorageManager.autoSave(this.getAllFiles(), window.CircuitCanvas.serialize(), projectName);
         }
       }, 2000);
 
@@ -565,6 +571,9 @@ void loop() {
         window.App.showToast(`Theme switched to ${theme.replace('arduino-', '')} mode`);
       }
     });
+
+    // Initialize the file system
+    this._initFileSystem();
   },
 
   _initFallback() {
@@ -575,6 +584,11 @@ void loop() {
     ta.style.cssText = `width:100%;height:100%;background:#0d1117;color:#e6edf3;font-family:'JetBrains Mono',monospace;font-size:13px;padding:12px;border:none;outline:none;resize:none;`;
     container.appendChild(ta);
     this._fallbackTA = ta;
+    this.files = {};
+    this._fileStates = {};
+    this.activeFile = 'sketch.ino';
+    this.files['sketch.ino'] = { content: ta.value, model: null };
+    this._fileStates['sketch.ino'] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
     if (window.App) window.App.onEditorReady(this.loadFromUrlHash());
   },
 
@@ -654,28 +668,439 @@ void loop() {
       this._saveTimer = setTimeout(() => {
         if (window.CircuitCanvas && window.StorageManager && window.App) {
           const projectName = window.App.getProjectName ? window.App.getProjectName() : 'Untitled Project';
-          window.StorageManager.autoSave(this.getCode(), window.CircuitCanvas.serialize(), projectName);
+          const files = this.activeFile ? { [this.activeFile]: ta.value } : { 'sketch.ino': ta.value };
+          window.StorageManager.autoSave(files, window.CircuitCanvas.serialize(), projectName);
         }
       }, 2000);
     });
 
     this.monacoReady = false;
+    this.files = {};
+    this._fileStates = {};
+    this.activeFile = 'sketch.ino';
+    this.files['sketch.ino'] = { content: ta.value, model: null };
+    this._fileStates['sketch.ino'] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
     if (window.App) window.App.onEditorReady(this.loadFromUrlHash());
   },
 
+  /* ═══════════════════════════════════════════════════════
+     Multi-file System
+     ═══════════════════════════════════════════════════════ */
+
+  _getLanguageForFile(name) {
+    if (name.endsWith('.ino') || name.endsWith('.cpp') || name.endsWith('.c') || name.endsWith('.h')) return 'arduino';
+    return 'plaintext';
+  },
+
+  _getFileExt(name) {
+    const dot = name.lastIndexOf('.');
+    return dot >= 0 ? name.substring(dot + 1) : '';
+  },
+
+  _initFileSystem() {
+    this.files = {};
+    this._fileStates = {};
+    this.createFile('sketch.ino', this.DEFAULT_CODE, true);
+    this._renderFileExplorer();
+    this._renderTabs();
+    this._bindFileEvents();
+  },
+
+  createFile(name, content = '', activate = false) {
+    if (this.files[name]) return this.files[name].model;
+    const lang = this._getLanguageForFile(name);
+    const model = monaco.editor.createModel(content, lang);
+    this.files[name] = { content, model };
+    this._fileStates[name] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
+    if (activate) this.openFile(name);
+    this._renderFileExplorer();
+    this._renderTabs();
+    return model;
+  },
+
+  openFile(name) {
+    if (!this.files[name]) return;
+    if (this.activeFile && this.files[this.activeFile]) {
+      this._saveFileState(this.activeFile);
+    }
+    this.activeFile = name;
+    this.editor.setModel(this.files[name].model);
+    this._restoreFileState(name);
+    this._renderFileExplorer();
+    this._renderTabs();
+    this.clearErrors();
+  },
+
+  renameFile(oldName, newName) {
+    if (!this.files[oldName] || oldName === newName) return false;
+    if (this.files[newName]) return false;
+    if (!/\.(ino|h|cpp|c)$/i.test(newName)) return false;
+
+    const entry = this.files[oldName];
+    const state = this._fileStates[oldName];
+    delete this.files[oldName];
+    delete this._fileStates[oldName];
+
+    const lang = this._getLanguageForFile(newName);
+    monaco.editor.setModelLanguage(entry.model, lang);
+    this.files[newName] = entry;
+    this._fileStates[newName] = state || { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
+
+    if (this.activeFile === oldName) this.activeFile = newName;
+
+    this._renderFileExplorer();
+    this._renderTabs();
+    if (window.StorageManager) window.StorageManager.markDirty();
+    return true;
+  },
+
+  deleteFile(name) {
+    const keys = Object.keys(this.files);
+    if (keys.length <= 1) return false;
+    if (!this.files[name]) return false;
+
+    const model = this.files[name].model;
+    delete this.files[name];
+    delete this._fileStates[name];
+    if (model) model.dispose();
+
+    if (this.activeFile === name) {
+      const remaining = Object.keys(this.files);
+      this.openFile(remaining[0]);
+    } else {
+      this._renderFileExplorer();
+      this._renderTabs();
+    }
+    if (window.StorageManager) window.StorageManager.markDirty();
+    return true;
+  },
+
+  getAllFiles() {
+    const result = {};
+    for (const [name, entry] of Object.entries(this.files)) {
+      result[name] = entry.model.getValue();
+    }
+    return result;
+  },
+
+  getActiveFileName() {
+    return this.activeFile;
+  },
+
+  getCombinedCode() {
+    const names = Object.keys(this.files);
+    const parts = [];
+    const headerNames = names.filter(n => n.endsWith('.h')).sort();
+    const cppNames = names.filter(n => n.endsWith('.cpp') || n.endsWith('.c')).sort();
+    const inoNames = names.filter(n => n.endsWith('.ino')).sort();
+
+    for (const n of headerNames) parts.push(this.files[n].model.getValue());
+    for (const n of cppNames) parts.push(this.files[n].model.getValue());
+    for (const n of inoNames) parts.push(this.files[n].model.getValue());
+
+    return parts.join('\n\n');
+  },
+
   getCode() {
+    if (this.activeFile && this.files[this.activeFile]) {
+      return this.files[this.activeFile].model.getValue();
+    }
     if (this.editor) return this.editor.getValue();
     if (this._fallbackTA) return this._fallbackTA.value;
     return '';
   },
 
   setCode(code) {
-    if (this.editor) {
+    if (this.activeFile && this.files[this.activeFile]) {
+      this.files[this.activeFile].model.setValue(code);
+      this.editor.revealLine(1);
+    } else if (this.editor) {
       this.editor.setValue(code);
       this.editor.revealLine(1);
     } else if (this._fallbackTA) {
       this._fallbackTA.value = code;
     }
+  },
+
+  loadFiles(filesObj, activateName) {
+    for (const [name, content] of Object.entries(filesObj)) {
+      if (this.files[name]) {
+        this.files[name].model.setValue(content);
+      } else {
+        this.createFile(name, content, false);
+      }
+    }
+    const target = activateName || Object.keys(this.files)[0];
+    if (target && this.files[target]) {
+      this.openFile(target);
+    }
+  },
+
+  _saveFileState(name) {
+    if (!name || !this.files[name]) return;
+    const cursor = this.editor.getPosition();
+    const scrollTop = this.editor.getScrollTop();
+    this._fileStates[name] = { cursor: cursor || { lineNumber: 1, column: 1 }, scrollTop };
+  },
+
+  _restoreFileState(name) {
+    const state = this._fileStates[name];
+    if (state) {
+      this.editor.setPosition(state.cursor);
+      this.editor.setScrollTop(state.scrollTop);
+    }
+  },
+
+  /* ── File Explorer UI ── */
+  _renderFileExplorer() {
+    const list = document.getElementById('file-explorer-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const names = Object.keys(this.files).sort((a, b) => {
+      const aIno = a.endsWith('.ino') ? 0 : 1;
+      const bIno = b.endsWith('.ino') ? 0 : 1;
+      if (aIno !== bIno) return aIno - bIno;
+      return a.localeCompare(b);
+    });
+
+    for (const name of names) {
+      const ext = this._getFileExt(name);
+      const item = document.createElement('div');
+      item.className = 'file-item' + (name === this.activeFile ? ' active' : '');
+      item.dataset.name = name;
+
+      item.innerHTML = `
+        <span class="file-item-icon ${ext}">${ext}</span>
+        <span class="file-item-name">${this._escHtml(name)}</span>
+        <input class="file-item-rename" type="text" value="${this._escHtml(name)}" spellcheck="false" />
+        <span class="file-item-actions">
+          <button class="file-item-action file-item-delete-btn" title="Delete">&times;</button>
+        </span>
+      `;
+
+      item.addEventListener('click', (e) => {
+        if (e.target.closest('.file-item-delete-btn') || e.target.closest('.file-item-rename')) return;
+        this.openFile(name);
+      });
+
+      item.addEventListener('dblclick', (e) => {
+        if (e.target.closest('.file-item-delete-btn')) return;
+        this._startRename(name, item);
+      });
+
+      item.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        this._showFileContextMenu(e, name);
+      });
+
+      const deleteBtn = item.querySelector('.file-item-delete-btn');
+      if (deleteBtn) {
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this._confirmDeleteFile(name);
+        });
+      }
+
+      const renameInput = item.querySelector('.file-item-rename');
+      if (renameInput) {
+        renameInput.addEventListener('blur', () => this._finishRename(name, item, renameInput));
+        renameInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') renameInput.blur();
+          if (e.key === 'Escape') { renameInput.value = name; renameInput.blur(); }
+        });
+      }
+
+      list.appendChild(item);
+    }
+  },
+
+  _startRename(name, itemEl) {
+    itemEl.classList.add('file-item-renaming');
+    const input = itemEl.querySelector('.file-item-rename');
+    if (input) {
+      input.value = name;
+      input.focus();
+      const dot = name.lastIndexOf('.');
+      if (dot > 0) input.setSelectionRange(0, dot);
+      else input.select();
+    }
+  },
+
+  _finishRename(oldName, itemEl, input) {
+    itemEl.classList.remove('file-item-renaming');
+    const newName = (input.value || '').trim();
+    if (!newName || newName === oldName) return;
+    if (!/\.(ino|h|cpp|c)$/i.test(newName)) {
+      if (window.App && window.App.showToast) window.App.showToast('File must end with .ino, .h, .cpp, or .c', 'warning');
+      return;
+    }
+    if (this.files[newName]) {
+      if (window.App && window.App.showToast) window.App.showToast('A file with that name already exists', 'warning');
+      return;
+    }
+    this.renameFile(oldName, newName);
+  },
+
+  _confirmDeleteFile(name) {
+    const keys = Object.keys(this.files);
+    if (keys.length <= 1) {
+      if (window.App && window.App.showToast) window.App.showToast('Cannot delete the last file', 'warning');
+      return;
+    }
+    const doDelete = () => {
+      this.deleteFile(name);
+      if (window.App && window.App.showToast) window.App.showToast(`"${name}" deleted`, 'info');
+    };
+    if (window.App && window.App.showConfirm) {
+      window.App.showConfirm(`Delete "${name}"?`, 'This cannot be undone.', doDelete);
+    } else {
+      if (confirm(`Delete "${name}"?`)) doDelete();
+    }
+  },
+
+  /* ── Tab Bar UI ── */
+  _renderTabs() {
+    const tabsEl = document.getElementById('editor-tabs');
+    if (!tabsEl) return;
+    tabsEl.innerHTML = '';
+
+    const names = Object.keys(this.files).sort((a, b) => {
+      const aIno = a.endsWith('.ino') ? 0 : 1;
+      const bIno = b.endsWith('.ino') ? 0 : 1;
+      if (aIno !== bIno) return aIno - bIno;
+      return a.localeCompare(b);
+    });
+
+    for (const name of names) {
+      const ext = this._getFileExt(name);
+      const tab = document.createElement('div');
+      tab.className = 'editor-tab' + (name === this.activeFile ? ' active' : '');
+      tab.dataset.name = name;
+      tab.innerHTML = `
+        <span class="editor-tab-icon ${ext}">${ext}</span>
+        <span class="editor-tab-name">${this._escHtml(name)}</span>
+        <button class="editor-tab-close" title="Close">&times;</button>
+      `;
+
+      tab.addEventListener('click', (e) => {
+        if (e.target.closest('.editor-tab-close')) return;
+        this.openFile(name);
+      });
+
+      const closeBtn = tab.querySelector('.editor-tab-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const keys = Object.keys(this.files);
+          if (keys.length <= 1) {
+            if (window.App && window.App.showToast) window.App.showToast('Cannot close the last file', 'warning');
+            return;
+          }
+          if (name === this.activeFile) {
+            const idx = keys.indexOf(name);
+            const next = keys[idx + 1] || keys[idx - 1];
+            this.openFile(next);
+          }
+          this._renderTabs();
+          this._renderFileExplorer();
+        });
+      }
+
+      tabsEl.appendChild(tab);
+    }
+  },
+
+  /* ── File Context Menu ── */
+  _showFileContextMenu(e, name) {
+    this._contextTarget = name;
+    const menu = document.getElementById('file-context-menu');
+    if (!menu) return;
+    menu.classList.remove('hidden');
+    menu.style.left = `${e.clientX}px`;
+    menu.style.top = `${e.clientY}px`;
+
+    const rect = menu.getBoundingClientRect();
+    if (rect.right > window.innerWidth) menu.style.left = `${window.innerWidth - rect.width - 4}px`;
+    if (rect.bottom > window.innerHeight) menu.style.top = `${window.innerHeight - rect.height - 4}px`;
+  },
+
+  _hideFileContextMenu() {
+    const menu = document.getElementById('file-context-menu');
+    if (menu) menu.classList.add('hidden');
+    this._contextTarget = null;
+  },
+
+  _bindFileEvents() {
+    const newFileBtn = document.getElementById('btn-new-file');
+    if (newFileBtn) {
+      newFileBtn.addEventListener('click', () => this._promptNewFile());
+    }
+
+    const ctxRename = document.getElementById('ctx-file-rename');
+    if (ctxRename) {
+      ctxRename.addEventListener('click', () => {
+        if (this._contextTarget) {
+          const item = document.querySelector(`.file-item[data-name="${CSS.escape(this._contextTarget)}"]`);
+          if (item) this._startRename(this._contextTarget, item);
+        }
+        this._hideFileContextMenu();
+      });
+    }
+
+    const ctxDelete = document.getElementById('ctx-file-delete');
+    if (ctxDelete) {
+      ctxDelete.addEventListener('click', () => {
+        if (this._contextTarget) this._confirmDeleteFile(this._contextTarget);
+        this._hideFileContextMenu();
+      });
+    }
+
+    document.addEventListener('click', () => this._hideFileContextMenu());
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        this._promptNewFile();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
+        const tag = document.activeElement?.tagName;
+        const inInput = tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.closest?.('.monaco-editor');
+        if (!inInput) {
+          e.preventDefault();
+          if (this.activeFile) this._confirmDeleteFile(this.activeFile);
+        }
+      }
+      if (e.key === 'F2' && !e.ctrlKey && !e.metaKey) {
+        const tag = document.activeElement?.tagName;
+        const inInput = tag === 'INPUT' || tag === 'TEXTAREA';
+        if (!inInput && this.activeFile) {
+          e.preventDefault();
+          const item = document.querySelector(`.file-item[data-name="${CSS.escape(this.activeFile)}"]`);
+          if (item) this._startRename(this.activeFile, item);
+        }
+      }
+    });
+  },
+
+  _promptNewFile() {
+    let name = 'new_file.ino';
+    let counter = 1;
+    while (this.files[name]) {
+      name = `new_file_${counter}.ino`;
+      counter++;
+    }
+    this.createFile(name, '', true);
+    this._renderFileExplorer();
+    this._renderTabs();
+    const item = document.querySelector(`.file-item[data-name="${CSS.escape(name)}"]`);
+    if (item) {
+      setTimeout(() => this._startRename(name, item), 50);
+    }
+  },
+
+  _escHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   },
 
   /**
@@ -763,8 +1188,8 @@ void loop() {
   getShareableUrl() {
     const circuitData = window.CircuitCanvas ? window.CircuitCanvas.serialize() : null;
     const payload = {
-      v: 1,
-      code: this.getCode(),
+      v: 2,
+      files: this.getAllFiles(),
       circuit: circuitData
     };
 
@@ -794,8 +1219,10 @@ void loop() {
 
       const payload = JSON.parse(jsonString);
 
-      if (payload.code) {
-        this.setCode(payload.code);
+      if (payload.files && typeof payload.files === 'object') {
+        this.loadFiles(payload.files);
+      } else if (payload.code) {
+        this.loadFiles({ 'sketch.ino': payload.code });
       }
 
       if (payload.circuit && window.CircuitCanvas && window.CircuitCanvas.deserialize) {
@@ -912,6 +1339,7 @@ void loop() {
   showError(line, msg) {
     if (!this.editor) return;
     const model = this.editor.getModel();
+    if (!model) return;
     monaco.editor.setModelMarkers(model, 'ardusim', [{
       severity: monaco.MarkerSeverity.Error,
       startLineNumber: line || 1,
@@ -962,7 +1390,7 @@ void loop() {
   },
 
   async _doAutoCompile() {
-    const code = this.getCode();
+    const code = this.getCombinedCode();
     if (!code || code === this._lastCompileCode) return;
     this._lastCompileCode = code;
 
@@ -1338,6 +1766,11 @@ void loop() {
       this.editor.dispose();
       this.editor = null;
     }
+    for (const entry of Object.values(this.files)) {
+      if (entry.model) entry.model.dispose();
+    }
+    this.files = {};
+    this._fileStates = {};
     if (this._fallbackTA) {
       this._fallbackTA.remove();
       this._fallbackTA = null;
