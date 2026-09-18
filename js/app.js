@@ -668,18 +668,61 @@ class App {
 
   _highlightBoard2(textarea, codeEl) {
     const code = textarea.value;
-    const html = code
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/(\/\/.*$)/gm, '<span class="board2-cmt">$1</span>')
-      .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="board2-cmt">$1</span>')
-      .replace(/(#include\s*[&lt;""][\s\S]*?[&gt;"])/g, '<span class="board2-dir">$1</span>')
-      .replace(/(#define\s+\w+)/g, '<span class="board2-dir">$1</span>')
-      .replace(/\b(void|int|long|float|double|byte|boolean|bool|char|String|unsigned|const|return|if|else|for|while|do|switch|case|break|continue|struct|class|true|false|static|volatile)\b/g, '<span class="board2-kw">$1</span>')
-      .replace(/\b(uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t)\b/g, '<span class="board2-type">$1</span>')
-      .replace(/\b(setup|loop|pinMode|digitalWrite|digitalRead|analogWrite|analogRead|delay|delayMicroseconds|millis|micros|tone|noTone|pulseIn|Serial|WiFi|Wire)\b/g, '<span class="board2-fn">$1</span>')
-      .replace(/\b(\d+\.?\d*[fF]?\b)/g, '<span class="board2-num">$1</span>')
-      .replace(/("[^"]*")/g, '<span class="board2-str">$1</span>');
-    codeEl.innerHTML = html;
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const tokens = [];
+    let pos = 0;
+    const len = code.length;
+    const KW = new Set(['void','int','long','float','double','byte','boolean','bool','char','String','unsigned','const','return','if','else','for','while','do','switch','case','break','continue','struct','class','true','false','static','volatile','typedef','enum','sizeof','new','delete','public','private','protected','virtual','override']);
+    const TY = new Set(['uint8_t','uint16_t','uint32_t','int8_t','int16_t','int32_t','size_t']);
+    const FN = new Set(['setup','loop','pinMode','digitalWrite','digitalRead','analogWrite','analogRead','delay','delayMicroseconds','millis','micros','tone','noTone','pulseIn','begin','macAddress','esp_now_init','esp_now_register_send_cb','esp_now_register_recv_cb','esp_now_add_peer','esp_now_send','memcpy','parseInt','printf','attachInterrupt','detachInterrupt','Serial','WiFi','Wire','print','println','available','read','write','flush','peek','end','setPin','analogSetWidth','ledcSetup','ledcAttachPin','ledcWrite','ledcDetachPin','touchRead','deepSleep','restart','getEfuseMac','chipRevision','getCpuFreqMHz','flashFrequency']);
+    while (pos < len) {
+      const ch = code[pos];
+      if (ch === '/' && pos + 1 < len && code[pos + 1] === '*') {
+        const end = code.indexOf('*/', pos + 2);
+        const close = end === -1 ? len : end + 2;
+        tokens.push('<span class="board2-cmt">' + esc(code.slice(pos, close)) + '</span>');
+        pos = close;
+      } else if (ch === '/' && pos + 1 < len && code[pos + 1] === '/') {
+        const nl = code.indexOf('\n', pos);
+        const end = nl === -1 ? len : nl;
+        tokens.push('<span class="board2-cmt">' + esc(code.slice(pos, end)) + '</span>');
+        pos = end;
+      } else if (ch === '#') {
+        const m = code.slice(pos).match(/^#[a-zA-Z_]\w*/);
+        if (m) { tokens.push('<span class="board2-dir">' + esc(m[0]) + '</span>'); pos += m[0].length; }
+        else { tokens.push(esc(ch)); pos++; }
+      } else if (ch === '"') {
+        let end = pos + 1;
+        while (end < len && code[end] !== '"') { if (code[end] === '\\') end++; end++; }
+        if (end < len) end++;
+        tokens.push('<span class="board2-str">' + esc(code.slice(pos, end)) + '</span>');
+        pos = end;
+      } else if (ch === "'") {
+        let end = pos + 1;
+        while (end < len && code[end] !== "'") { if (code[end] === '\\') end++; end++; }
+        if (end < len) end++;
+        tokens.push('<span class="board2-str">' + esc(code.slice(pos, end)) + '</span>');
+        pos = end;
+      } else if (/\d/.test(ch)) {
+        const m = code.slice(pos).match(/^\d+\.?\d*[fFlLuUxXbBoO]*/);
+        if (m) { tokens.push('<span class="board2-num">' + esc(m[0]) + '</span>'); pos += m[0].length; }
+        else { tokens.push(esc(ch)); pos++; }
+      } else if (/[a-zA-Z_]/.test(ch)) {
+        const m = code.slice(pos).match(/^[a-zA-Z_]\w*/);
+        if (m) {
+          const w = m[0];
+          if (KW.has(w)) tokens.push('<span class="board2-kw">' + esc(w) + '</span>');
+          else if (TY.has(w)) tokens.push('<span class="board2-type">' + esc(w) + '</span>');
+          else if (FN.has(w)) tokens.push('<span class="board2-fn">' + esc(w) + '</span>');
+          else tokens.push(esc(w));
+          pos += m[0].length;
+        } else { tokens.push(esc(ch)); pos++; }
+      } else {
+        tokens.push(esc(ch));
+        pos++;
+      }
+    }
+    codeEl.innerHTML = tokens.join('');
   }
 
   _setBoard2Code(code) {
