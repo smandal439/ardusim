@@ -17,34 +17,12 @@ const EditorManager = {
   _fileStates: {},
   _contextTarget: null,
 
-  DEFAULT_CODE: `/*
- * ArduSim — Arduino Online Simulator
- * Write your Arduino sketch below.
- * Click "Run" to start the simulation.
- *
- * Add components to the canvas on the right,
- * then connect their pins with wires.
- */
+  DEFAULT_CODE: `void setup() {
 
-// Built-in LED pin
-int ledPin = 13;
-
-void setup() {
-  // Run once at startup
-  pinMode(ledPin, OUTPUT);
-  Serial.begin(9600);
-  Serial.println("ArduSim Ready!");
 }
 
 void loop() {
-  // Runs repeatedly
-  digitalWrite(ledPin, HIGH);
-  Serial.println("LED ON");
-  delay(1000);
 
-  digitalWrite(ledPin, LOW);
-  Serial.println("LED OFF");
-  delay(1000);
 }`,
 
   init() {
