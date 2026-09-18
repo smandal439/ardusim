@@ -696,7 +696,7 @@ class App {
       if (fileExplorer) fileExplorer.style.display = 'none';
       if (editorTabs) editorTabs.style.display = 'none';
       const textarea = document.getElementById('board2-code-textarea');
-      if (textarea && !textarea.value.trim()) {
+      if (textarea) {
         textarea.value = this._board2Code || this._getDefaultBoard2Code();
       }
     }
@@ -1640,6 +1640,8 @@ _newProject() {
       this.editor?.setCode(EditorManager.DEFAULT_CODE);
     }
     this._board2Code = '';
+    this._board1FilesCache = null;
+    this._board1ActiveFile = null;
     const b2ta = document.getElementById('board2-code-textarea');
     if (b2ta) b2ta.value = '';
     this._setProjectName('Untitled Project');
@@ -2737,6 +2739,8 @@ _newProject() {
         this._board2Code = example.board2Code || '';
         const b2ta = document.getElementById('board2-code-textarea');
         if (b2ta) b2ta.value = this._board2Code;
+        this._board1FilesCache = null;
+        this._board1ActiveFile = null;
         if (example.circuit && this.canvas) this._loadExampleCircuit(example.circuit);
         this._closeModal();
         this.showToast(`${example.name} loaded`, 'success');
@@ -2779,6 +2783,8 @@ _newProject() {
     this._board2Code = ex.board2Code || '';
     const b2ta = document.getElementById('board2-code-textarea');
     if (b2ta) b2ta.value = this._board2Code;
+    this._board1FilesCache = null;
+    this._board1ActiveFile = null;
     if (ex.circuit && this.canvas) this._loadExampleCircuit(ex.circuit);
     this.showToast(`${ex.name} loaded`, 'success');
   }
