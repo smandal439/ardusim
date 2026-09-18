@@ -737,8 +737,10 @@ void loop() {
       this._saveFileState(this.activeFile);
     }
     this.activeFile = name;
-    this.editor.setModel(this.files[name].model);
-    this._restoreFileState(name);
+    if (this.editor && this.files[name].model) {
+      this.editor.setModel(this.files[name].model);
+      this._restoreFileState(name);
+    }
     this._renderFileExplorer();
     this._renderTabs();
     this.clearErrors();
@@ -755,7 +757,7 @@ void loop() {
     delete this._fileStates[oldName];
 
     const lang = this._getLanguageForFile(newName);
-    monaco.editor.setModelLanguage(entry.model, lang);
+    if (entry.model) monaco.editor.setModelLanguage(entry.model, lang);
     this.files[newName] = entry;
     this._fileStates[newName] = state || { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
 
@@ -791,7 +793,7 @@ void loop() {
   getAllFiles() {
     const result = {};
     for (const [name, entry] of Object.entries(this.files)) {
-      result[name] = entry.model.getValue();
+      result[name] = entry.model ? entry.model.getValue() : (entry.content || '');
     }
     return result;
   },
@@ -807,16 +809,23 @@ void loop() {
     const cppNames = names.filter(n => n.endsWith('.cpp') || n.endsWith('.c')).sort();
     const inoNames = names.filter(n => n.endsWith('.ino')).sort();
 
-    for (const n of headerNames) parts.push(this.files[n].model.getValue());
-    for (const n of cppNames) parts.push(this.files[n].model.getValue());
-    for (const n of inoNames) parts.push(this.files[n].model.getValue());
+    const getContent = (n) => {
+      const e = this.files[n];
+      return e.model ? e.model.getValue() : (e.content || '');
+    };
+
+    for (const n of headerNames) parts.push(getContent(n));
+    for (const n of cppNames) parts.push(getContent(n));
+    for (const n of inoNames) parts.push(getContent(n));
 
     return parts.join('\n\n');
   },
 
   getCode() {
     if (this.activeFile && this.files[this.activeFile]) {
-      return this.files[this.activeFile].model.getValue();
+      const entry = this.files[this.activeFile];
+      if (entry.model) return entry.model.getValue();
+      return entry.content || '';
     }
     if (this.editor) return this.editor.getValue();
     if (this._fallbackTA) return this._fallbackTA.value;
@@ -825,8 +834,13 @@ void loop() {
 
   setCode(code) {
     if (this.activeFile && this.files[this.activeFile]) {
-      this.files[this.activeFile].model.setValue(code);
-      this.editor.revealLine(1);
+      const entry = this.files[this.activeFile];
+      if (entry.model) {
+        entry.model.setValue(code);
+        this.editor.revealLine(1);
+      } else {
+        entry.content = code;
+      }
     } else if (this.editor) {
       this.editor.setValue(code);
       this.editor.revealLine(1);
@@ -863,13 +877,14 @@ void loop() {
   },
 
   _saveFileState(name) {
-    if (!name || !this.files[name]) return;
+    if (!name || !this.files[name] || !this.editor) return;
     const cursor = this.editor.getPosition();
     const scrollTop = this.editor.getScrollTop();
     this._fileStates[name] = { cursor: cursor || { lineNumber: 1, column: 1 }, scrollTop };
   },
 
   _restoreFileState(name) {
+    if (!this.editor) return;
     const state = this._fileStates[name];
     if (state) {
       this.editor.setPosition(state.cursor);
@@ -1232,6 +1247,7 @@ void loop() {
   },
 
   loadFromUrlHash() {
+    if (!this.monacoReady) return false;
     const hash = window.location.hash;
     if (!hash.includes('#project=')) return false;
 
