@@ -698,9 +698,22 @@ void loop() {
   },
 
   _initFileSystem() {
+    const existingFiles = this.files && Object.keys(this.files).length > 0 ? { ...this.files } : null;
     this.files = {};
     this._fileStates = {};
-    this.createFile('sketch.ino', this.DEFAULT_CODE, true);
+    if (existingFiles) {
+      for (const [name, entry] of Object.entries(existingFiles)) {
+        const lang = this._getLanguageForFile(name);
+        const model = monaco.editor.createModel(entry.content || '', lang);
+        this.files[name] = { content: entry.content || '', model };
+        this._fileStates[name] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
+      }
+      const first = Object.keys(this.files)[0];
+      this.activeFile = first || null;
+      if (first) this.editor.setModel(this.files[first].model);
+    } else {
+      this.createFile('sketch.ino', this.DEFAULT_CODE, true);
+    }
     this._renderFileExplorer();
     this._renderTabs();
     this._bindFileEvents();
@@ -825,14 +838,27 @@ void loop() {
   loadFiles(filesObj, activateName) {
     for (const [name, content] of Object.entries(filesObj)) {
       if (this.files[name]) {
-        this.files[name].model.setValue(content);
+        if (this.files[name].model) {
+          this.files[name].model.setValue(content);
+        } else {
+          this.files[name].content = content;
+        }
       } else {
-        this.createFile(name, content, false);
+        if (this.monacoReady) {
+          this.createFile(name, content, false);
+        } else {
+          this.files[name] = { content, model: null };
+          this._fileStates[name] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
+        }
       }
     }
     const target = activateName || Object.keys(this.files)[0];
     if (target && this.files[target]) {
-      this.openFile(target);
+      if (this.monacoReady) {
+        this.openFile(target);
+      } else {
+        this.activeFile = target;
+      }
     }
   },
 
