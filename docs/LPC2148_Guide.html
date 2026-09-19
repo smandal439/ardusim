@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LPC2148 Programming Guide - ArduSim</title>
+<style>
+body{font-family:Calibri,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;line-height:1.6;color:#1a1a1a}
+h1{color:#00979c;border-bottom:3px solid #00979c;padding-bottom:10px}
+h2{color:#00695c;border-bottom:2px solid #ccc;padding-bottom:5px;margin-top:40px}
+h3{color:#004d40;margin-top:25px}
+h4{color:#333;margin-top:15px}
+code,pre{font-family:Consolas,'Courier New',monospace;background:#f4f4f4;border-radius:4px}
+code{padding:2px 5px;font-size:0.9em}
+pre{padding:15px;overflow-x:auto;border:1px solid #ddd;font-size:0.85em;line-height:1.4}
+table{border-collapse:collapse;width:100%;margin:15px 0}
+th,td{border:1px solid #ccc;padding:8px 12px;text-align:left}
+th{background:#00979c;color:white}
+tr:nth-child(even){background:#f9f9f9}
+.tip{background:#e8f5e9;border-left:4px solid #4caf50;padding:10px 15px;margin:15px 0}
+.warn{background:#fff3e0;border-left:4px solid #ff9800;padding:10px 15px;margin:15px 0}
+.info{background:#e3f2fd;border-left:4px solid #2196f3;padding:10px 15px;margin:15px 0}
+pre code{background:transparent;padding:0}
+a{color:#00979c}
+</style>
+</head>
+<body>
+<h1>LPC2148 Programming Guide</h1>
+<p><strong>Board:</strong> LPC2148 SmartX Board &nbsp;|&nbsp; <strong>MCU:</strong> NXP LPC2148 ARM7TDMI-S 60MHz &nbsp;|&nbsp; <strong>Logic:</strong> 3.3V</p>
+<p>This guide covers how to write C code for the LPC2148 in the ArduSim simulator using real register-level programming, just like on physical hardware.</p>
+
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#overview">Board Overview</a></li>
+<li><a href="#quickstart">Quick Start</a></li>
+<li><a href="#code-style">Code Style: main() and while(1)</a></li>
+<li><a href="#gpio">GPIO Programming</a></li>
+<li><a href="#leds">Onboard LEDs</a></li>
+<li><a href="#buttons">Reading Buttons / Digital Input</a></li>
+<li><a href="#adc">ADC (Analog-to-Digital Converter)</a></li>
+<li><a href="#uart">UART Serial Communication</a></li>
+<li><a href="#registers">Complete Register Reference</a></li>
+<li><a href="#pins">Pin Map &amp; Pin Function Select</a></li>
+<li><a href="#timing">Timing &amp; Delay Functions</a></li>
+<li><a href="#tips">Tips &amp; Gotchas</a></li>
+</ol>
+
+<h2 id="overview">1. Board Overview</h2>
+<p>The LPC2148 SmartX Board in ArduSim replicates the real NXP LPC2148 ARM7 microcontroller with:</p>
+<ul>
+<li><strong>MCU:</strong> ARM7TDMI-S, 60 MHz, 512 KB Flash, 40 KB SRAM</li>
+<li><strong>GPIO:</strong> Port 0 (P0.0&ndash;P0.23, P0.25&ndash;P0.28) and Port 1 (P1.16&ndash;P1.31)</li>
+<li><strong>Onboard LEDs:</strong> LED1 (P0.12, red), LED2 (P0.13, green), LED3 (P0.14, orange), LED4 (P0.15, blue)</li>
+<li><strong>ADC:</strong> 10-bit, 8 channels on P0.26&ndash;P0.28 (AIN0&ndash;AIN2)</li>
+<li><strong>UART0:</strong> TXD0 (P0.2), RXD0 (P0.3)</li>
+<li><strong>UART1:</strong> TXD1 (P0.4), RXD1 (P0.5)</li>
+<li><strong>SPI0:</strong> SCK0 (P0.7), MISO0 (P0.8), MOSI0 (P0.9), SSEL0 (P0.10)</li>
+<li><strong>I2C0:</strong> SDA0, SCL0</li>
+<li><strong>Timers:</strong> Timer0 and Timer1</li>
+<li><strong>DAC:</strong> 10-bit, output on P0.25 (AOUT)</li>
+<li><strong>Logic Level:</strong> 3.3V (outputs are clamped to 3.3V max)</li>
+<li><strong>Power:</strong> VCC (3.3V), VBUS (5V), GND</li>
+</ul>
+
+<div class="info"><strong>Note:</strong> All I/O pins operate at 3.3V logic levels. Connecting 5V signals directly may cause issues in real hardware. In the simulator, logic HIGH is 3.3V.</div>
+
+<h2 id="quickstart">2. Quick Start</h2>
+<p>Open ArduSim, select <strong>LPC2148 SmartX Board</strong> from the board selector, and write code in the editor:</p>
+<pre><code>#include &lt;LPC214x.h&gt;
+
+int main() {
+    IO0DIR |= (1 &lt;&lt; 12);           // P0.12 = output (LED1)
+    while (1) {
+        IO0SET = (1 &lt;&lt; 12);       // LED1 ON
+        delay_ms(500);
+        IO0CLR = (1 &lt;&lt; 12);       // LED1 OFF
+        delay_ms(500);
+    }
+}</code></pre>
+<p>Press <strong>Run</strong>. The red LED1 on the board will blink at 1 Hz.</p>
+
+<div class="tip"><strong>Tip:</strong> The simulator automatically converts your <code>int main()</code> + <code>while(1)</code> pattern into the internal <code>setup()</code> + <code>loop()</code> format. You write standard LPC2148 C code &mdash; no need to use Arduino-style functions.</div>
+
+<h2 id="code-style">3. Code Style: main() and while(1)</h2>
+<p>Unlike Arduino sketches, the LPC2148 uses the standard ARM7 C entry point:</p>
+<pre><code>int main() {
+    // One-time initialization here
+    IO0DIR |= (1 &lt;&lt; 12);   // Set P0.12 as output
+
+    while (1) {
+        // Repeated code here (the "loop")
+        IO0SET = (1 &lt;&lt; 12);
+        delay_ms(500);
+        IO0CLR = (1 &lt;&lt; 12);
+        delay_ms(500);
+    }
+}</code></pre>
+
+<p>The transpiler automatically splits this into:</p>
+<ul>
+<li><code>async function setup()</code> &mdash; runs once (code before <code>while(1)</code>)</li>
+<li><code>async function loop()</code> &mdash; runs repeatedly (code inside <code>while(1)</code>)</li>
+</ul>
+
+<p>If you declare variables before <code>while(1)</code>, they are promoted to outer scope so they persist between loop iterations:</p>
+<pre><code>int main() {
+    int count = 0;                  // This variable persists across loop() calls
+    IO0DIR |= (0xF &lt;&lt; 12);         // P0.12-P0.15 as outputs
+    while (1) {
+        IO0CLR = 0xF &lt;&lt; 12;        // Clear all 4 LEDs
+        IO0SET = (count &amp; 0xF) &lt;&lt; 12; // Show count on LEDs
+        delay_ms(500);
+        count = (count + 1) &amp; 0xF;
+    }
+}</code></pre>
+
+<div class="warn"><strong>Important:</strong> The simulator supports <code>int main()</code> and <code>int main(void)</code>. If you use <code>void setup()</code> + <code>void loop()</code> style, the auto-conversion is skipped and Arduino-style runs directly.</div>
+
+<h2 id="gpio">4. GPIO Programming</h2>
+<p>GPIO is controlled through memory-mapped registers. The simulator intercepts register writes and updates the visual pin states on the canvas.</p>
+
+<h3>Direction Register (IO0DIR / IO1DIR)</h3>
+<p>Set a pin as <strong>output</strong> (1) or <strong>input</strong> (0):</p>
+<pre><code>IO0DIR |= (1 &lt;&lt; 12);      // P0.12 = output
+IO0DIR &amp;= ~(1 &lt;&lt; 16);     // P0.16 = input</code></pre>
+
+<h3>Writing Outputs</h3>
+<pre><code>IO0SET = (1 &lt;&lt; 12);       // Set P0.12 HIGH (LED ON)
+IO0CLR = (1 &lt;&lt; 12);       // Set P0.12 LOW  (LED OFF)</code></pre>
+
+<p>You can also write directly to IO0PIN:</p>
+<pre><code>IO0PIN = (1 &lt;&lt; 12);       // P0.12 HIGH, all other P0.x LOW</code></pre>
+
+<h3>Reading Inputs</h3>
+<pre><code>if (IO0PIN &amp; (1 &lt;&lt; 16)) {
+    // P0.16 is HIGH
+} else {
+    // P0.16 is LOW
+}</code></pre>
+
+<h3>Bitwise Operations</h3>
+<p>All compound assignments are supported on register names:</p>
+<pre><code>IO0DIR |= (1 &lt;&lt; 12);      // Set bit
+IO0DIR &amp;= ~(1 &lt;&lt; 12);     // Clear bit
+IO0DIR ^= (1 &lt;&lt; 12);      // Toggle bit
+IO0DIR &lt;&lt;= 2;              // Left shift
+IO0DIR &gt;&gt;= 1;              // Right shift</code></pre>
+
+<h3>Port 1 (P1.16 &ndash; P1.31)</h3>
+<pre><code>IO1DIR |= (1 &lt;&lt; 16);      // P1.16 = output
+IO1SET = (1 &lt;&lt; 16);       // P1.16 HIGH
+IO1CLR = (1 &lt;&lt; 16);       // P1.16 LOW
+if (IO1PIN &amp; (1 &lt;&lt; 16)) { // Read P1.16
+    // HIGH
+}</code></pre>
+
+<div class="info"><strong>Note:</strong> Port 1 only has P1.16&ndash;P1.31 accessible on the SmartX board. Bits 0&ndash;15 of IO1PIN are read from internal register state.</div>
+
+<h2 id="leds">5. Onboard LEDs</h2>
+<p>The SmartX board has 4 user LEDs directly connected to GPIO pins:</p>
+<table>
+<tr><th>LED</th><th>Pin</th><th>Color</th><th>Bitmask</th></tr>
+<tr><td>LED1</td><td>P0.12</td><td>Red</td><td><code>(1 &lt;&lt; 12)</code></td></tr>
+<tr><td>LED2</td><td>P0.13</td><td>Green</td><td><code>(1 &lt;&lt; 13)</code></td></tr>
+<tr><td>LED3</td><td>P0.14</td><td>Orange</td><td><code>(1 &lt;&lt; 14)</code></td></tr>
+<tr><td>LED4</td><td>P0.15</td><td>Blue</td><td><code>(1 &lt;&lt; 15)</code></td></tr>
+</table>
+
+<p>You can also use the predefined constants:</p>
+<pre><code>IO0DIR |= (1 &lt;&lt; LED1);    // Same as (1 &lt;&lt; 12)
+IO0SET = (1 &lt;&lt; LED1);     // LED1 ON</code></pre>
+
+<p><strong>Blink all 4 LEDs in sequence:</strong></p>
+<pre><code>#include &lt;LPC214x.h&gt;
+
+int main() {
+    IO0DIR |= (0xF &lt;&lt; 12);       // P0.12-P0.15 = outputs
+    while (1) {
+        IO0SET = (1 &lt;&lt; LED1);    // LED1 ON
+        delay_ms(200);
+        IO0CLR = (1 &lt;&lt; LED1);    // LED1 OFF
+        IO0SET = (1 &lt;&lt; LED2);    // LED2 ON
+        delay_ms(200);
+        IO0CLR = (1 &lt;&lt; LED2);    // LED2 OFF
+        IO0SET = (1 &lt;&lt; LED3);    // LED3 ON
+        delay_ms(200);
+        IO0CLR = (1 &lt;&lt; LED3);    // LED3 OFF
+        IO0SET = (1 &lt;&lt; LED4);    // LED4 ON
+        delay_ms(200);
+        IO0CLR = (1 &lt;&lt; LED4);    // LED4 OFF
+    }
+}</code></pre>
+
+<div class="tip"><strong>Tip:</strong> You can also use the alias <code>LED_BUILTIN</code> which maps to pin 12 (LED1).</div>
+
+<h2 id="buttons">6. Reading Buttons / Digital Input</h2>
+<p>To read a push button, configure the pin as input and read IO0PIN:</p>
+<pre><code>#include &lt;LPC214x.h&gt;
+
+int main() {
+    IO0DIR |= (1 &lt;&lt; 12);        // P0.12 = output (LED1)
+    IO0DIR &amp;= ~(1 &lt;&lt; 16);       // P0.16 = input  (button)
+    while (1) {
+        if (!(IO0PIN &amp; (1 &lt;&lt; 16))) {  // Button active LOW
+            IO0SET = (1 &lt;&lt; 12);        // LED1 ON
+        } else {
+            IO0CLR = (1 &lt;&lt; 12);        // LED1 OFF
+        }
+        delay_ms(50);
+    }
+}</code></pre>
+
+<div class="warn"><strong>Wiring:</strong> Connect one side of the push button to the GPIO pin (e.g., P0.16) and the other side to GND. The button reads LOW when pressed (active-low). No external pull-up resistor is needed in the simulator &mdash; the pin reads the wire state directly.</div>
+
+<h2 id="adc">7. ADC (Analog-to-Digital Converter)</h2>
+<p>The LPC2148 has a 10-bit ADC with 8 channels. In the simulator, channels are mapped to analog-capable pins:</p>
+<table>
+<tr><th>Channel</th><th>Pin</th><th>Register</th></tr>
+<tr><td>AIN0</td><td>P0.26</td><td>AD0DR0</td></tr>
+<tr><td>AIN1</td><td>P0.27</td><td>AD0DR1</td></tr>
+<tr><td>AIN2</td><td>P0.28</td><td>AD0DR2</td></tr>
+</table>
+
+<h3>Reading ADC</h3>
+<pre><code>#include &lt;LPC214x.h&gt;
+
+int main(void) {
+    // Setup UART0 for serial output
+    PINSEL0 |= (1 &lt;&lt; 0) | (1 &lt;&lt; 2);   // P0.2=TXD0, P0.3=RXD0
+    U0LCR = 0x83;                        // 8N1, DLAB=1
+    U0DLL = 0x06;                        // 9600 baud @ 60MHz PCLK
+    U0DLM = 0x00;
+    U0LCR = 0x03;                        // DLAB=0, 8N1
+
+    // Setup ADC: PDN=1, channel 0 (AIN0 = P0.26)
+    AD0CR = (1 &lt;&lt; 21) | (1 &lt;&lt; 0);
+
+    while (1) {
+        AD0CR |= (1 &lt;&lt; 24);            // Start conversion
+        while (!(AD0GDR &amp; (1 &lt;&lt; 31))); // Wait for DONE bit
+        int val = (AD0GDR &gt;&gt; 6) &amp; 0x3FF; // Extract 10-bit result
+
+        // Send value over UART0
+        uart0_printNum(val);
+        uart0_print("\r\n");
+
+        AD0CR &amp;= ~(1 &lt;&lt; 24);           // Stop
+        delay_ms(500);
+    }
+}</code></pre>
+
+<h3>ADC Bit Layout</h3>
+<table>
+<tr><th>Register</th><th>Bits</th><th>Purpose</th></tr>
+<tr><td>AD0CR</td><td>[21]</td><td>PDN &mdash; Power on ADC (must be 1)</td></tr>
+<tr><td>AD0CR</td><td>[24]</td><td>START &mdash; Begin conversion</td></tr>
+<tr><td>AD0CR</td><td>[16]</td><td>BURST &mdash; Continuous mode</td></tr>
+<tr><td>AD0CR</td><td>[3:0]</td><td>Channel select (0&ndash;7)</td></tr>
+<tr><td>AD0GDR</td><td>[31]</td><td>DONE &mdash; Conversion complete</td></tr>
+<tr><td>AD0GDR</td><td>[15:6]</td><td>10-bit ADC result</td></tr>
+</table>
+
+<div class="tip"><strong>Tip:</strong> Use the alias <code>A0</code> for pin 26 (AIN0), <code>A1</code> for pin 27 (AIN1), and <code>A2</code> for pin 28 (AIN2).</div>
+
+<h3>DAC (Digital-to-Analog Converter)</h3>
+<p>The LPC2148 has a 10-bit DAC on P0.25 (AOUT). Write a 10-bit value to the DACR register:</p>
+<pre><code>// Output analog value on P0.25
+DACR = (value &amp; 0x3FF) &lt;&lt; 6;   // Write 10-bit DAC value</code></pre>
+
+<h2 id="uart">8. UART Serial Communication</h2>
+<p>UART0 is fully simulated. Write characters to the Serial Monitor panel.</p>
+
+<h3>UART0 Initialization</h3>
+<pre><code>// Configure P0.2 as TXD0, P0.3 as RXD0
+PINSEL0 |= (1 &lt;&lt; 0) | (1 &lt;&lt; 2);
+
+// 8N1, DLAB=1 (to access divisor latches)
+U0LCR = 0x83;
+
+// Set baud rate: 9600 baud at 60 MHz PCLK
+// Divider = 60000000 / (16 * 9600) = 390.625 ≈ 0x186
+// For simplicity: U0DLL=0x06, U0DLM=0x00 gives ~57600 baud
+U0DLL = 0x06;
+U0DLM = 0x00;
+
+// DLAB=0, 8N1
+U0LCR = 0x03;</code></pre>
+
+<h3>UART0 Transmit</h3>
+<pre><code>void uart0_tx(char c) {
+    while (!(U0LSR &amp; 0x20));   // Wait for THR empty (bit 5)
+    U0THR = c;                  // Send character
+}
+
+void uart0_print(const char *s) {
+    while (*s) uart0_tx(*s++);
+}</code></pre>
+
+<h3>UART0 Receive</h3>
+<pre><code>// Check if data is available
+if (U0LSR &amp; 0x01) {           // Data Ready (bit 0)
+    char c = U0RBR;             // Read received byte
+}</code></pre>
+
+<h3>UART0 Register Quick Reference</h3>
+<table>
+<tr><th>Register</th><th>Address</th><th>Purpose</th></tr>
+<tr><td>U0RBR</td><td>0xE000C000</td><td>Receive Buffer (read when DLAB=0)</td></tr>
+<tr><td>U0THR</td><td>0xE000C000</td><td>Transmit Holding (write when DLAB=0)</td></tr>
+<tr><td>U0DLL</td><td>0xE000C000</td><td>Divisor Latch LSB (write when DLAB=1)</td></tr>
+<tr><td>U0DLM</td><td>0xE000C004</td><td>Divisor Latch MSB (write when DLAB=1)</td></tr>
+<tr><td>U0LCR</td><td>0xE000C00C</td><td>Line Control (data bits, stop, parity, DLAB)</td></tr>
+<tr><td>U0LSR</td><td>0xE000C014</td><td>Line Status (TX/RX ready flags)</td></tr>
+<tr><td>U0FCR</td><td>0xE000C008</td><td>FIFO Control</td></tr>
+<tr><td>U0TER</td><td>0xE000C030</td><td>Transmitter Enable</td></tr>
+</table>
+
+<div class="info"><strong>Simulator Note:</strong> U0LSR always returns THRE+TEMT set (0x60), meaning the transmitter is always ready. There is no FIFO emulation &mdash; each write is immediate.</div>
+
+<h2 id="registers">9. Complete Register Reference</h2>
+
+<h3>GPIO Registers</h3>
+<table>
+<tr><th>Register</th><th>Address</th><th>R/W</th><th>Purpose</th></tr>
+<tr><td>IO0PIN</td><td>0xE0028000</td><td>R/W</td><td>Port 0 pin value</td></tr>
+<tr><td>IO0SET</td><td>0xE0028004</td><td>W</td><td>Set Port 0 pins HIGH</td></tr>
+<tr><td>IO0DIR</td><td>0xE0028008</td><td>R/W</td><td>Port 0 direction (1=output)</td></tr>
+<tr><td>IO0CLR</td><td>0xE002800C</td><td>W</td><td>Clear Port 0 pins LOW</td></tr>
+<tr><td>IO1PIN</td><td>0xE0029000</td><td>R/W</td><td>Port 1 pin value</td></tr>
+<tr><td>IO1SET</td><td>0xE0029004</td><td>W</td><td>Set Port 1 pins HIGH</td></tr>
+<tr><td>IO1DIR</td><td>0xE0029008</td><td>R/W</td><td>Port 1 direction (1=output)</td></tr>
+<tr><td>IO1CLR</td><td>0xE002900C</td><td>W</td><td>Clear Port 1 pins LOW</td></tr>
+</table>
+
+<h3>Pin Function Select</h3>
+<table>
+<tr><th>Register</th><th>Address</th><th>Purpose</th></tr>
+<tr><td>PINSEL0</td><td>0xE002C000</td><td>Pin function for P0.0&ndash;P0.15</td></tr>
+<tr><td>PINSEL1</td><td>0xE002C004</td><td>Pin function for P0.16&ndash;P0.31</td></tr>
+<tr><td>PINSEL2</td><td>0xE002C014</td><td>Pin function select 2</td></tr>
+</table>
+
+<h3>Timer0 Registers</h3>
+<table>
+<tr><th>Register</th><th>Address</th><th>Purpose</th></tr>
+<tr><td>T0IR</td><td>0xE0004000</td><td>Interrupt Register</td></tr>
+<tr><td>T0TCR</td><td>0xE0004004</td><td>Timer Control (enable/reset)</td></tr>
+<tr><td>T0TC</td><td>0xE0004008</td><td>Timer Counter</td></tr>
+<tr><td>T0PR</td><td>0xE000400C</td><td>Prescale Register</td></tr>
+<tr><td>T0PC</td><td>0xE0004010</td><td>Prescale Counter</td></tr>
+<tr><td>T0MCR</td><td>0xE0004014</td><td>Match Control Register</td></tr>
+<tr><td>T0MR0</td><td>0xE0004018</td><td>Match Register 0</td></tr>
+<tr><td>T0MR1</td><td>0xE000401C</td><td>Match Register 1</td></tr>
+<tr><td>T0MR2</td><td>0xE0004020</td><td>Match Register 2</td></tr>
+<tr><td>T0MR3</td><td>0xE0004024</td><td>Match Register 3</td></tr>
+<tr><td>T0CCR</td><td>0xE0004028</td><td>Capture Control Register</td></tr>
+<tr><td>T0CR0</td><td>0xE000402C</td><td>Capture Register 0</td></tr>
+</table>
+
+<h3>Timer1 Registers</h3>
+<table>
+<tr><th>Register</th><th>Address</th><th>Purpose</th></tr>
+<tr><td>T1IR</td><td>0xE0008000</td><td>Interrupt Register</td></tr>
+<tr><td>T1TCR</td><td>0xE0008004</td><td>Timer Control</td></tr>
+<tr><td>T1TC</td><td>0xE0008008</td><td>Timer Counter</td></tr>
+<tr><td>T1PR</td><td>0xE000800C</td><td>Prescale Register</td></tr>
+<tr><td>T1PC</td><td>0xE0008010</td><td>Prescale Counter</td></tr>
+<tr><td>T1MCR</td><td>0xE0008014</td><td>Match Control Register</td></tr>
+<tr><td>T1MR0</td><td>0xE0008018</td><td>Match Register 0</td></tr>
+</table>
+
+<h3>ADC Registers</h3>
+<table>
+<tr><th>Register</th><th>Address</th><th>Purpose</th></tr>
+<tr><td>AD0CR</td><td>0xE0034000</td><td>ADC0 Control (channel, start, power)</td></tr>
+<tr><td>AD0GDR</td><td>0xE0034004</td><td>ADC0 Global Data (result + done flag)</td></tr>
+<tr><td>AD0INTEN</td><td>0xE003400C</td><td>ADC0 Interrupt Enable</td></tr>
+<tr><td>AD0DR0</td><td>0xE0034010</td><td>ADC0 Channel 0 Data</td></tr>
+<tr><td>AD0DR1</td><td>0xE0034014</td><td>ADC0 Channel 1 Data</td></tr>
+<tr><td>AD0DR2</td><td>0xE0034018</td><td>ADC0 Channel 2 Data</td></tr>
+<tr><td>AD0DR3</td><td>0xE003401C</td><td>ADC0 Channel 3 Data</td></tr>
+<tr><td>AD0DR4</td><td>0xE0034020</td><td>ADC0 Channel 4 Data</td></tr>
+<tr><td>AD0DR5</td><td>0xE0034024</td><td>ADC0 Channel 5 Data</td></tr>
+<tr><td>AD0DR6</td><td>0xE0034028</td><td>ADC0 Channel 6 Data</td></tr>
+<tr><td>AD0DR7</td><td>0xE003402C</td><td>ADC0 Channel 7 Data</td></tr>
+</table>
+
+<h3>SPI0 Registers</h3>
+<table>
+<tr><th>Register</th><th>Address</th><th>Purpose</th></tr>
+<tr><td>S0CR</td><td>0xE0020000</td><td>SPI0 Control Register</td></tr>
+<tr><td>S0SR</td><td>0xE0020004</td><td>SPI0 Status Register</td></tr>
+<tr><td>S0DR</td><td>0xE0020008</td><td>SPI0 Data Register</td></tr>
+<tr><td>S0CPSR</td><td>0xE0020010</td><td>SPI0 Clock Prescale Register</td></tr>
+</table>
+
+<h3>I2C0 Registers</h3>
+<table>
+<tr><th>Register</th><th>Address</th><th>Purpose</th></tr>
+<tr><td>I2C0CONSET</td><td>0xE001C000</td><td>I2C0 Control Set</td></tr>
+<tr><td>I2C0STAT</td><td>0xE001C004</td><td>I2C0 Status</td></tr>
+<tr><td>I2C0DAT</td><td>0xE001C008</td><td>I2C0 Data</td></tr>
+<tr><td>I2C0SCLL</td><td>0xE001C010</td><td>I2C0 SCL Duty Cycle Low</td></tr>
+<tr><td>I2C0SCLH</td><td>0xE001C014</td><td>I2C0 SCL Duty Cycle High</td></tr>
+</table>
+
+<h3>Other Registers</h3>
+<table>
+<tr><th>Register</th><th>Address</th><th>Purpose</th></tr>
+<tr><td>DACR</td><td>0xE000C500</td><td>DAC Control (10-bit value in bits 15:6)</td></tr>
+<tr><td>PCLKSEL0</td><td>0xE001C1A4</td><td>Peripheral Clock Selection 0</td></tr>
+<tr><td>PCLKSEL1</td><td>0xE001C1A8</td><td>Peripheral Clock Selection 1</td></tr>
+</table>
+
+<h2 id="pins">10. Pin Map &amp; Pin Function Select</h2>
+<h3>Full Pin Map</h3>
+<table>
+<tr><th>Pin ID</th><th>Label</th><th>Type</th><th>GPIO</th><th>Default Function</th></tr>
+<tr><td>P0_0</td><td>P0.0</td><td>Digital</td><td>0</td><td>GPIO</td></tr>
+<tr><td>P0_1</td><td>P0.1</td><td>Digital</td><td>1</td><td>GPIO</td></tr>
+<tr><td>P0_2</td><td>P0.2 (TXD0)</td><td>Signal</td><td>2</td><td>UART0 TXD</td></tr>
+<tr><td>P0_3</td><td>P0.3 (RXD0)</td><td>Signal</td><td>3</td><td>UART0 RXD</td></tr>
+<tr><td>P0_4</td><td>P0.4 (TXD1)</td><td>Signal</td><td>4</td><td>UART1 TXD</td></tr>
+<tr><td>P0_5</td><td>P0.5 (RXD1)</td><td>Signal</td><td>5</td><td>UART1 RXD</td></tr>
+<tr><td>P0_6</td><td>P0.6</td><td>Digital</td><td>6</td><td>GPIO</td></tr>
+<tr><td>P0_7</td><td>P0.7 (SCK0)</td><td>Signal</td><td>7</td><td>SPI0 SCK</td></tr>
+<tr><td>P0_8</td><td>P0.8 (MISO0)</td><td>Signal</td><td>8</td><td>SPI0 MISO</td></tr>
+<tr><td>P0_9</td><td>P0.9 (MOSI0)</td><td>Signal</td><td>9</td><td>SPI0 MOSI</td></tr>
+<tr><td>P0_10</td><td>P0.10 (SSEL0)</td><td>Signal</td><td>10</td><td>SPI0 SSEL</td></tr>
+<tr><td>P0_11</td><td>P0.11</td><td>Digital</td><td>11</td><td>GPIO</td></tr>
+<tr><td>P0_12</td><td>P0.12 (LED1)</td><td>PWM</td><td>12</td><td>GPIO / LED1</td></tr>
+<tr><td>P0_13</td><td>P0.13 (LED2)</td><td>PWM</td><td>13</td><td>GPIO / LED2</td></tr>
+<tr><td>P0_14</td><td>P0.14 (LED3)</td><td>PWM</td><td>14</td><td>GPIO / LED3</td></tr>
+<tr><td>P0_15</td><td>P0.15 (LED4)</td><td>PWM</td><td>15</td><td>GPIO / LED4</td></tr>
+<tr><td>P0_16</td><td>P0.16</td><td>Digital</td><td>16</td><td>GPIO</td></tr>
+<tr><td>P0_17</td><td>P0.17</td><td>Digital</td><td>17</td><td>GPIO</td></tr>
+<tr><td>P0_18</td><td>P0.18</td><td>Digital</td><td>18</td><td>GPIO</td></tr>
+<tr><td>P0_19</td><td>P0.19</td><td>Digital</td><td>19</td><td>GPIO</td></tr>
+<tr><td>P0_20</td><td>P0.20</td><td>Digital</td><td>20</td><td>GPIO</td></tr>
+<tr><td>P0_21</td><td>P0.21</td><td>Digital</td><td>21</td><td>GPIO</td></tr>
+<tr><td>P0_22</td><td>P0.22</td><td>Digital</td><td>22</td><td>GPIO</td></tr>
+<tr><td>P0_23</td><td>P0.23</td><td>Digital</td><td>23</td><td>GPIO</td></tr>
+<tr><td>P0_25</td><td>P0.25 (AOUT)</td><td>Analog</td><td>25</td><td>DAC output</td></tr>
+<tr><td>P0_26</td><td>P0.26 (AIN0)</td><td>Analog</td><td>26</td><td>ADC channel 0</td></tr>
+<tr><td>P0_27</td><td>P0.27 (AIN1)</td><td>Analog</td><td>27</td><td>ADC channel 1</td></tr>
+<tr><td>P0_28</td><td>P0.28 (AIN2)</td><td>Analog</td><td>28</td><td>ADC channel 2</td></tr>
+<tr><td>VCC</td><td>VCC (3.3V)</td><td>Power</td><td>&mdash;</td><td>3.3V supply</td></tr>
+<tr><td>GND1</td><td>GND</td><td>GND</td><td>&mdash;</td><td>Ground</td></tr>
+<tr><td>VBUS</td><td>VBUS (5V)</td><td>Power</td><td>&mdash;</td><td>5V USB supply</td></tr>
+<tr><td>GND2</td><td>GND</td><td>GND</td><td>&mdash;</td><td>Ground</td></tr>
+<tr><td>RST</td><td>RST</td><td>Signal</td><td>&mdash;</td><td>Reset</td></tr>
+</table>
+
+<h3>PINSEL0 Bit Map (P0.0 &ndash; P0.15)</h3>
+<table>
+<tr><th>Pin</th><th>Bits</th><th>00=GPIO</th><th>01=Alt Func 1</th><th>10=Alt Func 2</th><th>11=Alt Func 3</th></tr>
+<tr><td>P0.0</td><td>[1:0]</td><td>GPIO</td><td>TXD0</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>P0.1</td><td>[3:2]</td><td>GPIO</td><td>RXD0</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>P0.2</td><td>[5:4]</td><td>GPIO</td><td>TXD0</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>P0.3</td><td>[7:6]</td><td>GPIO</td><td>RXD0</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>P0.4</td><td>[9:8]</td><td>GPIO</td><td>TXD1</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>P0.5</td><td>[11:10]</td><td>GPIO</td><td>RXD1</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>P0.7</td><td>[15:14]</td><td>GPIO</td><td>SCK0</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>P0.8</td><td>[17:16]</td><td>GPIO</td><td>MISO0</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>P0.9</td><td>[19:18]</td><td>GPIO</td><td>MOSI0</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>P0.10</td><td>[21:20]</td><td>GPIO</td><td>SSEL0</td><td>&mdash;</td><td>&mdash;</td></tr>
+</table>
+
+<div class="tip"><strong>Tip:</strong> Predefined constants are available: <code>PINSEL0_TXD0</code>, <code>PINSEL0_RXD0</code>, <code>PINSEL0_TXD1</code>, <code>PINSEL0_RXD1</code>, <code>PINSEL0_SCK0</code>, <code>PINSEL0_MISO0</code>, <code>PINSEL0_MOSI0</code>, <code>PINSEL0_SSEL0</code>.</div>
+
+<h2 id="timing">11. Timing &amp; Delay Functions</h2>
+<p>Two delay functions are available and map to the real LPC2148 firmware library:</p>
+<pre><code>delay_ms(500);             // Wait 500 milliseconds
+delay_us(100);             // Wait 100 microseconds</code></pre>
+
+<p>Both are <code>async</code> internally, so they yield to the simulator without blocking the browser. They advance the simulation clock by the specified time.</p>
+
+<div class="warn"><strong>Note:</strong> <code>delay_ms()</code> and <code>delay_us()</code> use <code>await</code> internally. You can call them directly in your C code &mdash; the transpiler handles the conversion automatically.</div>
+
+<h2 id="tips">12. Tips &amp; Gotchas</h2>
+
+<h3>Compiler Directives</h3>
+<p>The <code>#include &lt;LPC214x.h&gt;</code> directive is recognized by the simulator's plugin system. While the header content is stripped (the constants are injected directly), you should still include it so the LPC2148 plugin activates:</p>
+<pre><code>#include &lt;LPC214x.h&gt;    // Required! Activates the LPC2148 plugin
+</code></pre>
+
+<h3>Available C Constructs</h3>
+<p>The transpiler supports standard C constructs:</p>
+<ul>
+<li><code>int</code>, <code>char</code>, <code>unsigned int</code>, <code>long</code>, <code>short</code>, <code>byte</code>, <code>float</code>, <code>double</code></li>
+<li><code>if</code> / <code>else</code>, <code>for</code>, <code>while</code>, <code>do...while</code></li>
+<li><code>switch</code> / <code>case</code></li>
+<li><code>function</code> declarations (become <code>async function</code>)</li>
+<li><code>char[]</code> string arrays</li>
+<li>C-style casts: <code>(unsigned long)expr</code></li>
+</ul>
+
+<h3>What NOT to Use</h3>
+<ul>
+<li><code>pinMode()</code>, <code>digitalWrite()</code>, <code>digitalRead()</code> &mdash; these are Arduino functions, not ARM7. Use register-level GPIO instead.</li>
+<li><code>analogRead()</code>, <code>analogWrite()</code> &mdash; use <code>AD0CR</code>/<code>AD0GDR</code> for ADC and <code>DACR</code> for DAC.</li>
+<li><code>Serial.begin()</code>, <code>Serial.print()</code> &mdash; use direct UART register access (<code>U0THR</code>, <code>U0LSR</code>).</li>
+<li><code>millis()</code>, <code>micros()</code> &mdash; use Timer0/Timer1 registers (<code>T0TC</code>) for timing.</li>
+</ul>
+
+<h3>Serial Monitor Output</h3>
+<p>When using UART0 transmit, characters appear in the Serial Monitor panel. Make sure the Serial Monitor is open and the baud rate is set (default 9600).</p>
+
+<h3>Simulation Speed</h3>
+<p>The simulator runs in real-time by default. <code>delay_ms(500)</code> pauses for 500ms of simulation time. The simulation clock advances by the delay duration. For tight loops without delays, the simulator yields periodically to keep the UI responsive.</p>
+
+<h3>Wiring on the Canvas</h3>
+<p>Drag the LPC2148 board from the Boards category in the component library. Connect wires between board pins and other components by clicking a pin on one component and dragging to a pin on another.</p>
+
+<h3>Built-in Constants Summary</h3>
+<table>
+<tr><th>Constant</th><th>Value</th><th>Use</th></tr>
+<tr><td><code>LED1</code></td><td>12</td><td>P0.12 bit number</td></tr>
+<tr><td><code>LED2</code></td><td>13</td><td>P0.13 bit number</td></tr>
+<tr><td><code>LED3</code></td><td>14</td><td>P0.14 bit number</td></tr>
+<tr><td><code>LED4</code></td><td>15</td><td>P0.15 bit number</td></tr>
+<tr><td><code>LED_BUILTIN</code></td><td>12</td><td>Alias for LED1 pin</td></tr>
+<tr><td><code>A0</code></td><td>26</td><td>AIN0 pin number</td></tr>
+<tr><td><code>A1</code></td><td>27</td><td>AIN1 pin number</td></tr>
+<tr><td><code>A2</code></td><td>28</td><td>AIN2 pin number</td></tr>
+<tr><td><code>LSR_DR</code></td><td>0x01</td><td>UART LSR Data Ready bit</td></tr>
+<tr><td><code>LSR_THRE</code></td><td>0x20</td><td>UART LSR THR Empty bit</td></tr>
+<tr><td><code>LSR_TEMT</code></td><td>0x40</td><td>UART LSR Transmitter Empty bit</td></tr>
+<tr><td><code>ADC_CR_START</code></td><td>(1&lt;&lt;24)</td><td>ADC start conversion bit</td></tr>
+<tr><td><code>ADC_CR_BURST</code></td><td>(1&lt;&lt;16)</td><td>ADC burst mode bit</td></tr>
+<tr><td><code>ADC_CR_PDN</code></td><td>(1&lt;&lt;21)</td><td>ADC power-down bit</td></tr>
+</table>
+
+<h3>Pointer-Based Register Access</h3>
+<p>The simulator also supports direct pointer dereference syntax, matching how real LPC2148 firmware often accesses registers:</p>
+<pre><code>// These are equivalent:
+IO0DIR |= (1 &lt;&lt; 12);
+*((volatile unsigned long*)0xE0028008) |= (1 &lt;&lt; 12);</code></pre>
+
+<hr>
+<p style="text-align:center;color:#999;margin-top:40px">LPC2148 Programming Guide &mdash; ArduSim Online Circuit Simulator</p>
+</body>
+</html>
