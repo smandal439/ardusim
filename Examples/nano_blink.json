@@ -6,21 +6,103 @@
   "tags": [
     "beginner",
     "nano",
-    "led",
-    "pwm",
+    "led",    
     "output"
   ],
   "circuit": {
     "components": [
-      { "id": "n1", "type": "arduino_nano", "x": 200, "y": 120 },
-      { "id": "led1", "type": "led", "x": 110, "y": 300, "props": { "color": "#ff3333", "colorName": "Red" } },
-      { "id": "r1", "type": "resistor", "x": 110, "y": 380, "props": { "value": 220, "unit": "Ω" } }
+      {
+        "id": "n1",
+        "type": "arduino_nano",
+        "x": 200,
+        "y": 120,
+        "rotation": 0,
+        "props": {
+          "label": "NANO"
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 140,
+        "y": 105,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 145,
+        "y": 180,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
     ],
     "wires": [
-      { "id": "w1", "from": { "instId": "n1", "pinId": "D13" }, "to": { "instId": "led1", "pinId": "anode" } },
-      { "id": "w2", "from": { "instId": "led1", "pinId": "cathode" }, "to": { "instId": "r1", "pinId": "p1" } },
-      { "id": "w3", "from": { "instId": "r1", "pinId": "p2" }, "to": { "instId": "n1", "pinId": "GND2" } }
+      {
+        "id": "w1",
+        "from": {
+          "instId": "n1",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 215,
+            "y": 105
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789816581564_6yb2e",
+        "from": {
+          "instId": "n1",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 257,
+            "y": 240
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
     ]
   },
-  "code": "/*\n * Nano Blink — classic blink on the Arduino Nano\n * Blinks the built-in LED on D13\n */\n\nint ledPin = LED_BUILTIN;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Nano blink started!\");\n}\n\nvoid loop() {\n  digitalWrite(ledPin, HIGH);\n  Serial.println(\"LED ON\");\n  delay(500);\n  digitalWrite(ledPin, LOW);\n  Serial.println(\"LED OFF\");\n  delay(500);\n}"
+  "files": {
+    "sketch.ino": "/*\n * Nano Blink — classic blink on the Arduino Nano\n * Blinks the built-in LED on D13\n */\n\nint ledPin = LED_BUILTIN;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Nano blink started!\");\n}\n\nvoid loop() {\n  digitalWrite(ledPin, HIGH);\n  Serial.println(\"LED ON\");\n  delay(500);\n  digitalWrite(ledPin, LOW);\n  Serial.println(\"LED OFF\");\n  delay(500);\n}"
+  }
 }
