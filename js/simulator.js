@@ -1,6 +1,6 @@
-/* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|
+/* -------------------------------------------------------
    simulator.js �l� Arduino C++ Interpreter & Execution Engine
-   ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+   ------------------------------------------------------- */
 
 'use strict';
 
@@ -53,7 +53,7 @@ class ArduinoSimulator {
     this._prevPinValues = {};
   }
 
-  /* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| LIBRARY PLUGIN SYSTEM ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+  /* -------------- LIBRARY PLUGIN SYSTEM -------------- */
   _getPlugins() {
     return window.ArduinoLibs || {};
   }
@@ -101,7 +101,7 @@ class ArduinoSimulator {
     return active;
   }
 
-  /* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| TRANSPILER ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+  /* -------------- TRANSPILER -------------- */
   transpile(code) {
     if (typeof code !== 'string') code = '';
     // Store active plugins for buildContext() to use (avoids re-scanning)
@@ -665,7 +665,7 @@ class ArduinoSimulator {
     return js;
   }
 
-  /* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| EXECUTION CONTEXT ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+  /* -------------- EXECUTION CONTEXT -------------- */
   buildContext() {
     const self = this;
 
@@ -997,7 +997,7 @@ class ArduinoSimulator {
           return str.length;
         },
 
-        /* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| ESP32 �l� LEDC PWM ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+        /* ---------- ESP32 �l� LEDC PWM ---------- */
         ledcSetup(channel, freq, resolution) {
           const res = Number(resolution) || 8;
           self._ledcChannels[channel] = {
@@ -1052,7 +1052,7 @@ class ArduinoSimulator {
           return self.pinStates[`pin_${pin}`] || 0;
         },
 
-        /* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| ESP32 �l� analog / DAC / sensors ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+        /* ---------- ESP32 �l� analog / DAC / sensors ---------- */
         dacWrite(pin, value) {
           const key = `pin_${pin}`;
           const v = Math.max(0, Math.min(255, Math.round(Number(value) || 0)));
@@ -1530,7 +1530,7 @@ class ArduinoSimulator {
     return result;
   }
 
-  /* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| COMPILE & RUN ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+  /* -------------- COMPILE & RUN -------------- */
   async compile(code) {
     try {
       if (typeof code !== 'string') code = '';
@@ -1853,7 +1853,7 @@ class ArduinoSimulator {
     this._stopAllTones();
   }
 
-  /* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| MPU6050 (0x68) register read emulation ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|
+  /* -------------- MPU6050 (0x68) register read emulation --------------
      Serves Wire.requestFrom(0x68, n) starting at the register pointer set
      by a preceding Wire.write(reg). Values come from the placed mpu6050
      component's interactive sliders (runtimeState/props). */
@@ -1886,7 +1886,7 @@ class ArduinoSimulator {
     return out;
   }
 
-  /* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| DS3231 RTC (0x68) register read emulation ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|
+  /* -------------- DS3231 RTC (0x68) register read emulation --------------
      Serves Wire.requestFrom(0x68, n) starting at the register pointer set
      by a preceding Wire.write(reg). Values come from the placed ds3231
      component's runtime state (time, date, temperature). */
@@ -2069,7 +2069,7 @@ class ArduinoSimulator {
     this.pinStates[`${inst.id}_${pinId}`] = voltage;
   }
 
-  /* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| TONE ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+  /* -------------- TONE -------------- */
   _initAudio() {
     if (!this._toneCtx) {
       try {
@@ -2184,7 +2184,7 @@ class ArduinoSimulator {
     this._toneOscillators = {};
   }
 
-  /* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| INTERNALS ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+  /* -------------- INTERNALS -------------- */
   _serialLog(text, type = 'data') {
     if (this.onSerial) this.onSerial(text, type);
   }
@@ -2319,11 +2319,11 @@ class ArduinoSimulator {
 
 }
 
-/* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| EXAMPLE SKETCHES ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
-/* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|
+/* ---------------------------- EXAMPLE SKETCHES --------------- */
+/* -----------------------------------------------------------
    EXAMPLE CIRCUITS �l� serialized project data loaded on the canvas
    when an example is opened. Matches the pins of each example code.
-   ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+   ----------------------------------------------------------- */
 /* Examples are now loaded from the examples/ folder as individual JSON files. */
 
 /* Export */
@@ -2367,7 +2367,7 @@ window.loadExamplesFromFiles = async function () {
     'rfid_inventory_tracker', 'rgb_matrix_demo', 'rotary_encoder_counter', 'rotary_encoder_servo', 'seg7_counter', 'serial_peek',
     'serial_peek_2', 'serial_plotter', 'serial_plotter_sine_and_triangle', 'servo_continuous_spin', 'servo_sweep', 'shift_resister_circuit',
     'simplebme280_altimeter_on_lcd', 'simplebme280_altitude', 'simplebme280_basic', 'stepper_motor', 'stm32f746_blink', 'stm32f746_button',
-    'stm32f746_lcd', 'stm32f746_pot_led', 'tb6600_stepper', 'temperature', 'traffic_light', 'two_lcd',
+    'stm32f746_lcd', 'stm32f746_pot_led', 'tb6600_stepper', 'traffic_light', 'two_lcd',
     'u8g2_oled_example', 'ultrasonic', 'ultrasonic_distance_pulsein', 'vl53l0x_proximity_sensor', 'voltage_divider', 'water_flow',
     'weather_station_multi', 'weather_station_simple', 'weather_station_tft', 'wifi_bssid', 'wifi_scan', 'zigbee_8_led_control',
     'zigbee_led_control', 'zigbee_sender_receiver', 'zigbee_sensor_network'
