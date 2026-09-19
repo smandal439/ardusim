@@ -396,7 +396,6 @@ window.ArduinoLibs['LPC2148'] = {
       if (addr === 0xE002C004) {
         regs[0xE002C004] = val;
       }
-      }
     }
 
     return { _regR: _readReg, _regW: _writeReg };
