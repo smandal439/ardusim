@@ -1,0 +1,14 @@
+{
+  "id": "lpc2148_serial_hello",
+  "name": "LPC2148 Serial Hello World",
+  "icon": "🔌",
+  "desc": "LPC2148 SmartX Board - UART0 sends 'Hello LPC2148' to Serial Monitor using register-level code",
+  "tags": ["arm", "lpc2148", "uart", "serial", "beginner"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "lpc2148", "x": 200, "y": 100 }
+    ],
+    "wires": []
+  },
+  "code": "/*\n * LPC2148 SmartX Board - UART0 Hello World\n * Sends \"Hello LPC2148\" to the Serial Monitor.\n * Uses register-level UART0 at 9600 baud.\n */\n\n#include <LPC214x.h>\n\nvoid UART0_Init(unsigned int baud) {\n    unsigned int divisor = 15000000 / (16 * baud);\n    PINSEL0 |= (1 << 1);\n    PINSEL0 &= ~(1 << 2);\n    PINSEL0 |= (1 << 7);\n    PINSEL0 &= ~(1 << 6);\n    U0LCR = 0x83;\n    U0DLL = divisor & 0xFF;\n    U0DLM = (divisor >> 8) & 0xFF;\n    U0LCR = 0x03;\n    U0FCR = 0x07;\n}\n\nvoid UART0_SendChar(unsigned char ch) {\n    while (!(U0LSR & 0x20));\n    U0THR = ch;\n}\n\nvoid UART0_SendString(unsigned char *str) {\n    unsigned int i = 0;\n    while (str[i] != 0) {\n        UART0_SendChar(str[i]);\n        i++;\n    }\n}\n\nint main(void) {\n    unsigned char msg[] = {'H','e','l','l','o',' ','L','P','C','2','1','4','8','\\r','\\n',0};\n    UART0_Init(9600);\n    UART0_SendString(msg);\n    while (1) {\n        if (U0LSR & 0x01) {\n            unsigned char ch = U0RBR;\n            UART0_SendChar(ch);\n        }\n        delay_ms(10);\n    }\n}"
+}
