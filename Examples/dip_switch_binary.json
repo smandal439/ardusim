@@ -3,7 +3,14 @@
   "name": "DIP Switch Binary Input Reader",
   "icon": "🎚️",
   "desc": "Read 8-position DIP switch as binary input and display decimal value on Serial",
-  "tags": ["input", "dip", "switch", "binary", "digital"],
+  "tags": [
+    "input",
+    "dip",
+    "switch",
+    "binary",
+    "digital",
+    "arduino"
+  ],
   "code": "int pins[8] = {2, 3, 4, 5, 6, 7, 8, 9};\n\nvoid setup() {\n  for (int i = 0; i < 8; i++) {\n    pinMode(pins[i], INPUT_PULLUP);\n  }\n  Serial.begin(115200);\n}\n\nvoid loop() {\n  int value = 0;\n  for (int i = 0; i < 8; i++) {\n    if (digitalRead(pins[i]) == HIGH) {\n      value |= (1 << i);\n    }\n  }\n  Serial.print(\"Binary: \");\n  for (int i = 7; i >= 0; i--) {\n    Serial.print((value >> i) & 1);\n  }\n  Serial.print(\"  Decimal: \");\n  Serial.println(value);\n  delay(200);\n}",
   "circuit": {
     "components": [
@@ -14,7 +21,9 @@
         "y": 120,
         "width": 230,
         "height": 150,
-        "props": { "label": "UNO" },
+        "props": {
+          "label": "UNO"
+        },
         "runtimeState": {},
         "selected": false,
         "rotation": 0
@@ -26,21 +35,113 @@
         "y": 130,
         "width": 140,
         "height": 60,
-        "props": { "switches": 0 },
-        "runtimeState": { "switches": 0 },
+        "props": {
+          "switches": 0
+        },
+        "runtimeState": {
+          "switches": 0
+        },
         "selected": false,
         "rotation": 0
       }
     ],
     "wires": [
-      { "id": "w1", "from": { "instId": "dip1", "pinId": "1" }, "to": { "instId": "b1", "pinId": "D2" }, "waypoints": [] },
-      { "id": "w2", "from": { "instId": "dip1", "pinId": "2" }, "to": { "instId": "b1", "pinId": "D3" }, "waypoints": [] },
-      { "id": "w3", "from": { "instId": "dip1", "pinId": "3" }, "to": { "instId": "b1", "pinId": "D4" }, "waypoints": [] },
-      { "id": "w4", "from": { "instId": "dip1", "pinId": "4" }, "to": { "instId": "b1", "pinId": "D5" }, "waypoints": [] },
-      { "id": "w5", "from": { "instId": "dip1", "pinId": "5" }, "to": { "instId": "b1", "pinId": "D6" }, "waypoints": [] },
-      { "id": "w6", "from": { "instId": "dip1", "pinId": "6" }, "to": { "instId": "b1", "pinId": "D7" }, "waypoints": [] },
-      { "id": "w7", "from": { "instId": "dip1", "pinId": "7" }, "to": { "instId": "b1", "pinId": "D8" }, "waypoints": [] },
-      { "id": "w8", "from": { "instId": "dip1", "pinId": "8" }, "to": { "instId": "b1", "pinId": "D9" }, "waypoints": [] }
+      {
+        "id": "w1",
+        "from": {
+          "instId": "dip1",
+          "pinId": "1"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D2"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "dip1",
+          "pinId": "2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D3"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "dip1",
+          "pinId": "3"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D4"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "dip1",
+          "pinId": "4"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D5"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "dip1",
+          "pinId": "5"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D6"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "dip1",
+          "pinId": "6"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D7"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w7",
+        "from": {
+          "instId": "dip1",
+          "pinId": "7"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D8"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w8",
+        "from": {
+          "instId": "dip1",
+          "pinId": "8"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D9"
+        },
+        "waypoints": []
+      }
     ]
   }
 }

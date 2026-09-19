@@ -6,7 +6,8 @@
   "tags": [
     "beginner",
     "input",
-    "button"
+    "button",
+    "arduino"
   ],
   "circuit": {
     "components": [

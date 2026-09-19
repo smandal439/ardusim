@@ -6,7 +6,8 @@
   "tags": [
     "intermediate",
     "counter",
-    "button"
+    "button",
+    "arduino"
   ],
   "circuit": {
     "components": [

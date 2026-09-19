@@ -3,7 +3,15 @@
   "name": "HC-05 Bluetooth LED Control",
   "icon": "📶",
   "desc": "Toggle LED on/off via Bluetooth using HC-05 module and Serial communication",
-  "tags": ["bluetooth", "hc05", "uart", "led", "wireless"],
+  "tags": [
+    "bluetooth",
+    "hc05",
+    "uart",
+    "led",
+    "wireless",
+    "arduino",
+    "intermediate"
+  ],
   "code": "int ledPin = 13;\nbool ledState = false;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  digitalWrite(ledPin, LOW);\n}\n\nvoid loop() {\n  if (Serial.available() > 0) {\n    char c = Serial.read();\n    if (c == '1') {\n      ledState = true;\n      digitalWrite(ledPin, HIGH);\n      Serial.println(\"LED ON\");\n    } else if (c == '0') {\n      ledState = false;\n      digitalWrite(ledPin, LOW);\n      Serial.println(\"LED OFF\");\n    }\n  }\n  delay(50);\n}",
   "circuit": {
     "components": [
@@ -14,7 +22,9 @@
         "y": 120,
         "width": 230,
         "height": 150,
-        "props": { "label": "UNO" },
+        "props": {
+          "label": "UNO"
+        },
         "runtimeState": {},
         "selected": false,
         "rotation": 0
@@ -26,8 +36,14 @@
         "y": 120,
         "width": 50,
         "height": 70,
-        "props": { "connected": false, "rxData": "" },
-        "runtimeState": { "connected": false, "rxData": "" },
+        "props": {
+          "connected": false,
+          "rxData": ""
+        },
+        "runtimeState": {
+          "connected": false,
+          "rxData": ""
+        },
         "selected": false,
         "rotation": 0
       },
@@ -38,7 +54,10 @@
         "y": 260,
         "width": 30,
         "height": 60,
-        "props": { "color": "#ff3333", "colorName": "Red" },
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        },
         "runtimeState": {},
         "selected": false,
         "rotation": 0
@@ -50,7 +69,10 @@
         "y": 330,
         "width": 20,
         "height": 60,
-        "props": { "value": 220, "unit": "\u03a9" },
+        "props": {
+          "value": 220,
+          "unit": "\u03a9"
+        },
         "runtimeState": {},
         "selected": false,
         "rotation": 0
@@ -81,14 +103,102 @@
       }
     ],
     "wires": [
-      { "id": "w1", "from": { "instId": "bt1", "pinId": "TXD" }, "to": { "instId": "b1", "pinId": "D0" }, "waypoints": [] },
-      { "id": "w2", "from": { "instId": "bt1", "pinId": "RXD" }, "to": { "instId": "b1", "pinId": "D1" }, "waypoints": [] },
-      { "id": "w3", "from": { "instId": "vcc1", "pinId": "vcc" }, "to": { "instId": "bt1", "pinId": "VCC" }, "waypoints": [] },
-      { "id": "w4", "from": { "instId": "gnd1", "pinId": "gnd" }, "to": { "instId": "bt1", "pinId": "GND" }, "waypoints": [] },
-      { "id": "w5", "from": { "instId": "gnd1", "pinId": "gnd" }, "to": { "instId": "b1", "pinId": "GND2" }, "waypoints": [] },
-      { "id": "w6", "from": { "instId": "b1", "pinId": "D13" }, "to": { "instId": "led1", "pinId": "anode" }, "waypoints": [] },
-      { "id": "w7", "from": { "instId": "led1", "pinId": "cathode" }, "to": { "instId": "r1", "pinId": "p1" }, "waypoints": [] },
-      { "id": "w8", "from": { "instId": "r1", "pinId": "p2" }, "to": { "instId": "gnd1", "pinId": "gnd" }, "waypoints": [] }
+      {
+        "id": "w1",
+        "from": {
+          "instId": "bt1",
+          "pinId": "TXD"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D0"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "bt1",
+          "pinId": "RXD"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "D1"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "vcc1",
+          "pinId": "vcc"
+        },
+        "to": {
+          "instId": "bt1",
+          "pinId": "VCC"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "gnd1",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "bt1",
+          "pinId": "GND"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "gnd1",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND2"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "b1",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w7",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "waypoints": []
+      },
+      {
+        "id": "w8",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "gnd1",
+          "pinId": "gnd"
+        },
+        "waypoints": []
+      }
     ]
   }
 }

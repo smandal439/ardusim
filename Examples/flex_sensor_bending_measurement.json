@@ -7,7 +7,9 @@
     "flex",
     "sensor",
     "bending",
-    "measurement"
+    "measurement",
+    "arduino",
+    "beginner"
   ],
   "circuit": {
     "components": [

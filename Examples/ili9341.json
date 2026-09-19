@@ -9,7 +9,9 @@
     "spi",
     "tft",
     "graphics",
-    "color"
+    "color",
+    "arduino",
+    "ili9341"
   ],
   "circuit": {
     "components": [

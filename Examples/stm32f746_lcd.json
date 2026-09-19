@@ -1,8 +1,8 @@
 {
   "id": "stm32f746_lcd",
   "name": "STM32 Onboard LCD",
-  "icon": "🖥️",
-  "desc": "STM32F746G-DISCO — draw graphics and text on the onboard 4.3\" 480x272 TFT LCD using Adafruit_GFX",
+  "icon": "\ud83d\udda5\ufe0f",
+  "desc": "STM32F746G-DISCO — draw graphics and text on the onboard 4.3\" LCD using register-level TFT helpers",
   "tags": [
     "stm32",
     "display",
@@ -21,5 +21,5 @@
     ],
     "wires": []
   },
-  "code": "#include \"stm32f7xx.h\"\n#include <SPI.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_ILI9341.h>\n\nAdafruit_ILI9341 tft(10, 9, 8);\n\nvoid SystemClock_Config(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n\n  tft.begin();\n  tft.setRotation(1);\n\n  tft.fillScreen(0x001F);\n\n  tft.setTextColor(0xFFE0);\n  tft.setTextSize(3);\n  tft.setCursor(20, 10);\n  tft.println(\"STM32F746G-DISCO\");\n\n  tft.setTextColor(0xFFFF);\n  tft.setTextSize(2);\n  tft.setCursor(20, 50);\n  tft.println(\"Register-Level Mode\");\n  tft.println(\"No Arduino setup/loop\");\n\n  tft.fillRect(20, 100, 120, 60, 0xF800);\n  tft.fillRect(160, 100, 120, 60, 0x07E0);\n  tft.fillRect(300, 100, 120, 60, 0x001F);\n\n  tft.setTextColor(0xFFFF);\n  tft.setTextSize(2);\n  tft.setCursor(50, 120);  tft.print(\"RED\");\n  tft.setCursor(190, 120); tft.print(\"GREEN\");\n  tft.setCursor(325, 120); tft.print(\"BLUE\");\n\n  while (1) {\n    HAL_Delay(100);\n  }\n}\n\nvoid SystemClock_Config(void) {\n}"
+  "code": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n\n  _tftPower(1);\n  _tftFillScreen(0x001F);\n\n  _tftPrint(20, 10, \"STM32F746G-DISCO\", 0xFFE0, 0x001F, 3);\n  _tftPrint(20, 60, \"Register-Level Mode\", 0xFFFF, 0x001F, 2);\n  _tftPrint(20, 85, \"No Arduino libraries\", 0xFFFF, 0x001F, 2);\n\n  _tftFillRect(20, 130, 120, 60, 0xF800);\n  _tftFillRect(160, 130, 120, 60, 0x07E0);\n  _tftFillRect(300, 130, 120, 60, 0x001F);\n\n  _tftPrint(55, 150, \"RED\", 0xFFFF, 0xF800, 2);\n  _tftPrint(180, 150, \"GREEN\", 0xFFFF, 0x07E0, 2);\n  _tftPrint(325, 150, \"BLUE\", 0xFFFF, 0x001F, 2);\n\n  while (1) {\n    HAL_Delay(100);\n  }\n}\n\nvoid SystemClock_Config(void) {\n}"
 }

@@ -1,0 +1,99 @@
+{
+  "id": "fade_led_pwm",
+  "name": "Fade LED (PWM)",
+  "icon": "🔧",
+  "desc": "This example demonstrates how to use Pulse Width Modulation (PWM) to fade an LED in and out using an Arduino. The LED is connected to digital pin 9, and the code gradually increases and decreases the brightness of the LED by adjusting the PWM duty cycle. The current brightness level is also printed to the Serial Monitor for monitoring purposes.",
+  "tags": [
+    "arduino",
+    "pwm",
+    "led",
+    "fade",
+    "beginner"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 115,
+        "y": 115,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 120,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Î©"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "D9"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "/*\n * Fade — LED brightness fade using PWM\n */\n\nint ledPin = 9;\nint brightness = 0;\nint fadeAmount = 5;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n}\n\nvoid loop() {\n  analogWrite(ledPin, brightness);\n  brightness += fadeAmount;\n\n  if (brightness <= 0 || brightness >= 255) {\n    fadeAmount = -fadeAmount;\n    Serial.print(\"Brightness: \");\n    Serial.println(brightness);\n  }\n\n  delay(30);\n}"
+  }
+}

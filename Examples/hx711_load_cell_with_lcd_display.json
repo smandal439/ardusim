@@ -2,10 +2,13 @@
   "id": "hx711_load_cell_with_lcd_display",
   "name": "HX711 Load Cell with LCD Display",
   "icon": "🔧",
-  "desc": "A custom HX711 Load Cell with LCD Display circuit example.",
-  "tags": [
-    "custom",
-    "circuit"
+  "desc": "This example demonstrates how to use an HX711 load cell amplifier with a load cell to measure weight and display the readings on an I2C LCD. The load cell is connected to the HX711, which is then connected to an Arduino. The code reads the weight values from the load cell and updates the LCD display accordingly. The calibration factor can be adjusted for accurate weight measurements.",
+  "tags": [    
+    "arduino",
+    "beginner","load_cell",
+    "hx711",
+    "lcd",
+    "i2c"
   ],
   "circuit": {
     "components": [

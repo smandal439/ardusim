@@ -10,7 +10,8 @@
     "i2c",
     "clock",
     "time",
-    "temperature"
+    "temperature",
+    "arduino"
   ],
   "circuit": {
     "components": [

@@ -2,10 +2,13 @@
   "id": "dht11_temperature_humidity",
   "name": "DHT11 Temperature & Humidity",
   "icon": "🔧",
-  "desc": "A custom DHT11 Temperature & Humidity circuit example.",
+  "desc": "This example demonstrates how to use a DHT11 sensor to measure temperature and humidity, and display the readings on an I2C LCD. The DHT11 sensor is connected to digital pin 2 of the Arduino, and the I2C LCD is used to show the temperature in Celsius and the humidity percentage. The code reads the sensor data every 2 seconds and updates the display accordingly.",
   "tags": [
-    "custom",
-    "circuit"
+    "sensor",
+    "temperature",
+    "humidity",
+    "dht11",
+    "arduino"
   ],
   "circuit": {
     "components": [

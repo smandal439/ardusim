@@ -11,7 +11,8 @@
     "motor control",
     "analog input",
     "speed control",
-    "direction control"
+    "direction control",
+    "arduino"
   ],
   "circuit": {
     "components": [

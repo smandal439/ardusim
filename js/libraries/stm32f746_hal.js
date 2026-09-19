@@ -890,6 +890,42 @@ window.ArduinoLibs['STM32F746'] = {
       self._stm32_tick = (self._stm32_tick || 0) + 1;
     }
 
+    function _tftPower(on) {
+      if (self._emitEvent) self._emitEvent('tft_power', { on: !!on });
+    }
+
+    function _tftFillScreen(color) {
+      if (self._emitEvent) self._emitEvent('tft_draw', { op: 'fillScreen', color: color });
+    }
+
+    function _tftDrawPixel(x, y, color) {
+      if (self._emitEvent) self._emitEvent('tft_draw', { op: 'pixel', x: x, y: y, color: color });
+    }
+
+    function _tftFillRect(x, y, w, h, color) {
+      if (self._emitEvent) self._emitEvent('tft_draw', { op: 'fillRect', x: x, y: y, w: w, h: h, color: color });
+    }
+
+    function _tftDrawRect(x, y, w, h, color) {
+      if (self._emitEvent) self._emitEvent('tft_draw', { op: 'rect', x: x, y: y, w: w, h: h, color: color });
+    }
+
+    function _tftFillCircle(x, y, r, color) {
+      if (self._emitEvent) self._emitEvent('tft_draw', { op: 'fillCircle', x: x, y: y, r: r, color: color });
+    }
+
+    function _tftDrawCircle(x, y, r, color) {
+      if (self._emitEvent) self._emitEvent('tft_draw', { op: 'circle', x: x, y: y, r: r, color: color });
+    }
+
+    function _tftDrawLine(x0, y0, x1, y1, color) {
+      if (self._emitEvent) self._emitEvent('tft_draw', { op: 'line', x0: x0, y0: y0, x1: x1, y1: y1, color: color });
+    }
+
+    function _tftPrint(x, y, text, fg, bg, size) {
+      if (self._emitEvent) self._emitEvent('tft_draw', { op: 'print', x: x, y: y, text: String(text), fg: fg || 0xFFFF, bg: bg || 0x0000, size: size || 1 });
+    }
+
     return {
       _regR: _readReg,
       _regW: _writeReg,
@@ -909,6 +945,15 @@ window.ArduinoLibs['STM32F746'] = {
       _noop: _noop,
       _hal_getTick: _hal_getTick,
       _hal_incTick: _hal_incTick,
+      _tftPower: _tftPower,
+      _tftFillScreen: _tftFillScreen,
+      _tftDrawPixel: _tftDrawPixel,
+      _tftFillRect: _tftFillRect,
+      _tftDrawRect: _tftDrawRect,
+      _tftFillCircle: _tftFillCircle,
+      _tftDrawCircle: _tftDrawCircle,
+      _tftDrawLine: _tftDrawLine,
+      _tftPrint: _tftPrint,
     };
   },
 };

@@ -2,10 +2,13 @@
   "id": "interrupts_test",
   "name": "Interrupts test",
   "icon": "🔧",
-  "desc": "A custom Interrupts test circuit example.",
+  "desc": "This example demonstrates how to use external interrupts on an Arduino to toggle the state of an LED when a button is pressed. The button is connected to digital pin 2, which supports external interrupts on the Arduino Uno. When the button is pressed, the interrupt service routine (ISR) is triggered, toggling the state of the built-in LED on pin 13. The main loop can perform other tasks or use delays, but the interrupt will immediately respond to the button press.",
   "tags": [
-    "custom",
-    "circuit"
+    "arduino",
+    "interrupts",
+    "button",
+    "led",
+    "beginner"
   ],
   "circuit": {
     "components": [

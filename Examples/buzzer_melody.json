@@ -7,7 +7,8 @@
     "beginner",
     "sound",
     "tone",
-    "buzzer"
+    "buzzer",
+    "arduino"
   ],
   "circuit": {
     "components": [
