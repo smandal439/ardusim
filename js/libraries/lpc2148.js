@@ -186,9 +186,14 @@ window.ArduinoLibs['LPC2148'] = {
 
       if (addr === 0xE0028000) {
         var val = regs[addr] & 0xFF000000;
+        var _sim = window.ArduinoSim;
         for (var bit = 0; bit < 24; bit++) {
           var pinKey = 'pin_P0_' + bit;
           var pinState = self.pinStates[pinKey];
+          if ((!pinState || pinState <= 0) && _sim && _sim.pinStates) {
+            var gPin = _sim.pinStates[pinKey];
+            if (gPin && gPin > 0) pinState = gPin;
+          }
           if (pinState && pinState > 0) val |= (1 << bit);
         }
         regs[addr] = val;
@@ -196,9 +201,14 @@ window.ArduinoLibs['LPC2148'] = {
 
       if (addr === 0xE0029000) {
         var val2 = regs[addr] & 0x0000FFFF;
+        var _sim2 = window.ArduinoSim;
         for (var bit2 = 16; bit2 < 32; bit2++) {
           var pk = 'pin_P1_' + bit2;
           var ps = self.pinStates[pk];
+          if ((!ps || ps <= 0) && _sim2 && _sim2.pinStates) {
+            var gp = _sim2.pinStates[pk];
+            if (gp && gp > 0) ps = gp;
+          }
           if (ps && ps > 0) val2 |= (1 << bit2);
         }
         regs[addr] = val2;
