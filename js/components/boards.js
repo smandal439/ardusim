@@ -1922,13 +1922,13 @@ defComp({
     ctx.textAlign = 'center';
     ctx.fillText('PWR', pwrLedX, pwrLedY + 9);
 
-    // ── Onboard User LEDs (P0.12–P0.15) ──
+    // ── Onboard User LEDs (P0.12–P0.15) ── horizontal row
     var ledColors = ['#ff4444', '#44ff44', '#ffaa00', '#4488ff'];
     var ledLabels = ['LED1', 'LED2', 'LED3', 'LED4'];
     var ledGpios = [12, 13, 14, 15];
     for (var li = 0; li < 4; li++) {
-      var lx = W - 50 + (li % 2) * 28;
-      var ly = 50 + Math.floor(li / 2) * 28;
+      var lx = W - 80 + li * 20;
+      var ly = 60;
       var lkey = 'pin_P0_' + ledGpios[li];
       var lit = sim && sim.pinStates && sim.pinStates[lkey] > 0;
       drawLED_on_board(ctx, lx, ly, lit ? ledColors[li] : '#333', 5);
@@ -2005,8 +2005,8 @@ defComp({
     ctx.font = 'bold 8px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('LPC2148 SmartX Board', W / 2, 20);
-    ctx.fillStyle = 'rgba(255,255,255,0.12)';
-    ctx.font = '6px monospace';
+    ctx.fillStyle = 'rgb(255, 255, 255)';
+    ctx.font = '8px monospace';
     ctx.fillText('ARM7TDMI-S  60MHz  512KB Flash  40KB SRAM', W / 2, H - 4);
 
     // ── Selection Outline ──
