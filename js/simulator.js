@@ -1496,7 +1496,12 @@ class ArduinoSimulator {
     for (const [libName, lib] of Object.entries(plugins)) {
       if (lib.runtime) {
         const rt = lib.runtime(self);
-        if (rt && typeof rt === 'object') Object.assign(result._a, rt);
+        if (rt && typeof rt === 'object') {
+          Object.assign(result._a, rt);
+          for (const [rk, rv] of Object.entries(rt)) {
+            if (typeof rv === 'function' && !(rk in result)) result[rk] = rv;
+          }
+        }
       }
       if (lib.constructor) {
         result[libName] = lib.constructor;
