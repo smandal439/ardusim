@@ -1,5 +1,5 @@
 /* components/boards.js — Arduino & ESP32 board definitions */
-// 'use strict';
+'use strict';
 
 /* ──────────────────── Arduino BOARDS ──────────────────── */
 defComp({

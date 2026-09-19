@@ -1,12 +1,12 @@
-/* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|
-   guide.js �l� Home page, Component Reference & Tutorials
+/* ════════════════════════════════════════════════════════════════════════════════════════════════
+   guide.js — Home page, Component Reference & Tutorials
    Enriched component descriptions, pin configurations, wiring
    examples and step-by-step guides for ArduSim.
-   ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+════════════════════════════════════════════════════════════════════════════════════════════════ */
 
 'use strict';
 
-/* ΀l΀l Pin type �r~ human readable label ΀l΀l */
+/* ═══ Pin type → human readable label ═══ */
 const GUIDE_PIN_TYPE_LABELS = {
   digital: 'Digital',
   analog: 'Analog',
@@ -16,32 +16,32 @@ const GUIDE_PIN_TYPE_LABELS = {
   signal: 'Signal',
 };
 
-/* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|
+/* ════════════════════════════════════════════════════════════════════════════════════════════════
    COMPONENT REFERENCE DATA
    Every entry documents one component: what it does, every pin,
    configurable properties, typical wiring and sample code.
-   ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+════════════════════════════════════════════════════════════════════════════════════════════════ */
 
 const GUIDE_COMPONENTS = {
-  /* ΀l΀l BOARDS ΀l΀l */
+  /* ═══ BOARDS ═══ */
   arduino_uno: {
     id: 'arduino_uno',
     name: 'Arduino Uno R3',
-    icon: '🔌',
+    icon: '🇸',
     category: 'Boards',
     grouped: true,
-    longDesc: 'The Arduino Uno is the most popular Arduino board, powered by the ATmega328P 8-bit microcontroller running at 16 MHz. It exposes 14 digital I/O pins (6 with PWM), 6 analog inputs, and 5 V / 3.3 V power rails. Every ArduSim project starts here �l� the built-in "L" LED on pin 13 doubles as a debugging output.',
+    longDesc: 'The Arduino Uno is the most popular Arduino board, powered by the ATmega328P 8-bit microcontroller running at 16 MHz. It exposes 14 digital I/O pins (6 with PWM), 6 analog inputs, and 5 V / 3.3 V power rails. Every ArduSim project starts here — the built-in "L" LED on pin 13 doubles as a debugging output.',
     use: 'The brain of your circuit. Connect output components (LEDs, buzzers, servos, displays) to its digital pins and read input components (buttons, sensors, potentiometers) from its digital or analog pins.',
     pins: {
-      'D0�lD13': { label: 'D0�lD13', type: 'digital', desc: 'Digital I/O pins. D0 (RX) and D1 (TX) double as the serial port. PWM capable pins are D3, D5, D6, D9, D10 and D11.' },
+      'D0–D13': { label: 'D0–D13', type: 'digital', desc: 'Digital I/O pins. D0 (RX) and D1 (TX) double as the serial port. PWM capable pins are D3, D5, D6, D9, D10 and D11.' },
       'D13': { label: 'D13', type: 'digital', desc: 'Also drives the built-in "L" LED (LED_BUILTIN).' },
-      'A0�lA5': { label: 'A0�lA5', type: 'analog', desc: 'Analog input pins (10-bit, 0�l1023). A4 (SDA) and A5 (SCL) also serve the I2C bus.' },
+      'A0–A5': { label: 'A0–A5', type: 'analog', desc: 'Analog input pins (10-bit, 0–1023). A4 (SDA) and A5 (SCL) also serve the I2C bus.' },
       '5V': { label: '5V', type: 'power', desc: '5 V regulated output for powering external components.' },
       '3V3': { label: '3.3V', type: 'power', desc: '3.3 V regulated output for low-voltage modules (OLED, ESP sensors).' },
-      'VIN': { label: 'VIN', type: 'power', desc: 'Input voltage to the board (7�l12 V via barrel jack).' },
-      'GND': { label: 'GND', type: 'gnd', desc: 'Common ground �l� every component must share this reference.' },
+      'VIN': { label: 'VIN', type: 'power', desc: 'Input voltage to the board (7–12 V via barrel jack).' },
+      'GND': { label: 'GND', type: 'gnd', desc: 'Common ground — every component must share this reference.' },
       'AREF': { label: 'AREF', type: 'signal', desc: 'External analog reference voltage (advanced use).' },
-      'RST': { label: 'RST', type: 'signal', desc: 'Reset line �l� pulling it low restarts the sketch.' },
+      'RST': { label: 'RST', type: 'signal', desc: 'Reset line — pulling it low restarts the sketch.' },
     },
     props: { label: 'Board label shown on the canvas.' },
     wiring: 'Place the board, then wire every other component back to it: outputs to digital pins, sensors to analog pins, and always connect a GND rail.',
@@ -62,13 +62,13 @@ void loop() {
   esp32_devkit_v1: {
     id: 'esp32_devkit_v1',
     name: 'ESP32 DevKit V1',
-    icon: '܋�x',
+    icon: '🇸',
     category: 'Boards',
     grouped: true,
     longDesc: 'The ESP32 DevKit V1 is a dual-core 240 MHz Wi-Fi + Bluetooth development board built around the ESP-WROOM-32 module. It works at 3.3 V logic and exposes 30 pins on two headers. GPIO2 drives the on-board blue LED (LED_BUILTIN). Great for connected / wireless projects.',
     use: 'A powerful alternative to the Uno. Use it for Wi-Fi, Bluetooth, dual-core code and projects that need more RAM. Many GPIOs support analog input and PWM output at the same time.',
     pins: {
-      'VP / VN': { label: 'VP / VN', type: 'analog', desc: 'Analog inputs 36 and 39 �l� no internal pull-up.' },
+      'VP / VN': { label: 'VP / VN', type: 'analog', desc: 'Analog inputs 36 and 39 — no internal pull-up.' },
       'D34 / D35': { label: 'D34 / D35', type: 'analog', desc: 'Analog input only (no output capability).' },
       'D32, D33': { label: 'D32 / D33', type: 'analog', desc: 'Analog + digital + DAC output.' },
       'D25, D26': { label: 'D25 / D26', type: 'analog', desc: 'Analog + digital + DAC output.' },
@@ -88,7 +88,7 @@ void loop() {
       'GND': { label: 'GND', type: 'gnd', desc: 'Common ground.' },
     },
     props: { label: 'Board label shown on the canvas.' },
-    wiring: 'Place the board and wire outputs to GPIO pins, sensors to ADC-capable pins (VP/VN/D32�lD35). Remember to power modules from 3V3, not 5V.',
+    wiring: 'Place the board and wire outputs to GPIO pins, sensors to ADC-capable pins (VP/VN/D32–D35). Remember to power modules from 3V3, not 5V.',
     code: `void setup() {
   pinMode(LED_BUILTIN, OUTPUT);  // GPIO2
   Serial.begin(115200);
@@ -105,20 +105,20 @@ void loop() {
   arduino_nano: {
     id: 'arduino_nano',
     name: 'Arduino Nano R3',
-    icon: '܋z�ۤ{',
+    icon: '⬟',
     category: 'Boards',
     grouped: true,
     longDesc: 'Arduino Nano R3 is a compact, breadboard-friendly board based on the ATmega328P microcontroller. It offers the same functionality as the Arduino Uno R3 in a smaller form factor, ideal for space-constrained projects. The board runs at 16 MHz with 32 KB of Flash and 2 KB of RAM. Digital pin 13 controls the built-in LED.',
     use: 'Connect output components (LEDs, buzzers, displays) to digital pins and read input components (buttons, sensors, potentiometers) from analog pins. Perfect for compact projects that don\'t need the full size of an Uno.',
     pins: {
-      'D0�lD13': { label: 'D0�lD13', type: 'digital', desc: 'Digital I/O pins. D0 (RX) and D1 (TX) double as the serial port. PWM capable pins are D3, D5, D6, D9, D10 and D11.' },
+      'D0–D13': { label: 'D0–D13', type: 'digital', desc: 'Digital I/O pins. D0 (RX) and D1 (TX) double as the serial port. PWM capable pins are D3, D5, D6, D9, D10 and D11.' },
       'D13': { label: 'D13', type: 'digital', desc: 'Also drives the built-in "L" LED (LED_BUILTIN).' },
-      'A0�lA5': { label: 'A0�lA5', type: 'analog', desc: 'Analog input pins (10-bit, 0�l1023).' },
+      'A0–A5': { label: 'A0–A5', type: 'analog', desc: 'Analog input pins (10-bit, 0–1023).' },
       '5V': { label: '5V', type: 'power', desc: '5 V regulated output for powering external components.' },
       '3V3': { label: '3.3V', type: 'power', desc: '3.3 V regulated output for low-voltage modules.' },
-      'VIN': { label: 'VIN', type: 'power', desc: 'Input voltage to the board (7�l12 V via barrel jack).' },
-      'GND': { label: 'GND', type: 'gnd', desc: 'Common ground �l� every component must share this reference.' },
-      'RST': { label: 'RST', type: 'signal', desc: 'Reset line �l� pulling it low restarts the sketch.' },
+      'VIN': { label: 'VIN', type: 'power', desc: 'Input voltage to the board (7–12 V via barrel jack).' },
+      'GND': { label: 'GND', type: 'gnd', desc: 'Common ground — every component must share this reference.' },
+      'RST': { label: 'RST', type: 'signal', desc: 'Reset line — pulling it low restarts the sketch.' },
     },
     props: { label: 'Board label shown on the canvas.' },
     wiring: 'Place the board, then wire every other component back to it: outputs to digital pins, sensors to analog pins, and always connect a GND rail.',
@@ -138,24 +138,24 @@ void loop() {
   stm32f746_disco: {
     id: 'stm32f746_disco',
     name: 'STM32F746G-DISCO',
-    icon: '܋�x',
+    icon: '📐',
     category: 'Boards',
     grouped: true,
     longDesc: 'The STM32F746G Discovery kit features an ARM Cortex-M7 MCU running at 216 MHz with 1 MB Flash and 320 KB SRAM. It has a 4.3" 480x272 TFT LCD, SAI audio codec, USB OTG, Ethernet, and Arduino Uno V3 compatible connectors. The board operates at 3.3V logic. LD1 (green LED on PI1) is the user-controllable LED mapped to D13.',
     use: 'A powerful ARM development board for graphics, audio, and connectivity projects. Use it for LCD/touchscreen interfaces, audio processing, Ethernet networking, and complex embedded applications.',
     pins: {
-      'D0�lD13': { label: 'D0�lD13', type: 'digital', desc: 'Digital I/O pins. D0 (PC7) is USART6_RX, D1 (PC6) is USART6_TX. D3 (PB4) is PWM (TIM3_CH1). D10 (PA8) is SPI2_NSS. D13 (PI1) drives LD1 (user LED).' },
+      'D0–D13': { label: 'D0–D13', type: 'digital', desc: 'Digital I/O pins. D0 (PC7) is USART6_RX, D1 (PC6) is USART6_TX. D3 (PB4) is PWM (TIM3_CH1). D10 (PA8) is SPI2_NSS. D13 (PI1) drives LD1 (user LED).' },
       'D13': { label: 'D13', type: 'digital', desc: 'Also drives the on-board green LED LD1 (LED_BUILTIN). Connected to PI1 / SPI2_SCK.' },
       'D14 / D15': { label: 'D14 / D15', type: 'signal', desc: 'I2C bus: D14 (PB9) = SDA, D15 (PB8) = SCL. Primary I2C1 pins.' },
-      'A0�lA5': { label: 'A0�lA5', type: 'analog', desc: 'Analog input pins (12-bit ADC, 0�l4095). A0=PA0 (ADC3_IN0), A1=PF10, A2=PF9, A3=PF8, A4=PF7, A5=PF6.' },
+      'A0–A5': { label: 'A0–A5', type: 'analog', desc: 'Analog input pins (12-bit ADC, 0–4095). A0=PA0 (ADC3_IN0), A1=PF10, A2=PF9, A3=PF8, A4=PF7, A5=PF6.' },
       '5V': { label: '5V', type: 'power', desc: '5V power rail from USB or VIN.' },
-      '3V3': { label: '3.3V', type: 'power', desc: '3.3V regulated output. All GPIOs are 3.3V logic �l� do NOT connect 5V signals directly.' },
+      '3V3': { label: '3.3V', type: 'power', desc: '3.3V regulated output. All GPIOs are 3.3V logic — do NOT connect 5V signals directly.' },
       'GND': { label: 'GND', type: 'gnd', desc: 'Common ground.' },
       'VIN': { label: 'VIN', type: 'power', desc: 'External power input (7-12V via Arduino connector).' },
       'NRST': { label: 'NRST', type: 'signal', desc: 'MCU reset (active low). Also accessible via B2 reset button.' },
     },
     props: { label: 'Board label shown on the canvas.' },
-    wiring: 'Connect outputs to digital pins D0�lD15, sensors to analog pins A0�lA5. Use 3.3V for powering modules. D14/D15 provide I2C (SDA/SCL). D10�lD13 provide SPI (NSS/MOSI/MISO/SCK).',
+    wiring: 'Connect outputs to digital pins D0–D15, sensors to analog pins A0–A5. Use 3.3V for powering modules. D14/D15 provide I2C (SDA/SCL). D10–D13 provide SPI (NSS/MOSI/MISO/SCK).',
     code: `void setup() {
   pinMode(LED_BUILTIN, OUTPUT);  // D13 = PI1 = LD1
   Serial.begin(115200);
@@ -167,10 +167,13 @@ void loop() {
   delay(500);
 }`,
 
+    exampleId: 'stm32f746_disco',
+  },
+
   lpc2148: {
     id: 'lpc2148',
     name: 'LPC2148 SmartX Board',
-    icon: '🔌',
+    icon: '🇸',
     category: 'Boards',
     grouped: true,
     longDesc: 'NXP LPC2148 ARM7TDMI-S MCU running at 60 MHz with 512 KB Flash and 40 KB SRAM. Features 10-bit ADC (14 channels), DAC, USB 2.0 device, dual UART, SPI, I2C, and two 32-bit timers. The SmartX board provides easy access to GPIO via two headers, 4 user LEDs (P0.12-P0.15), and onboard ISP programmer. All GPIO runs at 3.3V logic. This board uses real register-level programming (IO0DIR, IO0SET, IO0CLR, IO0PIN) rather than Arduino-style functions.',
@@ -189,23 +192,23 @@ void loop() {
     exampleId: 'blink',
   },
 
-  /* ΀l΀l OUTPUTS ΀l΀l */
+  /* ═══ OUTPUTS ═══ */
   led: {
     id: 'led',
     name: 'LED',
-    icon: '܋~�',
+    icon: '💡',
     category: 'Output',
-    longDesc: 'A Light Emitting Diode that glows when current flows from the anode to the cathode. An LED has polarity �l� the longer leg is the anode (+). Always use a current-limiting resistor (typically 220 ��) in series so the LED is not destroyed.',
+    longDesc: 'A Light Emitting Diode that glows when current flows from the anode to the cathode. An LED has polarity — the longer leg is the anode (+). Always use a current-limiting resistor (typically 220 °) in series so the LED is not destroyed.',
     use: 'The universal "Hello World" output. Light an LED with digitalWrite(), fade it with analogWrite() on a PWM pin, or use it as an activity indicator.',
     pins: {
-      anode: { label: '+', type: 'pwm', desc: 'Anode (long leg). Connect to a digital pin through a resistor. Accepts HIGH/LOW or PWM (0�l255).' },
-      cathode: { label: '�t~', type: 'gnd', desc: 'Cathode (short leg, flat side). Connect to GND.' },
+      anode: { label: '+', type: 'pwm', desc: 'Anode (long leg). Connect to a digital pin through a resistor. Accepts HIGH/LOW or PWM (0–255).' },
+      cathode: { label: '−', type: 'gnd', desc: 'Cathode (short leg, flat side). Connect to GND.' },
     },
     props: {
       color: 'Hex colour of the LED body (e.g. #ff3333).',
       colorName: 'Human readable colour name.',
     },
-    wiring: 'D13 �r~ resistor �r~ LED anode(+) ; LED cathode(�t~) �r~ GND.',
+    wiring: 'D13 → resistor → LED anode(+) ; LED cathode(−) → GND.',
     code: `void setup() {
   pinMode(13, OUTPUT);
 }
@@ -221,7 +224,7 @@ void loop() {
   multi_led_array: {
     id: 'multi_led_array',
     name: 'Multi-Color LED Array',
-    icon: '܋��',
+    icon: '💡',
     category: 'Output',
     longDesc: 'A compact module with four independent LEDs (Red, Yellow, Green, Blue) that share a single common ground. Each LED has its own drive pin, making traffic-light or status-panel circuits tidy and easy to wire.',
     use: 'Traffic lights, status indicators, sequencers. Drive each colour with its own digital pin or fade them individually with PWM.',
@@ -230,10 +233,10 @@ void loop() {
       led_y: { label: 'Y', type: 'digital', desc: 'Yellow LED drive pin.' },
       led_g: { label: 'G', type: 'digital', desc: 'Green LED drive pin.' },
       led_b: { label: 'B', type: 'digital', desc: 'Blue LED drive pin.' },
-      gnd: { label: '�t~', type: 'gnd', desc: 'Common cathode �l� connect to GND.' },
+      gnd: { label: '−', type: 'gnd', desc: 'Common cathode — connect to GND.' },
     },
     props: {},
-    wiring: 'R �r~ D10, Y �r~ D11, G �r~ D12, B �r~ D13 ; GND �r~ GND.',
+    wiring: 'R → D10, Y → D11, G → D12, B → D13 ; GND → GND.',
     code: `void setup() {
   for (int p = 10; p <= 13; p++) pinMode(p, OUTPUT);
 }
@@ -250,18 +253,18 @@ void loop() {
   rgb_led: {
     id: 'rgb_led',
     name: 'RGB LED',
-    icon: '܋xt',
+    icon: '🌈',
     category: 'Output',
-    longDesc: 'A single LED package containing a red, green and blue die. By mixing the three channels with PWM you can produce almost any colour. This variant is a common-cathode LED �l� the shared pin goes to ground.',
+    longDesc: 'A single LED package containing a red, green and blue die. By mixing the three channels with PWM you can produce almost any colour. This variant is a common-cathode LED — the shared pin goes to ground.',
     use: 'Full-colour lighting, mood lamps, colour-mixing demos. Each channel is driven from a PWM pin via analogWrite().',
     pins: {
-      red: { label: 'R', type: 'pwm', desc: 'Red channel anode �l� PWM (0�l255).' },
-      green: { label: 'G', type: 'pwm', desc: 'Green channel anode �l� PWM (0�l255).' },
-      blue: { label: 'B', type: 'pwm', desc: 'Blue channel anode �l� PWM (0�l255).' },
-      gnd: { label: '�t~', type: 'gnd', desc: 'Common cathode �l� connect to GND.' },
+      red: { label: 'R', type: 'pwm', desc: 'Red channel anode — PWM (0–255).' },
+      green: { label: 'G', type: 'pwm', desc: 'Green channel anode — PWM (0–255).' },
+      blue: { label: 'B', type: 'pwm', desc: 'Blue channel anode — PWM (0–255).' },
+      gnd: { label: '−', type: 'gnd', desc: 'Common cathode — connect to GND.' },
     },
     props: {},
-    wiring: 'R �r~ D9, G �r~ D10, B �r~ D11 (PWM pins) ; GND �r~ GND.',
+    wiring: 'R → D9, G → D10, B → D11 (PWM pins) ; GND → GND.',
     code: `void setup() {
   pinMode(9, OUTPUT); pinMode(10, OUTPUT); pinMode(11, OUTPUT);
 }
@@ -279,16 +282,16 @@ void loop() {
   buzzer: {
     id: 'buzzer',
     name: 'Buzzer',
-    icon: '܋��',
+    icon: '🔔',
     category: 'Output',
     longDesc: 'A piezoelectric buzzer that converts an electrical signal into sound. The active variant beeps when it simply receives a HIGH level; the simulator also honours the tone() library so you can play melodies and frequencies.',
     use: 'Alarms, notifications, melodies. Drive it HIGH/LOW for a beep or use tone(pin, frequency) for musical tones.',
     pins: {
-      vcc: { label: '+', type: 'digital', desc: 'Positive supply �l� connect to a digital pin (HIGH beeps).' },
-      gnd: { label: '�t~', type: 'gnd', desc: 'Negative supply �l� connect to GND.' },
+      vcc: { label: '+', type: 'digital', desc: 'Positive supply — connect to a digital pin (HIGH beeps).' },
+      gnd: { label: '−', type: 'gnd', desc: 'Negative supply — connect to GND.' },
     },
     props: { frequency: 'Default tone frequency in Hz when driven by tone().' },
-    wiring: 'D8 �r~ buzzer(+) ; buzzer(�t~) �r~ GND.',
+    wiring: 'D8 → buzzer(+) ; buzzer(−) → GND.',
     code: `void setup() {
   pinMode(8, OUTPUT);
 }
@@ -304,9 +307,9 @@ void loop() {
   seg7: {
     id: 'seg7',
     name: '7-Segment Display',
-    icon: '܋��',
+    icon: '🔢',
     category: 'Output',
-    longDesc: 'A single digit made from seven LED bars (a�lg) plus a decimal point. Each segment is a separate LED; lighting the right combination shows any digit 0�l9 or some letters. The common pin (COM) completes the circuit �l� set commonAnode false for a common-cathode module.',
+    longDesc: 'A single digit made from seven LED bars (a–g) plus a decimal point. Each segment is a separate LED; lighting the right combination shows any digit 0–9 or some letters. The common pin (COM) completes the circuit — set commonAnode false for a common-cathode module.',
     use: 'Numeric counters, clocks, scoreboards. Each segment maps to its own digital pin.',
     pins: {
       segA: { label: 'A', type: 'digital', desc: 'Top horizontal segment.' },
@@ -317,10 +320,10 @@ void loop() {
       segF: { label: 'F', type: 'digital', desc: 'Top-left vertical segment.' },
       segG: { label: 'G', type: 'digital', desc: 'Middle horizontal segment.' },
       dp: { label: 'DP', type: 'digital', desc: 'Decimal point segment.' },
-      com: { label: 'COM', type: 'power', desc: 'Common pin �l� connect to GND (common cathode) or 5V (common anode).' },
+      com: { label: 'COM', type: 'power', desc: 'Common pin — connect to GND (common cathode) or 5V (common anode).' },
     },
     props: { commonAnode: 'true if the display is common-anode (COM to +5V).' },
-    wiring: 'A�r~D2, B�r~D3, C�r~D4, D�r~D5, E�r~D6, F�r~D7, G�r~D8 ; COM �r~ GND.',
+    wiring: 'A→D2, B→D3, C→D4, D→D5, E→D6, F→D7, G→D8 ; COM → GND.',
     code: `// segment patterns for digits 0-9 (a,b,c,d,e,f,g)
 byte digit[10] = { 0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F };
 byte pins[7] = {2,3,4,5,6,7,8};
@@ -336,18 +339,18 @@ void loop(){
 
   lcd1602: {
     id: 'lcd1602',
-    name: 'LCD 16��2',
-    icon: '܋��ۤ{',
+    name: 'LCD 16°2',
+    icon: '📺',
     category: 'Output',
-    longDesc: 'A classic 16-column �� 2-row character LCD driven by the Hitachi HD44780 controller. Used through the LiquidCrystal library, it needs 6 control/data lines (RS, EN, D4�lD7) plus power. Perfect for text, sensor readouts and simple menus.',
+    longDesc: 'A classic 16-column ° 2-row character LCD driven by the Hitachi HD44780 controller. Used through the LiquidCrystal library, it needs 6 control/data lines (RS, EN, D4–D7) plus power. Perfect for text, sensor readouts and simple menus.',
     use: 'Displaying text and numeric values. The parallel version uses more pins; for a wiring-light option use the I2C version instead.',
     pins: {
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
       vcc: { label: 'VCC', type: 'power', desc: '5 V power.' },
       vo: { label: 'V0', type: 'signal', desc: 'Contrast control (usually a potentiometer).' },
-      rs: { label: 'RS', type: 'digital', desc: 'Register select �l� command vs. data.' },
-      rw: { label: 'R/W', type: 'digital', desc: 'Read/Write �l� tie to GND for write-only.' },
-      en: { label: 'EN', type: 'digital', desc: 'Enable pulse �l� latches the data.' },
+      rs: { label: 'RS', type: 'digital', desc: 'Register select — command vs. data.' },
+      rw: { label: 'R/W', type: 'digital', desc: 'Read/Write — tie to GND for write-only.' },
+      en: { label: 'EN', type: 'digital', desc: 'Enable pulse — latches the data.' },
       d4: { label: 'D4', type: 'digital', desc: 'Data line 4 (4-bit mode).' },
       d5: { label: 'D5', type: 'digital', desc: 'Data line 5 (4-bit mode).' },
       d6: { label: 'D6', type: 'digital', desc: 'Data line 6 (4-bit mode).' },
@@ -357,7 +360,7 @@ void loop(){
       line1: 'Default text on the first row.',
       line2: 'Default text on the second row.',
     },
-    wiring: 'VCC�r~5V, GND�r~GND, RS�r~D12, EN�r~D11, D4�r~D5, D5�r~D4, D6�r~D3, D7�r~D2.',
+    wiring: 'VCC→5V, GND→GND, RS→D12, EN→D11, D4→D5, D5→D4, D6→D3, D7→D2.',
     code: `#include <LiquidCrystal.h>
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 void setup(){
@@ -374,23 +377,23 @@ void loop(){
 
   lcd1602_i2c: {
     id: 'lcd1602_i2c',
-    name: 'LCD 16��2 (I2C)',
-    icon: '܋��ۤ{',
+    name: 'LCD 16°2 (I2C)',
+    icon: '📺',
     category: 'Output',
-    longDesc: 'The same 16��2 character LCD but with a PCF8574 I2C backpack �l� only four wires are needed (GND, VCC, SDA, SCL) and the default address is 0x27. Use the LiquidCrystal_I2C library.',
-    use: 'Text and data displays with minimal wiring �l� ideal when pins are scarce. Uses A4 (SDA) and A5 (SCL) on the Uno.',
+    longDesc: 'The same 16°2 character LCD but with a PCF8574 I2C backpack — only four wires are needed (GND, VCC, SDA, SCL) and the default address is 0x27. Use the LiquidCrystal_I2C library.',
+    use: 'Text and data displays with minimal wiring — ideal when pins are scarce. Uses A4 (SDA) and A5 (SCL) on the Uno.',
     pins: {
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
       vcc: { label: 'VCC', type: 'power', desc: '5 V power.' },
-      sda: { label: 'SDA', type: 'digital', desc: 'I2C data line �l� connect to A4 (Uno) / D21 (ESP32).' },
-      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock line �l� connect to A5 (Uno) / D22 (ESP32).' },
+      sda: { label: 'SDA', type: 'digital', desc: 'I2C data line — connect to A4 (Uno) / D21 (ESP32).' },
+      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock line — connect to A5 (Uno) / D22 (ESP32).' },
     },
     props: {
       address: 'I2C address of the backpack (default 0x27).',
       line1: 'Default text on the first row.',
       line2: 'Default text on the second row.',
     },
-    wiring: 'VCC�r~5V, GND�r~GND, SDA�r~A4, SCL�r~A5.',
+    wiring: 'VCC→5V, GND→GND, SDA→A4, SCL→A5.',
     code: `#include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 void setup(){
@@ -408,19 +411,19 @@ void loop(){
 
   oled_ssd1306: {
     id: 'oled_ssd1306',
-    name: 'OLED 128��64 (I2C)',
-    icon: '܋��ۤ{',
+    name: 'OLED 128°64 (I2C)',
+    icon: '📺',
     category: 'Output',
-    longDesc: 'A 128��64 monochrome OLED screen driven by the SSD1306 controller over I2C. Sharp, fast and low-power. Driven with the Adafruit_SSD1306 + Adafruit_GFX libraries, it can render text, lines, circles, rectangles and even pixel art.',
+    longDesc: 'A 128°64 monochrome OLED screen driven by the SSD1306 controller over I2C. Sharp, fast and low-power. Driven with the Adafruit_SSD1306 + Adafruit_GFX libraries, it can render text, lines, circles, rectangles and even pixel art.',
     use: 'Dashboards, graphs, small UI screens. Only four wires (GND, VCC, SCL, SDA); works at both 3.3 V and 5 V with the Uno at address 0x3C.',
     pins: {
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
       vcc: { label: 'VCC', type: 'power', desc: '3.3 V / 5 V power.' },
-      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock �l� connect to A5 (Uno) / D22 (ESP32).' },
-      sda: { label: 'SDA', type: 'digital', desc: 'I2C data �l� connect to A4 (Uno) / D21 (ESP32).' },
+      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock — connect to A5 (Uno) / D22 (ESP32).' },
+      sda: { label: 'SDA', type: 'digital', desc: 'I2C data — connect to A4 (Uno) / D21 (ESP32).' },
     },
     props: { address: 'I2C address of the display (default 0x3C).' },
-    wiring: 'VCC�r~5V, GND�r~GND, SDA�r~A4, SCL�r~A5.',
+    wiring: 'VCC→5V, GND→GND, SDA→A4, SCL→A5.',
     code: `#include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -439,25 +442,25 @@ void loop(){}`,
     exampleId: 'oled_ssd1306',
   },
 
-  /* ΀l΀l INPUTS ΀l΀l */
+  /* ═══ INPUTS ═══ */
   push_button: {
     id: 'push_button',
     name: 'Push Button',
-    icon: '܋��',
+    icon: '🔘',
     category: 'Input',
-    longDesc: 'A momentary tactile switch. The four legs form two internally-connected pairs �l� pressing the cap joins the pairs so current can flow. Read it with digitalRead() and an INPUT_PULLUP so the pin reads HIGH when released and LOW when pressed. Works standalone with ICs (no Arduino needed) �l� the simulator traces through the switch to find the voltage source on the other side.',
-    use: 'User input �l� buttons, doorbells, triggers. Wire one side to a digital pin (with internal pull-up) and the other to GND. Toggle it by clicking on the canvas or pressing Space/Enter when selected.',
+    longDesc: 'A momentary tactile switch. The four legs form two internally-connected pairs — pressing the cap joins the pairs so current can flow. Read it with digitalRead() and an INPUT_PULLUP so the pin reads HIGH when released and LOW when pressed. Works standalone with ICs (no Arduino needed) — the simulator traces through the switch to find the voltage source on the other side.',
+    use: 'User input — buttons, doorbells, triggers. Wire one side to a digital pin (with internal pull-up) and the other to GND. Toggle it by clicking on the canvas or pressing Space/Enter when selected.',
     pins: {
-      p1: { label: '1', type: 'digital', desc: 'Leg 1 �l� one side of the switch contact.' },
-      p2: { label: '2', type: 'digital', desc: 'Leg 2 �l� internally connected to leg 1.' },
-      p3: { label: '3', type: 'digital', desc: 'Leg 3 �l� the other side of the switch contact.' },
-      p4: { label: '4', type: 'digital', desc: 'Leg 4 �l� internally connected to leg 3.' },
+      p1: { label: '1', type: 'digital', desc: 'Leg 1 — one side of the switch contact.' },
+      p2: { label: '2', type: 'digital', desc: 'Leg 2 — internally connected to leg 1.' },
+      p3: { label: '3', type: 'digital', desc: 'Leg 3 — the other side of the switch contact.' },
+      p4: { label: '4', type: 'digital', desc: 'Leg 4 — internally connected to leg 3.' },
     },
     props: {
       pressed: 'Simulated pressed state when toggled in the canvas.',
       label: 'Button label shown on the canvas.',
     },
-    wiring: 'D2 �r~ pin 1, pin 3 �r~ GND. Enable INPUT_PULLUP in code.',
+    wiring: 'D2 → pin 1, pin 3 → GND. Enable INPUT_PULLUP in code.',
     code: `void setup(){
   pinMode(2, INPUT_PULLUP);
   Serial.begin(9600);
@@ -472,21 +475,21 @@ void loop(){
   potentiometer: {
     id: 'potentiometer',
     name: 'Potentiometer',
-    icon: '܋z�ۤ{',
+    icon: '🎛️',
     category: 'Input',
-    longDesc: 'A 10 k�� variable resistor (rotary knob). The wiper picks a voltage between VCC and GND, giving a smooth 0�l1023 analog value. In the simulator, drag the knob (or use the property panel) to change the value while the simulation runs. Works standalone with ICs (no Arduino needed) �l� the wiper output can drive other IC inputs directly.',
+    longDesc: 'A 10 k° variable resistor (rotary knob). The wiper picks a voltage between VCC and GND, giving a smooth 0–1023 analog value. In the simulator, drag the knob (or use the property panel) to change the value while the simulation runs. Works standalone with ICs (no Arduino needed) — the wiper output can drive other IC inputs directly.',
     use: 'Volume controls, brightness dimmers, position sensors. Connect the wiper to an analog input and read with analogRead().',
     pins: {
       vcc: { label: 'VCC', type: 'power', desc: 'Connect to 5 V (or 3.3 V).' },
-      wiper: { label: 'OUT', type: 'analog', desc: 'Variable output �l� connect to an analog input (A0�lA5).' },
+      wiper: { label: 'OUT', type: 'analog', desc: 'Variable output — connect to an analog input (A0–A5).' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Connect to GND.' },
     },
     props: {
-      value: 'Current wiper position (0�l1023).',
+      value: 'Current wiper position (0–1023).',
       maxValue: 'Full-scale value (default 1023).',
       resistance: 'Resistance in ohms (default 10000).',
     },
-    wiring: 'VCC�r~5V, OUT�r~A0, GND�r~GND.',
+    wiring: 'VCC→5V, OUT→A0, GND→GND.',
     code: `void setup(){
   Serial.begin(9600);
 }
@@ -501,23 +504,23 @@ void loop(){
   joystick: {
     id: 'joystick',
     name: 'Joystick Module',
-    icon: '܋��ۤ{',
+    icon: '🎮',
     category: 'Input',
-    longDesc: 'A two-axis analog joystick with a push button (SW). Each axis is a pair of potentiometers giving a 0�l1023 value (roughly 512 at centre), and the button reads as a digital input (LOW when pressed).',
+    longDesc: 'A two-axis analog joystick with a push button (SW). Each axis is a pair of potentiometers giving a 0–1023 value (roughly 512 at centre), and the button reads as a digital input (LOW when pressed).',
     use: 'Game controllers, robotics, menu navigation. Read X and Y on two analog pins and the button on a digital pin.',
     pins: {
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
       vcc: { label: 'VCC', type: 'power', desc: '5 V power.' },
-      x: { label: 'X', type: 'analog', desc: 'X-axis analog output �l� connect to A0.' },
-      y: { label: 'Y', type: 'analog', desc: 'Y-axis analog output �l� connect to A1.' },
+      x: { label: 'X', type: 'analog', desc: 'X-axis analog output — connect to A0.' },
+      y: { label: 'Y', type: 'analog', desc: 'Y-axis analog output — connect to A1.' },
       sw: { label: 'SW', type: 'digital', desc: 'Push button output (LOW when pressed).' },
     },
     props: {
-      x: 'X-axis position (0�l1023).',
-      y: 'Y-axis position (0�l1023).',
+      x: 'X-axis position (0–1023).',
+      y: 'Y-axis position (0–1023).',
       sw: 'Button state (0 = released, 1 = pressed).',
     },
-    wiring: 'VCC�r~5V, GND�r~GND, X�r~A0, Y�r~A1, SW�r~D2.',
+    wiring: 'VCC→5V, GND→GND, X→A0, Y→A1, SW→D2.',
     code: `void setup(){
   pinMode(2, INPUT_PULLUP);
   Serial.begin(9600);
@@ -534,7 +537,7 @@ void loop(){
   keypad_4x4: {
     id: 'keypad_4x4',
     name: '4\u00d74 Matrix Keypad',
-    icon: '\u2328\ufe0f',
+    icon: '🖱️',
     category: 'Input',
     longDesc: 'A 16-button matrix keypad organized into 4 rows and 4 columns. Pressing a key creates a contact between its row and column lines, allowing 16 inputs using only 8 digital pins.',
     use: 'PIN/passcode entry, menu navigation, numerical input panels. Driven using the Arduino Keypad library.',
@@ -581,25 +584,25 @@ void loop() {
     exampleId: 'keypad_interfacing',
   },
 
-  /* ΀l΀l ACTUATORS ΀l΀l */
+  /* ═══ ACTUATORS ═══ */
   servo: {
     id: 'servo',
     name: 'Servo Motor',
-    icon: 'Ά�ۤ{',
+    icon: '🧱',
     category: 'Actuators',
-    longDesc: 'An RC servo motor that rotates to a precise angle between 0�� and 180��. Driven by a 50 Hz PWM signal whose pulse width encodes the target angle �l� the Servo library does this for you with servo.write(angle).',
+    longDesc: 'An RC servo motor that rotates to a precise angle between 0° and 180°. Driven by a 50 Hz PWM signal whose pulse width encodes the target angle — the Servo library does this for you with servo.write(angle).',
     use: 'Robotics, pan/tilt heads, gauges, automation. One signal wire + power and ground is all it needs.',
     pins: {
-      signal: { label: 'SIG', type: 'pwm', desc: 'Control signal �l� connect to a PWM-capable pin (D9/D10 on Uno).' },
-      vcc: { label: '+', type: 'power', desc: 'Power �l� 5 V.' },
-      gnd: { label: '�t~', type: 'gnd', desc: 'Ground.' },
+      signal: { label: 'SIG', type: 'pwm', desc: 'Control signal — connect to a PWM-capable pin (D9/D10 on Uno).' },
+      vcc: { label: '+', type: 'power', desc: 'Power — 5 V.' },
+      gnd: { label: '−', type: 'gnd', desc: 'Ground.' },
     },
     props: {
-      angle: 'Target angle (0�l180��).',
+      angle: 'Target angle (0–180°).',
       minAngle: 'Minimum angle (default 0).',
       maxAngle: 'Maximum angle (default 180).',
     },
-    wiring: 'SIG�r~D9, +�r~5V, �t~�r~GND.',
+    wiring: 'SIG→D9, +→5V, −→GND.',
     code: `#include <Servo.h>
 Servo s;
 void setup(){ s.attach(9); }
@@ -613,16 +616,16 @@ void loop(){
   dc_motor: {
     id: 'dc_motor',
     name: 'DC Motor',
-    icon: '܋xl',
+    icon: '⬟',
     category: 'Actuators',
-    longDesc: 'A brushed DC motor whose speed follows the PWM duty cycle applied to its input pin �l� 0 stops it, 255 is full speed. The shaft and fan spin proportionally to the PWM value so you can see speed at a glance.',
+    longDesc: 'A brushed DC motor whose speed follows the PWM duty cycle applied to its input pin — 0 stops it, 255 is full speed. The shaft and fan spin proportionally to the PWM value so you can see speed at a glance.',
     use: 'Fans, wheels, pumps. Drive it from a PWM pin; pair with a transistor or motor driver in real hardware to handle the current.',
     pins: {
-      in: { label: 'IN', type: 'pwm', desc: 'Speed input �l� PWM (0�l255).' },
+      in: { label: 'IN', type: 'pwm', desc: 'Speed input — PWM (0–255).' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
     },
     props: { label: 'Motor label shown on the canvas.' },
-    wiring: 'IN�r~D9 (PWM), GND�r~GND.',
+    wiring: 'IN→D9 (PWM), GND→GND.',
     code: `void setup(){
   pinMode(9, OUTPUT);
 }
@@ -636,51 +639,51 @@ void loop(){
   relay: {
     id: 'relay',
     name: 'Relay Module',
-    icon: 'Ά�',
+    icon: '⬟',
     category: 'Actuators',
     longDesc: 'An electromagnetic relay module. A LOW/HIGH control signal on the input pin energises the coil and throws a switch between the Common (COM), Normally-Open (NO) and Normally-Closed (NC) terminals. Use it to switch higher-voltage loads safely.',
     use: 'Switching lamps, fans and other mains or high-current devices from a low-current logic pin. The status LED shows the relay state.',
     pins: {
-      vcc: { label: 'VCC', type: 'power', desc: 'Module power �l� 5 V.' },
+      vcc: { label: 'VCC', type: 'power', desc: 'Module power — 5 V.' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      sig: { label: 'IN', type: 'digital', desc: 'Control signal �l� drives the coil.' },
+      sig: { label: 'IN', type: 'digital', desc: 'Control signal — drives the coil.' },
       com: { label: 'COM', type: 'signal', desc: 'Common contact of the switched circuit.' },
-      no: { label: 'NO', type: 'signal', desc: 'Normally-open contact �l� connects to COM when energised.' },
-      nc: { label: 'NC', type: 'signal', desc: 'Normally-closed contact �l� connected to COM when idle.' },
+      no: { label: 'NO', type: 'signal', desc: 'Normally-open contact — connects to COM when energised.' },
+      nc: { label: 'NC', type: 'signal', desc: 'Normally-closed contact — connected to COM when idle.' },
     },
     props: { label: 'Relay label shown on the canvas.' },
-    wiring: 'VCC�r~5V, GND�r~GND, IN�r~D9, 5V�r~COM, NO�r~LED anode.',
+    wiring: 'VCC→5V, GND→GND, IN→D9, 5V→COM, NO→LED anode.',
     code: `void setup(){
   pinMode(9, OUTPUT);
 }
 void loop(){
-  digitalWrite(9, HIGH);   // relay on, COM�r~NO
+  digitalWrite(9, HIGH);   // relay on, COM→NO
   delay(1000);
-  digitalWrite(9, LOW);    // relay off, COM�r~NC
+  digitalWrite(9, LOW);    // relay off, COM→NC
   delay(1000);
 }`,
     exampleId: 'relay_control',
   },
 
-  /* ΀l΀l SENSORS ΀l΀l */
+  /* ═══ SENSORS ═══ */
   dht11: {
     id: 'dht11',
     name: 'DHT11 Sensor',
-    icon: '܋x�ۤ{',
+    icon: '🌡️',
     category: 'Sensors',
-    longDesc: 'A digital temperature and humidity sensor. It reports 0�l50 ��C temperature and 20�l90 % relative humidity over a single data wire using a custom one-wire protocol (the DHT library handles it). Adjust the simulated values live from the property panel.',
+    longDesc: 'A digital temperature and humidity sensor. It reports 0–50 °C temperature and 20–90 % relative humidity over a single data wire using a custom one-wire protocol (the DHT library handles it). Adjust the simulated values live from the property panel.',
     use: 'Weather stations, greenhouses, climate logging. Read temperature and humidity with the DHT library and print them to the Serial Monitor.',
     pins: {
       vcc: { label: 'VCC', type: 'power', desc: '3.3 V / 5 V power.' },
-      data: { label: 'DAT', type: 'digital', desc: 'One-wire data signal �l� connect to a digital pin.' },
+      data: { label: 'DAT', type: 'digital', desc: 'One-wire data signal — connect to a digital pin.' },
       nc: { label: 'NC', type: 'signal', desc: 'Not connected.' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
     },
     props: {
-      temperature: 'Simulated temperature in ��C (0�l50).',
-      humidity: 'Simulated relative humidity in % (20�l90).',
+      temperature: 'Simulated temperature in °C (0–50).',
+      humidity: 'Simulated relative humidity in % (20–90).',
     },
-    wiring: 'VCC�r~5V, DAT�r~D2, GND�r~GND.',
+    wiring: 'VCC→5V, DAT→D2, GND→GND.',
     code: `#include <DHT.h>
 DHT dht(2, DHT11);
 void setup(){
@@ -700,18 +703,18 @@ void loop(){
   hcsr04: {
     id: 'hcsr04',
     name: 'HC-SR04 Ultrasonic',
-    icon: '܋�',
+    icon: '⬟',
     category: 'Sensors',
-    longDesc: 'An ultrasonic distance sensor that measures 2�l400 cm. Send a 10 ��s HIGH pulse on TRIG; the ECHO pin then stays HIGH for a duration proportional to the distance. Distance (cm) = echoTime(��s) / 58.',
+    longDesc: 'An ultrasonic distance sensor that measures 2–400 cm. Send a 10 µs HIGH pulse on TRIG; the ECHO pin then stays HIGH for a duration proportional to the distance. Distance (cm) = echoTime(µs) / 58.',
     use: 'Obstacle avoidance, parking sensors, tank level gauges. Set the simulated distance from the property panel and read it with pulseIn().',
     pins: {
       vcc: { label: 'VCC', type: 'power', desc: '5 V power.' },
-      trig: { label: 'TRIG', type: 'digital', desc: 'Trigger �l� send a 10 ��s HIGH pulse to start a measurement.' },
-      echo: { label: 'ECHO', type: 'digital', desc: 'Echo �l� returns HIGH for the flight time of the ping.' },
+      trig: { label: 'TRIG', type: 'digital', desc: 'Trigger — send a 10 µs HIGH pulse to start a measurement.' },
+      echo: { label: 'ECHO', type: 'digital', desc: 'Echo — returns HIGH for the flight time of the ping.' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
     },
-    props: { distance: 'Simulated object distance in cm (2�l400).' },
-    wiring: 'VCC�r~5V, TRIG�r~D7, ECHO�r~D8, GND�r~GND.',
+    props: { distance: 'Simulated object distance in cm (2–400).' },
+    wiring: 'VCC→5V, TRIG→D7, ECHO→D8, GND→GND.',
     code: `void setup(){
   pinMode(7, OUTPUT); pinMode(8, INPUT);
   Serial.begin(9600);
@@ -731,17 +734,17 @@ void loop(){
   ldr: {
     id: 'ldr',
     name: 'LDR Photoresistor',
-    icon: '܋~�',
+    icon: '⬟',
     category: 'Sensors',
-    longDesc: 'A light-dependent resistor whose resistance falls as light increases. Wired as a voltage divider it produces a 0�l1023 analog value �l� low in bright light, high in darkness. Change the light level live from the property panel.',
+    longDesc: 'A light-dependent resistor whose resistance falls as light increases. Wired as a voltage divider it produces a 0–1023 analog value — low in bright light, high in darkness. Change the light level live from the property panel.',
     use: 'Automatic night lights, light meters, camera exposure. Read the light level on an analog pin.',
     pins: {
       vcc: { label: 'VCC', type: 'power', desc: '5 V power.' },
-      a: { label: 'A', type: 'analog', desc: 'Analog output (0�l1023) �l� connect to A0.' },
+      a: { label: 'A', type: 'analog', desc: 'Analog output (0–1023) — connect to A0.' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
     },
-    props: { light: 'Simulated light level (0�l1023, higher = brighter).' },
-    wiring: 'VCC�r~5V, A�r~A0, GND�r~GND.',
+    props: { light: 'Simulated light level (0–1023, higher = brighter).' },
+    wiring: 'VCC→5V, A→A0, GND→GND.',
     code: `void setup(){
   Serial.begin(9600);
 }
@@ -757,17 +760,17 @@ void loop(){
   pir: {
     id: 'pir',
     name: 'PIR Motion Sensor',
-    icon: '܋��',
+    icon: '⬟',
     category: 'Sensors',
     longDesc: 'A passive infrared motion sensor. When movement is detected inside its field of view, the OUT pin goes HIGH and its LED lights. Toggle the simulated motion in the property panel to trigger it.',
     use: 'Security alarms, automatic lights, presence detection. Read OUT with digitalRead().',
     pins: {
       vcc: { label: 'VCC', type: 'power', desc: '5 V power.' },
-      out: { label: 'OUT', type: 'digital', desc: 'Motion output �l� HIGH while motion is detected.' },
+      out: { label: 'OUT', type: 'digital', desc: 'Motion output — HIGH while motion is detected.' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
     },
     props: { motion: 'Simulated motion (0 = idle, 1 = motion detected).' },
-    wiring: 'VCC�r~5V, OUT�r~D2, GND�r~GND.',
+    wiring: 'VCC→5V, OUT→D2, GND→GND.',
     code: `void setup(){
   pinMode(2, INPUT);
   pinMode(13, OUTPUT);
@@ -785,13 +788,13 @@ void loop(){
   lm35_sensor: {
     id: 'lm35_sensor',
     name: 'LM35 Temperature Sensor',
-    icon: '܋x�ۤ{',
+    icon: '⬟',
     category: 'Sensors',
     longDesc: 'A precision analog centigrade temperature sensor. Output voltage is linearly proportional to Celsius temperature at 10 mV/\u00b0C, eliminating the need for complex calibration code.',
     use: 'Measuring ambient temperature. Read the output pin with analogRead() and scale the voltage value to calculate degrees Celsius.',
     pins: {
-      VCC: { label: 'VCC', type: 'power', desc: 'Power supply �l� 5 V.' },
-      OUT: { label: 'OUT', type: 'analog', desc: 'Analog voltage output (10 mV/��C) �l� connect to A0�lA5.' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Power supply — 5 V.' },
+      OUT: { label: 'OUT', type: 'analog', desc: 'Analog voltage output (10 mV/°C) — connect to A0–A5.' },
       GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
     },
     props: {
@@ -813,20 +816,20 @@ void loop() {
     exampleId: 'lm35_temperature',
   },
 
-  /* ΀l΀l PASSIVES ΀l΀l */
+  /* ═══ PASSIVES ═══ */
   resistor: {
     id: 'resistor',
     name: 'Resistor',
-    icon: 'Θ�',
+    icon: '⬟',
     category: 'Passive',
-    longDesc: 'A two-terminal component that limits current. Its value in ohms is shown by the colour bands and adjustable in the property panel. A 220 �� resistor in series with an LED is the classic current limiter.',
+    longDesc: 'A two-terminal component that limits current. Its value in ohms is shown by the colour bands and adjustable in the property panel. A 220 ° resistor in series with an LED is the classic current limiter.',
     use: 'Current limiting for LEDs, voltage dividers with sensors, pull-up/pull-down resistors for buttons.',
     pins: {
       p1: { label: '1', type: 'signal', desc: 'Terminal 1 (non-polarised).' },
       p2: { label: '2', type: 'signal', desc: 'Terminal 2 (non-polarised).' },
     },
     props: { value: 'Resistance in ohms (e.g. 220, 10000).' },
-    wiring: 'In series anywhere in a circuit �l� polarity does not matter.',
+    wiring: 'In series anywhere in a circuit — polarity does not matter.',
     code: `// A resistor is a passive component; it needs no code.
 // Example: LED anode -> resistor -> 5V limits LED current.`,
   },
@@ -834,37 +837,37 @@ void loop() {
   capacitor: {
     id: 'capacitor',
     name: 'Capacitor',
-    icon: 'Ά�',
+    icon: '⬟',
     category: 'Passive',
     longDesc: 'An electrolytic capacitor that stores charge. The positive (+) lead is the longer leg; observe polarity when wiring. Capacitors smooth power rails, hold state in timing circuits and block DC.',
     use: 'Decoupling/smoothing power supplies, RC timing, energy storage.',
     pins: {
       pos: { label: '+', type: 'signal', desc: 'Positive terminal (polarised).' },
-      neg: { label: '�t~', type: 'gnd', desc: 'Negative terminal.' },
+      neg: { label: '−', type: 'gnd', desc: 'Negative terminal.' },
     },
-    props: { value: 'Capacitance in ��F (e.g. 100).' },
-    wiring: 'Across the power rails: + to 5V and �t~ to GND to smooth noise.',
+    props: { value: 'Capacitance in °F (e.g. 100).' },
+    wiring: 'Across the power rails: + to 5V and − to GND to smooth noise.',
     code: `// Capacitors are passive components and need no code.`,
   },
 
   breadboard: {
     id: 'breadboard',
     name: 'Breadboard',
-    icon: '܋��',
+    icon: '⨁',
     category: 'Passive',
-    longDesc: 'A solderless prototyping board. The two long power rails on the edges carry + and �t~ along the whole strip; the middle rows connect holes vertically. Use it to build neat, expandable circuits.',
-    use: 'Breadboarding temporary circuits �l� connect power rails to the Arduino and plug LEDs, buttons and sensors into the middle rows.',
+    longDesc: 'A solderless prototyping board. The two long power rails on the edges carry + and − along the whole strip; the middle rows connect holes vertically. Use it to build neat, expandable circuits.',
+    use: 'Breadboarding temporary circuits — connect power rails to the Arduino and plug LEDs, buttons and sensors into the middle rows.',
     pins: {},
     props: {},
-    wiring: 'Wire the + rail to 5V and the �t~ rail to GND, then build your circuit in the middle rows.',
+    wiring: 'Wire the + rail to 5V and the − rail to GND, then build your circuit in the middle rows.',
     code: `// Breadboards are passive; they only route connections.`,
   },
 
-  /* ΀l΀l POWER ΀l΀l */
+  /* ═══ POWER ═══ */
   power_5v: {
     id: 'power_5v',
     name: '5V Power',
-    icon: 'Ά�',
+    icon: '⬟',
     category: 'Power',
     longDesc: 'A standalone 5 V supply terminal. Useful for breadboard power rails or for powering a sub-circuit independently of the board.',
     use: 'Provide a fixed 5 V rail anywhere on the canvas.',
@@ -879,9 +882,9 @@ void loop() {
   power_gnd: {
     id: 'power_gnd',
     name: 'GND',
-    icon: '�{�',
+    icon: '{',
     category: 'Power',
-    longDesc: 'A standalone ground terminal. Every circuit needs a common ground reference �l� use this to give your components a clean ground rail.',
+    longDesc: 'A standalone ground terminal. Every circuit needs a common ground reference — use this to give your components a clean ground rail.',
     use: 'Provide a ground rail anywhere on the canvas.',
     pins: {
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground terminal.' },
@@ -891,33 +894,33 @@ void loop() {
     code: `// Ground rails need no code.`,
   },
 
-  /* ΀l΀l INSTRUMENTS ΀l΀l */
+  /* ═══ INSTRUMENTS ═══ */
   multimeter: {
     id: 'multimeter',
     name: 'Digital Multimeter',
-    icon: '܋��',
+    icon: '⬟',
     category: 'Instruments',
-    longDesc: 'A digital multimeter that measures DC/AC voltage, resistance, continuity, and DC current between two probe points. Select the mode from the properties panel �l� the LCD display updates live during simulation.',
+    longDesc: 'A digital multimeter that measures DC/AC voltage, resistance, continuity, and DC current between two probe points. Select the mode from the properties panel — the LCD display updates live during simulation.',
     use: 'Measuring voltage across components, resistance of resistors, continuity of wires, and current through a series circuit. Place in parallel for voltage, in series for current.',
     pins: {
-      probe_red: { label: 'V+', type: 'signal', desc: 'Red probe �l� positive measurement terminal.' },
-      probe_com: { label: 'COM', type: 'gnd', desc: 'Black probe �l� common / ground terminal.' },
+      probe_red: { label: 'V+', type: 'signal', desc: 'Red probe — positive measurement terminal.' },
+      probe_com: { label: 'COM', type: 'gnd', desc: 'Black probe — common / ground terminal.' },
     },
     props: {
       mode: 'Measurement mode: V_DC (DC Voltage), V_AC (AC Voltage), A_DC (DC Current), RES (Resistance), CONT (Continuity).',
     },
     wiring: 'For voltage: connect V+ and COM in parallel across the component. For current: break the circuit and insert the DMM in series.',
-    code: `// The multimeter is a measuring instrument �l� no Arduino code needed.`,
+    code: `// The multimeter is a measuring instrument — no Arduino code needed.`,
     exampleId: 'dmm_voltage',
   },
 
   func_gen: {
     id: 'func_gen',
     name: 'Function Generator',
-    icon: '�l�',
+    icon: '—',
     category: 'Instruments',
     longDesc: 'A dual-channel DDS function generator that outputs sine, square, triangle, sawtooth, and noise waveforms. Each channel has independent frequency, amplitude, DC offset, phase, and duty cycle controls. The scope display shows live waveforms during simulation.',
-    use: 'Signal source for testing circuits �l� drive LEDs, buzzers, servos, or logic circuits with configurable waveforms. CH1 and CH2 outputs are independent voltage sources.',
+    use: 'Signal source for testing circuits — drive LEDs, buzzers, servos, or logic circuits with configurable waveforms. CH1 and CH2 outputs are independent voltage sources.',
     pins: {
       ch1_out: { label: 'CH1', type: 'signal', desc: 'Channel 1 signal output.' },
       ch1_gnd: { label: 'GND1', type: 'gnd', desc: 'Channel 1 ground.' },
@@ -926,42 +929,42 @@ void loop() {
     },
     props: {
       ch1_wave: 'CH1 waveform: sine, square, triangle, sawtooth, noise.',
-      ch1_freq: 'CH1 frequency in Hz (10�l3000).',
-      ch1_amp: 'CH1 peak-to-peak amplitude in volts (0.1�l10).',
+      ch1_freq: 'CH1 frequency in Hz (10–3000).',
+      ch1_amp: 'CH1 peak-to-peak amplitude in volts (0.1–10).',
       ch1_offset: 'CH1 DC offset in volts (-5 to +5).',
-      ch1_phase: 'CH1 phase in degrees (0�l360).',
-      ch1_duty: 'CH1 duty cycle in percent (5�l95).',
+      ch1_phase: 'CH1 phase in degrees (0–360).',
+      ch1_duty: 'CH1 duty cycle in percent (5–95).',
       ch2_wave: 'CH2 waveform: sine, square, triangle, sawtooth, noise.',
-      ch2_freq: 'CH2 frequency in Hz (10�l3000).',
-      ch2_amp: 'CH2 peak-to-peak amplitude in volts (0.1�l10).',
+      ch2_freq: 'CH2 frequency in Hz (10–3000).',
+      ch2_amp: 'CH2 peak-to-peak amplitude in volts (0.1–10).',
       ch2_offset: 'CH2 DC offset in volts (-5 to +5).',
-      ch2_phase: 'CH2 phase in degrees (0�l360).',
-      ch2_duty: 'CH2 duty cycle in percent (5�l95).',
+      ch2_phase: 'CH2 phase in degrees (0–360).',
+      ch2_duty: 'CH2 duty cycle in percent (5–95).',
     },
     wiring: 'Connect CH1 or CH2 output to your circuit input. Connect the corresponding GND to the circuit ground.',
-    code: `// The function generator is a signal source �l� no Arduino code needed.`,
+    code: `// The function generator is a signal source — no Arduino code needed.`,
     exampleId: 'func_gen_led',
   },
 
-  /* ΀l΀l NEOPIXEL EXTENSIONS ΀l΀l */
+  /* ═══ NEOPIXEL EXTENSIONS ═══ */
   neopixel_strip: {
     id: 'neopixel_strip',
     name: 'NeoPixel Strip (8 LED)',
-    icon: '܋xt',
+    icon: '⬟',
     category: 'Output',
     longDesc: 'An 8-pixel WS2812B addressable LED strip. Each pixel can be set to any RGB colour independently via a single data pin. The strip has DIN (data in) and DOUT (data out) so multiple strips can be daisy-chained.',
     use: 'Creating colour-cycling animations, status indicators, or ambient lighting effects driven from a single Arduino digital pin.',
     pins: {
       VCC: { label: 'VCC', type: 'power', desc: '5 V power supply.' },
-      DIN: { label: 'DIN', type: 'digital', desc: 'Data input �l� connect to an Arduino digital pin (e.g. D6).' },
+      DIN: { label: 'DIN', type: 'digital', desc: 'Data input — connect to an Arduino digital pin (e.g. D6).' },
       GND: { label: 'GND', type: 'gnd', desc: 'Common ground.' },
-      DOUT: { label: 'DOut', type: 'digital', desc: 'Data output �l� chain to the DIN of the next strip.' },
+      DOUT: { label: 'DOut', type: 'digital', desc: 'Data output — chain to the DIN of the next strip.' },
     },
     props: {
       numPixels: 'Number of pixels (default 8).',
-      brightness: 'Global brightness 0�l255.',
+      brightness: 'Global brightness 0–255.',
     },
-    wiring: 'VCC �r~ 5 V, GND �r~ GND, DIN �r~ Arduino D6 (or any digital pin). Use a 330�l470 �� resistor on the data line and a 1000 ��F capacitor across VCC/GND for best results.',
+    wiring: 'VCC → 5 V, GND → GND, DIN → Arduino D6 (or any digital pin). Use a 330–470 ° resistor on the data line and a 1000 °F capacitor across VCC/GND for best results.',
     code: `#include <Adafruit_NeoPixel.h>
 
 #define PIN        6
@@ -989,21 +992,21 @@ void loop() {
   neopixel_ring: {
     id: 'neopixel_ring',
     name: 'NeoPixel Ring (12 LED)',
-    icon: 'Ι�',
+    icon: '⬟',
     category: 'Output',
     longDesc: 'A 12-pixel WS2812B circular LED ring. The LEDs are arranged in a ring, ideal for clocks, compass displays, or decorative light patterns. Uses the same single-wire protocol as other NeoPixel products.',
-    use: 'Building radial animations, rotary indicators, or circular colour effects. Works identically to the NeoPixel Strip in code �l� just a different physical layout.',
+    use: 'Building radial animations, rotary indicators, or circular colour effects. Works identically to the NeoPixel Strip in code — just a different physical layout.',
     pins: {
       VCC: { label: 'VCC', type: 'power', desc: '5 V power supply.' },
-      DIN: { label: 'DIN', type: 'digital', desc: 'Data input �l� connect to an Arduino digital pin.' },
-      DOUT: { label: 'DOut', type: 'digital', desc: 'Data output �l� chain to the next NeoPixel device.' },
+      DIN: { label: 'DIN', type: 'digital', desc: 'Data input — connect to an Arduino digital pin.' },
+      DOUT: { label: 'DOut', type: 'digital', desc: 'Data output — chain to the next NeoPixel device.' },
       GND: { label: 'GND', type: 'gnd', desc: 'Common ground.' },
     },
     props: {
       numPixels: 'Number of pixels (default 12).',
-      brightness: 'Global brightness 0�l255.',
+      brightness: 'Global brightness 0–255.',
     },
-    wiring: 'VCC �r~ 5 V, GND �r~ GND, DIN �r~ Arduino D6. Same decoupling recommendations as the strip (1000 ��F cap + 470 �� resistor on DIN).',
+    wiring: 'VCC → 5 V, GND → GND, DIN → Arduino D6. Same decoupling recommendations as the strip (1000 °F cap + 470 ° resistor on DIN).',
     code: `#include <Adafruit_NeoPixel.h>
 
 #define PIN        6
@@ -1029,30 +1032,30 @@ void loop() {
     exampleId: 'neopixel_color_cycle',
   },
 
-  /* ΀l΀l ICs ΀l΀l */
+  /* ═══ ICs ═══ */
   ic_555: {
     id: 'ic_555',
     name: '555 Timer IC',
-    icon: '�{�ۤ{',
+    icon: '⬟',
     category: 'ICs',
-    longDesc: 'The classic 555 timer IC configured in astable mode. The simulator automatically detects connected R1, R2, and C values and calculates the real oscillation frequency using the standard formulas: f = 1.44 / ((R1 + 2��R2) �� C). Works standalone without an Arduino �l� the OUT pin drives LEDs and other components directly.',
+    longDesc: 'The classic 555 timer IC configured in astable mode. The simulator automatically detects connected R1, R2, and C values and calculates the real oscillation frequency using the standard formulas: f = 1.44 / ((R1 + 2°R2) ° C). Works standalone without an Arduino — the OUT pin drives LEDs and other components directly.',
     use: 'Generating square waves, LED blinkers, tone generators, PWM sources. Connect R1 between VCC and DIS, R2 between DIS and THR, and C between THR/TRIG and GND.',
     pins: {
       GND: { label: 'GND', type: 'gnd', desc: 'Ground pin.' },
-      TRIG: { label: 'TRIG', type: 'digital', desc: 'Trigger input �l� starts the cycle when voltage falls below 1/3 VCC.' },
-      OUT: { label: 'OUT', type: 'digital', desc: 'Output pin �l� drives HIGH (~VCC) or LOW (GND).' },
-      RST: { label: 'RST', type: 'digital', desc: 'Reset �l� tie to VCC to keep timer active.' },
-      DIS: { label: 'DIS', type: 'digital', desc: 'Discharge pin �l� internal transistor sinks current to GND when OUT is LOW.' },
-      THR: { label: 'THR', type: 'digital', desc: 'Threshold input �l� resets the cycle when voltage exceeds 2/3 VCC.' },
-      CV: { label: 'CV', type: 'signal', desc: 'Control voltage �l� add a 0.1 ��F cap to GND for noise bypass.' },
-      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage (4.5�l16 V).' },
+      TRIG: { label: 'TRIG', type: 'digital', desc: 'Trigger input — starts the cycle when voltage falls below 1/3 VCC.' },
+      OUT: { label: 'OUT', type: 'digital', desc: 'Output pin — drives HIGH (~VCC) or LOW (GND).' },
+      RST: { label: 'RST', type: 'digital', desc: 'Reset — tie to VCC to keep timer active.' },
+      DIS: { label: 'DIS', type: 'digital', desc: 'Discharge pin — internal transistor sinks current to GND when OUT is LOW.' },
+      THR: { label: 'THR', type: 'digital', desc: 'Threshold input — resets the cycle when voltage exceeds 2/3 VCC.' },
+      CV: { label: 'CV', type: 'signal', desc: 'Control voltage — add a 0.1 °F cap to GND for noise bypass.' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage (4.5–16 V).' },
     },
     props: {
       frequency: 'Fallback frequency in Hz (used when R/C values cannot be detected).',
       dutyCycle: 'Fallback duty cycle in % (used when R/C values cannot be detected).',
     },
-    wiring: 'VCC�r~5V, GND�r~GND, RST�r~VCC, CV�r~0.1��F�r~GND, OUT�r~LED+resistor�r~GND. For astable: VCC�r~R1�r~DIS, DIS�r~R2�r~THR, THR�r~C�r~GND, TRIG�r~THR.',
-    code: `// The 555 timer runs autonomously �l� no Arduino code needed.
+    wiring: 'VCC→5V, GND→GND, RST→VCC, CV→0.1°F→GND, OUT→LED+resistor→GND. For astable: VCC→R1→DIS, DIS→R2→THR, THR→C→GND, TRIG→THR.',
+    code: `// The 555 timer runs autonomously — no Arduino code needed.
 // Set frequency/duty via component values:
 //   R1, R2 (resistors) and C (capacitor) determine timing.
 //   f = 1.44 / ((R1 + 2*R2) * C)`,
@@ -1062,49 +1065,49 @@ void loop() {
   max7219: {
     id: 'max7219',
     name: 'MAX7219 LED Matrix',
-    icon: '܋��',
+    icon: '⬟',
     category: 'ICs',
-    longDesc: 'An 8��8 LED dot matrix driver using the MAX7219 chip with SPI interface. Supports cascading via DOUT�r~DIN. The simulator decodes SPI commands and renders the LED matrix on the canvas. Works with or without an Arduino.',
+    longDesc: 'An 8°8 LED dot matrix driver using the MAX7219 chip with SPI interface. Supports cascading via DOUT→DIN. The simulator decodes SPI commands and renders the LED matrix on the canvas. Works with or without an Arduino.',
     use: 'Scrolling text displays, animations, bar graphs. Driven via SPI with DIN, CS, and CLK pins.',
     pins: {
       VCC: { label: 'VCC', type: 'power', desc: '5 V power supply.' },
       GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      DIN: { label: 'DIN', type: 'digital', desc: 'SPI data input �l� connect to MOSI or any digital pin.' },
-      CS: { label: 'CS', type: 'digital', desc: 'Chip select �l� active LOW. Latch data on rising edge.' },
+      DIN: { label: 'DIN', type: 'digital', desc: 'SPI data input — connect to MOSI or any digital pin.' },
+      CS: { label: 'CS', type: 'digital', desc: 'Chip select — active LOW. Latch data on rising edge.' },
       CLK: { label: 'CLK', type: 'digital', desc: 'SPI clock input.' },
-      DOUT: { label: 'DOUT', type: 'digital', desc: 'Data output �l� chain to the next MAX7219 DIN.' },
+      DOUT: { label: 'DOUT', type: 'digital', desc: 'Data output — chain to the next MAX7219 DIN.' },
     },
     props: {},
-    wiring: 'VCC�r~5V, GND�r~GND, DIN�r~D11 (MOSI), CS�r~D10, CLK�r~D13 (SCK). For cascading: DOUT�r~next DIN.',
+    wiring: 'VCC→5V, GND→GND, DIN→D11 (MOSI), CS→D10, CLK→D13 (SCK). For cascading: DOUT→next DIN.',
     code: `// Uses SPI to send 16-bit frames: [address][data]
-// Address 0x01�l0x08: row data (bit 0 = left, bit 7 = right)
+// Address 0x01–0x08: row data (bit 0 = left, bit 7 = right)
 // Address 0x09: decode mode (0x00 = no decode)
-// Address 0x0A: intensity (0x00�l0x0F)
+// Address 0x0A: intensity (0x00–0x0F)
 // Address 0x0B: scan limit (0x07 = all 8 rows)
 // Address 0x0C: shutdown (0x01 = normal operation)`,
     exampleId: 'max7219',
   },
 
-  /* ΀l΀l DISPLAYS ΀l΀l */
+  /* ═══ DISPLAYS ═══ */
   ili9341: {
     id: 'ili9341',
     name: 'ILI9341 TFT Display',
-    icon: '܋��ۤ{',
+    icon: '📺',
     category: 'Output',
-    longDesc: 'A 2.4�l� 320��240 TFT LCD driven by the ILI9341 controller with SPI interface. Supports Adafruit_GFX drawing primitives �l� lines, rectangles, circles, triangles, text, and pixel-level control. The simulator renders a 5��7 ASCII font for text and colour RGB drawing primitives.',
+    longDesc: 'A 2.4— 320°240 TFT LCD driven by the ILI9341 controller with SPI interface. Supports Adafruit_GFX drawing primitives — lines, rectangles, circles, triangles, text, and pixel-level control. The simulator renders a 5°7 ASCII font for text and colour RGB drawing primitives.',
     use: 'Colour graphics, dashboards, games, data visualization. Uses SPI: CS, DC, RST, MOSI, SCK, and LED backlight pins.',
     pins: {
       VCC: { label: 'VCC', type: 'power', desc: '3.3 V / 5 V power.' },
       GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      CS: { label: 'CS', type: 'digital', desc: 'Chip select �l� active LOW.' },
-      DC: { label: 'DC', type: 'digital', desc: 'Data/Command select �l� HIGH for data, LOW for command.' },
-      RST: { label: 'RST', type: 'digital', desc: 'Hardware reset �l� active LOW.' },
+      CS: { label: 'CS', type: 'digital', desc: 'Chip select — active LOW.' },
+      DC: { label: 'DC', type: 'digital', desc: 'Data/Command select — HIGH for data, LOW for command.' },
+      RST: { label: 'RST', type: 'digital', desc: 'Hardware reset — active LOW.' },
       MOSI: { label: 'MOSI', type: 'digital', desc: 'SPI master-out data.' },
       SCK: { label: 'SCK', type: 'digital', desc: 'SPI clock.' },
-      LED: { label: 'LED', type: 'power', desc: 'Backlight control �l� tie to VCC for always-on.' },
+      LED: { label: 'LED', type: 'power', desc: 'Backlight control — tie to VCC for always-on.' },
     },
     props: {},
-    wiring: 'VCC�r~3.3V/5V, GND�r~GND, CS�r~D10, DC�r~D9, RST�r~D8, MOSI�r~D11, SCK�r~D13, LED�r~VCC.',
+    wiring: 'VCC→3.3V/5V, GND→GND, CS→D10, DC→D9, RST→D8, MOSI→D11, SCK→D13, LED→VCC.',
     code: `#include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
@@ -1129,23 +1132,23 @@ void loop() {}`,
     exampleId: 'ili9341',
   },
 
-  /* ΀l΀l SENSORS ΀l΀l */
+  /* ═══ SENSORS ═══ */
   ir_obstacle: {
     id: 'ir_obstacle',
     name: 'IR Obstacle Sensor',
-    icon: '܋�',
+    icon: '📏',
     category: 'Sensors',
     longDesc: 'An infrared obstacle detection sensor. When an object is detected within range, the OUT pin goes LOW (active-low). The LED indicator lights up when an obstacle is detected. Toggle the simulated detection in the property panel.',
     use: 'Obstacle avoidance robots, line followers, proximity detection. Read OUT with digitalRead().',
     pins: {
       VCC: { label: 'VCC', type: 'power', desc: '3.3 V / 5 V power.' },
       GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      OUT: { label: 'OUT', type: 'digital', desc: 'Digital output �l� LOW when obstacle detected, HIGH when clear.' },
+      OUT: { label: 'OUT', type: 'digital', desc: 'Digital output — LOW when obstacle detected, HIGH when clear.' },
     },
     props: {
       detected: 'Simulated detection state (0 = clear, 1 = obstacle detected).',
     },
-    wiring: 'VCC�r~5V, GND�r~GND, OUT�r~D2.',
+    wiring: 'VCC→5V, GND→GND, OUT→D2.',
     code: `void setup(){
   pinMode(2, INPUT);
   pinMode(13, OUTPUT);
@@ -1162,18 +1165,18 @@ void loop(){
   flex_sensor: {
     id: 'flex_sensor',
     name: 'Flex Sensor',
-    icon: '�l�ۤ{',
+    icon: '🧱',
     category: 'Sensors',
-    longDesc: 'A resistive flex sensor whose resistance increases when bent. Wired as a voltage divider, it produces a 0�l1023 analog value proportional to the bend angle. Adjust the simulated bend value in the property panel.',
+    longDesc: 'A resistive flex sensor whose resistance increases when bent. Wired as a voltage divider, it produces a 0–1023 analog value proportional to the bend angle. Adjust the simulated bend value in the property panel.',
     use: 'Gesture detection, glove interfaces, robotics finger control. Read the analog output with analogRead().',
     pins: {
       p1: { label: '1', type: 'power', desc: 'Connect to 5V (through a fixed resistor for voltage divider).' },
-      p2: { label: '2', type: 'analog', desc: 'Analog output �l� connect to an analog input pin.' },
+      p2: { label: '2', type: 'analog', desc: 'Analog output — connect to an analog input pin.' },
     },
     props: {
       bend: 'Simulated bend angle (0 = straight, 1023 = fully bent).',
     },
-    wiring: '5V�r~p1 (via 10k�� resistor), p2�r~A0, other end of fixed resistor�r~GND.',
+    wiring: '5V→p1 (via 10k° resistor), p2→A0, other end of fixed resistor→GND.',
     code: `void setup(){
   Serial.begin(9600);
 }
@@ -1188,18 +1191,18 @@ void loop(){
   thermistor: {
     id: 'thermistor',
     name: 'NTC Thermistor',
-    icon: '܋x�ۤ{',
+    icon: '⬟',
     category: 'Sensors',
     longDesc: 'A Negative Temperature Coefficient thermistor whose resistance decreases as temperature rises. Wired as a voltage divider, it produces an analog value proportional to temperature. Adjust the simulated temperature in the property panel.',
     use: 'Temperature measurement, thermal protection, environmental monitoring. Read the analog output with analogRead().',
     pins: {
-      p1: { label: '1', type: 'analog', desc: 'Analog output �l� connect to an analog input pin.' },
+      p1: { label: '1', type: 'analog', desc: 'Analog output — connect to an analog input pin.' },
       p2: { label: '2', type: 'gnd', desc: 'Connect to GND (through the thermistor to form a voltage divider).' },
     },
     props: {
-      temperature: 'Simulated temperature in ��C (default 25��C).',
+      temperature: 'Simulated temperature in °C (default 25°C).',
     },
-    wiring: '5V�r~10k�� fixed resistor�r~p1, p1�r~A0, p2�r~GND.',
+    wiring: '5V→10k° fixed resistor→p1, p1→A0, p2→GND.',
     code: `void setup(){
   Serial.begin(9600);
 }
@@ -1214,29 +1217,29 @@ void loop(){
 }`,
   },
 
-  /* ΀l΀l PASSIVES ΀l΀l */
+  /* ═══ PASSIVES ═══ */
   diode_1n4007: {
     id: 'diode_1n4007',
     name: '1N4007 Diode',
-    icon: '΂�',
+    icon: '⬟',
     category: 'Passive',
     longDesc: 'A general-purpose silicon rectifier diode. Current flows from anode to cathode with a ~0.7 V forward voltage drop. Blocks reverse current. Used for polarity protection, rectification, and flyback protection.',
     use: 'Reverse polarity protection, rectifying AC, flyback diodes across inductive loads (relays, motors).',
     pins: {
-      anode: { label: 'A', type: 'signal', desc: 'Anode �l� current flows INTO this pin (from positive side).' },
-      cathode: { label: 'K', type: 'signal', desc: 'Cathode �l� current flows OUT of this pin (toward load/GND).' },
+      anode: { label: 'A', type: 'signal', desc: 'Anode — current flows INTO this pin (from positive side).' },
+      cathode: { label: 'K', type: 'signal', desc: 'Cathode — current flows OUT of this pin (toward load/GND).' },
     },
     props: {},
     wiring: 'Place in series: anode to positive source, cathode to load.',
-    code: `// Diodes are passive components �l� no code needed.
+    code: `// Diodes are passive components — no code needed.
 // Anode (+) -> Diode -> Cathode (-) -> Load`,
   },
 
-  /* ΀l΀l ACTUATORS ΀l΀l */
+  /* ═══ ACTUATORS ═══ */
   l298n: {
     id: 'l298n',
     name: 'L298N Motor Driver',
-    icon: '܋�x',
+    icon: '⚙️',
     category: 'Actuators',
     longDesc: 'Dual H-Bridge motor driver module. Controls direction and speed (PWM) for up to two DC motors independently. IN1/IN2 control Motor A direction, IN3/IN4 control Motor B. ENA/ENB accept PWM for speed control.',
     use: 'Driving DC motors, stepper motors, solenoids. IN1/IN2 set Motor A direction (HIGH/LOW = forward, LOW/HIGH = reverse), ENA sets speed via PWM.',
@@ -1245,17 +1248,17 @@ void loop(){
       IN2: { label: 'IN2', type: 'digital', desc: 'Motor A direction input 2.' },
       IN3: { label: 'IN3', type: 'digital', desc: 'Motor B direction input 1.' },
       IN4: { label: 'IN4', type: 'digital', desc: 'Motor B direction input 2.' },
-      ENA: { label: 'ENA', type: 'pwm', desc: 'Motor A speed (PWM) �l� jumper on for full speed.' },
-      ENB: { label: 'ENB', type: 'pwm', desc: 'Motor B speed (PWM) �l� jumper on for full speed.' },
+      ENA: { label: 'ENA', type: 'pwm', desc: 'Motor A speed (PWM) — jumper on for full speed.' },
+      ENB: { label: 'ENB', type: 'pwm', desc: 'Motor B speed (PWM) — jumper on for full speed.' },
       OUT1: { label: 'M1+', type: 'signal', desc: 'Motor A positive terminal.' },
       OUT2: { label: 'M1-', type: 'signal', desc: 'Motor A negative terminal.' },
       OUT3: { label: 'M2+', type: 'signal', desc: 'Motor B positive terminal.' },
       OUT4: { label: 'M2-', type: 'signal', desc: 'Motor B negative terminal.' },
-      VS: { label: 'VS', type: 'power', desc: 'Motor supply voltage (6�l12V). 5V pin output when jumper is on.' },
-      GND: { label: 'GND', type: 'gnd', desc: 'Common ground �l� must share GND with Arduino.' },
+      VS: { label: 'VS', type: 'power', desc: 'Motor supply voltage (6–12V). 5V pin output when jumper is on.' },
+      GND: { label: 'GND', type: 'gnd', desc: 'Common ground — must share GND with Arduino.' },
     },
     props: {},
-    wiring: 'IN1�r~D8, IN2�r~D9, ENA�r~D10(PWM). VS�r~external 7�l12V. GND�r~Arduino GND. OUT1/OUT2�r~Motor A.',
+    wiring: 'IN1→D8, IN2→D9, ENA→D10(PWM). VS→external 7–12V. GND→Arduino GND. OUT1/OUT2→Motor A.',
     code: `void setup(){
   pinMode(8, OUTPUT);
   pinMode(9, OUTPUT);
@@ -1276,19 +1279,19 @@ void loop(){
   servo_continuous: {
     id: 'servo_continuous',
     name: 'Cont. Rotation Servo',
-    icon: 'Ά�ۤ{',
+    icon: '⬟',
     category: 'Actuators',
-    longDesc: 'Continuous rotation servo motor. Unlike standard servos (0�l180��), this spins continuously in both directions. A 1500��s pulse stops the motor; above 1500��s spins one direction, below spins the other. Speed is proportional to pulse width deviation.',
+    longDesc: 'Continuous rotation servo motor. Unlike standard servos (0–180°), this spins continuously in both directions. A 1500µs pulse stops the motor; above 1500µs spins one direction, below spins the other. Speed is proportional to pulse width deviation.',
     use: 'Wheels on robots, conveyor belts, panning mechanisms. Use analogWrite or Servo library to set speed.',
     pins: {
-      signal: { label: 'SIG', type: 'pwm', desc: 'PWM signal �l� pulse width controls speed and direction.' },
-      vcc: { label: '+', type: 'power', desc: 'Power supply (4.8�l6V typical).' },
-      gnd: { label: '�t~', type: 'gnd', desc: 'Ground.' },
+      signal: { label: 'SIG', type: 'pwm', desc: 'PWM signal — pulse width controls speed and direction.' },
+      vcc: { label: '+', type: 'power', desc: 'Power supply (4.8–6V typical).' },
+      gnd: { label: '−', type: 'gnd', desc: 'Ground.' },
     },
     props: {
-      speed: 'Simulated speed: �t~100% (full CCW) to +100% (full CW), 0% = stopped.',
+      speed: 'Simulated speed: −100% (full CCW) to +100% (full CW), 0% = stopped.',
     },
-    wiring: 'SIG�r~D9 (PWM), +�r~5V (or external 5V), �t~�r~GND.',
+    wiring: 'SIG→D9 (PWM), +→5V (or external 5V), −→GND.',
     code: `void setup(){
   pinMode(9, OUTPUT);
 }
@@ -1305,24 +1308,24 @@ void loop(){
     exampleId: 'servo_continuous_spin',
   },
 
-  /* ΀l΀l INPUT ΀l΀l */
+  /* ═══ INPUT ═══ */
   rotary_encoder: {
     id: 'rotary_encoder',
     name: 'Rotary Encoder EC11',
-    icon: '܋z�ۤ{',
+    icon: '⬟',
     category: 'Input',
-    longDesc: 'EC11 rotary encoder with push button. Provides infinite rotation with quadrature output (A, B channels 90�� out of phase). Turns left/right and presses like a button. Use interrupts for accurate position tracking.',
+    longDesc: 'EC11 rotary encoder with push button. Provides infinite rotation with quadrature output (A, B channels 90° out of phase). Turns left/right and presses like a button. Use interrupts for accurate position tracking.',
     use: 'Menu navigation, volume control, parameter adjustment. Use attachInterrupt() on pin A to count edges.',
     pins: {
-      A: { label: 'A', type: 'digital', desc: 'Channel A �l� connect to interrupt pin (D2/D3).' },
-      B: { label: 'B', type: 'digital', desc: 'Channel B �l� connect to digital input.' },
-      SW: { label: 'SW', type: 'digital', desc: 'Push switch �l� active LOW (internal pull-up).' },
+      A: { label: 'A', type: 'digital', desc: 'Channel A — connect to interrupt pin (D2/D3).' },
+      B: { label: 'B', type: 'digital', desc: 'Channel B — connect to digital input.' },
+      SW: { label: 'SW', type: 'digital', desc: 'Push switch — active LOW (internal pull-up).' },
       GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
     },
     props: {
       position: 'Rotational position (drag slider to simulate turning).',
     },
-    wiring: 'A�r~D2 (interrupt), B�r~D3, SW�r~D4 (INPUT_PULLUP), GND�r~GND.',
+    wiring: 'A→D2 (interrupt), B→D3, SW→D4 (INPUT_PULLUP), GND→GND.',
     code: `volatile int counter = 0;
 void setup(){
   attachInterrupt(digitalPinToInterrupt(2), readEncoder, CHANGE);
@@ -1344,24 +1347,24 @@ void loop(){
   dip_switch: {
     id: 'dip_switch',
     name: 'DIP Switch 8-Pos',
-    icon: '܋z�ۤ{',
+    icon: '⬟',
     category: 'Input',
-    longDesc: '8-position DIP switch bank. Each toggle is an independent SPST switch �l� up = ON (HIGH), down = OFF (LOW). Commonly used for hardware address configuration, mode selection, or binary input.',
+    longDesc: '8-position DIP switch bank. Each toggle is an independent SPST switch — up = ON (HIGH), down = OFF (LOW). Commonly used for hardware address configuration, mode selection, or binary input.',
     use: 'Set binary input values, hardware configuration, mode selection. Read each pin with digitalRead().',
     pins: {
-      '1': { label: '1', type: 'digital', desc: 'Switch 1 �l� bit 0 of binary value.' },
-      '2': { label: '2', type: 'digital', desc: 'Switch 2 �l� bit 1 of binary value.' },
-      '3': { label: '3', type: 'digital', desc: 'Switch 3 �l� bit 2.' },
-      '4': { label: '4', type: 'digital', desc: 'Switch 4 �l� bit 3.' },
-      '5': { label: '5', type: 'digital', desc: 'Switch 5 �l� bit 4.' },
-      '6': { label: '6', type: 'digital', desc: 'Switch 6 �l� bit 5.' },
-      '7': { label: '7', type: 'digital', desc: 'Switch 7 �l� bit 6.' },
-      '8': { label: '8', type: 'digital', desc: 'Switch 8 �l� bit 7 (MSB).' },
+      '1': { label: '1', type: 'digital', desc: 'Switch 1 — bit 0 of binary value.' },
+      '2': { label: '2', type: 'digital', desc: 'Switch 2 — bit 1 of binary value.' },
+      '3': { label: '3', type: 'digital', desc: 'Switch 3 — bit 2.' },
+      '4': { label: '4', type: 'digital', desc: 'Switch 4 — bit 3.' },
+      '5': { label: '5', type: 'digital', desc: 'Switch 5 — bit 4.' },
+      '6': { label: '6', type: 'digital', desc: 'Switch 6 — bit 5.' },
+      '7': { label: '7', type: 'digital', desc: 'Switch 7 — bit 6.' },
+      '8': { label: '8', type: 'digital', desc: 'Switch 8 — bit 7 (MSB).' },
     },
     props: {
-      switches: '8-bit binary value (0�l255). Each bit controls one switch position.',
+      switches: '8-bit binary value (0–255). Each bit controls one switch position.',
     },
-    wiring: 'Connect pins 1�l8 to Arduino digital inputs D2�lD9. Use INPUT_PULLUP for each pin.',
+    wiring: 'Connect pins 1–8 to Arduino digital inputs D2–D9. Use INPUT_PULLUP for each pin.',
     code: `int pins[8] = {2,3,4,5,6,7,8,9};
 void setup(){
   for(int i=0;i<8;i++) pinMode(pins[i], INPUT_PULLUP);
@@ -1377,24 +1380,24 @@ void loop(){
     exampleId: 'dip_switch_binary',
   },
 
-  /* ΀l΀l SENSORS / COMMUNICATION ΀l΀l */
+  /* ═══ SENSORS / COMMUNICATION ═══ */
   hc05: {
     id: 'hc05',
     name: 'HC-05 Bluetooth',
-    icon: '܋�',
+    icon: '📏',
     category: 'Sensors',
-    longDesc: 'HC-05 serial-to-Bluetooth transceiver module (UART). Pairs with a phone/tablet to send and receive data over Bluetooth Serial Port Profile (SPP). Defaults to 9600 baud. TXD�r~Arduino RX, RXD�r~Arduino TX (with voltage divider for 3.3V logic).',
+    longDesc: 'HC-05 serial-to-Bluetooth transceiver module (UART). Pairs with a phone/tablet to send and receive data over Bluetooth Serial Port Profile (SPP). Defaults to 9600 baud. TXD→Arduino RX, RXD→Arduino TX (with voltage divider for 3.3V logic).',
     use: 'Wireless communication with phone apps, remote control, telemetry. Send characters from phone to Arduino via Bluetooth.',
     pins: {
-      VCC: { label: 'VCC', type: 'power', desc: 'Power supply (3.6�l6V).' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Power supply (3.6–6V).' },
       GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      TXD: { label: 'TXD', type: 'digital', desc: 'Bluetooth TX �r~ Arduino RX (D0).' },
-      RXD: { label: 'RXD', type: 'digital', desc: 'Bluetooth RX �r~ Arduino TX (D1) via voltage divider.' },
+      TXD: { label: 'TXD', type: 'digital', desc: 'Bluetooth TX → Arduino RX (D0).' },
+      RXD: { label: 'RXD', type: 'digital', desc: 'Bluetooth RX → Arduino TX (D1) via voltage divider.' },
     },
     props: {
       connected: 'Toggle Bluetooth connection status (simulated).',
     },
-    wiring: 'VCC�r~5V, GND�r~GND, TXD�r~Arduino D0 (RX), RXD�r~Arduino D1 (TX via 1k��/2k�� divider).',
+    wiring: 'VCC→5V, GND→GND, TXD→Arduino D0 (RX), RXD→Arduino D1 (TX via 1k°/2k° divider).',
     code: `void setup(){
   Serial.begin(9600);
   pinMode(13, OUTPUT);
@@ -1412,26 +1415,26 @@ void loop(){
   ds3231: {
     id: 'ds3231',
     name: 'DS3231 RTC Module',
-    icon: '܋�|',
+    icon: '⬟',
     category: 'Sensors',
-    longDesc: 'DS3231 high-precision RTC (Real-Time Clock) module with battery backup �l� I2C @ 0x68. Provides year/month/day/hour/minute/second with ��2ppm accuracy, built-in temperature sensor, and two programmable alarms. Time is simulated in real-time during simulation.',
+    longDesc: 'DS3231 high-precision RTC (Real-Time Clock) module with battery backup — I2C @ 0x68. Provides year/month/day/hour/minute/second with °2ppm accuracy, built-in temperature sensor, and two programmable alarms. Time is simulated in real-time during simulation.',
     use: 'Data logging with timestamps, clocks, scheduled events, alarm systems. Read time with the RTClib or Wire library and print to Serial/LCD.',
     pins: {
       VCC: { label: 'VCC', type: 'power', desc: '5V power supply.' },
       GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      SCL: { label: 'SCL', type: 'digital', desc: 'I2C clock line �l� connect to A5 (Uno) or SCL.' },
-      SDA: { label: 'SDA', type: 'digital', desc: 'I2C data line �l� connect to A4 (Uno) or SDA.' },
+      SCL: { label: 'SCL', type: 'digital', desc: 'I2C clock line — connect to A5 (Uno) or SCL.' },
+      SDA: { label: 'SDA', type: 'digital', desc: 'I2C data line — connect to A4 (Uno) or SDA.' },
     },
     props: {
-      hour: 'Initial hour (0�l23).',
-      minute: 'Initial minute (0�l59).',
-      second: 'Initial second (0�l59).',
-      day: 'Initial day (1�l31).',
-      month: 'Initial month (1�l12).',
-      year: 'Initial year (0�l99, represents 2000�l2099).',
-      temperature: 'Simulated temperature in ��C.',
+      hour: 'Initial hour (0–23).',
+      minute: 'Initial minute (0–59).',
+      second: 'Initial second (0–59).',
+      day: 'Initial day (1–31).',
+      month: 'Initial month (1–12).',
+      year: 'Initial year (0–99, represents 2000–2099).',
+      temperature: 'Simulated temperature in °C.',
     },
-    wiring: 'VCC�r~5V, GND�r~GND, SCL�r~A5, SDA�r~A4.',
+    wiring: 'VCC→5V, GND→GND, SCL→A5, SDA→A4.',
     code: `#include <Wire.h>
 #include <RtcDS3231.h>
 
@@ -1460,20 +1463,20 @@ void loop(){
   vl53l0x: {
     id: 'vl53l0x',
     name: 'VL53L0X Time-of-Flight Sensor',
-    icon: '܋{',
+    icon: '⬟',
     category: 'Sensors',
     longDesc: 'VL53L0X is a time-of-flight distance sensor that measures the distance to an object using laser light. It communicates via I2C and can measure distances from 30mm to 2m with high accuracy.',
     use: 'Distance measurement, obstacle detection, robotics, and automation. Read distance values using the Wire library or dedicated VL53L0X libraries.',
     pins: {
       VCC: { label: 'VCC', type: 'power', desc: '3.3V or 5V power supply.' },
       GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      SDA: { label: 'SDA', type: 'digital', desc: 'I2C data line �l� connect to A4 (Uno) or SDA.' },
-      SCL: { label: 'SCL', type: 'digital', desc: 'I2C clock line �l� connect to A5 (Uno) or SCL.' },
+      SDA: { label: 'SDA', type: 'digital', desc: 'I2C data line — connect to A4 (Uno) or SDA.' },
+      SCL: { label: 'SCL', type: 'digital', desc: 'I2C clock line — connect to A5 (Uno) or SCL.' },
     },
     props: {
       distance: 'Simulated distance in millimeters (default 100mm).',
     },
-    wiring: 'VCC�r~3.3V/5V, GND�r~GND, SDA�r~A4, SCL�r~A5.',
+    wiring: 'VCC→3.3V/5V, GND→GND, SDA→A4, SCL→A5.',
     code: `#include <Wire.h>
 #include <Adafruit_VL53L0X.h>
 
@@ -1529,22 +1532,22 @@ void loop() {
   bme280: {
     id: 'bme280',
     name: 'BME280 Environmental Sensor',
-    icon: '܋x�ۤ{',
+    icon: '⬟',
     category: 'Sensors',
     longDesc: 'BME280 is a combined humidity, pressure, and temperature sensor. It communicates via I2C and provides accurate measurements for weather monitoring and environmental applications.',
     use: 'Weather monitoring, indoor climate control, altitude estimation. Read sensor values using the Wire library or dedicated BME280 libraries.',
     pins: {
       VCC: { label: 'VCC', type: 'power', desc: '3.3V or 5V power supply.' },
       GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      SDA: { label: 'SDA', type: 'digital', desc: 'I2C data line �l� connect to A4 (Uno) or SDA.' },
-      SCL: { label: 'SCL', type: 'digital', desc: 'I2C clock line �l� connect to A5 (Uno) or SCL.' },
+      SDA: { label: 'SDA', type: 'digital', desc: 'I2C data line — connect to A4 (Uno) or SDA.' },
+      SCL: { label: 'SCL', type: 'digital', desc: 'I2C clock line — connect to A5 (Uno) or SCL.' },
     },
     props: {
-      temperature: 'Simulated temperature in Celsius (default 25��C).',
+      temperature: 'Simulated temperature in Celsius (default 25°C).',
       pressure: 'Simulated pressure in hPa (default 1013.25 hPa).',
       humidity: 'Simulated humidity in % (default 50%).',
     },
-    wiring: 'VCC�r~3.3V/5V, GND�r~GND, SDA�r~A4, SCL�r~A5.',
+    wiring: 'VCC→3.3V/5V, GND→GND, SDA→A4, SCL→A5.',
     code: `#include <Wire.h>
 #include <SimpleBME280.h>
 
@@ -1583,10 +1586,10 @@ void loop() {
     exampleId: 'simplebme280_altitude',
   },
 
-  /* ΀l΀l LED COLOR VARIANTS ΀l΀l */
+  /* ═══ LED COLOR VARIANTS ═══ */
   led_green: {
     id: 'led_green', name: 'LED (Green)', icon: '\u{1f7e2}', category: 'Output',
-    longDesc: 'Green light-emitting diode. Identical electrical characteristics to a standard LED �l� always pair with a 220\u03a9 series resistor.',
+    longDesc: 'Green light-emitting diode. Identical electrical characteristics to a standard LED — always pair with a 220\u03a9 series resistor.',
     use: 'Same as a regular LED but provides a green indicator colour. Use for status lights, traffic-light simulations, or any circuit where green is preferred.',
     pins: { anode: { label: '+', type: 'pwm', desc: 'Anode (+). Connect to a digital/PWM pin through a 220\u03a9 resistor.' }, cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode (\u2212). Connect to GND.' } },
     props: { color: 'LED colour hex code (default #33ff66).', colorName: 'Human-readable colour name.' },
@@ -1595,7 +1598,7 @@ void loop() {
   },
 
   led_blue: {
-    id: 'led_blue', name: 'LED (Blue)', icon: '\u{1f535}', category: 'Output',
+    id: 'led_blue', name: 'LED (Blue)', icon: '🟢', category: 'Output',
     longDesc: 'Blue light-emitting diode. Typical forward voltage ~3.0 V (higher than red/green). Always use a series resistor.',
     use: 'Indicator LED where blue light is needed. Blue LEDs have a slightly higher forward voltage (~3 V) than red/green (~2 V).',
     pins: { anode: { label: '+', type: 'pwm', desc: 'Anode (+). Connect to digital/PWM pin via resistor.' }, cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode (\u2212). Connect to GND.' } },
@@ -1605,7 +1608,7 @@ void loop() {
   },
 
   led_yellow: {
-    id: 'led_yellow', name: 'LED (Yellow)', icon: '\u{1f7e1}', category: 'Output',
+    id: 'led_yellow', name: 'LED (Yellow)', icon: '🔵', category: 'Output',
     longDesc: 'Yellow light-emitting diode. Forward voltage ~2.1 V. Pair with a 220\u03a9 series resistor.',
     use: 'Status indicators, warning lights, traffic-light simulations.',
     pins: { anode: { label: '+', type: 'pwm', desc: 'Anode (+). Connect to digital/PWM pin via resistor.' }, cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode (\u2212). Connect to GND.' } },
@@ -1615,7 +1618,7 @@ void loop() {
   },
 
   led_orange: {
-    id: 'led_orange', name: 'LED (Orange)', icon: '\u{1f7e0}', category: 'Output',
+    id: 'led_orange', name: 'LED (Orange)', icon: '🟡', category: 'Output',
     longDesc: 'Orange light-emitting diode. Forward voltage ~2.0 V. Pair with a 220\u03a9 series resistor.',
     use: 'Warning indicators, temperature status, traffic-light simulations.',
     pins: { anode: { label: '+', type: 'pwm', desc: 'Anode (+). Connect to digital/PWM pin via resistor.' }, cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode (\u2212). Connect to GND.' } },
@@ -1625,7 +1628,7 @@ void loop() {
   },
 
   led_white: {
-    id: 'led_white', name: 'LED (White)', icon: '\u26aa', category: 'Output',
+    id: 'led_white', name: 'LED (White)', icon: '🟠', category: 'Output',
     longDesc: 'White light-emitting diode. Forward voltage ~3.0\u20133.5 V (highest among common LEDs). Always use a series resistor.',
     use: 'General illumination, backlighting, indicator where white light is needed.',
     pins: { anode: { label: '+', type: 'pwm', desc: 'Anode (+). Connect to digital/PWM pin via resistor.' }, cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode (\u2212). Connect to GND.' } },
@@ -1634,7 +1637,7 @@ void loop() {
     code: 'void setup() { pinMode(13, OUTPUT); }\nvoid loop() {\n  digitalWrite(13, HIGH); delay(500);\n  digitalWrite(13, LOW);  delay(500);\n}',
   },
 
-  /* ΀l΀l OUTPUT / DISPLAYS ΀l΀l */
+  /* ═══ OUTPUT / DISPLAYS ═══ */
   lcd2004_i2c: {
     id: 'lcd2004_i2c', name: 'LCD 20x4 (I2C)', icon: '\u{1f5a5}\ufe0f', category: 'Output',
     longDesc: 'A 20-character \u00d7 4-line character LCD display with an integrated PCF8574 I2C backpack. Uses only 2 data pins (SDA, SCL) instead of the usual 6+ parallel pins.',
@@ -1680,7 +1683,7 @@ void loop() {
     code: '#include <Adafruit_GFX.h>\n#include <RGBmatrixPanel.h>\n#define CLK 11  #define LAT 10\n#define OE 9   #define A A0\n#define B A1   #define C A2\n#define D A3\nRGBmatrixPanel matrix(A,B,C,D,CLK,LAT,OE, false, 64);\nvoid setup() {\n  matrix.begin();\n  matrix.drawPixel(10, 10, matrix.Color333(7, 0, 0));\n}\nvoid loop() {}',
   },
 
-  /* ΀l΀l ACTUATORS ΀l΀l */
+  /* ═══ ACTUATORS ═══ */
   stepper_28byj: {
     id: 'stepper_28byj', name: '28BYJ-48 Stepper', icon: '\u2699\ufe0f', category: 'Actuators',
     longDesc: 'A 5 V 4-phase unipolar stepper motor with built-in ULN2003-style driver coils. 2048 steps per revolution (5.625\u00b0/step). Low power, widely used in robotics and CNC projects.',
@@ -1691,7 +1694,7 @@ void loop() {
     code: '#include <Stepper.h>\nStepper motor(2048, 8, 10, 9, 11);\nvoid setup() {\n  motor.setSpeed(10);\n  motor.step(2048);  // one full revolution\n}\nvoid loop() {}',
   },
 
-  /* ΀l΀l AUDIO ΀l΀l */
+  /* ═══ AUDIO ═══ */
   max98357a: {
     id: 'max98357a', name: 'MAX98357A I2S Amp', icon: '\u{1f50a}', category: 'Audio',
     longDesc: 'A 3.2 W monaural Class-D I2S audio amplifier with digital input, flexible gain control (3\u201315 dB), and BTL differential output. Converts I2S digital audio to analog speaker output.',
@@ -1714,10 +1717,10 @@ void loop() {
     pins: { pos: { label: '+', type: 'signal', desc: 'Positive terminal.' }, neg: { label: '\u2212', type: 'signal', desc: 'Negative terminal.' } },
     props: { impedance: 'Speaker impedance in ohms (default 4).', power_rating: 'Max RMS power in watts (default 3.0).' },
     wiring: 'Connect to amplifier output (e.g. MAX98357A OUT+/OUT\u2212). Do NOT connect directly to Arduino pins.',
-    code: '// Speaker needs an amplifier �l� see MAX98357A example.',
+    code: '// Speaker needs an amplifier — see MAX98357A example.',
   },
 
-  /* ΀l΀l SENSORS ΀l΀l */
+  /* ═══ SENSORS ═══ */
   mpu6050: {
     id: 'mpu6050', name: 'MPU6050 6-Axis IMU', icon: '\u{1f9ed}', category: 'Sensors',
     longDesc: 'GY-521 MPU-6050 module combining a 3-axis gyroscope and 3-axis accelerometer with a 16-bit ADC. Communicates via I2C. Features live 3D orientation visualisation.',
@@ -1729,7 +1732,7 @@ void loop() {
   },
 
   ir_receiver: {
-    id: 'ir_receiver', name: 'IR Receiver TSOP4838', icon: '\u{1f4f1}', category: 'Sensors',
+    id: 'ir_receiver', name: 'IR Receiver TSOP4838', icon: '📋', category: 'Sensors',
     longDesc: 'TSOP4838 38 kHz infrared receiver module. Demodulates IR remote-control signals (NEC, RC5, Sony SIRC, etc.) and outputs a digital pulse train for decoding.',
     use: 'Remote control decoding, wireless data reception, home automation input.',
     pins: { OUT: { label: 'OUT', type: 'digital', desc: 'Demodulated digital output \u2192 digital pin.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' }, VCC: { label: 'VCC', type: 'power', desc: '5 V power supply.' } },
@@ -1739,7 +1742,7 @@ void loop() {
   },
 
   gps_neo6m: {
-    id: 'gps_neo6m', name: 'GPS NEO-6M/8M', icon: '\u{1f6f0}\ufe0f', category: 'Sensors',
+    id: 'gps_neo6m', name: 'GPS NEO-6M/8M', icon: '📱', category: 'Sensors',
     longDesc: 'NEO-6M/8M GPS module with TinyGPS++ simulation. Provides latitude, longitude, altitude, satellite count, ground speed, and time via UART NMEA stream.',
     use: 'Location tracking, navigation, geo-fencing, time synchronisation, vehicle tracking.',
     pins: { VCC: { label: 'VCC', type: 'power', desc: '3.3 V or 5 V power.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' }, TX: { label: 'TX', type: 'digital', desc: 'GPS TX \u2192 Arduino RX (soft or hardware serial).' }, RX: { label: 'RX', type: 'digital', desc: 'GPS RX \u2192 Arduino TX.' } },
@@ -1772,7 +1775,7 @@ void loop() {
     id: 'water_flow_sensor', name: 'YF-S201 Water Flow', icon: '\u{1f4a7}', category: 'Sensors',
     longDesc: 'YF-S201 Hall-effect water flow sensor. A hall-effect element inside a pipe generates pulses as water flows past a magnetised rotor. Approximately 450 pulses per litre (F = Q x 7.5 where F is Hz and Q is L/min).',
     use: 'Measuring water flow rate and total volume in cooling systems, irrigation projects, water meters, and Arduino-based liquid dispensers.',
-    pins: { VCC: { label: 'VCC', type: 'power', desc: '+5 V supply (red wire).' }, SIG: { label: 'SIG', type: 'digital', desc: 'Pulse output �l� connect to an Arduino interrupt-capable digital pin (e.g. D2).' }, GND: { label: 'GND', type: 'gnd', desc: 'Common ground (black wire).' } },
+    pins: { VCC: { label: 'VCC', type: 'power', desc: '+5 V supply (red wire).' }, SIG: { label: 'SIG', type: 'digital', desc: 'Pulse output — connect to an Arduino interrupt-capable digital pin (e.g. D2).' }, GND: { label: 'GND', type: 'gnd', desc: 'Common ground (black wire).' } },
     props: { flowRate: 'Current flow rate 0\u201330 L/min.' },
     wiring: 'VCC \u2192 5 V, GND \u2192 GND, SIG \u2192 D2. Use interrupt pin for accurate pulse counting.',
     code: 'volatile unsigned long pulseCount = 0;\nconst float CALIBRATION = 7.5; // Hz per L/min\n\nvoid flowPulse() { pulseCount++; }\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(2, INPUT_PULLUP);\n  attachInterrupt(digitalPinToInterrupt(2), flowPulse, RISING);\n}\n\nvoid loop() {\n  unsigned long count;\n  noInterrupts(); count = pulseCount; interrupts();\n  float lpm = count / CALIBRATION;\n  float ml  = lpm * (millis() / 60000.0);\n  Serial.print("Flow: "); Serial.print(lpm);\n  Serial.print(" L/min  Vol: "); Serial.print(ml);\n  Serial.println(" mL");\n  delay(500);\n}',
@@ -1788,7 +1791,7 @@ void loop() {
     code: '#include "HX711.h"\nHX711 scale(D2, D3); // DT, SCK\n\nvoid setup() {\n  Serial.begin(9600);\n  scale.set_scale(2280);\n  scale.tare();\n}\nvoid loop() {\n  float weight = scale.get_units(10);\n  Serial.print("Weight: ");\n  Serial.print(weight, 1);\n  Serial.println(" kg");\n  delay(300);\n}',
   },
 
-  /* ΀l΀l PASSIVES ΀l΀l */
+  /* ═══ PASSIVES ═══ */
   breadboard_small: {
     id: 'breadboard_small', name: 'Breadboard (Small)', icon: '\u{1f7e6}', category: 'Passive',
     longDesc: '170 tie-point mini breadboard with 16 columns split into upper (a\u2013e) and lower (f\u2013j) halves plus 4 power rails. Ideal for DIP IC circuits and small prototypes.',
@@ -1796,10 +1799,10 @@ void loop() {
     pins: { rp: { label: '+', type: 'power', desc: 'Top positive power rail.' }, rn: { label: '\u2212', type: 'gnd', desc: 'Top negative power rail.' }, bp: { label: '+', type: 'power', desc: 'Bottom positive power rail.' }, bn: { label: '\u2212', type: 'gnd', desc: 'Bottom negative power rail.' } },
     props: {},
     wiring: 'Place components across the centre channel. Connect power rails to VCC and GND.',
-    code: '// Breadboard is passive �l� no code needed.',
+    code: '// Breadboard is passive — no code needed.',
   },
 
-  /* ΀l΀l POWER ΀l΀l */
+  /* ═══ POWER ═══ */
   mb102_power: {
     id: 'mb102_power', name: 'MB102 Power Supply', icon: '\u26a1', category: 'Power',
     longDesc: 'MB102 breadboard power supply module with DC barrel jack and USB input. Dual AMS1117 regulators provide switchable 3.3 V / 5 V output to top and bottom breadboard rails independently.',
@@ -1811,7 +1814,7 @@ void loop() {
     },
     props: { powered: 'Power switch (0=off, 1=on).', topVoltage: 'Top rail voltage: OFF, 3.3V, or 5V.', bottomVoltage: 'Bottom rail voltage: OFF, 3.3V, or 5V.' },
     wiring: 'Plug directly onto breadboard power rails, or wire VCC/GND pins to your circuit.',
-    code: '// Power module is passive �l� no code needed.',
+    code: '// Power module is passive — no code needed.',
   },
 
   bench_power_supply: {
@@ -1824,18 +1827,18 @@ void loop() {
     code: '// Bench supply is passive \u2014 no code needed. Connect to your circuit.',
   },
 
-  /* ΀l΀l COMMUNICATION ΀l΀l */
+  /* ═══ COMMUNICATION ═══ */
   wifi_module: {
     id: 'wifi_module', name: 'Wi-Fi Hotspot', icon: '\u{1f4f6}', category: 'Communication',
     longDesc: 'Simulated Wi-Fi access point (hotspot). The ESP32 must match this component\'s SSID and password to connect to WiFi. Without this component on the canvas, WiFi.begin() will fail with "SSID not found". Place it on the canvas and configure its SSID and password to enable WiFi connectivity.',
     use: 'IoT projects, remote monitoring, cloud dashboards, MQTT messaging, HTTP server, WebSocket communication. Required for any WiFi-based project.',
     pins: {},
     props: { ssid: 'Wi-Fi network name (SSID). The ESP32 must use this exact name.', password: 'Wi-Fi password. The ESP32 must use this exact password.', channel: 'Wi-Fi channel (1-13).' },
-    wiring: 'No physical wiring �l� this is a wireless access point. Configure SSID and password in the properties panel, then use WiFi.begin(ssid, password) in your Arduino code.',
+    wiring: 'No physical wiring — this is a wireless access point. Configure SSID and password in the properties panel, then use WiFi.begin(ssid, password) in your Arduino code.',
     code: '// Place a Wi-Fi Hotspot component on the canvas.\n// Configure its SSID and password in the properties panel.\n// Then in your Arduino code:\n#include <WiFi.h>\nWiFi.begin("ArduSim_Network", "password123");\nwhile (WiFi.status() != WL_CONNECTED) {\n  delay(500);\n  Serial.print(".");\n}\nSerial.println("Connected!");',
   },
 
-  /* ΀l΀l DIGITAL ICs ΀l΀l */
+  /* ═══ DIGITAL ICs ═══ */
   ic_74hc00: {
     id: 'ic_74hc00', name: '74HC00 Quad NAND', icon: '\u2b97', category: 'Digital ICs',
     longDesc: 'Quad 2-input NAND gate. Each gate outputs LOW only when both inputs are HIGH. Four independent gates in a single 14-pin DIP package.',
@@ -1955,7 +1958,7 @@ void loop() {
     },
     props: {},
     wiring: 'VCC\u21925V, GND\u2192GND, /OE\u2192GND (always enabled), DIR\u2192digital pin.',
-    code: '// Bus transceiver is combinational �l� set DIR pin HIGH or LOW.',
+    code: '// Bus transceiver is combinational — set DIR pin HIGH or LOW.',
   },
 
   ic_74hc74: {
@@ -2035,7 +2038,7 @@ void loop() {
     },
     props: {},
     wiring: 'VCC\u21925V, GND\u2192GND, A\u2013D\u2192BCD inputs, a\u2013g\u2192common-anode 7-segment display segments.',
-    code: '// Connect BCD counter outputs to A\u2013D. Segments drive directly �l� no code needed.',
+    code: '// Connect BCD counter outputs to A\u2013D. Segments drive directly — no code needed.',
   },
 
   ic_74hc148: {
@@ -2071,10 +2074,10 @@ void loop() {
     },
     props: {},
     wiring: 'VCCP\u2192+12V, VCCN\u2192\u221212V (or GND for single supply). INP/INN to inputs, OUT to output.',
-    code: '// Op-amp is analog �l� configure gain with external R1, R2 resistors.\n// Non-inverting: Vout = Vin \u00d7 (1 + R2/R1)',
+    code: '// Op-amp is analog — configure gain with external R1, R2 resistors.\n// Non-inverting: Vout = Vin \u00d7 (1 + R2/R1)',
   },
 
-  /* ΀l΀l INSTRUMENTS ΀l΀l */
+  /* ═══ INSTRUMENTS ═══ */
   dso_4ch: {
     id: 'dso_4ch', name: '2-Ch Digital Oscilloscope', icon: '\u223f', category: 'Instruments',
     longDesc: '2-channel digital storage oscilloscope with phosphor display, AC/DC coupling, adjustable trigger, auto-measurement, cursors, math channel, and spectrum/XY display modes.',
@@ -2082,41 +2085,41 @@ void loop() {
     pins: { ch1_in: { label: 'CH1', type: 'signal', desc: 'Channel 1 input.' }, ch2_in: { label: 'CH2', type: 'signal', desc: 'Channel 2 input.' }, gnd: { label: 'GND', type: 'gnd', desc: 'Ground reference for probes.' } },
     props: { powered: 'Power switch (0/1).', runStop: 'Run/Stop toggle.', timebase: 'Time per division (seconds).', trig_source: 'Trigger source: ch1, ch2.', trig_level: 'Trigger level (V).', ch1_vdiv: 'CH1 Volts/division.', ch2_vdiv: 'CH2 Volts/division.', ch1_coupling: 'CH1 coupling: dc, ac, gnd.', ch2_coupling: 'CH2 coupling: dc, ac, gnd.', dsoMode: 'Display mode: scope, spectrum, xy.' },
     wiring: 'Connect signal wires to CH1 or CH2 inputs. Connect GND to circuit ground.',
-    code: '// Oscilloscope is a measurement instrument �l� no Arduino code needed.',
+    code: '// Oscilloscope is a measurement instrument — no Arduino code needed.',
   },
 
-  /* ΀l΀l NEW COMPONENTS ΀l΀l */
+  /* ═══ NEW COMPONENTS ═══ */
   bh1750: {
     id: 'bh1750',
     name: 'BH1750 Light Sensor',
-    icon: '΄l',
+    icon: '⬟',
     category: 'Sensors',
-    longDesc: 'BH1750 ambient light intensity sensor module using I2C communication at address 0x23. Digital output in lux (1�l65535 lx). Used in automatic lighting systems, weather stations, and light-sensitive projects.',
+    longDesc: 'BH1750 ambient light intensity sensor module using I2C communication at address 0x23. Digital output in lux (1–65535 lx). Used in automatic lighting systems, weather stations, and light-sensitive projects.',
     use: 'Automatic lighting, brightness control, environmental monitoring.',
     pins: {
-      vcc: { label: 'VCC', type: 'power', desc: '3.3V�l5V power supply.' },
+      vcc: { label: 'VCC', type: 'power', desc: '3.3V–5V power supply.' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock �l� connect to A5 (Uno) / D22 (ESP32).' },
-      sda: { label: 'SDA', type: 'digital', desc: 'I2C data �l� connect to A4 (Uno) / D21 (ESP32).' },
+      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock — connect to A5 (Uno) / D22 (ESP32).' },
+      sda: { label: 'SDA', type: 'digital', desc: 'I2C data — connect to A4 (Uno) / D21 (ESP32).' },
     },
-    wiring: 'VCC�r~5V, GND�r~GND, SDA�r~A4, SCL�r~A5.',
+    wiring: 'VCC→5V, GND→GND, SDA→A4, SCL→A5.',
     code: `#include <Wire.h>\n#include <BH1750.h>\nBH1750 lightMeter;\nvoid setup(){\n  Wire.begin();\n  lightMeter.begin();\n  Serial.begin(9600);\n}\nvoid loop(){\n  float lux = lightMeter.readLightLevel();\n  Serial.print("Lux: ");\n  Serial.println(lux);\n  delay(1000);\n}`,
   },
 
   ina219: {
     id: 'ina219',
     name: 'INA219 Power Monitor',
-    icon: 'Ά�',
+    icon: '📊',
     category: 'Sensors',
-    longDesc: 'INA219 bidirectional current and power monitor module using I2C at address 0x40. Measures bus voltage (0�l26V), shunt voltage, current (up to 3.2A), and power.',
+    longDesc: 'INA219 bidirectional current and power monitor module using I2C at address 0x40. Measures bus voltage (0–26V), shunt voltage, current (up to 3.2A), and power.',
     use: 'Battery monitoring, power consumption analysis, solar projects.',
     pins: {
-      vcc: { label: 'VCC', type: 'power', desc: '3.3V�l5V power supply.' },
+      vcc: { label: 'VCC', type: 'power', desc: '3.3V–5V power supply.' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock �l� connect to A5 (Uno) / D22 (ESP32).' },
-      sda: { label: 'SDA', type: 'digital', desc: 'I2C data �l� connect to A4 (Uno) / D21 (ESP32).' },
+      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock — connect to A5 (Uno) / D22 (ESP32).' },
+      sda: { label: 'SDA', type: 'digital', desc: 'I2C data — connect to A4 (Uno) / D21 (ESP32).' },
     },
-    wiring: 'VCC�r~5V, GND�r~GND, SDA�r~A4, SCL�r~A5.',
+    wiring: 'VCC→5V, GND→GND, SDA→A4, SCL→A5.',
     code: `#include <Wire.h>\n#include <Adafruit_INA219.h>\nAdafruit_INA219 ina219;\nvoid setup(){\n  Serial.begin(9600);\n  ina219.begin();\n}\nvoid loop(){\n  float busVoltage = ina219.getBusVoltage_V();\n  float current = ina219.getCurrent_mA();\n  float power = ina219.getPower_mW();\n  Serial.print("V: "); Serial.print(busVoltage);\n  Serial.print(" I: "); Serial.print(current);\n  Serial.print("mA P: "); Serial.print(power);\n  Serial.println("mW");\n  delay(1000);\n}`,
     exampleId: 'ina219_solar_tracker',
   },
@@ -2124,85 +2127,85 @@ void loop() {
   max6675: {
     id: 'max6675',
     name: 'MAX6675 Thermocouple',
-    icon: '܋��',
+    icon: '🌡️',
     category: 'Sensors',
-    longDesc: 'MAX6675 K-type thermocouple-to-digital converter using SPI. Measures 0�l1024 ��C with 0.25 ��C resolution.',
+    longDesc: 'MAX6675 K-type thermocouple-to-digital converter using SPI. Measures 0–1024 °C with 0.25 °C resolution.',
     use: 'High-temperature measurement, oven control, industrial sensing.',
     pins: {
       vcc: { label: 'VCC', type: 'power', desc: '5V power supply.' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      cs: { label: 'CS', type: 'digital', desc: 'Chip select �l� any digital pin.' },
-      clk: { label: 'CLK', type: 'digital', desc: 'SPI clock �l� D13 (Uno).' },
-      do: { label: 'DO', type: 'digital', desc: 'SPI data out �l� D12 (Uno).' },
+      cs: { label: 'CS', type: 'digital', desc: 'Chip select — any digital pin.' },
+      clk: { label: 'CLK', type: 'digital', desc: 'SPI clock — D13 (Uno).' },
+      do: { label: 'DO', type: 'digital', desc: 'SPI data out — D12 (Uno).' },
     },
-    wiring: 'VCC�r~5V, GND�r~GND, CS�r~D10, CLK�r~D13, DO�r~D12.',
+    wiring: 'VCC→5V, GND→GND, CS→D10, CLK→D13, DO→D12.',
     code: `#include <max6675.h>\nint thermoDO = 12;\nint thermoCS = 10;\nint thermoCLK = 13;\nMAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);\nvoid setup(){\n  Serial.begin(9600);\n}\nvoid loop(){\n  Serial.print("C = ");\n  Serial.println(thermocouple.readCelsius());\n  delay(1000);\n}`,
   },
 
   u8g2_oled: {
     id: 'u8g2_oled',
     name: 'U8g2 OLED Display',
-    icon: '܋��',
+    icon: '⬟',
     category: 'Output',
     longDesc: 'Monochrome OLED display (128x64 SSD1306/SH1106) controlled via U8g2 library. Supports I2C and SPI.',
     use: 'Dashboards, status displays, small UI screens.',
     pins: {
       vcc: { label: 'VCC', type: 'power', desc: '3.3V / 5V power.' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock �l� connect to A5 (Uno) / D22 (ESP32).' },
-      sda: { label: 'SDA', type: 'digital', desc: 'I2C data �l� connect to A4 (Uno) / D21 (ESP32).' },
+      scl: { label: 'SCL', type: 'digital', desc: 'I2C clock — connect to A5 (Uno) / D22 (ESP32).' },
+      sda: { label: 'SDA', type: 'digital', desc: 'I2C data — connect to A4 (Uno) / D21 (ESP32).' },
     },
-    wiring: 'VCC�r~5V, GND�r~GND, SDA�r~A4, SCL�r~A5.',
+    wiring: 'VCC→5V, GND→GND, SDA→A4, SCL→A5.',
     code: `#include <U8g2lib.h>\nU8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0);\nvoid setup(){\n  u8g2.begin();\n}\nvoid loop(){\n  u8g2.clearBuffer();\n  u8g2.setFont(u8g2_font_ncenB08_tr);\n  u8g2.drawStr(0, 15, "Hello U8g2!");\n  u8g2.sendBuffer();\n  delay(1000);\n}`,
   },
 
   tft_display: {
     id: 'tft_display',
     name: 'TFT_eSPI Display',
-    icon: '܋��',
+    icon: '⬟',
     category: 'Output',
     longDesc: 'Color TFT display (ILI9341/ST7789, 240x320) controlled via TFT_eSPI library. SPI with high-speed rendering.',
     use: 'GUIs, graphs, video output, touch interfaces.',
     pins: {
       vcc: { label: 'VCC', type: 'power', desc: '3.3V power supply.' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      sck: { label: 'SCK', type: 'digital', desc: 'SPI clock �l� D13 (Uno).' },
-      mosi: { label: 'MOSI', type: 'digital', desc: 'SPI data �l� D11 (Uno).' },
-      cs: { label: 'CS', type: 'digital', desc: 'Chip select �l� D10 (Uno).' },
+      sck: { label: 'SCK', type: 'digital', desc: 'SPI clock — D13 (Uno).' },
+      mosi: { label: 'MOSI', type: 'digital', desc: 'SPI data — D11 (Uno).' },
+      cs: { label: 'CS', type: 'digital', desc: 'Chip select — D10 (Uno).' },
     },
-    wiring: 'VCC�r~3.3V, GND�r~GND, SCK�r~D13, MOSI�r~D11, CS�r~D10.',
+    wiring: 'VCC→3.3V, GND→GND, SCK→D13, MOSI→D11, CS→D10.',
     code: `#include <TFT_eSPI.h>\nTFT_eSPI tft = TFT_eSPI();\nvoid setup(){\n  tft.init();\n  tft.setRotation(1);\n  tft.fillScreen(TFT_BLACK);\n  tft.setTextColor(TFT_WHITE, TFT_BLACK);\n  tft.setTextSize(2);\n}\nvoid loop(){\n  tft.setCursor(10, 10);\n  tft.println("Hello TFT!");\n  delay(1000);\n}`,
   },
 
   sd_card: {
     id: 'sd_card',
     name: 'SD Card Module',
-    icon: '܋~�',
+    icon: '💾',
     category: 'Communication',
     longDesc: 'SD card reader/writer module using SPI interface. Supports FAT16/FAT32 file systems on micro SD cards up to 32GB.',
     use: 'Data logging, file storage, configuration backup.',
     pins: {
       vcc: { label: 'VCC', type: 'power', desc: '5V power supply.' },
       gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
-      miso: { label: 'MISO', type: 'digital', desc: 'SPI master in slave out �l� D12 (Uno).' },
-      mosi: { label: 'MOSI', type: 'digital', desc: 'SPI master out slave in �l� D11 (Uno).' },
-      sck: { label: 'SCK', type: 'digital', desc: 'SPI clock �l� D13 (Uno).' },
-      cs: { label: 'CS', type: 'digital', desc: 'Chip select �l� D10 (Uno).' },
+      miso: { label: 'MISO', type: 'digital', desc: 'SPI master in slave out — D12 (Uno).' },
+      mosi: { label: 'MOSI', type: 'digital', desc: 'SPI master out slave in — D11 (Uno).' },
+      sck: { label: 'SCK', type: 'digital', desc: 'SPI clock — D13 (Uno).' },
+      cs: { label: 'CS', type: 'digital', desc: 'Chip select — D10 (Uno).' },
     },
-    wiring: 'VCC�r~5V, GND�r~GND, CS�r~D10, MOSI�r~D11, MISO�r~D12, SCK�r~D13.',
+    wiring: 'VCC→5V, GND→GND, CS→D10, MOSI→D11, MISO→D12, SCK→D13.',
     code: `#include <SD.h>\n#include <SPI.h>\n#define CS_PIN 10\nvoid setup(){\n  Serial.begin(9600);\n  if(!SD.begin(CS_PIN)){\n    Serial.println("SD init failed!");\n    return;\n  }\n  Serial.println("SD initialized.");\n  File f = SD.open("test.txt", FILE_WRITE);\n  if(f){\n    f.println("Hello SD!");\n    f.close();\n  }\n}\nvoid loop(){}`,
   },
 
   ir_led: {
     id: 'ir_led',
     name: 'IR LED',
-    icon: '\uD83D\uDD34',
+    icon: '🔆',
     category: 'Sensors',
-    longDesc: 'Infrared LED transmitter �l� emits IR light when driven HIGH. Use with a current-limiting resistor (220\u03A9). Pair with an IR Receiver TSOP4838 for wireless communication.',
+    longDesc: 'Infrared LED transmitter — emits IR light when driven HIGH. Use with a current-limiting resistor (220\u03A9). Pair with an IR Receiver TSOP4838 for wireless communication.',
     use: 'IR remote control transmitters, obstacle detection, proximity sensors.',
     pins: {
-      anode: { label: '+', type: 'digital', desc: 'Anode �l� connect to a digital pin through a 220\u03A9 resistor.' },
-      cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode �l� connect to GND.' },
+      anode: { label: '+', type: 'digital', desc: 'Anode — connect to a digital pin through a 220\u03A9 resistor.' },
+      cathode: { label: '\u2212', type: 'gnd', desc: 'Cathode — connect to GND.' },
     },
     wiring: 'Anode\u2192D3 (via 220\u03A9), Cathode\u2192GND.',
     code: `const int IR_PIN = 3;\nvoid setup(){\n  pinMode(IR_PIN, OUTPUT);\n}\nvoid loop(){\n  digitalWrite(IR_PIN, HIGH);\n  delay(500);\n  digitalWrite(IR_PIN, LOW);\n  delay(500);\n}`,
@@ -2222,18 +2225,18 @@ void loop() {
   },
 };
 
-/* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|
+/* ════════════════════════════════════════════════════════════════════════════════════════════════
    LIBRARY REFERENCE DATA
    Each entry documents an Arduino library supported by ArduSim:
    what it does, include directive, key API functions, and example code.
-   ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+════════════════════════════════════════════════════════════════════════════════════════════════ */
 
 const GUIDE_LIBRARIES = [
-  /* ΀l΀l CORE ΀l΀l */
+  /* ═══ CORE ═══ */
   {
     id: 'wire',
     name: 'Wire (I2C)',
-    icon: '܋��',
+    icon: '⚙️',
     category: 'Core',
     include: '<Wire.h>',
     desc: 'I2C communication library for master/slave data exchange. Used to connect LCDs, sensors, RTC modules, and other I2C peripherals.',
@@ -2269,7 +2272,7 @@ const GUIDE_LIBRARIES = [
   {
     id: 'spi',
     name: 'SPI',
-    icon: '܋��',
+    icon: '⬟',
     category: 'Core',
     include: '<SPI.h>',
     desc: 'Serial Peripheral Interface library for high-speed synchronous data transfer. Used with SD cards, displays, and RF modules.',
@@ -2298,7 +2301,7 @@ const GUIDE_LIBRARIES = [
   {
     id: 'eeprom',
     name: 'EEPROM',
-    icon: '܋~�',
+    icon: '⬟',
     category: 'Core',
     include: '<EEPROM.h>',
     desc: 'Read and write persistent data to simulated EEPROM (512 bytes). Data survives between simulation runs.',
@@ -2328,11 +2331,11 @@ const GUIDE_LIBRARIES = [
     exampleId: null,
   },
 
-  /* ΀l΀l DISPLAY ΀l΀l */
+  /* ═══ DISPLAY ═══ */
   {
     id: 'liquidcrystal',
     name: 'LiquidCrystal',
-    icon: '܋��ۤ{',
+    icon: '📺',
     category: 'Display',
     include: '<LiquidCrystal.h>',
     desc: 'Control HD44780 character LCD displays (16x2, 20x4) via parallel interface.',
@@ -2361,7 +2364,7 @@ const GUIDE_LIBRARIES = [
   {
     id: 'liquidcrystal_i2c',
     name: 'LiquidCrystal_I2C',
-    icon: '܋��ۤ{',
+    icon: '⬟',
     category: 'Display',
     include: '<LiquidCrystal_I2C.h>',
     desc: 'Control HD44780 LCD displays via I2C backpack (PCF8574). Supports 16x2 and 20x4 displays.',
@@ -2394,7 +2397,7 @@ const GUIDE_LIBRARIES = [
   {
     id: 'adafruit_ssd1306',
     name: 'Adafruit SSD1306',
-    icon: '܋��ۤ{',
+    icon: '⬟',
     category: 'Display',
     include: '<Adafruit_SSD1306.h>',
     desc: 'Drive SSD1306-based 128x64 OLED displays over I2C or SPI.',
@@ -2431,11 +2434,11 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, & Wire, -1);
     exampleId: 'oled_ssd1306',
   },
 
-  /* ΀l΀l SENSORS ΀l΀l */
+  /* ═══ SENSORS ═══ */
   {
     id: 'dht',
     name: 'DHT',
-    icon: '܋x�ۤ{',
+    icon: '📏',
     category: 'Sensors',
     include: '<DHT.h>',
     desc: 'Read temperature and humidity from DHT11 and DHT22 sensors.',
@@ -2470,7 +2473,7 @@ DHT dht(DHTPIN, DHTTYPE);
   {
     id: 'newping',
     name: 'NewPing',
-    icon: '܋�',
+    icon: '⬟',
     category: 'Sensors',
     include: '<NewPing.h>',
     desc: 'Ultrasonic sensor library for HC-SR04. Provides accurate distance measurement with multi-ping and median filtering.',
@@ -2502,18 +2505,18 @@ NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
     exampleId: 'ultrasonic',
   },
 
-  /* ΀l΀l ACTUATORS ΀l΀l */
+  /* ═══ ACTUATORS ═══ */
   {
     id: 'servo',
     name: 'Servo',
-    icon: 'Ά�ۤ{',
+    icon: '🧱',
     category: 'Actuators',
     include: '<Servo.h>',
-    desc: 'Control servo motors (SG90, MG996R, etc.) via PWM. Supports angles from 0�� to 180��.',
+    desc: 'Control servo motors (SG90, MG996R, etc.) via PWM. Supports angles from 0° to 180°.',
     api: [
       { fn: 'servo.attach(pin)', desc: 'Attach servo to pin' },
-      { fn: 'servo.write(angle)', desc: 'Set angle (0-180��)' },
-      { fn: 'servo.writeMicroseconds(us)', desc: 'Set pulse width (500-2400��s)' },
+      { fn: 'servo.write(angle)', desc: 'Set angle (0-180°)' },
+      { fn: 'servo.writeMicroseconds(us)', desc: 'Set pulse width (500-2400µs)' },
       { fn: 'servo.read()', desc: 'Read current angle' },
       { fn: 'servo.attached()', desc: 'Check if attached' },
       { fn: 'servo.detach()', desc: 'Detach from pin' },
@@ -2542,7 +2545,7 @@ int pos = 0;
   {
     id: 'stepper',
     name: 'Stepper',
-    icon: 'Ά�ۤ{',
+    icon: '⬟',
     category: 'Actuators',
     include: '<Stepper.h>',
     desc: 'Control stepper motors like the 28BYJ-48 with ULN2003 driver board.',
@@ -2570,11 +2573,11 @@ Stepper myStepper(STEPS_PER_REV, 8, 10, 9, 11);
     exampleId: 'stepper_motor',
   },
 
-  /* ΀l΀l WIRELESS ΀l΀l */
+  /* ═══ WIRELESS ═══ */
   {
     id: 'wifi',
     name: 'WiFi',
-    icon: '܋�',
+    icon: '📶',
     category: 'Wireless',
     include: '<WiFi.h>',
     desc: 'Wi-Fi connectivity for ESP32. Connect to networks and create access points.',
@@ -2609,7 +2612,7 @@ const char* ssid = "YourSSID";
   {
     id: 'espnow',
     name: 'ESP-NOW',
-    icon: '܋�',
+    icon: '⬟',
     category: 'Wireless',
     include: ['<esp_now.h>', '<WiFi.h>'],
     desc: 'Peer-to-peer wireless communication between ESP32 boards without a router. Fast, low-power, ideal for sensor networks.',
@@ -2647,7 +2650,7 @@ const char* ssid = "YourSSID";
   {
     id: 'zigbee',
     name: 'Zigbee',
-    icon: '܋�',
+    icon: '⬟',
     category: 'Wireless',
     include: '<Zigbee.h>',
     desc: 'Zigbee mesh networking for IoT. Supports Coordinator/End Device architecture with short addresses, channels, and PAN IDs.',
@@ -2693,7 +2696,7 @@ const char* ssid = "YourSSID";
   {
     id: 'bluetoothserial',
     name: 'BluetoothSerial',
-    icon: '܋�',
+    icon: '⬟',
     category: 'Wireless',
     include: '<BluetoothSerial.h>',
     desc: 'Classic Bluetooth SPP (Serial Port Profile) for ESP32. Serial-like communication between two Bluetooth devices.',
@@ -2727,11 +2730,11 @@ const char* ssid = "YourSSID";
     exampleId: 'bluetooth_serial_bridge',
   },
 
-  /* ΀l΀l IOT PROTOCOLS ΀l΀l */
+  /* ═══ IOT PROTOCOLS ═══ */
   {
     id: 'pubsubclient',
     name: 'PubSubClient (MQTT)',
-    icon: '܋�',
+    icon: '📡',
     category: 'IoT',
     include: '<PubSubClient.h>',
     desc: 'MQTT publish/subscribe client for lightweight IoT messaging. Connect to brokers like HiveMQ, Mosquitto, or cloud services.',
@@ -2770,7 +2773,7 @@ PubSubClient client(espClient);
   {
     id: 'coap',
     name: 'CoAP',
-    icon: '܋x|',
+    icon: '⬟',
     category: 'IoT',
     include: '<coap.h>',
     desc: 'Constrained Application Protocol for resource-constrained IoT devices. RESTful API with GET/PUT/POST/DELETE methods.',
@@ -2801,7 +2804,7 @@ PubSubClient client(espClient);
   {
     id: 'httpclient',
     name: 'HTTPClient',
-    icon: '܋x|',
+    icon: '⬟',
     category: 'IoT',
     include: '<HTTPClient.h>',
     desc: 'Make HTTP requests (GET, POST, PUT, DELETE) from ESP32. Useful for REST APIs and web services.',
@@ -2837,7 +2840,7 @@ PubSubClient client(espClient);
   {
     id: 'webserver',
     name: 'WebServer',
-    icon: '܋x|',
+    icon: '⬟',
     category: 'IoT',
     include: '<WebServer.h>',
     desc: 'Create a web server on ESP32. Serve HTML pages, handle REST endpoints, and build web dashboards.',
@@ -2869,11 +2872,11 @@ PubSubClient client(espClient);
     exampleId: null,
   },
 
-  /* ΀l΀l AUDIO ΀l΀l */
+  /* ═══ AUDIO ═══ */
   {
     id: 'i2s',
     name: 'I2S',
-    icon: '܋�v',
+    icon: '🔊',
     category: 'Audio',
     include: '<driver/i2s.h>',
     desc: 'Inter-IC Sound interface for ESP32. Play audio through I2S DACs and amplifiers like MAX98357A.',
@@ -2901,7 +2904,7 @@ PubSubClient client(espClient);
   {
     id: 'esp32_i2s_online_radio_player',
     name: 'ESP32 I2S Online Radio Player',
-    icon: '܋�',
+    icon: '⬟',
     category: 'Audio',
     include: '<WiFi.h>\n<HTTPClient.h>\n<driver/i2s.h>\n<IRremote.h>',
     desc: 'Stream online radio stations over WiFi with IR Remote control. Play/pause, next/prev station, volume control.',
@@ -2946,7 +2949,7 @@ void loop() {
   {
     id: 'esp32_i2s_local_radio_player',
     name: 'ESP32 I2S Local Radio Player',
-    icon: '܋�',
+    icon: '⬟',
     category: 'Audio',
     include: '<WiFi.h>\n<HTTPClient.h>\n<driver/i2s.h>\n<IRremote.h>',
     desc: 'Play local radio stations with IR Remote control. Uses a local Python server for audio streaming.',
@@ -2989,7 +2992,7 @@ void loop() {
   {
     id: 'esp32_i2s_local_radio_player_2',
     name: 'ESP32 I2S Local Radio Player 2',
-    icon: '܋�',
+    icon: '⬟',
     category: 'Audio',
     include: '<WiFi.h>\n<HTTPClient.h>\n<driver/i2s.h>\n<IRremote.h>',
     desc: 'Enhanced local radio player with IR Remote control and multiple station support.',
@@ -3032,7 +3035,7 @@ void loop() {
   {
     id: 'esp32_sd_songs_player',
     name: 'ESP32 SD Card Songs Player',
-    icon: '܋z�',
+    icon: '⬟',
     category: 'Audio',
     include: '<driver/i2s.h>\n<SD.h>\n<SPI.h>\n<IRremote.h>',
     desc: 'Play songs from an SD card through a MAX98357A I2S amplifier with IR Remote control. Upload .pcm audio files to the SD Card component, then use the IR Remote to play/pause, next/prev, and control volume.',
@@ -3051,30 +3054,30 @@ void loop() {
       { fn: 'irrecv.resume()', desc: 'Resume receiving next code' },
     ],
     pins: {
-      'SD Card �r~ ESP32': [
-        'CS  �r~ D5',
-        'SCK �r~ D18',
-        'MOSI �r~ D23',
-        'MISO �r~ D19',
-        'VCC �r~ VIN (5V)',
-        'GND �r~ GND',
+      'SD Card → ESP32': [
+        'CS  → D5',
+        'SCK → D18',
+        'MOSI → D23',
+        'MISO → D19',
+        'VCC → VIN (5V)',
+        'GND → GND',
       ],
-      'MAX98357A �r~ ESP32': [
-        'BCLK �r~ D26',
-        'LRC  �r~ D25',
-        'DIN  �r~ D22',
-        'VIN  �r~ VIN (5V)',
-        'GND  �r~ GND',
-        'SD   �r~ GND (enable)',
+      'MAX98357A → ESP32': [
+        'BCLK → D26',
+        'LRC  → D25',
+        'DIN  → D22',
+        'VIN  → VIN (5V)',
+        'GND  → GND',
+        'SD   → GND (enable)',
       ],
-      'MAX98357A �r~ Speaker': [
-        'OUT+ �r~ Speaker +',
-        'OUT- �r~ Speaker -',
+      'MAX98357A → Speaker': [
+        'OUT+ → Speaker +',
+        'OUT- → Speaker -',
       ],
-      'IR Receiver �r~ ESP32': [
-        'OUT �r~ D15',
-        'VCC �r~ VIN (5V)',
-        'GND �r~ GND',
+      'IR Receiver → ESP32': [
+        'OUT → D15',
+        'VCC → VIN (5V)',
+        'GND → GND',
       ],
     },
     exampleId: 'esp32_sd_songs_player',
@@ -3143,11 +3146,11 @@ song3.pcm`,
     ],
   },
 
-  /* ΀l΀l MISC ΀l΀l */
+  /* ═══ MISC ═══ */
   {
     id: 'arduinojson',
     name: 'ArduinoJson',
-    icon: '܋p',
+    icon: '📦',
     category: 'Utility',
     include: '<ArduinoJson.h>',
     desc: 'Parse and serialize JSON data. Essential for IoT APIs, configuration, and data exchange.',
@@ -3178,7 +3181,7 @@ song3.pcm`,
   {
     id: 'tinygps',
     name: 'TinyGPS++',
-    icon: '܋��ۤ{',
+    icon: '⬟',
     category: 'Utility',
     include: '<TinyGPS++.h>',
     desc: 'Parse GPS NMEA sentences from NEO-6M and other GPS modules. Extracts location, altitude, speed, and satellite data.',
@@ -3212,7 +3215,7 @@ song3.pcm`,
   {
     id: 'irremote',
     name: 'IRremote',
-    icon: '܋�',
+    icon: '⬟',
     category: 'Utility',
     include: '<IRremote.h>',
     desc: 'Send and receive infrared signals. Decode remote control protocols (NEC, Sony, RC5, etc.).',
@@ -3244,7 +3247,7 @@ decode_results results;
   {
     id: 'fastled',
     name: 'FastLED',
-    icon: '܋xt',
+    icon: '⬟',
     category: 'Output',
     include: '<FastLED.h>',
     desc: 'Control addressable LED strips (WS2812B, SK6812, etc.). Extensive color palettes, effects, and animations.',
@@ -3277,7 +3280,7 @@ CRGB leds[NUM_LEDS];
   {
     id: 'neopixel',
     name: 'Adafruit NeoPixel',
-    icon: '܋xt',
+    icon: '⬟',
     category: 'Output',
     include: '<Adafruit_NeoPixel.h>',
     desc: 'Control NeoPixel (WS2812B) LED strips and matrices with a simple API.',
@@ -3313,7 +3316,7 @@ Adafruit_NeoPixel strip(NUM_LEDS, PIN, NEO_GRB + NEO_KHZ800);
   {
     id: 'mfrc522',
     name: 'MFRC522',
-    icon: '܋~�',
+    icon: '⬟',
     category: 'Utility',
     include: '<MFRC522.h>',
     desc: 'Read and write MIFARE RFID tags using the MFRC522 reader module (13.56 MHz).',
@@ -3351,29 +3354,29 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
   },
 ];
 
-/* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|
+/* ════════════════════════════════════════════════════════════════════════════════════════════════
    TUTORIALS / HOW TO USE
    Each guide explains a concept step-by-step and maps to a built-in
    example you can load with one click.
-   ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+════════════════════════════════════════════════════════════════════════════════════════════════ */
 
 const GUIDE_TUTORIALS = [
   {
     id: 'getting-started',
     title: 'Getting Started with ArduSim',
-    icon: '܋�l',
+    icon: '⬟',
     level: 'Beginner',
     tags: ['workspace', 'basics'],
     summary: 'Learn the workspace: code editor, circuit canvas, component library, serial monitor and the Run button.',
     steps: [
       'Take a look at the layout: code editor on the left, circuit canvas in the centre, component library on the right, and instruments (Serial Monitor, Output, Oscilloscope, Plotter, Pin Monitor) along the bottom.',
-      'Every new project opens with the classic Blink example �l� an Arduino Uno with an LED on pin 13.',
+      'Every new project opens with the classic Blink example — an Arduino Uno with an LED on pin 13.',
       'Click the green Run button (or press F5) to compile and run the sketch. Watch the LED on the canvas blink and the status bar start its timer.',
       'Open the Serial Monitor tab at the bottom to see Serial.println() output live.',
       'Use the "Examples" button in the toolbar to browse and load other ready-made projects.',
-      'Press F6 to stop, F7 to pause/resume. Drag the "Speed" selector to run the simulation up to 10�� faster.',
+      'Press F6 to stop, F7 to pause/resume. Drag the "Speed" selector to run the simulation up to 10° faster.',
     ],
-    wiring: 'No wiring required �l� the built-in Blink circuit is already set up for you.',
+    wiring: 'No wiring required — the built-in Blink circuit is already set up for you.',
     code: `void setup() {
     pinMode(13, OUTPUT);
     Serial.begin(9600);
@@ -3392,18 +3395,18 @@ const GUIDE_TUTORIALS = [
   {
     id: 'blink',
     title: 'Blinking an LED',
-    icon: '܋~�',
+    icon: '⬟',
     level: 'Beginner',
     tags: ['LED', 'digital', 'output'],
-    summary: 'The classic "Hello World" �l� turn an LED on and off at a fixed interval.',
+    summary: 'The classic "Hello World" — turn an LED on and off at a fixed interval.',
     steps: [
       'From the component library drag an LED and a Resistor onto the canvas, or keep the default circuit.',
-      'Wire D13 �r~ resistor �r~ LED anode, then LED cathode �r~ GND. Click a pin, then click the next pin to draw a wire.',
+      'Wire D13 → resistor → LED anode, then LED cathode → GND. Click a pin, then click the next pin to draw a wire.',
       'In setup(), set pin 13 as OUTPUT with pinMode().',
       'In loop(), drive it HIGH, wait 1000 ms, drive it LOW, wait 1000 ms.',
       'Run the sketch (F5) and watch the LED pulse once per second.',
     ],
-    wiring: 'D13 �r~ 220 �� resistor �r~ LED anode(+) ; LED cathode(�t~) �r~ GND.',
+    wiring: 'D13 → 220 ° resistor → LED anode(+) ; LED cathode(−) → GND.',
     code: `void setup() {
     pinMode(13, OUTPUT);
   }
@@ -3419,7 +3422,7 @@ const GUIDE_TUTORIALS = [
   {
     id: 'fade',
     title: 'Fading an LED with PWM',
-    icon: '܋xq',
+    icon: '⬟',
     level: 'Beginner',
     tags: ['PWM', 'analogWrite', 'LED'],
     summary: 'Use analogWrite() on a PWM pin to ramp LED brightness smoothly up and down.',
@@ -3430,7 +3433,7 @@ const GUIDE_TUTORIALS = [
       'Reverse the direction whenever brightness hits 0 or 255.',
       'Watch the glow breathe in the simulation.',
     ],
-    wiring: 'D9 �r~ resistor �r~ LED anode(+) ; LED cathode(�t~) �r~ GND.',
+    wiring: 'D9 → resistor → LED anode(+) ; LED cathode(−) → GND.',
     code: `int ledPin = 9;
 int brightness = 0;
 int fadeAmount = 5;
@@ -3449,17 +3452,17 @@ int fadeAmount = 5;
   {
     id: 'button',
     title: 'Reading a Push Button',
-    icon: '܋��',
+    icon: '⬟',
     level: 'Beginner',
     tags: ['input', 'button', 'digitalRead'],
     summary: 'Read a button with INPUT_PULLUP and toggle an LED. Learn how to wire a four-leg switch.',
     steps: [
-      'Place a push button. Wire D2 �r~ pin 1 and pin 3 �r~ GND. Wire the LED to D13 as in the Blink tutorial.',
-      'Set pin 2 to INPUT_PULLUP �l� the pin reads HIGH when released, LOW when pressed.',
+      'Place a push button. Wire D2 → pin 1 and pin 3 → GND. Wire the LED to D13 as in the Blink tutorial.',
+      'Set pin 2 to INPUT_PULLUP — the pin reads HIGH when released, LOW when pressed.',
       'In loop(), read digitalRead(2). When LOW, light the LED.',
       'Optionally use the canvas to click the button and watch the state change live.',
     ],
-    wiring: 'D2 �r~ button pin 1 ; button pin 3 �r~ GND ; D13 �r~ LED.',
+    wiring: 'D2 → button pin 1 ; button pin 3 → GND ; D13 → LED.',
     code: `int buttonPin = 2;
 int ledPin = 13;
   void setup() {
@@ -3476,18 +3479,18 @@ int ledPin = 13;
   {
     id: 'potentiometer',
     title: 'Analog Input with a Potentiometer',
-    icon: '܋z�ۤ{',
+    icon: '🎛️',
     level: 'Beginner',
     tags: ['analogRead', 'potentiometer', 'sensor'],
-    summary: 'Read a knob position as a 0�l1023 value and print it to the Serial Monitor.',
+    summary: 'Read a knob position as a 0–1023 value and print it to the Serial Monitor.',
     steps: [
-      'Wire the potentiometer: VCC�r~5V, OUT�r~A0, GND�r~GND.',
+      'Wire the potentiometer: VCC→5V, OUT→A0, GND→GND.',
       'In setup(), start Serial at 9600 baud.',
       'In loop(), read analogRead(A0) and Serial.println() the value.',
       'Open the Serial Monitor (bottom panel) and drag the knob in the simulation to watch values change.',
-      'Tip: change the value in the property panel (right-click �r~ Properties) for precise control.',
+      'Tip: change the value in the property panel (right-click → Properties) for precise control.',
     ],
-    wiring: 'VCC�r~5V, OUT�r~A0, GND�r~GND.',
+    wiring: 'VCC→5V, OUT→A0, GND→GND.',
     code: `void setup() {
     Serial.begin(9600);
   }
@@ -3502,18 +3505,18 @@ int ledPin = 13;
   {
     id: 'servo',
     title: 'Controlling a Servo Motor',
-    icon: 'Ά�ۤ{',
+    icon: '🧱',
     level: 'Intermediate',
     tags: ['servo', 'actuator', 'library'],
-    summary: 'Sweep a servo between 0�� and 180�� using the Servo library.',
+    summary: 'Sweep a servo between 0° and 180° using the Servo library.',
     steps: [
-      'Place a servo. Wire SIG�r~D9, +�r~5V, �t~�r~GND.',
+      'Place a servo. Wire SIG→D9, +→5V, −→GND.',
       'Include <Servo.h> and create a Servo object.',
       'Attach it to pin 9 in setup().',
       'In loop(), sweep the angle from 0 to 180 and back with write() and short delays.',
       'The servo arm on the canvas turns in real time.',
     ],
-    wiring: 'SIG�r~D9, +�r~5V, �t~�r~GND.',
+    wiring: 'SIG→D9, +→5V, −→GND.',
     code: `#include < Servo.h >
     Servo s;
   void setup() {
@@ -3529,18 +3532,18 @@ int ledPin = 13;
   {
     id: 'lcd',
     title: 'Displaying Text on an LCD',
-    icon: '܋��ۤ{',
+    icon: '⬟',
     level: 'Intermediate',
     tags: ['LCD', 'display', 'library'],
-    summary: 'Show text and live values on a 16��2 I2C LCD using just four wires.',
+    summary: 'Show text and live values on a 16°2 I2C LCD using just four wires.',
     steps: [
-      'Place an LCD 16��2 (I2C). Wire VCC�r~5V, GND�r~GND, SDA�r~A4, SCL�r~A5.',
+      'Place an LCD 16°2 (I2C). Wire VCC→5V, GND→GND, SDA→A4, SCL→A5.',
       'Include <LiquidCrystal_I2C.h> and create the object with the address 0x27.',
       'In setup(), call lcd.init() and lcd.backlight(), then lcd.print().',
       'In loop(), use setCursor() to update a value on the second row.',
       'Run it and watch the display update in the simulation.',
     ],
-    wiring: 'VCC�r~5V, GND�r~GND, SDA�r~A4 (Uno), SCL�r~A5 (Uno).',
+    wiring: 'VCC→5V, GND→GND, SDA→A4 (Uno), SCL→A5 (Uno).',
     code: `#include < LiquidCrystal_I2C.h >
     LiquidCrystal_I2C lcd(0x27, 16, 2);
   void setup() {
@@ -3559,18 +3562,18 @@ int ledPin = 13;
   {
     id: 'dht',
     title: 'Temperature & Humidity with DHT11',
-    icon: '܋x�ۤ{',
+    icon: '⬟',
     level: 'Intermediate',
     tags: ['sensor', 'temperature', 'DHT'],
     summary: 'Read temperature and humidity from a DHT11 and print both to the Serial Monitor.',
     steps: [
-      'Place a DHT11. Wire VCC�r~5V, DAT�r~D2, GND�r~GND.',
+      'Place a DHT11. Wire VCC→5V, DAT→D2, GND→GND.',
       'Include <DHT.h> and create a DHT object on pin 2.',
       'Call dht.begin() in setup().',
       'In loop(), read readTemperature() and readHumidity() and print them.',
-      'Adjust the simulated values in the property panel (right-click the sensor �r~ Properties).',
+      'Adjust the simulated values in the property panel (right-click the sensor → Properties).',
     ],
-    wiring: 'VCC�r~5V, DAT�r~D2, GND�r~GND.',
+    wiring: 'VCC→5V, DAT→D2, GND→GND.',
     code: `#include < DHT.h >
     DHT dht(2, DHT11);
   void setup() {
@@ -3590,18 +3593,18 @@ int ledPin = 13;
   {
     id: 'ultrasonic',
     title: 'Measuring Distance with HC-SR04',
-    icon: '܋�',
+    icon: '⬟',
     level: 'Intermediate',
     tags: ['sensor', 'ultrasonic', 'distance'],
     summary: 'Trigger an ultrasonic sensor and read the distance from the echo pulse.',
     steps: [
-      'Place an HC-SR04. Wire VCC�r~5V, TRIG�r~D7, ECHO�r~D8, GND�r~GND.',
+      'Place an HC-SR04. Wire VCC→5V, TRIG→D7, ECHO→D8, GND→GND.',
       'Set TRIG as OUTPUT and ECHO as INPUT.',
-      'Send a 10 ��s HIGH pulse on TRIG, then pulseIn(ECHO, HIGH).',
+      'Send a 10 µs HIGH pulse on TRIG, then pulseIn(ECHO, HIGH).',
       'Convert the echo time to centimetres: cm = t / 58.0.',
       'Change the simulated distance in the property panel to see the reading change.',
     ],
-    wiring: 'VCC�r~5V, TRIG�r~D7, ECHO�r~D8, GND�r~GND.',
+    wiring: 'VCC→5V, TRIG→D7, ECHO→D8, GND→GND.',
     code: `void setup() {
     pinMode(7, OUTPUT);
     pinMode(8, INPUT);
@@ -3621,17 +3624,17 @@ int ledPin = 13;
   {
     id: 'serial-plotter',
     title: 'Graphing Data with the Serial Plotter',
-    icon: '܋t',
+    icon: '⬟',
     level: 'Intermediate',
     tags: ['plotter', 'serial', 'data'],
     summary: 'Visualise numeric sensor data live using the built-in Serial Plotter.',
     steps: [
-      'Write code that Serial.print()s numbers �l� one per line, or multiple values separated by spaces or tabs.',
+      'Write code that Serial.print()s numbers — one per line, or multiple values separated by spaces or tabs.',
       'Open the Plotter tab at the bottom of the workspace.',
       'Run the sketch; each numeric line is graphed in real time with its own colour.',
       'The default serial_plotter example plots a sine wave and a triangle wave.',
     ],
-    wiring: 'Potentiometer optional �l� this works with any numeric serial output.',
+    wiring: 'Potentiometer optional — this works with any numeric serial output.',
     code: `void setup() {
     Serial.begin(9600);
   }
@@ -3649,17 +3652,17 @@ int ledPin = 13;
   {
     id: 'rgb',
     title: 'Making Colours with an RGB LED',
-    icon: '܋xt',
+    icon: '⬟',
     level: 'Intermediate',
     tags: ['PWM', 'RGB', 'LED'],
     summary: 'Mix the red, green and blue channels with PWM to create a rainbow.',
     steps: [
-      'Place an RGB LED. Wire R�r~D9, G�r~D10, B�r~D11, common(�t~)�r~GND.',
+      'Place an RGB LED. Wire R→D9, G→D10, B→D11, common(−)→GND.',
       'Each channel is driven with analogWrite() between 0 and 255.',
       'Sweep the hue by cycling the three channels with different phase offsets.',
       'Watch the bulb change colour smoothly on the canvas.',
     ],
-    wiring: 'R�r~D9, G�r~D10, B�r~D11, �t~�r~GND.',
+    wiring: 'R→D9, G→D10, B→D11, −→GND.',
     code: `void setup() {
     pinMode(9, OUTPUT); pinMode(10, OUTPUT); pinMode(11, OUTPUT);
   }
@@ -3677,13 +3680,13 @@ int ledPin = 13;
   {
     id: 'keyboard-shortcuts',
     title: 'Keyboard Shortcuts',
-    icon: '�x�ۤ{',
+    icon: '⬟',
     level: 'Beginner',
     tags: ['shortcuts', 'productivity', 'keyboard'],
     summary: 'Speed up your workflow with these keyboard shortcuts for circuit editing and simulation.',
     steps: [
-      'Select a push button on the canvas and press Space or Enter to toggle it �l� no need to click.',
-      'Press R to rotate the selected component by 90��.',
+      'Select a push button on the canvas and press Space or Enter to toggle it — no need to click.',
+      'Press R to rotate the selected component by 90°.',
       'Press Delete or Backspace to delete the selected component or wire.',
       'Press F to fit the entire circuit in view.',
       'Press Escape to cancel wiring mode, deselect, or close dialogs.',
@@ -3694,38 +3697,38 @@ int ledPin = 13;
       'F5 to run the simulation, F6 to stop, F7 to pause/resume.',
       'Ctrl+S to save the project, Ctrl+Shift+S to export as JSON.',
     ],
-    wiring: 'N/A �l� these are editor/canvas shortcuts.',
+    wiring: 'N/A — these are editor/canvas shortcuts.',
     code: `// Shortcuts are for the simulator UI, not Arduino code.`,
   },
 ];
 
-/* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|
+/* ════════════════════════════════════════════════════════════════════════════════════════════════
    HOME PAGE CONTENT
-   ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+════════════════════════════════════════════════════════════════════════════════════════════════ */
 
 const GUIDE_HOME = {
-  tagline: 'Simulate Arduino circuits in your browser �l� no install, no hardware.',
-  intro: 'ArduSim is a full Arduino development environment that runs entirely in your browser. Write Arduino C++ in a VS Code-grade editor, drag components onto a live circuit canvas, wire them up, and hit Run �l� the simulation, Serial Monitor, oscilloscope and plotter all respond instantly.',
+  tagline: 'Simulate Arduino circuits in your browser — no install, no hardware.',
+  intro: 'ArduSim is a full Arduino development environment that runs entirely in your browser. Write Arduino C++ in a VS Code-grade editor, drag components onto a live circuit canvas, wire them up, and hit Run — the simulation, Serial Monitor, oscilloscope and plotter all respond instantly.',
   features: [
-    { icon: 'Ά�', title: 'Real-time Simulation', desc: 'Arduino code transpiles and runs in the browser at 0.25���l10�� speed with infinite-loop protection.' },
-    { icon: '�x�ۤ{', title: 'VS Code-grade Editor', desc: 'Monaco-powered editor with autocomplete, syntax highlighting, diagnostics and formatting.' },
-    { icon: '܋��', title: 'Drag & Drop Circuitry', desc: '25+ components, click-to-connect wiring, grid snapping, rotate/duplicate/undo and PNG export.' },
-    { icon: '܋�', title: 'Serial Monitor & Plotter', desc: 'Live bi-directional serial I/O, multi-channel oscilloscope and a real-time data plotter.' },
-    { icon: '܋v', title: 'Pin Monitor', desc: 'A live colour-coded board showing the state and mode of every pin.' },
-    { icon: '܋~�', title: 'Project Management', desc: 'Auto-save, portable JSON export/import, saved projects and one-click URL sharing.' },
+    { icon: '⬟', title: 'Real-time Simulation', desc: 'Arduino code transpiles and runs in the browser at 0.25°–10° speed with infinite-loop protection.' },
+    { icon: '⬟', title: 'VS Code-grade Editor', desc: 'Monaco-powered editor with autocomplete, syntax highlighting, diagnostics and formatting.' },
+    { icon: '⬟', title: 'Drag & Drop Circuitry', desc: '25+ components, click-to-connect wiring, grid snapping, rotate/duplicate/undo and PNG export.' },
+    { icon: '⬟', title: 'Serial Monitor & Plotter', desc: 'Live bi-directional serial I/O, multi-channel oscilloscope and a real-time data plotter.' },
+    { icon: '⬟', title: 'Pin Monitor', desc: 'A live colour-coded board showing the state and mode of every pin.' },
+    { icon: '⬟', title: 'Project Management', desc: 'Auto-save, portable JSON export/import, saved projects and one-click URL sharing.' },
   ],
   steps: [
     { title: 'Pick a component', desc: 'Browse the library on the right and click a component to place it on the canvas.' },
     { title: 'Wire it up', desc: 'Click a pin, then click another pin to draw a wire. Connect everything back to the board and ground.' },
-    { title: 'Write the code', desc: 'Write or paste Arduino C++ in the editor �l� autocomplete and IntelliSense guide you.' },
+    { title: 'Write the code', desc: 'Write or paste Arduino C++ in the editor — autocomplete and IntelliSense guide you.' },
     { title: 'Run & debug', desc: 'Press Run (F5) and watch your circuit react. Use the Serial Monitor, Oscilloscope and Pin Monitor to debug.' },
   ],
-  cta: 'View Full Guide �r~',
+  cta: 'View Full Guide →',
 };
 
-/* ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|
-   GUIDE MANAGER �l� renders Home / Components / Tutorials
-   ΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁|΁| */
+/* ════════════════════════════════════════════════════════════════════════════════════════════════
+   GUIDE MANAGER — renders Home / Components / Tutorials
+════════════════════════════════════════════════════════════════════════════════════════════════ */
 
 class GuideManager {
   constructor() {
@@ -3737,7 +3740,7 @@ class GuideManager {
     this._bindReady = false;
   }
 
-  /* ΀l΀l bind header tabs / close (called when the app is ready) ΀l΀l */
+  /* ═══ bind header tabs / close (called when the app is ready) ═══ */
   bind() {
     if (this._bindReady) return;
     this._bindReady = true;
@@ -3746,7 +3749,7 @@ class GuideManager {
     });
   }
 
-  /* ΀l΀l open / close ΀l΀l */
+  /* ═══ open / close ═══ */
   open(tab = 'home') {
     const overlay = document.getElementById('guide-overlay');
     if (!overlay) return;
@@ -3766,7 +3769,7 @@ class GuideManager {
     return !!(overlay && !overlay.classList.contains('hidden'));
   }
 
-  /* ΀l΀l tab switching ΀l΀l */
+  /* ═══ tab switching ═══ */
   _switchTab(tab) {
     this._activeTab = tab;
     document.querySelectorAll('.guide-tab').forEach(t =>
@@ -3783,7 +3786,7 @@ class GuideManager {
     if (body) body.scrollTop = 0;
   }
 
-  /* ΀l΀l Home ΀l΀l */
+  /* ═══ Home ═══ */
   _renderHome() {
     const root = document.getElementById('guide-pane-home');
     if (!root) return;
@@ -3810,13 +3813,13 @@ class GuideManager {
 
     root.innerHTML = `
       <div class="guide-hero">
-        <div class="guide-hero-badge">100% in-browser �� No installation</div>
-        <div class="guide-hero-icon">܋z�ۤ{</div>
+        <div class="guide-hero-badge">100% in-browser ° No installation</div>
+        <div class="guide-hero-icon">🔬</div>
         <h1>Welcome to <span class="grad">ArduSim</span></h1>
         <p class="guide-hero-tag">${this._esc(GUIDE_HOME.tagline)}</p>
         <p class="guide-hero-intro">${this._esc(GUIDE_HOME.intro)}</p>
         <div class="guide-hero-cta">
-          <button class="gh-btn gh-btn-primary" id="gh-go-sim">Ά� Launch the Simulator</button>
+          <button class="gh-btn gh-btn-primary" id="gh-go-sim">🚀 Launch the Simulator</button>
           <button class="gh-btn gh-btn-ghost" id="gh-go-comp">Browse Components</button>
           <button class="gh-btn gh-btn-ghost" id="gh-go-tut">Read the Tutorials</button>
           <button class="gh-btn gh-btn-ghost" id="gh-go-guide">View Full Guide</button>
@@ -3843,10 +3846,10 @@ class GuideManager {
           <h3>Ready to build your first circuit?</h3>
           <p>Load the built-in examples or dive straight into the simulator.</p>
         </div>
-        <button class="gh-btn gh-btn-primary" id="gh-go-sim2">Start Simulating �r~</button>
+        <button class="gh-btn gh-btn-primary" id="gh-go-sim2">Start Simulating →</button>
       </div>
 
-      <footer class="guide-footer">ArduSim �� Free, open-source Arduino simulator for education and hobbyists.</footer>`;
+      <footer class="guide-footer">ArduSim ° Free, open-source Arduino simulator for education and hobbyists.</footer>`;
 
     const bind = (id, fn) => {
       const el = root.querySelector(id);
@@ -3860,7 +3863,7 @@ class GuideManager {
     bind('#gh-go-guide', () => window.open('docs/ArduSim_Guide.html', '_blank'));
   }
 
-  /* ΀l΀l Component reference ΀l΀l */
+  /* ═══ Component reference ═══ */
   _renderComponents() {
     const root = document.getElementById('guide-pane-components');
     if (!root) return;
@@ -3869,7 +3872,7 @@ class GuideManager {
       <div class="gc-toolbar">
         <div class="library-search">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/></svg>
-          <input type="text" id="gc-search" placeholder="Search components�l�" aria-label="Search components" />
+          <input type="text" id="gc-search" placeholder="Search components—" aria-label="Search components" />
         </div>
         <div class="library-filters" id="gc-filters">
           <button class="filter-chip active" data-filter="all">All</button>
@@ -3934,7 +3937,7 @@ class GuideManager {
       return `
         <button class="gc-card" data-comp="${this._esc(id)}">
           <div class="gc-card-head">
-            <span class="gc-card-icon">${def.icon || '܋��'}</span>
+            <span class="gc-card-icon">${def.icon || '📋'}</span>
             <div>
               <strong>${this._esc(def.name)}</strong>
               <span class="gc-card-cat">${this._esc(def.category)}</span>
@@ -3960,7 +3963,7 @@ class GuideManager {
     // Pin table (merge runtime pins with documented descriptions)
     const grouped = g.grouped || (!def.pins || def.pins.length === 0);
     const pinRows = grouped ? (() => {
-      // Grouped pins (boards) �l� document by function group
+      // Grouped pins (boards) — document by function group
       return Object.entries(g.pins || {}).map(([key, info]) => `
         <tr>
           <td><code class="gc-pin-label">${this._esc(info.label)}</code></td>
@@ -3995,7 +3998,7 @@ class GuideManager {
       <div class="gc-detail-section">
         <h3>Configurable properties</h3>
         <ul class="gc-props">
-          ${Object.entries(g.props).map(([k, v]) => `<li><code>${this._esc(k)}</code> �l� ${this._esc(v)}</li>`).join('')}
+          ${Object.entries(g.props).map(([k, v]) => `<li><code>${this._esc(k)}</code> — ${this._esc(v)}</li>`).join('')}
         </ul>
       </div>` : '';
 
@@ -4009,10 +4012,10 @@ class GuideManager {
       </div>` : '';
 
     root.innerHTML = `
-      <button class="gh-btn gh-btn-ghost gh-btn-sm gc-back">�r| Back to all components</button>
+      <button class="gh-btn gh-btn-ghost gh-btn-sm gc-back">← Back to all components</button>
       <div class="gc-detail">
         <div class="gc-detail-head">
-          <span class="gc-card-icon gc-card-icon-lg">${def.icon || '܋��'}</span>
+          <span class="gc-card-icon gc-card-icon-lg">${def.icon || '📋'}</span>
           <div>
             <h2>${this._esc(def.name)}</h2>
             <span class="gc-card-cat">${this._esc(def.category)}</span>
@@ -4030,14 +4033,14 @@ class GuideManager {
 
         <div class="gc-detail-section">
           <h3>Typical use</h3>
-          <p class="gc-long-desc">${this._esc(g.use || '�l�')}</p>
+          <p class="gc-long-desc">${this._esc(g.use || '—')}</p>
         </div>
 
         ${pinBlock}
 
         <div class="gc-detail-section">
           <h3>Typical wiring</h3>
-          <p class="gc-wiring">${this._esc(g.wiring || '�l�')}</p>
+          <p class="gc-wiring">${this._esc(g.wiring || '—')}</p>
         </div>
 
         ${propsBlock}
@@ -4076,7 +4079,7 @@ class GuideManager {
     });
   }
 
-  /* ΀l΀l Libraries ΀l΀l */
+  /* ═══ Libraries ═══ */
   _renderLibraries() {
     const root = document.getElementById('guide-pane-libraries');
     if (!root) return;
@@ -4117,7 +4120,7 @@ class GuideManager {
 
     root.innerHTML = `
       <div class="gt-head">
-        <h2>܋� Arduino Libraries</h2>
+        <h2>📚 Arduino Libraries</h2>
         <p>Complete reference for all Arduino libraries supported by ArduSim. Click any library to see its API, example code, and compatible components.</p>
         <div class="gl-stats">
           <span><strong>${GUIDE_LIBRARIES.length}</strong> libraries</span>
@@ -4147,7 +4150,7 @@ class GuideManager {
       </tr>`).join('');
 
     root.innerHTML = `
-      <button class="gh-btn gh-btn-ghost gh-btn-sm gc-back">�r| All libraries</button>
+      <button class="gh-btn gh-btn-ghost gh-btn-sm gc-back">← All libraries</button>
       <div class="gc-detail">
         <div class="gc-detail-head">
           <span class="gc-card-icon gc-card-icon-lg">${lib.icon}</span>
@@ -4204,7 +4207,7 @@ class GuideManager {
     });
   }
 
-  /* ΀l΀l Tutorials ΀l΀l */
+  /* ═══ Tutorials ═══ */
   _renderTutorials() {
     const root = document.getElementById('guide-pane-tutorials');
     if (!root) return;
@@ -4253,7 +4256,7 @@ class GuideManager {
       </li>`).join('');
 
     root.innerHTML = `
-      <button class="gh-btn gh-btn-ghost gh-btn-sm gc-back">�r| All tutorials</button>
+      <button class="gh-btn gh-btn-ghost gh-btn-sm gc-back">← All tutorials</button>
       <div class="gc-detail">
         <div class="gc-detail-head">
           <span class="gc-card-icon gc-card-icon-lg">${t.icon}</span>
@@ -4278,7 +4281,7 @@ class GuideManager {
 
         <div class="gc-detail-section">
           <h3>Wiring</h3>
-          <p class="gc-wiring">${this._esc(t.wiring || '�l�')}</p>
+          <p class="gc-wiring">${this._esc(t.wiring || '—')}</p>
         </div>
 
         <div class="gc-detail-section">
@@ -4303,14 +4306,14 @@ class GuideManager {
     });
   }
 
-  /* ΀l΀l actions that talk to the app ΀l΀l */
+  /* ═══ actions that talk to the app ═══ */
   _placeComponent(id) {
     const app = window.App;
     if (app && app.canvas && app.canvas.startPlacing) {
       this.close();
       app.canvas.startPlacing(id);
       const def = (window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS[id]);
-      app.showToast(`${def ? def.name : id} selected �l� click on canvas to place`, 'info');
+      app.showToast(`${def ? def.name : id} selected — click on canvas to place`, 'info');
     }
   }
 
@@ -4326,7 +4329,7 @@ class GuideManager {
     const done = () => {
       if (btn) {
         const old = btn.textContent;
-        btn.textContent = 'Έ Copied';
+        btn.textContent = '═ ✓ Copied';
         setTimeout(() => { btn.textContent = old; }, 1500);
       }
     };
@@ -4349,7 +4352,7 @@ class GuideManager {
     done();
   }
 
-  /* ΀l΀l helpers ΀l΀l */
+  /* ═══ helpers ═══ */
   _esc(s) {
     return String(s == null ? '' : s).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
   }
@@ -4367,7 +4370,7 @@ class GuideManager {
   }
 }
 
-/* ΀l΀l expose ΀l΀l */
+/* ═══ expose ═══ */
 window.GuideManager = new GuideManager();
 window.GuideManagerData = { GUIDE_COMPONENTS, GUIDE_TUTORIALS, GUIDE_HOME };
 window.GuidePinDescs = (function () {

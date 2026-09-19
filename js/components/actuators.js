@@ -14,7 +14,7 @@ defComp({
   pins: [
     { id: 'signal', label: 'SIG', type: PIN_TYPE.PWM, x: 8, y: 50, side: 'bottom' },
     { id: 'vcc', label: '+', type: PIN_TYPE.POWER, x: 25, y: 50, side: 'bottom' },
-    { id: 'gnd', label: '−', type: PIN_TYPE.GND, x: 42, y: 50, side: 'bottom' },
+    { id: 'gnd', label: '-', type: PIN_TYPE.GND, x: 42, y: 50, side: 'bottom' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -1955,7 +1955,7 @@ class ServoComponent extends Component {
     return [
       { id: 'signal', label: 'SIG', type: PIN_TYPE.PWM, x: 8, y: 50, side: 'bottom' },
       { id: 'vcc', label: '+', type: PIN_TYPE.POWER, x: 25, y: 50, side: 'bottom' },
-      { id: 'gnd', label: '−', type: PIN_TYPE.GND, x: 42, y: 50, side: 'bottom' },
+      { id: 'gnd', label: '-', type: PIN_TYPE.GND, x: 42, y: 50, side: 'bottom' },
     ];
   }
   update(canvas) {
@@ -1974,7 +1974,7 @@ class ServoContinuousComponent extends Component {
     return [
       { id: 'signal', label: 'SIG', type: PIN_TYPE.PWM, x: 8, y: 50, side: 'bottom' },
       { id: 'vcc', label: '+', type: PIN_TYPE.POWER, x: 25, y: 50, side: 'bottom' },
-      { id: 'gnd', label: '−', type: PIN_TYPE.GND, x: 42, y: 50, side: 'bottom' },
+      { id: 'gnd', label: '-', type: PIN_TYPE.GND, x: 42, y: 50, side: 'bottom' },
     ];
   }
   update(canvas) {
