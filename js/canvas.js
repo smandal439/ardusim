@@ -1,4 +1,4 @@
-﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    canvas.js — Circuit Canvas (HTML5 Canvas, drag/drop, wiring, pan/zoom)
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
@@ -4647,7 +4647,7 @@ class CircuitCanvas {
         }
       }
 
-      // 4b. Relay internal pass-through (COM â†” NO when active, COM â†” NC when inactive)
+      // 4b. Relay internal pass-through (COM ↔ NO when active, COM ↔ NC when inactive)
       if (inst.type === 'relay') {
         const relayOn = !!(inst.runtimeState && inst.runtimeState.active);
         if (current.pinId === 'com') {
@@ -4659,7 +4659,7 @@ class CircuitCanvas {
         }
       }
 
-      // 4b0. Multimeter pass-through in current mode (probe_red â†” probe_com, 0Î©)
+      // 4b0. Multimeter pass-through in current mode (probe_red ↔ probe_com, 0Ω)
       if (inst.type === 'multimeter') {
         const mmMode = inst.runtimeState?.mode || inst.props?.mode || 'V_DC';
         if (mmMode === 'A_DC' || mmMode === 'A_AC') {
@@ -4812,7 +4812,7 @@ class CircuitCanvas {
     const getResistance = (inst) => {
       if (inst.type === 'resistor') {
         return (Number(inst.props && inst.props.value) || 220)
-          * (inst.props.unit === 'kÎ©' ? 1e3 : inst.props.unit === 'MÎ©' ? 1e6 : 1);
+          * (inst.props.unit === 'kΩ' ? 1e3 : inst.props.unit === 'MΩ' ? 1e6 : 1);
       }
       if (inst.type === 'diode_1n4007') return 0.7;
       if (inst.type === 'bulb_12v') return 12;

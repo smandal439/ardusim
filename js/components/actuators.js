@@ -960,7 +960,7 @@ defComp({
   name: '28BYJ-48 Stepper',
   category: 'Actuators',
   icon: 'Ⓜ️',
-  desc: '5V 4-phase unipolar stepper motor with ULN2003 driver (2048 steps/rev, 5.625Â°/step)',
+  desc: '5V 4-phase unipolar stepper motor with ULN2003 driver (2048 steps/rev, 5.625°/step)',
   width: 100,
   height: 100,
   defaultProps: { angle: 0 },
@@ -1092,7 +1092,7 @@ defComp({
     ctx.font = 'bold 7px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`${Math.round(((angle % 360) + 360) % 360)}Â°`, 50, 48);
+    ctx.fillText(`${Math.round(((angle % 360) + 360) % 360)}°`, 50, 48);
 
     // ==========================================
     // 2. ULN2003 DRIVER BOARD (Bottom Section)
@@ -1827,7 +1827,7 @@ defComp({
 //       ctx.fill();
 //     });
 
-//     // Status LEDs â€” green when motor runs forward, red when reverse, dim when stopped
+//     // Status LEDs — green when motor runs forward, red when reverse, dim when stopped
 //     const mA = inst.runtimeState?.motorA ?? 0;
 //     const mB = inst.runtimeState?.motorB ?? 0;
 //     // Motor A LED
@@ -1875,7 +1875,7 @@ defComp({
   name: 'Cont. Rotation Servo',
   category: 'Actuators',
   icon: '♾️',
-  desc: 'Continuous rotation servo motor. Variable speed control in both directions (not 0-180Â° positioning)',
+  desc: 'Continuous rotation servo motor. Variable speed control in both directions (not 0-180° positioning)',
   width: 60,
   height: 50,
   defaultProps: { speed: 0 },
@@ -1885,7 +1885,7 @@ defComp({
   pins: [
     { id: 'signal', label: 'SIG', type: PIN_TYPE.PWM, x: 8, y: 50, side: 'bottom' },
     { id: 'vcc', label: '+', type: PIN_TYPE.POWER, x: 25, y: 50, side: 'bottom' },
-    { id: 'gnd', label: 'âˆ’', type: PIN_TYPE.GND, x: 42, y: 50, side: 'bottom' },
+    { id: 'gnd', label: '−', type: PIN_TYPE.GND, x: 42, y: 50, side: 'bottom' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;

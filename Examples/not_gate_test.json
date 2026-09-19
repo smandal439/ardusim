@@ -73,7 +73,7 @@
         "height": 60,
         "props": {
           "value": 220,
-          "unit": "Î©"
+          "unit": "Ω"
         },
         "runtimeState": {},
         "selected": false,

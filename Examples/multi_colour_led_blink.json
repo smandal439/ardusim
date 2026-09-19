@@ -39,7 +39,7 @@
         "rotation": 0,
         "props": {
           "value": 220,
-          "unit": "Î©"
+          "unit": "Ω"
         }
       },
       {
@@ -105,7 +105,7 @@
         "rotation": 0,
         "props": {
           "value": 220,
-          "unit": "Î©"
+          "unit": "Ω"
         }
       },
       {
@@ -116,7 +116,7 @@
         "rotation": 0,
         "props": {
           "value": 220,
-          "unit": "Î©"
+          "unit": "Ω"
         }
       },
       {
@@ -127,7 +127,7 @@
         "rotation": 0,
         "props": {
           "value": 220,
-          "unit": "Î©"
+          "unit": "Ω"
         }
       },
       {
@@ -138,7 +138,7 @@
         "rotation": 0,
         "props": {
           "value": 220,
-          "unit": "Î©"
+          "unit": "Ω"
         }
       },
       {
@@ -149,7 +149,7 @@
         "rotation": 0,
         "props": {
           "value": 220,
-          "unit": "Î©"
+          "unit": "Ω"
         }
       }
     ],

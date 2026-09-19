@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 class App {
   constructor() {
@@ -2960,7 +2960,7 @@ _newProject() {
       : '';
     infoBlock.innerHTML = `
       <div class="props-desc">
-        <span class="props-comp-icon">${this._escHtml(def ? def.icon : 'ðŸ”§')}</span>
+        <span class="props-comp-icon">${this._escHtml(def ? def.icon : '🔧')}</span>
         <div>
           <p class="props-desc-text">${esc(g.longDesc || def?.desc || '')}</p>
           <button type="button" class="gh-btn gh-btn-ghost gh-btn-sm props-ref-btn">Open full reference ←</button>
@@ -3120,7 +3120,7 @@ _newProject() {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
 
-    const icons = { success: 'âœ“', error: '✕', warn: '⚠', info: 'â„¹' };
+    const icons = { success: '✓', error: '✕', warn: '⚠', info: 'â„¹' };
     const icon = document.createElement('span');
     icon.className = 'toast-icon';
     icon.textContent = icons[type] || 'â„¹';

@@ -1,4 +1,4 @@
-﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    components/base.js — Shared utilities for all components
    Load this file FIRST before any component files.
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
@@ -375,14 +375,14 @@ const COMPONENT_CATALOG = [
   {
     category: 'Output', ids: ['multi_led_array', 'rgb_led', 'buzzer', 'seg7', 'lcd1602', 'lcd1602_i2c', 'lcd2004_i2c', 'oled_ssd1306', 'neopixel', 'neopixel_strip', 'neopixel_ring', 'neopixel_8x8_matrix', 'bulb_12v', 'max7219', 'ili9341'],
     dropdown: {
-      id: 'led', label: 'LED', icon: 'ðŸ’¡', desc: 'Light Emitting Diode',
+      id: 'led', label: 'LED', icon: '💡', desc: 'Light Emitting Diode',
       variants: [
-        { id: 'led', name: 'Red LED', color: '#ff3333', icon: 'ðŸ”´' },
-        { id: 'led_green', name: 'Green LED', color: '#33ff33', icon: 'ðŸŸ¢' },
-        { id: 'led_blue', name: 'Blue LED', color: '#3366ff', icon: 'ðŸ”µ' },
-        { id: 'led_yellow', name: 'Yellow LED', color: '#ffff33', icon: 'ðŸŸ¡' },
-        { id: 'led_orange', name: 'Orange LED', color: '#ff9933', icon: 'ðŸŸ ' },
-        { id: 'led_white', name: 'White LED', color: '#ffffff', icon: 'âšª' },
+        { id: 'led', name: 'Red LED', color: '#ff3333', icon: '🔴' },
+        { id: 'led_green', name: 'Green LED', color: '#33ff33', icon: '🟢' },
+        { id: 'led_blue', name: 'Blue LED', color: '#3366ff', icon: '🔵' },
+        { id: 'led_yellow', name: 'Yellow LED', color: '#ffff33', icon: '🟡' },
+        { id: 'led_orange', name: 'Orange LED', color: '#ff9933', icon: '🟠' },
+        { id: 'led_white', name: 'White LED', color: '#ffffff', icon: '⚪' },
       ]
     }
   },
@@ -395,7 +395,7 @@ const COMPONENT_CATALOG = [
   {
     category: 'Digital ICs', ids: [],
     dropdown: {
-      id: 'digital_ic', label: 'Digital ICs', icon: 'â®—', desc: 'Logic Gates & Timers',
+      id: 'digital_ic', label: 'Digital ICs', icon: '⮗', desc: 'Logic Gates & Timers',
       variants: [
         { id: 'ic_555', name: '555 Timer', icon: '⏱ï¸' },
         { id: 'ic_74hc00', name: '74HC00 NAND', icon: 'â®—' },
@@ -421,20 +421,20 @@ const COMPONENT_CATALOG = [
     dropdown: {
       id: 'probe', label: 'Probes', icon: 'ðŸ”', desc: 'Oscilloscope, DSO & Logic Analyzer Probes',
       variants: [
-        { id: 'osc_probe_ch1', name: 'OSC CH1', icon: 'ðŸŸ¢', color: '#73ff00' },
-        { id: 'osc_probe_ch2', name: 'OSC CH2', icon: 'ðŸŸ ', color: '#ff9800' },
-        { id: 'dso_probe_ch1', name: 'DSO CH1', icon: 'ðŸŸ¡', color: '#ffe600' },
-        { id: 'dso_probe_ch2', name: 'DSO CH2', icon: 'ðŸ”µ', color: '#00e5ff' },
-        { id: 'dso_probe_ch3', name: 'DSO CH3', icon: 'ðŸŸ£', color: '#ff3090' },
-        { id: 'dso_probe_ch4', name: 'DSO CH4', icon: 'ðŸŸ¢', color: '#30ff60' },
-        { id: 'la_probe_ch1', name: 'LA CH1', icon: 'ðŸ”µ', color: '#00e5ff' },
-        { id: 'la_probe_ch2', name: 'LA CH2', icon: 'ðŸŸ ', color: '#ff9800' },
-        { id: 'la_probe_ch3', name: 'LA CH3', icon: 'ðŸŸ¢', color: '#4caf50' },
-        { id: 'la_probe_ch4', name: 'LA CH4', icon: 'ðŸ”´', color: '#ff5722' },
-        { id: 'la_probe_ch5', name: 'LA CH5', icon: 'ðŸŸ£', color: '#ab47bc' },
-        { id: 'la_probe_ch6', name: 'LA CH6', icon: 'ðŸŸ¡', color: '#ffee33' },
-        { id: 'la_probe_ch7', name: 'LA CH7', icon: 'ðŸ©·', color: '#e91e63' },
-        { id: 'la_probe_ch8', name: 'LA CH8', icon: 'ðŸ’š', color: '#76ff03' },
+        { id: 'osc_probe_ch1', name: 'OSC CH1', icon: '🟢', color: '#73ff00' },
+        { id: 'osc_probe_ch2', name: 'OSC CH2', icon: '🟠', color: '#ff9800' },
+        { id: 'dso_probe_ch1', name: 'DSO CH1', icon: '🟡', color: '#ffe600' },
+        { id: 'dso_probe_ch2', name: 'DSO CH2', icon: '🔵', color: '#00e5ff' },
+        { id: 'dso_probe_ch3', name: 'DSO CH3', icon: '🟣', color: '#ff3090' },
+        { id: 'dso_probe_ch4', name: 'DSO CH4', icon: '🟢', color: '#30ff60' },
+        { id: 'la_probe_ch1', name: 'LA CH1', icon: '🔵', color: '#00e5ff' },
+        { id: 'la_probe_ch2', name: 'LA CH2', icon: '🟠', color: '#ff9800' },
+        { id: 'la_probe_ch3', name: 'LA CH3', icon: '🟢', color: '#4caf50' },
+        { id: 'la_probe_ch4', name: 'LA CH4', icon: '🔴', color: '#ff5722' },
+        { id: 'la_probe_ch5', name: 'LA CH5', icon: '🟣', color: '#ab47bc' },
+        { id: 'la_probe_ch6', name: 'LA CH6', icon: '🟡', color: '#ffee33' },
+        { id: 'la_probe_ch7', name: 'LA CH7', icon: '🩷', color: '#e91e63' },
+        { id: 'la_probe_ch8', name: 'LA CH8', icon: '💚', color: '#76ff03' },
       ]
     }
   },

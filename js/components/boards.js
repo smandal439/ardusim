@@ -12,7 +12,7 @@ defComp({
   height: 150,
   defaultProps: { label: 'UNO' },
   pins: [
-    // Digital pins top row (D0â€“D13, from left), then GND + AREF
+    // Digital pins top row (D0–D13, from left), then GND + AREF
     { id:'D0',   label:'D0',   type:PIN_TYPE.DIGITAL, x: 10, y: 12, side:'top' },
     { id:'D1',   label:'D1',   type:PIN_TYPE.DIGITAL, x: 24, y: 12, side:'top' },
     { id:'D2',   label:'D2',   type:PIN_TYPE.DIGITAL, x: 38, y: 12, side:'top' },
@@ -119,7 +119,7 @@ defComp({
     ctx.textAlign = 'center';
     ctx.fillText('16U2', 19, 44);
 
-    // â”€â”€ ATmega328P DIP (center) â”€â”€
+    // ── ATmega328P DIP (center) ──
     const chipX = 70, chipY = 60, chipW = 76, chipH = 32;
     ctx.fillStyle = '#0c0c0c';
     roundRect(ctx, chipX, chipY, chipW, chipH, 3);
@@ -149,7 +149,7 @@ defComp({
     ctx.font = '5px JetBrains Mono, monospace';
     ctx.fillText('- P U -', chipX + chipW / 2, chipY + 22);
 
-    // â”€â”€ ICSP header (right of chip) â”€â”€
+    // ── ICSP header (right of chip) ──
     ctx.fillStyle = '#151517';
     roundRect(ctx, 168, 62, 20, 24, 2);
     ctx.fill();
@@ -170,7 +170,7 @@ defComp({
     ctx.font = '4.5px sans-serif';
     ctx.fillText('ICSP', 178, 60);
 
-    // â”€â”€ Crystal oscillator â”€â”€
+    // ── Crystal oscillator ──
     ctx.fillStyle = '#b0b0b0';
     roundRect(ctx, 42, 78, 22, 9, 2);
     ctx.fill();
@@ -184,7 +184,7 @@ defComp({
     ctx.beginPath(); ctx.moveTo(46, 87); ctx.lineTo(46, 92); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(60, 87); ctx.lineTo(60, 92); ctx.stroke();
 
-    // â”€â”€ Reset button (bottom-left) â”€â”€
+    // ── Reset button (bottom-left) ──
     ctx.fillStyle = '#c43c3c';
     roundRect(ctx, 10, 92, 18, 18, 3);
     ctx.fill();
@@ -198,7 +198,7 @@ defComp({
     ctx.font = '5px sans-serif';
     ctx.fillText('RST', 19, 116);
 
-    // â”€â”€ Barrel jack (bottom-left edge) â”€â”€
+    // ── Barrel jack (bottom-left edge) ──
     ctx.fillStyle = '#1c1c1c';
     roundRect(ctx, -14, 100, 20, 26, 4);
     ctx.fill();
@@ -207,7 +207,7 @@ defComp({
     ctx.fillStyle = '#1c1c1c';
     ctx.beginPath(); ctx.arc(-4, 113, 3, 0, Math.PI * 2); ctx.fill();
 
-    // â”€â”€ Voltage regulator (SOT-223, right-bottom) â”€â”€
+    // ── Voltage regulator (SOT-223, right-bottom) ──
     ctx.fillStyle = '#2e2e2e';
     roundRect(ctx, 156, 102, 18, 20, 2);
     ctx.fill();
@@ -225,7 +225,7 @@ defComp({
     ctx.font = '5px sans-serif';
     ctx.fillText('5V', 165, 115);
 
-    // â”€â”€ Electrolytic capacitors â”€â”€
+    // ── Electrolytic capacitors ──
     const caps = [
       { cx: 132, cy: 112, r: 5,   t: '1' },
       { cx: 120, cy: 112, r: 4.2, t: '2' },
@@ -244,7 +244,7 @@ defComp({
       ctx.fillText(c.t, c.cx, c.cy + c.r * 0.35);
     }
 
-    // â”€â”€ Status LEDs â”€â”€
+    // ── Status LEDs ──
     const lit = sim && sim.pinStates && (sim.pinStates['pin_13'] || 0) > 0;
     drawLED_on_board(ctx, 150, 36, lit ? '#ffee33' : '#555', 3.5);  // L (D13)
     drawLED_on_board(ctx, 12, 62, '#ff4d4d', 3);  // TX
@@ -257,7 +257,7 @@ defComp({
     ctx.fillText('RX', 22, 72);
     ctx.fillText('ON', 32, 72);
 
-    // â”€â”€ Header strips â”€â”€
+    // ── Header strips ──
     const topHoles = [], analogHoles = [], powerHoles = [];
     for (let i = 0; i < 16; i++) topHoles.push(10 + i * 14);
     for (let i = 0; i < 6; i++) { analogHoles.push(14 + i * 14); powerHoles.push(104 + i * 14); }
@@ -265,7 +265,7 @@ defComp({
     drawHeaderStrip(ctx, 4, 128, 94, analogHoles, 134);
     drawHeaderStrip(ctx, 96, 128, 90, powerHoles, 134);
 
-    // â”€â”€ Silkscreen labels â”€â”€
+    // ── Silkscreen labels ──
     ctx.fillStyle = 'rgba(255,255,255,0.92)';
     ctx.font = 'bold 8px sans-serif';
     ctx.textAlign = 'center';
@@ -273,7 +273,7 @@ defComp({
     ctx.font = 'bold 6px sans-serif';
     ctx.fillText('UNO', 196, 57);
 
-    // â”€â”€ Pin labels (silkscreen, always readable) â”€â”€
+    // ── Pin labels (silkscreen, always readable) ──
     ctx.font = 'bold 5px JetBrains Mono, monospace';
     const paintPinLabel = (cx, baseline, text) => {
       const w = ctx.measureText(text).width + 5;
@@ -302,7 +302,7 @@ defComp({
     ctx.fillText('MADE IN ITALY', 0, 0);
     ctx.restore();
 
-    // â”€â”€ Selection outline â”€â”€
+    // ── Selection outline ──
     if (inst.selected) {
       ctx.strokeStyle = '#00e5ff';
       ctx.lineWidth = 2;
