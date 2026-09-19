@@ -1,0 +1,157 @@
+{
+  "id": "dht11_temperature_humidity",
+  "name": "DHT11 Temperature & Humidity",
+  "icon": "🔧",
+  "desc": "A custom DHT11 Temperature & Humidity circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "dht1",
+        "type": "dht11",
+        "x": 90,
+        "y": 135,
+        "rotation": 0,
+        "props": {
+          "temperature": 25,
+          "humidity": 60
+        }
+      },
+      {
+        "id": "comp_1788286045312_7ynf5",
+        "type": "lcd1602_i2c",
+        "x": 440,
+        "y": 110,
+        "rotation": 0,
+        "props": {
+          "address": "0x27",
+          "line1": "Hello, I2C!    ",
+          "line2": "Addr: 0x27      "
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "dht1",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "b1",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "dht1",
+          "pinId": "data"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "dht1",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1788286071854_7vb79",
+        "from": {
+          "instId": "b1",
+          "pinId": "SDA"
+        },
+        "to": {
+          "instId": "comp_1788286045312_7ynf5",
+          "pinId": "sda"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1788286075102_7frmw",
+        "from": {
+          "instId": "b1",
+          "pinId": "SCL"
+        },
+        "to": {
+          "instId": "comp_1788286045312_7ynf5",
+          "pinId": "scl"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1788286298499_r25hd",
+        "from": {
+          "instId": "b1",
+          "pinId": "5V2"
+        },
+        "to": {
+          "instId": "comp_1788286045312_7ynf5",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1788286300685_2akou",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND3"
+        },
+        "to": {
+          "instId": "comp_1788286045312_7ynf5",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n#include <DHT.h>\n\n#define DHTPIN 2     // Digital pin connected to the DHT11 data pin\n#define DHTTYPE DHT11   // Defining sensor type as DHT11\n\nDHT dht(DHTPIN, DHTTYPE);\nLiquidCrystal_I2C lcd(0x27, 16, 2); // Set the LCD address to 0x27 for a 16 chars and 2 line display\n\nvoid setup() {\n  Serial.begin(115200);\n  dht.begin();\n  lcd.init();          // Initialize the LCD\n  lcd.backlight();     // Turn on the backlight\n}\n\nvoid loop() {\n  // Wait 2 seconds between measurements (DHT11 is slow)\n  delay(2000);\n  lcd.clear();\n\n  // Read humidity and temperature\n  float h = dht.readHumidity();\n  float t = dht.readTemperature(); // Read temperature in Celsius\n\n  // Check if readings failed and exit early to try again\n  if (isnan(h) || isnan(t)) {\n    lcd.setCursor(0, 0);\n    lcd.print(\"Sensor Error\");\n    return;\n  }\n\n  // Display Temperature on LCD\n  lcd.setCursor(0, 0);\n  lcd.print(\"Temp: \");\n  lcd.print(t);\n  lcd.print(\" °C\");\n\n  // Display Humidity on LCD\n  lcd.setCursor(0, 1);\n  lcd.print(\"Humidity: \");\n  lcd.print(h);\n  lcd.print(\" %\");\n}\n"
+  }
+}

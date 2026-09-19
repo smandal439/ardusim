@@ -1586,7 +1586,9 @@ void loop() {
     exampleId: 'simplebme280_altitude',
   },
 
-  /* ═══ LED COLOR VARIANTS ═══ */
+  /* ---------------------------------------------------------
+                          LED COLOR VARIANTS
+    --------------------------------------------------------- */
   led_green: {
     id: 'led_green', name: 'LED (Green)', icon: '\u{1f7e2}', category: 'Output',
     longDesc: 'Green light-emitting diode. Identical electrical characteristics to a standard LED — always pair with a 220\u03a9 series resistor.',

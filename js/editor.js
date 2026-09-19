@@ -661,9 +661,9 @@ void loop() {
     if (window.App) window.App.onEditorReady(this.loadFromUrlHash());
   },
 
-  /* ═══════════════════════════════════════════════════════
-     Multi-file System
-     ═══════════════════════════════════════════════════════ */
+  /* ---------------------------------------------------------
+                          Multi-file System
+    --------------------------------------------------------- */
 
   _getLanguageForFile(name) {
     if (name.endsWith('.ino') || name.endsWith('.cpp') || name.endsWith('.c') || name.endsWith('.h')) return 'arduino';

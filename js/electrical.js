@@ -1,7 +1,7 @@
-﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+﻿/* 
    js/electrical.js — Electrical Connection Engine
    Circuit graph builder, net tracer, voltage/current solver.
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+*/
 
 'use strict';
 
@@ -55,7 +55,7 @@ class ElectricalEngine {
     this.groundNet = null;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• GRAPH CONSTRUCTION â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------------------- GRAPH CONSTRUCTION ------------------------------- */
 
   /**
    * Build the circuit graph from components and wires.
@@ -183,7 +183,7 @@ class ElectricalEngine {
         break;
       }
       case 'multimeter': {
-        // In current mode, the multimeter is a short circuit (0Î©) — probes are connected
+        // In current mode, the multimeter is a short circuit (0Ω) — probes are connected
         const mode = inst.runtimeState?.mode || inst.props?.mode || 'V_DC';
         if (mode === 'A_DC' || mode === 'A_AC') {
           conns.push([key('probe_red'), key('probe_com')]);
@@ -234,7 +234,7 @@ class ElectricalEngine {
     return null;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• NET SOLVING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* --------------------------- NET SOLVING ----------------------------------- */
 
   /**
    * Solve the circuit using nodal analysis (Gauss-Seidel iteration).
@@ -278,7 +278,7 @@ class ElectricalEngine {
       switch (inst.type) {
         case 'resistor': {
           const r = (Number(inst.props?.value) || 220)
-            * (inst.props?.unit === 'kÎ©' ? 1e3 : inst.props?.unit === 'MÎ©' ? 1e6 : 1);
+            * (inst.props?.unit === 'kΩ' ? 1e3 : inst.props?.unit === 'MΩ' ? 1e6 : 1);
           addEdge(net1, net2, Math.max(r, 0.01));
           break;
         }
@@ -299,7 +299,7 @@ class ElectricalEngine {
           break;
         }
         case 'bulb_12v':
-          addEdge(net1, net2, 12); // nominal 12Î© filament
+          addEdge(net1, net2, 12); // nominal 12Ω filament
           break;
         case 'led':
         case 'led_green':
@@ -308,7 +308,7 @@ class ElectricalEngine {
         case 'led_orange':
         case 'led_white':
           // LED: modeled as a forward voltage drop with small resistance
-          addEdge(net1, net2, 20); // ~20Î© effective resistance
+          addEdge(net1, net2, 20); // ~20Ω effective resistance
           break;
       }
     }
@@ -326,7 +326,7 @@ class ElectricalEngine {
     }
 
     // 4. Gauss-Seidel iterative relaxation to solve KCL at each free node
-    //    For each free node: V = Î£(V_neighbor / R_neighbor) / Î£(1 / R_neighbor)
+    //    For each free node: V = Σ(V_neighbor / R_neighbor) / Σ(1 / R_neighbor)
     for (let iter = 0; iter < 200; iter++) {
       let maxDelta = 0;
       for (const [netId, net] of this.nets) {
@@ -335,8 +335,8 @@ class ElectricalEngine {
         if (!neighbors || neighbors.length === 0) continue;
 
         // KCL: sum of currents leaving this node = 0
-        // Î£ (V_net - V_neighbor) / R_neighbor = 0
-        // V_net Ã— Î£(1/R) = Î£(V_neighbor / R)
+        // Σ (V_net - V_neighbor) / R_neighbor = 0
+        // V_net × Σ(1/R) = Σ(V_neighbor / R)
         let sumG = 0;
         let sumVG = 0;
         for (const { net: neighbor, resistance } of neighbors) {
@@ -492,7 +492,7 @@ class ElectricalEngine {
       ic_74hc32: ['Y1', 'Y2', 'Y3', 'Y4'],
       ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'],
       ic_74hc138: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'],
-      ic_74hc245: ['A1','A2','A3','A4','A5','A6','A7','A8','B1','B2','B3','B4','B5','B6','B7','B8'],
+      ic_74hc245: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
       ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
       ic_74hc165: ['Q7', 'Q7n'],
       ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],
@@ -531,7 +531,7 @@ class ElectricalEngine {
     return invR > 0 ? 1 / invR : Infinity;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• QUERY API â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /*  -----------------------QUERY API  -----------------------------------*/
 
   /**
    * Get the Net for a specific pin on a component.
@@ -629,7 +629,7 @@ class ElectricalEngine {
       const key = (pin) => `${inst.id}:${pin}`;
       if (inst.type === 'resistor') {
         const r = (Number(inst.props?.value) || 220)
-          * (inst.props?.unit === 'kÎ©' ? 1e3 : inst.props?.unit === 'MÎ©' ? 1e6 : 1);
+          * (inst.props?.unit === 'kΩ' ? 1e3 : inst.props?.unit === 'MΩ' ? 1e6 : 1);
         addEdge(key('p1'), key('p2'), Math.max(r, 0.01));
       } else if (inst.type === 'diode_1n4007') {
         addEdge(key('anode'), key('cathode'), 0.7);
@@ -670,7 +670,7 @@ class ElectricalEngine {
 
     if (pathResistances.length === 0) return Infinity;
 
-    // Parallel combination: 1/R_total = Î£(1/Ri)
+    // Parallel combination: 1/R_total = Σ(1/Ri)
     let totalConductance = 0;
     for (const r of pathResistances) {
       if (r > 0) totalConductance += 1 / r;
@@ -704,6 +704,6 @@ class ElectricalEngine {
   }
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• EXPORT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* --------------------------- EXPORT -----------------------------------*/
 window.ElectricalEngine = ElectricalEngine;
 window.Net = Net;
