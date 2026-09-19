@@ -229,9 +229,14 @@ class ArduinoSimulator {
           }
           const _preLoop = _mainBody.substring(0, _whileMatch.index).trim();
           const _loopBody = _mainBody.substring(_wStart, _wEnd - 1).trim();
-          // Promote let declarations from pre-loop to outer scope
+          // Promote variable declarations from pre-loop to outer scope
           const _letDecls = [];
-          const _initCode = _preLoop.replace(/\blet\s+(\w+)\s*=\s*([^;]+);/g, (_, n, v) => {
+          const _declRe = new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)\\s*=\\s*([^;]+);`, 'g');
+          let _initCode = _preLoop.replace(_declRe, (_, n, v) => {
+            _letDecls.push({ n, v });
+            return '';
+          });
+          _initCode = _initCode.replace(/\blet\s+(\w+)\s*=\s*([^;]+);/g, (_, n, v) => {
             _letDecls.push({ n, v });
             return '';
           }).trim();
