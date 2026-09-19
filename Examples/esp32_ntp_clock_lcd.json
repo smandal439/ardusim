@@ -1,5 +1,5 @@
 {
-  "id": "esp32_ntp_clock_lcd",
+   "id": "esp32_ntp_clock_lcd",
   "name": "ESP32 NTP Clock (LCD)",
   "icon": "🔧",
   "desc": "A simple ESP32-based NTP clock that connects to Wi-Fi, fetches the current UTC time from an NTP server, applies the Indian Standard Time (IST) offset, and displays the time in HH:MM:SS format on a 16x2 I2C LCD display.",
@@ -46,7 +46,10 @@
           "ssid": "ArduSimNet",
           "password": "simulator",
           "channel": 6,
-          "ipAddress": "192.168.1.1"
+          "ipAddress": "192.168.1.1",
+          "txPower": 20,
+          "security": "WPA2-PSK",
+          "hidden": false
         }
       }
     ],
@@ -62,7 +65,9 @@
           "pinId": "vcc"
         },
         "color": null,
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w2",
@@ -75,7 +80,9 @@
           "pinId": "gnd"
         },
         "color": null,
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w3",
@@ -88,7 +95,9 @@
           "pinId": "sda"
         },
         "color": null,
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w4",
@@ -101,9 +110,13 @@
           "pinId": "scl"
         },
         "color": null,
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       }
     ]
   },
-  "code": "/*\n * ESP32 NTP Clock on LCD I2C - Indian Standard Time (IST)\n * Connects to Wi-Fi, fetches UTC time via ntpEpoch(),\n * applies UTC+5:30 offset, and displays HH:MM:SS on a 16x2 LCD.\n *\n * Wiring: LCD VCC -> 3V3/5V, GND -> GND, SDA -> D21, SCL -> D22\n */\n\n#include <WiFi.h>\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nconst char* ssid = \"ArduSimNet\";\nconst char* password = \"simulator\";\n\n// IST is UTC +5:30 (5*3600 + 30*60 = 19800 seconds)\nconst long istOffsetSec = 19800;\n\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nvoid setup() {\n Serial.begin(115200);\n lcd.init();\n lcd.backlight();\n\n lcd.setCursor(0, 0);\n lcd.print(\"Connecting...\");\n Serial.println(\"Connecting to Wi-Fi...\");\n\n WiFi.begin(ssid, password);\n while (WiFi.status() != WL_CONNECTED) {\n delay(300);\n Serial.print(\".\");\n }\n Serial.println();\n Serial.print(\"IP: \");\n Serial.println(WiFi.localIP());\n\n lcd.clear();\n lcd.setCursor(0, 0);\n lcd.print(\" NTP Clock\");\n lcd.setCursor(0, 1);\n lcd.print(WiFi.localIP());\n delay(1500);\n lcd.clear();\n}\n\nvoid loop() {\n // Fetch UTC epoch and apply IST offset\n unsigned long epoch = ntpEpoch() + istOffsetSec;\n\n int hours = (epoch % 86400) / 3600;\n int minutes = (epoch % 3600) / 60;\n int seconds = epoch % 60;\n\n // Row 0: static label (exactly 16 chars)\n lcd.setCursor(0, 0);\n lcd.print(\" NTP Time (IST) \");\n\n // Row 1: always write all 16 chars to avoid leftover IP characters\n // Format: '  HH:MM:SS      ' = 2 + 8 + 6 trailing spaces = 16 chars\n lcd.setCursor(0, 1);\n lcd.print(\"  \");\n if (hours < 10) lcd.print(\"0\");\n lcd.print(hours);\n lcd.print(\":\");\n if (minutes < 10) lcd.print(\"0\");\n lcd.print(minutes);\n lcd.print(\":\");\n if (seconds < 10) lcd.print(\"0\");\n lcd.print(seconds);\n lcd.print(\"      \");\n\n Serial.print(\"IST Time: \");\n if (hours < 10) Serial.print(\"0\");\n Serial.print(hours);\n Serial.print(\":\");\n if (minutes < 10) Serial.print(\"0\");\n Serial.print(minutes);\n Serial.print(\":\");\n if (seconds < 10) Serial.print(\"0\");\n Serial.println(seconds);\n\n delay(1000);\n}"
+  "files": {
+    "sketch.ino": "/*\n* ESP32 NTP Clock on LCD I2C - Indian Standard Time (IST)\n* Connects to Wi-Fi, fetches UTC time via ntpEpoch(),\n* applies UTC+5:30 offset, and displays HH:MM:SS on a 16x2 LCD.\n*\n* Wiring: LCD VCC -> 3V3/5V, GND -> GND, SDA -> D21, SCL -> D22\n*/\n\n#include <WiFi.h>\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nconst char* ssid = \"ArduSimNet\";\nconst char* password = \"simulator\";\n\n// IST is UTC +5:30 (5*3600 + 30*60 = 19800 seconds)\nconst long istOffsetSec = 19800;\n\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nvoid setup() {\n  Serial.begin(115200);\n  lcd.init();\n  lcd.backlight();\n\n  lcd.setCursor(0, 0);\n  lcd.print(\"Connecting...\");\n  Serial.println(\"Connecting to Wi-Fi...\");\n\n  WiFi.begin(ssid, password);\n  while (WiFi.status() != WL_CONNECTED) {\n    delay(300);\n    Serial.print(\".\");\n  }\n  Serial.println();\n  Serial.print(\"IP: \");\n  Serial.println(WiFi.localIP());\n\n  lcd.clear();\n  lcd.setCursor(0, 0);\n  lcd.print(\" NTP Clock\");\n  lcd.setCursor(0, 1);\n  lcd.print(WiFi.localIP());\n  delay(1500);\n  lcd.clear();\n}\n\nvoid loop() {\n// Fetch UTC epoch and apply IST offset\n  unsigned long epoch = ntpEpoch() + istOffsetSec;\n\n  int hours = (epoch % 86400) / 3600 |0;\n  int minutes = (epoch % 3600) / 60 |0;\n  int seconds = epoch % 60 | 0;\n\n// Row 0: static label (exactly 16 chars)\n  lcd.setCursor(0, 0);\n  lcd.print(\" NTP Time (IST) \");\n\n// Row 1: always write all 16 chars to avoid leftover IP characters\n// Format: '  HH:MM:SS      ' = 2 + 8 + 6 trailing spaces = 16 chars\n  lcd.setCursor(0, 1);\n  lcd.print(\"  \");\n  if (hours < 10) lcd.print(\"0\");\n  lcd.print(hours);\n  lcd.print(\":\");\n  if (minutes < 10) lcd.print(\"0\");\n  lcd.print(minutes);\n  lcd.print(\":\");\n  if (seconds < 10) lcd.print(\"0\");\n  lcd.print(seconds);\n  lcd.print(\"      \");\n\n  Serial.print(\"IST Time: \");\n  if (hours < 10) Serial.print(\"0\");\n  Serial.print(hours);\n  Serial.print(\":\");\n  if (minutes < 10) Serial.print(\"0\");\n  Serial.print(minutes);\n  Serial.print(\":\");\n  if (seconds < 10) Serial.print(\"0\");\n  Serial.println(seconds);\n\n  delay(1000);\n}"
+  }
 }

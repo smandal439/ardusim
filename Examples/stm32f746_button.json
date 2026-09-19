@@ -50,5 +50,5 @@
       }
     ]
   },
-  "code": "/*\n * STM32F746G-DISCO Button + Onboard LED\n * Button on D2 (PG6), onboard LED LD1 on D13 (PI1)\n * Uses INPUT_PULLUP so no external resistor needed.\n * Press the button → LD1 turns ON.\n */\n\nint buttonPin = 2;   // D2 = PG6\nint ledPin = 13;     // D13 = PI1 = LD1 (green)\n\nvoid setup() {\n  pinMode(buttonPin, INPUT_PULLUP);\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"STM32F746 button test ready\");\n}\n\nvoid loop() {\n  int state = digitalRead(buttonPin);\n\n  if (state == LOW) {\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"Button PRESSED — LD1 ON\");\n  } else {\n    digitalWrite(ledPin, LOW);\n  }\n\n  delay(50);\n}"
+  "code": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOIEN | RCC_AHB1ENR_GPIOGEN;\n\n  GPIOI->MODER |= (1 << (1 * 2));\n\n  GPIOG->MODER &= ~(3 << (6 * 2));\n\n  while (1) {\n    if (!(GPIOG->IDR & (1 << 6))) {\n      GPIOI->ODR |= (1 << 1);\n    } else {\n      GPIOI->ODR &= ~(1 << 1);\n    }\n    HAL_Delay(50);\n  }\n}\n\nvoid SystemClock_Config(void) {\n}"
 }

@@ -1,0 +1,24 @@
+{
+  "id": "stm32f746_register_uart",
+  "name": "STM32F746 Register UART Echo",
+  "icon": "🔌",
+  "desc": "STM32F746G-DISCO — USART1 register-level TX output to serial monitor",
+  "tags": [
+    "stm32",
+    "intermediate",
+    "UART",
+    "register"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "stm32f746_disco",
+        "x": 200,
+        "y": 100
+      }
+    ],
+    "wires": []
+  },
+  "code": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\nvoid USART1_Init(void);\nvoid USART1_SendChar(char c);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n  USART1_Init();\n\n  while (1) {\n    USART1_SendChar('H');\n    USART1_SendChar('e');\n    USART1_SendChar('l');\n    USART1_SendChar('l');\n    USART1_SendChar('o');\n    USART1_SendChar(' ');\n    USART1_SendChar('S');\n    USART1_SendChar('T');\n    USART1_SendChar('M');\n    USART1_SendChar('3');\n    USART1_SendChar('2');\n    USART1_SendChar('!');\n    USART1_SendChar('\\r');\n    USART1_SendChar('\\n');\n    HAL_Delay(1000);\n  }\n}\n\nvoid USART1_Init(void) {\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;\n  RCC->APB2ENR |= RCC_APB2ENR_USART1EN;\n\n  GPIOA->MODER &= ~(3 << (9 * 2));\n  GPIOA->MODER |= (2 << (9 * 2));\n  GPIOA->AFRL |= (7 << (9 * 4));\n\n  USART1->BRR = 0x683;\n  USART1->CR1 = USART_CR1_UE | USART_CR1_TE | USART_CR1_RE;\n}\n\nvoid USART1_SendChar(char c) {\n  while (!(USART1->SR & USART_SR_TXE));\n  USART1->DR = c;\n}\n\nvoid SystemClock_Config(void) {\n}"
+}

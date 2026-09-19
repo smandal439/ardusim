@@ -519,7 +519,23 @@ class ArduinoSimulator {
     // Standard C math (sin, cos, atan2, sqrt, etc.) is mapped by the regex
     // rules in Section 4 to Math.*. Only Arduino-specific and plugin-provided
     // functions that need _a.* prefix are listed here.
-    const API = [
+    // For STM32F746 board, skip Arduino-specific APIs (pinMode, digitalWrite, etc.)
+    // since users write register-level / HAL code. Keep delay/delayMicroseconds
+    // since the HAL delay runtime uses them internally.
+    const _isStm32 = this.board === 'stm32f746_disco';
+    const API = _isStm32 ? [
+      ['delay', '_a.delay'],
+      ['delayMicroseconds', '_a.delayMicroseconds'],
+      ['millis', '_a.millis'],
+      ['micros', '_a.micros'],
+      ['min', '_a.min'],
+      ['max', '_a.max'],
+      ['map', '_a.map'],
+      ['constrain', '_a.constrain'],
+      ['random', '_a.random'],
+      ['randomSeed', '_a.randomSeed'],
+      ['snprintf', '_a.snprintf'],
+    ] : [
       ['delay', '_a.delay'],
       ['delayMicroseconds', '_a.delayMicroseconds'],
       ['pinMode', '_a.pinMode'],

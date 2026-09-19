@@ -3,10 +3,21 @@
   "name": "LPC2148 Binary Counter",
   "icon": "🔌",
   "desc": "LPC2148 SmartX Board - binary counter on all 4 onboard LEDs (P0.12-P0.15)",
-  "tags": ["arm", "lpc2148", "beginner", "LED", "counter"],
+  "tags": [
+    "arm",
+    "lpc2148",
+    "beginner",
+    "LED",
+    "counter"
+  ],
   "circuit": {
     "components": [
-      { "id": "b1", "type": "lpc2148", "x": 200, "y": 100 }
+      {
+        "id": "b1",
+        "type": "lpc2148",
+        "x": 200,
+        "y": 100
+      }
     ],
     "wires": []
   },

@@ -1,0 +1,117 @@
+{
+  "id": "lpc2148_binary_counter",
+  "name": "LPC2148 Binary Counter",
+  "icon": "🔧",
+  "desc": "LPC2148 SmartX Board - binary counter on all 4 onboard LEDs (P0.12-P0.15).",
+  "tags": [
+   "arm",
+    "lpc2148",
+    "beginner",
+    "LED",
+    "counter"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "lpc2148",
+        "x": 200,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "LPC2148"
+        }
+      },
+      {
+        "id": "comp_1789839784782_x0cjl",
+        "type": "multi_led_array",
+        "x": 665,
+        "y": 140,
+        "rotation": 0,
+        "props": {
+          "label": "8-LED ARRAY"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1789839809898_3zd2o",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND1"
+        },
+        "to": {
+          "instId": "comp_1789839784782_x0cjl",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789839813953_uhf6v",
+        "from": {
+          "instId": "b1",
+          "pinId": "P0_12"
+        },
+        "to": {
+          "instId": "comp_1789839784782_x0cjl",
+          "pinId": "l1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789839817615_6sc91",
+        "from": {
+          "instId": "b1",
+          "pinId": "P0_13"
+        },
+        "to": {
+          "instId": "comp_1789839784782_x0cjl",
+          "pinId": "l2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789839822618_s6o7e",
+        "from": {
+          "instId": "b1",
+          "pinId": "P0_14"
+        },
+        "to": {
+          "instId": "comp_1789839784782_x0cjl",
+          "pinId": "l3"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789839825501_48ghg",
+        "from": {
+          "instId": "b1",
+          "pinId": "P0_15"
+        },
+        "to": {
+          "instId": "comp_1789839784782_x0cjl",
+          "pinId": "l4"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "/*\n * LPC2148 SmartX Board - 4-LED Binary Counter\n * Counts from 0 to 15 on onboard LEDs (P0.12-P0.15)\n * No external wiring required!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    // Set P0.12-P0.15 as outputs (LED1-LED4)\n    IO0DIR |= (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);\n    int count = 0;\n    while (1) {\n        IO0CLR = 0xF << 12;              // Clear all 4 LEDs\n        IO0SET = (count & 0xF) << 12;    // Set current count pattern\n        delay_ms(500);\n        count = (count + 1) & 0xF;       // Increment, wrap at 16\n    }\n}"
+  }
+}

@@ -25,6 +25,34 @@ void loop() {
 
 }`,
 
+  STM32_DEFAULT_CODE: `#include "stm32f7xx.h"
+
+void SystemClock_Config(void);
+
+int main(void) {
+  HAL_Init();
+  SystemClock_Config();
+
+  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOIEN;
+
+  GPIOI->MODER |= (1 << (1 * 2));
+
+  while (1) {
+    GPIOI->ODR |= (1 << 1);
+    HAL_Delay(500);
+    GPIOI->ODR &= ~(1 << 1);
+    HAL_Delay(500);
+  }
+}
+
+void SystemClock_Config(void) {
+}`,
+
+  _getDefaultCode() {
+    const board = window.App?.canvas?.boardType || 'arduino_uno';
+    return board === 'stm32f746_disco' ? this.STM32_DEFAULT_CODE : this.DEFAULT_CODE;
+  },
+
   init() {
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
@@ -558,7 +586,7 @@ void loop() {
     const container = document.getElementById('editor-container');
     if (!container) return;
     const ta = document.createElement('textarea');
-    ta.value = this.DEFAULT_CODE;
+    ta.value = this._getDefaultCode();
     ta.style.cssText = `width:100%;height:100%;background:#0d1117;color:#e6edf3;font-family:'JetBrains Mono',monospace;font-size:13px;padding:12px;border:none;outline:none;resize:none;`;
     container.appendChild(ta);
     this._fallbackTA = ta;
@@ -604,7 +632,7 @@ void loop() {
     gutter.id = 'mobile-line-numbers';
 
     const ta = document.createElement('textarea');
-    ta.value = this.DEFAULT_CODE;
+    ta.value = this._getDefaultCode();
     ta.spellcheck = false;
     ta.autocomplete = 'off';
     ta.autocorrect = 'off';
@@ -690,7 +718,7 @@ void loop() {
       this.activeFile = first || null;
       if (first) this.editor.setModel(this.files[first].model);
     } else {
-      this.createFile('sketch.ino', this.DEFAULT_CODE, true);
+      this.createFile('sketch.ino', this._getDefaultCode(), true);
     }
     this._renderFileExplorer();
     this._renderTabs();
