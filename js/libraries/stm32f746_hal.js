@@ -423,9 +423,12 @@ window.ArduinoLibs['STM32F746'] = {
       SYSTICK: 0xE000E010,
     };
 
-    var PERIPH_REGS = {
+    var GPIO_REGS = {
       MODER: 0x00, OTYPER: 0x04, OSPEEDR: 0x08, PUPDR: 0x0C,
       IDR: 0x10, ODR: 0x14, BSRR: 0x18, LCKR: 0x1C, AFRL: 0x20, AFRH: 0x24,
+    };
+
+    var RCC_REGS = {
       CR: 0x00, PLLCFGR: 0x04, CFGR: 0x08, CIR: 0x0C,
       AHB1RSTR: 0x10, AHB2RSTR: 0x14, AHB3RSTR: 0x18,
       APB1RSTR: 0x20, APB2RSTR: 0x24,
@@ -433,37 +436,89 @@ window.ArduinoLibs['STM32F746'] = {
       APB1ENR: 0x40, APB2ENR: 0x44,
       AHB1LPENR: 0x50, APB1LPENR: 0x58, APB2LPENR: 0x5C,
       BDCR: 0x70, CSR: 0x74, SSCGR: 0x80, PLLI2SCFGR: 0x84,
-      ACR: 0x00,
+    };
+
+    var USART_REGS = {
       SR: 0x00, DR: 0x04, BRR: 0x08, CR1: 0x0C, CR2: 0x10, CR3: 0x14, GTPR: 0x18,
+    };
+
+    var ADC_REGS = {
+      SR: 0x00, CR1: 0x04, CR2: 0x08,
       SMPR1: 0x0C, SMPR2: 0x10,
       JOFR1: 0x14, JOFR2: 0x18, JOFR3: 0x1C, JOFR4: 0x20,
       HTR: 0x24, LTR: 0x28,
       SQR1: 0x2C, SQR2: 0x30, SQR3: 0x34, JSQR: 0x38,
       JDR1: 0x3C, JDR2: 0x40, JDR3: 0x44, JDR4: 0x48,
-      SMCR: 0x08, DIER: 0x0C, EGR: 0x14,
-      CCMR1: 0x18, CCMR2: 0x1C, CCER: 0x20,
-      CNT: 0x24, PSC: 0x28, ARR: 0x2C, RCR: 0x30,
-      CCR1: 0x34, CCR2: 0x38, CCR3: 0x3C, CCR4: 0x40, BDTR: 0x44, DCR: 0x48,
-      CRCPR: 0x10, RXCRCR: 0x14, TXCRCR: 0x18,
-      OAR1: 0x08, OAR2: 0x0C, SR1: 0x14, SR2: 0x18, CCR: 0x1C, TRISE: 0x20,
+      DR: 0x4C, CCR: 0x300,
+    };
+
+    var TIM_REGS = {
+      CR1: 0x00, CR2: 0x04, SMCR: 0x08, DIER: 0x0C, SR: 0x10, EGR: 0x14,
+      CCMR1: 0x18, CCMR2: 0x1C, CCER: 0x20, CNT: 0x24, PSC: 0x28, ARR: 0x2C,
+      RCR: 0x30, CCR1: 0x34, CCR2: 0x38, CCR3: 0x3C, CCR4: 0x40, BDTR: 0x44, DCR: 0x48,
+    };
+
+    var SPI_REGS = {
+      CR1: 0x00, CR2: 0x04, SR: 0x08, DR: 0x0C, CRCPR: 0x10, RXCRCR: 0x14, TXCRCR: 0x18,
+    };
+
+    var I2C_REGS = {
+      CR1: 0x00, CR2: 0x04, OAR1: 0x08, OAR2: 0x0C, DR: 0x10,
+      SR1: 0x14, SR2: 0x18, CCR: 0x1C, TRISE: 0x20,
+    };
+
+    var SYSTICK_REGS = {
       CTRL: 0x00, LOAD: 0x04, VAL: 0x08, CALIB: 0x0C,
     };
 
-    var R = {};
-    Object.keys(GPIO_BASES).forEach(function (port) {
-      Object.keys(GPIO_REGS).forEach(function (reg) {
-        R[port + '_' + reg] = GPIO_BASES[port] + GPIO_REGS[reg];
+    var PERIPH_TYPE = {};
+    Object.keys(GPIO_BASES).forEach(function (n) { PERIPH_TYPE[n] = 'GPIO'; });
+    PERIPH_TYPE.RCC = 'RCC';
+    PERIPH_TYPE.FLASH_R = 'FLASH';
+    Object.keys(PERIPH_BASES).forEach(function (n) {
+      if (n.match(/^USART|^UART/)) PERIPH_TYPE[n] = 'USART';
+      if (n.match(/^ADC/)) PERIPH_TYPE[n] = 'ADC';
+      if (n.match(/^TIM/)) PERIPH_TYPE[n] = 'TIM';
+      if (n.match(/^SPI/)) PERIPH_TYPE[n] = 'SPI';
+      if (n.match(/^I2C/)) PERIPH_TYPE[n] = 'I2C';
+      if (n === 'SYSTICK') PERIPH_TYPE[n] = 'SYSTICK';
+    });
+
+    var PERIPH_REGS = {
+      GPIO: GPIO_REGS,
+      RCC: RCC_REGS,
+      USART: USART_REGS,
+      ADC: ADC_REGS,
+      TIM: TIM_REGS,
+      SPI: SPI_REGS,
+      I2C: I2C_REGS,
+      SYSTICK: SYSTICK_REGS,
+    };
+
+    var PF_ADDR = {};
+    var allFieldNames = {};
+    Object.keys(PERIPH_BASES).forEach(function (pName) {
+      var type = PERIPH_TYPE[pName];
+      var regs = PERIPH_REGS[type];
+      if (!regs) return;
+      var base = PERIPH_BASES[pName];
+      Object.keys(regs).forEach(function (fName) {
+        PF_ADDR[pName + '->' + fName] = (base + regs[fName]) >>> 0;
+        allFieldNames[fName] = true;
       });
     });
 
     var periphNames = Object.keys(PERIPH_BASES).sort(function (a, b) { return b.length - a.length; });
-    var fieldNames = Object.keys(PERIPH_REGS).sort(function (a, b) { return b.length - a.length; });
+    var fieldNames = Object.keys(allFieldNames).sort(function (a, b) { return b.length - a.length; });
     var periphPat = '(' + periphNames.join('|') + ')';
     var fieldPat = '(' + fieldNames.join('|') + ')';
     var periphFieldPat = periphPat + '->' + fieldPat;
 
     function _pfx(periph, field) {
-      return '0x' + ((PERIPH_BASES[periph] + PERIPH_REGS[field]) >>> 0).toString(16);
+      var key = periph + '->' + field;
+      var addr = PF_ADDR[key];
+      if (addr === undefined) return '0x0';
+      return '0x' + addr.toString(16);
     }
 
     var rules = [];
@@ -550,6 +605,19 @@ window.ArduinoLibs['STM32F746'] = {
       'A_0': 'pin_14',
       'F_6': 'pin_19', 'F_7': 'pin_18',
       'F_8': 'pin_17', 'F_9': 'pin_16', 'F_10': 'pin_15',
+    };
+
+    var ADC_PIN_MAP = {
+      'A_0': 0,
+      'A_1': 1, 'A_2': 2, 'A_3': 3, 'A_4': 4, 'A_5': 5, 'A_6': 6, 'A_7': 7,
+      'B_0': 8, 'B_1': 9,
+      'C_0': 10, 'C_1': 11, 'C_2': 12, 'C_3': 13, 'C_4': 14, 'C_5': 15,
+    };
+
+    var ADC_BASES = {
+      0x40012000: 1,
+      0x40012400: 2,
+      0x40012800: 3,
     };
 
     var REVERSE_PORT_PIN = {};
@@ -644,6 +712,51 @@ window.ArduinoLibs['STM32F746'] = {
           var fifo = UART_RX_FIFOS[baseAddr];
           if (fifo && fifo.length > 0) return fifo.shift();
           return 0;
+        }
+      }
+
+      var adcDrAddrs = [0x4001204C, 0x4001244C, 0x4001284C];
+      for (var a = 0; a < adcDrAddrs.length; a++) {
+        if (addr === adcDrAddrs[a]) {
+          var adcBase = adcDrAddrs[a] - 0x4C;
+          var cr2 = regs[adcBase + 0x08] || 0;
+          if (cr2 & ADC_CR2_ADON) {
+            var sq3 = regs[adcBase + 0x34] || 0;
+            var channel = sq3 & 0x1F;
+            var gpioLetter = null;
+            var gpioBit = -1;
+            if (channel <= 7) { gpioLetter = 'A'; gpioBit = channel; }
+            else if (channel <= 9) { gpioLetter = 'B'; gpioBit = channel - 8; }
+            else if (channel <= 15) { gpioLetter = 'C'; gpioBit = channel - 10; }
+            if (gpioLetter) {
+              var adcKey = gpioLetter + '_' + gpioBit;
+              var pinName = PORT_PIN_MAP[adcKey];
+              if (pinName) {
+                var pinNum = parseInt(pinName.replace('pin_', ''));
+                var adcLabel = null;
+                var stmMap = { 14: 'A0', 15: 'A1', 16: 'A2', 17: 'A3', 18: 'A4', 19: 'A5' };
+                adcLabel = stmMap[pinNum] || null;
+                var adcVal = 0;
+                if (adcLabel) {
+                  var canvas = window.CircuitCanvas;
+                  if (canvas && typeof canvas._readAnalogInput === 'function') {
+                    var board = typeof canvas.getBoardInst === 'function' ? canvas.getBoardInst() : null;
+                    if (board) {
+                      var measured = Number(canvas._readAnalogInput(board.id, adcLabel));
+                      if (Number.isFinite(measured)) {
+                        adcVal = Math.round((measured / 1023) * 4095);
+                      }
+                    }
+                  }
+                }
+                if (adcVal < 0) adcVal = 0;
+                if (adcVal > 4095) adcVal = 4095;
+                regs[addr] = adcVal;
+                regs[adcBase + 0x00] = (regs[adcBase + 0x00] || 0) | 0x02;
+              }
+            }
+          }
+          return regs[addr] || 0;
         }
       }
 
