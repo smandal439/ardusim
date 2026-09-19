@@ -1,4 +1,4 @@
-﻿/**
+/**
  * LPC2148 Register-Level Plugin for ArduSim
  *
  * Provides real LPC2148 ARM7 register definitions and transpilation.
@@ -100,8 +100,8 @@ window.ArduinoLibs['LPC2148'] = {
   },
 
   transpile: [
-    [/\bdelay_ms\s*\(/g, 'await _a.delay('],
-    [/\bdelay_us\s*\(/g, 'await _a.delayMicroseconds('],
+    [/\bdelay_ms\s*\(/g, 'await delay('],
+    [/\bdelay_us\s*\(/g, 'await delayMicroseconds('],
 
     // Compound assignments (must precede simple assignment)
     [/\b(IO[01](?:SET|CLR|PIN|DIR))\s*\|=\s*([^;]+)/g,
@@ -124,7 +124,7 @@ window.ArduinoLibs['LPC2148'] = {
      '_regW($1, ($2))'],
 
     // Register reads (rvalue)
-    [/\b(IO[01](?:SET|CLR|PIN|DIR))\b(?!\s*[=|&^<>!])/g, '_regR($1)'],
+    [/\b(?<!_reg[WR]\()(IO[01](?:SET|CLR|PIN|DIR))\b/g, '_regR($1)'],
 
     // Pointer-based register access
     [/\*\s*\(\s*\(\s*volatile\s+(?:unsigned\s+)?(?:long|int|short|char)\s*\*\s*\)\s*(0x[0-9A-Fa-f]+)\s*\)\s*=\s*([^;]+)/g,
