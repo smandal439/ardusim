@@ -121,7 +121,7 @@ window.ArduinoLibs['LPC2148'] = {
       I2C0CONSET: 0xE001C000, I2C0STAT: 0xE001C004, I2C0DAT: 0xE001C008,
       I2C0SCLL: 0xE001C010, I2C0SCLH: 0xE001C014,
       PCLKSEL0: 0xE001C1A4, PCLKSEL1: 0xE001C1A8,
-      LED1: 12, LED2: 13, LED3: 14, LED4: 15,
+
     };
 
     var regNames = Object.keys(R).sort(function(a, b) { return b.length - a.length; });
@@ -155,7 +155,8 @@ window.ArduinoLibs['LPC2148'] = {
        function(m, r, v) { return '_regW(' + _hx(r) + ', (' + v.trim() + '))'; }],
 
       // Register reads (rvalue) — only if not already inside _regW/_regR
-      [new RegExp('(?<!_reg[WR]\\()' + regPat, 'g'), function(m, r) { return _hx(r); }],
+      // Hardware registers (addr >= 0x10000) use _regR(); small constants (LED1=12) use raw hex
+      [new RegExp('(?<!_reg[WR]\\()' + regPat, 'g'), function(m, r) { return R[r] >= 0x10000 ? '_regR(' + _hx(r) + ')' : _hx(r); }],
 
       // Pointer-based register access
       [/\*\s*\(\s*\(\s*volatile\s+(?:unsigned\s+)?(?:long|int|short|char)\s*\*\s*\)\s*(0x[0-9A-Fa-f]+)\s*\)\s*=\s*([^;]+)/g,
@@ -269,6 +270,7 @@ window.ArduinoLibs['LPC2148'] = {
           if (val & (1 << b)) {
             var k = 'pin_P0_' + b;
             self.pinStates[k] = 1;
+            self.pinStates['pin_' + b] = 1;
             self._emitPinChange(k, 1);
           }
         }
@@ -278,6 +280,7 @@ window.ArduinoLibs['LPC2148'] = {
           if (val & (1 << b2)) {
             var k2 = 'pin_P0_' + b2;
             self.pinStates[k2] = 0;
+            self.pinStates['pin_' + b2] = 0;
             self._emitPinChange(k2, 0);
           }
         }
@@ -288,13 +291,16 @@ window.ArduinoLibs['LPC2148'] = {
           var nv = (val & (1 << b3)) ? 1 : 0;
           if (self.pinStates[k3] !== nv) {
             self.pinStates[k3] = nv;
+            self.pinStates['pin_' + b3] = nv;
             self._emitPinChange(k3, nv);
           }
         }
       }
       if (addr === 0xE0028008) {
         for (var b4 = 0; b4 < 32; b4++) {
-          self.pinModes['pin_P0_' + b4] = (val & (1 << b4)) ? 'OUTPUT' : 'INPUT';
+          var mode4 = (val & (1 << b4)) ? 'OUTPUT' : 'INPUT';
+          self.pinModes['pin_P0_' + b4] = mode4;
+          self.pinModes['pin_' + b4] = mode4;
         }
       }
       if (addr === 0xE0029004) {
@@ -302,6 +308,7 @@ window.ArduinoLibs['LPC2148'] = {
           if (val & (1 << b5)) {
             var k5 = 'pin_P1_' + b5;
             self.pinStates[k5] = 1;
+            self.pinStates['pin_' + b5] = 1;
             self._emitPinChange(k5, 1);
           }
         }
@@ -311,13 +318,16 @@ window.ArduinoLibs['LPC2148'] = {
           if (val & (1 << b6)) {
             var k6 = 'pin_P1_' + b6;
             self.pinStates[k6] = 0;
+            self.pinStates['pin_' + b6] = 0;
             self._emitPinChange(k6, 0);
           }
         }
       }
       if (addr === 0xE0029008) {
         for (var b7 = 16; b7 < 32; b7++) {
-          self.pinModes['pin_P1_' + b7] = (val & (1 << b7)) ? 'OUTPUT' : 'INPUT';
+          var mode7 = (val & (1 << b7)) ? 'OUTPUT' : 'INPUT';
+          self.pinModes['pin_P1_' + b7] = mode7;
+          self.pinModes['pin_' + b7] = mode7;
         }
       }
       if (addr === 0xE000C000) {

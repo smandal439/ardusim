@@ -4773,8 +4773,8 @@ class CircuitCanvas {
     if (inst.type === 'bench_power_supply') return pinId === 'GND' || pinId === 'GND_5V';
     if (inst.type === 'mb102_power') return pinId === 'gnd_t' || pinId === 'gnd_b' || pinId === 'aux_gnd';
     if (inst.type === 'battery') return pinId === 'neg';
-    // Arduino digital pin LOW acts as ground
-    if (inst.type === 'arduino_uno' || inst.type === 'arduino_nano' || inst.type === 'esp32_devkit_v1') {
+    // Arduino / LPC2148 digital pin LOW acts as ground
+    if (inst.type === 'arduino_uno' || inst.type === 'arduino_nano' || inst.type === 'esp32_devkit_v1' || inst.type === 'lpc2148') {
       const pinNum = this._pinToNumber(pinId);
       if (pinNum != null) {
         const sim = window.ArduinoSim;
