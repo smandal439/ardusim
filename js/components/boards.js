@@ -1927,7 +1927,7 @@ defComp({
     var ledLabels = ['LED1', 'LED2', 'LED3', 'LED4'];
     var ledGpios = [12, 13, 14, 15];
     for (var li = 0; li < 4; li++) {
-      var lx = W - 65 + li * 20;
+      var lx = W - 110 + li * 20;
       var ly = 60;
       var lkey = 'pin_P0_' + ledGpios[li];
       var lit = sim && sim.pinStates && sim.pinStates[lkey] > 0;
