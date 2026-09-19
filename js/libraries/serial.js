@@ -83,10 +83,12 @@ window.ArduinoLibs['Serial'] = {
     /* ── UART TX pin helpers — simulate frame on the hardware TX pin ── */
     function _uartTxPin() {
       if (self.board === 'esp32_devkit_v1') return 1;  /* GPIO1 = TX0 */
+      if (self.board === 'lpc2148') return 2;           /* P0.2 = TXD0 */
       return 1; /* Arduino Uno/Nano D1 */
     }
     function _uartRxPin() {
       if (self.board === 'esp32_devkit_v1') return 3;  /* GPIO3 = RX0 */
+      if (self.board === 'lpc2148') return 3;           /* P0.3 = RXD0 */
       return 0; /* Arduino Uno/Nano D0 */
     }
     function _setPin(pin, v) {

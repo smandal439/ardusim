@@ -1,0 +1,7 @@
+{
+  "name": "DAC Sine Wave",
+  "category": "LPC2148",
+  "description": "Generate a sine wave on the DAC output pin (P0.25)",
+  "image": "lpc2148",
+  "code": "var phase = 0;\n\nasync function setup() {\n  _regW(0xE0028008, 0); // P0.25 = INPUT (DAC default)\n}\n\nasync function loop() {\n  var val = Math.round(512 + 511 * Math.sin(phase));\n  _regW(0xE000C500, (val & 0x3FF) << 6);\n  phase += 0.15;\n  if (phase > 6.28) phase -= 6.28;\n  await delay_ms(1);\n}"
+}

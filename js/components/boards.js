@@ -2010,7 +2010,7 @@ defComp({
     ctx.fillText('ARM7TDMI-S  60MHz  512KB Flash  40KB SRAM', W / 2, H - 4);
 
     // ── Selection Outline ──
-    if (inst && inst._selected) {
+    if (inst && inst.selected) {
       ctx.setLineDash([5, 4]);
       ctx.strokeStyle = '#00d4ff';
       ctx.lineWidth = 2;

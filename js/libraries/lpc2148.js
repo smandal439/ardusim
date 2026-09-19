@@ -141,6 +141,13 @@ window.ArduinoLibs['LPC2148'] = {
     regs[0xE0029008] = 0;
     regs[0xE000C000] = 0;
     regs[0xE000C008] = 0x01;
+    regs[0xE0010000] = 0;
+    regs[0xE0010008] = 0x01;
+    regs[0xE002C000] = 0;
+
+    function _uartHandler(ch) {
+      if (self._serialLog) self._serialLog(String.fromCharCode(ch));
+    }
 
     function _readReg(addr) {
       if (regs[addr] === undefined) regs[addr] = 0;
@@ -166,10 +173,46 @@ window.ArduinoLibs['LPC2148'] = {
       }
 
       if (addr === 0xE000C014) return regs[addr] | 0x60;
+      // UART1 LSR
+      if (addr === 0xE0010014) return regs[addr] | 0x60;
       if (addr === 0xE000C000) {
         if (self._lpc2148_uart0_rx && self._lpc2148_uart0_rx.length > 0)
           return self._lpc2148_uart0_rx.shift();
         return 0;
+      }
+      // UART1 RBR
+      if (addr === 0xE0010000) {
+        if (self._lpc2148_uart1_rx && self._lpc2148_uart1_rx.length > 0)
+          return self._lpc2148_uart1_rx.shift();
+        return 0;
+      }
+      // Timer0 TC: increment if enabled
+      if (addr === 0xE0004008) {
+        var tcr = regs[0xE0004004] || 0;
+        if (tcr & 1) {
+          regs[0xE0004008] = (regs[0xE0004008] || 0) + 1;
+          var mr0 = regs[0xE0004018] || 0;
+          var mcr = regs[0xE0004014] || 0;
+          if (mr0 > 0 && (regs[0xE0004008] || 0) >= mr0) {
+            if (mcr & 1) regs[0xE0004008] = 0;
+            if (mcr & 2) regs[0xE0004000] = (regs[0xE0004000] || 0) | 1;
+          }
+        }
+        return regs[0xE0004008] || 0;
+      }
+      // Timer1 TC: increment if enabled
+      if (addr === 0xE0008008) {
+        var tcr1 = regs[0xE0008004] || 0;
+        if (tcr1 & 1) {
+          regs[0xE0008008] = (regs[0xE0008008] || 0) + 1;
+          var mr0_1 = regs[0xE0008018] || 0;
+          var mcr1 = regs[0xE0008014] || 0;
+          if (mr0_1 > 0 && (regs[0xE0008008] || 0) >= mr0_1) {
+            if (mcr1 & 1) regs[0xE0008008] = 0;
+            if (mcr1 & 2) regs[0xE0008000] = (regs[0xE0008000] || 0) | 1;
+          }
+        }
+        return regs[0xE0008008] || 0;
       }
       if (addr === 0xE0034004) return regs[addr] || 0;
 
@@ -236,7 +279,23 @@ window.ArduinoLibs['LPC2148'] = {
         }
       }
       if (addr === 0xE000C000) {
-        if (self._lpc2148_uart_handler) self._lpc2148_uart_handler(val & 0xFF);
+        _uartHandler(val & 0xFF);
+      }
+      // UART1 TX (U1THR)
+      if (addr === 0xE0010000) {
+        _uartHandler(val & 0xFF);
+      }
+      // Timer0 TC: increment counter on write
+      if (addr === 0xE0004008) {
+        regs[0xE0004008] = val;
+      }
+      // Timer0 TCR: enable/reset
+      if (addr === 0xE0004004) {
+        regs[0xE0004004] = val;
+      }
+      // Timer1 TCR: enable/reset
+      if (addr === 0xE0008004) {
+        regs[0xE0008004] = val;
       }
       if (addr === 0xE0034000) {
         if (val & (1 << 24)) {
@@ -253,6 +312,21 @@ window.ArduinoLibs['LPC2148'] = {
         var dac = (val >> 6) & 0x3FF;
         self.pinStates['pin_DAC'] = dac;
         self._emitPinChange('pin_DAC', dac);
+      }
+      // PINSEL0: store and set alternate pin functions
+      if (addr === 0xE002C000) {
+        regs[0xE002C000] = val;
+        for (var pn = 0; pn < 16; pn++) {
+          var func = (val >> (pn * 2)) & 0x03;
+          var pk = 'pin_P0_' + pn;
+          if (func === 1) self.pinModes[pk] = 'ALT1';
+          else if (func === 2) self.pinModes[pk] = 'ALT2';
+          else if (func === 3) self.pinModes[pk] = 'ALT3';
+        }
+      }
+      if (addr === 0xE002C004) {
+        regs[0xE002C004] = val;
+      }
       }
     }
 

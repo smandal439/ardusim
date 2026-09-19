@@ -1,0 +1,7 @@
+{
+  "name": "UART1 Echo",
+  "category": "LPC2148",
+  "description": "Echo received characters on UART1 back to Serial Monitor",
+  "image": "lpc2148",
+  "code": "async function setup() {\n  // PINSEL0: P0.4=TXD1, P0.5=RXD1 (func=01)\n  _regW(0xE002C000, _regR(0xE002C000) | (0x01 << 8) | (0x01 << 10));\n  // UART1: 9600 baud (PCLK=15MHz, divider=975)\n  _regW(0xE0010008, 0x83); // Enable DLAB\n  _regW(0xE0010000, 0x87); // DLL = 0x87\n  _regW(0xE0010004, 0x03); // DLM = 0x03\n  _regW(0xE0010008, 0x03); // 8N1, disable DLAB\n}\n\nasync function loop() {\n  var lsr = _regR(0xE0010014);\n  if (lsr & 1) {\n    var ch = _regR(0xE0010000);\n    _regW(0xE0010000, ch);\n  }\n  await delay_ms(10);\n}"
+}

@@ -709,12 +709,12 @@ class ArduinoSimulator {
                   let arduinoPinNum = null;
                   if (w.from.instId === inst.id && w.from.pinId === cPinId) {
                     const other = canvas.components.find(ci => ci.id === w.to.instId);
-                    if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1' || other.type === 'stm32f746_disco')) {
+                    if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1' || other.type === 'stm32f746_disco' || other.type === 'lpc2148')) {
                       arduinoPinNum = canvas._pinToNumber(w.to.pinId);
                     }
                   } else if (w.to.instId === inst.id && w.to.pinId === cPinId) {
                     const other = canvas.components.find(ci => ci.id === w.from.instId);
-                    if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1' || other.type === 'stm32f746_disco')) {
+                    if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1' || other.type === 'stm32f746_disco' || other.type === 'lpc2148')) {
                       arduinoPinNum = canvas._pinToNumber(w.from.pinId);
                     }
                   }
@@ -739,12 +739,12 @@ class ArduinoSimulator {
                 let rPinNum = null;
                 if (w.from.instId === inst.id && w.from.pinId === rPinId) {
                   const other = canvas.components.find(ci => ci.id === w.to.instId);
-                  if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1' || other.type === 'stm32f746_disco')) {
+                  if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1' || other.type === 'stm32f746_disco' || other.type === 'lpc2148')) {
                     rPinNum = canvas._pinToNumber(w.to.pinId);
                   }
                 } else if (w.to.instId === inst.id && w.to.pinId === rPinId) {
                   const other = canvas.components.find(ci => ci.id === w.from.instId);
-                  if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1' || other.type === 'stm32f746_disco')) {
+                  if (other && (other.type === 'arduino_uno' || other.type === 'arduino_nano' || other.type === 'esp32_devkit_v1' || other.type === 'stm32f746_disco' || other.type === 'lpc2148')) {
                     rPinNum = canvas._pinToNumber(w.from.pinId);
                   }
                 }
@@ -797,6 +797,9 @@ class ArduinoSimulator {
               } else if (board.type === 'stm32f746_disco') {
                 const stmMap = { 14: 'A0', 15: 'A1', 16: 'A2', 17: 'A3', 18: 'A4', 19: 'A5' };
                 label = stmMap[pinNum] || null;
+              } else if (board.type === 'lpc2148') {
+                const lpcMap = { 26: 'AIN0', 27: 'AIN1', 28: 'AIN2', 29: 'AIN3', 30: 'AIN4', 31: 'AIN5', 32: 'AIN6', 33: 'AIN7' };
+                label = lpcMap[pinNum] || null;
               }
 
               if (label) {
@@ -2355,18 +2358,19 @@ window.loadExamplesFromFiles = async function () {
     'ir_dfplayer_remote', 'ir_obstacle_sensor_led_alert', 'ir_remote_decode', 'ir_remote_decoder', 'ir_remote_lcd', 'joystick_led',
     'keypad_interfacing', 'l298n_dc_motor', 'lcd', 'lcd_hello_world', 'lcd_i2c', 'lcd_i2c_display_20x4',
     'lcd_print_remotely', 'ldr_lamp', 'led_array_blink_pattern', 'lm35_temperature', 'lm35_temperature_sensor', 'logic_analyzer_test',
-    'lora_sender_receiver', 'lpc2148_all_leds', 'lpc2148_blink', 'lpc2148_button', 'lpc2148_pot_adc', 'math_operations',
-    'max7219', 'morse', 'morse_code_using_serial_data', 'mpu6050_accel', 'mpu6050_accelerometer_2', 'multi_colour_led_blink',
-    'nano_blink', 'neopixel_8x8_matrix_rainbow_2', 'neopixel_8x8_matrix_rainbow_3', 'neopixel_8x8_matrix_rainbow_4', 'neopixel_color_cycle', 'neopixel_strip_chase',
-    'neopixel_strip_color_pattern', 'not_gate_test', 'ntc_thermistor_dc_motor', 'oled_ssd1306', 'opamp_741_non_inverting', 'or_gate',
-    'pir_alarm', 'plugin_tutorial', 'potentiometer', 'print_binary_data', 'rainbow_rgb', 'read_rfid_card_raw_data',
-    'relay_control', 'remote_control_leds', 'remote_servo_control', 'rfid_inventory_tracker', 'rgb_matrix_demo', 'rotary_encoder_counter',
-    'rotary_encoder_servo', 'seg7_counter', 'serial_peek', 'serial_peek_2', 'serial_plotter', 'serial_plotter_sine_and_triangle',
-    'servo_continuous_spin', 'servo_sweep', 'shift_resister_circuit', 'simplebme280_altimeter_on_lcd', 'simplebme280_altitude', 'simplebme280_basic',
-    'stepper_motor', 'stm32f746_blink', 'stm32f746_button', 'stm32f746_lcd', 'stm32f746_pot_led', 'tb6600_stepper',
-    'temperature', 'traffic_light', 'two_lcd', 'u8g2_oled_example', 'ultrasonic', 'ultrasonic_distance_pulsein',
-    'vl53l0x_proximity_sensor', 'voltage_divider', 'water_flow', 'weather_station_multi', 'weather_station_simple', 'weather_station_tft',
-    'wifi_bssid', 'wifi_scan', 'zigbee_8_led_control', 'zigbee_led_control', 'zigbee_sender_receiver', 'zigbee_sensor_network'
+    'lora_sender_receiver', 'lpc2148_all_leds', 'lpc2148_blink', 'lpc2148_button', 'lpc2148_dac_sine', 'lpc2148_pot_adc',
+    'lpc2148_timer0_led', 'lpc2148_uart1_echo', 'math_operations', 'max7219', 'morse', 'morse_code_using_serial_data',
+    'mpu6050_accel', 'mpu6050_accelerometer_2', 'multi_colour_led_blink', 'nano_blink', 'neopixel_8x8_matrix_rainbow_2', 'neopixel_8x8_matrix_rainbow_3',
+    'neopixel_8x8_matrix_rainbow_4', 'neopixel_color_cycle', 'neopixel_strip_chase', 'neopixel_strip_color_pattern', 'not_gate_test', 'ntc_thermistor_dc_motor',
+    'oled_ssd1306', 'opamp_741_non_inverting', 'or_gate', 'pir_alarm', 'plugin_tutorial', 'potentiometer',
+    'print_binary_data', 'rainbow_rgb', 'read_rfid_card_raw_data', 'relay_control', 'remote_control_leds', 'remote_servo_control',
+    'rfid_inventory_tracker', 'rgb_matrix_demo', 'rotary_encoder_counter', 'rotary_encoder_servo', 'seg7_counter', 'serial_peek',
+    'serial_peek_2', 'serial_plotter', 'serial_plotter_sine_and_triangle', 'servo_continuous_spin', 'servo_sweep', 'shift_resister_circuit',
+    'simplebme280_altimeter_on_lcd', 'simplebme280_altitude', 'simplebme280_basic', 'stepper_motor', 'stm32f746_blink', 'stm32f746_button',
+    'stm32f746_lcd', 'stm32f746_pot_led', 'tb6600_stepper', 'temperature', 'traffic_light', 'two_lcd',
+    'u8g2_oled_example', 'ultrasonic', 'ultrasonic_distance_pulsein', 'vl53l0x_proximity_sensor', 'voltage_divider', 'water_flow',
+    'weather_station_multi', 'weather_station_simple', 'weather_station_tft', 'wifi_bssid', 'wifi_scan', 'zigbee_8_led_control',
+    'zigbee_led_control', 'zigbee_sender_receiver', 'zigbee_sensor_network'
   ];
 
   const sketches = [];

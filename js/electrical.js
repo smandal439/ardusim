@@ -390,7 +390,7 @@ class ElectricalEngine {
           if (!pinKey.startsWith(inst.id + ':')) continue;
           const pinId = pinKey.slice(inst.id.length + 1);
 
-          if (pinId === '5V' || pinId === 'VIN' || pinId === '5V2') {
+          if (pinId === '5V' || pinId === 'VIN' || pinId === '5V2' || pinId === 'VCC' || pinId === 'VBUS') {
             addSource(pinId, '5v', 5.0, 255);
           } else if (pinId === '3V3') {
             addSource(pinId, '3v3', 3.3, 168);
