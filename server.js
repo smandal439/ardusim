@@ -282,7 +282,7 @@ function readExamples() {
   return fs.readdirSync(dir)
     .filter(f => f.toLowerCase().endsWith('.json'))
     .map(f => {
-      try { return JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); }
+      try { let c = fs.readFileSync(path.join(dir, f), 'utf8'); if (c.charCodeAt(0) === 0xFEFF) c = c.slice(1); return JSON.parse(c); }
       catch (e) { return null; }
     })
     .filter(Boolean);
