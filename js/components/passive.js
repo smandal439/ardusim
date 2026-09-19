@@ -100,7 +100,7 @@ defComp({
   ],
   pins: [
     { id: 'pos', label: '+', type: PIN_TYPE.SIGNAL, x: 10, y: 0, side: 'top' },
-    { id: 'neg', label: 'âˆ’', type: PIN_TYPE.GND, x: 10, y: 60, side: 'bottom' },
+    { id: 'neg', label: '−', type: PIN_TYPE.GND, x: 10, y: 60, side: 'bottom' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;

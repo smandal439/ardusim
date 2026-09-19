@@ -189,7 +189,7 @@ class App {
     exportBtn?.addEventListener('click', () => this.exportImage());
     formatBtn?.addEventListener('click', () => this.formatCode());
     verifyBtn?.addEventListener('click', () => this.verify());
-    // Logo click â†’ go to home page
+    // Logo click ← go to home page
     document.querySelector('.header-logo')?.addEventListener('click', () => {
       window.location.href = '/';
     });
@@ -392,7 +392,7 @@ class App {
     if (projectNameEl) {
       projectNameEl.addEventListener('input', (e) => {
         this._projectName = (e.target.value || 'Untitled Project').trim() || 'Untitled Project';
-        document.title = `${this._projectName} â€” ArduSim`;
+        document.title = `${this._projectName} — ArduSim`;
         window.StorageManager?.markDirty();
       });
       projectNameEl.addEventListener('blur', () => {
@@ -479,7 +479,7 @@ class App {
           item.classList.toggle('placing', placing && item.dataset.type === type);
         });
       };
-      // Initial sync â€” if already in placing mode from a previous session
+      // Initial sync — if already in placing mode from a previous session
       this.canvas.onPlacingChanged(this.canvas.placingType != null);
       this.canvas.onContextMenu = (inst, x, y) => this._showContextMenu(inst, x, y);
       this._refreshCanvasSummary();
@@ -504,7 +504,7 @@ class App {
   }
 
   // Sync sim.board (and the board selector UI) with the board actually placed
-  // on the canvas, so LED_BUILTIN / A0â€“A5 map to the right pins.
+  // on the canvas, so LED_BUILTIN / A0—A5 map to the right pins.
   _syncBoardFromCanvas() {
     const active = this._getActiveBoardType();
     if (this.sim.board !== active) {
@@ -532,7 +532,7 @@ class App {
       this._loadExampleCircuit('blink');
       this.showToast(`${boardName} starter circuit loaded`, 'success');
     } else {
-      this.showToast(`Board set to ${boardName} â€” existing wiring assumes the previous board`, 'info');
+      this.showToast(`Board set to ${boardName} — existing wiring assumes the previous board`, 'info');
     }
   }
 
@@ -580,7 +580,7 @@ class App {
     };
 
     this.sim2.onStart = () => {
-      this.output?.log('[Board2] Compile OK â€” running', 'success');
+      this.output?.log('[Board2] Compile OK — running', 'success');
     };
 
     this.sim2.onPinChange = (pinKey, value) => {
@@ -817,7 +817,7 @@ class App {
 
   _getDefaultBoard2Code() {
     return `/*
- * ArduSim â€” Board 2 (Receiver)
+ * ArduSim — Board 2 (Receiver)
  * This board runs on the secondary ESP32.
  * Both boards run simultaneously when you click "Run".
  */
@@ -882,7 +882,7 @@ void loop() {
       this._setRunningState(true);
       this._updateCompileStatus(this.sim2 && this.sim2.isRunning ? 'Running (2 boards)' : 'Running');
       this._updateStatus('Simulation running');
-      this.output?.log('Compile OK â€” running simulation', 'success');
+      this.output?.log('Compile OK — running simulation', 'success');
       // Start remote control bridge
       if (this.remote && this.sim.sessionId) {
         this.remote.start(this.sim.sessionId);
@@ -921,12 +921,12 @@ void loop() {
       this._updatePinMonitor();
       const simTimeEl = document.getElementById('sim-time');
       const fpsEl     = document.getElementById('sim-fps');
-      if (simTimeEl) simTimeEl.textContent = `â± ${(simTime / 1000).toFixed(2)}s`;
+      if (simTimeEl) simTimeEl.textContent = `⏱ ${(simTime / 1000).toFixed(2)}s`;
       if (fpsEl)     fpsEl.textContent     = `${fps} FPS`;
       const laStatus = document.getElementById('la-status');
       if (laStatus && this.la && !this.la.paused) {
         const samples = this.la.channels.reduce((n, ch) => n + (this.la.data[ch.pin]?.length || 0), 0);
-        laStatus.textContent = `Running Â· ${samples} samples`;
+        laStatus.textContent = `Running · ${samples} samples`;
       }
     };
 
@@ -965,7 +965,7 @@ void loop() {
           const sclPin = this.canvas._getConnectedPinNum(inst.id, 'scl');
           if (sdaPin === null || sclPin === null) continue;
 
-          // Route by I2C address â€” only handle events for this LCD's address
+          // Route by I2C address — only handle events for this LCD's address
           if (data && data.addr != null) {
             const raw = String(inst.props && inst.props.address || '0x27').trim();
             const instAddr = raw.startsWith('0x') || raw.startsWith('0X')
@@ -1006,18 +1006,18 @@ void loop() {
         }
       }
 
-      // OLED (SSD1306 I2C) display events â€” maintains a 128Ã—64 framebuffer
+      // OLED (SSD1306 I2C) display events — maintains a 128Ã—64 framebuffer
       for (const inst of insts) {
         if (inst.type !== 'oled_ssd1306') continue;
 
-        // SDA/SCL wiring check â€” skip if not wired to a board
+        // SDA/SCL wiring check — skip if not wired to a board
         if (this.canvas._getConnectedPinNum) {
           const sdaPin = this.canvas._getConnectedPinNum(inst.id, 'sda');
           const sclPin = this.canvas._getConnectedPinNum(inst.id, 'scl');
           if (sdaPin === null || sclPin === null) continue;
         }
 
-        // Address-based routing â€” skip if event addr doesn't match this OLED
+        // Address-based routing — skip if event addr doesn't match this OLED
         if (data && data.addr != null) {
           const raw = String(inst.props && inst.props.address || '0x3C').trim();
           const instAddr = raw.startsWith('0x') || raw.startsWith('0X')
@@ -1124,14 +1124,14 @@ void loop() {
             fillHalf(y0, y1, x0, x1, x2);
             fillHalf(y1, y2, x1, x2, x0);
           } else if (op === 'dim') {
-            // Dim is a brightness hint â€” ignore for now
+            // Dim is a brightness hint — ignore for now
           } else if (op === 'contrast') {
-            // Contrast â€” ignore for simulation
+            // Contrast — ignore for simulation
           }
         }
       }
 
-      // TFT (ILI9341 240Ã—320 SPI) display events â€” maintains a 320Ã—240 RGB framebuffer
+      // TFT (ILI9341 240Ã—320 SPI) display events — maintains a 320Ã—240 RGB framebuffer
       // Also supports STM32F746G-DISCO onboard LCD (480Ã—272 framebuffer)
       for (const inst of insts) {
         if (inst.type !== 'ili9341' && inst.type !== 'stm32f746_disco') continue;
@@ -1380,8 +1380,8 @@ void loop() {
         }
       }
 
-      // NeoPixel / FastLED strip events â€” map strip LEDs onto placed WS2812B
-      // components in placement order (led[0] â†’ first neopixel, etc.)
+      // NeoPixel / FastLED strip events — map strip LEDs onto placed WS2812B
+      // components in placement order (led[0] ← first neopixel, etc.)
       if (type === 'fastled_show' && data && Array.isArray(data.leds)) {
         const npInsts = insts.filter(i => i.type === 'neopixel' || i.type === 'neopixel_strip' || i.type === 'neopixel_ring' || i.type === 'neopixel_8x8_matrix');
         const brightness = Math.max(0, Math.min(255, Number(data.brightness != null ? data.brightness : 255) || 0));
@@ -1422,10 +1422,10 @@ void loop() {
     if (!this.editor) return;
     const code = this.editor.getCombinedCode();
     this._syncBoardFromCanvas();
-    this._updateCompileStatus('Compilingâ€¦');
+    this._updateCompileStatus('Compiling…');
     this._updateStatus('Compiling sketch');
-    this.serial?.log('Compiling sketchâ€¦', 'system');
-    this.output?.log('Compiling sketchâ€¦', 'system');
+    this.serial?.log('Compiling sketch…', 'system');
+    this.output?.log('Compiling sketch…', 'system');
     if (this.editor) this.editor.clearErrors();
 
     this.sim.stop();
@@ -1434,7 +1434,7 @@ void loop() {
 
     // Compile Board 1 first (compile only, don't block)
     this._setRunningState(true);
-    this._updateCompileStatus('Compilingâ€¦');
+    this._updateCompileStatus('Compiling…');
     let result1;
     try {
       result1 = await this.sim.compile(code);
@@ -1474,7 +1474,7 @@ void loop() {
           hasBoard2 = true;
           this.output?.log('[Board2] Compile OK', 'success');
         } else {
-          this.output?.log('[Board2] Compile failed â€” only Board 1 running', 'warn');
+          this.output?.log('[Board2] Compile failed — only Board 1 running', 'warn');
         }
       } catch (err) {
         console.error('[ArduSim] Board 2 compile error:', err);
@@ -1482,10 +1482,10 @@ void loop() {
       }
     }
 
-    // Both compiled â€” run them in parallel (don't await)
+    // Both compiled — run them in parallel (don't await)
     this._updateCompileStatus(hasBoard2 ? 'Running (2 boards)' : 'Running');
     this._updateStatus('Simulation running');
-    this.output?.log('Compile OK â€” running simulation' + (hasBoard2 ? ' (2 boards)' : ''), 'success');
+    this.output?.log('Compile OK — running simulation' + (hasBoard2 ? ' (2 boards)' : ''), 'success');
 
     // Reset state for Board 1
     this.sim.simTime = 0;
@@ -1574,7 +1574,7 @@ void loop() {
 
   _setProjectName(name) {
     this._projectName = name || 'Untitled Project';
-    document.title = `${this._projectName} â€” ArduSim`;
+    document.title = `${this._projectName} — ArduSim`;
     const el = document.getElementById('project-name');
     if (el) el.value = this._projectName;
   }
@@ -1646,7 +1646,7 @@ void loop() {
         this.showToast(`Synced ${result.merged} project(s) from server`, 'info');
       }
     } catch (e) {
-      // Backend offline â€” the app simply continues with local storage
+      // Backend offline — the app simply continues with local storage
     }
   }
 
@@ -1672,7 +1672,7 @@ void loop() {
       : projects;
 
     if (!filtered.length) {
-      list.innerHTML = `<div class="saved-empty">No saved projects match â€œ${esc(this._savedQuery)}â€.</div>`;
+      list.innerHTML = `<div class="saved-empty">No saved projects match ”${esc(this._savedQuery)}â€.</div>`;
       return;
     }
 
@@ -1686,7 +1686,7 @@ void loop() {
           <div class="saved-project-thumb"><img alt="" loading="lazy"></div>
           <div class="saved-project-info">
             <strong class="saved-project-name">${name}</strong>
-            <span class="saved-project-meta">${compCount} components Â· ${wireCount} wires Â· ${esc(date)}</span>
+            <span class="saved-project-meta">${compCount} components · ${wireCount} wires · ${esc(date)}</span>
             <span class="saved-project-actions">
               <button class="hdr-btn hdr-btn-ghost saved-load" data-id="${esc(p.id)}">Open</button>
               <button class="hdr-btn hdr-btn-ghost saved-download" data-id="${esc(p.id)}" title="Download as JSON file">Download</button>
@@ -1819,7 +1819,7 @@ _newProject() {
             item.classList.remove('open');
             if (this.canvas) {
               this.canvas.startPlacing(v.id);
-              this.showToast(`${v.name} selected â€” click on canvas to place`, 'info');
+              this.showToast(`${v.name} selected — click on canvas to place`, 'info');
             }
           });
           menu.appendChild(btn);
@@ -1847,14 +1847,14 @@ _newProject() {
         item.className = 'comp-item';
         item.dataset.type = id;
         item.title = def.desc || def.name;
-        const shortDesc = (def.desc || '').length > 42 ? def.desc.slice(0, 42) + 'â€¦' : (def.desc || '');
+        const shortDesc = (def.desc || '').length > 42 ? def.desc.slice(0, 42) + '…' : (def.desc || '');
         const searchText = ((def.name || '') + ' ' + (def.desc || '') + ' ' + (def.search || '')).toLowerCase().replace(/[\s\-_]+/g, ' ');
         item.dataset.search = searchText;
         item.innerHTML = `<span class="comp-icon">${this._escHtml(def.icon || 'ðŸ”§')}</span><span class="comp-info"><span class="comp-name">${this._escHtml(def.name)}</span>${shortDesc ? `<span class="comp-desc">${this._escHtml(shortDesc)}</span>` : ''}</span>`;
         item.addEventListener('click', () => {
           if (this.canvas) {
             this.canvas.startPlacing(id);
-            this.showToast(`${def.name} selected â€” click on canvas to place`, 'info');
+            this.showToast(`${def.name} selected — click on canvas to place`, 'info');
           }
         });
         // Hover tooltip showing full description
@@ -2022,7 +2022,7 @@ _newProject() {
       const mode = this.sim.pinModes[pinKey];
       if (valEl) {
         if (val === undefined || val === null) {
-          valEl.textContent = 'â€”';
+          valEl.textContent = '—';
           row.classList.remove('pin-high', 'pin-pwm');
         } else if (val <= 1) {
           valEl.textContent = val ? 'HIGH' : 'LOW';
@@ -2039,7 +2039,7 @@ _newProject() {
         barEl.style.width = `${pct}%`;
       }
       if (modeEl) {
-        modeEl.textContent = mode || 'â€”';
+        modeEl.textContent = mode || '—';
       }
     });
   }
@@ -2056,13 +2056,13 @@ _newProject() {
       { key: 'pin_6',  label: 'D6~' }, { key: 'pin_7',  label: 'D7' },
       { key: 'pin_8',  label: 'D8' },  { key: 'pin_9',  label: 'D9~' },
       { key: 'pin_10', label: 'D10~'},  { key: 'pin_11', label: 'D11~'},
-      { key: 'pin_12', label: 'D12' }, { key: 'pin_13', label: 'D13 Â· L' },
+      { key: 'pin_12', label: 'D12' }, { key: 'pin_13', label: 'D13 · L' },
       { key: 'pin_14', label: 'A0' },  { key: 'pin_15', label: 'A1' },
       { key: 'pin_16', label: 'A2' },  { key: 'pin_17', label: 'A3' },
       { key: 'pin_18', label: 'A4' },  { key: 'pin_19', label: 'A5' },
     ];
     const pins = esp32 ? [
-      { key: 'pin_2',  label: 'D2 Â· L' },  { key: 'pin_4',  label: 'D4' },
+      { key: 'pin_2',  label: 'D2 · L' },  { key: 'pin_4',  label: 'D4' },
       { key: 'pin_5',  label: 'D5' },      { key: 'pin_12', label: 'D12' },
       { key: 'pin_13', label: 'D13' },     { key: 'pin_14', label: 'D14' },
       { key: 'pin_15', label: 'D15' },     { key: 'pin_16', label: 'D16' },
@@ -2072,20 +2072,20 @@ _newProject() {
       { key: 'pin_25', label: 'D25' },     { key: 'pin_26', label: 'D26' },
       { key: 'pin_27', label: 'D27' },     { key: 'pin_32', label: 'D32' },
       { key: 'pin_33', label: 'D33' },     { key: 'pin_34', label: 'D34' },
-      { key: 'pin_35', label: 'D35' },     { key: 'pin_36', label: 'VP Â· 36' },
-      { key: 'pin_39', label: 'VN Â· 39' }, { key: 'pin_1',  label: 'TX0' },
+      { key: 'pin_35', label: 'D35' },     { key: 'pin_36', label: 'VP · 36' },
+      { key: 'pin_39', label: 'VN · 39' }, { key: 'pin_1',  label: 'TX0' },
       { key: 'pin_3',  label: 'RX0' },
     ] : nano ? [
       ...unoPins,
-      { key: 'pin_20', label: 'A6 Â· 20' }, { key: 'pin_21', label: 'A7 Â· 21' },
+      { key: 'pin_20', label: 'A6 · 20' }, { key: 'pin_21', label: 'A7 · 21' },
     ] : stm32 ? [
-      { key: 'pin_0',  label: 'D0 Â· RX' },  { key: 'pin_1',  label: 'D1 Â· TX' },
+      { key: 'pin_0',  label: 'D0 · RX' },  { key: 'pin_1',  label: 'D1 · TX' },
       { key: 'pin_2',  label: 'D2' },  { key: 'pin_3',  label: 'D3~' },
       { key: 'pin_4',  label: 'D4' },  { key: 'pin_5',  label: 'D5~' },
       { key: 'pin_6',  label: 'D6~' }, { key: 'pin_7',  label: 'D7' },
       { key: 'pin_8',  label: 'D8' },  { key: 'pin_9',  label: 'D9~' },
       { key: 'pin_10', label: 'D10~'},  { key: 'pin_11', label: 'D11~'},
-      { key: 'pin_12', label: 'D12' }, { key: 'pin_13', label: 'D13 Â· L' },
+      { key: 'pin_12', label: 'D12' }, { key: 'pin_13', label: 'D13 · L' },
       { key: 'pin_14', label: 'A0' },  { key: 'pin_15', label: 'A1' },
       { key: 'pin_16', label: 'A2' },  { key: 'pin_17', label: 'A3' },
       { key: 'pin_18', label: 'A4' },  { key: 'pin_19', label: 'A5' },
@@ -2096,8 +2096,8 @@ _newProject() {
       row.dataset.pin = pin.key;
       row.innerHTML = `
         <span class="pin-label">${pin.label}</span>
-        <span class="pin-mode">â€”</span>
-        <span class="pin-val">â€”</span>
+        <span class="pin-mode">—</span>
+        <span class="pin-val">—</span>
         <div class="pin-bar"><div class="pin-bar-fill"></div></div>`;
       grid.appendChild(row);
     });
@@ -2158,7 +2158,7 @@ _newProject() {
 
   _updateCompileStatus(msg) {
     const el = document.getElementById('compile-status');
-    if (el) el.textContent = `â— ${msg}`;
+    if (el) el.textContent = `● ${msg}`;
   }
 
   /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
@@ -2180,7 +2180,7 @@ _newProject() {
 
     const sim = this.sim;
     if (sim && sim.isRunning && sim.sessionId) {
-      // Simulation is running â€” show session code
+      // Simulation is running — show session code
       idle?.classList.add('hidden');
       active?.classList.remove('hidden');
       const sessionInput = document.getElementById('remote-session-id');
@@ -2231,7 +2231,7 @@ _newProject() {
         }
       });
     } else {
-      // Not running â€” show idle message
+      // Not running — show idle message
       idle?.classList.remove('hidden');
       active?.classList.add('hidden');
     }
@@ -2683,10 +2683,10 @@ _newProject() {
     if (!this.editor) return;
     const code = this.editor.getCombinedCode();
     this._syncBoardFromCanvas();
-    this._updateCompileStatus('Verifyingâ€¦');
+    this._updateCompileStatus('Verifying…');
     this._updateStatus('Verifying sketch');
-    this.serial?.log('Verifying sketchâ€¦', 'system');
-    this.output?.log('Verifying sketchâ€¦', 'system');
+    this.serial?.log('Verifying sketch…', 'system');
+    this.output?.log('Verifying sketch…', 'system');
     if (this.editor) this.editor.clearErrors();
 
     let result;
@@ -2703,8 +2703,8 @@ _newProject() {
     if (result.ok) {
       this._updateCompileStatus('Verified âœ“');
       this._updateStatus('Verification succeeded');
-      this.output?.log('âœ“ Sketch verified â€” no errors found', 'success');
-      this.showToast('âœ“ Sketch verified â€” no errors found!', 'success');
+      this.output?.log('âœ“ Sketch verified — no errors found', 'success');
+      this.showToast('âœ“ Sketch verified — no errors found!', 'success');
       return true;
     }
 
@@ -2900,7 +2900,7 @@ _newProject() {
   _loadExampleCircuit(key) {
     if (!this.canvas) return;
 
-    // Data-driven circuit (serialized project data) â€” most examples use this
+    // Data-driven circuit (serialized project data) — most examples use this
     if (key && typeof key === 'object' && Array.isArray(key.components)) {
       this.canvas.deserialize(key);
       this._syncBoardFromCanvas();
@@ -2963,7 +2963,7 @@ _newProject() {
         <span class="props-comp-icon">${this._escHtml(def ? def.icon : 'ðŸ”§')}</span>
         <div>
           <p class="props-desc-text">${esc(g.longDesc || def?.desc || '')}</p>
-          <button type="button" class="gh-btn gh-btn-ghost gh-btn-sm props-ref-btn">Open full reference â†’</button>
+          <button type="button" class="gh-btn gh-btn-ghost gh-btn-sm props-ref-btn">Open full reference ←</button>
         </div>
       </div>
       ${pinsPreview ? `<div class="props-pins"><span class="props-pins-label">Pins</span><div class="props-pins-list">${pinsPreview}</div></div>` : ''}
@@ -3120,7 +3120,7 @@ _newProject() {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
 
-    const icons = { success: 'âœ“', error: 'âœ•', warn: 'âš ', info: 'â„¹' };
+    const icons = { success: 'âœ“', error: '✕', warn: '⚠', info: 'â„¹' };
     const icon = document.createElement('span');
     icon.className = 'toast-icon';
     icon.textContent = icons[type] || 'â„¹';

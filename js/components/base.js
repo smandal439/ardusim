@@ -1,5 +1,5 @@
 ﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   components/base.js â€” Shared utilities for all components
+   components/base.js — Shared utilities for all components
    Load this file FIRST before any component files.
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
@@ -44,23 +44,23 @@ const C = {
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /**
- * Component â€” base class for all circuit components.
+ * Component — base class for all circuit components.
  *
  * Every component type should extend this class and override
  * the standard lifecycle methods. This replaces the giant
  * switch/case in canvas.js with a clean, maintainable pattern.
  *
  * Lifecycle:
- *   1. constructor(props)  â€” initial state
- *   2. getPins()           â€” pin definitions
- *   3. update(canvas)      â€” electrical simulation (called each frame)
- *   4. render(ctx, sim)    â€” visual rendering (called each frame)
- *   5. serialize()         â€” save state to JSON
- *   6. deserialize(state)  â€” restore state from JSON
+ *   1. constructor(props)  — initial state
+ *   2. getPins()           — pin definitions
+ *   3. update(canvas)      — electrical simulation (called each frame)
+ *   4. render(ctx, sim)    — visual rendering (called each frame)
+ *   5. serialize()         — save state to JSON
+ *   6. deserialize(state)  — restore state from JSON
  */
 class Component {
   /**
-   * @param {Object} instance â€” the circuit instance { id, type, x, y, props, runtimeState }
+   * @param {Object} instance — the circuit instance { id, type, x, y, props, runtimeState }
    */
   constructor(instance) {
     this.inst = instance;
@@ -78,12 +78,12 @@ class Component {
   getPins() { return []; }
 
   /**
-   * Electrical simulation â€” called each frame while running.
-   * @param {CircuitCanvas} canvas â€” access to wires, _tracePinNet, _getConnectedPinNum, etc.
+   * Electrical simulation — called each frame while running.
+   * @param {CircuitCanvas} canvas — access to wires, _tracePinNet, _getConnectedPinNum, etc.
    */
   update(canvas) { }
 
-  // No default render() â€” subclasses that need custom drawing override this.
+  // No default render() — subclasses that need custom drawing override this.
   // Components without render() fall back to def.draw() in the renderer.
 
   /** Serialize current state for project save */
@@ -192,7 +192,7 @@ class Component {
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   COMPONENT REGISTRY â€” maps type â†’ class
+   COMPONENT REGISTRY — maps type â†’ class
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 const COMPONENT_DEFS = {};
@@ -397,7 +397,7 @@ const COMPONENT_CATALOG = [
     dropdown: {
       id: 'digital_ic', label: 'Digital ICs', icon: 'â®—', desc: 'Logic Gates & Timers',
       variants: [
-        { id: 'ic_555', name: '555 Timer', icon: 'â±ï¸' },
+        { id: 'ic_555', name: '555 Timer', icon: '⏱ï¸' },
         { id: 'ic_74hc00', name: '74HC00 NAND', icon: 'â®—' },
         { id: 'ic_74hc04', name: '74HC04 NOT', icon: 'â®—' },
         { id: 'ic_74hc08', name: '74HC08 AND', icon: 'â®—' },

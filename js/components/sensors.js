@@ -1579,7 +1579,7 @@ defComp({
 //   name: 'MPU6050 IMU',
 //   category: 'Sensors',
 //   icon: '🧭',
-//   desc: '6-axis Accelerometer + Gyroscope (I2C @ 0x68). Provides accel X/Y/Z Â±2g and gyro X/Y/Z Â±250Â°/s',
+//   desc: '6-axis Accelerometer + Gyroscope (I2C @ 0x68). Provides accel X/Y/Z ±2g and gyro X/Y/Z ±250°/s',
 //   width: 72,   // Scaled from 36 to 72 (2x)
 //   height: 64,  // Scaled from 32 to 64 (2x)
 //   defaultProps: { accelX: 0, accelY: 0, accelZ: 1024, gyroX: 0, gyroY: 0, gyroZ: 0 },
@@ -1652,7 +1652,7 @@ defComp({
   name: 'IR Obstacle Sensor',
   category: 'Sensors',
   icon: '🚧',
-  desc: 'Infrared obstacle detection sensor module with LM393 comparator (Digital OUT: LOW when obstacle detected, 2â€“30cm range)',
+  desc: 'Infrared obstacle detection sensor module with LM393 comparator (Digital OUT: LOW when obstacle detected, 2—30cm range)',
   width: 54,
   height: 92,
   defaultProps: { detected: 0 },
@@ -1916,12 +1916,12 @@ defComp({
   name: 'NTC Thermistor',
   category: 'Sensors',
   icon: '🌡',
-  desc: '10kÎ© NTC thermistor. Resistance decreases with temperature. Reads 0-1023 on analog pin',
+  desc: '10kΩ NTC thermistor. Resistance decreases with temperature. Reads 0-1023 on analog pin',
   width: 24,
   height: 30,
   defaultProps: { temperature: 25 },
   interactive: [
-    { field: 'temperature', label: 'Temp', min: -10, max: 80, step: 1, unit: 'Â°C' },
+    { field: 'temperature', label: 'Temp', min: -10, max: 80, step: 1, unit: '°C' },
   ],
   pins: [
     { id: 'p1', label: 'T1', type: PIN_TYPE.ANALOG, x: 8, y: 30, side: 'bottom' },
@@ -1954,7 +1954,7 @@ defComp({
     // Temperature readout
     ctx.fillStyle = '#00e5ff';
     ctx.font = 'bold 5px monospace';
-    ctx.fillText(`${temp}Â°C`, 12, 26);
+    ctx.fillText(`${temp}°C`, 12, 26);
 
     // Wire leads
     ctx.strokeStyle = '#a0a0a0';
@@ -1979,7 +1979,7 @@ defComp({
   height: 76,
   defaultProps: { temperature: 25, humidity: 50, pressure: 1013 },
   interactive: [
-    { field: 'temperature', label: 'Temp', min: -40, max: 85, step: 0.1, unit: 'Â°C' },
+    { field: 'temperature', label: 'Temp', min: -40, max: 85, step: 0.1, unit: '°C' },
     { field: 'humidity', label: 'Hum', min: 0, max: 100, step: 1, unit: '%' },
     { field: 'pressure', label: 'Press', min: 300, max: 1100, step: 1, unit: 'hPa' },
   ],
@@ -2062,7 +2062,7 @@ defComp({
     ctx.font = 'bold 4px monospace';
     ctx.fillText('T:', 6, 37);
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(`${temp.toFixed(1)}Â°C`, 14, 37);
+    ctx.fillText(`${temp.toFixed(1)}°C`, 14, 37);
 
     // Humidity
     ctx.fillStyle = '#00e5ff';

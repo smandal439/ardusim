@@ -1,4 +1,4 @@
-﻿/* components/output.js — Output component definitions */
+/* components/output.js — Output component definitions */
 'use strict';
 
 /*  Shared LED draw helper — used by all coloured LED variants  */
@@ -376,7 +376,7 @@ registerComponent('led_white', LEDComponent);
 //     { id: 'led_y', label: 'Y', type: PIN_TYPE.DIGITAL, x: 30, y: 60, side: 'bottom' },
 //     { id: 'led_g', label: 'G', type: PIN_TYPE.DIGITAL, x: 45, y: 60, side: 'bottom' },
 //     { id: 'led_b', label: 'B', type: PIN_TYPE.DIGITAL, x: 60, y: 60, side: 'bottom' },
-//     { id: 'gnd', label: 'âˆ’', type: PIN_TYPE.GND, x: 75, y: 60, side: 'bottom' },
+//     { id: 'gnd', label: '−', type: PIN_TYPE.GND, x: 75, y: 60, side: 'bottom' },
 //   ],
 //   draw(ctx, inst, sim) {
 //     const { x, y } = inst;
@@ -415,7 +415,7 @@ registerComponent('led_white', LEDComponent);
 //     ctx.fillStyle = '#aaaaaa';
 //     ctx.font = 'bold 8px sans-serif';
 //     ctx.textAlign = 'center';
-//     ctx.fillText('âˆ’', 75, 53);
+//     ctx.fillText('−', 75, 53);
 
 //     // Render Individual LEDs
 //     leds.forEach(led => {
@@ -746,7 +746,7 @@ defComp({
     { id: 'red', label: 'R', type: PIN_TYPE.PWM, x: 6, y: 0, side: 'top' },
     { id: 'green', label: 'G', type: PIN_TYPE.PWM, x: 15, y: 0, side: 'top' },
     { id: 'blue', label: 'B', type: PIN_TYPE.PWM, x: 24, y: 0, side: 'top' },
-    { id: 'gnd', label: 'âˆ’', type: PIN_TYPE.GND, x: 15, y: 70, side: 'bottom' },
+    { id: 'gnd', label: '−', type: PIN_TYPE.GND, x: 15, y: 70, side: 'bottom' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -842,7 +842,7 @@ defComp({
   defaultProps: { frequency: 1000 },
   pins: [
     { id: 'vcc', label: '+', type: PIN_TYPE.DIGITAL, x: 12, y: 50, side: 'bottom' },
-    { id: 'gnd', label: 'âˆ’', type: PIN_TYPE.GND, x: 28, y: 50, side: 'bottom' },
+    { id: 'gnd', label: '−', type: PIN_TYPE.GND, x: 28, y: 50, side: 'bottom' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -889,12 +889,12 @@ defComp({
       }
     }
 
-    // + and âˆ’ marks
+    // + and − marks
     ctx.fillStyle = '#888';
     ctx.font = 'bold 9px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('+', 12, 48);
-    ctx.fillText('âˆ’', 28, 48);
+    ctx.fillText('−', 28, 48);
 
     if (inst.selected) drawSelectionRect(ctx, -3, -3, 46, 56);
     ctx.restore();
@@ -1812,7 +1812,7 @@ defComp({
   name: 'WS2812B NeoPixel',
   category: 'Output',
   icon: '💠',
-  desc: 'Addressable RGB LED (WS2812B). Single pixel â€” data pin receives color via NeoPixel library',
+  desc: 'Addressable RGB LED (WS2812B). Single pixel — data pin receives color via NeoPixel library',
   width: 40,   // Scaled from 20 to 40 (2x)
   height: 48,  // Scaled from 24 to 48 (2x)
   defaultProps: { r: 0, g: 0, b: 0, brightness: 255 },
@@ -2437,7 +2437,7 @@ defComp({
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // Screen area â€” render framebuffer or show default blue
+    // Screen area — render framebuffer or show default blue
     const screenX = 12, screenY = 8, screenW = 136, screenH = 92;
 
     if (tft && tft.pixels) {
