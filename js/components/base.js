@@ -192,7 +192,7 @@ class Component {
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   COMPONENT REGISTRY — maps type â†’ class
+   COMPONENT REGISTRY — maps type → class
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 const COMPONENT_DEFS = {};
@@ -397,20 +397,20 @@ const COMPONENT_CATALOG = [
     dropdown: {
       id: 'digital_ic', label: 'Digital ICs', icon: '⮗', desc: 'Logic Gates & Timers',
       variants: [
-        { id: 'ic_555', name: '555 Timer', icon: '⏱ï¸' },
-        { id: 'ic_74hc00', name: '74HC00 NAND', icon: 'â®—' },
-        { id: 'ic_74hc04', name: '74HC04 NOT', icon: 'â®—' },
-        { id: 'ic_74hc08', name: '74HC08 AND', icon: 'â®—' },
-        { id: 'ic_74hc32', name: '74HC32 OR', icon: 'â®—' },
-        { id: 'ic_74hc74', name: '74HC74 Dual DFF', icon: 'â®—' },
-        { id: 'ic_74hc47', name: '74HC47 BCDâ†’7Seg', icon: 'â®—' },
-        { id: 'ic_74hc148', name: '74HC148 Encoder', icon: 'â®—' },
-        { id: 'ic_74hc595', name: '74HC595 Shift Reg', icon: 'â®—' },
-        { id: 'ic_74hc138', name: '74HC138 Decoder', icon: 'â®—' },
-        { id: 'ic_74hc165', name: '74HC165 PISO', icon: 'â®—' },
-        { id: 'ic_74hc193', name: '74HC193 Counter', icon: 'â®—' },
-        { id: 'ic_74hc245', name: '74HC245 Buffer', icon: 'â®—' },
-        { id: 'lm741', name: 'LM741 Op-Amp', icon: 'ðŸ“' },
+        { id: 'ic_555', name: '555 Timer', icon: '⏱️' },
+        { id: 'ic_74hc00', name: '74HC00 NAND', icon: '⮗' },
+        { id: 'ic_74hc04', name: '74HC04 NOT', icon: '⮗' },
+        { id: 'ic_74hc08', name: '74HC08 AND', icon: '⮗' },
+        { id: 'ic_74hc32', name: '74HC32 OR', icon: '⮗' },
+        { id: 'ic_74hc74', name: '74HC74 Dual DFF', icon: '⮗' },
+        { id: 'ic_74hc47', name: '74HC47 BCD→7Seg', icon: '⮗' },
+        { id: 'ic_74hc148', name: '74HC148 Encoder', icon: '⮗' },
+        { id: 'ic_74hc595', name: '74HC595 Shift Reg', icon: '⮗' },
+        { id: 'ic_74hc138', name: '74HC138 Decoder', icon: '⮗' },
+        { id: 'ic_74hc165', name: '74HC165 PISO', icon: '⮗' },
+        { id: 'ic_74hc193', name: '74HC193 Counter', icon: '⮗' },
+        { id: 'ic_74hc245', name: '74HC245 Buffer', icon: '⮗' },
+        { id: 'lm741', name: 'LM741 Op-Amp', icon: '📐' },
       ]
     }
   },
@@ -419,7 +419,7 @@ const COMPONENT_CATALOG = [
     category: 'Instruments',
     ids: ['multimeter', 'func_gen', 'dso_4ch'],
     dropdown: {
-      id: 'probe', label: 'Probes', icon: 'ðŸ”', desc: 'Oscilloscope, DSO & Logic Analyzer Probes',
+      id: 'probe', label: 'Probes', icon: '🔍', desc: 'Oscilloscope, DSO & Logic Analyzer Probes',
       variants: [
         { id: 'osc_probe_ch1', name: 'OSC CH1', icon: '🟢', color: '#73ff00' },
         { id: 'osc_probe_ch2', name: 'OSC CH2', icon: '🟠', color: '#ff9800' },

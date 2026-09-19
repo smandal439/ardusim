@@ -1672,7 +1672,7 @@ void loop() {
       : projects;
 
     if (!filtered.length) {
-      list.innerHTML = `<div class="saved-empty">No saved projects match ”${esc(this._savedQuery)}â€.</div>`;
+      list.innerHTML = `<div class="saved-empty">No saved projects match ”${esc(this._savedQuery)}”.</div>`;
       return;
     }
 
@@ -1783,7 +1783,7 @@ _newProject() {
       title.textContent = group.category;
       const arrow = document.createElement('span');
       arrow.className = 'collapse-arrow';
-      arrow.textContent = 'â–¾';
+      arrow.textContent = '▾';
       title.appendChild(arrow);
       if (collapsedState[group.category]) section.classList.add('collapsed');
       title.addEventListener('click', () => {
@@ -1801,7 +1801,7 @@ _newProject() {
         item.className = 'comp-item comp-dropdown';
         item.dataset.type = dd.id;
         item.title = dd.desc || dd.label;
-        item.innerHTML = `<span class="comp-icon">${this._escHtml(dd.icon || 'ðŸ”§')}</span><span class="comp-info"><span class="comp-name">${this._escHtml(dd.label)}</span><span class="comp-desc">${this._escHtml(dd.desc || '')}</span></span><span class="comp-dropdown-arrow">â–¾</span>`;
+        item.innerHTML = `<span class="comp-icon">${this._escHtml(dd.icon || '⚙️')}</span><span class="comp-info"><span class="comp-name">${this._escHtml(dd.label)}</span><span class="comp-desc">${this._escHtml(dd.desc || '')}</span></span><span class="comp-dropdown-arrow">▾</span>`;
 
         const menu = document.createElement('div');
         menu.className = 'comp-dropdown-menu';
@@ -1850,7 +1850,7 @@ _newProject() {
         const shortDesc = (def.desc || '').length > 42 ? def.desc.slice(0, 42) + '…' : (def.desc || '');
         const searchText = ((def.name || '') + ' ' + (def.desc || '') + ' ' + (def.search || '')).toLowerCase().replace(/[\s\-_]+/g, ' ');
         item.dataset.search = searchText;
-        item.innerHTML = `<span class="comp-icon">${this._escHtml(def.icon || 'ðŸ”§')}</span><span class="comp-info"><span class="comp-name">${this._escHtml(def.name)}</span>${shortDesc ? `<span class="comp-desc">${this._escHtml(shortDesc)}</span>` : ''}</span>`;
+        item.innerHTML = `<span class="comp-icon">${this._escHtml(def.icon || '⚙️')}</span><span class="comp-info"><span class="comp-name">${this._escHtml(def.name)}</span>${shortDesc ? `<span class="comp-desc">${this._escHtml(shortDesc)}</span>` : ''}</span>`;
         item.addEventListener('click', () => {
           if (this.canvas) {
             this.canvas.startPlacing(id);
