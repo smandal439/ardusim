@@ -1,0 +1,14 @@
+﻿{
+  "id": "lpc2148_all_leds",
+  "name": "LPC2148 Binary Counter",
+  "icon": "🔌",
+  "desc": "LPC2148 SmartX Board - binary counter on all 4 onboard LEDs (P0.12-P0.15)",
+  "tags": ["arm", "lpc2148", "beginner", "LED", "counter"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "lpc2148", "x": 200, "y": 100 }
+    ],
+    "wires": []
+  },
+  "code": "/*\n * LPC2148 SmartX Board - 4-LED Binary Counter\n * Counts from 0 to 15 on onboard LEDs (P0.12-P0.15)\n * No external wiring required!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    // Set P0.12-P0.15 as outputs (LED1-LED4)\n    IO0DIR |= (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);\n    int count = 0;\n    while (1) {\n        IO0CLR = 0xF << 12;              // Clear all 4 LEDs\n        IO0SET = (count & 0xF) << 12;    // Set current count pattern\n        delay_ms(500);\n        count = (count + 1) & 0xF;       // Increment, wrap at 16\n    }\n}"
+}

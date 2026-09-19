@@ -1,17 +1,17 @@
-/* ═══════════════════════════════════════════════════════
-   js/electrical.js — Electrical Connection Engine
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   js/electrical.js â€” Electrical Connection Engine
    Circuit graph builder, net tracer, voltage/current solver.
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 'use strict';
 
 /**
- * Net — a set of electrically connected pins sharing the same voltage.
+ * Net â€” a set of electrically connected pins sharing the same voltage.
  */
 class Net {
   constructor(id) {
     this.id = id;
-    /** @type {Map<string,{instId:string, pinId:string}>} pinId → { instId, pinId } */
+    /** @type {Map<string,{instId:string, pinId:string}>} pinId â†’ { instId, pinId } */
     this.pins = new Map();
     /** @type {{voltage:number, type:string, resistance:number, rawVal?:number}[]} */
     this.sources = [];
@@ -33,7 +33,7 @@ class Net {
 }
 
 /**
- * ElectricalEngine — builds circuit graph and solves voltages.
+ * ElectricalEngine â€” builds circuit graph and solves voltages.
  *
  * Usage:
  *   const engine = new ElectricalEngine(components, wires);
@@ -47,15 +47,15 @@ class ElectricalEngine {
     this.components = [];
     /** @type {{from:{instId:string,pinId:string}, to:{instId:string,pinId:string}}[]} */
     this.wires = [];
-    /** @type {Map<string,Net>} netKey → Net */
+    /** @type {Map<string,Net>} netKey â†’ Net */
     this.nets = new Map();
-    /** @type {Map<string,Net>} "instId:pinId" → Net */
+    /** @type {Map<string,Net>} "instId:pinId" â†’ Net */
     this.pinToNet = new Map();
     /** Ground net reference */
     this.groundNet = null;
   }
 
-  /* ═══════════════ GRAPH CONSTRUCTION ═══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• GRAPH CONSTRUCTION â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
   /**
    * Build the circuit graph from components and wires.
@@ -112,7 +112,7 @@ class ElectricalEngine {
     }
 
     // 2. Build Net objects from union-find groups
-    const groups = new Map(); // rootKey → Net
+    const groups = new Map(); // rootKey â†’ Net
     for (const [key] of parent) {
       const root = find(key);
       if (!groups.has(root)) groups.set(root, new Net(root));
@@ -146,7 +146,7 @@ class ElectricalEngine {
   /**
    * Get internal pin connections for a component (e.g., switch contacts).
    * Returns array of [pinA_key, pinB_key] pairs.
-   * Resistors and capacitors are NOT shorted — they are resistive elements
+   * Resistors and capacitors are NOT shorted â€” they are resistive elements
    * solved by the nodal analysis in solve().
    */
   _getInternalConnections(inst) {
@@ -160,7 +160,7 @@ class ElectricalEngine {
       case 'capacitor':
         break;
       case 'diode_1n4007':
-        // Forward-biased: anode → cathode (handled in solve, not graph)
+        // Forward-biased: anode â†’ cathode (handled in solve, not graph)
         break;
       case 'push_button': {
         const pressed = inst.runtimeState?.pressed;
@@ -183,7 +183,7 @@ class ElectricalEngine {
         break;
       }
       case 'multimeter': {
-        // In current mode, the multimeter is a short circuit (0Ω) — probes are connected
+        // In current mode, the multimeter is a short circuit (0Î©) â€” probes are connected
         const mode = inst.runtimeState?.mode || inst.props?.mode || 'V_DC';
         if (mode === 'A_DC' || mode === 'A_AC') {
           conns.push([key('probe_red'), key('probe_com')]);
@@ -234,13 +234,13 @@ class ElectricalEngine {
     return null;
   }
 
-  /* ═══════════════ NET SOLVING ═══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• NET SOLVING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
   /**
    * Solve the circuit using nodal analysis (Gauss-Seidel iteration).
    * Computes correct voltages for resistive networks including voltage dividers.
    * Call after buildGraph().
-   * @param {CircuitCanvas} canvas — canvas instance for pin number resolution
+   * @param {CircuitCanvas} canvas â€” canvas instance for pin number resolution
    */
   solve(canvas) {
     const { COMPONENT_DEFS } = window.ArduinoComponents || {};
@@ -254,14 +254,14 @@ class ElectricalEngine {
       net.resistanceToGround = Infinity;
     }
 
-    // 1. Classify components — identify voltage sources and grounds
+    // 1. Classify components â€” identify voltage sources and grounds
     for (const inst of this.components) {
       this._classifyComponent(inst);
     }
 
     // 2. Build adjacency list from resistive elements (resistors, bulbs, diodes, etc.)
     //    Each edge connects two nets with a resistance value.
-    const adjacency = new Map(); // netId → [{ net, resistance }]
+    const adjacency = new Map(); // netId â†’ [{ net, resistance }]
     const addEdge = (netA, netB, resistance) => {
       if (!netA || !netB || netA === netB || resistance <= 0) return;
       if (!adjacency.has(netA.id)) adjacency.set(netA.id, []);
@@ -278,7 +278,7 @@ class ElectricalEngine {
       switch (inst.type) {
         case 'resistor': {
           const r = (Number(inst.props?.value) || 220)
-            * (inst.props?.unit === 'kΩ' ? 1e3 : inst.props?.unit === 'MΩ' ? 1e6 : 1);
+            * (inst.props?.unit === 'kÎ©' ? 1e3 : inst.props?.unit === 'MÎ©' ? 1e6 : 1);
           addEdge(net1, net2, Math.max(r, 0.01));
           break;
         }
@@ -299,7 +299,7 @@ class ElectricalEngine {
           break;
         }
         case 'bulb_12v':
-          addEdge(net1, net2, 12); // nominal 12Ω filament
+          addEdge(net1, net2, 12); // nominal 12Î© filament
           break;
         case 'led':
         case 'led_green':
@@ -308,7 +308,7 @@ class ElectricalEngine {
         case 'led_orange':
         case 'led_white':
           // LED: modeled as a forward voltage drop with small resistance
-          addEdge(net1, net2, 20); // ~20Ω effective resistance
+          addEdge(net1, net2, 20); // ~20Î© effective resistance
           break;
       }
     }
@@ -326,7 +326,7 @@ class ElectricalEngine {
     }
 
     // 4. Gauss-Seidel iterative relaxation to solve KCL at each free node
-    //    For each free node: V = Σ(V_neighbor / R_neighbor) / Σ(1 / R_neighbor)
+    //    For each free node: V = Î£(V_neighbor / R_neighbor) / Î£(1 / R_neighbor)
     for (let iter = 0; iter < 200; iter++) {
       let maxDelta = 0;
       for (const [netId, net] of this.nets) {
@@ -335,8 +335,8 @@ class ElectricalEngine {
         if (!neighbors || neighbors.length === 0) continue;
 
         // KCL: sum of currents leaving this node = 0
-        // Σ (V_net - V_neighbor) / R_neighbor = 0
-        // V_net × Σ(1/R) = Σ(V_neighbor / R)
+        // Î£ (V_net - V_neighbor) / R_neighbor = 0
+        // V_net Ã— Î£(1/R) = Î£(V_neighbor / R)
         let sumG = 0;
         let sumVG = 0;
         for (const { net: neighbor, resistance } of neighbors) {
@@ -380,8 +380,9 @@ class ElectricalEngine {
       case 'arduino_uno':
       case 'arduino_nano':
       case 'esp32_devkit_v1':
-      case 'stm32f746_disco': {
-        const maxV = (inst.type === 'esp32_devkit_v1' || inst.type === 'stm32f746_disco') ? 3.3 : 5.0;
+      case 'stm32f746_disco':
+      case 'lpc2148': {
+        const maxV = (inst.type === 'esp32_devkit_v1' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148') ? 3.3 : 5.0;
         const sim = window.ArduinoSim;
 
         // Iterate over all pins on this component that have nets
@@ -400,7 +401,7 @@ class ElectricalEngine {
             if (pinNum != null) {
               const pinMode = sim?.pinModes?.[`pin_${pinNum}`];
               if (pinMode === 'INPUT' || pinMode === 'INPUT_PULLUP') {
-                // Input pins are passive readers — don't drive the electrical graph.
+                // Input pins are passive readers â€” don't drive the electrical graph.
                 // Their solved voltages are fed back to pinStates in updateSimState.
               } else {
                 const rawVal = sim?.pinStates?.[`pin_${pinNum}`] || 0;
@@ -530,7 +531,7 @@ class ElectricalEngine {
     return invR > 0 ? 1 / invR : Infinity;
   }
 
-  /* ═══════════════ QUERY API ═══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• QUERY API â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
   /**
    * Get the Net for a specific pin on a component.
@@ -552,7 +553,7 @@ class ElectricalEngine {
   /**
    * Get the best (highest) voltage source connected to a pin.
    * Traces through the adjacency (resistive edges) to find sources on
-   * connected nets — needed because resistors are no longer shorted.
+   * connected nets â€” needed because resistors are no longer shorted.
    * @returns {{voltage:number, rawVal:number, type:string, resistance:number}|null}
    */
   getSourceAtPin(instId, pinId) {
@@ -628,7 +629,7 @@ class ElectricalEngine {
       const key = (pin) => `${inst.id}:${pin}`;
       if (inst.type === 'resistor') {
         const r = (Number(inst.props?.value) || 220)
-          * (inst.props?.unit === 'kΩ' ? 1e3 : inst.props?.unit === 'MΩ' ? 1e6 : 1);
+          * (inst.props?.unit === 'kÎ©' ? 1e3 : inst.props?.unit === 'MÎ©' ? 1e6 : 1);
         addEdge(key('p1'), key('p2'), Math.max(r, 0.01));
       } else if (inst.type === 'diode_1n4007') {
         addEdge(key('anode'), key('cathode'), 0.7);
@@ -669,7 +670,7 @@ class ElectricalEngine {
 
     if (pathResistances.length === 0) return Infinity;
 
-    // Parallel combination: 1/R_total = Σ(1/Ri)
+    // Parallel combination: 1/R_total = Î£(1/Ri)
     let totalConductance = 0;
     for (const r of pathResistances) {
       if (r > 0) totalConductance += 1 / r;
@@ -691,7 +692,7 @@ class ElectricalEngine {
   }
 
   /**
-   * Check if a complete circuit exists (source → component → ground).
+   * Check if a complete circuit exists (source â†’ component â†’ ground).
    */
   hasCompleteCircuit(instId, sourcePin, groundPin) {
     const hasSource = this.getSourceAtPin(instId, sourcePin) !== null;
@@ -703,6 +704,6 @@ class ElectricalEngine {
   }
 }
 
-/* ═══════════════ EXPORT ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• EXPORT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 window.ElectricalEngine = ElectricalEngine;
 window.Net = Net;

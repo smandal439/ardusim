@@ -1,13 +1,13 @@
-/* ═══════════════════════════════════════════════════════
-   components/base.js — Shared utilities for all components
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   components/base.js â€” Shared utilities for all components
    Load this file FIRST before any component files.
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 'use strict';
 
 const GRID = 1;
 
-/* ── Pin types ── */
+/* â”€â”€ Pin types â”€â”€ */
 const PIN_TYPE = {
   DIGITAL: 'digital',
   ANALOG: 'analog',
@@ -17,7 +17,7 @@ const PIN_TYPE = {
   SIGNAL: 'signal',
 };
 
-/* ── Color map for components ── */
+/* â”€â”€ Color map for components â”€â”€ */
 const C = {
   BOARD: '#1a5c1a',
   BOARD_D: '#12401a',
@@ -39,28 +39,28 @@ const C = {
   WIRE_L: '#4488cc',
 };
 
-/* ══════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    COMPONENT BASE CLASS & REGISTRY
-   ══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /**
- * Component — base class for all circuit components.
+ * Component â€” base class for all circuit components.
  *
  * Every component type should extend this class and override
  * the standard lifecycle methods. This replaces the giant
  * switch/case in canvas.js with a clean, maintainable pattern.
  *
  * Lifecycle:
- *   1. constructor(props)  — initial state
- *   2. getPins()           — pin definitions
- *   3. update(canvas)      — electrical simulation (called each frame)
- *   4. render(ctx, sim)    — visual rendering (called each frame)
- *   5. serialize()         — save state to JSON
- *   6. deserialize(state)  — restore state from JSON
+ *   1. constructor(props)  â€” initial state
+ *   2. getPins()           â€” pin definitions
+ *   3. update(canvas)      â€” electrical simulation (called each frame)
+ *   4. render(ctx, sim)    â€” visual rendering (called each frame)
+ *   5. serialize()         â€” save state to JSON
+ *   6. deserialize(state)  â€” restore state from JSON
  */
 class Component {
   /**
-   * @param {Object} instance — the circuit instance { id, type, x, y, props, runtimeState }
+   * @param {Object} instance â€” the circuit instance { id, type, x, y, props, runtimeState }
    */
   constructor(instance) {
     this.inst = instance;
@@ -72,18 +72,18 @@ class Component {
     this.canvas = null;
   }
 
-  /* ── Standard interface (override in subclasses) ── */
+  /* â”€â”€ Standard interface (override in subclasses) â”€â”€ */
 
   /** Return pin definitions: [{ id, label, type, x, y, side }] */
   getPins() { return []; }
 
   /**
-   * Electrical simulation — called each frame while running.
-   * @param {CircuitCanvas} canvas — access to wires, _tracePinNet, _getConnectedPinNum, etc.
+   * Electrical simulation â€” called each frame while running.
+   * @param {CircuitCanvas} canvas â€” access to wires, _tracePinNet, _getConnectedPinNum, etc.
    */
   update(canvas) { }
 
-  // No default render() — subclasses that need custom drawing override this.
+  // No default render() â€” subclasses that need custom drawing override this.
   // Components without render() fall back to def.draw() in the renderer.
 
   /** Serialize current state for project save */
@@ -108,7 +108,7 @@ class Component {
     if (state.rotation !== undefined) this.inst.rotation = state.rotation;
   }
 
-  /* ── Convenience helpers for subclasses ── */
+  /* â”€â”€ Convenience helpers for subclasses â”€â”€ */
 
   /** Get the electrical engine instance. */
   get engine() {
@@ -191,9 +191,9 @@ class Component {
   }
 }
 
-/* ══════════════════════════════════════════════════════
-   COMPONENT REGISTRY — maps type → class
-   ══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   COMPONENT REGISTRY â€” maps type â†’ class
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 const COMPONENT_DEFS = {};
 const COMPONENT_CLASSES = {};
@@ -219,7 +219,7 @@ function createComponent(inst) {
   return null;
 }
 
-/* ═══════════════ HELPER DRAWING FUNCTIONS ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• HELPER DRAWING FUNCTIONS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 function drawHeaderStrip(ctx, hx, hy, hw, holes, pinY) {
   ctx.fillStyle = '#141416';
@@ -352,9 +352,9 @@ function resistorBands(val) {
 
 function formatResistance(val, unit) {
   if (unit) return val + unit;
-  if (val >= 1000000) return (val / 1000000).toFixed(1) + 'MΩ';
-  if (val >= 1000) return (val / 1000).toFixed(1) + 'kΩ';
-  return val + 'Ω';
+  if (val >= 1000000) return (val / 1000000).toFixed(1) + 'MÎ©';
+  if (val >= 1000) return (val / 1000).toFixed(1) + 'kÎ©';
+  return val + 'Î©';
 }
 
 /* Get all world-space pin positions for a component instance */
@@ -369,20 +369,20 @@ function getComponentPins(inst) {
   }));
 }
 
-/* ═══════════════ COMPONENT CATALOG (for UI display) ═══════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• COMPONENT CATALOG (for UI display) â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 const COMPONENT_CATALOG = [
-  { category: 'Boards', ids: ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco'] },
+  { category: 'Boards', ids: ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148'] },
   {
     category: 'Output', ids: ['multi_led_array', 'rgb_led', 'buzzer', 'seg7', 'lcd1602', 'lcd1602_i2c', 'lcd2004_i2c', 'oled_ssd1306', 'neopixel', 'neopixel_strip', 'neopixel_ring', 'neopixel_8x8_matrix', 'bulb_12v', 'max7219', 'ili9341'],
     dropdown: {
-      id: 'led', label: 'LED', icon: '💡', desc: 'Light Emitting Diode',
+      id: 'led', label: 'LED', icon: 'ðŸ’¡', desc: 'Light Emitting Diode',
       variants: [
-        { id: 'led', name: 'Red LED', color: '#ff3333', icon: '🔴' },
-        { id: 'led_green', name: 'Green LED', color: '#33ff33', icon: '🟢' },
-        { id: 'led_blue', name: 'Blue LED', color: '#3366ff', icon: '🔵' },
-        { id: 'led_yellow', name: 'Yellow LED', color: '#ffff33', icon: '🟡' },
-        { id: 'led_orange', name: 'Orange LED', color: '#ff9933', icon: '🟠' },
-        { id: 'led_white', name: 'White LED', color: '#ffffff', icon: '⚪' },
+        { id: 'led', name: 'Red LED', color: '#ff3333', icon: 'ðŸ”´' },
+        { id: 'led_green', name: 'Green LED', color: '#33ff33', icon: 'ðŸŸ¢' },
+        { id: 'led_blue', name: 'Blue LED', color: '#3366ff', icon: 'ðŸ”µ' },
+        { id: 'led_yellow', name: 'Yellow LED', color: '#ffff33', icon: 'ðŸŸ¡' },
+        { id: 'led_orange', name: 'Orange LED', color: '#ff9933', icon: 'ðŸŸ ' },
+        { id: 'led_white', name: 'White LED', color: '#ffffff', icon: 'âšª' },
       ]
     }
   },
@@ -395,22 +395,22 @@ const COMPONENT_CATALOG = [
   {
     category: 'Digital ICs', ids: [],
     dropdown: {
-      id: 'digital_ic', label: 'Digital ICs', icon: '⮗', desc: 'Logic Gates & Timers',
+      id: 'digital_ic', label: 'Digital ICs', icon: 'â®—', desc: 'Logic Gates & Timers',
       variants: [
-        { id: 'ic_555', name: '555 Timer', icon: '⏱️' },
-        { id: 'ic_74hc00', name: '74HC00 NAND', icon: '⮗' },
-        { id: 'ic_74hc04', name: '74HC04 NOT', icon: '⮗' },
-        { id: 'ic_74hc08', name: '74HC08 AND', icon: '⮗' },
-        { id: 'ic_74hc32', name: '74HC32 OR', icon: '⮗' },
-        { id: 'ic_74hc74', name: '74HC74 Dual DFF', icon: '⮗' },
-        { id: 'ic_74hc47', name: '74HC47 BCD→7Seg', icon: '⮗' },
-        { id: 'ic_74hc148', name: '74HC148 Encoder', icon: '⮗' },
-        { id: 'ic_74hc595', name: '74HC595 Shift Reg', icon: '⮗' },
-        { id: 'ic_74hc138', name: '74HC138 Decoder', icon: '⮗' },
-        { id: 'ic_74hc165', name: '74HC165 PISO', icon: '⮗' },
-        { id: 'ic_74hc193', name: '74HC193 Counter', icon: '⮗' },
-        { id: 'ic_74hc245', name: '74HC245 Buffer', icon: '⮗' },
-        { id: 'lm741', name: 'LM741 Op-Amp', icon: '📐' },
+        { id: 'ic_555', name: '555 Timer', icon: 'â±ï¸' },
+        { id: 'ic_74hc00', name: '74HC00 NAND', icon: 'â®—' },
+        { id: 'ic_74hc04', name: '74HC04 NOT', icon: 'â®—' },
+        { id: 'ic_74hc08', name: '74HC08 AND', icon: 'â®—' },
+        { id: 'ic_74hc32', name: '74HC32 OR', icon: 'â®—' },
+        { id: 'ic_74hc74', name: '74HC74 Dual DFF', icon: 'â®—' },
+        { id: 'ic_74hc47', name: '74HC47 BCDâ†’7Seg', icon: 'â®—' },
+        { id: 'ic_74hc148', name: '74HC148 Encoder', icon: 'â®—' },
+        { id: 'ic_74hc595', name: '74HC595 Shift Reg', icon: 'â®—' },
+        { id: 'ic_74hc138', name: '74HC138 Decoder', icon: 'â®—' },
+        { id: 'ic_74hc165', name: '74HC165 PISO', icon: 'â®—' },
+        { id: 'ic_74hc193', name: '74HC193 Counter', icon: 'â®—' },
+        { id: 'ic_74hc245', name: '74HC245 Buffer', icon: 'â®—' },
+        { id: 'lm741', name: 'LM741 Op-Amp', icon: 'ðŸ“' },
       ]
     }
   },
@@ -419,22 +419,22 @@ const COMPONENT_CATALOG = [
     category: 'Instruments',
     ids: ['multimeter', 'func_gen', 'dso_4ch'],
     dropdown: {
-      id: 'probe', label: 'Probes', icon: '🔍', desc: 'Oscilloscope, DSO & Logic Analyzer Probes',
+      id: 'probe', label: 'Probes', icon: 'ðŸ”', desc: 'Oscilloscope, DSO & Logic Analyzer Probes',
       variants: [
-        { id: 'osc_probe_ch1', name: 'OSC CH1', icon: '🟢', color: '#73ff00' },
-        { id: 'osc_probe_ch2', name: 'OSC CH2', icon: '🟠', color: '#ff9800' },
-        { id: 'dso_probe_ch1', name: 'DSO CH1', icon: '🟡', color: '#ffe600' },
-        { id: 'dso_probe_ch2', name: 'DSO CH2', icon: '🔵', color: '#00e5ff' },
-        { id: 'dso_probe_ch3', name: 'DSO CH3', icon: '🟣', color: '#ff3090' },
-        { id: 'dso_probe_ch4', name: 'DSO CH4', icon: '🟢', color: '#30ff60' },
-        { id: 'la_probe_ch1', name: 'LA CH1', icon: '🔵', color: '#00e5ff' },
-        { id: 'la_probe_ch2', name: 'LA CH2', icon: '🟠', color: '#ff9800' },
-        { id: 'la_probe_ch3', name: 'LA CH3', icon: '🟢', color: '#4caf50' },
-        { id: 'la_probe_ch4', name: 'LA CH4', icon: '🔴', color: '#ff5722' },
-        { id: 'la_probe_ch5', name: 'LA CH5', icon: '🟣', color: '#ab47bc' },
-        { id: 'la_probe_ch6', name: 'LA CH6', icon: '🟡', color: '#ffee33' },
-        { id: 'la_probe_ch7', name: 'LA CH7', icon: '🩷', color: '#e91e63' },
-        { id: 'la_probe_ch8', name: 'LA CH8', icon: '💚', color: '#76ff03' },
+        { id: 'osc_probe_ch1', name: 'OSC CH1', icon: 'ðŸŸ¢', color: '#73ff00' },
+        { id: 'osc_probe_ch2', name: 'OSC CH2', icon: 'ðŸŸ ', color: '#ff9800' },
+        { id: 'dso_probe_ch1', name: 'DSO CH1', icon: 'ðŸŸ¡', color: '#ffe600' },
+        { id: 'dso_probe_ch2', name: 'DSO CH2', icon: 'ðŸ”µ', color: '#00e5ff' },
+        { id: 'dso_probe_ch3', name: 'DSO CH3', icon: 'ðŸŸ£', color: '#ff3090' },
+        { id: 'dso_probe_ch4', name: 'DSO CH4', icon: 'ðŸŸ¢', color: '#30ff60' },
+        { id: 'la_probe_ch1', name: 'LA CH1', icon: 'ðŸ”µ', color: '#00e5ff' },
+        { id: 'la_probe_ch2', name: 'LA CH2', icon: 'ðŸŸ ', color: '#ff9800' },
+        { id: 'la_probe_ch3', name: 'LA CH3', icon: 'ðŸŸ¢', color: '#4caf50' },
+        { id: 'la_probe_ch4', name: 'LA CH4', icon: 'ðŸ”´', color: '#ff5722' },
+        { id: 'la_probe_ch5', name: 'LA CH5', icon: 'ðŸŸ£', color: '#ab47bc' },
+        { id: 'la_probe_ch6', name: 'LA CH6', icon: 'ðŸŸ¡', color: '#ffee33' },
+        { id: 'la_probe_ch7', name: 'LA CH7', icon: 'ðŸ©·', color: '#e91e63' },
+        { id: 'la_probe_ch8', name: 'LA CH8', icon: 'ðŸ’š', color: '#76ff03' },
       ]
     }
   },

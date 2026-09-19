@@ -1,0 +1,14 @@
+﻿{
+  "id": "lpc2148_blink",
+  "name": "LPC2148 Onboard LED",
+  "icon": "🔌",
+  "desc": "LPC2148 SmartX Board - blink the onboard LED1 on P0.12 using real register-level code (IO0SET/IO0CLR)",
+  "tags": ["arm", "lpc2148", "beginner", "LED"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "lpc2148", "x": 200, "y": 100 }
+    ],
+    "wires": []
+  },
+  "code": "/*\n * LPC2148 SmartX Board - Onboard LED1 Blink\n * P0.12 drives the red LED1 using register-level GPIO.\n * No external wiring required - just press Run!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    IO0DIR |= (1 << 12);      // P0.12 = output (LED1)\n    while (1) {\n        IO0SET = (1 << 12);   // Set P0.12 HIGH - LED ON\n        delay_ms(500);\n        IO0CLR = (1 << 12);   // Set P0.12 LOW - LED OFF\n        delay_ms(500);\n    }\n}"
+}

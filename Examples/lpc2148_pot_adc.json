@@ -1,0 +1,19 @@
+﻿{
+  "id": "lpc2148_pot_adc",
+  "name": "LPC2148 ADC Potentiometer",
+  "icon": "🔌",
+  "desc": "LPC2148 SmartX Board - read a potentiometer via ADC0 (P0.26/AIN0) and display value on Serial monitor",
+  "tags": ["arm", "lpc2148", "ADC", "potentiometer", "serial"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "lpc2148", "x": 200, "y": 100 },
+      { "id": "pot1", "type": "potentiometer", "x": 500, "y": 200 }
+    ],
+    "wires": [
+      { "from": { "instId": "pot1", "pinId": "wiper" }, "to": { "instId": "b1", "pinId": "P0_26" } },
+      { "from": { "instId": "pot1", "pinId": "cw" }, "to": { "instId": "b1", "pinId": "VCC" } },
+      { "from": { "instId": "pot1", "pinId": "ccw" }, "to": { "instId": "b1", "pinId": "GND1" } }
+    ]
+  },
+  "code": "/*\n * LPC2148 SmartX Board - ADC Potentiometer\n * Read potentiometer on AIN0 (P0.26) using ADC0\n * Send results to Serial Monitor via UART0\n */\n\n#include <LPC214x.h>\n\nvoid uart0_init(void) {\n    PINSEL0 |= (1 << 0) | (1 << 2);  // P0.2=TXD0, P0.3=RXD0\n    U0LCR = 0x83;                     // 8N1, DLAB=1\n    U0DLL = 0x06;                     // 9600 baud @ 60MHz PCLK\n    U0DLM = 0x00;\n    U0LCR = 0x03;                     // DLAB=0, 8N1\n}\n\nvoid uart0_tx(char c) {\n    while (!(U0LSR & 0x20));          // Wait for THR empty\n    U0THR = c;\n}\n\nvoid uart0_print(const char *s) {\n    while (*s) uart0_tx(*s++);\n}\n\nvoid uart0_printNum(int n) {\n    char buf[8];\n    int i = 0;\n    if (n == 0) { uart0_tx('0'); return; }\n    while (n > 0) { buf[i++] = '0' + (n % 10); n /= 10; }\n    while (i > 0) uart0_tx(buf[--i]);\n}\n\nint main(void) {\n    uart0_init();\n    AD0CR = (1 << 21) | (1 << 0);    // PDN=1, select channel 0\n    uart0_print(\"LPC2148 ADC Demo\\r\\n\");\n    while (1) {\n        AD0CR |= (1 << 24);          // Start conversion\n        while (!(AD0GDR & (1 << 31)));// Wait for DONE\n        int val = (AD0GDR >> 6) & 0x3FF;\n        uart0_print(\"AIN0 = \");\n        uart0_printNum(val);\n        uart0_print(\"\\r\\n\");\n        AD0CR &= ~(1 << 24);         // Stop\n        delay_ms(500);\n    }\n}"
+}

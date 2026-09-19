@@ -1,10 +1,10 @@
-/* ═══════════════════════════════════════════════════════
-   canvas.js — Circuit Canvas (HTML5 Canvas, drag/drop, wiring, pan/zoom)
-   ═══════════════════════════════════════════════════════ */
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   canvas.js â€” Circuit Canvas (HTML5 Canvas, drag/drop, wiring, pan/zoom)
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 'use strict';
 
-/* ── Hoisted IC output-pin tables (used by _readDigitalInput / _readAnalogInput) ── */
+/* â”€â”€ Hoisted IC output-pin tables (used by _readDigitalInput / _readAnalogInput) â”€â”€ */
 const IC_OUTPUT_MAP = {
   ic_555: { pins: ['OUT'], activeLow: [] },
   ic_74hc00: { pins: ['Y1', 'Y2', 'Y3', 'Y4'], activeLow: [] },
@@ -68,7 +68,7 @@ class CircuitCanvas {
     this.wireMouse = null;     // { x, y } world coords
     this.placingType = null;
     this._wireOffsets = {};       // wireId -> {hx, hy} routing hint for wire reshape
-    this.draggingWire = null;     // { wireId, segIdx } — which wire segment is being dragged
+    this.draggingWire = null;     // { wireId, segIdx } â€” which wire segment is being dragged
     this.placingMouse = null;
 
     /* History */
@@ -95,7 +95,7 @@ class CircuitCanvas {
     this._tipKey = null;
   }
 
-  /* ══════════════ RESIZE ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• RESIZE â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _resize() {
     const w = this.wrapper.clientWidth;
     const h = this.wrapper.clientHeight;
@@ -108,7 +108,7 @@ class CircuitCanvas {
     }
   }
 
-  /* ══════════════ RENDER ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• RENDER â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _render() {
     const { ctx, canvas, zoom, panX, panY } = this;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -318,7 +318,7 @@ class CircuitCanvas {
         ctx.stroke();
       }
 
-      // Pin label (only when zoomed in enough) — boards have baked-in labels
+      // Pin label (only when zoomed in enough) â€” boards have baked-in labels
       const isBoard = inst.type === 'arduino_uno' || inst.type === 'esp32_devkit_v1' || inst.type === 'arduino_nano';
       if (this.zoom >= 1 && !isBoard) {
         ctx.fillStyle = '#888';
@@ -331,12 +331,12 @@ class CircuitCanvas {
     }
   }
 
-  // ─── Wire routing (Wokwi / Tinkercad style orthogonal traces) ───
+  // â”€â”€â”€ Wire routing (Wokwi / Tinkercad style orthogonal traces) â”€â”€â”€
   // A wire exits each pin straight out from the component side, then runs
   // horizontally/vertically with right-angle bends, avoiding component bodies.
 
   // Rotate a pin's local (pin.x, pin.y) offset around the component centre
-  // by inst.rotation × 90° CW and return the world position.
+  // by inst.rotation Ã— 90Â° CW and return the world position.
   _pinWorldPos(inst, pin) {
     const defs = window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS;
     const def = defs && defs[inst.type];
@@ -364,7 +364,7 @@ class CircuitCanvas {
     const dirs = { top: { x: 0, y: -1 }, bottom: { x: 0, y: 1 }, left: { x: -1, y: 0 }, right: { x: 1, y: 0 } };
     let d = dirs[side] || { x: 0, y: 1 };
     const rot = (inst.rotation || 0) % 4;
-    for (let i = 0; i < rot; i++) d = { x: -d.y, y: d.x }; // rotate 90° clockwise
+    for (let i = 0; i < rot; i++) d = { x: -d.y, y: d.x }; // rotate 90Â° clockwise
     return d;
   }
 
@@ -379,7 +379,7 @@ class CircuitCanvas {
     return rects;
   }
 
-  // Liang–Barsky: does segment (a→b) intersect axis-aligned rect r?
+  // Liangâ€“Barsky: does segment (aâ†’b) intersect axis-aligned rect r?
   _segHitsRect(ax, ay, bx, by, r) {
     const l = r.x, t = r.y, ri = r.x + r.w, b = r.y + r.h;
     if ((ax < l && bx < l) || (ax > ri && bx > ri) || (ay < t && by < t) || (ay > b && by > b)) return false;
@@ -402,7 +402,7 @@ class CircuitCanvas {
   _scorePath(pts) {
     const rects = this._componentRects();
     let penalty = 0, len = 0;
-    // Score from index 1..len-1 — excludes the pin→stub end segments
+    // Score from index 1..len-1 â€” excludes the pinâ†’stub end segments
     for (let i = 1; i < pts.length - 1; i++) {
       const a = pts[i], b = pts[i + 1];
       len += Math.hypot(b.x - a.x, b.y - a.y);
@@ -724,7 +724,7 @@ class CircuitCanvas {
     }
   }
 
-  // ─── Interactive on-canvas controls (sliders for sensors / potentiometer) ───
+  // â”€â”€â”€ Interactive on-canvas controls (sliders for sensors / potentiometer) â”€â”€â”€
   _drawInteractives(ctx) {
     const defs = window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS;
     if (!defs || this.zoom < 0.4) return;
@@ -734,7 +734,7 @@ class CircuitCanvas {
       const rects = this._getInteractiveRects(inst);
       for (let i = 0; i < rects.length; i++) {
         const r = rects[i];
-        // Skip inline toggles — they're drawn by the component's own draw()
+        // Skip inline toggles â€” they're drawn by the component's own draw()
         if (r.ctrl.type === 'toggle' && r.ctrl.inline) continue;
         this._drawSlider(ctx, inst, r.ctrl, r);
       }
@@ -917,7 +917,7 @@ class CircuitCanvas {
       const rects = this._getInteractiveRects(inst);
       for (let i = 0; i < rects.length; i++) {
         const r = rects[i];
-        // Skip inline toggles — they are handled by _hitTestInlineToggle
+        // Skip inline toggles â€” they are handled by _hitTestInlineToggle
         if (r.ctrl.type === 'toggle' && r.ctrl.inline) continue;
         if (wx >= r.x - 6 && wx <= r.x + r.width + 6 && wy >= r.y - 8 && wy <= r.y + r.height + 8) {
           return { inst, ctrl: r.ctrl, rect: r };
@@ -1238,7 +1238,7 @@ class CircuitCanvas {
     }
   }
 
-  /* ══════════════ COMPONENT MANAGEMENT ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• COMPONENT MANAGEMENT â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   addComponent(type, worldX, worldY) {
     const def = window.ArduinoComponents.COMPONENT_DEFS[type];
     if (!def) return null;
@@ -1490,7 +1490,7 @@ class CircuitCanvas {
     }
 
     const offset = this.GRID * 4;
-    const idMap = {}; // oldId → newId
+    const idMap = {}; // oldId â†’ newId
     const pastedComps = [];
 
     for (const orig of origComps) {
@@ -1562,7 +1562,7 @@ class CircuitCanvas {
     if (this.onPlacingChanged) this.onPlacingChanged(false);
   }
 
-  /* ══════════════ EVENT HANDLING ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• EVENT HANDLING â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _bindEvents() {
     const canvas = this.canvas;
 
@@ -1583,7 +1583,7 @@ class CircuitCanvas {
     document.addEventListener('mouseup', () => { if (this.mode === 'panning') this.mode = 'idle'; });
   }
 
-  /* ═══════════════ TOUCH HANDLERS ═══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TOUCH HANDLERS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _onTouchStart(e) {
     if (e.touches.length === 2) {
       e.preventDefault();
@@ -1777,7 +1777,7 @@ class CircuitCanvas {
         return;
       }
 
-      // Keypad button click — press on click, auto-release after 150ms
+      // Keypad button click â€” press on click, auto-release after 150ms
       const keypadHit = this._hitTestKeypadButton(world.x, world.y);
       if (keypadHit) {
         const { inst, key } = keypadHit;
@@ -1797,7 +1797,7 @@ class CircuitCanvas {
         return;
       }
 
-      // IR Remote button click — press on click, send code to all ir_receiver instances
+      // IR Remote button click â€” press on click, send code to all ir_receiver instances
       const irRemoteHit = this._hitTestIrRemoteButton(world.x, world.y);
       if (irRemoteHit) {
         const { inst, btn } = irRemoteHit;
@@ -1910,7 +1910,7 @@ class CircuitCanvas {
         return;
       }
 
-      // Click on empty space — deselect
+      // Click on empty space â€” deselect
       this._selectAll(false);
       this.selected = null;
       this.selectedWire = null;
@@ -2258,7 +2258,7 @@ class CircuitCanvas {
     if (e.ctrlKey && e.key === 'a') { e.preventDefault(); this.selectAll(); }
   }
 
-  /* ══════════════ WIRING ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• WIRING â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _startWiring(inst, pin, wx, wy) {
     this.mode = 'wiring';
     this.wiringFrom = { inst, pin, wx, wy };
@@ -2277,7 +2277,7 @@ class CircuitCanvas {
     if (hint) hint.classList.add('hidden');
   }
 
-  /* ══════════════ HIT TESTING ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• HIT TESTING â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _hitTestPin(wx, wy) {
     const { COMPONENT_DEFS } = window.ArduinoComponents;
     const radius = Math.max(8, 10 / this.zoom);
@@ -2298,7 +2298,7 @@ class CircuitCanvas {
     return null;
   }
 
-  /* ══════════════ PIN TOOLTIP ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• PIN TOOLTIP â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _pinTypeLabel(type) {
     const map = {
       digital: 'Digital I/O',
@@ -2336,7 +2336,7 @@ class CircuitCanvas {
         : ((def && def.name) || inst.type);
       const title = document.createElement('div');
       title.className = 'pin-tip-title';
-      title.textContent = `${compName} · ${pin.label}`;
+      title.textContent = `${compName} Â· ${pin.label}`;
       frag.appendChild(title);
 
       const addRow = (k, v, cls) => {
@@ -2359,7 +2359,7 @@ class CircuitCanvas {
         if (pinDoc[pin.id] && pinDoc[pin.id].desc) {
           addRow('Function', pinDoc[pin.id].desc);
         } else {
-          // Board-style grouped pins (e.g. D0–D13, VP / VN): find a matching group
+          // Board-style grouped pins (e.g. D0â€“D13, VP / VN): find a matching group
           const match = Object.entries(pinDoc).find(([k, v]) =>
             v.label && this._pinMatchesGroup(pin.id, v.label));
           if (match && match[1].desc) addRow('Function', match[1].desc);
@@ -2484,7 +2484,7 @@ class CircuitCanvas {
     return Math.sqrt((px - nx) ** 2 + (py - ny) ** 2);
   }
 
-  /* ══════════════ UTILITIES ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• UTILITIES â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _toWorld(sx, sy) {
     return {
       x: (sx - this.panX) / this.zoom,
@@ -2526,20 +2526,23 @@ class CircuitCanvas {
     if (pinId in analogMap) return analogMap[pinId];
     // ESP32 DevKit V1 pin aliases
     const esp32Map = { VP: 36, VN: 39, TX0: 1, RX0: 3, EN: 0 };
+    // LPC2148 pin aliases
+    const lpcMap = { VCC: -1, VBUS: -2, GND1: -3, GND2: -4, RST: -5, P0_0: 0, P0_1: 1, P0_2: 2, P0_3: 3, P0_4: 4, P0_5: 5, P0_6: 6, P0_7: 7, P0_8: 8, P0_9: 9, P0_10: 10, P0_11: 11, P0_12: 12, P0_13: 13, P0_14: 14, P0_15: 15, P0_16: 16, P0_17: 17, P0_18: 18, P0_19: 19, P0_20: 20, P0_21: 21, P0_22: 22, P0_23: 23, P0_25: 25, P0_26: 26, P0_27: 27, P0_28: 28 };
+    if (pinId in lpcMap) return lpcMap[pinId];
     if (pinId in esp32Map) return esp32Map[pinId];
-    // STM32F746G-DISCO: use Arduino D-number directly (D0-D15 → 0-15)
+    // STM32F746G-DISCO: use Arduino D-number directly (D0-D15 â†’ 0-15)
     if (/^D\d+$/.test(pinId)) return parseInt(pinId.slice(1));
     const n = parseInt(pinId.replace(/[^0-9]/g, ''));
     return isNaN(n) ? 0 : n;
   }
 
-  /* Match a pin like D7/A3/VP against a group label like "D0–D13",
-     "A0–A5", "VP / VN" or "D34 / D35". */
+  /* Match a pin like D7/A3/VP against a group label like "D0â€“D13",
+     "A0â€“A5", "VP / VN" or "D34 / D35". */
   _pinMatchesGroup(pinId, groupLabel) {
     const label = String(groupLabel || '').trim();
-    // Range form: "D0–D13"
-    if (label.includes('–') || label.includes('-')) {
-      const parts = label.split(/[–-]/);
+    // Range form: "D0â€“D13"
+    if (label.includes('â€“') || label.includes('-')) {
+      const parts = label.split(/[â€“-]/);
       if (parts.length !== 2) return false;
       const m = /^([AD])(\d+)$/.exec(pinId);
       if (!m) return false;
@@ -2550,14 +2553,14 @@ class CircuitCanvas {
       if (!start || !end || start[1] !== letter || end[1] !== letter) return false;
       return num >= parseInt(start[2], 10) && num <= parseInt(end[2], 10);
     }
-    // List form: "VP / VN" — match if pinId appears on either side
+    // List form: "VP / VN" â€” match if pinId appears on either side
     return label.split('/').map(s => s.trim()).includes(pinId);
   }
 
   _placeComponent(world) {
     if (!this.placingType) return;
     const inst = this.addComponent(this.placingType, world.x, world.y);
-    // Don't cancel placing — allow multiple placement
+    // Don't cancel placing â€” allow multiple placement
     // Press ESC to stop
     return inst;
   }
@@ -2585,7 +2588,7 @@ class CircuitCanvas {
     if (this.onCompChanged) this.onCompChanged();
   }
 
-  /* ══════════════ VIEWPORT ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• VIEWPORT â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   fitView() {
     if (this.components.length === 0) {
       this.panX = this.canvas.width / 2 - 200;
@@ -2618,7 +2621,7 @@ class CircuitCanvas {
   zoomIn() { this.zoom = Math.min(4, this.zoom * 1.2); this._updateZoomDisplay(); }
   zoomOut() { this.zoom = Math.max(0.1, this.zoom / 1.2); this._updateZoomDisplay(); }
 
-  /* ══════════════ HISTORY ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• HISTORY â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   _serializeState() {
     return JSON.stringify({ components: this.components, wires: this.wires }, (key, val) => {
       if (key === '_componentInstance') return undefined;
@@ -2668,7 +2671,7 @@ class CircuitCanvas {
     } catch (e) { }
   }
 
-  /* ══════════════ SERIALIZE ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• SERIALIZE â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   serialize() {
     return {
       components: this.components.map(c => ({
@@ -2786,7 +2789,7 @@ class CircuitCanvas {
     }
   }
 
-  /* ══════════════ SIM HELPERS ══════════════ */
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• SIM HELPERS â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   // Get Arduino Uno instance (first one found)
   getArduinoInst() {
     return this.components.find(c => c.type === 'arduino_uno') || null;
@@ -2838,7 +2841,7 @@ class CircuitCanvas {
     this.engine.solve(this);
 
     // Feed back solved voltages for Arduino input pins so external signals
-    // (func_gen, sensors, etc.) propagate to pinStates → _emitPinChange → interrupts
+    // (func_gen, sensors, etc.) propagate to pinStates â†’ _emitPinChange â†’ interrupts
     const sim = window.ArduinoSim;
     if (sim && this.engine.pinToNet) {
       const arduinoTypes = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'stm32f746_disco'];
@@ -2871,7 +2874,7 @@ class CircuitCanvas {
     }
 
     for (const inst of this.components) {
-      // ── Class-based component: delegate to update() ──
+      // â”€â”€ Class-based component: delegate to update() â”€â”€
       const CompClass = getComponentClass(inst.type);
       if (CompClass) {
         if (!inst._componentInstance || inst._componentInstance.type !== inst.type) {
@@ -2882,7 +2885,7 @@ class CircuitCanvas {
         continue; // skip legacy switch/case
       }
 
-      // ── Legacy defComp() fallback ──
+      // â”€â”€ Legacy defComp() fallback â”€â”€
       switch (inst.type) {
         case 'led':
         case 'led_green':
@@ -2916,7 +2919,7 @@ class CircuitCanvas {
               const vf = 2.0; // typical LED forward voltage drop (V)
               const rawVal = bestSource.rawVal;
 
-              // PWM (analogWrite, value 2–254 on a digital pin): brightness follows the
+              // PWM (analogWrite, value 2â€“254 on a digital pin): brightness follows the
               // duty cycle directly so fades are clearly visible, even below Vf.
               const isPWM = bestSource.type === 'digital' && rawVal > 1 && rawVal < 255;
 
@@ -2947,7 +2950,7 @@ class CircuitCanvas {
                 inst.runtimeState.brightness = normBrightness;
               }
 
-              // ── Overload / failure detection ──
+              // â”€â”€ Overload / failure detection â”€â”€
               // A standard LED is rated for ~20 mA. Above 20 mA it's stressed (warning),
               // above 40 mA (e.g. connected straight to 5V without a resistor) it "blows".
               const iLed = inst.runtimeState.current_mA || 0;
@@ -2962,7 +2965,7 @@ class CircuitCanvas {
                   inst.runtimeState._warnedBlown = true;
                   if (window.OutputPanel) {
                     window.OutputPanel.log(
-                      `LED (${inst.id}) is over-current (~${Math.round(iLed)} mA) without a current-limiting resistor and has blown! Add a 220Ω resistor in series.`,
+                      `LED (${inst.id}) is over-current (~${Math.round(iLed)} mA) without a current-limiting resistor and has blown! Add a 220Î© resistor in series.`,
                       'warn'
                     );
                   }
@@ -3395,21 +3398,21 @@ class CircuitCanvas {
           const dt = (now - inst.runtimeState._lastTime) / 1000;
           inst.runtimeState._lastTime = now;
 
-          // ── Resolve actual R1, R2, C from connected components ──
+          // â”€â”€ Resolve actual R1, R2, C from connected components â”€â”€
           let r1 = null, r2 = null, capC = null;
           const self = this;
 
           const _getOhms = (c) => {
             let v = c.runtimeState?.value ?? c.props?.value ?? 0;
-            const u = c.runtimeState?.unit || c.props?.unit || 'Ω';
-            if (u === 'kΩ') v *= 1e3;
-            if (u === 'MΩ') v *= 1e6;
+            const u = c.runtimeState?.unit || c.props?.unit || 'Î©';
+            if (u === 'kÎ©') v *= 1e3;
+            if (u === 'MÎ©') v *= 1e6;
             return v;
           };
           const _getFarads = (c) => {
             let v = c.runtimeState?.value ?? c.props?.value ?? 0;
             const u = c.runtimeState?.unit || c.props?.unit || 'F';
-            if (u === 'µF') v *= 1e-6;
+            if (u === 'ÂµF') v *= 1e-6;
             if (u === 'nF') v *= 1e-9;
             if (u === 'pF') v *= 1e-12;
             if (u === 'mF') v *= 1e-3;
@@ -3459,7 +3462,7 @@ class CircuitCanvas {
           const allCaps = [...new Set([...capComps, ...trigCapComps])];
           if (allCaps.length > 0) capC = _getFarads(allCaps[0]);
 
-          // ── Calculate timing from component values ──
+          // â”€â”€ Calculate timing from component values â”€â”€
           let tHigh, tLow;
           if (r1 != null && r2 != null && capC != null && capC > 0 && r1 > 0 && r2 > 0) {
             // Real 555 astable formulas
@@ -3834,7 +3837,7 @@ class CircuitCanvas {
           if (read('B')) bcd |= 2;
           if (read('C')) bcd |= 4;
           if (read('D')) bcd |= 8;
-          // 7-segment decode table (active LOW: 0=on, 1=off) — segments a-g
+          // 7-segment decode table (active LOW: 0=on, 1=off) â€” segments a-g
           const segTable = [0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x7C,0x39,0x5E,0x79,0x71];
           const lt = read('LT');
           const bi = read('BI');
@@ -3931,7 +3934,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* ── MPU6050 IMU (I2C sensor — writes accel values to pin states) ── */
+        /* â”€â”€ MPU6050 IMU (I2C sensor â€” writes accel values to pin states) â”€â”€ */
         case 'mpu6050': {
           const sim = window.ArduinoSim;
           if (!sim || !sim.pinStates) break;
@@ -3945,7 +3948,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* ── DS3231 RTC (I2C sensor — provides time/date via registers) ── */
+        /* â”€â”€ DS3231 RTC (I2C sensor â€” provides time/date via registers) â”€â”€ */
         case 'ds3231': {
           const sim = window.ArduinoSim;
           if (!sim || !sim.pinStates) break;
@@ -3989,7 +3992,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* ── 28BYJ-48 Stepper Motor (reads 4 digital pins, computes angle) ── */
+        /* â”€â”€ 28BYJ-48 Stepper Motor (reads 4 digital pins, computes angle) â”€â”€ */
         case 'stepper_28byj': {
           const sim = window.ArduinoSim;
           if (!sim || !sim.pinStates) break;
@@ -4000,7 +4003,7 @@ class CircuitCanvas {
           };
           const in1 = readBit('IN1'), in2 = readBit('IN2');
           const in3 = readBit('IN3'), in4 = readBit('IN4');
-          // Half-step sequence lookup: pattern → step delta
+          // Half-step sequence lookup: pattern â†’ step delta
           const pattern = (in1) | (in2 << 1) | (in3 << 2) | (in4 << 3);
           const prev = inst.runtimeState._lastPattern ?? 0;
           const stepAngle = 5.625 / 64;
@@ -4026,7 +4029,7 @@ class CircuitCanvas {
             }
             inst.runtimeState._lastPos = matched.pos;
           } else if (pattern !== 0 && pattern !== prev) {
-            // Fallback: no Stepper object — any coil change = one step forward
+            // Fallback: no Stepper object â€” any coil change = one step forward
             inst.runtimeState.angle = (inst.runtimeState.angle ?? 0) + stepAngle;
           }
           inst.runtimeState._lastPattern = pattern;
@@ -4034,7 +4037,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* ── WS2812B NeoPixel (single LED — reads color from props/runtimeState) ── */
+        /* â”€â”€ WS2812B NeoPixel (single LED â€” reads color from props/runtimeState) â”€â”€ */
         case 'neopixel': {
           if (inst.runtimeState.r === undefined) inst.runtimeState.r = inst.props.r ?? 0;
           if (inst.runtimeState.g === undefined) inst.runtimeState.g = inst.props.g ?? 0;
@@ -4043,7 +4046,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* ── WS2812B NeoPixel Strip (8-pixel — reads pixel array from runtimeState) ── */
+        /* â”€â”€ WS2812B NeoPixel Strip (8-pixel â€” reads pixel array from runtimeState) â”€â”€ */
         case 'neopixel_strip': {
           const npStripBri = inst.props.brightness ?? 255;
           if (inst.runtimeState.brightness === undefined) inst.runtimeState.brightness = npStripBri;
@@ -4054,7 +4057,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* ── WS2812B NeoPixel Ring (12-pixel — reads pixel array from runtimeState) ── */
+        /* â”€â”€ WS2812B NeoPixel Ring (12-pixel â€” reads pixel array from runtimeState) â”€â”€ */
         case 'neopixel_ring': {
           const npRingBri = inst.props.brightness ?? 255;
           if (inst.runtimeState.brightness === undefined) inst.runtimeState.brightness = npRingBri;
@@ -4065,7 +4068,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* ── WS2812B NeoPixel 8x8 Matrix (64-pixel — reads pixel array from runtimeState) ── */
+        /* â”€â”€ WS2812B NeoPixel 8x8 Matrix (64-pixel â€” reads pixel array from runtimeState) â”€â”€ */
         case 'neopixel_8x8_matrix': {
           const npRingBri = inst.props.brightness ?? 255;
           if (inst.runtimeState.brightness === undefined) inst.runtimeState.brightness = npRingBri;
@@ -4076,7 +4079,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* ── IR Obstacle Sensor (writes digital to connected pin) ── */
+        /* â”€â”€ IR Obstacle Sensor (writes digital to connected pin) â”€â”€ */
         case 'ir_obstacle': {
           const sim = window.ArduinoSim;
           if (!sim || !sim.pinStates) break;
@@ -4088,7 +4091,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* ── Flex Sensor (writes analog value to connected pin) ── */
+        /* â”€â”€ Flex Sensor (writes analog value to connected pin) â”€â”€ */
         case 'flex_sensor': {
           const sim = window.ArduinoSim;
           if (!sim || !sim.pinStates) break;
@@ -4099,20 +4102,20 @@ class CircuitCanvas {
           break;
         }
 
-        /* ── NTC Thermistor (writes analog value to connected pin) ── */
+        /* â”€â”€ NTC Thermistor (writes analog value to connected pin) â”€â”€ */
         case 'thermistor': {
           const sim = window.ArduinoSim;
           if (!sim || !sim.pinStates) break;
           const temp = inst.runtimeState?.temperature ?? inst.props.temperature ?? 25;
           inst.runtimeState.temperature = temp;
-          // Convert temperature to analog value (simplified: 0-1023 maps to -10-80°C)
+          // Convert temperature to analog value (simplified: 0-1023 maps to -10-80Â°C)
           const analogVal = Math.round(((temp + 10) / 90) * 1023);
           const p1Pn = this._getConnectedPinNum(inst.id, 'p1');
           if (p1Pn !== null) sim.pinStates[`pin_${p1Pn}`] = Math.max(0, Math.min(1023, analogVal));
           break;
         }
 
-        /* ── 1N4007 Diode (pass-through with forward voltage drop) ── */
+        /* â”€â”€ 1N4007 Diode (pass-through with forward voltage drop) â”€â”€ */
         case 'diode_1n4007': {
           // Diode participates in _tracePinNet for electrical simulation
           // Here we just track its conducting state for visual feedback
@@ -4124,7 +4127,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* ── Digital Multimeter — measures voltage / resistance / continuity ── */
+        /* â”€â”€ Digital Multimeter â€” measures voltage / resistance / continuity â”€â”€ */
         case 'multimeter': {
           const mode = inst.runtimeState.mode || inst.props.mode || 'V_DC';
 
@@ -4147,7 +4150,7 @@ class CircuitCanvas {
               let pfx = '';
               if (absV >= 1e6) { disp = absV / 1e6; pfx = 'M'; }
               else if (absV >= 1e3) { disp = absV / 1e3; pfx = 'k'; }
-              else if (absV > 0 && absV < 0.001) { disp = absV * 1e6; pfx = 'µ'; }
+              else if (absV > 0 && absV < 0.001) { disp = absV * 1e6; pfx = 'Âµ'; }
               else if (absV > 0 && absV < 1) { disp = absV * 1e3; pfx = 'm'; }
               const decimals = disp >= 100 ? 1 : 3;
               displayText = sign + disp.toFixed(decimals);
@@ -4213,7 +4216,7 @@ class CircuitCanvas {
                 switch (comp.type) {
                   case 'resistor':
                     r = (Number(comp.props?.value) || 220)
-                      * (comp.props?.unit === 'kΩ' ? 1e3 : comp.props?.unit === 'MΩ' ? 1e6 : 1);
+                      * (comp.props?.unit === 'kÎ©' ? 1e3 : comp.props?.unit === 'MÎ©' ? 1e6 : 1);
                     break;
                   case 'bulb_12v': r = 12; break;
                   case 'led': case 'led_green': case 'led_blue':
@@ -4235,7 +4238,7 @@ class CircuitCanvas {
                 let disp, pfx;
                 if (absA >= 1) { disp = absA; pfx = 'A'; }
                 else if (absA >= 0.001) { disp = absA * 1000; pfx = 'mA'; }
-                else { disp = absA * 1e6; pfx = 'µA'; }
+                else { disp = absA * 1e6; pfx = 'ÂµA'; }
                 const decimals = disp >= 100 ? 1 : 3;
                 displayText = sign + disp.toFixed(decimals);
                 displayUnit = pfx;
@@ -4252,7 +4255,7 @@ class CircuitCanvas {
               if (redHasSrc && comHasSrc) {
                 displayText = 'Err';
                 displayUnit = '';
-                displayMode = 'Ω';
+                displayMode = 'Î©';
               } else {
                 const totalR = this._measureResistanceBetween(inst.id, 'probe_red', inst.id, 'probe_com');
                 if (totalR < Infinity && totalR > 0) {
@@ -4262,11 +4265,11 @@ class CircuitCanvas {
                   else if (totalR >= 1e3) { disp = totalR / 1e3; pfx = 'k'; }
                   const decimals = disp >= 100 ? 1 : 2;
                   displayText = disp.toFixed(decimals);
-                  displayUnit = pfx + 'Ω';
+                  displayUnit = pfx + 'Î©';
                   displayMode = 'AUTO';
                 } else {
                   displayText = 'O.L';
-                  displayUnit = 'MΩ';
+                  displayUnit = 'MÎ©';
                   displayMode = 'AUTO';
                 }
               }
@@ -4277,11 +4280,11 @@ class CircuitCanvas {
               const threshold = 40;
               if (totalR <= threshold && totalR > 0) {
                 displayText = totalR.toFixed(1);
-                displayUnit = 'Ω';
+                displayUnit = 'Î©';
                 displayBeep = true;
               } else {
                 displayText = 'O.L';
-                displayUnit = 'Ω';
+                displayUnit = 'Î©';
                 displayBeep = false;
               }
               displayMode = 'CONT';
@@ -4312,7 +4315,7 @@ class CircuitCanvas {
               let disp, pfx;
               if (amps >= 1) { disp = amps; pfx = 'A'; }
               else if (amps >= 0.001) { disp = amps * 1000; pfx = 'mA'; }
-              else { disp = amps * 1e6; pfx = 'µA'; }
+              else { disp = amps * 1e6; pfx = 'ÂµA'; }
               const decimals = disp >= 100 ? 1 : 3;
               displayText = disp.toFixed(decimals);
               displayUnit = pfx;
@@ -4329,7 +4332,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* ── Dual Channel Function Generator — outputs voltage waveforms ── */
+        /* â”€â”€ Dual Channel Function Generator â€” outputs voltage waveforms â”€â”€ */
         case 'func_gen': {
           const props = inst.props || {};
           const sim = window.ArduinoSim;
@@ -4362,12 +4365,12 @@ class CircuitCanvas {
         case 'lm35_sensor': {
           const outPin = this._getConnectedPinNum(inst.id, 'OUT');
           if (outPin !== null && window.ArduinoSim && window.ArduinoSim.pinStates) {
-            // Temperature in °C (default 25°C)
+            // Temperature in Â°C (default 25Â°C)
             const temp = inst.runtimeState.temp !== undefined 
               ? inst.runtimeState.temp 
               : (inst.props.temp ?? 25);
 
-            // LM35 outputs 10mV/°C (0.01V/°C). Map to 10-bit ADC (0-1023) based on a 5.0V VREF:
+            // LM35 outputs 10mV/Â°C (0.01V/Â°C). Map to 10-bit ADC (0-1023) based on a 5.0V VREF:
             const voltage = Math.max(0, temp * 0.01);
             const adcVal = Math.max(0, Math.min(1023, Math.round((voltage / 5.0) * 1023)));
 
@@ -4377,11 +4380,11 @@ class CircuitCanvas {
         }
 
         case 'keypad_4x4': {
-          // Keypad column state is computed live in digitalRead() — no cached update needed.
+          // Keypad column state is computed live in digitalRead() â€” no cached update needed.
           break;
         }
 
-        /* ── MAX7219 — SPI bit-bang decoder ── */
+        /* â”€â”€ MAX7219 â€” SPI bit-bang decoder â”€â”€ */
         case 'max7219': {
           const sim = window.ArduinoSim;
           if (!sim || !sim.pinStates) break;
@@ -4496,7 +4499,7 @@ class CircuitCanvas {
         } else if (pinId === '3V3') {
           sources.push({ type: '3v3', voltage: 3.3, rawVal: 168, resistance: current.resistance });
         } else {
-          // Digital or Analog pin (D0–D13, A0–A5)
+          // Digital or Analog pin (D0â€“D13, A0â€“A5)
           const pinNum = this._pinToNumber(pinId);
           const pinKey = `pin_${pinNum}`;
           const sim = window.ArduinoSim;
@@ -4523,9 +4526,9 @@ class CircuitCanvas {
         } else if (pinId === '3V3') {
           sources.push({ type: '3v3', voltage: 3.3, rawVal: 168, resistance: current.resistance });
         } else if (pinId === 'EN') {
-          // Reset line — not a usable GPIO
+          // Reset line â€” not a usable GPIO
         } else {
-          // GPIO (D0–D35), analog ADC pins (VP/VN/D32–D35), UART (TX0/RX0)
+          // GPIO (D0â€“D35), analog ADC pins (VP/VN/D32â€“D35), UART (TX0/RX0)
           const pinNum = this._pinToNumber(pinId);
           const pinKey = `pin_${pinNum}`;
           const sim = window.ArduinoSim;
@@ -4597,13 +4600,13 @@ class CircuitCanvas {
         if (bsPowered && current.pinId === 'GND_5V') {
           grounds.push({ type: 'gnd', instId: inst.id, pinId: current.pinId, resistance: current.resistance });
         }
-        // Do NOT continue — let wire-following at bottom of loop execute
+        // Do NOT continue â€” let wire-following at bottom of loop execute
         // so the trace can leave the bench_supply through connected wires
       }
 
       // 3. Resistor internal pass-through (p1 <-> p2)
       if (inst.type === 'resistor') {
-        const rVal = (Number(inst.props.value) || 220) * (inst.props.unit === 'kΩ' ? 1e3 : inst.props.unit === 'MΩ' ? 1e6 : 1);
+        const rVal = (Number(inst.props.value) || 220) * (inst.props.unit === 'kÎ©' ? 1e3 : inst.props.unit === 'MÎ©' ? 1e6 : 1);
         const otherPin = current.pinId === 'p1' ? 'p2' : 'p1';
         queue.push({
           instId: inst.id,
@@ -4612,8 +4615,8 @@ class CircuitCanvas {
         });
       }
 
-      // 3b. 12V Bulb internal pass-through (anode -> cathode only, ~12Ω nominal)
-      // Directional: only allows trace in forward current direction (anode→cathode)
+      // 3b. 12V Bulb internal pass-through (anode -> cathode only, ~12Î© nominal)
+      // Directional: only allows trace in forward current direction (anodeâ†’cathode)
       // to prevent cross-circuit leakage through shared rails
       if (inst.type === 'bulb_12v' && !skipInternalTypes.includes('bulb_12v')) {
         if (current.pinId === 'anode') {
@@ -4644,7 +4647,7 @@ class CircuitCanvas {
         }
       }
 
-      // 4b. Relay internal pass-through (COM ↔ NO when active, COM ↔ NC when inactive)
+      // 4b. Relay internal pass-through (COM â†” NO when active, COM â†” NC when inactive)
       if (inst.type === 'relay') {
         const relayOn = !!(inst.runtimeState && inst.runtimeState.active);
         if (current.pinId === 'com') {
@@ -4656,7 +4659,7 @@ class CircuitCanvas {
         }
       }
 
-      // 4b0. Multimeter pass-through in current mode (probe_red ↔ probe_com, 0Ω)
+      // 4b0. Multimeter pass-through in current mode (probe_red â†” probe_com, 0Î©)
       if (inst.type === 'multimeter') {
         const mmMode = inst.runtimeState?.mode || inst.props?.mode || 'V_DC';
         if (mmMode === 'A_DC' || mmMode === 'A_AC') {
@@ -4809,14 +4812,14 @@ class CircuitCanvas {
     const getResistance = (inst) => {
       if (inst.type === 'resistor') {
         return (Number(inst.props && inst.props.value) || 220)
-          * (inst.props.unit === 'kΩ' ? 1e3 : inst.props.unit === 'MΩ' ? 1e6 : 1);
+          * (inst.props.unit === 'kÎ©' ? 1e3 : inst.props.unit === 'MÎ©' ? 1e6 : 1);
       }
       if (inst.type === 'diode_1n4007') return 0.7;
       if (inst.type === 'bulb_12v') return 12;
       return 0;
     };
 
-    // Build adjacency list: pinKey → [{ pinKey, resistance }]
+    // Build adjacency list: pinKey â†’ [{ pinKey, resistance }]
     const adj = new Map();
     const addEdge = (a, b, r) => {
       if (!adj.has(a)) adj.set(a, []);
@@ -4946,7 +4949,7 @@ class CircuitCanvas {
 
       const otherInst = this.components.find(c => c.id === otherInstId);
       if (!otherInst) continue;
-      if (otherInst.type === 'arduino_uno' || otherInst.type === 'arduino_nano' || otherInst.type === 'esp32_devkit_v1') {
+      if (otherInst.type === 'arduino_uno' || otherInst.type === 'arduino_nano' || otherInst.type === 'esp32_devkit_v1' || otherInst.type === 'lpc2148') {
         return this._pinToNumber(otherPinId);
       }
     }
@@ -5109,7 +5112,7 @@ class CircuitCanvas {
       return (sim && sim.pinStates) ? (sim.pinStates[`pin_${pn}`] || 0) : 0;
     }
     // If the source is a board but the wire target is a sensor (not a board),
-    // read from pinStates directly — sensors like LM35 write ADC values there.
+    // read from pinStates directly â€” sensors like LM35 write ADC values there.
     const fromInst = this.components.find(c => c.id === fromInstId);
     if (fromInst && (fromInst.type === 'arduino_uno' || fromInst.type === 'arduino_nano' || fromInst.type === 'esp32_devkit_v1')) {
       const boardPn = this._pinToNumber(pinId);

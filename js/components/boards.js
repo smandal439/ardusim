@@ -1717,3 +1717,308 @@ defComp({
     ctx.restore();
   }
 });
+/* ──────────────────── LPC2148 SMARTX BOARD ──────────────────── */
+defComp({
+  id: 'lpc2148',
+  name: 'LPC2148 SmartX Board',
+  category: 'Boards',
+  icon: '🔌',
+  desc: 'NXP LPC2148 ARM7TDMI-S 60MHz MCU — 512KB Flash, 40KB SRAM, 10-bit ADC, USB 2.0, 3.3V logic',
+  width: 380,
+  height: 320,
+  defaultProps: { label: 'LPC2148' },
+  pins: [
+    // ── Left Header: P0.0 – P0.13 ──
+    { id: 'P0_0',  label: 'P0.0',            type: PIN_TYPE.DIGITAL, x: 18, y: 30,  side: 'left', gpio: 0 },
+    { id: 'P0_1',  label: 'P0.1',            type: PIN_TYPE.DIGITAL, x: 18, y: 49,  side: 'left', gpio: 1 },
+    { id: 'P0_2',  label: 'P0.2 (TXD0)',    type: PIN_TYPE.SIGNAL,  x: 18, y: 68,  side: 'left', gpio: 2 },
+    { id: 'P0_3',  label: 'P0.3 (RXD0)',    type: PIN_TYPE.SIGNAL,  x: 18, y: 87,  side: 'left', gpio: 3 },
+    { id: 'P0_4',  label: 'P0.4 (TXD1)',    type: PIN_TYPE.SIGNAL,  x: 18, y: 106, side: 'left', gpio: 4 },
+    { id: 'P0_5',  label: 'P0.5 (RXD1)',    type: PIN_TYPE.SIGNAL,  x: 18, y: 125, side: 'left', gpio: 5 },
+    { id: 'P0_6',  label: 'P0.6',            type: PIN_TYPE.DIGITAL, x: 18, y: 144, side: 'left', gpio: 6 },
+    { id: 'P0_7',  label: 'P0.7 (SCK0)',    type: PIN_TYPE.SIGNAL,  x: 18, y: 163, side: 'left', gpio: 7 },
+    { id: 'P0_8',  label: 'P0.8 (MISO0)',   type: PIN_TYPE.SIGNAL,  x: 18, y: 182, side: 'left', gpio: 8 },
+    { id: 'P0_9',  label: 'P0.9 (MOSI0)',   type: PIN_TYPE.SIGNAL,  x: 18, y: 201, side: 'left', gpio: 9 },
+    { id: 'P0_10', label: 'P0.10 (SSEL0)',  type: PIN_TYPE.SIGNAL,  x: 18, y: 220, side: 'left', gpio: 10 },
+    { id: 'P0_11', label: 'P0.11',           type: PIN_TYPE.DIGITAL, x: 18, y: 239, side: 'left', gpio: 11 },
+    { id: 'P0_12', label: 'P0.12 (LED1)',   type: PIN_TYPE.PWM,     x: 18, y: 258, side: 'left', gpio: 12 },
+    { id: 'P0_13', label: 'P0.13 (LED2)',   type: PIN_TYPE.PWM,     x: 18, y: 277, side: 'left', gpio: 13 },
+    // ── Right Header: P0.14 – P0.28 + Power ──
+    { id: 'P0_14', label: 'P0.14 (LED3)',   type: PIN_TYPE.PWM,     x: 362, y: 30,  side: 'right', gpio: 14 },
+    { id: 'P0_15', label: 'P0.15 (LED4)',   type: PIN_TYPE.PWM,     x: 362, y: 49,  side: 'right', gpio: 15 },
+    { id: 'P0_16', label: 'P0.16',           type: PIN_TYPE.DIGITAL, x: 362, y: 68,  side: 'right', gpio: 16 },
+    { id: 'P0_17', label: 'P0.17',           type: PIN_TYPE.DIGITAL, x: 362, y: 87,  side: 'right', gpio: 17 },
+    { id: 'P0_18', label: 'P0.18',           type: PIN_TYPE.DIGITAL, x: 362, y: 106, side: 'right', gpio: 18 },
+    { id: 'P0_19', label: 'P0.19',           type: PIN_TYPE.DIGITAL, x: 362, y: 125, side: 'right', gpio: 19 },
+    { id: 'P0_20', label: 'P0.20',           type: PIN_TYPE.DIGITAL, x: 362, y: 144, side: 'right', gpio: 20 },
+    { id: 'P0_21', label: 'P0.21',           type: PIN_TYPE.DIGITAL, x: 362, y: 163, side: 'right', gpio: 21 },
+    { id: 'P0_22', label: 'P0.22',           type: PIN_TYPE.DIGITAL, x: 362, y: 182, side: 'right', gpio: 22 },
+    { id: 'P0_23', label: 'P0.23',           type: PIN_TYPE.DIGITAL, x: 362, y: 201, side: 'right', gpio: 23 },
+    { id: 'P0_25', label: 'P0.25 (AOUT)',   type: PIN_TYPE.ANALOG,  x: 362, y: 220, side: 'right', gpio: 25 },
+    { id: 'P0_26', label: 'P0.26 (AIN0)',   type: PIN_TYPE.ANALOG,  x: 362, y: 239, side: 'right', gpio: 26 },
+    { id: 'P0_27', label: 'P0.27 (AIN1)',   type: PIN_TYPE.ANALOG,  x: 362, y: 258, side: 'right', gpio: 27 },
+    { id: 'P0_28', label: 'P0.28 (AIN2)',   type: PIN_TYPE.ANALOG,  x: 362, y: 277, side: 'right', gpio: 28 },
+    // ── Bottom Edge: Power + Reset ──
+    { id: 'VCC',   label: 'VCC (3.3V)',      type: PIN_TYPE.POWER,  x: 80,  y: 310, side: 'bottom' },
+    { id: 'GND1',  label: 'GND',             type: PIN_TYPE.GND,    x: 150, y: 310, side: 'bottom' },
+    { id: 'VBUS',  label: 'VBUS (5V)',       type: PIN_TYPE.POWER,  x: 220, y: 310, side: 'bottom' },
+    { id: 'GND2',  label: 'GND',             type: PIN_TYPE.GND,    x: 290, y: 310, side: 'bottom' },
+    { id: 'RST',   label: 'RST',             type: PIN_TYPE.SIGNAL, x: 350, y: 310, side: 'bottom' },
+  ],
+
+  draw(ctx, inst, sim) {
+    var W = inst.width, H = inst.height;
+    ctx.save();
+    ctx.translate(inst.x, inst.y);
+
+    // ── PCB Body ──
+    var grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, '#0a2e1a');
+    grad.addColorStop(0.3, '#0d3822');
+    grad.addColorStop(0.7, '#0a2e1a');
+    grad.addColorStop(1, '#071f12');
+    ctx.fillStyle = grad;
+    roundRect(ctx, 0, 0, W, H, 10);
+    ctx.fill();
+    ctx.strokeStyle = '#051509';
+    ctx.lineWidth = 2;
+    roundRect(ctx, 0, 0, W, H, 10);
+    ctx.stroke();
+
+    // Corner Mounting Holes
+    var holes = [[12, 12], [W - 12, 12], [12, H - 12], [W - 12, H - 12]];
+    for (var hi = 0; hi < holes.length; hi++) {
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.arc(holes[hi][0], holes[hi][1], 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#d0b060';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // Silkscreen border
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
+    roundRect(ctx, 5, 5, W - 10, H - 10, 7);
+    ctx.stroke();
+
+    // ── LPC2148 QFP64 Chip ──
+    var chipW = 80, chipH = 80;
+    var chipX = (W - chipW) / 2;
+    var chipY = 55;
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(ctx, chipX, chipY, chipW, chipH, 3);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Chip pin-1 dot
+    ctx.fillStyle = '#888';
+    ctx.beginPath();
+    ctx.arc(chipX + 10, chipY + 10, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Chip text
+    ctx.fillStyle = '#666';
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('NXP', chipX + chipW / 2, chipY + 28);
+    ctx.fillStyle = '#555';
+    ctx.font = '7px monospace';
+    ctx.fillText('LPC2148', chipX + chipW / 2, chipY + 40);
+    ctx.fillText('FBD64', chipX + chipW / 2, chipY + 50);
+    ctx.fillStyle = '#444';
+    ctx.font = '5px monospace';
+    ctx.fillText('ARM7TDMI-S', chipX + chipW / 2, chipY + 62);
+
+    // Chip pins
+    ctx.fillStyle = '#d0b060';
+    for (var ci = 0; ci < 16; ci++) {
+      ctx.fillRect(chipX + 8 + ci * 4.5, chipY - 4, 2, 4);
+      ctx.fillRect(chipX + 8 + ci * 4.5, chipY + chipH, 2, 4);
+      ctx.fillRect(chipX - 4, chipY + 8 + ci * 4.5, 4, 2);
+      ctx.fillRect(chipX + chipW, chipY + 8 + ci * 4.5, 4, 2);
+    }
+
+    // ── Crystal (12 MHz) ──
+    ctx.fillStyle = '#333';
+    roundRect(ctx, chipX + chipW + 12, chipY + 10, 18, 8, 2);
+    ctx.fill();
+    ctx.fillStyle = '#aaa';
+    ctx.font = '4px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('12M', chipX + chipW + 21, chipY + 16);
+
+    // ── 3.3V Regulator ──
+    ctx.fillStyle = '#222';
+    roundRect(ctx, chipX + chipW + 12, chipY + 30, 14, 10, 2);
+    ctx.fill();
+    ctx.fillStyle = '#888';
+    ctx.font = '4px monospace';
+    ctx.fillText('3.3V', chipX + chipW + 19, chipY + 37);
+
+    // ── USB Mini-B ──
+    ctx.fillStyle = '#8a8a8a';
+    roundRect(ctx, 28, H - 22, 42, 14, 3);
+    ctx.fill();
+    ctx.fillStyle = '#2c3e50';
+    roundRect(ctx, 33, H - 19, 32, 8, 2);
+    ctx.fill();
+    ctx.fillStyle = '#aaa';
+    ctx.font = 'bold 5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('USB', 49, H - 27);
+
+    // ── ISP Header ──
+    var ispX = 80, ispY2 = H - 36;
+    ctx.fillStyle = '#111';
+    roundRect(ctx, ispX, ispY2, 22, 16, 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = 'bold 5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('ISP', ispX + 11, ispY2 - 3);
+    for (var ir = 0; ir < 2; ir++) {
+      for (var ic = 0; ic < 3; ic++) {
+        ctx.fillStyle = '#d0b060';
+        ctx.beginPath();
+        ctx.arc(ispX + 5 + ic * 6, ispY2 + 5 + ir * 6, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // ── Reset Button ──
+    var rstX = 115, rstY = H - 36;
+    ctx.fillStyle = '#1b1e24';
+    roundRect(ctx, rstX, rstY, 22, 15, 3);
+    ctx.fill();
+    ctx.fillStyle = '#cc2222';
+    roundRect(ctx, rstX + 3, rstY + 3, 16, 9, 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = 'bold 5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('RST', rstX + 11, rstY - 2);
+
+    // ── ISP Button ──
+    var ispBtnX = 145, ispBtnY = H - 36;
+    ctx.fillStyle = '#1b1e24';
+    roundRect(ctx, ispBtnX, ispBtnY, 28, 15, 3);
+    ctx.fill();
+    ctx.fillStyle = '#2266cc';
+    roundRect(ctx, ispBtnX + 3, ispBtnY + 3, 22, 9, 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = 'bold 5px monospace';
+    ctx.fillText('ISP', ispBtnX + 14, ispBtnY - 2);
+
+    // ── Power LED ──
+    var pwrLedX = W - 50, pwrLedY = 20;
+    drawLED_on_board(ctx, pwrLedX, pwrLedY, '#ff3333', 4);
+    ctx.fillStyle = '#888';
+    ctx.font = '5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('PWR', pwrLedX, pwrLedY + 9);
+
+    // ── Onboard User LEDs (P0.12–P0.15) ──
+    var ledColors = ['#ff4444', '#44ff44', '#ffaa00', '#4488ff'];
+    var ledLabels = ['LED1', 'LED2', 'LED3', 'LED4'];
+    var ledGpios = [12, 13, 14, 15];
+    for (var li = 0; li < 4; li++) {
+      var lx = W - 50 + (li % 2) * 28;
+      var ly = 50 + Math.floor(li / 2) * 28;
+      var lkey = 'pin_P0_' + ledGpios[li];
+      var lit = sim && sim.pinStates && sim.pinStates[lkey] > 0;
+      drawLED_on_board(ctx, lx, ly, lit ? ledColors[li] : '#333', 5);
+      ctx.fillStyle = '#888';
+      ctx.font = '5px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(ledLabels[li], lx, ly + 11);
+    }
+
+    // ── Pin Header Strips ──
+    var pinsList = inst.pins || this.pins || [];
+    var leftYs = [], rightYs = [];
+    for (var pi = 0; pi < pinsList.length; pi++) {
+      if (pinsList[pi].side === 'left') leftYs.push(pinsList[pi].y);
+      if (pinsList[pi].side === 'right') rightYs.push(pinsList[pi].y);
+    }
+
+    function drawVertHeader(hx, holeYs, holeX) {
+      ctx.shadowColor = 'rgba(0,0,0,0.4)';
+      ctx.shadowBlur = 6;
+      ctx.fillStyle = '#0f1115';
+      var topY = Math.min.apply(null, holeYs) - 10;
+      var botY = Math.max.apply(null, holeYs) + 10;
+      roundRect(ctx, hx, topY, 16, botY - topY, 3);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      for (var hi2 = 0; hi2 < holeYs.length; hi2++) {
+        ctx.fillStyle = '#d0b060';
+        ctx.shadowColor = 'rgba(208,176,96,0.3)';
+        ctx.shadowBlur = 3;
+        ctx.beginPath();
+        ctx.arc(holeX, holeYs[hi2], 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#050608';
+        ctx.beginPath();
+        ctx.arc(holeX, holeYs[hi2], 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    drawVertHeader(6, leftYs, 14);
+    drawVertHeader(W - 22, rightYs, W - 14);
+
+    // ── Pin Labels ──
+    ctx.font = 'bold 6px monospace';
+    for (var pli = 0; pli < pinsList.length; pli++) {
+      var pin = pinsList[pli];
+      if (pin.side !== 'left' && pin.side !== 'right') continue;
+      var pw = ctx.measureText(pin.label).width + 6;
+      var bx = pin.side === 'left' ? pin.x - 2 - pw : pin.x + 2;
+      var bgColor = 'rgba(10,46,26,0.9)';
+      if (pin.type === PIN_TYPE.POWER) bgColor = 'rgba(160,30,30,0.9)';
+      else if (pin.type === PIN_TYPE.GND) bgColor = 'rgba(35,35,40,0.9)';
+      else if (pin.type === PIN_TYPE.ANALOG) bgColor = 'rgba(20,70,110,0.9)';
+      else if (pin.type === PIN_TYPE.PWM) bgColor = 'rgba(110,70,20,0.9)';
+      else if (pin.type === PIN_TYPE.SIGNAL) bgColor = 'rgba(50,50,80,0.9)';
+      ctx.fillStyle = bgColor;
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 3;
+      roundRect(ctx, bx, pin.y - 4.5, pw, 9, 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#e6edf3';
+      ctx.textAlign = pin.side === 'left' ? 'right' : 'left';
+      ctx.fillText(pin.label, bx + (pin.side === 'left' ? pw - 3 : 3), pin.y + 2);
+    }
+
+    // ── Board Branding ──
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('LPC2148 SmartX Board', W / 2, 20);
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.font = '6px monospace';
+    ctx.fillText('ARM7TDMI-S  60MHz  512KB Flash  40KB SRAM', W / 2, H - 4);
+
+    // ── Selection Outline ──
+    if (inst && inst._selected) {
+      ctx.setLineDash([5, 4]);
+      ctx.strokeStyle = '#00d4ff';
+      ctx.lineWidth = 2;
+      roundRect(ctx, -2, -2, W + 4, H + 4, 12);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    ctx.restore();
+  }
+});
