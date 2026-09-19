@@ -191,7 +191,7 @@ window.ArduinoLibs['LPC2148'] = {
           var pinKey = 'pin_P0_' + bit;
           var pinState = self.pinStates[pinKey];
           if ((!pinState || pinState <= 0) && _sim && _sim.pinStates) {
-            var gPin = _sim.pinStates[pinKey];
+            var gPin = _sim.pinStates[pinKey] || _sim.pinStates['pin_' + bit];
             if (gPin && gPin > 0) pinState = gPin;
           }
           if (pinState && pinState > 0) val |= (1 << bit);
@@ -206,7 +206,7 @@ window.ArduinoLibs['LPC2148'] = {
           var pk = 'pin_P1_' + bit2;
           var ps = self.pinStates[pk];
           if ((!ps || ps <= 0) && _sim2 && _sim2.pinStates) {
-            var gp = _sim2.pinStates[pk];
+            var gp = _sim2.pinStates[pk] || _sim2.pinStates['pin_' + bit2];
             if (gp && gp > 0) ps = gp;
           }
           if (ps && ps > 0) val2 |= (1 << bit2);
