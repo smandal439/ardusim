@@ -1,0 +1,14 @@
+{
+  "id": "lpc2148_serial_echo",
+  "name": "LPC2148 Serial Echo",
+  "icon": "🔌",
+  "desc": "LPC2148 SmartX Board - UART0 serial echo. Type in the Serial Monitor to send characters; the board echoes them back.",
+  "tags": ["arm", "lpc2148", "uart", "serial", "beginner"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "lpc2148", "x": 200, "y": 100 }
+    ],
+    "wires": []
+  },
+  "code": "/*\n * LPC2148 SmartX Board - UART0 Serial Echo\n * Configures UART0 at 9600 baud using register-level access.\n * Opens Serial Monitor and types characters; the board echoes them.\n *\n * UART0 pins: P0.2 = TXD0, P0.3 = RXD0\n */\n\n#include <LPC214x.h>\n\nunsigned char msg[] = {'L','P','C','2','1','4','8',' ','U','A','R','T','0',' ','E','c','h','o','\\r','\\n',0};\n\nvoid uart0_init(unsigned int baud) {\n    unsigned int divisor = 15000000 / (16 * baud);\n    PINSEL0 |= (1 << 1);\n    PINSEL0 &= ~(1 << 2);\n    PINSEL0 |= (1 << 7);\n    PINSEL0 &= ~(1 << 6);\n    U0LCR = 0x83;\n    U0DLL = divisor & 0xFF;\n    U0DLM = (divisor >> 8) & 0xFF;\n    U0LCR = 0x03;\n    U0FCR = 0x07;\n}\n\nvoid uart0_tx(unsigned char ch) {\n    while (!(U0LSR & 0x20));\n    U0THR = ch;\n}\n\nint main() {\n    unsigned int i;\n    uart0_init(9600);\n    i = 0;\n    while (msg[i] != 0) {\n        uart0_tx(msg[i]);\n        i++;\n    }\n    while (1) {\n        if (U0LSR & 0x01) {\n            unsigned char ch = U0RBR;\n            uart0_tx(ch);\n        }\n        delay_ms(10);\n    }\n}"
+}

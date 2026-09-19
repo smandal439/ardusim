@@ -177,6 +177,8 @@ window.ArduinoLibs['LPC2148'] = {
     regs[0xE0010000] = 0;
     regs[0xE0010008] = 0x01;
     regs[0xE002C000] = 0;
+    var u0dlab = 0;
+    var u1dlab = 0;
 
     function _uartHandler(ch) {
       if (self._serialLog) self._serialLog(String.fromCharCode(ch));
@@ -218,15 +220,20 @@ window.ArduinoLibs['LPC2148'] = {
       if (addr === 0xE000C014) return regs[addr] | 0x60;
       // UART1 LSR
       if (addr === 0xE0010014) return regs[addr] | 0x60;
+      // UART0 RBR
       if (addr === 0xE000C000) {
         if (self._lpc2148_uart0_rx && self._lpc2148_uart0_rx.length > 0)
           return self._lpc2148_uart0_rx.shift();
+        if (self.serialInputBuffer && self.serialInputBuffer.length > 0)
+          return self.serialInputBuffer.shift().charCodeAt(0);
         return 0;
       }
       // UART1 RBR
       if (addr === 0xE0010000) {
         if (self._lpc2148_uart1_rx && self._lpc2148_uart1_rx.length > 0)
           return self._lpc2148_uart1_rx.shift();
+        if (self.serialInputBuffer && self.serialInputBuffer.length > 0)
+          return self.serialInputBuffer.shift().charCodeAt(0);
         return 0;
       }
       // Timer0 TC: increment if enabled
@@ -330,12 +337,21 @@ window.ArduinoLibs['LPC2148'] = {
           self.pinModes['pin_' + b7] = mode7;
         }
       }
-      if (addr === 0xE000C000) {
-        _uartHandler(val & 0xFF);
+      // UART0 LCR: track DLAB bit
+      if (addr === 0xE000C00C) {
+        u0dlab = (val >> 7) & 1;
       }
-      // UART1 TX (U1THR)
+      // UART0 TX (U0THR) — only when DLAB=0
+      if (addr === 0xE000C000) {
+        if (!u0dlab) _uartHandler(val & 0xFF);
+      }
+      // UART1 LCR: track DLAB bit
+      if (addr === 0xE001000C) {
+        u1dlab = (val >> 7) & 1;
+      }
+      // UART1 TX (U1THR) — only when DLAB=0
       if (addr === 0xE0010000) {
-        _uartHandler(val & 0xFF);
+        if (!u1dlab) _uartHandler(val & 0xFF);
       }
       // Timer0 TC: increment counter on write
       if (addr === 0xE0004008) {
