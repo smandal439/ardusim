@@ -2004,10 +2004,10 @@ defComp({
     ctx.fillStyle = 'rgba(255,255,255,0.2)';
     ctx.font = 'bold 8px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('LPC2148 SmartX Board', W / 2, 20);
+    ctx.fillText('LPC2148 SmartX Board', W / 2, 12);
     ctx.fillStyle = 'rgb(255, 255, 255)';
     ctx.font = '8px monospace';
-    ctx.fillText('ARM7TDMI-S  60MHz  512KB Flash  40KB SRAM', W / 2, H - 4);
+    ctx.fillText('ARM7TDMI-S  60MHz  512KB Flash  40KB SRAM', W / 2, H - 14);
 
     // ── Selection Outline ──
     if (inst && inst.selected) {
