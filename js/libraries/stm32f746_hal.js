@@ -594,17 +594,18 @@ window.ArduinoLibs['STM32F746'] = {
     var GPIO_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
 
     var PORT_PIN_MAP = {
-      'I_1': 'pin_13', 'I_0': 'pin_5',
-      'B_4': 'pin_3', 'B_5': 'pin_4',
-      'B_6': 'pin_14', 'B_8': 'pin_15', 'B_9': 'pin_16',
+      'I_1': 'pin_13',
+      'D_12': 'pin_3', 'D_13': 'pin_4',
+      'D_14': 'pin_5', 'D_15': 'pin_6',
       'C_6': 'pin_1', 'C_7': 'pin_0',
       'G_6': 'pin_2',
-      'A_8': 'pin_10', 'B_3': 'pin_6',
-      'A_15': 'pin_9', 'B_10': 'pin_8',
-      'B_14': 'pin_12', 'B_15': 'pin_11',
-      'A_0': 'pin_14',
-      'F_6': 'pin_19', 'F_7': 'pin_18',
-      'F_8': 'pin_17', 'F_9': 'pin_16', 'F_10': 'pin_15',
+      'G_11': 'pin_7', 'G_12': 'pin_8',
+      'B_8': 'pin_9', 'B_10': 'pin_10',
+      'E_5': 'pin_11', 'E_6': 'pin_12',
+      'B_9': 'pin_14', 'B_7': 'pin_15',
+      'A_4': 'pin_15', 'A_5': 'pin_16',
+      'A_6': 'pin_17', 'A_7': 'pin_18',
+      'C_4': 'pin_19',
     };
 
     var ADC_PIN_MAP = {
