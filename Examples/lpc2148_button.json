@@ -9,15 +9,18 @@
       { "id": "b1", "type": "lpc2148", "x": 250, "y": 100 },
       { "id": "btn1", "type": "push_button", "x": 500, "y": 180 },
       { "id": "led1", "type": "led", "x": 500, "y": 300 },
-      { "id": "r1", "type": "resistor", "x": 500, "y": 380 }
+      { "id": "r1", "type": "resistor", "x": 500, "y": 380 },
+      { "id": "r2", "type": "resistor", "x": 620, "y": 180 }
     ],
     "wires": [
       { "from": { "instId": "b1", "pinId": "P0_16" }, "to": { "instId": "btn1", "pinId": "p1" } },
-      { "from": { "instId": "btn1", "pinId": "p2" }, "to": { "instId": "b1", "pinId": "GND1" } },
+      { "from": { "instId": "btn1", "pinId": "p3" }, "to": { "instId": "b1", "pinId": "GND1" } },
+      { "from": { "instId": "b1", "pinId": "P0_16" }, "to": { "instId": "r2", "pinId": "p1" } },
+      { "from": { "instId": "r2", "pinId": "p2" }, "to": { "instId": "b1", "pinId": "VCC" } },
       { "from": { "instId": "b1", "pinId": "P0_12" }, "to": { "instId": "led1", "pinId": "anode" } },
       { "from": { "instId": "led1", "pinId": "cathode" }, "to": { "instId": "r1", "pinId": "p1" } },
       { "from": { "instId": "r1", "pinId": "p2" }, "to": { "instId": "b1", "pinId": "GND1" } }
     ]
   },
-  "code": "/*\n * LPC2148 SmartX Board - Button + LED\n * Read button on P0.16 (active low with internal pull-up)\n * Control onboard LED1 on P0.12\n */\n\n#include <LPC214x.h>\n\nint main() {\n    IO0DIR |= (1 << 12);       // P0.12 = output (LED1)\n    IO0DIR &= ~(1 << 16);      // P0.16 = input (button)\n    while (1) {\n        if (!(IO0PIN & (1 << 16))) {   // Button pressed (active low)\n            IO0SET = (1 << 12);         // LED1 ON\n        } else {\n            IO0CLR = (1 << 12);         // LED1 OFF\n        }\n        delay_ms(50);\n    }\n}"
+  "code": "/*\n * LPC2148 SmartX Board - Button + LED\n * Read button on P0.16 (active low with pull-up resistor)\n * Control onboard LED1 on P0.12\n */\n\n#include <LPC214x.h>\n\nint main() {\n    IO0DIR |= (1 << 12);       // P0.12 = output (LED1)\n    IO0DIR &= ~(1 << 16);      // P0.16 = input (button)\n    while (1) {\n        if (!(IO0PIN & (1 << 16))) {   // Button pressed (active low)\n            IO0SET = (1 << 12);         // LED1 ON\n        } else {\n            IO0CLR = (1 << 12);         // LED1 OFF\n        }\n        delay_ms(50);\n    }\n}"
 }
