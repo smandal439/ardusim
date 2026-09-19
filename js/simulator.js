@@ -205,8 +205,48 @@ class ArduinoSimulator {
       }
     }
 
+    // 4c. Auto-convert ARM7-style int main() { ... while(1) { ... } } into
+    //     Arduino-style setup() + loop() so boards like LPC2148 work.
+    if (/\basync\s+function\s+main\s*\(/.test(js) && !/\basync\s+function\s+setup\s*\(/.test(js)) {
+      const _mainMatch = js.match(/\basync\s+function\s+main\s*\([^)]*\)\s*\{/);
+      if (_mainMatch) {
+        const _mStart = _mainMatch.index + _mainMatch[0].length;
+        let _depth = 1, _mEnd = _mStart;
+        while (_mEnd < js.length && _depth > 0) {
+          if (js[_mEnd] === '{') _depth++;
+          else if (js[_mEnd] === '}') _depth--;
+          _mEnd++;
+        }
+        const _mainBody = js.substring(_mStart, _mEnd - 1);
+        const _whileMatch = _mainBody.match(/\bwhile\s*\(\s*(?:1|true|TRUE)\s*\)\s*\{/);
+        if (_whileMatch) {
+          const _wStart = _whileMatch.index + _whileMatch[0].length;
+          let _wd = 1, _wEnd = _wStart;
+          while (_wEnd < _mainBody.length && _wd > 0) {
+            if (_mainBody[_wEnd] === '{') _wd++;
+            else if (_mainBody[_wEnd] === '}') _wd--;
+            _wEnd++;
+          }
+          const _preLoop = _mainBody.substring(0, _whileMatch.index).trim();
+          const _loopBody = _mainBody.substring(_wStart, _wEnd - 1).trim();
+          // Promote let declarations from pre-loop to outer scope
+          const _letDecls = [];
+          const _initCode = _preLoop.replace(/\blet\s+(\w+)\s*=\s*([^;]+);/g, (_, n, v) => {
+            _letDecls.push({ n, v });
+            return '';
+          }).trim();
+          let _replacement = '';
+          if (_letDecls.length > 0) {
+            _replacement += 'let ' + _letDecls.map(d => d.n).join(', ') + ';\n';
+          }
+          _replacement += `async function setup() {\n${_initCode}\n${_letDecls.map(d => `${d.n} = ${d.v};`).join('\n')}\n}\n\nasync function loop() {\n${_loopBody}\n}`;
+          js = js.substring(0, _mainMatch.index) + _replacement + js.substring(_mEnd);
+        }
+      }
+    }
+
     // 5. Handle variable declarations (not already transformed)
-    // Strip C-style casts: (unsigned char)1 �r~ 1, (long)expr �r~ expr
+    // Strip C-style casts: (unsigned char)1 → 1, (long)expr → expr
     js = js.replace(new RegExp(`\\((?:unsigned\\s+char|unsigned\\s+long|unsigned\\s+int|unsigned\\s+short|unsigned|long\\s+long|long|int|short|byte|float|double)\\)\\s*(?=[a-zA-Z0-9_\\(])`, 'g'), '');
     // unsigned char x; �r~ let x;  (MUST be before plain char rule)
     js = js.replace(/\bunsigned\s+char\s+(\w+)(?=\s*[=;,\[\)])/g, 'let $1');
@@ -2292,38 +2332,31 @@ window.loadExamplesFromFiles = async function () {
   } catch (e) { /* static hosting uses the bundled fallback list */ }
 
   const files = [
-    '7408_test_with_logic_analyzer', 'add_2_number', 'and_gate', 'astable_555', 'blink', 'bluetooth_serial_bridge',
-    'bme280_weather', 'bmp280_altitude', 'bssid', 'button', 'buzzer_melody', 'coap_client',
-    'coap_dip_switch_to_8_led', 'coap_simple_server', 'continuous_rotation_servo_control_by_pot',
-     'counter', 'current_divider',    'dc_motor_speed',    'dip_switch_and_led_array', 'dip_switch_binary', 
-     'dmm_current', 'dmm_resistance', 'dmm_voltage', 'ds3231_rtc_clock', 'ds3231_rtc_clock_sync_with_ntp',
-      'dso_oscilloscope', 'dual_core_mqtt', 'esp32_blink', 'esp32_dual_core_blink', 'esp32_fade',
-    'esp32_freertos_queue', 'esp32_gpio_control', 'esp32_hub75_matrixpaneli2s_dma', 'esp32_i2s_local_radio_player',
-    'esp32_i2s_local_radio_player_2', 'esp32_i2s_local_test', 'esp32_i2s_music_player', 
-    'esp32_i2s_online_radio_player', 'esp32_mqtt_pub_sub', 'esp32_ntp_clock_lcd', 'esp32_server',
-    'esp_now_dip_switch_to_8_led', 'esp_now_sender_with_receiver', 'espnow_led_control', 'espnow_receiver', 
-    'espnow_sender', 'fade', 'flex_sensor_bending_measurement', 'func_gen_dual', 'func_gen_led', 
-    'gps_neo_6m_8m_tracker', 'hc05_bluetooth_led', 'hx711_load_cell', 'hx711_load_cell_lcd',
-    'ic_nand_test', 'ili9341', 'ina219_solar_tracker', 'interrupts_test', 'inverting_amplifier', 
-    'ir_obstacle_sensor_led_alert', 'ir_dfplayer_remote', 'ir_remote_decode', 'joystick_led',
+    '7408_test_with_logic_analyzer', 'add_2_number', 'and_gate', 'astable_555', 'bh1750_light_sensor', 'blink',
+    'bluetooth_serial_bridge', 'bme280_weather', 'bmp280_altitude', 'button', 'buzzer_melody', 'coap_client',
+    'coap_dip_switch_to_8_led', 'coap_simple_server', 'continuous_rotation_servo_control_by_pot', 'counter', 'current_divider', 'dc_motor_speed',
+    'dip_switch_and_led_array', 'dip_switch_binary', 'dmm_current', 'dmm_resistance', 'dmm_voltage', 'ds3231_rtc_clock',
+    'ds3231_rtc_clock_sync_with_ntp', 'dso_oscilloscope', 'dual_core_mqtt', 'esp32_blink', 'esp32_dual_core_blink', 'esp32_fade',
+    'esp32_freertos_queue', 'esp32_gpio_control', 'esp32_gpio_control_dashboard', 'esp32_hub75_matrixpaneli2s_dma', 'esp32_i2s_local_radio_player', 'esp32_i2s_music_player',
+    'esp32_i2s_online_radio_player', 'esp32_mqtt_pub_sub', 'esp32_ntp_clock_lcd', 'esp32_sd_songs_player', 'esp32_server', 'esp_now_dip_switch_to_8_led',
+    'esp_now_sender_with_receiver', 'espnow_led_control', 'espnow_receiver', 'espnow_sender', 'fade', 'flex_sensor_bending_measurement',
+    'func_gen_dual', 'func_gen_led', 'gps_neo_6m_8m_tracker', 'hc05_bluetooth_led', 'http_slider_pwm', 'hx711_load_cell_with_lcd_display',
+    'ic_nand_test', 'ili9341', 'ina219_solar_tracker', 'interrupts_test', 'interrupts_test copy', 'inverting_amplifier',
+    'ir_dfplayer_remote', 'ir_obstacle_sensor_led_alert', 'ir_remote_decode', 'ir_remote_decoder', 'ir_remote_lcd', 'joystick_led',
     'keypad_interfacing', 'l298n_dc_motor', 'lcd', 'lcd_hello_world', 'lcd_i2c', 'lcd_i2c_display_20x4',
-    'lcd_print_remotely', 'ldr_lamp', 'led_array_blink_pattern', 'lm35_temperature', 'lm35_temperature_sensor', 
-    'load_cell_scale', 'logic_analyzer_test', 'lora_sender_receiver', 'math_operations', 'max7219', 'morse', 
-    'morse_code_using_serial_data', 'mpu6050_accel', 'mpu6050_accelerometer_2', 'multi_colour_led_blink', 
-    'nano_blink', 'neopixel_8x8_matrix_rainbow_2', 'neopixel_8x8_matrix_rainbow_3',
-    'neopixel_8x8_matrix_rainbow_4',    'neopixel_color_cycle', 'neopixel_strip_chase', 
-    'neopixel_strip_color_pattern', 'not_gate_test', 'ntc_thermistor_dc_motor',    'oled_ssd1306',
-    'opamp_741_non_inverting', 'or_gate', 'pir_alarm', 'plugin_tutorial', 'potentiometer', 'print_binary_data',
-    'rainbow_rgb', 'read_rfid_card_raw_data', 'relay_control', 'remote_control_leds', 'remote_servo_control', 
-    'rfid_inventory_tracker', 'rgb_matrix_demo', 'rotary_encoder_counter', 'rotary_encoder_servo',
-     'esp32_sd_songs_player', 'seg7_counter', 'serial_peek', 'serial_peek_2', 'serial_plotter', 
-     'serial_plotter_sine_and_triangle', 'servo_continuous_spin', 'servo_sweep', 'shift_resister_circuit',
-    'simplebme280_altimeter_on_lcd', 'simplebme280_altitude', 'simplebme280_basic', 'stepper_motor', 
-    'stm32f746_blink', 'stm32f746_button', 'stm32f746_lcd', 'stm32f746_pot_led',
-    'lpc2148_blink', 'lpc2148_button', 'lpc2148_pot_adc', 'lpc2148_all_leds', 'temperature', 'traffic_light',
-     'two_lcd', 'ultrasonic', 'ultrasonic_distance_pulsein', 'vl53l0x_proximity_sensor', 'voltage_divider', 
-     'water_flow', 'weather_station_multi', 'weather_station_simple', 'weather_station_tft', 'wifi_scan', 
-     'zigbee_8_led_control', 'zigbee_led_control', 'zigbee_sender_receiver', 'zigbee_sensor_network'
+    'lcd_print_remotely', 'ldr_lamp', 'led_array_blink_pattern', 'lm35_temperature', 'lm35_temperature_sensor', 'logic_analyzer_test',
+    'lora_sender_receiver', 'lpc2148_all_leds', 'lpc2148_blink', 'lpc2148_button', 'lpc2148_pot_adc', 'math_operations',
+    'max7219', 'morse', 'morse_code_using_serial_data', 'mpu6050_accel', 'mpu6050_accelerometer_2', 'multi_colour_led_blink',
+    'nano_blink', 'neopixel_8x8_matrix_rainbow_2', 'neopixel_8x8_matrix_rainbow_3', 'neopixel_8x8_matrix_rainbow_4', 'neopixel_color_cycle', 'neopixel_strip_chase',
+    'neopixel_strip_color_pattern', 'not_gate_test', 'ntc_thermistor_dc_motor', 'oled_ssd1306', 'opamp_741_non_inverting', 'or_gate',
+    'pir_alarm', 'plugin_tutorial', 'potentiometer', 'print_binary_data', 'rainbow_rgb', 'read_rfid_card_raw_data',
+    'relay_control', 'remote_control_leds', 'remote_servo_control', 'rfid_inventory_tracker', 'rgb_matrix_demo', 'rotary_encoder_counter',
+    'rotary_encoder_servo', 'seg7_counter', 'serial_peek', 'serial_peek_2', 'serial_plotter', 'serial_plotter_sine_and_triangle',
+    'servo_continuous_spin', 'servo_sweep', 'shift_resister_circuit', 'simplebme280_altimeter_on_lcd', 'simplebme280_altitude', 'simplebme280_basic',
+    'stepper_motor', 'stm32f746_blink', 'stm32f746_button', 'stm32f746_lcd', 'stm32f746_pot_led', 'tb6600_stepper',
+    'temperature', 'traffic_light', 'two_lcd', 'u8g2_oled_example', 'ultrasonic', 'ultrasonic_distance_pulsein',
+    'vl53l0x_proximity_sensor', 'voltage_divider', 'water_flow', 'weather_station_multi', 'weather_station_simple', 'weather_station_tft',
+    'wifi_bssid', 'wifi_scan', 'zigbee_8_led_control', 'zigbee_led_control', 'zigbee_sender_receiver', 'zigbee_sensor_network'
   ];
 
   const sketches = [];
