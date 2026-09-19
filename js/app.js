@@ -348,6 +348,10 @@ class App {
       });
     });
     document.addEventListener('click', () => this._closeHeaderDropdowns());
+    // Prevent clicks inside dropdown menus from closing them
+    document.querySelectorAll('.hdr-dropdown-menu').forEach(menu => {
+      menu.addEventListener('click', (e) => e.stopPropagation());
+    });
 
     // Bottom tabs
     bottomTabButtons.forEach(btn => btn.addEventListener('click', (e) => this._switchBottomTab(e.currentTarget)));
