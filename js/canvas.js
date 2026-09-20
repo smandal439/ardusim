@@ -2532,6 +2532,17 @@ class CircuitCanvas {
     if (pinId in esp32Map) return esp32Map[pinId];
     // STM32F746G-DISCO: use Arduino D-number directly (D0-D15 ← 0-15)
     if (/^D\d+$/.test(pinId)) return parseInt(pinId.slice(1));
+    // Intel 8085: PA.0-7 → 200-207, PB.0-7 → 210-217, PC.0-7 → 220-227
+    // Intel 8051: P0.0-7 → 200-207, P1.0-7 → 210-217, P2.0-7 → 220-227, P3.0-7 → 230-237
+    const i8085Match = /^P([ABC])\.(\d)$/.exec(pinId);
+    if (i8085Match) {
+      const portIdx = { A: 0, B: 1, C: 2 }[i8085Match[1]];
+      return 200 + portIdx * 10 + parseInt(i8085Match[2]);
+    }
+    const i8051Match = /^P(\d)\.(\d)$/.exec(pinId);
+    if (i8051Match) {
+      return 200 + parseInt(i8051Match[1]) * 10 + parseInt(i8051Match[2]);
+    }
     const n = parseInt(pinId.replace(/[^0-9]/g, ''));
     return isNaN(n) ? 0 : n;
   }
@@ -4937,6 +4948,11 @@ class CircuitCanvas {
   }
 
   _getConnectedPinNum(instId, pinId) {
+    const BOARD_TYPES = new Set(['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'lpc2148', 'stm32f746_disco', 'intel_8085', 'intel_8051']);
+    const inst = this.components.find(c => c.id === instId);
+    if (inst && BOARD_TYPES.has(inst.type)) {
+      return this._pinToNumber(pinId);
+    }
     for (const wire of this.wires) {
       let otherInstId, otherPinId;
       if (wire.from.instId === instId && wire.from.pinId === pinId) {
@@ -4949,7 +4965,7 @@ class CircuitCanvas {
 
       const otherInst = this.components.find(c => c.id === otherInstId);
       if (!otherInst) continue;
-      if (otherInst.type === 'arduino_uno' || otherInst.type === 'arduino_nano' || otherInst.type === 'esp32_devkit_v1' || otherInst.type === 'lpc2148') {
+      if (otherInst.type === 'arduino_uno' || otherInst.type === 'arduino_nano' || otherInst.type === 'esp32_devkit_v1' || otherInst.type === 'lpc2148' || otherInst.type === 'intel_8085' || otherInst.type === 'intel_8051') {
         return this._pinToNumber(otherPinId);
       }
     }
