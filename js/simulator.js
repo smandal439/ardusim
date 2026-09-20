@@ -2359,7 +2359,7 @@ window.loadExamplesFromFiles = async function () {
     'keypad_interfacing', 'l298n_dc_motor', 'lcd', 'lcd_hello_world', 'lcd_i2c', 'lcd_i2c_display_20x4',
     'lcd_print_remotely', 'ldr_lamp', 'led_array_blink_pattern', 'lm35_temperature', 'lm35_temperature_sensor', 'logic_analyzer_test',
     'lora_sender_receiver', 'lpc2148_all_leds', 'lpc2148_blink', 'lpc2148_button', 'lpc2148_dac_sine', 'lpc2148_pot_adc',
-    'lpc2148_timer0_led', 'lpc2148_uart1_echo', 'math_operations', 'max7219', 'morse', 'morse_code_using_serial_data',
+    'lpc2148_serial_print', 'lpc2148_timer0_led', 'lpc2148_uart1_echo', 'math_operations', 'max7219', 'morse', 'morse_code_using_serial_data',
     'mpu6050_accel', 'mpu6050_accelerometer_2', 'multi_colour_led_blink', 'nano_blink', 'neopixel_8x8_matrix_rainbow_2', 'neopixel_8x8_matrix_rainbow_3',
     'neopixel_8x8_matrix_rainbow_4', 'neopixel_color_cycle', 'neopixel_strip_chase', 'neopixel_strip_color_pattern', 'not_gate_test', 'ntc_thermistor_dc_motor',
     'oled_ssd1306', 'opamp_741_non_inverting', 'or_gate', 'pir_alarm', 'plugin_tutorial', 'potentiometer',
