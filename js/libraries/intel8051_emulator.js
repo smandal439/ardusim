@@ -52,9 +52,8 @@ if(!d||!d[b.type])return;
 var pn=['P0','P1','P2','P3'][p];
 for(var i=0;i<8;i++){var pid=pn+'.'+i;
 var pin=d[b.type].pins.find(function(x){return x.id===pid;});
-if(pin){var val=(v>>i)&1;var pk='pin_'+pid;
-window.ArduinoSim.pinStates[pk]=val;window.ArduinoSim.pinStates['pin_'+pid]=val;
-window.ArduinoSim._emitPinChange(pk,val);}}},
+if(pin){var val=(v>>i)&1;
+if(window.CircuitCanvas&&typeof window.CircuitCanvas._writeDigitalOutput==='function'){window.CircuitCanvas._writeDigitalOutput(b.id,pid,val);}}}},
 _rd:function(p,b){
 var c=window.CircuitCanvas;if(!c)return 0;
 var br=typeof c.getBoardInst==='function'?c.getBoardInst():null;if(!br)return 0;

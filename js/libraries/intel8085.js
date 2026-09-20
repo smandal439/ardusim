@@ -33,9 +33,8 @@ window.ArduinoLibs['Intel8085'] = {
       var pins = portNames[port] + '.';
       for (var i = 0; i < 8; i++) {
         var pid = pins + i;
-        var pin = defs[b.type].pins.find(function(p) { return p.id === pid; });
-        if (pin) { var pk = 'pin_' + pid;
-          window.CircuitCanvas._writeDigitalOutput(b.id, pk, (val >> i) & 1); }}
+          var pin = defs[b.type].pins.find(function(p) { return p.id === pid; });
+          if (pin) { window.CircuitCanvas._writeDigitalOutput(b.id, pid, (val >> i) & 1); }}
     }
     function readPort(port, bit) {
       var b = window.CircuitCanvas.getBoardInst();
