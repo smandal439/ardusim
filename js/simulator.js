@@ -1,5 +1,5 @@
 /* -------------------------------------------------------
-   simulator.js �l� Arduino C++ Interpreter & Execution Engine
+   simulator.js -> Arduino C++ Interpreter & Execution Engine
    ------------------------------------------------------- */
 
 'use strict';
@@ -12,15 +12,15 @@ class ArduinoSimulator {
     this.speed = 1;
     this.board = 'arduino_uno'; // arduino_uno | esp32_devkit_v1
     this.boardIndex = 0; // 0 = primary, 1 = secondary (for dual-board)
-    this.pinStates = {}; // pinKey �r~ value (0-255, or 0/1)
-    this.pinModes = {}; // pinKey �r~ INPUT/OUTPUT/INPUT_PULLUP
+    this.pinStates = {}; // pinKey -> value (0-255, or 0/1)
+    this.pinModes = {}; // pinKey -> INPUT/OUTPUT/INPUT_PULLUP
     this.serialBaud = 9600;
     this.serialInputBuffer = [];
     this._loopAbortController = null;
     this._loopPromise = null;
     this.onSerial = null;  // callback(text, type)
     this.onWebPage = null;  // callback({code, type, content, url, method})
-    this.onStart = null;  // callback() �l� fired when the simulation loop actually starts
+    this.onStart = null;  // callback() -> fired when the simulation loop actually starts
     this.onPinChange = null;  // callback(pinKey, value)
     this.onError = null;  // callback(err)
     this.onStatus = null;  // callback(msg)
@@ -45,9 +45,9 @@ class ArduinoSimulator {
     this._MAX_TIGHT_ITERS = 50000;
     // EEPROM simulation (512 bytes)
     this._eeprom = new Uint8Array(512);
-    // ESP32 LEDC PWM channel registry: channel �r~ { pin, freq, resolution, maxDuty }
+    // ESP32 LEDC PWM channel registry: channel -> { pin, freq, resolution, maxDuty }
     this._ledcChannels = {};
-    // Interrupt registry: pinNum �r~ { fn, mode }
+    // Interrupt registry: pinNum -> { fn, mode }
     this._interrupts = {};
     // Previous pin values for edge detection in interrupt firing
     this._prevPinValues = {};
@@ -113,7 +113,7 @@ class ArduinoSimulator {
     let js = code;
 
     // Remove comments temporarily for processing, then restore
-    // Actually keep comments �l� they're valid JS too
+    // Actually keep comments -> they're valid JS too
 
     // 1. Handle #define macros (simple value replacement)
     const defines = {};
@@ -129,7 +129,7 @@ class ArduinoSimulator {
     //     would confuse the auto-await pass that adds 'await' before user function calls.
     js = js.replace(/^\s*(?:const\s+)?(?:unsigned\s+)?(?:void|int|float|double|long|short|char|bool|boolean|byte|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t)\s+\w+\s*\([^)]*\)\s*;\s*$/gm, '');
 
-    // 2b. C++11 raw string literals: R"delim(...)delim" �r~ `...`
+    // 2b. C++11 raw string literals: R"delim(...)delim" -> `...`
     js = js.replace(/\bR"([a-zA-Z0-9_]*)\(([\s\S]*?)\)\1"/g, (_, delim, content) => {
       return '`' + content.replace(/\$/g, '\\$').replace(/`/g, '\\`') + '`';
     });
@@ -139,7 +139,7 @@ class ArduinoSimulator {
     //    parenthesized constants (e.g. #define SEALEVELPRESSURE_HPA (1013.25)).
     for (const [name, value] of Object.entries(defines)) {
       if (!/^[A-Za-z_]\w*$/.test(name)) continue;
-      if (/^\w+\s*\(/.test(value)) continue; // function-like macro �l� leave untouched
+      if (/^\w+\s*\(/.test(value)) continue; // function-like macro -> leave untouched
       js = js.replace(new RegExp(`\\b${name}\\b`, 'g'), () => value);
     }
 
@@ -197,7 +197,7 @@ class ArduinoSimulator {
     );
 
     // 4b. Plugin-specific transpile rules (BEFORE variable declarations)
-    //     so plugin rules like esp_now_peer_info_t can match before Type�r~let stripping
+    //     so plugin rules like esp_now_peer_info_t can match before Type->et stripping
     //     Only apply plugins whose #include headers are present in the sketch.
     const _plugins = this._activePlugins;
     const _pluginEntries = Object.entries(_plugins).sort((a, b) => (a[1].priority || 50) - (b[1].priority || 50));
@@ -257,43 +257,43 @@ class ArduinoSimulator {
     // 5. Handle variable declarations (not already transformed)
     // Strip C-style casts: (unsigned char)1 → 1, (long)expr → expr
     js = js.replace(new RegExp(`\\((?:unsigned\\s+char|unsigned\\s+long|unsigned\\s+int|unsigned\\s+short|unsigned|long\\s+long|long|int|short|byte|float|double)\\)\\s*(?=[a-zA-Z0-9_\\(])`, 'g'), '');
-    // unsigned char x; �r~ let x;  (MUST be before plain char rule)
+    // unsigned char x; -> let x;  (MUST be before plain char rule)
     js = js.replace(/\bunsigned\s+char\s+(\w+)(?=\s*[=;,\[\)])/g, 'let $1');
-    // Type var = ...; �r~ let var = ...; (using centralized types)
+    // Type var = ...; -> let var = ...; (using centralized types)
     js = js.replace(new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)(?=\\s*[=;,\\[\\)])`, 'g'), 'let $1');
-    // char x = 'a'; �r~ let x = 'a';
+    // char x = 'a'; -> let x = 'a';
     js = js.replace(/\bchar\s+(\w+)(?=\s*[=;,\[\)])/g, 'let $1');
-    // Standalone unsigned x; �r~ let x; (unsigned alone = unsigned int in C)
+    // Standalone unsigned x; -> let x; (unsigned alone = unsigned int in C)
     js = js.replace(/\bunsigned\s+(\w+)(?=\s*[=;,\[\)])/g, 'let $1');
     // Handle const
     js = js.replace(/\bconst\s+let\b/g, 'let');
     js = js.replace(/\bconst\s+var\b/g, 'var');
     js = js.replace(/\bconst\s+async\b/g, 'async');
-    // Strip const before type keywords: const int x = 5; �r~ int x = 5;
+    // Strip const before type keywords: const int x = 5; -> int x = 5;
     js = js.replace(new RegExp(`\\bconst\\s+((?:unsigned\\s+)?(?:${_typePat}))\\s*\\*?\\s*`, 'g'), '$1 ');
-    // char* name[] = { ... } �r~ var name = [ ... ]  (C-style string array, single or multi-line)
+    // char* name[] = { ... } -> var name = [ ... ]  (C-style string array, single or multi-line)
     js = js.replace(/\bchar\s*\*\s+(\w+)\s*\[\s*\]\s*=\s*\{([\s\S]*?)\}\s*;/g, 'var $1 = [$2]');
-    // char name[] = { ... } �r~ var name = [ ... ]  (after const* stripping removes the *)
+    // char name[] = { ... } -> var name = [ ... ]  (after const* stripping removes the *)
     js = js.replace(/\bchar\s+(\w+)\s*\[\s*\]\s*=\s*\{([\s\S]*?)\}\s*;/g, 'var $1 = [$2]');
-    // Type name[size]; �r~ let name = [];  (C-style array declaration, NOT followed by = {)
+    // Type name[size]; -> let name = [];  (C-style array declaration, NOT followed by = {)
     js = js.replace(new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)\\s*\\[\\s*(?:\\w+)?\\s*\\](?=\\s*[;,)])`, 'g'), 'let $1 = []');
-    // Type name[size] = { ... }; �r~ let name = [ ... ];  (initialized array, single or multi-line)
+    // Type name[size] = { ... }; -> let name = [ ... ];  (initialized array, single or multi-line)
     js = js.replace(new RegExp(`\\b(?:unsigned\\s+)?(?:${_typePat})\\s+(\\w+)\\s*\\[\\s*(?:\\w+)?\\s*\\]\\s*=\\s*\\{([\\s\\S]*?)\\}\\s*;`, 'g'), 'let $1 = [$2]');
-    // C++ designated initializers in struct: .field = value �r~ field: value
-    // Must run AFTER Type�r~let conversion so `let varname = {` is already formed
+    // C++ designated initializers in struct: .field = value -> field: value
+    // Must run AFTER Type->et conversion so `let varname = {` is already formed
     js = js.replace(/^\s+\.(\w+)\s*=\s*/gm, '  $1: ');
-    // Strip C type casts in struct initializers: (i2s_mode_t)(...) �r~ (...)
+    // Strip C type casts in struct initializers: (i2s_mode_t)(...) -> (...)
     js = js.replace(/\(i2s_mode_t\)\s*/g, '');
 
-    // C++ pointer dereference: stream->method() �r~ stream.method()
+    // C++ pointer dereference: stream->method() -> stream.method()
     js = js.replace(/->/g, '.');
-    // C++ address-of in function args: func(&var) �r~ func(var)
+    // C++ address-of in function args: func(&var) -> func(var)
     js = js.replace(/([,(]\s*)&(\w+)/g, '$1$2');
     // Re-clean const after pointer rule may have introduced 'const var'
     js = js.replace(/\bconst\s+let\b/g, 'let');
     js = js.replace(/\bconst\s+var\b/g, 'var');
 
-    // C++ std math functions �r~ JavaScript Math.*
+    // C++ std math functions -> JavaScript Math.*
     // atan2 is provided by js/libraries/math.js plugin
     js = js.replace(/\bsqrt\s*\(/g, 'Math.sqrt(');
     js = js.replace(/\babs\s*\(/g, 'Math.abs(');
@@ -304,19 +304,19 @@ class ArduinoSimulator {
     js = js.replace(/\bround\s*\(/g, 'Math.round(');
     js = js.replace(/\bfloor\s*\(/g, 'Math.floor(');
     js = js.replace(/\bceil\s*\(/g, 'Math.ceil(');
-    // Bare PI constant �r~ Math.PI (word boundary so "Serial" etc. unchanged)
+    // Bare PI constant -> Math.PI (word boundary so "Serial" etc. unchanged)
     js = js.replace(/\bPI\b/g, 'Math.PI');
 
     // Object-style library declarations:
-    // Servo myServo;  �r~  let myServo = new Servo();
-    // LiquidCrystal lcd(12, 11, 5, 4, 3, 2);  �r~  let lcd = new LiquidCrystal(12, 11, 5, 4, 3, 2);
-    // WiFiClient espClient;  �r~  let espClient = new WiFiClient();
-    // PubSubClient client(espClient);  �r~  let client = new PubSubClient(espClient);
-    // WebServer server(80);  �r~  let server = new WebServer(80);
-    // Adafruit_SSD1306 display(128, 64, &Wire, -1);  �r~  let display = new Adafruit_SSD1306(128, 64, Wire, -1);
-    // Adafruit_ILI9341 tft(CS, DC, MOSI, SCK, RESET);  �r~  let tft = new Adafruit_ILI9341(CS, DC, MOSI, SCK, RESET);
+    // Servo myServo;  ->  let myServo = new Servo();
+    // LiquidCrystal lcd(12, 11, 5, 4, 3, 2);  ->  let lcd = new LiquidCrystal(12, 11, 5, 4, 3, 2);
+    // WiFiClient espClient;  ->  let espClient = new WiFiClient();
+    // PubSubClient client(espClient);  ->  let client = new PubSubClient(espClient);
+    // WebServer server(80);  ->  let server = new WebServer(80);
+    // Adafruit_SSD1306 display(128, 64, &Wire, -1);  ->  let display = new Adafruit_SSD1306(128, 64, Wire, -1);
+    // Adafruit_ILI9341 tft(CS, DC, MOSI, SCK, RESET);  ->  let tft = new Adafruit_ILI9341(CS, DC, MOSI, SCK, RESET);
     js = js.replace(/\b(Servo|LiquidCrystal|LiquidCrystal_I2C|WiFiClient|PubSubClient|WebServer|Adafruit_SSD1306|Adafruit_ILI9341|SimpleBME280|Adafruit_VL53L0X|DHT|Stepper)\s+(\w+)\s*(?:\(([^)]*)\))?\s*;/g, 'let $2 = new $1($3)');
-    // Adafruit_VL53L0X lox = Adafruit_VL53L0X();  �r~  let lox = new Adafruit_VL53L0X();
+    // Adafruit_VL53L0X lox = Adafruit_VL53L0X();  ->  let lox = new Adafruit_VL53L0X();
     js = js.replace(/\b(Adafruit_VL53L0X)\s+(\w+)\s*=\s*\1\s*\(([^)]*)\)\s*;?/g, function (_, t, n, a) { return 'let ' + n + ' = new ' + t + '(' + a + ');'; });
 
     // Plugin-provided class constructors
@@ -346,13 +346,13 @@ class ArduinoSimulator {
     }
 
     // Pre-pass: remove typedef/struct definitions BEFORE generic constructor detection
-    // typedef struct { ... } Name; �r~ remove
+    // typedef struct { ... } Name; -> remove
     js = js.replace(/\btypedef\s+struct\s*\{[^}]*\}\s*\w+\s*;/g, '');
-    // struct Name { ... }; �r~ remove
+    // struct Name { ... }; -> remove
     js = js.replace(/\bstruct\s+\w+\s*\{[^}]*\}\s*;/g, '');
-    // struct Name varName; �r~ var varName = {};
+    // struct Name varName; -> var varName = {};
     js = js.replace(/\bstruct\s+(\w+)\s+(\w+)\s*;/g, 'var $2 = {};');
-    // PascalCaseTypeName varName; �r~ var varName = {};  (catches struct/class instances like DataPacket myData;)
+    // PascalCaseTypeName varName; -> var varName = {};  (catches struct/class instances like DataPacket myData;)
     js = js.replace(/\b([A-Z]\w+)\s+(\w+)\s*;/g, function (match, typeName, varName) {
       if (/^(Serial|Wire|SPI|WiFi|WiFiClient|EEPROM|Stream|Print|HardwareSerial|Serial1|Serial2)$/.test(typeName)) return match;
       if (/^(If|Else|For|While|Do|Switch|Case|Return|Function|Var|Let|Const|Import|Export|New|Delete|Try|Catch|Finally|Throw|Async|Await|Yield|Static|Super|With|Debugger|In|Of|This|Void|Typeof|Instanceof|Null|Undefined|True|False|Break|Continue|Default)$/.test(typeName)) return match;
@@ -371,19 +371,19 @@ class ArduinoSimulator {
     js = js.replace(/new\s+Adafruit_SSD1306\s*\(([^)]*)\)/g, (_, args) => `new Adafruit_SSD1306(${args.replace(/&\s*/g, '')})`);
     js = js.replace(/new\s+Adafruit_ILI9341\s*\(([^)]*)\)/g, (_, args) => `new Adafruit_ILI9341(${args.replace(/&\s*/g, '')})`);
 
-    // 6. Handle arrays: int arr[10] �r~ let arr = new Array(10).fill(0)
+    // 6. Handle arrays: int arr[10] -> let arr = new Array(10).fill(0)
     js = js.replace(/let\s+(\w+)\s*\[(\d+)\]\s*=\s*\{([^}]*)\}/g, 'let $1 = [$3]');
     js = js.replace(/let\s+(\w+)\s*\[\s*\]\s*=\s*\{([^}]*)\}/g, 'let $1 = [$2]');
     js = js.replace(/let\s+(\w+)\s*\[(\d+)\](?!\s*=)/g, 'let $1 = new Array($2).fill(0)');
     js = js.replace(/let\s+(\w+)\s*\[\s*\](?!\s*=)/g, 'let $1 = []');
-    // Also handle var arrays (from pointer/const stripping): var arr[] = {...} �r~ var arr = [...]
+    // Also handle var arrays (from pointer/const stripping): var arr[] = {...} -> var arr = [...]
     js = js.replace(/var\s+(\w+)\s*\[\s*\]\s*=\s*\{([^}]*)\}/g, 'var $1 = [$2]');
     // C-style char arrays with string literals: char str[20] = "hi"; / char msg[] = "hi";
     js = js.replace(/let\s+(\w+)\s*\[\s*\d*\s*\]\s*=\s*("[^"]*"|'[^']*')/g, 'let $1 = $2');
-    // const char name[] = "..." / const char name[] = `...` �r~ var name = "..." (after const char �r~ var)
+    // const char name[] = "..." / const char name[] = `...` -> var name = "..." (after const char -> var)
     js = js.replace(/var\s+(\w+)\s*\[\s*\d*\s*\]\s*=\s*("[^"]*"|'[^']*'|`[^`]*`)/g, 'var $1 = $2');
     js = js.replace(/let\s+(\w+)\s*\[\s*\d*\s*\]\s*=\s*("[^"]*"|'[^']*'|`[^`]*`)/g, 'let $1 = $2');
-    // Pointer declarations: WiFiClient* stream = ... �r~ var stream = ...
+    // Pointer declarations: WiFiClient* stream = ... -> var stream = ...
     js = js.replace(/\b(\w+)\s*\*\s+(\w+)\s*=/g, 'var $2 =');
     // Re-clean const after pointer rule may have introduced 'const var' or 'const let'
     js = js.replace(/\bconst\s+let\b/g, 'let');
@@ -391,9 +391,9 @@ class ArduinoSimulator {
 
     // 7. Boolean literals
     js = js.replace(/\btrue\b/g, 'true');
-    // sizeof(expr) �r~ expr.length (simplified �l� works for arrays/buffers)
+    // sizeof(expr) -> expr.length (simplified -> works for arrays/buffers)
     js = js.replace(/\bsizeof\s*\((\w+)\)/g, '$1.length');
-    // Arduino String .c_str() �r~ already a JS string, just strip
+    // Arduino String .c_str() -> already a JS string, just strip
     js = js.replace(/\.\s*c_str\s*\(\s*\)/g, '');
     js = js.replace(/\bfalse\b/g, 'false');
 
@@ -431,7 +431,7 @@ class ArduinoSimulator {
     js = js.replace(/\bconst\s+let\b/g, 'let');
     js = js.replace(/\bconst\s+var\b/g, 'var');
 
-    // 7a. Convert C char literals to charCode numbers: '1' �r~ 49, 'A' �r~ 65, '\n' �r~ 10
+    // 7a. Convert C char literals to charCode numbers: '1' -> 49, 'A' -> 65, '\n' -> 10
     // Only single-quoted single characters (not double-quoted strings or multi-char)
     js = js.replace(/'\\n'/g, '10');
     js = js.replace(/'\\r'/g, '13');
@@ -598,7 +598,7 @@ class ArduinoSimulator {
       js = js.replace(new RegExp(`\\b${orig}\\b(?=\\s*\\()`, 'g'), mapped);
     }
 
-    // Convert &ref args in I2S calls to reference objects: &bytesWritten �r~ __i2sRef1
+    // Convert &ref args in I2S calls to reference objects: &bytesWritten -> __i2sRef1
     // then read back after: bytesWritten = __i2sRef1.val
     js = js.replace(/(await\s+)?(_a\.i2s\w+)\s*\(([^)]*)\)/g, (_, awaitPrefix, fn, args) => {
       let refCount = 0;
@@ -625,7 +625,7 @@ class ArduinoSimulator {
     js = js.replace(/_a\.delayMicroseconds\s*\(/g, 'await _a.delayMicroseconds(');
     js = js.replace(/_a\.pulseIn\s*\(/g, 'await _a.pulseIn(');
 
-    // Stepper.step() is blocking on real hardware �l� await the animated motion
+    // Stepper.step() is blocking on real hardware -> await the animated motion
     js = js.replace(/(?<!await\s)_a\.stepperStep\s*\(/g, 'await _a.stepperStep(');
 
     // Auto-await calls to user-defined functions (they were transpiled to `async`,
@@ -640,46 +640,46 @@ class ArduinoSimulator {
     // Remove C++ type casts like (int), (float), etc.
     js = js.replace(new RegExp(`\\((?:${_typePat}|size_t)\\)\\s*`, 'g'), '');
 
-    // C++ pointer dereference: *(type *)var �r~ var
-    // e.g. *(int *)data �r~ data, *(float *)ptr �r~ ptr
+    // C++ pointer dereference: *(type *)var -> var
+    // e.g. *(int *)data -> data, *(float *)ptr -> ptr
     js = js.replace(new RegExp(`\\*\\(\\s*(?:${_typePat}|size_t)\\s*\\*\\)\\s*(\\w+)`, 'g'), '$1');
 
-    // memcpy(&dest, src, sizeof(dest)) �r~ dest = src (for struct copy)
+    // memcpy(&dest, src, sizeof(dest)) -> dest = src (for struct copy)
     // Also matches after sizeof has been replaced with .length
     js = js.replace(/\bmemcpy\s*\(\s*&(\w+)\s*,\s*(\w+)\s*,\s*(?:\1\.length|sizeof\s*\(\s*\1\s*\))\s*\)/g, '$1 = $2');
 
-    // memcpy(dest, src, len) �r~ _a.memcpy(dest, src, len) �l� fallback
+    // memcpy(dest, src, len) -> _a.memcpy(dest, src, len) -> fallback
     js = js.replace(/\bmemcpy\s*\(([^)]+)\)/g, '_a.memcpy($1)');
 
-    // StructType varName = { field: value, ... }; �r~ var varName = { field: value, ... };
+    // StructType varName = { field: value, ... }; -> var varName = { field: value, ... };
     js = js.replace(/\b(\w+)\s+(\w+)\s*=\s*\{/g, function (match, type, name) {
       // Skip known keywords, function calls, etc.
       if (/^(var|let|const|function|return|if|else|for|while|do|switch|case|break|continue|new|delete|typeof|instanceof|void|null|undefined|true|false|this|class|extends|import|export|default|try|catch|finally|throw|async|await|yield|static|super|with|debugger|in|of)$/.test(type)) return match;
       return 'var ' + name + ' = {';
     });
 
-    // String() �r~ String()  (already fine for JS)
+    // String() -> String()  (already fine for JS)
     // String to string comparison: == for strings works in JS, so fine
-    // .charAt(), .length, .indexOf() �l� all work in JS
+    // .charAt(), .length, .indexOf() -> all work in JS
 
     // Fix: handle C++ string char arrays declared as: char str[20];
     // Already handled above
 
     // Arduino String methods are in-place but JS String.prototype methods return new strings.
-    // Convert: command.trim();  �r~  command = command.trim();
-    // Convert: command.toLowerCase();  �r~  command = command.toLowerCase();
-    // Convert: command.toUpperCase();  �r~  command = command.toUpperCase();
+    // Convert: command.trim();  ->  command = command.trim();
+    // Convert: command.toLowerCase();  ->  command = command.toLowerCase();
+    // Convert: command.toUpperCase();  ->  command = command.toUpperCase();
     js = js.replace(/\b(\w+)\.trim\(\)\s*;/g, function (_, v) { return v + ' = ' + v + '.trim();'; });
     js = js.replace(/\b(\w+)\.toLowerCase\(\)\s*;/g, function (_, v) { return v + ' = ' + v + '.toLowerCase();'; });
     js = js.replace(/\b(\w+)\.toUpperCase\(\)\s*;/g, function (_, v) { return v + ' = ' + v + '.toUpperCase();'; });
 
-    // Arduino String.toInt() �r~ parseInt(str, 10) || 0
+    // Arduino String.toInt() -> parseInt(str, 10) || 0
     js = js.replace(/\.toInt\(\)/g, '|0');
-    // Arduino String.toFloat() �r~ parseFloat(str) || 0
+    // Arduino String.toFloat() -> parseFloat(str) || 0
     js = js.replace(/\.toFloat\(\)/g, '*1');
-    // Arduino String.length() �r~ .length (JS property, not method)
+    // Arduino String.length() -> .length (JS property, not method)
     js = js.replace(/\.length\(\)/g, '.length');
-    // Arduino String.charAt(n) �r~ [n]
+    // Arduino String.charAt(n) -> [n]
     js = js.replace(/\.charAt\s*\(([^)]+)\)/g, '[$1]');
 
     return js;
@@ -861,10 +861,10 @@ class ArduinoSimulator {
         millis() { return self.simTime; },
         micros() { return self.simTime * 1000; },
 
-        /* NTP �l� returns current UTC epoch seconds from the browser clock */
+        /* NTP -> returns current UTC epoch seconds from the browser clock */
         ntpEpoch() { return Math.floor(Date.now() / 1000); },
 
-        /* Math, bit operations, shift �l� provided by js/libraries/math.js plugin */
+        /* Math, bit operations, shift -> provided by js/libraries/math.js plugin */
 
         /* Interactive sensor widgets (sliders on the canvas).
            Reads a value from a placed sensor component by instance id or type.
@@ -907,7 +907,7 @@ class ArduinoSimulator {
             await self._delayPromise(realMs);
           };
 
-          // Try to find an HC-SR04 connected to this echo pin �l� compute directly
+          // Try to find an HC-SR04 connected to this echo pin -> compute directly
           const canvas = window.CircuitCanvas;
           if (canvas && canvas._getConnectedPinNum) {
             for (const inst of (canvas.components || [])) {
@@ -973,7 +973,7 @@ class ArduinoSimulator {
           return dest;
         },
 
-        /* snprintf(buf, size, fmt, ...) �l� C standard library formatted print */
+        /* snprintf(buf, size, fmt, ...) -> C standard library formatted print */
         snprintf(buf, size, fmt) {
           var args = Array.prototype.slice.call(arguments, 3);
           var i = 0;
@@ -1017,7 +1017,7 @@ class ArduinoSimulator {
           return str.length;
         },
 
-        /* ---------- ESP32 �l� LEDC PWM ---------- */
+        /* ---------- ESP32 -> LEDC PWM ---------- */
         ledcSetup(channel, freq, resolution) {
           const res = Number(resolution) || 8;
           self._ledcChannels[channel] = {
@@ -1025,7 +1025,7 @@ class ArduinoSimulator {
             resolution: res,
             maxDuty: Math.pow(2, res) - 1,
           };
-          self._serialLog(`[ESP32] LEDC channel ${channel} �r~ ${self._ledcChannels[channel].freq}Hz (${res}-bit)\n`, 'system');
+          self._serialLog(`[ESP32] LEDC channel ${channel} -> ${self._ledcChannels[channel].freq}Hz (${res}-bit)\n`, 'system');
           return self._ledcChannels[channel].maxDuty;
         },
         ledcSetupChannel(channel, freq, resolution) {
@@ -1046,7 +1046,7 @@ class ArduinoSimulator {
             resolution: res,
             maxDuty: Math.pow(2, res) - 1,
           };
-          self._serialLog(`[ESP32] LEDC: attached GPIO ${Number(pin)} �r~ ${Number(freq) || 5000}Hz (${res}-bit)\n`, 'system');
+          self._serialLog(`[ESP32] LEDC: attached GPIO ${Number(pin)} -> ${Number(freq) || 5000}Hz (${res}-bit)\n`, 'system');
           return true;
         },
         ledcWrite(channelOrPin, duty) {
@@ -1072,7 +1072,7 @@ class ArduinoSimulator {
           return self.pinStates[`pin_${pin}`] || 0;
         },
 
-        /* ---------- ESP32 �l� analog / DAC / sensors ---------- */
+        /* ---------- ESP32 -> analog / DAC / sensors ---------- */
         dacWrite(pin, value) {
           const key = `pin_${pin}`;
           const v = Math.max(0, Math.min(255, Math.round(Number(value) || 0)));
@@ -1082,7 +1082,7 @@ class ArduinoSimulator {
         analogReadMilliVolts(pin) {
           const v = self.pinStates[`pin_${pin}`];
           if (v === undefined || v === null) return 0;
-          // Simulation stores analog values in the 0�l1023 range (10-bit)
+          // Simulation stores analog values in the 0->1023 range (10-bit)
           return Math.round((Number(v) || 0) * 3300 / 1023);
         },
         analogReadMicroVolts(pin) { return this.analogReadMilliVolts(pin) * 1000; },
@@ -1155,7 +1155,7 @@ class ArduinoSimulator {
       /* Servo/LCD class stubs */
       Servo: function () { return {}; },
 
-      /* VL53L0X ToF distance sensor stub �l� reads distance from placed component */
+      /* VL53L0X ToF distance sensor stub -> reads distance from placed component */
       Adafruit_VL53L0X: function () {
         return {
           begin() { return true; },
@@ -1174,7 +1174,7 @@ class ArduinoSimulator {
         };
       },
 
-      /* VL53L0X measurement data struct �l� used as VL53L0X_RangingMeasurementData_t measure; */
+      /* VL53L0X measurement data struct -> used as VL53L0X_RangingMeasurementData_t measure; */
       VL53L0X_RangingMeasurementData_t: function () {
         this.RangeStatus = 4;
         this.RangeMilliMeter = 0;
@@ -1183,7 +1183,7 @@ class ArduinoSimulator {
       /* Library stubs (instances) */
       Wire: { begin() { }, requestFrom() { return 0; }, beginTransmission() { }, endTransmission() { return 0; }, write() { return 1; }, read() { return 0; }, available() { return 0; } },
       SPI: { begin() { }, transfer() { return 0; }, end() { }, setClockDivider() { }, setBitOrder() { }, setDataMode() { } },
-      /* ESP32 Wi-Fi object stub �l� requires a Wi-Fi Hotspot component on the canvas */
+      /* ESP32 Wi-Fi object stub -> requires a Wi-Fi Hotspot component on the canvas */
       WiFi: {
         _findHotspot(ssid) {
           const canvas = window.CircuitCanvas;
@@ -1386,7 +1386,7 @@ class ArduinoSimulator {
 
         const tryRealConnect = (clientId) => {
           if (typeof window.mqtt !== 'function' || !window.WebSocket) {
-            self._serialLog('[MQTT] MQTT.js not loaded �l� using local broker only\n', 'system');
+            self._serialLog('[MQTT] MQTT.js not loaded -> using local broker only\n', 'system');
             return;
           }
           const cfg = window.ArduSimMQTT || {};
@@ -1420,7 +1420,7 @@ class ArduinoSimulator {
             real.on('connect', () => {
               realReady = true;
               self._serialLog(`[MQTT] Live broker connected (${url}) as "${clientId}"\n`, 'system');
-              self._serialLog(`[MQTT] Watch it in MQTTX �r~ subscribe to: ${ns('ardusim/temp')} (and ${ns('ardusim/led')})\n`, 'system');
+              self._serialLog(`[MQTT] Watch it in MQTTX -> subscribe to: ${ns('ardusim/temp')} (and ${ns('ardusim/led')})\n`, 'system');
               for (const t of pendingSubs) real.subscribe(t);
               pendingSubs.clear();
             });
@@ -1431,18 +1431,18 @@ class ArduinoSimulator {
               self._serialLog(`[MQTT] Live broker error: ${e && e.message ? e.message : e}\n`, 'system');
             });
             real.on('close', () => {
-              if (realReady) self._serialLog('[MQTT] Live broker connection closed �l� retrying...\n', 'system');
+              if (realReady) self._serialLog('[MQTT] Live broker connection closed -> retrying...\n', 'system');
               realReady = false;
             });
             // If the public broker can't be reached at all, say so once so the
             // user knows the demo is running in local-only mode.
             setTimeout(() => {
               if (!realReady) {
-                self._serialLog('[MQTT] Public broker unreachable (check internet access) �l� running local broker only\n', 'system');
+                self._serialLog('[MQTT] Public broker unreachable (check internet access) -> running local broker only\n', 'system');
               }
             }, 12000);
           } catch (e) {
-            self._serialLog(`[MQTT] Live broker unavailable �l� using local broker only (${e && e.message ? e.message : e})\n`, 'system');
+            self._serialLog(`[MQTT] Live broker unavailable -> using local broker only (${e && e.message ? e.message : e})\n`, 'system');
           }
         };
 
@@ -1493,12 +1493,12 @@ class ArduinoSimulator {
             const t = String(topic);
             let msg;
             if (Array.isArray(payload)) {
-              // char[] buffer �l� join chars and strip trailing null terminators
+              // char[] buffer -> join chars and strip trailing null terminators
               msg = payload.join('').replace(/\0+$/, '');
             } else {
               msg = String(payload);
             }
-            self._serialLog(`[MQTT] Publish "${t}" �r~ ${msg}\n`, 'system');
+            self._serialLog(`[MQTT] Publish "${t}" -> ${msg}\n`, 'system');
             if (real) {
               try {
                 real.publish(ns(t), msg, { qos: 0, retain: false });
@@ -1544,7 +1544,7 @@ class ArduinoSimulator {
       }
     }
 
-    // Expose _idiv as a top-level function for integer division (C++ int / int �r~ truncation)
+    // Expose _idiv as a top-level function for integer division (C++ int / int -> truncation)
     result._idiv = result._a._idiv;
 
     return result;
@@ -1583,7 +1583,7 @@ class ArduinoSimulator {
       // The `return` lives inside the same block, so setup/loop stay in scope.
       const body = `{\n${js}\n\nif(typeof setup === "undefined") throw new Error("Missing setup() function. Every Arduino sketch needs a setup() function."); if(typeof loop === "undefined") throw new Error("Missing loop() function. Every Arduino sketch needs a loop() function."); return { setup, loop };\n}`;
 
-      // Try to build the function �l� will throw on syntax errors
+      // Try to build the function -> will throw on syntax errors
       const fn = new Function(...keys, body);
       this._compiledFn = fn;
       this._compiledCtx = { keys, vals, fn };
@@ -1623,7 +1623,7 @@ class ArduinoSimulator {
     this._iterSinceDelay = 0;
     this._interrupts = {};
     this._prevPinValues = {};
-    // FreeRTOS dual-core state �l� reset on each run
+    // FreeRTOS dual-core state -> reset on each run
     this._freertosTasks = { 0: [], 1: [] };
     this._freertosTaskRegistry = {};
     this._freertosQueues = [];
@@ -1708,7 +1708,7 @@ class ArduinoSimulator {
           }
           await loop();
           this._loopCount++;
-          // Yield to UI thread �l� advance simTime by actual elapsed ms
+          // Yield to UI thread -> advance simTime by actual elapsed ms
           await new Promise(r => setTimeout(r, 0));
           const _now = performance.now();
           // Only add elapsed time if delay() was NOT called during loop();
@@ -1761,7 +1761,7 @@ class ArduinoSimulator {
     const { keys, vals, fn } = this._compiledCtx;
     this._interrupts = {};
     this._prevPinValues = {};
-    // FreeRTOS dual-core state �l� ensure initialized for _startExecution path
+    // FreeRTOS dual-core state -> ensure initialized for _startExecution path
     this._freertosTasks = { 0: [], 1: [] };
     this._freertosTaskRegistry = {};
     this._freertosQueues = [];
@@ -1796,13 +1796,13 @@ class ArduinoSimulator {
             self._freertosTaskRegistry['__loop_task'] = loop;
             self._a.xTaskCreatePinnedToCore(loop, 'loopTask', 8192, null, 1, null, 1);
           }
-          // Start FreeRTOS scheduler �l� runs both cores concurrently
+          // Start FreeRTOS scheduler -> runs both cores concurrently
           self._serialLog('[FreeRTOS] Starting scheduler on 2 cores\n', 'system');
           if (self._a._freertosScheduler) {
             await self._a._freertosScheduler();
           }
         } else {
-          // Original behavior �l� single-threaded loop
+          // Original behavior -> single-threaded loop
           let _lastLoopTime2 = performance.now();
           while (self.isRunning && runId === self._runSeq) {
             if (self.isPaused) {
@@ -1889,7 +1889,7 @@ class ArduinoSimulator {
       ax = rd('accelX'); ay = rd('accelY'); az = rd('accelZ');
       gx = rd('gyroX'); gy = rd('gyroY'); gz = rd('gyroZ');
     }
-    const tempRaw = -3920; /* �ut 25 ��C �l� raw/340 + 36.53 */
+    const tempRaw = -3920; /* about 25 ->C -> raw/340 + 36.53 */
     const regs = {};
     const put16 = (a, v) => {
       v = Math.max(-32768, Math.min(32767, v | 0));
@@ -1930,7 +1930,7 @@ class ArduinoSimulator {
     }
     const toBCD = (v) => ((Math.floor(v / 10) & 0x0F) << 4) | (Math.floor(v) % 10);
     const tempInt = Math.floor(temp);
-    const tempFrac = Math.round((temp - tempInt) * 4); /* 0.25��C steps �r~ 0..3 */
+    const tempFrac = Math.round((temp - tempInt) * 4); /* 0.25 deg C steps -> 0..3 */
     const regs = {};
     /* Time & date registers (DS3231 datasheet Table 3) */
     regs[0x00] = toBCD(second) & 0x7F;  /* 0x00 = seconds (bit 7 = CH, 0 = running) */
@@ -1940,9 +1940,9 @@ class ArduinoSimulator {
     regs[0x04] = toBCD(day);             /* 0x04 = date */
     regs[0x05] = toBCD(month);           /* 0x05 = month + century bit */
     regs[0x06] = toBCD(year);            /* 0x06 = year (00-99) */
-    /* Alarm 1 registers (0x07-0x0A) �l� default 0 */
+    /* Alarm 1 registers (0x07-0x0A) -> default 0 */
     regs[0x07] = 0; regs[0x08] = 0; regs[0x09] = 0; regs[0x0A] = 0;
-    /* Alarm 2 registers (0x0B-0x0D) �l� default 0 */
+    /* Alarm 2 registers (0x0B-0x0D) -> default 0 */
     regs[0x0B] = 0; regs[0x0C] = 0; regs[0x0D] = 0;
     /* Control register 0x0E: INTCN=1 (no square wave), default */
     regs[0x0E] = 0x04;
@@ -1956,7 +1956,7 @@ class ArduinoSimulator {
     return out;
   }
 
-  /* Pausable sketch delay �l� records start/duration so pause() can freeze it */
+  /* Pausable sketch delay -> records start/duration so pause() can freeze it */
   _delayPromise(realMs) {
     const entry = {
       duration: Math.max(0, realMs),
@@ -2042,12 +2042,12 @@ class ArduinoSimulator {
     let line = '';
     // Runtime errors carry the compiled-code line in their stack as the first
     // "<anonymous>:N" frame. Syntax errors from `new Function` do not, and the
-    // first such frame would instead be the transpiler itself �l� so skip them.
+    // first such frame would instead be the transpiler itself -> so skip them.
     if (err && err.stack && !(err instanceof SyntaxError)) {
       const m = String(err.stack).match(/<anonymous>:(\d+)(?::\d+)?/);
       if (m) {
         const n = parseInt(m[1], 10) - 1; // account for the wrapper block offset
-        line = ` �l� line ${n > 0 ? n : 1}`;
+        line = ` -> line ${n > 0 ? n : 1}`;
       }
     }
     if (err instanceof SyntaxError) return `Syntax error: ${msg}. Check for missing semicolons or braces.`;
@@ -2322,11 +2322,11 @@ class ArduinoSimulator {
         if (other.type === 'lm741' && target.pinId === 'OUT') {
           return other.runtimeState ? (other.runtimeState.vOut || 0) : 0;
         }
-        // Probe pass-through �l� return voltage sampled at probe tip
+        // Probe pass-through -> return voltage sampled at probe tip
         if (other.type === 'probe' || other.type.startsWith('osc_probe_') || other.type.startsWith('dso_probe_')) {
           return other.runtimeState ? (other.runtimeState.voltage || 0) : 0;
         }
-        // Another DSO reading from a source �l� recurse
+        // Another DSO reading from a source -> recurse
         if (other.type === 'dso_4ch') {
           return 0;
         }
@@ -2341,7 +2341,7 @@ class ArduinoSimulator {
 
 /* ---------------------------- EXAMPLE SKETCHES --------------- */
 /* -----------------------------------------------------------
-   EXAMPLE CIRCUITS �l� serialized project data loaded on the canvas
+   EXAMPLE CIRCUITS -> serialized project data loaded on the canvas
    when an example is opened. Matches the pins of each example code.
    ----------------------------------------------------------- */
 /* Examples are now loaded from the examples/ folder as individual JSON files. */
