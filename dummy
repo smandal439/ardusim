@@ -1,0 +1,118 @@
+/**
+ * Intel 8085 Two-Pass Assembler
+ * Supports all 8085 instructions, labels, directives, and number formats.
+ */
+window.Intel8085Assembler = (function () {
+    "use strict";
+
+    var REG = { B: 0, C: 1, D: 2, E: 3, H: 5, L: 6, M: 7, A: 7 };
+    var RP = { B: 0, D: 1, H: 2, SP: 3 };
+    var RP_PSW = { B: 0, D: 1, H: 2, PSW: 3 };
+
+    var ALU = {
+        ADD: 0x80, ADC: 0x88, SUB: 0x90, SBB: 0x98,
+        ANA: 0xA0, XRA: 0xA8, ORA: 0xB0, CMP: 0xB8
+    };
+
+    var IMM8 = {
+        ADI: 0xC6, ACI: 0xCE, SUI: 0xD6, SBI: 0xDE,
+        ANI: 0xE6, XRI: 0xEE, ORI: 0xF6, CPI: 0xFE
+    };
+
+    var MEM16 = { LDA: 0x3A, STA: 0x32, LHLD: 0x2A, SHLD: 0x22 };
+
+    var CJMP = {
+        JC: 0xDA, JNC: 0xD2, JZ: 0xCA, JNZ: 0xC2,
+        JP: 0xF2, JM: 0xFA, JPE: 0xEA, JPO: 0xE2
+    };
+
+    var CCALL = {
+        CC: 0xDC, CNC: 0xD4, CZ: 0xCC, CNZ: 0xC4,
+        CP: 0xF4, CM: 0xFC, CPE: 0xEC, CPO: 0xE4
+    };
+
+    var CRET = {
+        RC: 0xD8, RNC: 0xD0, RZ: 0xC8, RNZ: 0xC0,
+        RP: 0xF0, RM: 0xF8, RPE: 0xE8, RPO: 0xE0
+    };
+
+    var _mnemonics = {};
+    (function () {
+        var names = [
+            "NOP","HLT","EI","DI","XCHG","SPHL","PCHL","XTHL",
+            "RLC","RRC","RAL","RAR","CMA","STC","CMC","DAA",
+            "MOV","MVI","LXI","LDAX","STAX","LDA","STA","LHLD","SHLD",
+            "ADD","ADC","SUB","SBB","ANA","XRA","ORA","CMP",
+            "ADI","ACI","SUI","SBI","ANI","XRI","ORI","CPI",
+            "INR","DCR","INX","DCX","DAD",
+            "JMP","CALL","RET","RST",
+            "JC","JNC","JZ","JNZ","JP","JM","JPE","JPO",
+            "CC","CNC","CZ","CNZ","CP","CM","CPE","CPO",
+            "RC","RNC","RZ","RNZ","RP","RM","RPE","RPO",
+            "PUSH","POP","IN","OUT",
+            "ORG","EQU","END","DB","DW",
+            "B","C","D","E","H","L","M","A","SP","PSW"
+        ];
+        for (var i = 0; i < names.length; i++) _mnemonics[names[i]] = true;
+    })();
+
+    function isMnemonic(token) {
+        return _mnemonics[token.toUpperCase()] === true;
+    }
+
+    function parseNumber(s) {
+        if (s == null || s === "") return null;
+        s = s.trim();
+        if (/^0[bB][01]+$/.test(s))                     return parseInt(s.substring(2), 2);
+        if (/^[0-9a-fA-F][0-9a-fA-F]*[hH]$/.test(s))    return parseInt(s.substring(0, s.length - 1), 16);
+        if (/^0[xX][0-9a-fA-F]+$/.test(s))              return parseInt(s, 16);
+        if (/^[0-9]+$/.test(s))                          return parseInt(s, 10);
+        if (/^-[0-9]+$/.test(s))                         return parseInt(s, 10);
+        return null;
+    }
+
+    function cleanSource(source) {
+        var lines = source.split(/?
+/);
+        var result = [];
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var ci = line.indexOf(";");
+            if (ci >= 0) line = line.substring(0, ci);
+            ci = line.indexOf("//");
+            if (ci >= 0) line = line.substring(0, ci);
+            result.push(line);
+        }
+        return result;
+    }
+
+    function tokenize(line) {
+        return line.split(/[,\s]+/).filter(function (t) { return t.length > 0; });
+    }
+
+    function evalExpr(tokenStr, labels, pc) {
+        var s = tokenStr.trim();
+        s = s.replace(/$/g, "(" + pc + ")");
+        var labelNames = Object.keys(labels);
+        labelNames.sort(function (a, b) { return b.length - a.length; });
+        for (var i = 0; i < labelNames.length; i++) {
+            var re = new RegExp("\\b" + labelNames[i].replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + "\\b", "g");
+            s = s.replace(re, "(" + labels[labelNames[i]] + ")");
+        }
+        s = s.replace(/\b([0-9a-fA-F][0-9a-fA-F]*)[hH]\b/g, function (m, num) {
+            return "0x" + num;
+        });
+        s = s.replace(/\b0[bB]([01]+)\b/g, function (m, num) {
+            return "0b" + num;
+        });
+        s = s.replace(/\b0+(\d+)\b/g, function (m, digits) {
+            return digits;
+        });
+        try {
+            if (/^[0-9a-fA-FxXbB\s+\-*/()]+$/.test(s)) {
+                var val = Function("\"use strict\"; return (" + s + ")")();
+                if (typeof val === "number" && isFinite(val)) return val | 0;
+            }
+        } catch (e) { /* fall through */ }
+        return NaN;
+    }
