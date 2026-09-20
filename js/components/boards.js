@@ -2066,8 +2066,10 @@ defComp({
     { id:'CLK', label:'CLK', type:PIN_TYPE.SIGNAL, x:10, y:260, side:'left' },
     { id:'RST', label:'RST', type:PIN_TYPE.SIGNAL, x:10, y:272, side:'left' },
   ],
-  draw(inst, ctx, W, H) {
+  draw(ctx, inst, sim) {
+    const { x, y, width: W, height: H } = inst;
     ctx.save();
+    ctx.translate(x, y);
     ctx.fillStyle = '#0a3e1a';
     roundRect(ctx, 0, 0, W, H, 6);
     ctx.fill();
@@ -2220,8 +2222,10 @@ defComp({
     { id:'XTAL2', label:'XTAL2', type:PIN_TYPE.SIGNAL, x:10, y:292, side:'left' },
     { id:'RST', label:'RST', type:PIN_TYPE.SIGNAL, x:190, y:292, side:'top' },
   ],
-  draw(inst, ctx, W, H) {
+  draw(ctx, inst, sim) {
+    const { x, y, width: W, height: H } = inst;
     ctx.save();
+    ctx.translate(x, y);
     ctx.fillStyle = '#1a0a3e';
     roundRect(ctx, 0, 0, W, H, 6);
     ctx.fill();
