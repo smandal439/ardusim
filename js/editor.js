@@ -1098,18 +1098,11 @@ DL2:    DJNZ R3, DL2
       if (closeBtn) {
         closeBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          const keys = Object.keys(this.files);
-          if (keys.length <= 1) {
-            if (window.App && window.App.showToast) window.App.showToast('Cannot close the last file', 'warning');
+          if (Object.keys(this.files).length <= 1) {
+            if (window.App?.showToast) window.App.showToast('Cannot close the last file', 'warning');
             return;
           }
-          if (name === this.activeFile) {
-            const idx = keys.indexOf(name);
-            const next = keys[idx + 1] || keys[idx - 1];
-            this.openFile(next);
-          }
-          this._renderTabs();
-          this._renderFileExplorer();
+          this.deleteFile(name);
         });
       }
 
