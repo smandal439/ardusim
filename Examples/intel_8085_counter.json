@@ -1,14 +1,176 @@
 {
-  "id": "intel_8085_counter",
+ "id": "intel_8085_counter",
   "name": "Intel 8085 Binary Counter",
   "icon": "🔌",
   "desc": "Intel 8085 - 8-bit binary counter on PB port. Outputs incrementing count (0-255) with visual LED pattern.",
-  "tags": ["8085", "assembly", "counter", "LED"],
+  "tags": [
+    "8085",
+    "assembly",
+    "counter",
+    "LED"
+  ],
   "circuit": {
     "components": [
-      { "id": "b1", "type": "intel_8085", "x": 200, "y": 100 }
+      {
+        "id": "b1",
+        "type": "intel_8085",
+        "x": 200,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "8085"
+        }
+      },
+      {
+        "id": "comp_1789928450945_rchw6",
+        "type": "multi_led_array",
+        "x": -10,
+        "y": 170,
+        "rotation": 0,
+        "props": {
+          "label": "8-LED ARRAY"
+        }
+      }
     ],
-    "wires": []
+    "wires": [
+      {
+        "id": "wire_1789928494505_scsgb",
+        "from": {
+          "instId": "b1",
+          "pinId": "PB.7"
+        },
+        "to": {
+          "instId": "comp_1789928450945_rchw6",
+          "pinId": "l1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789928496127_mqc0l",
+        "from": {
+          "instId": "comp_1789928450945_rchw6",
+          "pinId": "l2"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "PB.6"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789928497954_t9qax",
+        "from": {
+          "instId": "b1",
+          "pinId": "PB.5"
+        },
+        "to": {
+          "instId": "comp_1789928450945_rchw6",
+          "pinId": "l3"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789928500128_09bb3",
+        "from": {
+          "instId": "comp_1789928450945_rchw6",
+          "pinId": "l4"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "PB.4"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789928501677_uxebo",
+        "from": {
+          "instId": "b1",
+          "pinId": "PB.3"
+        },
+        "to": {
+          "instId": "comp_1789928450945_rchw6",
+          "pinId": "l5"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789928503271_s3g1f",
+        "from": {
+          "instId": "comp_1789928450945_rchw6",
+          "pinId": "l6"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "PB.2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789928504829_iqka0",
+        "from": {
+          "instId": "b1",
+          "pinId": "PB.1"
+        },
+        "to": {
+          "instId": "comp_1789928450945_rchw6",
+          "pinId": "l7"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789928506687_v9fvx",
+        "from": {
+          "instId": "comp_1789928450945_rchw6",
+          "pinId": "l8"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "PB.0"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1789928512605_g54dq",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "comp_1789928450945_rchw6",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
   },
-  "code": "; Intel 8085 - 8-bit Binary Counter on PB\n; Connect 8 LEDs from PB.0-PB.7 to GND\n; Each LED shows one bit of the counter\n\n        MVI A, FFH       ; All PB pins = output\n        OUT 00H           ; Configure PB direction\n        MVI B, 00H       ; B = counter value\n\nLOOP:   MOV A, B         ; Copy counter to A\n        OUT 01H           ; Output to PB port\n        INR B            ; Increment counter (wraps at 255)\n        CALL DELAY        ; Wait between counts\n        JMP LOOP\n\nDELAY:  MVI D, 08H       ; Moderate delay\nDL1:    MVI E, 0FFH\nDL2:    DCR E\n        JNZ DL2\n        DCR D\n        JNZ DL1\n        RET"
+  "files": {
+    "sketch.ino": "; Intel 8085 - 8-bit Binary Counter on PB\n; Connect 8 LEDs from PB.0-PB.7 to GND\n; Each LED shows one bit of the counter\n\n        MVI A, FFH       ; All PB pins = output\n        OUT 00H           ; Configure PB direction\n        MVI B, 00H       ; B = counter value\n\nLOOP:   MOV A, B         ; Copy counter to A\n        OUT 01H           ; Output to PB port\n        INR B            ; Increment counter (wraps at 255)\n        CALL DELAY        ; Wait between counts\n        JMP LOOP\n\nDELAY:  MVI D, 08H       ; Moderate delay\nDL1:    MVI E, 0FFH\nDL2:    DCR E\n        JNZ DL2\n        DCR D\n        JNZ DL1\n        RET"
+  }
 }

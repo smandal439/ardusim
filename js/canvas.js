@@ -4555,6 +4555,28 @@ class CircuitCanvas {
         continue;
       }
 
+      // 1c. Intel 8085 / 8051 Pins
+      if (inst.type === 'intel_8085' || inst.type === 'intel_8051') {
+        const pinId = current.pinId;
+        if (pinId === 'GND' || pinId === 'GND1' || pinId === 'GND2') {
+          grounds.push({ type: 'gnd', instId: inst.id, pinId, resistance: current.resistance });
+        } else if (pinId === 'VCC' || pinId === 'VCC2' || pinId === 'VCC5') {
+          sources.push({ type: '5v', voltage: 5.0, rawVal: 255, resistance: current.resistance });
+        } else {
+          const pinNum = this._pinToNumber(pinId);
+          const pinKey = `pin_${pinNum}`;
+          const sim = window.ArduinoSim;
+          const rawVal = sim && sim.pinStates ? (sim.pinStates[pinKey] || 0) : 0;
+          if (rawVal > 0) {
+            const voltage = 5.0 * (rawVal > 1 ? (rawVal / 255) : 1.0);
+            sources.push({ type: 'digital', pinNum, pinKey, voltage, rawVal, resistance: current.resistance });
+          } else {
+            grounds.push({ type: 'digital_low', pinNum, pinKey, resistance: current.resistance });
+          }
+        }
+        continue;
+      }
+
       // 2. Power and Ground components
       if (inst.type === 'power_5v') {
         sources.push({ type: '5v', voltage: 5.0, rawVal: 255, resistance: current.resistance });
@@ -4780,12 +4802,15 @@ class CircuitCanvas {
     if (inst.type === 'esp32_devkit_v1') {
       return pinId === 'GND1' || pinId === 'GND2' || pinId === 'GND';
     }
+    if (inst.type === 'intel_8085' || inst.type === 'intel_8051') {
+      return pinId === 'GND' || pinId === 'GND1' || pinId === 'GND2';
+    }
     if (inst.type === 'power_gnd') return true;
     if (inst.type === 'bench_power_supply') return pinId === 'GND' || pinId === 'GND_5V';
     if (inst.type === 'mb102_power') return pinId === 'gnd_t' || pinId === 'gnd_b' || pinId === 'aux_gnd';
     if (inst.type === 'battery') return pinId === 'neg';
     // Arduino / LPC2148 digital pin LOW acts as ground
-    if (inst.type === 'arduino_uno' || inst.type === 'arduino_nano' || inst.type === 'esp32_devkit_v1' || inst.type === 'lpc2148') {
+    if (inst.type === 'arduino_uno' || inst.type === 'arduino_nano' || inst.type === 'esp32_devkit_v1' || inst.type === 'lpc2148' || inst.type === 'intel_8085' || inst.type === 'intel_8051') {
       const pinNum = this._pinToNumber(pinId);
       if (pinNum != null) {
         const sim = window.ArduinoSim;
@@ -5130,7 +5155,7 @@ class CircuitCanvas {
     // If the source is a board but the wire target is a sensor (not a board),
     // read from pinStates directly — sensors like LM35 write ADC values there.
     const fromInst = this.components.find(c => c.id === fromInstId);
-    if (fromInst && (fromInst.type === 'arduino_uno' || fromInst.type === 'arduino_nano' || fromInst.type === 'esp32_devkit_v1' || fromInst.type === 'lpc2148' || fromInst.type === 'stm32f746_disco')) {
+    if (fromInst && (fromInst.type === 'arduino_uno' || fromInst.type === 'arduino_nano' || fromInst.type === 'esp32_devkit_v1' || fromInst.type === 'lpc2148' || fromInst.type === 'stm32f746_disco' || fromInst.type === 'intel_8085' || fromInst.type === 'intel_8051')) {
       const boardPn = this._pinToNumber(pinId);
       const sim = window.ArduinoSim;
       return (sim && sim.pinStates) ? (sim.pinStates[`pin_${boardPn}`] || 0) : 0;

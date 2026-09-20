@@ -956,7 +956,9 @@ void loop() {
       const laStatus = document.getElementById('la-status');
       if (laStatus && this.la && !this.la.paused) {
         const samples = this.la.channels.reduce((n, ch) => n + (this.la.data[ch.pin]?.length || 0), 0);
-        laStatus.textContent = `Running · ${samples} samples`;
+        const tb = this.la.timebase;
+        const tbStr = tb < 1 ? (tb * 1000).toFixed(0) + 'µs' : tb < 1000 ? tb.toFixed(0) + 'ms' : (tb / 1000).toFixed(1) + 's';
+        laStatus.textContent = `Running · ${samples} samples · ${tbStr}/div`;
       }
     };
 

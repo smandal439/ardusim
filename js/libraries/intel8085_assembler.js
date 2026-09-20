@@ -1,7 +1,7 @@
 ﻿'use strict';
 window.Intel8085Assembler = (function () {
   var REG = { A: 7, B: 0, C: 1, D: 2, E: 3, H: 5, L: 6, M: 7 };
-  var RP_LXI = { B: 0, D: 1, H: 3, SP: 3 };
+  var RP_LXI = { B: 0, D: 1, H: 2, SP: 3 };
   var RP_PP = { B: 0, D: 1, H: 2, PSW: 3 };
   var REG_BASE = { ADD: 0x80, ADC: 0x88, SUB: 0x90, SBB: 0x98, ANA: 0xA0, XRA: 0xA8, ORA: 0xB0, CMP: 0xB8 };
 
@@ -153,6 +153,10 @@ window.Intel8085Assembler = (function () {
           var lrp = (parts[idx] || '').toUpperCase();
           if (!(lrp in RP_LXI)) { err(i, 'Invalid LXI pair: ' + lrp); continue; }
           var ld = parseNum(parts[idx + 1] || '');
+          if (ld === null) {
+            var lbl = (parts[idx + 1] || '').trim().toUpperCase();
+            if (labels[lbl] !== undefined) ld = labels[lbl];
+          }
           if (ld === null) { err(i, 'Invalid LXI data'); continue; }
           out.push(0x01 + RP_LXI[lrp] * 0x10);
           out.push(ld & 0xFF); out.push((ld >> 8) & 0xFF); pc += 3; continue;
@@ -161,6 +165,10 @@ window.Intel8085Assembler = (function () {
         var mem16 = { LDA: 0x3A, STA: 0x32, LHLD: 0x2A, SHLD: 0x22 };
         if (mn in mem16) {
           var av = parseNum(parts[idx] || '');
+          if (av === null) {
+            var lbl = (parts[idx] || '').trim().toUpperCase();
+            if (labels[lbl] !== undefined) av = labels[lbl];
+          }
           if (av === null) { err(i, 'Invalid address'); continue; }
           out.push(mem16[mn]); out.push(av & 0xFF); out.push((av >> 8) & 0xFF); pc += 3; continue;
         }

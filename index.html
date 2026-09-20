@@ -835,7 +835,11 @@
                         <button class="serial-btn la-preset-btn" id="btn-la-i2c" title="Set CH1=SCL, CH2=SDA">I2C</button>
                         <button class="serial-btn la-preset-btn" id="btn-la-uart" title="Set CH1=TX, CH2=RX">UART</button>
                         <label class="serial-label">Time/div: <select class="serial-select" id="la-timebase">
-                                <option value="50">50ms</option><option value="100">100ms</option>
+                                <option value="0.05">50µs</option><option value="0.1">100µs</option>
+                                <option value="0.2">200µs</option><option value="0.5">500µs</option>
+                                <option value="1">1ms</option><option value="5">5ms</option>
+                                <option value="10">10ms</option><option value="50">50ms</option>
+                                <option value="100">100ms</option>
                                 <option value="200" selected>200ms</option><option value="500">500ms</option>
                                 <option value="1000">1s</option><option value="2000">2s</option>
                             </select> </label>

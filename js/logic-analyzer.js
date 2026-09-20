@@ -27,9 +27,10 @@ class LogicAnalyzer {
     /* Timing */
     this.timebase = 200; // ms per division
     this.gridDivs = 10;
+    this.sampleInterval = 0; // simulation-time ms between samples (0 = every change)
 
     /* Data — ring buffer per channel */
-    this.maxSamples = 4000;
+    this.maxSamples = 100000;
     this.data = {};
     this.channels.forEach(ch => { this.data[ch.pin] = []; });
 
@@ -50,7 +51,7 @@ class LogicAnalyzer {
 
     /* RAF */
     this._rafId = null;
-    this._lastSampleTime = 0;
+    this._lastSimTime = 0;
 
     this._ro = new ResizeObserver(() => this._resize());
     this._ro.observe(canvasEl.parentElement || canvasEl);
@@ -253,8 +254,8 @@ class LogicAnalyzer {
       }
     }
 
-    // Filter edges within cursor range (with 1ms tolerance)
-    const margin = 1;
+    // Filter edges within cursor range (with adaptive tolerance)
+    const margin = dt * 0.001; // 0.1% of cursor range
     const rangeEdges = edges.filter(e => e.t >= tA - margin && e.t <= tB + margin);
 
     // Count rising edges in range
@@ -310,9 +311,9 @@ class LogicAnalyzer {
   /* ── Called every simulation tick ── */
   sample(simTime, pinStates) {
     if (this.paused) return;
-    const now = performance.now();
-    if (now - this._lastSampleTime < 10) return;
-    this._lastSampleTime = now;
+    /* Only deduplicate if sampleInterval > 0; otherwise record every change */
+    if (this.sampleInterval > 0 && (simTime - this._lastSimTime) < this.sampleInterval) return;
+    this._lastSimTime = simTime;
 
     const states = (pinStates && typeof pinStates === 'object') ? pinStates : {};
 
@@ -348,6 +349,14 @@ class LogicAnalyzer {
       }
     }
     return null;
+  }
+
+  /* Format time value with appropriate unit (µs / ms / s) */
+  _formatTime(tMs) {
+    if (tMs < 0.001) return (tMs * 1e6).toFixed(0) + 'ns';
+    if (tMs < 1) return (tMs * 1e3).toFixed(1) + 'µs';
+    if (tMs < 1000) return tMs.toFixed(1) + 'ms';
+    return (tMs / 1000).toFixed(2) + 's';
   }
 
   getProbes() {
@@ -485,7 +494,7 @@ class LogicAnalyzer {
         ctx.fillStyle = 'rgba(255,255,255,0.25)';
         ctx.font = '7px JetBrains Mono, monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(`${t.toFixed(0)}ms`, x + (plotW / this.gridDivs) / 2, H - 3);
+        ctx.fillText(this._formatTime(t), x + (plotW / this.gridDivs) / 2, H - 3);
       }
     }
 
@@ -528,8 +537,8 @@ class LogicAnalyzer {
     let started = false;
     for (let i = 0; i < data.length; i++) {
       const pt = data[i];
-      if (pt.t < startT - 100) continue;
-      if (pt.t > endT + 100) break;
+      if (pt.t < startT - windowMs * 0.1) continue;
+      if (pt.t > endT + windowMs * 0.1) break;
 
       const x = labelW + ((pt.t - startT) / windowMs) * plotW;
       const y = pt.v ? yHigh + yPad : yLow - yPad;
@@ -647,7 +656,7 @@ class LogicAnalyzer {
         ctx.globalAlpha = 0.8;
         ctx.font = 'bold 8px JetBrains Mono, monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(`A: ${this.cursorA.toFixed(1)}ms`, xA, H - 2);
+        ctx.fillText(`A: ${this._fmtTime(this.cursorA)}`, xA, H - 2);
         ctx.globalAlpha = 1;
       }
     }
@@ -658,7 +667,7 @@ class LogicAnalyzer {
         ctx.globalAlpha = 0.8;
         ctx.font = 'bold 8px JetBrains Mono, monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(`B: ${this.cursorB.toFixed(1)}ms`, xB, H - 2);
+        ctx.fillText(`B: ${this._fmtTime(this.cursorB)}`, xB, H - 2);
         ctx.globalAlpha = 1;
       }
     }
@@ -726,7 +735,8 @@ class LogicAnalyzer {
   _fmtTime(ms) {
     if (ms >= 1000) return (ms / 1000).toFixed(2) + 's';
     if (ms >= 1) return ms.toFixed(2) + 'ms';
-    return (ms * 1000).toFixed(0) + 'μs';
+    if (ms >= 0.001) return (ms * 1000).toFixed(1) + 'µs';
+    return (ms * 1e6).toFixed(0) + 'ns';
   }
 
   _fmtFreq(hz) {
@@ -739,7 +749,9 @@ class LogicAnalyzer {
     ctx.fillStyle = this.TEXT_COLOR;
     ctx.font = '8px JetBrains Mono, monospace';
     ctx.textAlign = 'right';
-    ctx.fillText(`${this.timebase}ms/div · ${activeChannels.length} ch`, W - 8, 12);
+    const tb = this.timebase;
+    const tbStr = tb < 1 ? (tb * 1000).toFixed(0) + 'µs' : tb < 1000 ? tb + 'ms' : (tb / 1000).toFixed(1) + 's';
+    ctx.fillText(`${tbStr}/div · ${activeChannels.length} ch`, W - 8, 12);
 
     // Measurement instructions
     if (this.cursorA === null && this.cursorB === null) {
@@ -772,9 +784,23 @@ class LogicAnalyzer {
       D14: 14, D15: 15, D16: 16, D17: 17, D18: 18, D19: 19,
       D21: 21, D22: 22, D23: 23, D25: 25, D26: 26, D27: 27,
       D32: 32, D33: 33, D34: 34, D35: 35, D36: 36, D39: 39,
-      'SDA': 18, 'SCL': 19, 'RX (D0)': 0, 'TX (D1)': 1,
+      'SDA': 18, 'SCL': 19, 'RX (D1)': 0, 'TX (D1)': 1,
       'SDA (GPIO21)': 21, 'SCL (GPIO22)': 22,
       'TX0 (GPIO1)': 1, 'RX0 (GPIO3)': 3,
+      'PA.0': 200, 'PA.1': 201, 'PA.2': 202, 'PA.3': 203,
+      'PA.4': 204, 'PA.5': 205, 'PA.6': 206, 'PA.7': 207,
+      'PB.0': 210, 'PB.1': 211, 'PB.2': 212, 'PB.3': 213,
+      'PB.4': 214, 'PB.5': 215, 'PB.6': 216, 'PB.7': 217,
+      'PC.0': 220, 'PC.1': 221, 'PC.2': 222, 'PC.3': 223,
+      'PC.4': 224, 'PC.5': 225, 'PC.6': 226, 'PC.7': 227,
+      'P0.0': 200, 'P0.1': 201, 'P0.2': 202, 'P0.3': 203,
+      'P0.4': 204, 'P0.5': 205, 'P0.6': 206, 'P0.7': 207,
+      'P1.0': 210, 'P1.1': 211, 'P1.2': 212, 'P1.3': 213,
+      'P1.4': 214, 'P1.5': 215, 'P1.6': 216, 'P1.7': 217,
+      'P2.0': 220, 'P2.1': 221, 'P2.2': 222, 'P2.3': 223,
+      'P2.4': 224, 'P2.5': 225, 'P2.6': 226, 'P2.7': 227,
+      'P3.0': 230, 'P3.1': 231, 'P3.2': 232, 'P3.3': 233,
+      'P3.4': 234, 'P3.5': 235, 'P3.6': 236, 'P3.7': 237,
     };
     return map[name] !== undefined ? map[name] : null;
   }
@@ -792,7 +818,11 @@ class LogicAnalyzer {
   }
 
   setTimebase(ms) {
-    this.timebase = parseInt(ms) || 200;
+    this.timebase = parseFloat(ms) || 200;
+    /* Auto-adjust max samples to fill 5 screen-worth of data */
+    const windowMs = this.timebase * this.gridDivs;
+    const minSamples = Math.max(1000, Math.ceil(windowMs / Math.max(this.timebase * 0.01, 0.01)) * 5);
+    this.maxSamples = Math.min(200000, minSamples);
   }
 
   clear() {
