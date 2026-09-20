@@ -136,27 +136,23 @@ window.Intel8085Assembler = (function () {
         }
         // MOV
         if (mn === 'MOV') {
-          var ops = (parts[idx] || '').toUpperCase().split(',');
-          if (ops.length < 2) { err(i, 'MOV needs 2 operands'); continue; }
-          var d = REG[ops[0].trim()], s = REG[ops[1].trim()];
+          var d = REG[(parts[idx] || '').toUpperCase()], s = REG[(parts[idx + 1] || '').toUpperCase()];
           if (d === undefined || s === undefined) { err(i, 'Invalid MOV operands'); continue; }
           out.push(0x40 + d * 8 + s); pc++; continue;
         }
         // MVI
         if (mn === 'MVI') {
-          var mviOps = (parts[idx] || '').toUpperCase().split(',');
-          var mr = mviOps[0].trim();
+          var mr = (parts[idx] || '').toUpperCase();
           if (!(mr in REG)) { err(i, 'Invalid MVI register: ' + mr); continue; }
-          var md = parseNum(mviOps[1] || '');
+          var md = parseNum(parts[idx + 1] || '');
           if (md === null) { err(i, 'Invalid MVI data'); continue; }
           out.push(0x06 + REG[mr] * 8); out.push(md & 0xFF); pc += 2; continue;
         }
         // LXI
         if (mn === 'LXI') {
-          var lxiOps = (parts[idx] || '').toUpperCase().split(',');
-          var lrp = lxiOps[0].trim();
+          var lrp = (parts[idx] || '').toUpperCase();
           if (!(lrp in RP_LXI)) { err(i, 'Invalid LXI pair: ' + lrp); continue; }
-          var ld = parseNum(lxiOps[1] || '');
+          var ld = parseNum(parts[idx + 1] || '');
           if (ld === null) { err(i, 'Invalid LXI data'); continue; }
           out.push(0x01 + RP_LXI[lrp] * 0x10);
           out.push(ld & 0xFF); out.push((ld >> 8) & 0xFF); pc += 3; continue;
@@ -214,6 +210,7 @@ window.Intel8085Assembler = (function () {
     runPass();
     var pass1 = output.slice();
     // Pass 2 (labels now collected)
+    errors = [];
     output = runPass();
     // Apply fixups
     for (var f = 0; f < fixups.length; f++) {

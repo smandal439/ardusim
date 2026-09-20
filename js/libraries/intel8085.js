@@ -15,7 +15,11 @@ window.ArduinoLibs['Intel8085'] = {
     } catch (e) { return '//__ASM_ERROR__\n' + JSON.stringify({ error: e.message }); }
     if (result.errors && result.errors.length > 0) {
       return '//__ASM_ERROR__\n' + JSON.stringify({ error: result.errors.map(function(e) { return 'Line ' + e.line + ': ' + e.message; }).join('\n') }); }
-    return '//__8085_ASM_DATA__\n' + JSON.stringify({hex: result.hex, binary: result.binary});
+    var bytes = [];
+    for (var k in result.code) { bytes.push(result.code[k] & 0xFF); }
+    var hex = bytes.map(function(b) { return ('0' + b.toString(16)).slice(-2).toUpperCase(); }).join(' ');
+    var binary = String.fromCharCode.apply(null, bytes);
+    return '//__8085_ASM_DATA__\n' + JSON.stringify({hex: hex, binary: binary});
   },
   runtime: function (self) {
     var cpu = null;
