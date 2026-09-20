@@ -2571,7 +2571,8 @@ _newProject() {
         this._activeView = null;
         this._updateViewButtons();
       }
-      if (this.editor) this.editor.layout();
+      const em = window.EditorManager;
+      if (em?.editor?.layout) em.editor.layout();
     }
   }
 
