@@ -7,7 +7,7 @@
 
 const DSP = (() => {
 
-  /* ════════════ HANN WINDOW ════════════ */
+  /* ------------ HANN WINDOW ------------ */
   function hannWindow(N) {
     const w = new Float64Array(N);
     for (let n = 0; n < N; n++) {
@@ -16,7 +16,7 @@ const DSP = (() => {
     return w;
   }
 
-  /* ════════════ RADIX-2 FFT (Cooley-Tukey) ════════════ */
+  /* ------------ RADIX-2 FFT (Cooley-Tukey) ------------ */
   // Input: interleaved real[] and imag[] arrays (length must be power of 2)
   // In-place Cooley-Tukey decimation-in-time FFT
   function fft(re, im) {
@@ -60,7 +60,7 @@ const DSP = (() => {
     }
   }
 
-  /* ════════════ INVERSE FFT ════════════ */
+  /* ------------ INVERSE FFT ------------ */
   function ifft(re, im) {
     const N = re.length;
     // Conjugate, run FFT, conjugate, scale
@@ -72,7 +72,7 @@ const DSP = (() => {
     }
   }
 
-  /* ════════════ FFT COMPUTE ════════════ */
+  /* ------------ FFT COMPUTE ------------ */
   // Takes raw time-domain samples, applies window, runs FFT
   // Returns { magnitude: Float64Array, phase: Float64Array, freqAxis: Float64Array }
   function computeFFT(samples, sampleRate) {
@@ -108,7 +108,7 @@ const DSP = (() => {
     return { magnitude, phase, freqAxis, fftN, sampleRate };
   }
 
-  /* ════════════ MEASUREMENT ALGORITHMS ════════════ */
+  /* ------------ MEASUREMENT ALGORITHMS ------------ */
 
   function measureVpp(samples) {
     if (!samples || samples.length === 0) return 0;
@@ -264,7 +264,7 @@ const DSP = (() => {
     return Math.sqrt(harmonicPower) / fundPower * 100;
   }
 
-  /* ════════════ SPECTRUM HELPERS ════════════ */
+  /* ------------ SPECTRUM HELPERS ------------ */
 
   // Downsample FFT magnitude to display bins
   function downsampleSpectrum(magnitude, targetBins) {
@@ -295,7 +295,7 @@ const DSP = (() => {
     return result;
   }
 
-  /* ════════════ MATH OPERATIONS ════════════ */
+  /* ------------ MATH OPERATIONS ------------ */
 
   function mathAdd(ch1, ch2) {
     const len = Math.min(ch1.length, ch2.length);
@@ -325,7 +325,7 @@ const DSP = (() => {
     return result;
   }
 
-  /* ════════════ CURSOR HELPERS ════════════ */
+  /* ------------ CURSOR HELPERS ------------ */
 
   function interpolateSample(samples, times, targetTime) {
     if (!samples || samples.length < 2) return 0;
@@ -342,7 +342,7 @@ const DSP = (() => {
     return samples[lo] + frac * (samples[hi] - samples[lo]);
   }
 
-  /* ════════════ PUBLIC API ════════════ */
+  /* ------------ PUBLIC API ------------ */
   return {
     hannWindow,
     fft,

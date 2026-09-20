@@ -1,6 +1,6 @@
-/* ═══════════════════════════════════════════════════════
+/* -------------------------------------------------------
    storage.js — Save / Load / Share / Auto-save
-   ═══════════════════════════════════════════════════════ */
+   ------------------------------------------------------- */
 
 'use strict';
 
@@ -178,9 +178,9 @@ const StorageManager = {
     this.showToast('Project downloaded!', 'success');
   },
 
-  /* ═══════════════════════════════════════════════════════
+  /* -------------------------------------------------------
      Minimal ZIP file generator (STORE + DEFLATE via pako)
-     ═══════════════════════════════════════════════════════ */
+     ------------------------------------------------------- */
   _createZipBlob(files) {
     // files: Array<{ name: string, data: string }>
     // Returns a Blob of a valid ZIP file (STORE method, no compression)

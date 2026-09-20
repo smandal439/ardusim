@@ -1,8 +1,8 @@
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* -------------------------------------------------------
    canvas.js — Circuit Canvas (HTML5 Canvas, drag/drop, wiring, pan/zoom)
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  ------------------------------------------------------- */
 
-'use strict';
+'use strict'; 
 
 /* â”€â”€ Hoisted IC output-pin tables (used by _readDigitalInput / _readAnalogInput) â”€â”€ */
 const IC_OUTPUT_MAP = {
@@ -13,7 +13,7 @@ const IC_OUTPUT_MAP = {
   ic_74hc32: { pins: ['Y1', 'Y2', 'Y3', 'Y4'], activeLow: [] },
   ic_74hc595: { pins: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'], activeLow: [] },
   ic_74hc138: { pins: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'], activeLow: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'] },
-  ic_74hc245: { pins: ['A1','A2','A3','A4','A5','A6','A7','A8','B1','B2','B3','B4','B5','B6','B7','B8'], activeLow: [] },
+  ic_74hc245: { pins: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'], activeLow: [] },
   ic_74hc74: { pins: ['Q1', 'Q1n', 'Q2', 'Q2n'], activeLow: ['Q1n', 'Q2n'] },
   ic_74hc165: { pins: ['Q7', 'Q7n'], activeLow: ['Q7n'] },
   ic_74hc193: { pins: ['QA', 'QB', 'QC', 'QD', 'CO', 'BO'], activeLow: ['CO', 'BO'] },
@@ -30,7 +30,7 @@ const IC_OUTPUT_PIN_LIST = {
   ic_74hc32: ['Y1', 'Y2', 'Y3', 'Y4'],
   ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'],
   ic_74hc138: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'],
-  ic_74hc245: ['A1','A2','A3','A4','A5','A6','A7','A8','B1','B2','B3','B4','B5','B6','B7','B8'],
+  ic_74hc245: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
   ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
   ic_74hc165: ['Q7', 'Q7n'],
   ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],
@@ -95,7 +95,7 @@ class CircuitCanvas {
     this._tipKey = null;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• RESIZE â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------- RESIZE -------------- */
   _resize() {
     const w = this.wrapper.clientWidth;
     const h = this.wrapper.clientHeight;
@@ -108,7 +108,7 @@ class CircuitCanvas {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• RENDER â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------- RENDER -------------- */
   _render() {
     const { ctx, canvas, zoom, panX, panY } = this;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -200,7 +200,7 @@ class CircuitCanvas {
     const sim2 = window.App && window.App.sim2;
     if (!sim2) return sim1;
     if (boards.length < 2) return sim1;
-    const boardTypes = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148'];
+    const boardTypes = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'intel_8085', 'intel_8051'];
     if (boardTypes.includes(inst.type)) {
       const idx = boards.indexOf(inst);
       return idx === 1 ? sim2 : sim1;
@@ -319,7 +319,7 @@ class CircuitCanvas {
       }
 
       // Pin label (only when zoomed in enough) — boards have baked-in labels
-      const isBoard = inst.type === 'arduino_uno' || inst.type === 'esp32_devkit_v1' || inst.type === 'arduino_nano' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148';
+      const isBoard = inst.type === 'arduino_uno' || inst.type === 'esp32_devkit_v1' || inst.type === 'arduino_nano' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148' || inst.type === 'intel_8085' || inst.type === 'intel_8051';
       if (this.zoom >= 1 && !isBoard) {
         ctx.fillStyle = '#888';
         ctx.font = `${8 / this.zoom}px Inter, sans-serif`;
@@ -416,7 +416,7 @@ class CircuitCanvas {
         if (!wSegs || wSegs.length < 2) continue;
         for (let i = 1; i < pts.length - 1; i++) {
           for (let j = 0; j < wSegs.length - 1; j++) {
-            if (this._segHitsSeg(pts[i].x, pts[i].y, pts[i+1].x, pts[i+1].y, wSegs[j].x, wSegs[j].y, wSegs[j+1].x, wSegs[j+1].y)) {
+            if (this._segHitsSeg(pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y, wSegs[j].x, wSegs[j].y, wSegs[j + 1].x, wSegs[j + 1].y)) {
               penalty += 0.5;
             }
           }
@@ -1134,10 +1134,10 @@ class CircuitCanvas {
     const defs = window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS;
     if (!defs) return null;
     const keyMap = [
-      ['1','2','3','A'],
-      ['4','5','6','B'],
-      ['7','8','9','C'],
-      ['*','0','#','D']
+      ['1', '2', '3', 'A'],
+      ['4', '5', '6', 'B'],
+      ['7', '8', '9', 'C'],
+      ['*', '0', '#', 'D']
     ];
     const btnW = 24, btnH = 20, startX = 14, startY = 14, gapX = 6, gapY = 6;
     for (const inst of this.components) {
@@ -1160,26 +1160,26 @@ class CircuitCanvas {
     if (!defs) return null;
     const buttons = [
       { label: 'CH\u2212', code: 0x45, row: 0, col: 0 },
-      { label: 'CH',      code: 0x46, row: 0, col: 1 },
-      { label: 'CH+',     code: 0x47, row: 0, col: 2 },
-      { label: 'PREV',    code: 0x44, row: 1, col: 0 },
-      { label: 'NEXT',    code: 0x40, row: 1, col: 1 },
-      { label: 'PLAY',    code: 0x43, row: 1, col: 2 },
-      { label: '\u2212',  code: 0x07, row: 2, col: 0 },
-      { label: '+',       code: 0x15, row: 2, col: 1 },
-      { label: 'EQ',      code: 0x09, row: 2, col: 2 },
-      { label: '0',       code: 0x16, row: 3, col: 0 },
-      { label: '100+',    code: 0x19, row: 3, col: 1 },
-      { label: '200+',    code: 0x0D, row: 3, col: 2 },
-      { label: '1',       code: 0x0C, row: 4, col: 0 },
-      { label: '2',       code: 0x18, row: 4, col: 1 },
-      { label: '3',       code: 0x5E, row: 4, col: 2 },
-      { label: '4',       code: 0x08, row: 5, col: 0 },
-      { label: '5',       code: 0x1C, row: 5, col: 1 },
-      { label: '6',       code: 0x5A, row: 5, col: 2 },
-      { label: '7',       code: 0x42, row: 6, col: 0 },
-      { label: '8',       code: 0x52, row: 6, col: 1 },
-      { label: '9',       code: 0x4A, row: 6, col: 2 },
+      { label: 'CH', code: 0x46, row: 0, col: 1 },
+      { label: 'CH+', code: 0x47, row: 0, col: 2 },
+      { label: 'PREV', code: 0x44, row: 1, col: 0 },
+      { label: 'NEXT', code: 0x40, row: 1, col: 1 },
+      { label: 'PLAY', code: 0x43, row: 1, col: 2 },
+      { label: '\u2212', code: 0x07, row: 2, col: 0 },
+      { label: '+', code: 0x15, row: 2, col: 1 },
+      { label: 'EQ', code: 0x09, row: 2, col: 2 },
+      { label: '0', code: 0x16, row: 3, col: 0 },
+      { label: '100+', code: 0x19, row: 3, col: 1 },
+      { label: '200+', code: 0x0D, row: 3, col: 2 },
+      { label: '1', code: 0x0C, row: 4, col: 0 },
+      { label: '2', code: 0x18, row: 4, col: 1 },
+      { label: '3', code: 0x5E, row: 4, col: 2 },
+      { label: '4', code: 0x08, row: 5, col: 0 },
+      { label: '5', code: 0x1C, row: 5, col: 1 },
+      { label: '6', code: 0x5A, row: 5, col: 2 },
+      { label: '7', code: 0x42, row: 6, col: 0 },
+      { label: '8', code: 0x52, row: 6, col: 1 },
+      { label: '9', code: 0x4A, row: 6, col: 2 },
     ];
     const btnW = 29, btnH = 20, gapX = 6, gapY = 4.5;
     const startX = 10, startY = 38;
@@ -1238,7 +1238,7 @@ class CircuitCanvas {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• COMPONENT MANAGEMENT â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------- COMPONENT MANAGEMENT -------------- */
   addComponent(type, worldX, worldY) {
     const def = window.ArduinoComponents.COMPONENT_DEFS[type];
     if (!def) return null;
@@ -1562,7 +1562,7 @@ class CircuitCanvas {
     if (this.onPlacingChanged) this.onPlacingChanged(false);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• EVENT HANDLING â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------- EVENT HANDLING -------------- */
   _bindEvents() {
     const canvas = this.canvas;
 
@@ -1583,7 +1583,7 @@ class CircuitCanvas {
     document.addEventListener('mouseup', () => { if (this.mode === 'panning') this.mode = 'idle'; });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TOUCH HANDLERS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* --------------- TOUCH HANDLERS --------------- */
   _onTouchStart(e) {
     if (e.touches.length === 2) {
       e.preventDefault();
@@ -2258,7 +2258,7 @@ class CircuitCanvas {
     if (e.ctrlKey && e.key === 'a') { e.preventDefault(); this.selectAll(); }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• WIRING â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------- WIRING -------------- */
   _startWiring(inst, pin, wx, wy) {
     this.mode = 'wiring';
     this.wiringFrom = { inst, pin, wx, wy };
@@ -2277,7 +2277,7 @@ class CircuitCanvas {
     if (hint) hint.classList.add('hidden');
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• HIT TESTING â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------- HIT TESTING -------------- */
   _hitTestPin(wx, wy) {
     const { COMPONENT_DEFS } = window.ArduinoComponents;
     const radius = Math.max(8, 10 / this.zoom);
@@ -2298,7 +2298,7 @@ class CircuitCanvas {
     return null;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• PIN TOOLTIP â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------- PIN TOOLTIP -------------- */
   _pinTypeLabel(type) {
     const map = {
       digital: 'Digital I/O',
@@ -2484,7 +2484,7 @@ class CircuitCanvas {
     return Math.sqrt((px - nx) ** 2 + (py - ny) ** 2);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• UTILITIES â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------- UTILITIES -------------- */
   _toWorld(sx, sy) {
     return {
       x: (sx - this.panX) / this.zoom,
@@ -2588,7 +2588,7 @@ class CircuitCanvas {
     if (this.onCompChanged) this.onCompChanged();
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• VIEWPORT â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------- VIEWPORT -------------- */
   fitView() {
     if (this.components.length === 0) {
       this.panX = this.canvas.width / 2 - 200;
@@ -2621,7 +2621,7 @@ class CircuitCanvas {
   zoomIn() { this.zoom = Math.min(4, this.zoom * 1.2); this._updateZoomDisplay(); }
   zoomOut() { this.zoom = Math.max(0.1, this.zoom / 1.2); this._updateZoomDisplay(); }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• HISTORY â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------- HISTORY -------------- */
   _serializeState() {
     return JSON.stringify({ components: this.components, wires: this.wires }, (key, val) => {
       if (key === '_componentInstance') return undefined;
@@ -2671,7 +2671,7 @@ class CircuitCanvas {
     } catch (e) { }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• SERIALIZE â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------- SERIALIZE -------------- */
   serialize() {
     return {
       components: this.components.map(c => ({
@@ -2789,7 +2789,7 @@ class CircuitCanvas {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â• SIM HELPERS â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* -------------- SIM HELPERS -------------- */
   // Get Arduino Uno instance (first one found)
   getArduinoInst() {
     return this.components.find(c => c.type === 'arduino_uno') || null;
@@ -2797,12 +2797,12 @@ class CircuitCanvas {
 
   // Get whichever microcontroller board instance is placed (first one found)
   getBoardInst() {
-    return this.components.find(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano' || c.type === 'stm32f746_disco' || c.type === 'lpc2148') || null;
+    return this.components.find(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano' || c.type === 'stm32f746_disco' || c.type === 'lpc2148' || c.type === 'intel_8085' || c.type === 'intel_8051') || null;
   }
 
   // Get all board instances on the canvas
   getAllBoardInsts() {
-    return this.components.filter(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano' || c.type === 'stm32f746_disco' || c.type === 'lpc2148');
+    return this.components.filter(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano' || c.type === 'stm32f746_disco' || c.type === 'lpc2148' || c.type === 'intel_8085' || c.type === 'intel_8051');
   }
 
   // Get board instance by index (0-based)
@@ -2844,7 +2844,7 @@ class CircuitCanvas {
     // (func_gen, sensors, etc.) propagate to pinStates ← _emitPinChange ← interrupts
     const sim = window.ArduinoSim;
     if (sim && this.engine.pinToNet) {
-      const arduinoTypes = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'stm32f746_disco', 'lpc2148'];
+      const arduinoTypes = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'stm32f746_disco', 'lpc2148', 'intel_8085', 'intel_8051'];
       for (const inst of this.components) {
         if (!arduinoTypes.includes(inst.type)) continue;
         const maxV = (inst.type === 'esp32_devkit_v1' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148') ? 3.3 : 5.0;
@@ -3264,7 +3264,7 @@ class CircuitCanvas {
               gain.connect(ctx.destination);
               osc.start();
               osc.stop(ctx.currentTime + 0.05);
-            } catch (e) {}
+            } catch (e) { }
           }
           break;
         }
@@ -3761,7 +3761,7 @@ class CircuitCanvas {
             // Parallel load A-H
             let val = 0;
             for (let i = 0; i < 8; i++) {
-              const pinId = ['A','E','F','G','H','Fn','Gn','Hn'][i];
+              const pinId = ['A', 'E', 'F', 'G', 'H', 'Fn', 'Gn', 'Hn'][i];
               if (read(pinId)) val |= (1 << i);
             }
             inst.runtimeState.bits = val;
@@ -3798,9 +3798,9 @@ class CircuitCanvas {
           } else if (pl === 0) {
             // Parallel load from A,B,C,D,DD inputs
             let val = 0;
-            if (read('A'))  val |= 1;
-            if (read('B'))  val |= 2;
-            if (read('C'))  val |= 4;
+            if (read('A')) val |= 1;
+            if (read('B')) val |= 2;
+            if (read('C')) val |= 4;
             if (read('DD')) val |= 8;
             inst.runtimeState.count = val & 0xF;
           } else {
@@ -3838,7 +3838,7 @@ class CircuitCanvas {
           if (read('C')) bcd |= 4;
           if (read('D')) bcd |= 8;
           // 7-segment decode table (active LOW: 0=on, 1=off) — segments a-g
-          const segTable = [0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x7C,0x39,0x5E,0x79,0x71];
+          const segTable = [0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71];
           const lt = read('LT');
           const bi = read('BI');
           let segments;
@@ -3872,7 +3872,7 @@ class CircuitCanvas {
           };
           const ei = read('EI'); // active LOW enable
           // Read inputs I0-I7 (active LOW: 0 = active)
-          const inputs = [0,1,2,3,4,5,6,7].map(i => !read(`I${i}`));
+          const inputs = [0, 1, 2, 3, 4, 5, 6, 7].map(i => !read(`I${i}`));
           let activeIdx = -1;
           for (let i = 7; i >= 0; i--) {
             if (inputs[i]) { activeIdx = i; break; }
@@ -3977,17 +3977,17 @@ class CircuitCanvas {
           if (elapsed > 0) {
             rs.second += Math.floor(elapsed / 1000);
             while (rs.second >= 60) { rs.second -= 60; rs.minute++; }
-            while (rs.second < 0)  { rs.second += 60; rs.minute--; }
+            while (rs.second < 0) { rs.second += 60; rs.minute--; }
             while (rs.minute >= 60) { rs.minute -= 60; rs.hour++; }
-            while (rs.minute < 0)  { rs.minute += 60; rs.hour--; }
-            while (rs.hour >= 24)  { rs.hour -= 24; rs.day++; }
-            while (rs.hour < 0)    { rs.hour += 24; rs.day--; }
+            while (rs.minute < 0) { rs.minute += 60; rs.hour--; }
+            while (rs.hour >= 24) { rs.hour -= 24; rs.day++; }
+            while (rs.hour < 0) { rs.hour += 24; rs.day--; }
             const daysInMonth = [31, (rs.year % 4 === 0 ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
             const maxDay = daysInMonth[(rs.month - 1)] || 31;
             while (rs.day > maxDay) { rs.day -= maxDay; rs.month++; }
-            while (rs.day < 1)      { rs.month--; rs.day += (daysInMonth[(rs.month - 1)] || 31); }
+            while (rs.day < 1) { rs.month--; rs.day += (daysInMonth[(rs.month - 1)] || 31); }
             while (rs.month > 12) { rs.month -= 12; rs.year++; }
-            while (rs.month < 1)  { rs.month += 12; rs.year--; }
+            while (rs.month < 1) { rs.month += 12; rs.year--; }
           }
           break;
         }
@@ -4366,8 +4366,8 @@ class CircuitCanvas {
           const outPin = this._getConnectedPinNum(inst.id, 'OUT');
           if (outPin !== null && window.ArduinoSim && window.ArduinoSim.pinStates) {
             // Temperature in °C (default 25°C)
-            const temp = inst.runtimeState.temp !== undefined 
-              ? inst.runtimeState.temp 
+            const temp = inst.runtimeState.temp !== undefined
+              ? inst.runtimeState.temp
               : (inst.props.temp ?? 25);
 
             // LM35 outputs 10mV/°C (0.01V/°C). Map to 10-bit ADC (0-1023) based on a 5.0V VREF:
@@ -4390,11 +4390,11 @@ class CircuitCanvas {
           if (!sim || !sim.pinStates) break;
 
           const dinPn = this._getConnectedPinNum(inst.id, 'DIN');
-          const csPn  = this._getConnectedPinNum(inst.id, 'CS');
+          const csPn = this._getConnectedPinNum(inst.id, 'CS');
           const clkPn = this._getConnectedPinNum(inst.id, 'CLK');
 
           const dinVal = dinPn !== null ? (sim.pinStates[`pin_${dinPn}`] ? 1 : 0) : this._readDigitalInput(inst.id, 'DIN');
-          const csVal  = csPn !== null ? (sim.pinStates[`pin_${csPn}`]  ? 1 : 0) : this._readDigitalInput(inst.id, 'CS');
+          const csVal = csPn !== null ? (sim.pinStates[`pin_${csPn}`] ? 1 : 0) : this._readDigitalInput(inst.id, 'CS');
           const clkVal = clkPn !== null ? (sim.pinStates[`pin_${clkPn}`] ? 1 : 0) : this._readDigitalInput(inst.id, 'CLK');
 
           if (!inst.runtimeState._spi) {
@@ -4408,7 +4408,7 @@ class CircuitCanvas {
             };
           }
           const spi = inst.runtimeState._spi;
-          const prevCs  = spi.prevCs;
+          const prevCs = spi.prevCs;
           const prevClk = spi.prevClk;
 
           if (prevCs === 1 && csVal === 0) {
@@ -4432,7 +4432,7 @@ class CircuitCanvas {
           }
 
           spi.prevClk = clkVal;
-          spi.prevCs  = csVal;
+          spi.prevCs = csVal;
           break;
         }
       }
@@ -4494,7 +4494,7 @@ class CircuitCanvas {
         const pinId = current.pinId;
         if (pinId === 'GND1' || pinId === 'GND2' || pinId === 'GND_D' || pinId === 'GND') {
           grounds.push({ type: 'gnd', instId: inst.id, pinId, resistance: current.resistance });
-        } else if (pinId === '5V' || pinId === 'VIN'||pinId === '5V2') {
+        } else if (pinId === '5V' || pinId === 'VIN' || pinId === '5V2') {
           sources.push({ type: '5v', voltage: 5.0, rawVal: 255, resistance: current.resistance });
         } else if (pinId === '3V3') {
           sources.push({ type: '3v3', voltage: 3.3, rawVal: 168, resistance: current.resistance });
@@ -5011,72 +5011,72 @@ class CircuitCanvas {
   //   return 0;
   // }
   _readDigitalInput(fromInstId, pinId, visited = new Set()) {
-  // Prevent infinite recursion loops across connected components
-  const visitKey = `${fromInstId}:${pinId}`;
-  if (visited.has(visitKey)) return 0;
-  visited.add(visitKey);
+    // Prevent infinite recursion loops across connected components
+    const visitKey = `${fromInstId}:${pinId}`;
+    if (visited.has(visitKey)) return 0;
+    visited.add(visitKey);
 
-  const wireTarget = this._getWireTarget(fromInstId, pinId);
-  if (!wireTarget) return 0;
+    const wireTarget = this._getWireTarget(fromInstId, pinId);
+    if (!wireTarget) return 0;
 
-  const other = wireTarget.inst;
-  const targetPin = wireTarget.pinId;
+    const other = wireTarget.inst;
+    const targetPin = wireTarget.pinId;
 
-  // 1. Power rails
-  if (other.type === 'power_5v') return 1;
-  if (other.type === 'power_gnd') return 0;
+    // 1. Power rails
+    if (other.type === 'power_5v') return 1;
+    if (other.type === 'power_gnd') return 0;
 
-  // 2. Pass-through components (Resistors)
-  if (other.type === 'resistor') {
-    const otherPin = targetPin === 'p1' ? 'p2' : 'p1';
-    return this._readDigitalInput(other.id, otherPin, visited);
-  }
-
-  // 3. Push buttons
-  if (other.type === 'push_button') {
-    const pressed = other.runtimeState && other.runtimeState.pressed;
-    if (pressed) {
-      const nextPin = (targetPin === 'p1' || targetPin === 'p2') ? 'p3' : 'p1';
-      return this._readDigitalInput(other.id, nextPin, visited);
+    // 2. Pass-through components (Resistors)
+    if (other.type === 'resistor') {
+      const otherPin = targetPin === 'p1' ? 'p2' : 'p1';
+      return this._readDigitalInput(other.id, otherPin, visited);
     }
-    // Unpressed: pass through adjacent terminal pairs (p1-p2 or p3-p4)
-    const pairMap = { p1: 'p2', p2: 'p1', p3: 'p4', p4: 'p3' };
-    return pairMap[targetPin] ? this._readDigitalInput(other.id, pairMap[targetPin], visited) : 0;
-  }
 
-  // 4. Analog signal sources (with 2.5V CMOS digital thresholding)
-  if (other.type === 'func_gen') {
-    const rs = other.runtimeState || {};
-    const v = targetPin === 'ch1_out' ? (rs.ch1_voltage || 0)
-            : targetPin === 'ch2_out' ? (rs.ch2_voltage || 0) : 0;
-    return v >= 2.5 ? 1 : 0;
-  }
-
-  if (other.type === 'potentiometer' && targetPin === 'wiper') {
-    const v = (other.runtimeState && other.runtimeState.voltage) || 0;
-    return v >= 2.5 ? 1 : 0;
-  }
-
-  // 5. Arduino Pin state bridge
-  const pn = this._getConnectedPinNum(fromInstId, pinId);
-  if (pn !== null) {
-    const sim = window.ArduinoSim;
-    return (sim && sim.pinStates && (sim.pinStates[`pin_${pn}`] || 0) > 0) ? 1 : 0;
-  }
-
-  // 6. Integrated Circuits with Active-LOW default handling
-  const icSpec = IC_OUTPUT_MAP[other.type];
-  if (icSpec && icSpec.pins.includes(targetPin)) {
-    const rs = other.runtimeState || {};
-    if (rs[targetPin] !== undefined) {
-      return rs[targetPin] > 0 ? 1 : 0;
+    // 3. Push buttons
+    if (other.type === 'push_button') {
+      const pressed = other.runtimeState && other.runtimeState.pressed;
+      if (pressed) {
+        const nextPin = (targetPin === 'p1' || targetPin === 'p2') ? 'p3' : 'p1';
+        return this._readDigitalInput(other.id, nextPin, visited);
+      }
+      // Unpressed: pass through adjacent terminal pairs (p1-p2 or p3-p4)
+      const pairMap = { p1: 'p2', p2: 'p1', p3: 'p4', p4: 'p3' };
+      return pairMap[targetPin] ? this._readDigitalInput(other.id, pairMap[targetPin], visited) : 0;
     }
-    // Default fallback: Active-LOW pins default to 1, others to 0
-    return icSpec.activeLow.includes(targetPin) ? 1 : 0;
-  }
 
-  return 0;
-}
+    // 4. Analog signal sources (with 2.5V CMOS digital thresholding)
+    if (other.type === 'func_gen') {
+      const rs = other.runtimeState || {};
+      const v = targetPin === 'ch1_out' ? (rs.ch1_voltage || 0)
+        : targetPin === 'ch2_out' ? (rs.ch2_voltage || 0) : 0;
+      return v >= 2.5 ? 1 : 0;
+    }
+
+    if (other.type === 'potentiometer' && targetPin === 'wiper') {
+      const v = (other.runtimeState && other.runtimeState.voltage) || 0;
+      return v >= 2.5 ? 1 : 0;
+    }
+
+    // 5. Arduino Pin state bridge
+    const pn = this._getConnectedPinNum(fromInstId, pinId);
+    if (pn !== null) {
+      const sim = window.ArduinoSim;
+      return (sim && sim.pinStates && (sim.pinStates[`pin_${pn}`] || 0) > 0) ? 1 : 0;
+    }
+
+    // 6. Integrated Circuits with Active-LOW default handling
+    const icSpec = IC_OUTPUT_MAP[other.type];
+    if (icSpec && icSpec.pins.includes(targetPin)) {
+      const rs = other.runtimeState || {};
+      if (rs[targetPin] !== undefined) {
+        return rs[targetPin] > 0 ? 1 : 0;
+      }
+      // Default fallback: Active-LOW pins default to 1, others to 0
+      return icSpec.activeLow.includes(targetPin) ? 1 : 0;
+    }
+
+    return 0;
+  }
 
   _readAnalogInput(fromInstId, pinId) {
     const wireTarget = this._getWireTarget(fromInstId, pinId);
@@ -5143,7 +5143,7 @@ class CircuitCanvas {
       ic_74hc32: ['Y1', 'Y2', 'Y3', 'Y4'],
       ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'],
       ic_74hc138: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'],
-      ic_74hc245: ['A1','A2','A3','A4','A5','A6','A7','A8','B1','B2','B3','B4','B5','B6','B7','B8'],
+      ic_74hc245: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
       ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
       ic_74hc165: ['Q7', 'Q7n'],
       ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],

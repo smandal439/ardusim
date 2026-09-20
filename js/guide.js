@@ -1,12 +1,12 @@
-/* ════════════════════════════════════════════════════════════════════════════════════════════════
+/* ------------------------------------------------------------------------------------------------
    guide.js — Home page, Component Reference & Tutorials
    Enriched component descriptions, pin configurations, wiring
    examples and step-by-step guides for ArduSim.
-════════════════════════════════════════════════════════════════════════════════════════════════ */
+------------------------------------------------------------------------------------------------ */
 
 'use strict';
 
-/* ═══ Pin type → human readable label ═══ */
+/* --- Pin type → human readable label --- */
 const GUIDE_PIN_TYPE_LABELS = {
   digital: 'Digital',
   analog: 'Analog',
@@ -16,14 +16,14 @@ const GUIDE_PIN_TYPE_LABELS = {
   signal: 'Signal',
 };
 
-/* ════════════════════════════════════════════════════════════════════════════════════════════════
+/* ------------------------------------------------------------------------------------------------
    COMPONENT REFERENCE DATA
    Every entry documents one component: what it does, every pin,
    configurable properties, typical wiring and sample code.
-════════════════════════════════════════════════════════════════════════════════════════════════ */
+------------------------------------------------------------------------------------------------ */
 
 const GUIDE_COMPONENTS = {
-  /* ═══ BOARDS ═══ */
+  /* --- BOARDS --- */
   arduino_uno: {
     id: 'arduino_uno',
     name: 'Arduino Uno R3',
@@ -202,7 +202,7 @@ void SystemClock_Config(void) {
     exampleId: 'blink',
   },
 
-  /* ═══ OUTPUTS ═══ */
+  /* --- OUTPUTS --- */
   led: {
     id: 'led',
     name: 'LED',
@@ -452,7 +452,7 @@ void loop(){}`,
     exampleId: 'oled_ssd1306',
   },
 
-  /* ═══ INPUTS ═══ */
+  /* --- INPUTS --- */
   push_button: {
     id: 'push_button',
     name: 'Push Button',
@@ -594,7 +594,7 @@ void loop() {
     exampleId: 'keypad_interfacing',
   },
 
-  /* ═══ ACTUATORS ═══ */
+  /* --- ACTUATORS --- */
   servo: {
     id: 'servo',
     name: 'Servo Motor',
@@ -675,7 +675,7 @@ void loop(){
     exampleId: 'relay_control',
   },
 
-  /* ═══ SENSORS ═══ */
+  /* --- SENSORS --- */
   dht11: {
     id: 'dht11',
     name: 'DHT11 Sensor',
@@ -826,7 +826,7 @@ void loop() {
     exampleId: 'lm35_temperature',
   },
 
-  /* ═══ PASSIVES ═══ */
+  /* --- PASSIVES --- */
   resistor: {
     id: 'resistor',
     name: 'Resistor',
@@ -873,7 +873,7 @@ void loop() {
     code: `// Breadboards are passive; they only route connections.`,
   },
 
-  /* ═══ POWER ═══ */
+  /* --- POWER --- */
   power_5v: {
     id: 'power_5v',
     name: '5V Power',
@@ -904,7 +904,7 @@ void loop() {
     code: `// Ground rails need no code.`,
   },
 
-  /* ═══ INSTRUMENTS ═══ */
+  /* --- INSTRUMENTS --- */
   multimeter: {
     id: 'multimeter',
     name: 'Digital Multimeter',
@@ -956,7 +956,7 @@ void loop() {
     exampleId: 'func_gen_led',
   },
 
-  /* ═══ NEOPIXEL EXTENSIONS ═══ */
+  /* --- NEOPIXEL EXTENSIONS --- */
   neopixel_strip: {
     id: 'neopixel_strip',
     name: 'NeoPixel Strip (8 LED)',
@@ -1042,7 +1042,7 @@ void loop() {
     exampleId: 'neopixel_color_cycle',
   },
 
-  /* ═══ ICs ═══ */
+  /* --- ICs --- */
   ic_555: {
     id: 'ic_555',
     name: '555 Timer IC',
@@ -1098,7 +1098,7 @@ void loop() {
     exampleId: 'max7219',
   },
 
-  /* ═══ DISPLAYS ═══ */
+  /* --- DISPLAYS --- */
   ili9341: {
     id: 'ili9341',
     name: 'ILI9341 TFT Display',
@@ -1142,7 +1142,7 @@ void loop() {}`,
     exampleId: 'ili9341',
   },
 
-  /* ═══ SENSORS ═══ */
+  /* --- SENSORS --- */
   ir_obstacle: {
     id: 'ir_obstacle',
     name: 'IR Obstacle Sensor',
@@ -1227,7 +1227,7 @@ void loop(){
 }`,
   },
 
-  /* ═══ PASSIVES ═══ */
+  /* --- PASSIVES --- */
   diode_1n4007: {
     id: 'diode_1n4007',
     name: '1N4007 Diode',
@@ -1245,7 +1245,7 @@ void loop(){
 // Anode (+) -> Diode -> Cathode (-) -> Load`,
   },
 
-  /* ═══ ACTUATORS ═══ */
+  /* --- ACTUATORS --- */
   l298n: {
     id: 'l298n',
     name: 'L298N Motor Driver',
@@ -1318,7 +1318,7 @@ void loop(){
     exampleId: 'servo_continuous_spin',
   },
 
-  /* ═══ INPUT ═══ */
+  /* --- INPUT --- */
   rotary_encoder: {
     id: 'rotary_encoder',
     name: 'Rotary Encoder EC11',
@@ -1390,7 +1390,7 @@ void loop(){
     exampleId: 'dip_switch_binary',
   },
 
-  /* ═══ SENSORS / COMMUNICATION ═══ */
+  /* --- SENSORS / COMMUNICATION --- */
   hc05: {
     id: 'hc05',
     name: 'HC-05 Bluetooth',
@@ -1649,7 +1649,7 @@ void loop() {
     code: 'void setup() { pinMode(13, OUTPUT); }\nvoid loop() {\n  digitalWrite(13, HIGH); delay(500);\n  digitalWrite(13, LOW);  delay(500);\n}',
   },
 
-  /* ═══ OUTPUT / DISPLAYS ═══ */
+  /* --- OUTPUT / DISPLAYS --- */
   lcd2004_i2c: {
     id: 'lcd2004_i2c', name: 'LCD 20x4 (I2C)', icon: '\u{1f5a5}\ufe0f', category: 'Output',
     longDesc: 'A 20-character \u00d7 4-line character LCD display with an integrated PCF8574 I2C backpack. Uses only 2 data pins (SDA, SCL) instead of the usual 6+ parallel pins.',
@@ -1695,7 +1695,7 @@ void loop() {
     code: '#include <Adafruit_GFX.h>\n#include <RGBmatrixPanel.h>\n#define CLK 11  #define LAT 10\n#define OE 9   #define A A0\n#define B A1   #define C A2\n#define D A3\nRGBmatrixPanel matrix(A,B,C,D,CLK,LAT,OE, false, 64);\nvoid setup() {\n  matrix.begin();\n  matrix.drawPixel(10, 10, matrix.Color333(7, 0, 0));\n}\nvoid loop() {}',
   },
 
-  /* ═══ ACTUATORS ═══ */
+  /* --- ACTUATORS --- */
   stepper_28byj: {
     id: 'stepper_28byj', name: '28BYJ-48 Stepper', icon: '\u2699\ufe0f', category: 'Actuators',
     longDesc: 'A 5 V 4-phase unipolar stepper motor with built-in ULN2003-style driver coils. 2048 steps per revolution (5.625\u00b0/step). Low power, widely used in robotics and CNC projects.',
@@ -1706,7 +1706,7 @@ void loop() {
     code: '#include <Stepper.h>\nStepper motor(2048, 8, 10, 9, 11);\nvoid setup() {\n  motor.setSpeed(10);\n  motor.step(2048);  // one full revolution\n}\nvoid loop() {}',
   },
 
-  /* ═══ AUDIO ═══ */
+  /* --- AUDIO --- */
   max98357a: {
     id: 'max98357a', name: 'MAX98357A I2S Amp', icon: '\u{1f50a}', category: 'Audio',
     longDesc: 'A 3.2 W monaural Class-D I2S audio amplifier with digital input, flexible gain control (3\u201315 dB), and BTL differential output. Converts I2S digital audio to analog speaker output.',
@@ -1732,7 +1732,7 @@ void loop() {
     code: '// Speaker needs an amplifier — see MAX98357A example.',
   },
 
-  /* ═══ SENSORS ═══ */
+  /* --- SENSORS --- */
   mpu6050: {
     id: 'mpu6050', name: 'MPU6050 6-Axis IMU', icon: '\u{1f9ed}', category: 'Sensors',
     longDesc: 'GY-521 MPU-6050 module combining a 3-axis gyroscope and 3-axis accelerometer with a 16-bit ADC. Communicates via I2C. Features live 3D orientation visualisation.',
@@ -1803,7 +1803,7 @@ void loop() {
     code: '#include "HX711.h"\nHX711 scale(D2, D3); // DT, SCK\n\nvoid setup() {\n  Serial.begin(9600);\n  scale.set_scale(2280);\n  scale.tare();\n}\nvoid loop() {\n  float weight = scale.get_units(10);\n  Serial.print("Weight: ");\n  Serial.print(weight, 1);\n  Serial.println(" kg");\n  delay(300);\n}',
   },
 
-  /* ═══ PASSIVES ═══ */
+  /* --- PASSIVES --- */
   breadboard_small: {
     id: 'breadboard_small', name: 'Breadboard (Small)', icon: '\u{1f7e6}', category: 'Passive',
     longDesc: '170 tie-point mini breadboard with 16 columns split into upper (a\u2013e) and lower (f\u2013j) halves plus 4 power rails. Ideal for DIP IC circuits and small prototypes.',
@@ -1814,7 +1814,7 @@ void loop() {
     code: '// Breadboard is passive — no code needed.',
   },
 
-  /* ═══ POWER ═══ */
+  /* --- POWER --- */
   mb102_power: {
     id: 'mb102_power', name: 'MB102 Power Supply', icon: '\u26a1', category: 'Power',
     longDesc: 'MB102 breadboard power supply module with DC barrel jack and USB input. Dual AMS1117 regulators provide switchable 3.3 V / 5 V output to top and bottom breadboard rails independently.',
@@ -1839,7 +1839,7 @@ void loop() {
     code: '// Bench supply is passive \u2014 no code needed. Connect to your circuit.',
   },
 
-  /* ═══ COMMUNICATION ═══ */
+  /* --- COMMUNICATION --- */
   wifi_module: {
     id: 'wifi_module', name: 'Wi-Fi Hotspot', icon: '\u{1f4f6}', category: 'Communication',
     longDesc: 'Simulated Wi-Fi access point (hotspot). The ESP32 must match this component\'s SSID and password to connect to WiFi. Without this component on the canvas, WiFi.begin() will fail with "SSID not found". Place it on the canvas and configure its SSID and password to enable WiFi connectivity.',
@@ -1850,7 +1850,7 @@ void loop() {
     code: '// Place a Wi-Fi Hotspot component on the canvas.\n// Configure its SSID and password in the properties panel.\n// Then in your Arduino code:\n#include <WiFi.h>\nWiFi.begin("ArduSim_Network", "password123");\nwhile (WiFi.status() != WL_CONNECTED) {\n  delay(500);\n  Serial.print(".");\n}\nSerial.println("Connected!");',
   },
 
-  /* ═══ DIGITAL ICs ═══ */
+  /* --- DIGITAL ICs --- */
   ic_74hc00: {
     id: 'ic_74hc00', name: '74HC00 Quad NAND', icon: '\u2b97', category: 'Digital ICs',
     longDesc: 'Quad 2-input NAND gate. Each gate outputs LOW only when both inputs are HIGH. Four independent gates in a single 14-pin DIP package.',
@@ -2089,7 +2089,7 @@ void loop() {
     code: '// Op-amp is analog — configure gain with external R1, R2 resistors.\n// Non-inverting: Vout = Vin \u00d7 (1 + R2/R1)',
   },
 
-  /* ═══ INSTRUMENTS ═══ */
+  /* --- INSTRUMENTS --- */
   dso_4ch: {
     id: 'dso_4ch', name: '2-Ch Digital Oscilloscope', icon: '\u223f', category: 'Instruments',
     longDesc: '2-channel digital storage oscilloscope with phosphor display, AC/DC coupling, adjustable trigger, auto-measurement, cursors, math channel, and spectrum/XY display modes.',
@@ -2100,7 +2100,7 @@ void loop() {
     code: '// Oscilloscope is a measurement instrument — no Arduino code needed.',
   },
 
-  /* ═══ NEW COMPONENTS ═══ */
+  /* --- NEW COMPONENTS --- */
   bh1750: {
     id: 'bh1750',
     name: 'BH1750 Light Sensor',
@@ -2237,14 +2237,14 @@ void loop() {
   },
 };
 
-/* ════════════════════════════════════════════════════════════════════════════════════════════════
+/* ------------------------------------------------------------------------------------------------
    LIBRARY REFERENCE DATA
    Each entry documents an Arduino library supported by ArduSim:
    what it does, include directive, key API functions, and example code.
-════════════════════════════════════════════════════════════════════════════════════════════════ */
+------------------------------------------------------------------------------------------------ */
 
 const GUIDE_LIBRARIES = [
-  /* ═══ CORE ═══ */
+  /* --- CORE --- */
   {
     id: 'wire',
     name: 'Wire (I2C)',
@@ -2343,7 +2343,7 @@ const GUIDE_LIBRARIES = [
     exampleId: null,
   },
 
-  /* ═══ DISPLAY ═══ */
+  /* --- DISPLAY --- */
   {
     id: 'liquidcrystal',
     name: 'LiquidCrystal',
@@ -2446,7 +2446,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, & Wire, -1);
     exampleId: 'oled_ssd1306',
   },
 
-  /* ═══ SENSORS ═══ */
+  /* --- SENSORS --- */
   {
     id: 'dht',
     name: 'DHT',
@@ -2517,7 +2517,7 @@ NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
     exampleId: 'ultrasonic',
   },
 
-  /* ═══ ACTUATORS ═══ */
+  /* --- ACTUATORS --- */
   {
     id: 'servo',
     name: 'Servo',
@@ -2585,7 +2585,7 @@ Stepper myStepper(STEPS_PER_REV, 8, 10, 9, 11);
     exampleId: 'stepper_motor',
   },
 
-  /* ═══ WIRELESS ═══ */
+  /* --- WIRELESS --- */
   {
     id: 'wifi',
     name: 'WiFi',
@@ -2742,7 +2742,7 @@ const char* ssid = "YourSSID";
     exampleId: 'bluetooth_serial_bridge',
   },
 
-  /* ═══ IOT PROTOCOLS ═══ */
+  /* --- IOT PROTOCOLS --- */
   {
     id: 'pubsubclient',
     name: 'PubSubClient (MQTT)',
@@ -2884,7 +2884,7 @@ PubSubClient client(espClient);
     exampleId: null,
   },
 
-  /* ═══ AUDIO ═══ */
+  /* --- AUDIO --- */
   {
     id: 'i2s',
     name: 'I2S',
@@ -3158,7 +3158,7 @@ song3.pcm`,
     ],
   },
 
-  /* ═══ MISC ═══ */
+  /* --- MISC --- */
   {
     id: 'arduinojson',
     name: 'ArduinoJson',
@@ -3366,11 +3366,11 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
   },
 ];
 
-/* ════════════════════════════════════════════════════════════════════════════════════════════════
+/* ------------------------------------------------------------------------------------------------
    TUTORIALS / HOW TO USE
    Each guide explains a concept step-by-step and maps to a built-in
    example you can load with one click.
-════════════════════════════════════════════════════════════════════════════════════════════════ */
+------------------------------------------------------------------------------------------------ */
 
 const GUIDE_TUTORIALS = [
   {
@@ -3714,9 +3714,9 @@ int ledPin = 13;
   },
 ];
 
-/* ════════════════════════════════════════════════════════════════════════════════════════════════
+/* ------------------------------------------------------------------------------------------------
    HOME PAGE CONTENT
-════════════════════════════════════════════════════════════════════════════════════════════════ */
+------------------------------------------------------------------------------------------------ */
 
 const GUIDE_HOME = {
   tagline: 'Simulate Arduino circuits in your browser — no install, no hardware.',
@@ -3738,9 +3738,9 @@ const GUIDE_HOME = {
   cta: 'View Full Guide →',
 };
 
-/* ════════════════════════════════════════════════════════════════════════════════════════════════
+/* ------------------------------------------------------------------------------------------------
    GUIDE MANAGER — renders Home / Components / Tutorials
-════════════════════════════════════════════════════════════════════════════════════════════════ */
+------------------------------------------------------------------------------------------------ */
 
 class GuideManager {
   constructor() {
@@ -3752,7 +3752,7 @@ class GuideManager {
     this._bindReady = false;
   }
 
-  /* ═══ bind header tabs / close (called when the app is ready) ═══ */
+  /* --- bind header tabs / close (called when the app is ready) --- */
   bind() {
     if (this._bindReady) return;
     this._bindReady = true;
@@ -3761,7 +3761,7 @@ class GuideManager {
     });
   }
 
-  /* ═══ open / close ═══ */
+  /* --- open / close --- */
   open(tab = 'home') {
     const overlay = document.getElementById('guide-overlay');
     if (!overlay) return;
@@ -3781,7 +3781,7 @@ class GuideManager {
     return !!(overlay && !overlay.classList.contains('hidden'));
   }
 
-  /* ═══ tab switching ═══ */
+  /* --- tab switching --- */
   _switchTab(tab) {
     this._activeTab = tab;
     document.querySelectorAll('.guide-tab').forEach(t =>
@@ -3798,7 +3798,7 @@ class GuideManager {
     if (body) body.scrollTop = 0;
   }
 
-  /* ═══ Home ═══ */
+  /* --- Home --- */
   _renderHome() {
     const root = document.getElementById('guide-pane-home');
     if (!root) return;
@@ -3875,7 +3875,7 @@ class GuideManager {
     bind('#gh-go-guide', () => window.open('docs/ArduSim_Guide.html', '_blank'));
   }
 
-  /* ═══ Component reference ═══ */
+  /* --- Component reference --- */
   _renderComponents() {
     const root = document.getElementById('guide-pane-components');
     if (!root) return;
@@ -4091,7 +4091,7 @@ class GuideManager {
     });
   }
 
-  /* ═══ Libraries ═══ */
+  /* --- Libraries --- */
   _renderLibraries() {
     const root = document.getElementById('guide-pane-libraries');
     if (!root) return;
@@ -4219,7 +4219,7 @@ class GuideManager {
     });
   }
 
-  /* ═══ Tutorials ═══ */
+  /* --- Tutorials --- */
   _renderTutorials() {
     const root = document.getElementById('guide-pane-tutorials');
     if (!root) return;
@@ -4318,7 +4318,7 @@ class GuideManager {
     });
   }
 
-  /* ═══ actions that talk to the app ═══ */
+  /* --- actions that talk to the app --- */
   _placeComponent(id) {
     const app = window.App;
     if (app && app.canvas && app.canvas.startPlacing) {
@@ -4341,7 +4341,7 @@ class GuideManager {
     const done = () => {
       if (btn) {
         const old = btn.textContent;
-        btn.textContent = '═ ✓ Copied';
+        btn.textContent = '- ✓ Copied';
         setTimeout(() => { btn.textContent = old; }, 1500);
       }
     };
@@ -4364,7 +4364,7 @@ class GuideManager {
     done();
   }
 
-  /* ═══ helpers ═══ */
+  /* --- helpers --- */
   _esc(s) {
     return String(s == null ? '' : s).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
   }
@@ -4382,7 +4382,7 @@ class GuideManager {
   }
 }
 
-/* ═══ expose ═══ */
+/* --- expose --- */
 window.GuideManager = new GuideManager();
 window.GuideManagerData = { GUIDE_COMPONENTS, GUIDE_TUTORIALS, GUIDE_HOME };
 window.GuidePinDescs = (function () {

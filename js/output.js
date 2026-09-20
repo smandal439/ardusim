@@ -1,8 +1,8 @@
-/* ═══════════════════════════════════════════════════════
+/* -------------------------------------------------------
    output.js — Compile / Debug Output panel
    Displays code errors, verify/compile results and runtime
    debug messages alongside the Serial Monitor.
-   ═══════════════════════════════════════════════════════ */
+   ------------------------------------------------------- */
 
 'use strict';
 

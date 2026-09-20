@@ -99,7 +99,7 @@ class App {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• GLOBAL ERROR HANDLING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- GLOBAL ERROR HANDLING ---------------------- */
   _initErrorHandlers() {
     window.addEventListener('error', (e) => {
       console.error('[ArduSim] Uncaught error:', e.error || e.message);
@@ -129,7 +129,7 @@ class App {
     this._hideLoadingOverlay();
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• UI BINDING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- UI BINDING ---------------------- */
   _bindUi() {
     const get = id => document.getElementById(id);
 
@@ -244,6 +244,8 @@ class App {
     zoomOutBtn?.addEventListener('click', () => this.canvas?.zoomOut());
     fitViewBtn?.addEventListener('click', () => this.canvas?.fitView());
     canvasFullscreenBtn?.addEventListener('click', () => this._toggleCanvasFullscreen());
+    const editorFullscreenBtn = get('btn-editor-fullscreen');
+    editorFullscreenBtn?.addEventListener('click', () => this._toggleEditorFullscreen());
     undoBtn?.addEventListener('click', () => this.canvas?.undo());
     redoBtn?.addEventListener('click', () => this.canvas?.redo());
     oscClearBtn?.addEventListener('click', () => this.osc?.clear());
@@ -424,6 +426,10 @@ class App {
           this._toggleCanvasFullscreen();
           return;
         }
+        if (document.body.classList.contains('editor-fullscreen')) {
+          this._toggleEditorFullscreen();
+          return;
+        }
         if (window.GuideManager?.isOpen?.()) {
           window.GuideManager.close();
           return;
@@ -457,7 +463,7 @@ class App {
     });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CANVAS INIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- CANVAS INIT ---------------------- */
   _initCanvas() {
     const canvasEl = document.getElementById('circuit-canvas');
     const wrapperEl = document.getElementById('canvas-wrapper');
@@ -486,10 +492,10 @@ class App {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• BOARD SELECTOR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- BOARD SELECTOR ---------------------- */
   _initBoardSelector() {
     const settings = window.StorageManager?.loadSettings?.() || {};
-    const board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148'].includes(settings.board) ? settings.board : 'arduino_uno';
+    const board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'intel_8085', 'intel_8051'].includes(settings.board) ? settings.board : 'arduino_uno';
     this.sim.setBoard(board);
     const sel = document.getElementById('board-select');
     if (sel) sel.value = board;
@@ -517,8 +523,8 @@ class App {
   }
 
   _setBoard(board) {
-    const b = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148'].includes(board) ? board : 'arduino_uno';
-    const boardName = b === 'esp32_devkit_v1' ? 'ESP32 DevKit V1' : b === 'arduino_nano' ? 'Arduino Nano' : b === 'stm32f746_disco' ? 'STM32F746G-DISCO' : b === 'lpc2148' ? 'LPC2148 SmartX' : 'Arduino Uno';
+    const b = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'intel_8085', 'intel_8051'].includes(board) ? board : 'arduino_uno';
+    const boardName = b === 'esp32_devkit_v1' ? 'ESP32 DevKit V1' : b === 'arduino_nano' ? 'Arduino Nano' : b === 'stm32f746_disco' ? 'STM32F746G-DISCO' : b === 'lpc2148' ? 'LPC2148 SmartX' : b === 'intel_8085' ? 'Intel 8085' : b === 'intel_8051' ? 'Intel 8051' : 'Arduino Uno';
     this.sim.setBoard(b);
     window.StorageManager?.saveSettings?.({ ...(window.StorageManager.loadSettings() || {}), board: b });
 
@@ -536,7 +542,7 @@ class App {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SERIAL INIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- SERIAL INIT ---------------------- */
   _initSerial() {
     if (window.SerialMonitorClass) {
       this.serial = new window.SerialMonitorClass();
@@ -545,7 +551,7 @@ class App {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• OUTPUT / DEBUG INIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- OUTPUT / DEBUG INIT ---------------------- */
   _initOutput() {
     if (window.OutputPanelClass) {
       this.output = new window.OutputPanelClass();
@@ -554,7 +560,7 @@ class App {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DUAL-BOARD SUPPORT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- DUAL-BOARD SUPPORT ---------------------- */
   _initSim2() {
     if (window.ArduinoSimulator) {
       this.sim2 = new window.ArduinoSimulator();
@@ -850,7 +856,7 @@ void loop() {
 }`;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SIMULATOR EVENTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- SIMULATOR EVENTS ---------------------- */
   _attachSimulatorEvents() {
     // Buffer serial output per-simulator so [Board] tag appears once per line
     this._serialBuf1 = '';
@@ -1417,7 +1423,7 @@ void loop() {
     };
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RUN / STOP / PAUSE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- RUN / STOP / PAUSE ---------------------- */
   async run() {
     if (!this.editor) return;
     const code = this.editor.getCombinedCode();
@@ -1567,7 +1573,7 @@ void loop() {
     this.editor?.formatCode();
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PROJECT NAME â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- PROJECT NAME ---------------------- */
   getProjectName() {
     return this._projectName || 'Untitled Project';
   }
@@ -1579,7 +1585,7 @@ void loop() {
     if (el) el.value = this._projectName;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SAVE / DOWNLOAD / LOAD / SHARE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- SAVE / DOWNLOAD / LOAD / SHARE ---------------------- */
   saveProject() {
     const files = this.editor?.getAllFiles?.() || { 'sketch.ino': '' };
     const board2Code = this._getBoard2Code();
@@ -1636,7 +1642,7 @@ void loop() {
     window.StorageManager?.shareUrl(files, circuitData, board2Code);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SAVED PROJECTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- SAVED PROJECTS ---------------------- */
   async _syncProjectsFromServer() {
     try {
       const result = await window.StorageManager?.syncFromServer?.();
@@ -1750,7 +1756,7 @@ _newProject() {
     this.output?.log('New project created', 'system');
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• AUTO-SAVE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- AUTO-SAVE ---------------------- */
   _triggerAutoSave() {
     if (!this._autoSaveDebounced) {
       this._autoSaveDebounced = window.Utils?.debounce((files, circuit, b2) => {
@@ -1766,7 +1772,7 @@ _newProject() {
     this._autoSaveDebounced(files, circuit, board2Code);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• COMPONENT LIBRARY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- COMPONENT LIBRARY ---------------------- */
   _renderComponentLibrary() {
     const container = document.getElementById('components-container');
     if (!container || !window.ArduinoComponents?.COMPONENT_CATALOG) return;
@@ -1887,6 +1893,8 @@ _newProject() {
 
   _filterComponents(term) {
     const query = (term || '').toLowerCase().replace(/[\s\-_]+/g, ' ');
+    const isSearching = query.length > 0;
+
     // Filter regular comp-items
     document.querySelectorAll('.comp-item:not(.comp-dropdown)').forEach(item => {
       const text = item.dataset.search || item.textContent.toLowerCase();
@@ -1903,10 +1911,20 @@ _newProject() {
       const hasVisibleDropdowns = Array.from(group.querySelectorAll('.comp-dropdown-item')).some(item => item.style.display !== 'none');
       const hasVisibleDropdown = group.querySelector('.comp-dropdown') && hasVisibleDropdowns;
       group.style.display = (hasVisibleItems || hasVisibleDropdown) ? '' : 'none';
+      // Auto-expand collapsed groups when searching, restore on clear
+      if (isSearching) {
+        group.classList.remove('collapsed');
+      } else {
+        const cat = group.querySelector('.comp-group-title')?.textContent?.trim();
+        if (cat) {
+          const cs = JSON.parse(localStorage.getItem('ardusim_comp_collapsed') || '{}');
+          if (cs[cat]) group.classList.add('collapsed');
+        }
+      }
     });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CANVAS SUMMARY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- CANVAS SUMMARY ---------------------- */
   _refreshCanvasSummary() {
     const compEl = document.getElementById('canvas-comp-count');
     const wireEl = document.getElementById('canvas-wire-count');
@@ -1917,7 +1935,7 @@ _newProject() {
     if (wireEl) wireEl.textContent = `${nw} wire${nw !== 1 ? 's' : ''}`;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RESTORE PROJECT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- RESTORE PROJECT ---------------------- */
   _restoreProject() {
     const project = window.StorageManager?.autoLoad?.();
     if (project) {
@@ -1960,7 +1978,7 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RUNNING STATE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- RUNNING STATE ---------------------- */
   _setRunningState(running) {
     this.isRunning = running;
     const runBtn   = document.getElementById('btn-run');
@@ -2000,7 +2018,7 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PIN MONITOR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- PIN MONITOR ---------------------- */
   _updatePinMonitor() {
     const grid = document.getElementById('pin-monitor-grid');
     if (!grid || !this.sim) return;
@@ -2049,6 +2067,8 @@ _newProject() {
     const esp32 = boardType === 'esp32_devkit_v1';
     const nano  = boardType === 'arduino_nano';
     const stm32 = boardType === 'stm32f746_disco';
+    const i8085 = boardType === 'intel_8085';
+    const i8051 = boardType === 'intel_8051';
     const unoPins = [
       { key: 'pin_0',  label: 'D0' },  { key: 'pin_1',  label: 'D1' },
       { key: 'pin_2',  label: 'D2' },  { key: 'pin_3',  label: 'D3~' },
@@ -2061,7 +2081,37 @@ _newProject() {
       { key: 'pin_16', label: 'A2' },  { key: 'pin_17', label: 'A3' },
       { key: 'pin_18', label: 'A4' },  { key: 'pin_19', label: 'A5' },
     ];
-    const pins = esp32 ? [
+    const pins = i8085 ? [
+      { key: 'pin_PA.0', label: 'PA0' }, { key: 'pin_PA.1', label: 'PA1' },
+      { key: 'pin_PA.2', label: 'PA2' }, { key: 'pin_PA.3', label: 'PA3' },
+      { key: 'pin_PA.4', label: 'PA4' }, { key: 'pin_PA.5', label: 'PA5' },
+      { key: 'pin_PA.6', label: 'PA6' }, { key: 'pin_PA.7', label: 'PA7' },
+      { key: 'pin_PB.0', label: 'PB0' }, { key: 'pin_PB.1', label: 'PB1' },
+      { key: 'pin_PB.2', label: 'PB2' }, { key: 'pin_PB.3', label: 'PB3' },
+      { key: 'pin_PB.4', label: 'PB4' }, { key: 'pin_PB.5', label: 'PB5' },
+      { key: 'pin_PB.6', label: 'PB6' }, { key: 'pin_PB.7', label: 'PB7' },
+      { key: 'pin_PC.0', label: 'PC0' }, { key: 'pin_PC.1', label: 'PC1' },
+      { key: 'pin_PC.2', label: 'PC2' }, { key: 'pin_PC.3', label: 'PC3' },
+      { key: 'pin_PC.4', label: 'PC4' }, { key: 'pin_PC.5', label: 'PC5' },
+      { key: 'pin_PC.6', label: 'PC6' }, { key: 'pin_PC.7', label: 'PC7' },
+    ] : i8051 ? [
+      { key: 'pin_P0.0', label: 'P0.0' }, { key: 'pin_P0.1', label: 'P0.1' },
+      { key: 'pin_P0.2', label: 'P0.2' }, { key: 'pin_P0.3', label: 'P0.3' },
+      { key: 'pin_P0.4', label: 'P0.4' }, { key: 'pin_P0.5', label: 'P0.5' },
+      { key: 'pin_P0.6', label: 'P0.6' }, { key: 'pin_P0.7', label: 'P0.7' },
+      { key: 'pin_P1.0', label: 'P1.0' }, { key: 'pin_P1.1', label: 'P1.1' },
+      { key: 'pin_P1.2', label: 'P1.2' }, { key: 'pin_P1.3', label: 'P1.3' },
+      { key: 'pin_P1.4', label: 'P1.4' }, { key: 'pin_P1.5', label: 'P1.5' },
+      { key: 'pin_P1.6', label: 'P1.6' }, { key: 'pin_P1.7', label: 'P1.7' },
+      { key: 'pin_P2.0', label: 'P2.0' }, { key: 'pin_P2.1', label: 'P2.1' },
+      { key: 'pin_P2.2', label: 'P2.2' }, { key: 'pin_P2.3', label: 'P2.3' },
+      { key: 'pin_P2.4', label: 'P2.4' }, { key: 'pin_P2.5', label: 'P2.5' },
+      { key: 'pin_P2.6', label: 'P2.6' }, { key: 'pin_P2.7', label: 'P2.7' },
+      { key: 'pin_P3.0', label: 'P3.0' }, { key: 'pin_P3.1', label: 'P3.1' },
+      { key: 'pin_P3.2', label: 'P3.2' }, { key: 'pin_P3.3', label: 'P3.3' },
+      { key: 'pin_P3.4', label: 'P3.4' }, { key: 'pin_P3.5', label: 'P3.5' },
+      { key: 'pin_P3.6', label: 'P3.6' }, { key: 'pin_P3.7', label: 'P3.7' },
+    ] : esp32 ? [
       { key: 'pin_2',  label: 'D2 · L' },  { key: 'pin_4',  label: 'D4' },
       { key: 'pin_5',  label: 'D5' },      { key: 'pin_12', label: 'D12' },
       { key: 'pin_13', label: 'D13' },     { key: 'pin_14', label: 'D14' },
@@ -2103,7 +2153,7 @@ _newProject() {
     });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• BEFORE UNLOAD GUARD â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- BEFORE UNLOAD GUARD ---------------------- */
   _setupBeforeUnloadGuard() {
     window.addEventListener('beforeunload', (e) => {
       if (window.StorageManager?.isDirty()) {
@@ -2114,7 +2164,7 @@ _newProject() {
     });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LOADING OVERLAY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- LOADING OVERLAY ---------------------- */
   _hideLoadingOverlay() {
     const overlay = document.getElementById('loading-overlay');
     if (!overlay) return;
@@ -2124,7 +2174,7 @@ _newProject() {
     }, 400);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• THEME â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- THEME ---------------------- */
   _toggleTheme(iconDark, iconLight) {
     const body = document.body;
     const isDark = body.classList.contains('dark-theme');
@@ -2150,7 +2200,7 @@ _newProject() {
     if (iconLight) iconLight.classList.toggle('hidden', darkMode);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• STATUS BAR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- STATUS BAR ---------------------- */
   _updateStatus(msg) {
     const el = document.getElementById('sim-status-text');
     if (el) el.textContent = msg;
@@ -2161,7 +2211,7 @@ _newProject() {
     if (el) el.textContent = `● ${msg}`;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- MODALS ---------------------- */
   _showModal(modalId) {
     const overlay = document.getElementById('modal-overlay');
     const modal   = document.getElementById(modalId);
@@ -2261,7 +2311,7 @@ _newProject() {
     this._closePropsModal();
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CONTEXT MENU â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- CONTEXT MENU ---------------------- */
   _showContextMenu(inst, x, y) {
     this._closeContextMenu();
     const menu = document.getElementById('canvas-context-menu');
@@ -2394,7 +2444,7 @@ _newProject() {
     if (menu) { menu.classList.add('hidden'); menu.classList.remove('active'); }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• HEADER DROPDOWNS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- HEADER DROPDOWNS ---------------------- */
   _closeHeaderDropdowns() {
     document.querySelectorAll('.hdr-dropdown.open').forEach(dd => {
       dd.classList.remove('open');
@@ -2409,7 +2459,7 @@ _newProject() {
     });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PANEL TOGGLES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- PANEL TOGGLES ---------------------- */
   _togglePanel(panelId, button, collapseTitle, expandTitle) {
     const panel = document.getElementById(panelId);
     if (!panel) return;
@@ -2475,10 +2525,10 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• VIEW FOCUS MODES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- VIEW FOCUS MODES ---------------------- */
   _setView(view) {
-    // Exit canvas fullscreen if active
-    document.body.classList.remove('canvas-fullscreen');
+    // Exit fullscreen modes if active
+    document.body.classList.remove('canvas-fullscreen', 'editor-fullscreen');
     if (this._activeView === view) {
       // Clicking the active view restores the default layout
       this._activeView = null;
@@ -2542,7 +2592,23 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DEFAULT LAYOUT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  _toggleEditorFullscreen() {
+    const isFullscreen = document.body.classList.toggle('editor-fullscreen');
+    const btn = document.getElementById('btn-editor-fullscreen');
+    if (btn) btn.title = isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen Editor (Esc to exit)';
+    if (isFullscreen) {
+      document.body.classList.remove('canvas-fullscreen');
+      if (this._activeView) {
+        document.body.classList.remove('view-code', 'view-circuit', 'view-serial');
+        this._activeView = null;
+        this._updateViewButtons();
+      }
+      const em = window.EditorManager;
+      if (em?.editor?.layout) em.editor.layout();
+    }
+  }
+
+  /* ---------------------- DEFAULT LAYOUT ---------------------- */
   _initDefaultLayout() {
     const LS_KEY = 'ardusim-layout';
     let saved = {};
@@ -2558,7 +2624,7 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PANEL RESIZERS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- PANEL RESIZERS ---------------------- */
   _initResizers() {
     const LS_KEY = 'ardusim-layout';
     let saved = {};
@@ -2589,7 +2655,9 @@ _newProject() {
         e.preventDefault();
         if (document.body.classList.contains('view-code') ||
             document.body.classList.contains('view-circuit') ||
-            document.body.classList.contains('view-serial')) return;
+            document.body.classList.contains('view-serial') ||
+            document.body.classList.contains('canvas-fullscreen') ||
+            document.body.classList.contains('editor-fullscreen')) return;
         const startX = e.clientX;
         const startW = panel.getBoundingClientRect().width;
         const minW = 120;
@@ -2629,7 +2697,9 @@ _newProject() {
         e.preventDefault();
         if (document.body.classList.contains('view-code') ||
             document.body.classList.contains('view-circuit') ||
-            document.body.classList.contains('view-serial')) return;
+            document.body.classList.contains('view-serial') ||
+            document.body.classList.contains('canvas-fullscreen') ||
+            document.body.classList.contains('editor-fullscreen')) return;
         if (bottomPanel.classList.contains('collapsed')) {
           bottomPanel.classList.remove('collapsed');
           document.body.classList.remove('bottom-collapsed');
@@ -2678,7 +2748,7 @@ _newProject() {
     if (button) button.textContent = paused ? 'Resume' : 'Pause';
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• VERIFY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- VERIFY ---------------------- */
   async verify() {
     if (!this.editor) return;
     const code = this.editor.getCombinedCode();
@@ -2716,14 +2786,14 @@ _newProject() {
     return false;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• OSCILLOSCOPE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- OSCILLOSCOPE ---------------------- */
   _initOscilloscope() {
     const oscCanvas = document.getElementById('oscilloscope-canvas');
     if (!oscCanvas || !window.OscilloscopeClass) return;
     this.osc = new window.OscilloscopeClass(oscCanvas);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DSO FULLSCREEN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- DSO FULLSCREEN ---------------------- */
   openDSOFullscreen(comp) {
     if (!window.DSOFullscreen) return;
     if (!this._dsoFS) {
@@ -2736,7 +2806,7 @@ _newProject() {
     if (this._dsoFS) this._dsoFS.close();
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LOGIC ANALYZER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- LOGIC ANALYZER ---------------------- */
   _initLogicAnalyzer() {
     const laCanvas = document.getElementById('logic-analyzer-canvas');
     if (!laCanvas || !window.LogicAnalyzerClass) return;
@@ -2745,7 +2815,7 @@ _newProject() {
     if (statusEl) statusEl.textContent = 'Ready';
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SERIAL PLOTTER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- SERIAL PLOTTER ---------------------- */
   _initPlotter() {
     const plotterCanvas = document.getElementById('plotter-canvas');
     if (!plotterCanvas || !window.SerialPlotterClass) return;
@@ -2760,13 +2830,13 @@ _newProject() {
     });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• WEB BROWSER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- WEB BROWSER ---------------------- */
   _initWebBrowser() {
     if (!window.WebBrowserClass) return;
     this.webBrowser = new window.WebBrowserClass();
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• EXAMPLES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- EXAMPLES ---------------------- */
   async _renderExamples() {
     const container = document.getElementById('examples-grid');
     if (!container) return;
@@ -2929,7 +2999,7 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PROPERTIES MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- PROPERTIES MODAL ---------------------- */
   openPropsModal(comp) {
     this._propsComp = comp;
     const title   = document.getElementById('modal-props-title');
@@ -3112,7 +3182,7 @@ _newProject() {
     this._propsComp = null;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TOAST STACK â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- TOAST STACK ---------------------- */
   showToast(msg, type = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -3145,7 +3215,7 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MOBILE SUPPORT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- MOBILE SUPPORT ---------------------- */
   _initMobile() {
     this._isMobile = window.matchMedia('(max-width: 768px)').matches;
     this._openSheet = null;
