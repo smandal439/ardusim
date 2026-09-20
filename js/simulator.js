@@ -197,12 +197,12 @@ class ArduinoSimulator {
     );
 
     // 4b. Plugin-specific transpile rules (BEFORE variable declarations)
-    //     so plugin rules like esp_now_peer_info_t can match before Type�r~let stripping
+    //     so plugin rules like esp_now_peer_info_t can match before TypeScript stripping
     //     Only apply plugins whose #include headers are present in the sketch.
     const _plugins = this._activePlugins;
     const _pluginEntries = Object.entries(_plugins).sort((a, b) => (a[1].priority || 50) - (b[1].priority || 50));
     for (const [_libName, _lib] of _pluginEntries) {
-      if (_lib.transpile) {
+      if (_lib.transpile && Array.isArray(_lib.transpile)) {
         for (const [_pattern, _replacement] of _lib.transpile) {
           js = js.replace(_pattern, _replacement);
         }
@@ -338,7 +338,7 @@ class ArduinoSimulator {
     // 5c. Second pass: re-apply plugin transpile rules after class constructors
     //     so `new Stepper(...)` created by constructor detection gets transpiled
     for (const [_libName, _lib] of pluginEntries) {
-      if (_lib.transpile) {
+      if (_lib.transpile && Array.isArray(_lib.transpile)) {
         for (const [_pattern, _replacement] of _lib.transpile) {
           js = js.replace(_pattern, _replacement);
         }
