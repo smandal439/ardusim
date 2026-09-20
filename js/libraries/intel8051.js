@@ -58,10 +58,13 @@ window.ArduinoLibs['Intel8051'] = {
         for (var i = 0; i < 8; i++) {
           var pid = pn + '.' + i;
           var pin = defs[b.type].pins.find(function(p) { return p.id === pid; });
-          if (pin) { var pk = 'pin_' + pid;
+          if (pin) {
             var iv = window.CircuitCanvas._readDigitalInput(b.id, pid);
             if (iv !== undefined && iv !== null) {
-              if (iv & 1) val |= (1 << i); }}
+              if (iv & 1) val |= (1 << i);
+            }
+          }
+        }
         if (pn === 'P0') cpu.P0 = (cpu.P0 & 0xF0) | (val & 0x0F);
         if (pn === 'P1') cpu.P1 = val;
         if (pn === 'P2') cpu.P2 = val;

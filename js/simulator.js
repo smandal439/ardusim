@@ -1600,10 +1600,9 @@ class ArduinoSimulator {
       // Check if board is 8085/8051 — transpile assembly through plugin
       if (this.board === 'intel_8085' || this.board === 'intel_8051') {
         const asmLib = window.ArduinoLibs[this.board === 'intel_8085' ? 'Intel8085' : 'Intel8051'];
-        if (asmLib && asmLib.transpile) {
+        if (asmLib && typeof asmLib.transpile === 'function') {
           const asmResult = asmLib.transpile(code);
           if (typeof asmResult === 'string' && asmResult.startsWith('//__')) {
-            // Recurse with the transpiled assembly data
             return this.compile(asmResult);
           }
         }

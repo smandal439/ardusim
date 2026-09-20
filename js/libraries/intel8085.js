@@ -56,10 +56,13 @@ window.ArduinoLibs['Intel8085'] = {
         for (var i = 0; i < 8; i++) {
           var pid = pn + '.' + i;
           var pin = defs[b.type].pins.find(function(p) { return p.id === pid; });
-          if (pin) { var pk = 'pin_' + pid;
+          if (pin) {
             var iv = window.CircuitCanvas._readDigitalInput(b.id, pid);
             if (iv !== undefined && iv !== null) {
-              if (iv & 1) val |= (1 << i); }}
+              if (iv & 1) val |= (1 << i);
+            }
+          }
+        }
         if (pn === 'PA') cpu.ports[0] = val;
         if (pn === 'PB') cpu.ports[1] = val;
         if (pn === 'PC') cpu.ports[2] = val;
