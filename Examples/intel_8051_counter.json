@@ -1,0 +1,14 @@
+{
+  "id": "intel_8051_counter",
+  "name": "Intel 8051 Binary Counter",
+  "icon": "🔌",
+  "desc": "Intel 8051 - 8-bit binary counter on P1 port. Increments from 0x00 to 0xFF and repeats.",
+  "tags": ["8051", "assembly", "counter", "LED"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "intel_8051", "x": 200, "y": 100 }
+    ],
+    "wires": []
+  },
+  "code": "; Intel 8051 - 8-bit Binary Counter on P1\n; Connect 8 LEDs from P1.0-P1.7 to GND\n; Each LED shows one bit of the counter\n\n        ORG 0000H\n\n        MOV A, #00H      ; A = counter value\n\nLOOP:   MOV P1, A        ; Output counter to P1\n        ACALL DELAY      ; Wait between counts\n        INC A            ; Increment counter (wraps at 255)\n        SJMP LOOP        ; Repeat\n\n; Delay subroutine\nDELAY:  MOV R2, #02H     ; Moderate delay\nDL1:    MOV R3, #0FFH\nDL2:    DJNZ R3, DL2\n        DJNZ R2, DL1\n        RET\n        END"
+}

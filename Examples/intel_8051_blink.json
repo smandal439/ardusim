@@ -1,0 +1,14 @@
+{
+  "id": "intel_8051_blink",
+  "name": "Intel 8051 LED Blink",
+  "icon": "🔌",
+  "desc": "Intel 8051 - Blink an LED on P1.7 using CLR/SETB bit instructions with ACALL delay.",
+  "tags": ["8051", "assembly", "beginner", "LED"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "intel_8051", "x": 200, "y": 100 }
+    ],
+    "wires": []
+  },
+  "code": "; Intel 8051 - Blink LED on P1.7\n; Connect an LED + resistor from P1.7 (pin 8) to GND\n\n        ORG 0000H\n\nLOOP:   CLR P1.7         ; P1.7 = 0 (LED ON, active low)\n        ACALL DELAY      ; Wait ~500ms\n        SETB P1.7        ; P1.7 = 1 (LED OFF)\n        ACALL DELAY      ; Wait ~500ms\n        SJMP LOOP        ; Repeat forever\n\n; Delay subroutine using nested DJNZ\nDELAY:  MOV R2, #0FFH    ; Outer counter = 255\nDL1:    MOV R3, #0FFH    ; Inner counter = 255\nDL2:    DJNZ R3, DL2     ; Decrement R3, loop if != 0\n        DJNZ R2, DL1     ; Decrement R2, loop if != 0\n        RET\n        END"
+}

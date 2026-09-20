@@ -202,6 +202,53 @@ void SystemClock_Config(void) {
     exampleId: 'blink',
   },
 
+  intel_8085: {
+    id: 'intel_8085',
+    name: 'Intel 8085',
+    icon: '🔲',
+    category: 'Boards',
+    grouped: true,
+    longDesc: 'Intel 8085 is an 8-bit microprocessor introduced in 1976. It has 7 general-purpose 8-bit registers (B, C, D, E, H, L), an accumulator (A), a flags register, 16-bit stack pointer (SP), and 16-bit program counter (PC). It supports 64KB of address space, 256 I/O ports, and five hardware interrupts (TRAP, RST7.5, RST6.5, RST5.5, INTR). The board provides three 8-bit I/O ports (PA, PB, PC) mapped to I/O ports 00H-02H for data and 00H-02H for direction. Port 0xFF is used for serial output to the monitor.',
+    use: 'An educational microprocessor board for learning 8085 assembly language, register-level I/O, and classic microprocessor programming concepts.',
+    pins: {
+      'PA.0-PA.7': { label: 'PA0-PA7', type: 'digital', desc: 'Port A (8-bit). Direction controlled by OUT 00H bit 0-2. Data read/written via OUT/IN 00H/01H. PA0-PA7 on left side.' },
+      'PB.0-PB.7': { label: 'PB0-PB7', type: 'digital', desc: 'Port B (8-bit). Direction controlled by OUT 00H bit 3-5. Data read/written via OUT/IN 01H/02H. PB0-PB7 on left side.' },
+      'PC.0-PC.7': { label: 'PC0-PC7', type: 'digital', desc: 'Port C (8-bit). Direction controlled by OUT 00H bit 6-7. Data read/written via OUT/IN 02H/03H. PC0-PC7 on right side.' },
+      'VCC': { label: 'VCC (5V)', type: 'power', desc: '5V power supply. All GPIO is 5V logic.' },
+      'GND': { label: 'GND', type: 'gnd', desc: 'Common ground.' },
+      'CLK': { label: 'CLK', type: 'signal', desc: 'System clock input.' },
+      'RST': { label: 'RST', type: 'signal', desc: 'Reset (active high).' },
+    },
+    props: { label: 'Board label shown on the canvas.' },
+    wiring: 'Connect LEDs to PB pins (through resistors to GND). Use PA for input switches. Serial output goes to the monitor automatically.',
+    code: "; Intel 8085 - Blink LED on PB.5\n        MVI A, 20H\n        OUT 00H\nLOOP:   MVI A, 20H\n        OUT 01H\n        CALL DELAY\n        MVI A, 00H\n        OUT 01H\n        CALL DELAY\n        JMP LOOP\nDELAY:  MVI D, 0FFH\nDL1:    MVI E, 0FFH\nDL2:    DCR E\n        JNZ DL2\n        DCR D\n        JNZ DL1\n        RET",
+    exampleId: 'intel_8085_blink',
+  },
+
+  intel_8051: {
+    id: 'intel_8051',
+    name: 'Intel 8051',
+    icon: '🔲',
+    category: 'Boards',
+    grouped: true,
+    longDesc: 'Intel 8051 is an 8-bit microcontroller introduced in 1980. It features 4 ports (P0-P3) with 32 I/O pins, two 16-bit timers, a full-duplex serial port (UART), and 128 bytes of internal RAM. P3 has alternate functions (RXD, TXD, INT0, INT1, T0, T1, WR, RD). The board provides all 4 ports accessible for digital I/O. Serial output via SBUF register goes to the serial monitor.',
+    use: 'An educational microcontroller board for learning 8051 assembly language, timer programming, serial communication, and bit-level I/O control.',
+    pins: {
+      'P0.0-P0.7': { label: 'P0.0-P0.7', type: 'digital', desc: 'Port 0 (8-bit, quasi-bidirectional). Open-drain outputs, needs external pull-ups for HIGH output. P0.0-P0.7 on left side.' },
+      'P1.0-P1.7': { label: 'P1.0-P1.7', type: 'digital', desc: 'Port 1 (8-bit, quasi-bidirectional). Built-in pull-ups. General-purpose I/O. P1.0-P1.7 on left side.' },
+      'P2.0-P2.7': { label: 'P2.0-P2.7', type: 'digital', desc: 'Port 2 (8-bit, quasi-bidirectional). Can be used as high-order address bus for external memory. P2.0-P2.7 on right side.' },
+      'P3.0-P3.7': { label: 'P3.0-P3.7', type: 'digital', desc: 'Port 3 (8-bit, quasi-bidirectional). Alternate functions: P3.0=RXD, P3.1=TXD, P3.2=INT0, P3.3=INT1, P3.4=T0, P3.5=T1, P3.6=WR, P3.7=RD. P3.0-P3.7 on right side.' },
+      'VCC': { label: 'VCC (5V)', type: 'power', desc: '5V power supply. All GPIO is 5V logic.' },
+      'GND': { label: 'GND', type: 'gnd', desc: 'Common ground.' },
+      'XTAL1/XTAL2': { label: 'XTAL', type: 'signal', desc: 'Crystal oscillator connections.' },
+      'RST': { label: 'RST', type: 'signal', desc: 'Reset (active high).' },
+    },
+    props: { label: 'Board label shown on the canvas.' },
+    wiring: 'Connect LEDs to P1 pins (through resistors to GND). Use P0 for inputs (needs pull-ups). P3 supports serial communication automatically.',
+    code: "; Intel 8051 - Blink LED on P1.7\n        ORG 0000H\nLOOP:   CLR P1.7\n        ACALL DELAY\n        SETB P1.7\n        ACALL DELAY\n        SJMP LOOP\nDELAY:  MOV R2, #0FFH\nDL1:    MOV R3, #0FFH\nDL2:    DJNZ R3, DL2\n        DJNZ R2, DL1\n        RET\n        END",
+    exampleId: 'intel_8051_blink',
+  },
+
   /* --- OUTPUTS --- */
   led: {
     id: 'led',

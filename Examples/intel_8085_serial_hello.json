@@ -1,0 +1,14 @@
+{
+  "id": "intel_8085_serial_hello",
+  "name": "Intel 8085 Serial Hello",
+  "icon": "🔌",
+  "desc": "Intel 8085 - Send 'Hello 8085' string to serial monitor using OUT 0FFH (serial output port).",
+  "tags": ["8085", "assembly", "serial", "beginner"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "intel_8085", "x": 200, "y": 100 }
+    ],
+    "wires": []
+  },
+  "code": "; Intel 8085 - Serial Hello World\n; Output 'Hello 8085' to the serial monitor\n; Each character sent by writing to port 0FFH\n\n        LXI H, MSG       ; HL = pointer to message string\n\nNEXT:   MOV A, M         ; Load next character\n        CPI 00H          ; Check for null terminator\n        JZ DONE          ; If null, we are done\n        OUT 0FFH         ; Send character to serial port\n        INX H            ; Next character\n        JMP NEXT         ; Loop\n\nDONE:   MVI A, 0DH       ; Send CR\n        OUT 0FFH\n        MVI A, 0AH       ; Send LF\n        OUT 0FFH\n        HLT              ; Stop CPU\n\nMSG:    DB 48H, 65H, 6CH, 6CH, 6FH  ; 'Hello'\n        DB 20H                      ; ' '\n        DB 38H, 30H, 38H, 35H      ; '8085'\n        DB 00H                      ; null terminator"
+}

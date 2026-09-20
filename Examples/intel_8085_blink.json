@@ -1,0 +1,14 @@
+{
+  "id": "intel_8085_blink",
+  "name": "Intel 8085 LED Blink",
+  "icon": "🔌",
+  "desc": "Intel 8085 - Blink an LED on PB.5 using OUT port instructions with a simple delay loop.",
+  "tags": ["8085", "assembly", "beginner", "LED"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "intel_8085", "x": 200, "y": 100 }
+    ],
+    "wires": []
+  },
+  "code": "; Intel 8085 - Blink LED on PB.5\n; Connect an LED + resistor from PB.5 (pin 15) to GND\n\n        MVI A, 20H       ; PB5 = 1 (output mask)\n        OUT 00H           ; Configure PB as output\n\nLOOP:   MVI A, 20H       ; PB5 HIGH - LED ON\n        OUT 01H           ; Write to PB port\n        CALL DELAY        ; Wait ~500ms\n\n        MVI A, 00H       ; PB5 LOW - LED OFF\n        OUT 01H           ; Write to PB port\n        CALL DELAY        ; Wait ~500ms\n\n        JMP LOOP          ; Repeat forever\n\n; Simple delay subroutine\nDELAY:  MVI D, 0FFH      ; Outer counter = 255\nDL1:    MVI E, 0FFH      ; Inner counter = 255\nDL2:    DCR E            ; Decrement inner\n        JNZ DL2          ; Loop until E = 0\n        DCR D            ; Decrement outer\n        JNZ DL1          ; Loop until D = 0\n        RET"
+}

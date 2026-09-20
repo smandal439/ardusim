@@ -1,0 +1,14 @@
+{
+  "id": "intel_8051_serial_hello",
+  "name": "Intel 8051 Serial Hello",
+  "icon": "🔌",
+  "desc": "Intel 8051 - Send 'Hello 8051' string to serial monitor via SBUF register.",
+  "tags": ["8051", "assembly", "serial", "beginner"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "intel_8051", "x": 200, "y": 100 }
+    ],
+    "wires": []
+  },
+  "code": "; Intel 8051 - Serial Hello World\n; Sends 'Hello 8051' to the serial monitor\n; Uses timer baud rate setup and SBUF output\n\n        ORG 0000H\n\n        ; Setup timer for serial baud rate\n        MOV TMOD, #20H   ; Timer1, Mode 2 (8-bit auto-reload)\n        MOV TH1, #0FDH   ; 9600 baud @ 11.0592MHz\n        MOV SCON, #50H   ; Mode 1, REN=1 (8-bit UART)\n        SETB TR1          ; Start Timer1\n\n        MOV DPTR, #MSG   ; DPTR = message pointer\n\nNEXT:   CLR A             ; Clear A for MOVC\n        MOVC A, @A+DPTR  ; Load next character\n        JZ DONE          ; If null, done\n        MOV SBUF, A      ; Send character\n        JNB TI, $        ; Wait for TX complete\n        CLR TI           ; Clear TI flag\n        INC DPTR         ; Next character\n        SJMP NEXT        ; Loop\n\nDONE:   SJMP $           ; Halt (infinite loop)\n\nMSG:    DB 'Hello 8051', 0DH, 0AH, 00H\n        END"
+}
