@@ -1558,6 +1558,13 @@ class ArduinoSimulator {
         return { ok: false, error: 'Code exceeds maximum length (100 KB). Please shorten your sketch.' };
       }
 
+      // Assembly error returned by plugin transpile
+      if (code.startsWith('//__ASM_ERROR__')) {
+        const jsonStr = code.replace(/^\/\/__ASM_ERROR__\n/, '');
+        const data = JSON.parse(jsonStr);
+        return { ok: false, error: data.error || 'Assembly error' };
+      }
+
       // Assembly mode: code already transpiled to JSON by the board plugin
       if (code.startsWith('//__8085_ASM_DATA__') || code.startsWith('//__8051_ASM_DATA__')) {
         const is8085 = code.startsWith('//__8085_ASM_DATA__');

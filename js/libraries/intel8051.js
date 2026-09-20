@@ -14,11 +14,11 @@ window.ArduinoLibs['Intel8051'] = {
   },
   transpile: function (code) {
     if (typeof window.Intel8051Assembler === 'undefined') {
-      alert('Intel 8051 assembler not loaded!'); return ''; }
+      return '//__ASM_ERROR__\n' + JSON.stringify({ error: 'Intel 8051 assembler not loaded!' }); }
     try { var result = window.Intel8051Assembler.assemble(code);
-    } catch (e) { console.error('8051 ASM Error:', e.message); alert('Assembly Error:\n' + e.message); return ''; }
+    } catch (e) { return '//__ASM_ERROR__\n' + JSON.stringify({ error: e.message }); }
     if (result.errors && result.errors.length > 0) {
-      alert('Assembly Errors:\n' + result.errors.join('\n')); return ''; }
+      return '//__ASM_ERROR__\n' + JSON.stringify({ error: result.errors.join('\n') }); }
     return '//__8051_ASM_DATA__\n' + JSON.stringify({hex: result.hex, binary: result.binary});
   },
   runtime: function (self) {
