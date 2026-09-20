@@ -225,6 +225,11 @@ class App {
       this._closeHeaderDropdowns();
       window.open('docs/ArduSim_Guide.html', '_blank');
     });
+    const helpLPC2148_Guide = get('btn-help-lpc2148-guide');
+    helpLPC2148_Guide?.addEventListener('click', () => {
+      this._closeHeaderDropdowns();
+      window.open('docs/LPC2148_Guide.html', '_blank');
+    });
     const guideLaunch = get('guide-launch');
     guideLaunch?.addEventListener('click', () => window.GuideManager?.close());
     const guideClose = get('guide-close');
@@ -3463,6 +3468,9 @@ _newProject() {
         break;
       case 'project-guide':
         window.open('docs/ArduSim_Guide.html', '_blank');
+        break;
+      case 'LPC2148_Guide':
+        window.open('docs/LPC2148_Guide.html', '_blank');
         break;
     }
   }

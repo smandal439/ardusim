@@ -1187,6 +1187,51 @@ DL2:    DJNZ R3, DL2
         }
       }
     });
+
+    // File explorer collapse toggle
+    const toggleBtn = document.getElementById('btn-toggle-file-explorer');
+    const fileExplorer = document.getElementById('file-explorer');
+    const resizer = document.getElementById('file-explorer-resizer');
+    if (toggleBtn && fileExplorer) {
+      toggleBtn.addEventListener('click', () => {
+        const collapsed = fileExplorer.classList.toggle('collapsed');
+        toggleBtn.title = collapsed ? 'Expand File Explorer' : 'Collapse File Explorer';
+        toggleBtn.innerHTML = collapsed
+          ? '<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>'
+          : '<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>';
+        if (resizer) resizer.style.display = collapsed ? 'none' : '';
+        if (this.editor) setTimeout(() => this.editor.layout(), 250);
+      });
+    }
+
+    // File explorer resize handle
+    if (resizer && fileExplorer) {
+      resizer.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        const startX = e.clientX;
+        const startW = fileExplorer.getBoundingClientRect().width;
+        const minW = 100;
+        const maxW = 350;
+        const onMove = (ev) => {
+          let w = ev.clientX - startX;
+          w = Math.max(minW, Math.min(maxW, w));
+          fileExplorer.style.width = `${w}px`;
+        };
+        const onUp = () => {
+          document.removeEventListener('pointermove', onMove);
+          document.removeEventListener('pointerup', onUp);
+          resizer.classList.remove('dragging');
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+          if (this.editor) this.editor.layout();
+        };
+        resizer.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        document.addEventListener('pointermove', onMove);
+        document.addEventListener('pointerup', onUp);
+      });
+    }
   },
 
   _promptNewFile() {
