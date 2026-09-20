@@ -93,7 +93,7 @@ DL2:    DJNZ R3, DL2
         END`,
 
   _getDefaultCode() {
-    const board = window.App?.canvas?.boardType || 'arduino_uno';
+    const board = window.App?.canvas?.getBoardInst?.()?.type || window.App?.sim?.board || 'arduino_uno';
     if (board === 'stm32f746_disco') return this.STM32_DEFAULT_CODE;
     if (board === 'intel_8085') return this.I8085_DEFAULT_CODE;
     if (board === 'intel_8051') return this.I8051_DEFAULT_CODE;
@@ -1503,7 +1503,7 @@ DL2:    DJNZ R3, DL2
 
     try {
       const sim = window.App.sim;
-      const board = window.App.canvas ? window.App.canvas.boardType || 'arduino_uno' : 'arduino_uno';
+      const board = window.App.canvas && window.App.canvas.getBoardInst ? (window.App.canvas.getBoardInst()?.type || 'arduino_uno') : (window.App.sim?.board || 'arduino_uno');
       sim.setBoard(board);
 
       const result = await sim.compile(code);

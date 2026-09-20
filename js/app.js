@@ -533,7 +533,7 @@ class App {
 
     // If the canvas only holds the default starter circuit, reload it for the new board
     const comps = this.canvas?.components || [];
-    const hasOnlyStarterBoard = comps.length === 1 && (comps[0].type === 'arduino_uno' || comps[0].type === 'esp32_devkit_v1' || comps[0].type === 'arduino_nano' || comps[0].type === 'stm32f746_disco' || comps[0].type === 'lpc2148');
+    const hasOnlyStarterBoard = comps.length === 1 && (comps[0].type === 'arduino_uno' || comps[0].type === 'esp32_devkit_v1' || comps[0].type === 'arduino_nano' || comps[0].type === 'stm32f746_disco' || comps[0].type === 'lpc2148' || comps[0].type === 'intel_8085' || comps[0].type === 'intel_8051');
     if (hasOnlyStarterBoard || comps.length === 0) {
       this._loadExampleCircuit('blink');
       this.showToast(`${boardName} starter circuit loaded`, 'success');
