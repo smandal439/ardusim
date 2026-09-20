@@ -7,7 +7,8 @@
     "espnow",
     "communication",
     "dip_switch",
-    "led_array"
+    "led_array",
+    "esp32"
   ],
   "circuit": {
     "components": [

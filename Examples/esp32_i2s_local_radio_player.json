@@ -5,7 +5,10 @@
   "desc": "A custom ESP32 I2S Local Radio Player circuit example.",
   "tags": [
     "custom",
-    "circuit"
+    "circuit",
+    "esp32",
+    "i2s","radio",
+    "local_server"
   ],
   "circuit": {
     "components": [

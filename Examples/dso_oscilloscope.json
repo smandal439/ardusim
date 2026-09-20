@@ -9,7 +9,8 @@
     "oscilloscope",
     "dso",
     "signal",
-    "waveform"
+    "waveform",
+    "arduino"
   ],
   "circuit": {
     "components": [
