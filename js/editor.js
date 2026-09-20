@@ -1190,18 +1190,28 @@ DL2:    DJNZ R3, DL2
 
     // File explorer collapse toggle
     const toggleBtn = document.getElementById('btn-toggle-file-explorer');
+    const expandBtn = document.getElementById('btn-expand-file-explorer');
     const fileExplorer = document.getElementById('file-explorer');
     const resizer = document.getElementById('file-explorer-resizer');
-    if (toggleBtn && fileExplorer) {
-      toggleBtn.addEventListener('click', () => {
-        const collapsed = fileExplorer.classList.toggle('collapsed');
+
+    const setCollapsed = (collapsed) => {
+      fileExplorer.classList.toggle('collapsed', collapsed);
+      document.body.classList.toggle('file-explorer-collapsed', collapsed);
+      if (resizer) resizer.style.display = collapsed ? 'none' : '';
+      if (toggleBtn) {
         toggleBtn.title = collapsed ? 'Expand File Explorer' : 'Collapse File Explorer';
         toggleBtn.innerHTML = collapsed
           ? '<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>'
           : '<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>';
-        if (resizer) resizer.style.display = collapsed ? 'none' : '';
-        if (this.editor) setTimeout(() => this.editor.layout(), 250);
-      });
+      }
+      if (this.editor) setTimeout(() => this.editor.layout(), 250);
+    };
+
+    if (toggleBtn && fileExplorer) {
+      toggleBtn.addEventListener('click', () => setCollapsed(!fileExplorer.classList.contains('collapsed')));
+    }
+    if (expandBtn && fileExplorer) {
+      expandBtn.addEventListener('click', () => setCollapsed(false));
     }
 
     // File explorer resize handle

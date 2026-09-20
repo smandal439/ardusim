@@ -687,6 +687,28 @@ body.view-serial #resizer-bottom { display: none; }
 .file-explorer.collapsed { width: 0 !important; border-right: none; }
 .file-explorer.collapsed .file-explorer-header,
 .file-explorer.collapsed .file-explorer-list { display: none; }
+.file-explorer-expand {
+  display: none;
+  width: 20px;
+  height: 100%;
+  flex-shrink: 0;
+  background: var(--bg-panel, #1a1a2e);
+  border: none;
+  border-right: 1px solid var(--border-color, #2a2a4a);
+  color: var(--text-muted, #667);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+  z-index: 2;
+}
+.file-explorer-expand:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--text-primary, #e6edf3);
+}
+body.file-explorer-collapsed .file-explorer-expand {
+  display: flex;
+}
 .file-explorer-header {
   display: flex;
   justify-content: space-between;
