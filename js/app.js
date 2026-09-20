@@ -2795,10 +2795,10 @@ _newProject() {
       return false;
     }
     if (result.ok) {
-      this._updateCompileStatus('Verified âœ“');
+      this._updateCompileStatus('Verified ✓');
       this._updateStatus('Verification succeeded');
-      this.output?.log('âœ“ Sketch verified — no errors found', 'success');
-      this.showToast('âœ“ Sketch verified — no errors found!', 'success');
+      this.output?.log('✓ Sketch verified — no errors found', 'success');
+      this.showToast('✓ Sketch verified — no errors found!', 'success');
       return true;
     }
 
