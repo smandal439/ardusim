@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>STM32F746G-DISCO Programming Guide - ArduSim</title>
+<style>
+body{font-family:Calibri,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;line-height:1.6;color:#1a1a1a}
+h1{color:#03234b;border-bottom:3px solid #03234b;padding-bottom:10px}
+h2{color:#03234b;border-bottom:2px solid #ccc;padding-bottom:5px;margin-top:40px}
+h3{color:#1a3c6e;margin-top:25px}
+h4{color:#333;margin-top:15px}
+code,pre{font-family:Consolas,'Courier New',monospace;background:#f4f4f4;border-radius:4px}
+code{padding:2px 5px;font-size:0.9em}
+pre{padding:15px;overflow-x:auto;border:1px solid #ddd;font-size:0.85em;line-height:1.4}
+table{border-collapse:collapse;width:100%;margin:15px 0}
+th,td{border:1px solid #ccc;padding:8px 12px;text-align:left}
+th{background:#03234b;color:white}
+tr:nth-child(even){background:#f9f9f9}
+.tip{background:#e8f5e9;border-left:4px solid #4caf50;padding:10px 15px;margin:15px 0}
+.warn{background:#fff3e0;border-left:4px solid #ff9800;padding:10px 15px;margin:15px 0}
+.info{background:#e3f2fd;border-left:4px solid #2196f3;padding:10px 15px;margin:15px 0}
+pre code{background:transparent;padding:0}
+a{color:#03234b}
+</style>
+</head>
+<body>
+<h1>STM32F746G-DISCO Programming Guide</h1>
+<p><strong>Board:</strong> STM32F746G-DISCO Discovery &nbsp;|&nbsp; <strong>MCU:</strong> STM32F746NGH6 ARM Cortex-M7 216MHz &nbsp;|&nbsp; <strong>Logic:</strong> 3.3V</p>
+<p>This guide covers how to write C code for the STM32F746 in the ArduSim simulator using HAL functions or direct register access.</p>
+
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#overview">Board Overview</a></li>
+<li><a href="#quickstart">Quick Start</a></li>
+<li><a href="#code-style">Code Style: main() and while(1)</a></li>
+<li><a href="#gpio">GPIO Programming</a></li>
+<li><a href="#led">Onboard LED (LD1)</a></li>
+<li><a href="#buttons">User Button (B1)</a></li>
+<li><a href="#adc">ADC (Analog-to-Digital Converter)</a></li>
+<li><a href="#uart">UART Serial Communication</a></li>
+<li><a href="#timers">Timers</a></li>
+<li><a href="#spi">SPI</a></li>
+<li><a href="#i2c">I2C</a></li>
+<li><a href="#registers">Register Reference</a></li>
+<li><a href="#pins">Pin Map</a></li>
+<li><a href="#tips">Tips &amp; Gotchas</a></li>
+</ol>
+
+<h2 id="overview">1. Board Overview</h2>
+<p>The STM32F746G-DISCO Discovery board in ArduSim replicates the real STMicroelectronics Cortex-M7 MCU with:</p>
+<ul>
+<li><strong>MCU:</strong> ARM Cortex-M7, 216 MHz, 1 MB Flash, 340 KB SRAM</li>
+<li><strong>GPIO:</strong> 11 ports (A&ndash;K), each with up to 16 pins</li>
+<li><strong>Onboard LED:</strong> LD1 (PI1 / D13) &mdash; active high</li>
+<li><strong>User Button:</strong> B1 (PC13) &mdash; active low</li>
+<li><strong>ADC:</strong> 3 ADCs, 12-bit, 6 analog pins (A0&ndash;A5)</li>
+<li><strong>USART:</strong> USART1&ndash;6</li>
+<li><strong>SPI:</strong> SPI1&ndash;4</li>
+<li><strong>I2C:</strong> I2C1&ndash;3</li>
+<li><strong>Timers:</strong> TIM1&ndash;TIM14</li>
+<li><strong>Display:</strong> 4.3&Prime; TFT LCD (ILI9341, 480&times;272)</li>
+<li><strong>Logic Level:</strong> 3.3V</li>
+</ul>
+
+<h2 id="quickstart">2. Quick Start</h2>
+<p>Open ArduSim, select <strong>STM32F746G-DISCO</strong> from the board selector, and write code in the editor:</p>
+<pre><code>#include &lt;stm32f7xx_hal.h&gt;
+
+int main() {
+    __HAL_RCC_GPIOI_CLK_ENABLE();
+    GPIO_InitTypeDef g = {0};
+    g.Pin = GPIO_PIN_1;
+    g.Mode = GPIO_MODE_OUTPUT_PP;
+    g.Pull = GPIO_NOPULL;
+    g.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOI, &amp;g);
+
+    while (1) {
+        HAL_GPIO_WritePin(GPIOI, GPIO_PIN_1, GPIO_PIN_SET);
+        HAL_Delay(500);
+        HAL_GPIO_WritePin(GPIOI, GPIO_PIN_1, GPIO_PIN_RESET);
+        HAL_Delay(500);
+    }
+}</code></pre>
+<p>Press <strong>Run</strong>. The onboard LD1 LED (connected to PI1) will blink at 1 Hz.</p>
+
+<h2 id="code-style">3. Code Style: main() and while(1)</h2>
+<p>Unlike Arduino sketches, the STM32 uses the standard ARM C entry point:</p>
+<pre><code>int main() {
+    // One-time initialization here
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+
+    while (1) {
+        // Repeated code here (the "loop")
+        HAL_GPIO_TogglePin(GPIOI, GPIO_PIN_1);
+        HAL_Delay(500);
+    }
+}</code></pre>
+<p>The transpiler automatically splits this into <code>setup()</code> (code before <code>while(1)</code>) and <code>loop()</code> (body of <code>while(1)</code>).</p>
+
+<h2 id="gpio">4. GPIO Programming</h2>
+<h3>HAL Method (Recommended)</h3>
+<pre><code>__HAL_RCC_GPIOx_CLK_ENABLE();  // Enable clock for port x
+
+GPIO_InitTypeDef g = {0};
+g.Pin = GPIO_PIN_n;
+g.Mode = GPIO_MODE_OUTPUT_PP;   // Push-pull output
+g.Pull = GPIO_NOPULL;
+g.Speed = GPIO_SPEED_FREQ_LOW;
+HAL_GPIO_Init(GPIOx, &amp;g);
+
+HAL_GPIO_WritePin(GPIOx, GPIO_PIN_n, GPIO_PIN_SET);    // HIGH
+HAL_GPIO_WritePin(GPIOx, GPIO_PIN_n, GPIO_PIN_RESET);  // LOW
+HAL_GPIO_TogglePin(GPIOx, GPIO_PIN_n);
+uint8_t val = HAL_GPIO_ReadPin(GPIOx, GPIO_PIN_n);</code></pre>
+
+<h3>Direct Register Method</h3>
+<pre><code>// Set PI1 as output: MODER1 = 01
+GPIOI-&gt;MODER |= (1 &lt;&lt; 2);   // bits [3:2] = 01
+
+// Write HIGH to PI1
+GPIOI-&gt;BSRR = GPIO_PIN_1;    // set bit
+
+// Write LOW to PI1
+GPIOI-&gt;BSRR = GPIO_PIN_1 &lt;&lt; 16;  // reset bit
+
+// Read PI1
+uint32_t val = GPIOI-&gt;IDR &amp; GPIO_PIN_1;</code></pre>
+
+<div class="info"><strong>Note:</strong> When using direct register access, you must enable the GPIO clock first via <code>RCC-&gt;AHB1ENR</code>.</div>
+
+<h2 id="led">5. Onboard LED (LD1)</h2>
+<p>The onboard user LED LD1 is connected to <strong>PI1</strong> (mapped to board pin <strong>D13</strong>).</p>
+<pre><code>__HAL_RCC_GPIOI_CLK_ENABLE();
+// Configure PI1 as output
+GPIOI-&gt;MODER |= (1 &lt;&lt; 2);
+
+while (1) {
+    GPIOI-&gt;BSRR = (1 &lt;&lt; 1);    // LED ON
+    HAL_Delay(500);
+    GPIOI-&gt;BSRR = (1 &lt;&lt; 17);   // LED OFF (bit 16+1)
+    HAL_Delay(500);
+}</code></pre>
+
+<h2 id="buttons">6. User Button (B1)</h2>
+<p>The blue user button B1 is connected to <strong>PC13</strong>.</p>
+<pre><code>__HAL_RCC_GPIOC_CLK_ENABLE();
+GPIO_InitTypeDef g = {0};
+g.Pin = GPIO_PIN_13;
+g.Mode = GPIO_MODE_INPUT;
+g.Pull = GPIO_PULLUP;
+HAL_GPIO_Init(GPIOC, &amp;g);
+
+if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET) {
+    // Button pressed (active low)
+}</code></pre>
+
+<h2 id="adc">7. ADC (Analog-to-Digital Converter)</h2>
+<p>6 analog input pins: A0 (PA0), A1 (PA4), A2 (PA5), A3 (PA6), A4 (PA7), A5 (PC4).</p>
+<pre><code>// Read analog value from A0 (PA0)
+ADC_HandleTypeDef hadc1;
+hadc1.Instance = ADC1;
+HAL_ADC_Start(&amp;hadc1);
+HAL_ADC_PollForConversion(&amp;hadc1, 100);
+uint32_t raw = HAL_ADC_GetValue(&amp;hadc1);
+float voltage = raw * 3.3f / 4095.0f;  // 12-bit ADC, 3.3V ref</code></pre>
+
+<h2 id="uart">8. UART Serial Communication</h2>
+<pre><code>// USART1: TX=PA9, RX=PA10
+UART_HandleTypeDef huart1;
+huart1.Instance = USART1;
+huart1.Init.BaudRate = 115200;
+huart1.Init.WordLength = UART_WORDLENGTH_8B;
+huart1.Init.StopBits = UART_STOPBITS_1;
+huart1.Init.Parity = UART_PARITY_NONE;
+HAL_UART_Init(&amp;huart1);
+
+char msg[] = "Hello STM32!\r\n";
+HAL_UART_Transmit(&amp;huart1, (uint8_t*)msg, sizeof(msg)-1, 100);
+
+uint8_t rx;
+HAL_UART_Receive(&amp;huart1, &amp;rx, 1, 100);</code></pre>
+
+<h2 id="timers">9. Timers</h2>
+<p>The board has 14 timers (TIM1&ndash;TIM14). Basic PWM example:</p>
+<pre><code>TIM_HandleTypeDef htim2;
+htim2.Instance = TIM2;
+htim2.Init.Prescaler = 10800 - 1;   // 108 MHz / 10800 = 10 kHz
+htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+htim2.Init.Period = 1000 - 1;       // 10 Hz
+HAL_TIM_PWM_Start(&amp;htim2, TIM_CHANNEL_1);</code></pre>
+
+<h2 id="spi">10. SPI</h2>
+<pre><code>SPI_HandleTypeDef hspi1;
+hspi1.Instance = SPI1;
+hspi1.Init.Mode = SPI_MODE_MASTER;
+hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
+hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
+HAL_SPI_Init(&amp;hspi1);
+
+uint8_t tx[] = {0x01, 0x02, 0x03};
+HAL_SPI_Transmit(&amp;hspi1, tx, 3, 100);
+
+uint8_t rx[3];
+HAL_SPI_Receive(&amp;hspi1, rx, 3, 100);</code></pre>
+
+<h2 id="i2c">11. I2C</h2>
+<pre><code>I2C_HandleTypeDef hi2c1;
+hi2c1.Instance = I2C1;
+hi2c1.Init.ClockSpeed = 100000;
+hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+HAL_I2C_Init(&amp;hi2c1);
+
+uint8_t data;
+HAL_I2C_Mem_Read(&amp;hi2c1, 0x68 &lt;&lt; 1, 0x75, I2C_MEMADD_SIZE_8BIT, &amp;data, 1, 100);</code></pre>
+
+<h2 id="registers">12. Register Reference</h2>
+
+<h3>GPIO Registers (per port, base + offset)</h3>
+<table>
+<tr><th>Register</th><th>Offset</th><th>Description</th></tr>
+<tr><td>MODER</td><td>0x00</td><td>Mode: 00=Input, 01=Output, 10=AF, 11=Analog (2 bits/pin)</td></tr>
+<tr><td>OTYPER</td><td>0x04</td><td>Output type: 0=Push-pull, 1=Open-drain</td></tr>
+<tr><td>OSPEEDR</td><td>0x08</td><td>Speed: 00=Low, 01=Med, 10=High, 11=Very High</td></tr>
+<tr><td>PUPDR</td><td>0x0C</td><td>Pull-up/down: 00=None, 01=Pull-up, 10=Pull-down</td></tr>
+<tr><td>IDR</td><td>0x10</td><td>Input data (read pin state)</td></tr>
+<tr><td>ODR</td><td>0x14</td><td>Output data</td></tr>
+<tr><td>BSRR</td><td>0x18</td><td>Bit set (low 16) / reset (high 16)</td></tr>
+<tr><td>AFRL</td><td>0x20</td><td>Alternate function low (pins 0&ndash;7)</td></tr>
+<tr><td>AFRH</td><td>0x24</td><td>Alternate function high (pins 8&ndash;15)</td></tr>
+</table>
+
+<h3>GPIO Port Base Addresses</h3>
+<table>
+<tr><th>Port</th><th>Base</th><th>Port</th><th>Base</th></tr>
+<tr><td>GPIOA</td><td>0x40020000</td><td>GPIOG</td><td>0x40021800</td></tr>
+<tr><td>GPIOB</td><td>0x40020400</td><td>GPIOH</td><td>0x40021C00</td></tr>
+<tr><td>GPIOC</td><td>0x40020800</td><td>GPIOI</td><td>0x40022000</td></tr>
+<tr><td>GPIOD</td><td>0x40020C00</td><td>GPIOJ</td><td>0x40022400</td></tr>
+<tr><td>GPIOE</td><td>0x40021000</td><td>GPIOK</td><td>0x40022800</td></tr>
+<tr><td>GPIOF</td><td>0x40021400</td><td></td><td></td></tr>
+</table>
+
+<h3>RCC Clock Enable</h3>
+<pre><code>RCC-&gt;AHB1ENR |= RCC_AHB1ENR_GPIOAEN;  // Enable GPIOA clock
+// Bit 0=A, 1=B, 2=C, 3=D, 4=E, 5=F, 6=G, 7=H, 8=I, 9=J, 10=K</code></pre>
+
+<h3>USART Registers</h3>
+<table>
+<tr><th>Register</th><th>Offset</th><th>Description</th></tr>
+<tr><td>SR</td><td>0x00</td><td>Status register (TXE, TC, RXNE)</td></tr>
+<tr><td>DR</td><td>0x04</td><td>Data register (transmit/receive)</td></tr>
+<tr><td>BRR</td><td>0x08</td><td>Baud rate divider</td></tr>
+<tr><td>CR1</td><td>0x0C</td><td>Control 1 (UE, TE, RE, RXNEIE)</td></tr>
+</table>
+
+<h3>ADC Registers</h3>
+<table>
+<tr><th>Register</th><th>Offset</th><th>Description</th></tr>
+<tr><td>SR</td><td>0x00</td><td>Status (EOC = end of conversion)</td></tr>
+<tr><td>CR1</td><td>0x04</td><td>Control 1</td></tr>
+<tr><td>CR2</td><td>0x08</td><td>Control 2 (ADON to enable)</td></tr>
+<tr><td>SQR3</td><td>0x34</td><td>Regular sequence ch1 (channel select)</td></tr>
+<tr><td>DR</td><td>0x4C</td><td>Data register (12-bit result)</td></tr>
+</table>
+
+<h2 id="pins">13. Pin Map</h2>
+<table>
+<tr><th>Board Pin</th><th>STM32 Pin</th><th>Type</th><th>Alternate</th></tr>
+<tr><td>A0</td><td>PA0</td><td>Analog</td><td>ADC1_IN0</td></tr>
+<tr><td>A1</td><td>PA4</td><td>Analog</td><td>ADC1_IN4</td></tr>
+<tr><td>A2</td><td>PA5</td><td>Analog</td><td>ADC1_IN5</td></tr>
+<tr><td>A3</td><td>PA6</td><td>Analog</td><td>ADC1_IN6</td></tr>
+<tr><td>A4</td><td>PA7</td><td>Analog</td><td>ADC1_IN7</td></tr>
+<tr><td>A5</td><td>PC4</td><td>Analog</td><td>ADC1_IN14</td></tr>
+<tr><td>D0</td><td>PC7</td><td>Signal</td><td></td></tr>
+<tr><td>D1</td><td>PC6</td><td>Signal</td><td></td></tr>
+<tr><td>D2</td><td>PG6</td><td>Digital</td><td></td></tr>
+<tr><td>D3</td><td>PD12</td><td>PWM</td><td>TIM4_CH1 (LD3 green)</td></tr>
+<tr><td>D4</td><td>PD13</td><td>Digital</td><td>TIM4_CH2 (LD4 orange)</td></tr>
+<tr><td>D5</td><td>PD14</td><td>PWM</td><td>TIM4_CH3 (LD5 red)</td></tr>
+<tr><td>D6</td><td>PD15</td><td>PWM</td><td>TIM4_CH4 (LD6 blue)</td></tr>
+<tr><td>D7</td><td>PG11</td><td>Digital</td><td></td></tr>
+<tr><td>D8</td><td>PG12</td><td>Digital</td><td></td></tr>
+<tr><td>D9</td><td>PB8</td><td>PWM</td><td>TIM10_CH1 / I2C1_SCL</td></tr>
+<tr><td>D10</td><td>PB10</td><td>PWM</td><td>TIM2_CH3 / I2C2_SCL</td></tr>
+<tr><td>D11</td><td>PE5</td><td>PWM</td><td>TIM9_CH1</td></tr>
+<tr><td>D12</td><td>PE6</td><td>Digital</td><td></td></tr>
+<tr><td>D13</td><td>PI1</td><td>Digital</td><td>LD1 (onboard LED)</td></tr>
+<tr><td>D14</td><td>PB9</td><td>Signal</td><td>I2C1_SDA</td></tr>
+<tr><td>D15</td><td>PB8</td><td>Signal</td><td>I2C1_SCL</td></tr>
+</table>
+
+<h2 id="tips">14. Tips &amp; Gotchas</h2>
+<div class="tip"><strong>Tip:</strong> Always enable the GPIO clock before configuring pins. Use <code>__HAL_RCC_GPIOx_CLK_ENABLE()</code> or set the bit in <code>RCC-&gt;AHB1ENR</code>.</div>
+
+<div class="tip"><strong>Tip:</strong> Use <code>BSRR</code> for atomic pin writes instead of <code>ODR</code> to avoid read-modify-write race conditions.</div>
+
+<div class="tip"><strong>Tip:</strong> The simulator auto-converts your C code into async JavaScript. Use <code>HAL_Delay()</code> or <code>delay_ms()</code> for timing &mdash; bare loops won't work as expected.</div>
+
+<div class="warn"><strong>Warning:</strong> All GPIO pins operate at 3.3V logic. The simulator clamps outputs to 3.3V max.</div>
+
+<div class="warn"><strong>Warning:</strong> The TFT LCD is not directly controlled through GPIO in the simulator. Use the component panel to add a TFT display component separately.</div>
+
+<p><a href="../index.html">&larr; Back to ArduSim</a></p>
+</body>
+</html>

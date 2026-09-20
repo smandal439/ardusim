@@ -230,6 +230,21 @@ class App {
       this._closeHeaderDropdowns();
       window.open('docs/LPC2148_Guide.html', '_blank');
     });
+    const helpSTM32Guide = get('btn-help-stm32-guide');
+    helpSTM32Guide?.addEventListener('click', () => {
+      this._closeHeaderDropdowns();
+      window.open('docs/STM32F746_Guide.html', '_blank');
+    });
+    const help8085Guide = get('btn-help-8085-guide');
+    help8085Guide?.addEventListener('click', () => {
+      this._closeHeaderDropdowns();
+      window.open('docs/Intel8085_Guide.html', '_blank');
+    });
+    const help8051Guide = get('btn-help-8051-guide');
+    help8051Guide?.addEventListener('click', () => {
+      this._closeHeaderDropdowns();
+      window.open('docs/Intel8051_Guide.html', '_blank');
+    });
     const guideLaunch = get('guide-launch');
     guideLaunch?.addEventListener('click', () => window.GuideManager?.close());
     const guideClose = get('guide-close');

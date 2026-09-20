@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Intel 8085 Programming Guide - ArduSim</title>
+<style>
+body{font-family:Calibri,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;line-height:1.6;color:#1a1a1a}
+h1{color:#6a1b9a;border-bottom:3px solid #6a1b9a;padding-bottom:10px}
+h2{color:#4a148c;border-bottom:2px solid #ccc;padding-bottom:5px;margin-top:40px}
+h3{color:#6a1b9a;margin-top:25px}
+h4{color:#333;margin-top:15px}
+code,pre{font-family:Consolas,'Courier New',monospace;background:#f4f4f4;border-radius:4px}
+code{padding:2px 5px;font-size:0.9em}
+pre{padding:15px;overflow-x:auto;border:1px solid #ddd;font-size:0.85em;line-height:1.4}
+table{border-collapse:collapse;width:100%;margin:15px 0}
+th,td{border:1px solid #ccc;padding:8px 12px;text-align:left}
+th{background:#6a1b9a;color:white}
+tr:nth-child(even){background:#f9f9f9}
+.tip{background:#e8f5e9;border-left:4px solid #4caf50;padding:10px 15px;margin:15px 0}
+.warn{background:#fff3e0;border-left:4px solid #ff9800;padding:10px 15px;margin:15px 0}
+.info{background:#e3f2fd;border-left:4px solid #2196f3;padding:10px 15px;margin:15px 0}
+pre code{background:transparent;padding:0}
+a{color:#6a1b9a}
+</style>
+</head>
+<body>
+<h1>Intel 8085 Programming Guide</h1>
+<p><strong>Platform:</strong> Intel 8085 &nbsp;|&nbsp; <strong>Architecture:</strong> 8-bit CISC &nbsp;|&nbsp; <strong>Clock:</strong> 3 MHz &nbsp;|&nbsp; <strong>Memory:</strong> 64KB</p>
+<p>This guide covers how to write 8085 assembly language programs in the ArduSim simulator. The assembler supports the complete 8085 instruction set with standard Intel syntax.</p>
+
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#overview">Architecture Overview</a></li>
+<li><a href="#quickstart">Quick Start</a></li>
+<li><a href="#registers">Registers</a></li>
+<li><a href="#memory">Memory Map &amp; I/O</a></li>
+<li><a href="#data-transfer">Data Transfer Instructions</a></li>
+<li><a href="#arithmetic">Arithmetic Instructions</a></li>
+<li><a href="#logical">Logical Instructions</a></li>
+<li><a href="#branch">Branch Instructions</a></li>
+<li><a href="#stack">Stack &amp; Subroutines</a></li>
+<li><a href="#io">I/O Port Operations</a></li>
+<li><a href="#assembly">Assembler Directives</a></li>
+<li><a href="#examples">Complete Examples</a></li>
+<li><a href="#tips">Tips &amp; Gotchas</a></li>
+</ol>
+
+<h2 id="overview">1. Architecture Overview</h2>
+<ul>
+<li><strong>Data Bus:</strong> 8-bit</li>
+<li><strong>Address Bus:</strong> 16-bit (64KB address space)</li>
+<li><strong>Clock:</strong> 3 MHz</li>
+<li><strong>Registers:</strong> 6 general-purpose 8-bit (B, C, D, E, H, L) + Accumulator + Flags</li>
+<li><strong>Register Pairs:</strong> BC, DE, HL (16-bit)</li>
+<li><strong>Special Registers:</strong> SP (Stack Pointer), PC (Program Counter)</li>
+<li><strong>I/O:</strong> 256 input ports + 256 output ports (separate I/O space)</li>
+<li><strong>Interrupts:</strong> TRAP, RST 7.5, RST 6.5, RST 5.5, INTR</li>
+</ul>
+
+<h2 id="quickstart">2. Quick Start</h2>
+<p>Open ArduSim, select <strong>Intel 8085</strong> from the board selector, and write assembly in the editor:</p>
+<pre><code>; Blink LED on Port A, bit 0
+        MVI A, 01H        ; A = 0x01 (bit 0)
+        OUT 00H           ; Output to Port A
+        HLT               ; Stop</code></pre>
+<p>Press <strong>Run</strong>. The LED on PA0 will turn on.</p>
+
+<h2 id="registers">3. Registers</h2>
+<h3>General-Purpose Registers</h3>
+<table>
+<tr><th>Register</th><th>Size</th><th>Description</th></tr>
+<tr><td>A (Accumulator)</td><td>8-bit</td><td>Primary register for arithmetic/logic results</td></tr>
+<tr><td>F (Flags)</td><td>8-bit</td><td>Status flags (S, Z, AC, P, CY)</td></tr>
+<tr><td>B</td><td>8-bit</td><td>General purpose / BC pair high byte</td></tr>
+<tr><td>C</td><td>8-bit</td><td>General purpose / BC pair low byte</td></tr>
+<tr><td>D</td><td>8-bit</td><td>General purpose / DE pair high byte</td></tr>
+<tr><td>E</td><td>8-bit</td><td>General purpose / DE pair low byte</td></tr>
+<tr><td>H</td><td>8-bit</td><td>General purpose / HL pair high byte</td></tr>
+<tr><td>L</td><td>8-bit</td><td>General purpose / HL pair low byte</td></tr>
+</table>
+
+<h3>16-Bit Registers</h3>
+<table>
+<tr><th>Register</th><th>Size</th><th>Description</th></tr>
+<tr><td>SP</td><td>16-bit</td><td>Stack Pointer (points to top of stack)</td></tr>
+<tr><td>PC</td><td>16-bit</td><td>Program Counter (next instruction address)</td></tr>
+<tr><td>HL</td><td>16-bit</td><td>Memory pointer pair (H=high, L=low)</td></tr>
+</table>
+
+<h3>Flag Register (F)</h3>
+<table>
+<tr><th>Bit</th><th>Flag</th><th>Name</th><th>Description</th></tr>
+<tr><td>7</td><td>S</td><td>Sign</td><td>Set if result is negative (bit 7 = 1)</td></tr>
+<tr><td>6</td><td>Z</td><td>Zero</td><td>Set if result is zero</td></tr>
+<tr><td>4</td><td>AC</td><td>Auxiliary Carry</td><td>Carry from bit 3 to bit 4 (for BCD)</td></tr>
+<tr><td>2</td><td>P</td><td>Parity</td><td>Set if number of 1-bits in result is even</td></tr>
+<tr><td>0</td><td>CY</td><td>Carry</td><td>Set if unsigned overflow occurred</td></tr>
+</table>
+
+<h2 id="memory">4. Memory Map &amp; I/O</h2>
+<h3>Memory Space (64KB)</h3>
+<pre><code>0x0000 - 0xFFFF : 64KB unified memory space
+                   Program code goes here (loaded by assembler)
+                   Data and stack also reside here</code></pre>
+
+<h3>I/O Ports (256 ports)</h3>
+<table>
+<tr><th>Port</th><th>Purpose</th></tr>
+<tr><td>0x00</td><td>Port A (PA0&ndash;PA7) &mdash; connected to board pins PA0&ndash;PA7</td></tr>
+<tr><td>0x01</td><td>Port B (PB0&ndash;PB7) &mdash; connected to board pins PB0&ndash;PB7</td></tr>
+<tr><td>0x02</td><td>Port C (PC0&ndash;PC7) &mdash; connected to board pins PC0&ndash;PC7</td></tr>
+<tr><td>0xFF</td><td>Serial output &mdash; writing a byte prints it to the serial monitor</td></tr>
+</table>
+
+<div class="info"><strong>Note:</strong> The 8085 uses separate I/O addressing. <code>IN</code>/<code>OUT</code> instructions access I/O ports, not memory. Memory-mapped operations use <code>LDA</code>/<code>STA</code>.</div>
+
+<h2 id="data-transfer">5. Data Transfer Instructions</h2>
+<table>
+<tr><th>Instruction</th><th>Operation</th><th>Description</th></tr>
+<tr><td><code>MOV Rd, Rs</code></td><td>Rd &larr; Rs</td><td>Move register to register</td></tr>
+<tr><td><code>MOV Rd, M</code></td><td>Rd &larr; [HL]</td><td>Load register from memory (HL pointer)</td></tr>
+<tr><td><code>MOV M, Rs</code></td><td>[HL] &larr; Rs</td><td>Store register to memory (HL pointer)</td></tr>
+<tr><td><code>MVI Rd, data</code></td><td>Rd &larr; imm8</td><td>Move immediate 8-bit value</td></tr>
+<tr><td><code>LXI Rp, data16</code></td><td>Rp &larr; imm16</td><td>Load register pair immediate</td></tr>
+<tr><td><code>LDA addr</code></td><td>A &larr; [addr]</td><td>Load A from direct memory address</td></tr>
+<tr><td><code>STA addr</code></td><td>[addr] &larr; A</td><td>Store A to direct memory address</td></tr>
+<tr><td><code>LDAX Rp</code></td><td>A &larr; [Rp]</td><td>Load A indirect via register pair</td></tr>
+<tr><td><code>STAX Rp</code></td><td>[Rp] &larr; A</td><td>Store A indirect via register pair</td></tr>
+<tr><td><code>LHLD addr</code></td><td>L &larr; [addr], H &larr; [addr+1]</td><td>Load HL from memory</td></tr>
+<tr><td><code>SHLD addr</code></td><td>[addr] &larr; L, [addr+1] &larr; H</td><td>Store HL to memory</td></tr>
+<tr><td><code>XCHG</code></td><td>DE &harr; HL</td><td>Exchange DE and HL</td></tr>
+<tr><td><code>SPHL</code></td><td>SP &larr; HL</td><td>Copy HL to SP</td></tr>
+<tr><td><code>PCHL</code></td><td>PC &larr; HL</td><td>Jump to address in HL</td></tr>
+<tr><td><code>XTHL</code></td><td>[SP] &harr; HL</td><td>Exchange stack top with HL</td></tr>
+</table>
+
+<h2 id="arithmetic">6. Arithmetic Instructions</h2>
+<table>
+<tr><th>Instruction</th><th>Operation</th><th>Description</th></tr>
+<tr><td><code>ADD Rs</code></td><td>A &larr; A + Rs</td><td>Add register to A</td></tr>
+<tr><td><code>ADC Rs</code></td><td>A &larr; A + Rs + CY</td><td>Add register with carry</td></tr>
+<tr><td><code>SUB Rs</code></td><td>A &larr; A - Rs</td><td>Subtract register from A</td></tr>
+<tr><td><code>SBB Rs</code></td><td>A &larr; A - Rs - CY</td><td>Subtract with borrow</td></tr>
+<tr><td><code>INR Rd</code></td><td>Rd &larr; Rd + 1</td><td>Increment register</td></tr>
+<tr><td><code>DCR Rd</code></td><td>Rd &larr; Rd - 1</td><td>Decrement register</td></tr>
+<tr><td><code>INX Rp</code></td><td>Rp &larr; Rp + 1</td><td>Increment register pair</td></tr>
+<tr><td><code>DCX Rp</code></td><td>Rp &larr; Rp - 1</td><td>Decrement register pair</td></tr>
+<tr><td><code>DAD Rp</code></td><td>HL &larr; HL + Rp</td><td>Add register pair to HL (sets CY)</td></tr>
+<tr><td><code>ADI data</code></td><td>A &larr; A + imm8</td><td>Add immediate</td></tr>
+<tr><td><code>ACI data</code></td><td>A &larr; A + imm8 + CY</td><td>Add immediate with carry</td></tr>
+<tr><td><code>SUI data</code></td><td>A &larr; A - imm8</td><td>Subtract immediate</td></tr>
+<tr><td><code>SBI data</code></td><td>A &larr; A - imm8 - CY</td><td>Subtract immediate with borrow</td></tr>
+<tr><td><code>DAA</code></td><td></td><td>Decimal adjust A (BCD correction)</td></tr>
+</table>
+
+<h2 id="logical">7. Logical Instructions</h2>
+<table>
+<tr><th>Instruction</th><th>Operation</th><th>Description</th></tr>
+<tr><td><code>ANA Rs</code></td><td>A &larr; A AND Rs</td><td>AND register</td></tr>
+<tr><td><code>XRA Rs</code></td><td>A &larr; A XOR Rs</td><td>XOR register</td></tr>
+<tr><td><code>ORA Rs</code></td><td>A &larr; A OR Rs</td><td>OR register</td></tr>
+<tr><td><code>CMP Rs</code></td><td>A - Rs</td><td>Compare (sets flags, no store)</td></tr>
+<tr><td><code>ANI data</code></td><td>A &larr; A AND imm8</td><td>AND immediate</td></tr>
+<tr><td><code>XRI data</code></td><td>A &larr; A XOR imm8</td><td>XOR immediate</td></tr>
+<tr><td><code>ORI data</code></td><td>A &larr; A OR imm8</td><td>OR immediate</td></tr>
+<tr><td><code>CPI data</code></td><td>A - imm8</td><td>Compare immediate</td></tr>
+<tr><td><code>RLC</code></td><td>A rotate left (CY = bit 7)</td><td>Rotate A left through carry</td></tr>
+<tr><td><code>RRC</code></td><td>A rotate right (CY = bit 0)</td><td>Rotate A right through carry</td></tr>
+<tr><td><code>RAL</code></td><td>A rotate left via CY</td><td>Rotate A left through carry</td></tr>
+<tr><td><code>RAR</code></td><td>A rotate right via CY</td><td>Rotate A right through carry</td></tr>
+<tr><td><code>CMA</code></td><td>A &larr; NOT A</td><td>Complement A</td></tr>
+<tr><td><code>STC</code></td><td>CY &larr; 1</td><td>Set carry</td></tr>
+<tr><td><code>CMC</code></td><td>CY &larr; NOT CY</td><td>Complement carry</td></tr>
+</table>
+
+<h2 id="branch">8. Branch Instructions</h2>
+<table>
+<tr><th>Instruction</th><th>Condition</th><th>Description</th></tr>
+<tr><td><code>JMP addr</code></td><td>Always</td><td>Unconditional jump</td></tr>
+<tr><td><code>JZ addr</code></td><td>Z=1</td><td>Jump if zero</td></tr>
+<tr><td><code>JNZ addr</code></td><td>Z=0</td><td>Jump if not zero</td></tr>
+<tr><td><code>JC addr</code></td><td>CY=1</td><td>Jump if carry</td></tr>
+<tr><td><code>JNC addr</code></td><td>CY=0</td><td>Jump if no carry</td></tr>
+<tr><td><code>JP addr</code></td><td>S=0</td><td>Jump if positive</td></tr>
+<tr><td><code>JM addr</code></td><td>S=1</td><td>Jump if minus (negative)</td></tr>
+<tr><td><code>JPE addr</code></td><td>P=1</td><td>Jump if parity even</td></tr>
+<tr><td><code>JPO addr</code></td><td>P=0</td><td>Jump if parity odd</td></tr>
+<tr><td><code>CALL addr</code></td><td>Always</td><td>Call subroutine</td></tr>
+<tr><td><code>CZ addr</code></td><td>Z=1</td><td>Call if zero</td></tr>
+<tr><td><code>CNZ addr</code></td><td>Z=0</td><td>Call if not zero</td></tr>
+<tr><td><code>RET</code></td><td>Always</td><td>Return from subroutine</td></tr>
+<tr><td><code>RZ</code></td><td>Z=1</td><td>Return if zero</td></tr>
+<tr><td><code>RNZ</code></td><td>Z=0</td><td>Return if not zero</td></tr>
+<tr><td><code>RST n</code></td><td>Always</td><td>Restart (call to fixed address n*8)</td></tr>
+</table>
+
+<h2 id="stack">9. Stack &amp; Subroutines</h2>
+<pre><code>; Push register pair to stack
+PUSH B          ; SP-=2, [SP]=C, [SP+1]=B
+PUSH D          ; SP-=2, [SP]=E, [SP+1]=D
+PUSH H          ; SP-=2, [SP]=L, [SP+1]=H
+
+; Pop from stack
+POP B           ; B=[SP+1], C=[SP], SP+=2
+POP D
+POP H
+
+; Call and return
+CALL SUBROUTINE ; Push PC, jump to SUBROUTINE
+RET             ; Pop PC, return to caller
+
+SUBROUTINE:
+    ; ... subroutine code ...
+    RET</code></pre>
+
+<div class="info"><strong>Note:</strong> The stack grows downward. PUSH decrements SP, POP increments SP. Initialize SP before using the stack (e.g., <code>LXI SP, 0FFF8H</code>).</div>
+
+<h2 id="io">10. I/O Port Operations</h2>
+<pre><code>; Output to port
+MVI A, 0FFH     ; A = 0xFF (all bits high)
+OUT 00H         ; Write to Port A (all PA pins HIGH)
+
+; Input from port
+IN 01H          ; Read Port B into A
+
+; Serial output (port 0xFF)
+MVI A, 'A'      ; A = 'A' (0x41)
+OUT 0FFH        ; Print 'A' to serial monitor</code></pre>
+
+<h2 id="assembly">11. Assembler Directives</h2>
+<table>
+<tr><th>Directive</th><th>Description</th></tr>
+<tr><td><code>ORG addr</code></td><td>Set origin address (where code is loaded)</td></tr>
+<tr><td><code>END</code></td><td>End of source file</td></tr>
+<tr><td><code>EQU symbol, value</code></td><td>Define constant</td></tr>
+<tr><td><code>DB data, ...</code></td><td>Define byte(s) in memory</td></tr>
+<tr><td><code>DW data, ...</code></td><td>Define word(s) (16-bit) in memory</td></tr>
+<tr><td><code>label:</code></td><td>Define a label (address)</td></tr>
+<tr><td><code>; comment</code></td><td>Inline comment</td></tr>
+</table>
+
+<h2 id="examples">12. Complete Examples</h2>
+
+<h3>Example 1: Count from 1 to 10</h3>
+<pre><code>        ORG 0000H
+        MVI A, 00H        ; A = 0
+LOOP:   INR A              ; A = A + 1
+        CPI 0AH            ; Compare A with 10
+        JNZ LOOP           ; If A != 10, repeat
+        HLT                ; Stop (A = 10)</code></pre>
+
+<h3>Example 2: Add Two Numbers</h3>
+<pre><code>        ORG 0000H
+        MVI A, 25H        ; A = 0x25 (37 decimal)
+        MVI B, 1AH        ; B = 0x1A (26 decimal)
+        ADD B              ; A = A + B = 0x3F (63 decimal)
+        STA 2050H          ; Store result at memory location 2050H
+        HLT</code></pre>
+
+<h3>Example 3: Blink LED on Port A</h3>
+<pre><code>        ORG 0000H
+        MVI A, 01H        ; A = 0x01 (bit 0)
+ON:     OUT 00H            ; Output to Port A (LED ON)
+        MVI C, 0FFH        ; Delay counter
+D1:     DCR C              ; Decrement counter
+        JNZ D1             ; Loop until C=0
+        MVI A, 00H        ; A = 0x00
+        OUT 00H            ; Output to Port A (LED OFF)
+        MVI C, 0FFH
+D2:     DCR C
+        JNZ D2
+        JMP ON             ; Repeat forever</code></pre>
+
+<h3>Example 4: Subroutine - Square of a Number</h3>
+<pre><code>        ORG 0000H
+        MVI A, 05H        ; Input: A = 5
+        CALL SQUARE        ; A = A * A = 25
+        HLT
+
+; Subroutine: returns A = A * A
+SQUARE: MOV B, A           ; B = A (save copy)
+        MVI A, 00H        ; A = 0 (accumulator for result)
+LOOP:   ADD B              ; A = A + B
+        DCR B              ; B = B - 1
+        JNZ LOOP           ; Repeat B times
+        RET</code></pre>
+
+<h3>Example 5: Serial Output - Print "HELLO"</h3>
+<pre><code>        ORG 0000H
+        MVI A, 'H'
+        OUT 0FFH           ; Serial output
+        MVI A, 'E'
+        OUT 0FFH
+        MVI A, 'L'
+        OUT 0FFH
+        MVI A, 'L'
+        OUT 0FFH
+        MVI A, 'O'
+        OUT 0FFH
+        HLT</code></pre>
+
+<h2 id="tips">13. Tips &amp; Gotchas</h2>
+<div class="tip"><strong>Tip:</strong> Use <code>ORG 0000H</code> at the start of your program to set the loading address.</div>
+
+<div class="tip"><strong>Tip:</strong> The <code>M</code> register is not a physical register &mdash; it refers to the memory location pointed to by the HL pair. Use <code>MOV A, M</code> to load from [HL], and <code>MOV M, A</code> to store to [HL].</div>
+
+<div class="tip"><strong>Tip:</strong> Register pairs for <code>LXI</code>, <code>PUSH</code>, <code>POP</code>, <code>DAD</code> are: BC, DE, HL, SP. For <code>LDAX</code>/<code>STAX</code> the pairs are: BC, DE (HL not supported).</div>
+
+<div class="warn"><strong>Warning:</strong> <code>INR</code> and <code>DCR</code> do NOT affect the Carry flag. Only AC, Z, S, P are updated.</div>
+
+<div class="warn"><strong>Warning:</strong> The <code>DAD</code> instruction only affects the Carry flag. All other flags are unchanged.</div>
+
+<div class="warn"><strong>Warning:</strong> Initialize SP before using <code>CALL</code>, <code>PUSH</code>, or <code>POP</code>. A common pattern: <code>LXI SP, 0FFF8H</code>.</div>
+
+<p><a href="../index.html">&larr; Back to ArduSim</a></p>
+</body>
+</html>

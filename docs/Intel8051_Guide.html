@@ -1,0 +1,366 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Intel 8051 Programming Guide - ArduSim</title>
+<style>
+body{font-family:Calibri,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;line-height:1.6;color:#1a1a1a}
+h1{color:#c62828;border-bottom:3px solid #c62828;padding-bottom:10px}
+h2{color:#b71c1c;border-bottom:2px solid #ccc;padding-bottom:5px;margin-top:40px}
+h3{color:#c62828;margin-top:25px}
+h4{color:#333;margin-top:15px}
+code,pre{font-family:Consolas,'Courier New',monospace;background:#f4f4f4;border-radius:4px}
+code{padding:2px 5px;font-size:0.9em}
+pre{padding:15px;overflow-x:auto;border:1px solid #ddd;font-size:0.85em;line-height:1.4}
+table{border-collapse:collapse;width:100%;margin:15px 0}
+th,td{border:1px solid #ccc;padding:8px 12px;text-align:left}
+th{background:#c62828;color:white}
+tr:nth-child(even){background:#f9f9f9}
+.tip{background:#e8f5e9;border-left:4px solid #4caf50;padding:10px 15px;margin:15px 0}
+.warn{background:#fff3e0;border-left:4px solid #ff9800;padding:10px 15px;margin:15px 0}
+.info{background:#e3f2fd;border-left:4px solid #2196f3;padding:10px 15px;margin:15px 0}
+pre code{background:transparent;padding:0}
+a{color:#c62828}
+</style>
+</head>
+<body>
+<h1>Intel 8051 Programming Guide</h1>
+<p><strong>Platform:</strong> Intel 8051 &nbsp;|&nbsp; <strong>Architecture:</strong> 8-bit CISC &nbsp;|&nbsp; <strong>Clock:</strong> 12 MHz &nbsp;|&nbsp; <strong>I/O:</strong> 4 Ports (32 pins)</p>
+<p>This guide covers how to write 8051 assembly language programs in the ArduSim simulator.</p>
+
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#overview">Architecture Overview</a></li>
+<li><a href="#quickstart">Quick Start</a></li>
+<li><a href="#registers">Registers and SFRs</a></li>
+<li><a href="#memory">Memory Map</a></li>
+<li><a href="#ports">I/O Ports</a></li>
+<li><a href="#data-transfer">Data Transfer Instructions</a></li>
+<li><a href="#arithmetic">Arithmetic Instructions</a></li>
+<li><a href="#logical">Logical Instructions</a></li>
+<li><a href="#bit">Bit Operation Instructions</a></li>
+<li><a href="#branch">Branch and Jump Instructions</a></li>
+<li><a href="#subroutine">Subroutine Instructions</a></li>
+<li><a href="#timers">Timer and Serial</a></li>
+<li><a href="#assembly">Assembler Directives</a></li>
+<li><a href="#examples">Complete Examples</a></li>
+<li><a href="#tips">Tips and Gotchas</a></li>
+</ol>
+
+<h2 id="overview">1. Architecture Overview</h2>
+<ul>
+<li><strong>Data Bus:</strong> 8-bit</li>
+<li><strong>Address Bus:</strong> 16-bit (64KB code space + 256B internal RAM + 64KB external data space)</li>
+<li><strong>Clock:</strong> 12 MHz (12 clock cycles per machine cycle)</li>
+<li><strong>Internal RAM:</strong> 128 bytes (direct) + 128 bytes (indirect upper half)</li>
+<li><strong>Special Function Registers (SFRs):</strong> Mapped at addresses 0x80-0xFF</li>
+<li><strong>I/O Ports:</strong> 4 quasi-bidirectional ports (P0-P3, 8 pins each = 32 pins)</li>
+<li><strong>Timers:</strong> Timer 0 and Timer 1 (16-bit)</li>
+<li><strong>Serial:</strong> Full-duplex UART (SCON/SBUF)</li>
+<li><strong>Interrupts:</strong> 5 sources (INT0, INT1, Timer0, Timer1, Serial)</li>
+</ul>
+
+<h2 id="quickstart">2. Quick Start</h2>
+<p>Open ArduSim, select <strong>Intel 8051</strong> from the board selector, and write assembly in the editor:</p>
+<pre><code>; Blink LED on P1.0
+        MOV A, #01H        ; A = 0x01
+        MOV P1, A          ; P1 = 0x01 (LED ON)
+        SJMP $              ; Infinite loop</code></pre>
+<p>Press <strong>Run</strong>. The LED on P1.0 will turn on.</p>
+
+<h2 id="registers">3. Registers and SFRs</h2>
+<h3>Core Registers</h3>
+<table>
+<tr><th>Register</th><th>SFR Addr</th><th>Size</th><th>Description</th></tr>
+<tr><td>ACC (Accumulator)</td><td>0xE0</td><td>8-bit</td><td>Primary register for arithmetic/logic</td></tr>
+<tr><td>B</td><td>0xF0</td><td>8-bit</td><td>Second accumulator (MUL/DIV)</td></tr>
+<tr><td>PSW</td><td>0xD0</td><td>8-bit</td><td>Program Status Word (flags)</td></tr>
+<tr><td>SP</td><td>0x81</td><td>8-bit</td><td>Stack Pointer (init to 0x07)</td></tr>
+<tr><td>DPH</td><td>0x83</td><td>8-bit</td><td>Data Pointer High</td></tr>
+<tr><td>DPL</td><td>0x82</td><td>8-bit</td><td>Data Pointer Low</td></tr>
+</table>
+
+<h3>PSW (Program Status Word) Flags</h3>
+<table>
+<tr><th>Bit</th><th>Flag</th><th>Name</th><th>Description</th></tr>
+<tr><td>7</td><td>CY</td><td>Carry</td><td>Arithmetic carry/borrow</td></tr>
+<tr><td>6</td><td>AC</td><td>Auxiliary Carry</td><td>Carry from bit 3 to 4 (BCD)</td></tr>
+<tr><td>5</td><td>F0</td><td>Flag 0</td><td>General purpose flag</td></tr>
+<tr><td>3:2</td><td>RS1:RS0</td><td>Register Bank Select</td><td>Selects bank 0-3</td></tr>
+<tr><td>1</td><td>OV</td><td>Overflow</td><td>Arithmetic overflow</td></tr>
+<tr><td>0</td><td>P</td><td>Parity</td><td>Auto-set if ACC has odd number of 1s</td></tr>
+</table>
+
+<h3>Register Banks (via RS1:RS0 in PSW)</h3>
+<table>
+<tr><th>Bank</th><th>RS1:RS0</th><th>R0-R7 Addresses</th></tr>
+<tr><td>Bank 0</td><td>00</td><td>0x00-0x07 (default)</td></tr>
+<tr><td>Bank 1</td><td>01</td><td>0x08-0x0F</td></tr>
+<tr><td>Bank 2</td><td>10</td><td>0x10-0x17</td></tr>
+<tr><td>Bank 3</td><td>11</td><td>0x18-0x1F</td></tr>
+</table>
+
+<h3>Port Registers</h3>
+<table>
+<tr><th>Port</th><th>SFR Addr</th><th>Pins</th></tr>
+<tr><td>P0</td><td>0x80</td><td>P0.0-P0.7 (quasi-bidirectional, needs pull-ups)</td></tr>
+<tr><td>P1</td><td>0x90</td><td>P1.0-P1.7</td></tr>
+<tr><td>P2</td><td>0xA0</td><td>P2.0-P2.7</td></tr>
+<tr><td>P3</td><td>0xB0</td><td>P3.0-P3.7 (RXD, TXD, INT0, INT1, T0, T1, WR, RD)</td></tr>
+</table>
+
+<h2 id="memory">4. Memory Map</h2>
+<pre><code>Internal RAM (256 bytes):
+  0x00 - 0x07 : Register Bank 0 (R0-R7) [default]
+  0x08 - 0x0F : Register Bank 1
+  0x10 - 0x17 : Register Bank 2
+  0x18 - 0x1F : Register Bank 3
+  0x20 - 0x2F : Bit-addressable area (128 bits)
+  0x30 - 0x7F : General purpose RAM
+  0x80 - 0xFF : SFR space (direct addressing only)
+
+External Data Memory: 0x0000 - 0xFFFF (64KB, accessed via MOVX)
+Code Memory:          0x0000 - 0xFFFF (64KB, accessed via MOVC)</code></pre>
+
+<h2 id="ports">5. I/O Ports</h2>
+<pre><code>; Write to Port 1
+MOV P1, #0FFH       ; All pins HIGH
+MOV P1, #00H        ; All pins LOW
+
+; Read from Port 1
+MOV A, P1           ; Read P1 into A
+
+; Bit-level operations
+SETB P1.0           ; Set P1.0 = 1
+CLR P1.0            ; Clear P1.0 = 0
+CPL P1.0            ; Toggle P1.0
+JB P1.0, label      ; Jump if P1.0 is set
+JNB P1.0, label     ; Jump if P1.0 is not set</code></pre>
+
+<h3>Special Port 3 Functions</h3>
+<table>
+<tr><th>Pin</th><th>Function</th><th>Description</th></tr>
+<tr><td>P3.0</td><td>RXD</td><td>Serial receive</td></tr>
+<tr><td>P3.1</td><td>TXD</td><td>Serial transmit</td></tr>
+<tr><td>P3.2</td><td>INT0</td><td>External interrupt 0</td></tr>
+<tr><td>P3.3</td><td>INT1</td><td>External interrupt 1</td></tr>
+<tr><td>P3.4</td><td>T0</td><td>Timer 0 external input</td></tr>
+<tr><td>P3.5</td><td>T1</td><td>Timer 1 external input</td></tr>
+<tr><td>P3.6</td><td>WR</td><td>External data memory write strobe</td></tr>
+<tr><td>P3.7</td><td>RD</td><td>External data memory read strobe</td></tr>
+</table>
+
+<h2 id="data-transfer">6. Data Transfer Instructions</h2>
+<table>
+<tr><th>Instruction</th><th>Operation</th><th>Description</th></tr>
+<tr><td><code>MOV A, Rn</code></td><td>A &lt;- Rn</td><td>Move register to A</td></tr>
+<tr><td><code>MOV Rn, A</code></td><td>Rn &lt;- A</td><td>Move A to register</td></tr>
+<tr><td><code>MOV A, direct</code></td><td>A &lt;- [direct]</td><td>Load A from direct address</td></tr>
+<tr><td><code>MOV direct, A</code></td><td>[direct] &lt;- A</td><td>Store A to direct address</td></tr>
+<tr><td><code>MOV A, #data</code></td><td>A &lt;- imm8</td><td>Load immediate to A</td></tr>
+<tr><td><code>MOV Rn, #data</code></td><td>Rn &lt;- imm8</td><td>Load immediate to register</td></tr>
+<tr><td><code>MOV direct, #data</code></td><td>[direct] &lt;- imm8</td><td>Load immediate to direct</td></tr>
+<tr><td><code>MOV A, @Ri</code></td><td>A &lt;- [Ri]</td><td>Indirect addressing via R0/R1</td></tr>
+<tr><td><code>MOV @Ri, A</code></td><td>[Ri] &lt;- A</td><td>Indirect store via R0/R1</td></tr>
+<tr><td><code>MOV DPTR, #data16</code></td><td>DPTR &lt;- imm16</td><td>Load 16-bit Data Pointer</td></tr>
+<tr><td><code>MOVC A, @A+DPTR</code></td><td>A &lt;- [A+DPTR]</td><td>Move code byte (lookup table)</td></tr>
+<tr><td><code>MOVX A, @DPTR</code></td><td>A &lt;- [DPTR]</td><td>Move external data to A</td></tr>
+<tr><td><code>MOVX @DPTR, A</code></td><td>[DPTR] &lt;- A</td><td>Move A to external data</td></tr>
+<tr><td><code>XCH A, Rn</code></td><td>A &lt;-&gt; Rn</td><td>Exchange A and register</td></tr>
+<tr><td><code>XCHD A, @Ri</code></td><td>A[3:0] &lt;-&gt; [Ri][3:0]</td><td>Exchange low nibbles</td></tr>
+<tr><td><code>SWAP A</code></td><td>A[7:4] &lt;-&gt; A[3:0]</td><td>Swap nibbles of A</td></tr>
+<tr><td><code>PUSH direct</code></td><td>SP++, [SP] &lt;- [direct]</td><td>Push to stack</td></tr>
+<tr><td><code>POP direct</code></td><td>[direct] &lt;- [SP], SP--</td><td>Pop from stack</td></tr>
+</table>
+
+<h2 id="arithmetic">7. Arithmetic Instructions</h2>
+<table>
+<tr><th>Instruction</th><th>Operation</th><th>Description</th></tr>
+<tr><td><code>ADD A, Rn</code></td><td>A &lt;- A + Rn</td><td>Add register</td></tr>
+<tr><td><code>ADD A, direct</code></td><td>A &lt;- A + [direct]</td><td>Add direct byte</td></tr>
+<tr><td><code>ADD A, #data</code></td><td>A &lt;- A + imm8</td><td>Add immediate</td></tr>
+<tr><td><code>ADDC A, Rn</code></td><td>A &lt;- A + Rn + CY</td><td>Add with carry</td></tr>
+<tr><td><code>SUBB A, Rn</code></td><td>A &lt;- A - Rn - CY</td><td>Subtract with borrow</td></tr>
+<tr><td><code>INC A/Rn/direct/DPTR</code></td><td></td><td>Increment</td></tr>
+<tr><td><code>DEC A/Rn/direct</code></td><td></td><td>Decrement</td></tr>
+<tr><td><code>MUL AB</code></td><td>A=low(A*B), B=high(A*B)</td><td>Multiply (8x8=16)</td></tr>
+<tr><td><code>DIV AB</code></td><td>A=quotient, B=remainder</td><td>Divide (unsigned)</td></tr>
+<tr><td><code>DA A</code></td><td></td><td>Decimal adjust A (BCD)</td></tr>
+</table>
+
+<h2 id="logical">8. Logical Instructions</h2>
+<table>
+<tr><th>Instruction</th><th>Description</th></tr>
+<tr><td><code>ANL A, Rn/direct/@Ri/#data</td><td>AND</td></tr>
+<tr><td><code>ANL direct, A/direct</td><td>AND direct byte</td></tr>
+<tr><td><code>ORL A, Rn/direct/@Ri/#data</td><td>OR</td></tr>
+<tr><td><code>ORL direct, A/direct</td><td>OR direct byte</td></tr>
+<tr><td><code>XRL A, Rn/direct/@Ri/#data</td><td>XOR</td></tr>
+<tr><td><code>XRL direct, A/direct</td><td>XOR direct byte</td></tr>
+<tr><td><code>CLR A</td><td>Clear A</td></tr>
+<tr><td><code>CPL A</td><td>Complement A</td></tr>
+<tr><td><code>RL A / RLC A / RR A / RRC A</td><td>Rotate A</td></tr>
+</table>
+
+<h2 id="bit">9. Bit Operation Instructions</h2>
+<table>
+<tr><th>Instruction</th><th>Description</th></tr>
+<tr><td><code>SETB C / SETB bit</td><td>Set carry or bit</td></tr>
+<tr><td><code>CLR C / CLR bit</td><td>Clear carry or bit</td></tr>
+<tr><td><code>CPL C / CPL bit</td><td>Complement carry or bit</td></tr>
+<tr><td><code>MOV C, bit</td><td>Move bit to carry</td></tr>
+<tr><td><code>MOV bit, C</td><td>Move carry to bit</td></tr>
+<tr><td><code>ANL C, /bit</td><td>AND carry with complemented bit</td></tr>
+<tr><td><code>ORL C, /bit</td><td>OR carry with complemented bit</td></tr>
+<tr><td><code>JC / JNC rel</td><td>Jump on carry</td></tr>
+<tr><td><code>JB / JNB / JBC bit, rel</td><td>Jump on bit</td></tr>
+</table>
+
+<h2 id="branch">10. Branch and Jump Instructions</h2>
+<table>
+<tr><th>Instruction</th><th>Description</th></tr>
+<tr><td><code>SJMP rel</td><td>Short jump (+-127 bytes)</td></tr>
+<tr><td><code>LJMP addr16</td><td>Long jump (16-bit address)</td></tr>
+<tr><td><code>AJMP addr11</td><td>Absolute jump (same 2KB page)</td></tr>
+<tr><td><code>JMP @A+DPTR</td><td>Indirect jump</td></tr>
+<tr><td><code>JZ / JNZ rel</td><td>Jump if A is zero / not zero</td></tr>
+<tr><td><code>CJNE A, Rn/direct/#data, rel</td><td>Compare and jump if not equal</td></tr>
+<tr><td><code>DJNZ Rn/direct, rel</td><td>Decrement and jump if not zero</td></tr>
+</table>
+
+<h2 id="subroutine">11. Subroutine Instructions</h2>
+<table>
+<tr><th>Instruction</th><th>Description</th></tr>
+<tr><td><code>ACALL addr11</td><td>Absolute call (same 2KB page)</td></tr>
+<tr><td><code>LCALL addr16</td><td>Long call (16-bit address)</td></tr>
+<tr><td><code>RET</td><td>Return from subroutine</td></tr>
+<tr><td><code>RETI</td><td>Return from interrupt</td></tr>
+</table>
+
+<h2 id="timers">12. Timer and Serial</h2>
+<h3>Timer Registers</h3>
+<table>
+<tr><th>Register</th><th>SFR Addr</th><th>Description</th></tr>
+<tr><td>TMOD</td><td>0x89</td><td>Timer mode (gate, C/T, M1, M0 for each timer)</td></tr>
+<tr><td>TCON</td><td>0x88</td><td>Timer control (run flags, interrupt flags)</td></tr>
+<tr><td>TH0/TL0</td><td>0x8C/0x8A</td><td>Timer 0 high/low byte</td></tr>
+<tr><td>TH1/TL1</td><td>0x8D/0x8B</td><td>Timer 1 high/low byte</td></tr>
+</table>
+
+<h3>Serial Registers</h3>
+<table>
+<tr><th>Register</th><th>SFR Addr</th><th>Description</th></tr>
+<tr><td>SCON</td><td>0x98</td><td>Serial control (mode, REN, TI, RI)</td></tr>
+<tr><td>SBUF</td><td>0x99</td><td>Serial data buffer (write=transmit, read=receive)</td></tr>
+<tr><td>PCON</td><td>0x87</td><td>Power control (SMOD double baud rate bit)</td></tr>
+</table>
+
+<pre><code>; Setup Timer 0 in Mode 1 (16-bit)
+MOV TMOD, #01H      ; Timer 0, Mode 1
+MOV TH0, #03CH      ; Load count for ~50ms at 12MHz
+MOV TL0, #0B0H
+SETB TR0            ; Start Timer 0
+
+; Serial: Mode 1, 9600 baud
+MOV SCON, #50H      ; Serial Mode 1, REN=1
+MOV TMOD, #20H      ; Timer 1, Mode 2 (auto-reload)
+MOV TH1, #0FDH      ; 9600 baud at 12MHz
+SETB TR1            ; Start Timer 1
+MOV SBUF, #'A'      ; Transmit 'A'</code></pre>
+
+<h2 id="assembly">13. Assembler Directives</h2>
+<table>
+<tr><th>Directive</th><th>Description</th></tr>
+<tr><td><code>ORG addr</code></td><td>Set origin address</td></tr>
+<tr><td><code>END</code></td><td>End of source file</td></tr>
+<tr><td><code>DB data, ...</code></td><td>Define byte(s)</td></tr>
+<tr><td><code>DW data, ...</code></td><td>Define word(s) (16-bit)</td></tr>
+<tr><td><code>label:</code></td><td>Define a label (address)</td></tr>
+<tr><td><code>; comment</code></td><td>Inline comment</td></tr>
+</table>
+
+<h2 id="examples">14. Complete Examples</h2>
+
+<h3>Example 1: Blink LED on P1.0</h3>
+<pre><code>        ORG 0000H
+LOOP:   MOV P1, #01H     ; P1.0 = 1 (LED ON)
+        ACALL DELAY       ; Wait
+        MOV P1, #00H     ; P1.0 = 0 (LED OFF)
+        ACALL DELAY
+        SJMP LOOP         ; Repeat
+
+; Delay subroutine (~250ms at 12MHz)
+DELAY:  MOV R3, #250
+D1:     MOV R4, #250
+D2:     MOV R5, #250
+D3:     DJNZ R5, D3
+        DJNZ R4, D2
+        DJNZ R3, D1
+        RET</code></pre>
+
+<h3>Example 2: Add Two Numbers</h3>
+<pre><code>        ORG 0000H
+        MOV A, #25H       ; A = 0x25 (37)
+        MOV R0, #1AH      ; R0 = 0x1A (26)
+        ADD A, R0          ; A = A + R0 = 0x3F (63)
+        MOV 30H, A        ; Store result at 0x30
+        SJMP $</code></pre>
+
+<h3>Example 3: Count on Port 1</h3>
+<pre><code>        ORG 0000H
+        MOV A, #00H       ; Start at 0
+LOOP:   MOV P1, A         ; Output to P1
+        ACALL DELAY
+        INC A              ; A = A + 1
+        SJMP LOOP
+
+DELAY:  MOV R3, #250
+D1:     MOV R4, #250
+D2:     DJNZ R4, D2
+        DJNZ R3, D1
+        RET</code></pre>
+
+<h3>Example 4: Serial Output "HELLO"</h3>
+<pre><code>        ORG 0000H
+        MOV SCON, #50H    ; Serial Mode 1
+        MOV TMOD, #20H    ; Timer 1 Mode 2
+        MOV TH1, #0FDH    ; 9600 baud
+        SETB TR1           ; Start timer
+
+        MOV SBUF, #'H'
+        ACALL WAIT_TI
+        MOV SBUF, #'E'
+        ACALL WAIT_TI
+        MOV SBUF, '#0LL'
+        ACALL WAIT_TI
+        MOV SBUF, '#0LL'
+        ACALL WAIT_TI
+        MOV SBUF, #'O'
+        SJMP $
+
+WAIT_TI: JNB TI, WAIT_TI  ; Wait for TX complete
+         CLR TI             ; Clear flag
+         RET</code></pre>
+
+<h3>Example 5: Read Buttons on P0, Display on P1</h3>
+<pre><code>        ORG 0000H
+LOOP:   MOV A, P0         ; Read P0 (buttons)
+        MOV P1, A         ; Display on P1 (LEDs)
+        SJMP LOOP</code></pre>
+
+<h2 id="tips">15. Tips and Gotchas</h2>
+<div class="tip"><strong>Tip:</strong> Use <code>ORG 0000H</code> at the start. The 8051 begins execution at address 0x0000.</div>
+
+<div class="tip"><strong>Tip:</strong> <code>SJMP $</code> creates an infinite loop at the current address. Use it to halt execution.</div>
+
+<div class="tip"><strong>Tip:</strong> The 8051 has 4 register banks. Use <code>SETB RS0</code> / <code>CLR RS0</code> etc. to switch banks and get 32 general-purpose registers.</div>
+
+<div class="warn"><strong>Warning:</strong> P0 is open-drain and defaults to 0xFF. It needs external pull-up resistors. In the simulator, P0 works as quasi-bidirectional.</div>
+
+<div class="warn"><strong>Warning:</strong> The SP initializes to 0x07, meaning the first PUSH goes to 0x08 (Bank 1 R0). If you use register banks 1-3, initialize SP to 0x2F or higher.</div>
+
+<div class="info"><strong>Note:</strong> Writing to <code>SBUF</code> (0x99) triggers serial output. The character appears in the serial monitor.</div>
+
+<p><a href="../index.html">&larr; Back to ArduSim</a></p>
+</body>
+</html>
