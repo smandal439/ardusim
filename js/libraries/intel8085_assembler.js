@@ -1,165 +1,233 @@
-﻿/**
- * Intel 8085 Two-Pass Assembler
- * Supports all 8085 instructions, labels, directives, and number formats.
- */
+﻿'use strict';
 window.Intel8085Assembler = (function () {
-    "use strict";
-    var REG = { B: 0, C: 1, D: 2, E: 3, H: 5, L: 6, M: 7, A: 7 };
-    var RP = { B: 0, D: 1, H: 2, SP: 3 };
-    var RP_PSW = { B: 0, D: 1, H: 2, PSW: 3 };
-    var ALU = { ADD: 0x80, ADC: 0x88, SUB: 0x90, SBB: 0x98, ANA: 0xA0, XRA: 0xA8, ORA: 0xB0, CMP: 0xB8 };
-    var IMM8 = { ADI: 0xC6, ACI: 0xCE, SUI: 0xD6, SBI: 0xDE, ANI: 0xE6, XRI: 0xEE, ORI: 0xF6, CPI: 0xFE };
-    var MEM16 = { LDA: 0x3A, STA: 0x32, LHLD: 0x2A, SHLD: 0x22 };
-    var CJMP = { JC: 0xDA, JNC: 0xD2, JZ: 0xCA, JNZ: 0xC2, JP: 0xF2, JM: 0xFA, JPE: 0xEA, JPO: 0xE2 };
-    var CCALL = { CC: 0xDC, CNC: 0xD4, CZ: 0xCC, CNZ: 0xC4, CP: 0xF4, CM: 0xFC, CPE: 0xEC, CPO: 0xE4 };
-    var CRET = { RC: 0xD8, RNC: 0xD0, RZ: 0xC8, RNZ: 0xC0, RP: 0xF0, RM: 0xF8, RPE: 0xE8, RPO: 0xE0 };
-    var _mn = {};
-    (function () { var n = ["NOP","HLT","EI","DI","XCHG","SPHL","PCHL","XTHL","RLC","RRC","RAL","RAR","CMA","STC","CMC","DAA","MOV","MVI","LXI","LDAX","STAX","LDA","STA","LHLD","SHLD","ADD","ADC","SUB","SBB","ANA","XRA","ORA","CMP","ADI","ACI","SUI","SBI","ANI","XRI","ORI","CPI","INR","DCR","INX","DCX","DAD","JMP","CALL","RET","RST","JC","JNC","JZ","JNZ","JP","JM","JPE","JPO","CC","CNC","CZ","CNZ","CP","CM","CPE","CPO","RC","RNC","RZ","RNZ","RP","RM","RPE","RPO","PUSH","POP","IN","OUT","ORG","EQU","END","DB","DW","B","C","D","E","H","L","M","A","SP","PSW"]; for (var i = 0; i < n.length; i++) _mn[n[i]] = true; })();
-    function isMnemonic(t) { return _mn[t.toUpperCase()] === true; }
-    function parseNumber(s) {
-        if (s == null || s === "") return null; s = s.trim();
-        if (/^0[bB][01]+$/.test(s)) return parseInt(s.substring(2), 2);
-        if (/^[0-9a-fA-F][0-9a-fA-F]*[hH]$/.test(s)) return parseInt(s.substring(0, s.length - 1), 16);
-        if (/^0[xX][0-9a-fA-F]+$/.test(s)) return parseInt(s, 16);
-        if (/^[0-9]+$/.test(s)) return parseInt(s, 10);
-        if (/^-[0-9]+$/.test(s)) return parseInt(s, 10);
-        return null; }
-    function cleanSource(source) {
-        var lines = source.split(/\r?\n/); var result = [];
-        for (var i = 0; i < lines.length; i++) { var line = lines[i];
-            var ci = line.indexOf(";"); if (ci >= 0) line = line.substring(0, ci);
-            ci = line.indexOf("//"); if (ci >= 0) line = line.substring(0, ci);
-            result.push(line); } return result; }
-    function tokenize(line) { return line.split(/[,\\s]+/).filter(function (t) { return t.length > 0; }); }
-    function evalExpr(tokenStr, labels, pc) {
-        var s = tokenStr.trim();
-        s = s.replace(/\$/g, "(" + pc + ")");
-        var ln = Object.keys(labels).sort(function (a, b) { return b.length - a.length; });
-        for (var i = 0; i < ln.length; i++) {
-            var re = new RegExp("\\\\b" + ln[i].replace(/[-\\/\\\\^$*+?.()|[\\]{}]/g, "\\\\$&") + "\\\\b", "g");
-            s = s.replace(re, "(" + labels[ln[i]] + ")");
-        }
-        s = s.replace(/\b([0-9a-fA-F][0-9a-fA-F]*)[hH]\b/g, function(m,n){return "0x"+n;});
-        s = s.replace(/\b0[bB]([01]+)\b/g, function(m,n){return "0b"+n;});
-        s = s.replace(/\b0+(\d+)\b/g, function(m,d){return d;});
-        try {
-            if (/^[0-9a-fA-FxXbB\s+\-*/()]+$/.test(s)) {
-                var val = Function("\\"use strict\\"; return (" + s + ")")();
-                if (typeof val === "number" && isFinite(val)) return val | 0;
-            }
-        } catch(e){} return NaN; }
-    function instrSize(tokens, pc, labels) {
-        var op = tokens[0].toUpperCase();
-        if (op === "ORG" || op === "EQU" || op === "END") return 0;
-        if (op === "DB") { var t=0; for(var i=1;i<tokens.length;i++){if(tokens[i].charAt(0)==="\"")t+=tokens[i].length-2;else t++;} return t; }
-        if (op === "DW") return (tokens.length - 1) * 2;
-        if (op === "NOP" || op === "MOV" || op === "INR" || op === "DCR") return 1;
-        if (op === "MVI") return 2;
-        if (op === "LXI") return 3;
-        if (op === "LDAX" || op === "STAX") return 1;
-        if (MEM16[op]) return 3;
-        if (op === "XCHG" || op === "SPHL" || op === "PCHL" || op === "XTHL") return 1;
-        if (ALU[op]) return 1;
-        if (IMM8[op]) return 2;
-        if (op === "INX" || op === "DCX" || op === "DAD") return 1;
-        if (op === "DAA" || op === "CMA" || op === "STC" || op === "CMC") return 1;
-        if (op === "RLC" || op === "RRC" || op === "RAL" || op === "RAR") return 1;
-        if (op === "JMP" || CJMP[op]) return 3;
-        if (op === "CALL" || CCALL[op]) return 3;
-        if (op === "RET" || CRET[op]) return 1;
-        if (op === "RST") return 1;
-        if (op === "PUSH" || op === "POP") return 1;
-        if (op === "EI" || op === "DI" || op === "HLT") return 1;
-        if (op === "IN" || op === "OUT") return 2;
-        return 0; }
-    function parseLine(tokens) {
-        var label = null;
-        if (tokens.length === 0) return { label: null, op: null, tokens: [] };
-        var first = tokens[0];
-        if (first.charAt(first.length - 1) === ":") {
-            label = first.substring(0, first.length - 1).toUpperCase(); tokens = tokens.slice(1);
-        } else if (tokens.length > 1 && !isMnemonic(first) && isMnemonic(tokens[1])) {
-            label = first.toUpperCase(); tokens = tokens.slice(1); }
-        if (tokens.length === 0) return { label: label, op: null, tokens: [] };
-        return { label: label, op: tokens[0].toUpperCase(), tokens: tokens }; }
-    function pass1(lines) {
-        var labels = {}, errors = [], pc = 0;
-        for (var li = 0; li < lines.length; li++) {
-            var raw = lines[li].trim(); if (raw === "") continue;
-            var tk = tokenize(raw); if (tk.length === 0) continue;
-            var p = parseLine(tk); var label = p.label, op = p.op; tk = p.tokens;
-            if (label) { if (labels.hasOwnProperty(label)) errors.push({line:li+1,message:"Duplicate label '" + label + "'"}); else labels[label] = pc; }
-            if (!op) continue;
-            if (op === "ORG") { var a = evalExpr(tk[1], labels, pc); if (!isNaN(a)) pc = a & 0xFFFF; continue; }
-            if (op === "EQU") { if (!label) errors.push({line:li+1,message:"EQU without label"}); else { var v = evalExpr(tk[1], labels, pc); if (isNaN(v)) errors.push({line:li+1,message:"Invalid EQU"}); else labels[label] = v & 0xFFFF; } continue; }
-            if (op === "END") break;
-            var size = instrSize(tk, pc, labels);
-            if (size === 0) errors.push({line:li+1,message:"Unknown instruction '" + op + "'"});
-            pc += size; }
-        return { labels: labels, errors: errors }; }
-    function pass2(lines, labels, maxAddr) {
-        var code = new Uint8Array(maxAddr + 1), errors = [], pc = 0, entryPoint = 0x0000;
-        function emit(b) { if (pc >= 0 && pc < code.length) code[pc] = b & 0xFF; pc++; }
-        function emit16(v) { emit(v & 0xFF); emit((v >> 8) & 0xFF); }
-        for (var li = 0; li < lines.length; li++) {
-            var raw = lines[li].trim(); if (raw === "") continue;
-            var tk = tokenize(raw); if (tk.length === 0) continue;
-            var p = parseLine(tk); var op = p.op; tk = p.tokens; if (!op) continue;
-            if (op === "ORG") { var a = evalExpr(tk[1], labels, pc); if (!isNaN(a)) pc = a & 0xFFFF; continue; }
-            if (op === "EQU") continue;
-            if (op === "END") { if (tk.length > 1) { var ep = evalExpr(tk[1], labels, pc); if (!isNaN(ep)) entryPoint = ep & 0xFFFF; } break; }
-            if (op === "DB") { for (var i=1;i<tk.length;i++){var t=tk[i];if(t.charAt(0)==="\x22"){var s=t.substring(1,t.length-1);for(var ci=0;ci<s.length;ci++)emit(s.charCodeAt(ci));}else{var v=evalExpr(t,labels,pc);if(isNaN(v)){errors.push({line:li+1,message:"Invalid DB value"});emit(0);}else emit(v&0xFF);}} continue; }
-            if (op === "DW") { for (var i=1;i<tk.length;i++){var v=evalExpr(tk[i],labels,pc);if(isNaN(v)){errors.push({line:li+1,message:"Invalid DW value"});emit16(0);}else emit16(v&0xFFFF);} continue; }
-            if (op==="NOP"){emit(0x00);continue;} if (op==="HLT"){emit(0x76);continue;}
-            if (op==="EI"){emit(0xFB);continue;} if (op==="DI"){emit(0xF3);continue;}
-            if (op==="XCHG"){emit(0xEB);continue;} if (op==="SPHL"){emit(0xF9);continue;}
-            if (op==="PCHL"){emit(0xE9);continue;} if (op==="XTHL"){emit(0xE3);continue;}
-            if (op==="RLC"){emit(0x07);continue;} if (op==="RRC"){emit(0x0F);continue;}
-            if (op==="RAL"){emit(0x17);continue;} if (op==="RAR"){emit(0x1F);continue;}
-            if (op==="CMA"){emit(0x2F);continue;} if (op==="STC"){emit(0x37);continue;}
-            if (op==="CMC"){emit(0x3F);continue;} if (op==="DAA"){emit(0x27);continue;}
-            if (op==="RET"){emit(0xC9);continue;}
-            if (CRET[op]!=null){emit(CRET[op]);continue;}
-            if (op==="RST"){var n=parseNumber(tk[1]);if(n==null||n<0||n>7){errors.push({line:li+1,message:"Invalid RST"});emit(0xC7);}else emit(0xC7+n*8);continue;}
-            if (op==="PUSH"||op==="POP"){var rp=(tk[1]||"").toUpperCase(),rv=RP_PSW[rp];if(rv==null){errors.push({line:li+1,message:"Invalid pair for "+op});emit(op==="PUSH"?0xC5:0xC1);}else emit((op==="PUSH"?0xC5:0xC1)+rv*0x10);continue;}
-            if (op==="MOV"){var pt=tk.slice(1).join("").toUpperCase().split(",");if(pt.length<2)pt=[tk[1]||"",tk[2]||""];var dst=pt[0].trim(),src=pt[1].trim();var dv=REG[dst],sv=REG[src];if(dv==null||sv==null){errors.push({line:li+1,message:"Invalid MOV"});emit(0x40);}else emit(0x40+dv*8+sv);continue;}
-            if (op==="MVI"){var rg=(tk[1]||"").toUpperCase().split(",")[0].trim(),rv=REG[rg];if(rv==null){errors.push({line:li+1,message:"Invalid MVI register"});emit(0x06);emit(0);}else{emit(0x06+rv*8);var d=evalExpr(tk[2]||(tk[1]||"").split(",")[1]||"0",labels,pc);emit(isNaN(d)?0:(d&0xFF));}continue;}
-            if (op==="LXI"){var ra=(tk[1]||"").toUpperCase().split(",")[0].trim(),rp=RP[ra];if(rp==null){errors.push({line:li+1,message:"Invalid LXI pair"});emit(0x01);emit(0);emit(0);}else{emit(0x01+rp*0x10);var ds=((tk[1]||"").split(",")[1]||tk[2]||"0").trim();var dv=evalExpr(ds,labels,pc);if(isNaN(dv)){errors.push({line:li+1,message:"Invalid LXI value"});emit(0);emit(0);}else emit16(dv&0xFFFF);}continue;}
-            if (op==="LDAX"||op==="STAX"){var rp=(tk[1]||"").toUpperCase(),rv=RP[rp];if(rv==null||rp==="SP"){errors.push({line:li+1,message:"Invalid pair for "+op});emit(op==="LDAX"?0x0A:0x02);}else emit((op==="LDAX"?0x0A:0x02)+rv*0x10);continue;}
-            if (MEM16[op]){emit(MEM16[op]);var addr=evalExpr(tk[1],labels,pc);if(isNaN(addr)){errors.push({line:li+1,message:"Invalid address for "+op});emit(0);emit(0);}else emit16(addr&0xFFFF);continue;}
-            if (ALU[op]){var rg=(tk[1]||"").toUpperCase().split(",")[0].trim(),rv=REG[rg];if(rv==null){errors.push({line:li+1,message:"Invalid ALU register"});emit(ALU[op]);}else emit(ALU[op]+rv);continue;}
-            if (IMM8[op]){emit(IMM8[op]);var data=evalExpr(tk[1],labels,pc);if(isNaN(data)){errors.push({line:li+1,message:"Invalid immediate"});emit(0);}else emit(data&0xFF);continue;}
-            if (op==="INR"||op==="DCR"){var rg=(tk[1]||"").toUpperCase().trim(),rv=REG[rg];if(rv==null){errors.push({line:li+1,message:"Invalid register"});emit(op==="INR"?0x04:0x05);}else emit((op==="INR"?0x04:0x05)+rv*8);continue;}
-            if (op==="INX"||op==="DCX"||op==="DAD"){var rp=(tk[1]||"").toUpperCase().trim(),rv=RP[rp];if(rv==null){errors.push({line:li+1,message:"Invalid pair for "+op});emit(op==="INX"?0x03:op==="DCX"?0x0B:0x09);}else{var b=op==="INX"?0x03:op==="DCX"?0x0B:0x09;emit(b+rv*0x10);}continue;}
-            if (op==="JMP"||op==="CALL"){emit(op==="JMP"?0xC3:0xCD);var addr=evalExpr(tk[1],labels,pc);if(isNaN(addr)){errors.push({line:li+1,message:"Invalid "+op+" address"});emit(0);emit(0);}else emit16(addr&0xFFFF);continue;}
-            if (CJMP[op]){emit(CJMP[op]);var addr=evalExpr(tk[1],labels,pc);if(isNaN(addr)){errors.push({line:li+1,message:"Invalid "+op+" address"});emit(0);emit(0);}else emit16(addr&0xFFFF);continue;}
-            if (CCALL[op]){emit(CCALL[op]);var addr=evalExpr(tk[1],labels,pc);if(isNaN(addr)){errors.push({line:li+1,message:"Invalid "+op+" address"});emit(0);emit(0);}else emit16(addr&0xFFFF);continue;}
-            if (op==="IN"||op==="OUT"){emit(op==="IN"?0xDB:0xD3);var port=evalExpr(tk[1],labels,pc);if(isNaN(port)){errors.push({line:li+1,message:"Invalid port"});emit(0);}else emit(port&0xFF);continue;}
-            errors.push({line:li+1,message:"Unknown instruction: "+op});
-        }
-        return { code: code, errors: errors, entryPoint: entryPoint }; }
-    function assemble(source) {
-        var lines = cleanSource(source);
-        var p1 = pass1(lines);
-        var labels = p1.labels;
-        var errors = p1.errors.slice();
-        var maxAddr = 0, pc = 0;
-        for (var li = 0; li < lines.length; li++) {
-            var raw = lines[li].trim(); if (raw === "") continue;
-            var tk = tokenize(raw); if (tk.length === 0) continue;
-            var p = parseLine(tk); var op = p.op; tk = p.tokens; if (!op) continue;
-            if (op === "ORG") { var a = evalExpr(tk[1], labels, pc); if (!isNaN(a)) pc = a & 0xFFFF; continue; }
-            if (op === "EQU" || op === "END") continue;
-            var size = instrSize(tk, pc, labels);
-            if (pc + size > maxAddr) maxAddr = pc + size; pc += size; }
-        if (maxAddr === 0) maxAddr = 0x0100;
-        var p2 = pass2(lines, labels, maxAddr);
-        errors = errors.concat(p2.errors);
-        var usedEnd = p2.code.length;
-        for (var i = p2.code.length - 1; i >= 0; i--) { if (p2.code[i] !== 0) { usedEnd = i + 1; break; } }
-        var trimmed = new Uint8Array(usedEnd);
-        for (var i = 0; i < usedEnd; i++) trimmed[i] = p2.code[i];
-        return { code: trimmed, errors: errors, labels: labels, entryPoint: p2.entryPoint };
+  var REG = { A: 7, B: 0, C: 1, D: 2, E: 3, H: 5, L: 6, M: 7 };
+  var RP_LXI = { B: 0, D: 1, H: 3, SP: 3 };
+  var RP_PP = { B: 0, D: 1, H: 2, PSW: 3 };
+  var REG_BASE = { ADD: 0x80, ADC: 0x88, SUB: 0x90, SBB: 0x98, ANA: 0xA0, XRA: 0xA8, ORA: 0xB0, CMP: 0xB8 };
+
+  function parseNum(s) {
+    s = s.trim();
+    if (!s) return null;
+    if (/^0[bB][01]+$/.test(s)) return parseInt(s.slice(2), 2) & 0xFFFF;
+    if (/^[01]+[bB]$/.test(s)) return parseInt(s.slice(0, -1), 2) & 0xFFFF;
+    if (/^0[xX][0-9a-fA-F]+$/.test(s)) return parseInt(s, 16) & 0xFFFF;
+    if (/^[0-9a-fA-F]+[hH]$/.test(s)) return parseInt(s.slice(0, -1), 16) & 0xFFFF;
+    if (/^-?\d+$/.test(s)) return parseInt(s, 10) & 0xFFFF;
+    return null;
+  }
+
+  function tokenize(line) {
+    var semi = line.indexOf(';');
+    if (semi >= 0) line = line.substring(0, semi);
+    line = line.trim();
+    if (!line) return null;
+    var parts = [], cur = '';
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === ',' || ch === '\t' || ch === ' ') {
+        if (cur.trim()) parts.push(cur.trim());
+        cur = '';
+      } else { cur += ch; }
     }
-    return { assemble: assemble };
+    if (cur.trim()) parts.push(cur.trim());
+    return parts.length ? parts : null;
+  }
+
+  function assemble(source) {
+    var lines = source.split('\n');
+    var errors = [], labels = {}, org = 0, output = [], fixups = [];
+
+    function err(ln, msg) { errors.push({ line: ln + 1, message: msg }); }
+
+    function runPass() {
+      var pc = org, out = [];
+      for (var i = 0; i < lines.length; i++) {
+        var parts = tokenize(lines[i]);
+        if (!parts) continue;
+        var idx = 0;
+        if (parts[idx] && parts[idx].endsWith(':')) {
+          labels[parts[idx].slice(0, -1).toUpperCase()] = pc;
+          idx++;
+        }
+        if (idx >= parts.length) continue;
+        var mn = parts[idx].toUpperCase(); idx++;
+        if (mn === 'ORG') { var ov = parseNum(parts[idx] || ''); if (ov !== null) { org = ov; pc = ov; } continue; }
+        if (mn === 'END') break;
+        if (mn === 'EQU') continue;
+        if (mn === 'DB') {
+          while (idx < parts.length) {
+            var t = parts[idx++].trim();
+            if (t.startsWith('"') && t.endsWith('"')) {
+              for (var j = 1; j < t.length - 1; j++) { out.push(t.charCodeAt(j) & 0xFF); pc++; }
+            } else {
+              var dv = parseNum(t);
+              if (dv !== null) { out.push(dv & 0xFF); pc++; }
+              else { fixups.push({ offset: out.length, tokens: [t], size: 1 }); out.push(0); pc++; }
+            }
+          }
+          continue;
+        }
+        if (mn === 'DW') {
+          while (idx < parts.length) {
+            var dw = parseNum(parts[idx++]);
+            if (dw !== null) { out.push(dw & 0xFF); out.push((dw >> 8) & 0xFF); pc += 2; }
+            else { fixups.push({ offset: out.length, tokens: [parts[idx-1]], size: 2 }); out.push(0); out.push(0); pc += 2; }
+          }
+          continue;
+        }
+        // NOP
+        if (mn === 'NOP') { out.push(0x00); pc++; continue; }
+        // HLT
+        if (mn === 'HLT') { out.push(0x76); pc++; continue; }
+        // EI DI
+        if (mn === 'EI') { out.push(0xFB); pc++; continue; }
+        if (mn === 'DI') { out.push(0xF3); pc++; continue; }
+        // XCHG SPHL PCHL XTHL
+        if (mn === 'XCHG') { out.push(0xEB); pc++; continue; }
+        if (mn === 'SPHL') { out.push(0xF9); pc++; continue; }
+        if (mn === 'PCHL') { out.push(0xE9); pc++; continue; }
+        if (mn === 'XTHL') { out.push(0xE3); pc++; continue; }
+        // RLC RRC RAL RAR CMA STC CMC DAA
+        if (mn === 'RLC') { out.push(0x07); pc++; continue; }
+        if (mn === 'RRC') { out.push(0x0F); pc++; continue; }
+        if (mn === 'RAL') { out.push(0x17); pc++; continue; }
+        if (mn === 'RAR') { out.push(0x1F); pc++; continue; }
+        if (mn === 'CMA') { out.push(0x2F); pc++; continue; }
+        if (mn === 'STC') { out.push(0x37); pc++; continue; }
+        if (mn === 'CMC') { out.push(0x3F); pc++; continue; }
+        if (mn === 'DAA') { out.push(0x27); pc++; continue; }
+        // RET and conditional returns
+        var retMap = { RET: 0xC9, RC: 0xD8, RNC: 0xD0, RZ: 0xC8, RNZ: 0xC0, RP: 0xF0, RM: 0xF8, RPE: 0xE8, RPO: 0xE0 };
+        if (mn in retMap) { out.push(retMap[mn]); pc++; continue; }
+        // RST
+        if (mn === 'RST') {
+          var rn = parts[idx] ? parts[idx].trim() : '';
+          var rnVal = -1;
+          if (/^\d+$/.test(rn)) rnVal = parseInt(rn);
+          else { var rnv = parseNum(rn); if (rnv !== null) rnVal = rnv; }
+          if (rnVal < 0 || rnVal > 7) { err(i, 'Invalid RST: ' + rn); continue; }
+          out.push(0xC7 + rnVal * 8); pc++; continue;
+        }
+        // IN OUT
+        if (mn === 'IN' || mn === 'OUT') {
+          var pv = parseNum(parts[idx] || '');
+          if (pv === null) { err(i, 'Invalid port'); continue; }
+          out.push(mn === 'IN' ? 0xDB : 0xD3);
+          out.push(pv & 0xFF); pc += 2; continue;
+        }
+        // ADI ACI SUI SBI ANI XRI ORI CPI
+        var immMap = { ADI: 0xC6, ACI: 0xCE, SUI: 0xD6, SBI: 0xDE, ANI: 0xE6, XRI: 0xEE, ORI: 0xF6, CPI: 0xFE };
+        if (mn in immMap) {
+          var iv = parseNum(parts[idx] || '');
+          if (iv === null) { err(i, 'Invalid immediate'); continue; }
+          out.push(immMap[mn]); out.push(iv & 0xFF); pc += 2; continue;
+        }
+        // INR DCR
+        if (mn === 'INR' || mn === 'DCR') {
+          var rr = (parts[idx] || '').toUpperCase();
+          if (!(rr in REG)) { err(i, 'Invalid register: ' + rr); continue; }
+          out.push((mn === 'INR' ? 0x04 : 0x05) + REG[rr] * 8); pc++; continue;
+        }
+        // ADD ADC SUB SBB ANA XRA ORA CMP
+        if (mn in REG_BASE) {
+          var sr = (parts[idx] || '').toUpperCase();
+          if (!(sr in REG)) { err(i, 'Invalid register: ' + sr); continue; }
+          out.push(REG_BASE[mn] + REG[sr]); pc++; continue;
+        }
+        // MOV
+        if (mn === 'MOV') {
+          var ops = (parts[idx] || '').toUpperCase().split(',');
+          if (ops.length < 2) { err(i, 'MOV needs 2 operands'); continue; }
+          var d = REG[ops[0].trim()], s = REG[ops[1].trim()];
+          if (d === undefined || s === undefined) { err(i, 'Invalid MOV operands'); continue; }
+          out.push(0x40 + d * 8 + s); pc++; continue;
+        }
+        // MVI
+        if (mn === 'MVI') {
+          var mviOps = (parts[idx] || '').toUpperCase().split(',');
+          var mr = mviOps[0].trim();
+          if (!(mr in REG)) { err(i, 'Invalid MVI register: ' + mr); continue; }
+          var md = parseNum(mviOps[1] || '');
+          if (md === null) { err(i, 'Invalid MVI data'); continue; }
+          out.push(0x06 + REG[mr] * 8); out.push(md & 0xFF); pc += 2; continue;
+        }
+        // LXI
+        if (mn === 'LXI') {
+          var lxiOps = (parts[idx] || '').toUpperCase().split(',');
+          var lrp = lxiOps[0].trim();
+          if (!(lrp in RP_LXI)) { err(i, 'Invalid LXI pair: ' + lrp); continue; }
+          var ld = parseNum(lxiOps[1] || '');
+          if (ld === null) { err(i, 'Invalid LXI data'); continue; }
+          out.push(0x01 + RP_LXI[lrp] * 0x10);
+          out.push(ld & 0xFF); out.push((ld >> 8) & 0xFF); pc += 3; continue;
+        }
+        // LDA STA LHLD SHLD
+        var mem16 = { LDA: 0x3A, STA: 0x32, LHLD: 0x2A, SHLD: 0x22 };
+        if (mn in mem16) {
+          var av = parseNum(parts[idx] || '');
+          if (av === null) { err(i, 'Invalid address'); continue; }
+          out.push(mem16[mn]); out.push(av & 0xFF); out.push((av >> 8) & 0xFF); pc += 3; continue;
+        }
+        // LDAX STAX
+        if (mn === 'LDAX' || mn === 'STAX') {
+          var lrp2 = (parts[idx] || '').toUpperCase();
+          if (!(lrp2 in RP_PP)) { err(i, 'Invalid pair: ' + lrp2); continue; }
+          out.push((mn === 'LDAX' ? 0x0A : 0x02) + RP_PP[lrp2] * 0x10); pc++; continue;
+        }
+        // INX DCX DAD
+        var rp16 = { INX: 0x03, DCX: 0x0B, DAD: 0x09 };
+        if (mn in rp16) {
+          var rrp = (parts[idx] || '').toUpperCase();
+          if (!(rrp in RP_LXI)) { err(i, 'Invalid pair: ' + rrp); continue; }
+          out.push(rp16[mn] + RP_LXI[rrp] * 0x10); pc++; continue;
+        }
+        // PUSH POP
+        if (mn === 'PUSH' || mn === 'POP') {
+          var ppr = (parts[idx] || '').toUpperCase();
+          if (!(ppr in RP_PP)) { err(i, 'Invalid pair: ' + ppr); continue; }
+          out.push((mn === 'PUSH' ? 0xC5 : 0xC1) + RP_PP[ppr] * 0x10); pc++; continue;
+        }
+        // JMP and conditional jumps
+        var jmpMap = { JMP: 0xC3, JC: 0xDA, JNC: 0xD2, JZ: 0xCA, JNZ: 0xC2, JP: 0xF2, JM: 0xFA, JPE: 0xEA, JPO: 0xE2 };
+        if (mn in jmpMap) {
+          var jv = parseNum(parts[idx] || '');
+          if (jv === null && labels[parts[idx] ? parts[idx].trim().toUpperCase() : ''] !== undefined)
+            jv = labels[parts[idx].trim().toUpperCase()];
+          if (jv === null) { err(i, 'Invalid jump address'); continue; }
+          out.push(jmpMap[mn]); out.push(jv & 0xFF); out.push((jv >> 8) & 0xFF); pc += 3; continue;
+        }
+        // CALL and conditional calls
+        var callMap = { CALL: 0xCD, CC: 0xDC, CNC: 0xD4, CZ: 0xCC, CNZ: 0xC4, CP: 0xF4, CM: 0xFC, CPE: 0xEC, CPO: 0xE4 };
+        if (mn in callMap) {
+          var cv = parseNum(parts[idx] || '');
+          if (cv === null && labels[parts[idx] ? parts[idx].trim().toUpperCase() : ''] !== undefined)
+            cv = labels[parts[idx].trim().toUpperCase()];
+          if (cv === null) { err(i, 'Invalid call address'); continue; }
+          out.push(callMap[mn]); out.push(cv & 0xFF); out.push((cv >> 8) & 0xFF); pc += 3; continue;
+        }
+        err(i, 'Unknown instruction: ' + mn);
+      }
+      return out;
+    }
+
+    // Pass 1
+    runPass();
+    var pass1 = output.slice();
+    // Pass 2 (labels now collected)
+    output = runPass();
+    // Apply fixups
+    for (var f = 0; f < fixups.length; f++) {
+      var fx = fixups[f];
+      var fv = parseNum(fx.tokens[0]);
+      if (fv === null && labels[fx.tokens[0].toUpperCase()] !== undefined)
+        fv = labels[fx.tokens[0].toUpperCase()];
+      if (fv !== null) {
+        if (fx.size === 1) output[fx.offset] = fv & 0xFF;
+        else { output[fx.offset] = fv & 0xFF; output[fx.offset + 1] = (fv >> 8) & 0xFF; }
+      }
+    }
+    return { code: new Uint8Array(output), errors: errors, labels: labels, entryPoint: org };
+  }
+
+  return { assemble: assemble };
 })();
