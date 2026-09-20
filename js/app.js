@@ -3190,10 +3190,10 @@ _newProject() {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
 
-    const icons = { success: '✓', error: '✕', warn: '⚠', info: 'â„¹' };
+    const icons = { success: '✓', error: '✕', warn: '⚠', info: 'ℹ' };
     const icon = document.createElement('span');
     icon.className = 'toast-icon';
-    icon.textContent = icons[type] || 'â„¹';
+    icon.textContent = icons[type] || 'ℹ';
     const text = document.createElement('span');
     text.className = 'toast-msg';
     text.textContent = String(msg);
