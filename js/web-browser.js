@@ -1,9 +1,9 @@
-/* ═══════════════════════════════════════════════════════
+/* -------------------------------------------------------
    web-browser.js — Web Browser Panel
    Renders HTML served by the simulated ESP32 WebServer.
    Intercepts link clicks and routes them back to the
    simulated server so GPIO changes happen on click.
-   ═══════════════════════════════════════════════════════ */
+   ------------------------------------------------------- */
 
 'use strict';
 

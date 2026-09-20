@@ -1,8 +1,8 @@
-/* ═══════════════════════════════════════════════════════
+/* -------------------------------------------------------
    remote.js — Phone-side MQTT client for remote control
    Connects to HiveMQ broker, sends pin commands,
    receives serial output and pin state updates.
-   ═══════════════════════════════════════════════════════ */
+   ------------------------------------------------------- */
 
 'use strict';
 

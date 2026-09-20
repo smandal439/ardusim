@@ -1,10 +1,10 @@
 'use strict';
 
-/* ═══════════════════════════════════════════════════════
+/* -------------------------------------------------------
    dso-fullscreen.js — Fullscreen DSO Overlay
    High-resolution rendering, smooth cursors, keyboard shortcuts,
    measurements, controls, responsive layout
-   ═══════════════════════════════════════════════════════ */
+   ------------------------------------------------------- */
 
 class DSOFullscreen {
   constructor() {
@@ -206,7 +206,7 @@ class DSOFullscreen {
     this._rafId = null;
   }
 
-  /* ══════════════ RENDERING ══════════════ */
+  /* -------------- RENDERING -------------- */
   _render() {
     const ctx = this.ctx;
     const inst = this.inst;
@@ -1202,7 +1202,7 @@ class DSOFullscreen {
     return r.toFixed(0) + 'Sa/s';
   }
 
-  /* ══════════════ PERSISTENCE ══════════════ */
+  /* -------------- PERSISTENCE -------------- */
   _initPersistenceCanvas() {
     if (!this.canvas) return;
     if (!this._persistenceCanvas) {
@@ -1234,7 +1234,7 @@ class DSOFullscreen {
     this._persistenceCtx.drawImage(this.canvas, 0, 0);
   }
 
-  /* ══════════════ REFERENCE WAVEFORM ══════════════ */
+  /* -------------- REFERENCE WAVEFORM -------------- */
   _storeReference() {
     if (!this.inst || !this.inst._buffers) return;
     const buf = this.inst._buffers;
@@ -1321,7 +1321,7 @@ class DSOFullscreen {
     ctx.restore();
   }
 
-  /* ══════════════ SCREENSHOT ══════════════ */
+  /* -------------- SCREENSHOT -------------- */
   _savePNG() {
     if (!this.canvas) return;
     const link = document.createElement('a');
@@ -1330,7 +1330,7 @@ class DSOFullscreen {
     link.click();
   }
 
-  /* ══════════════ HELP OVERLAY ══════════════ */
+  /* -------------- HELP OVERLAY -------------- */
   _toggleHelp() {
     this._helpVisible = !this._helpVisible;
     if (this._helpOverlay) {
@@ -1345,7 +1345,7 @@ class DSOFullscreen {
     }
   }
 
-  /* ══════════════ STATUS BAR ══════════════ */
+  /* -------------- STATUS BAR -------------- */
   _updateStatusBar() {
     if (!this.inst) return;
     const rs = this.inst.runtimeState || {};
@@ -1398,7 +1398,7 @@ class DSOFullscreen {
     }
   }
 
-  /* ══════════════ EVENT HANDLING ══════════════ */
+  /* -------------- EVENT HANDLING -------------- */
   _bindEvents() {
     if (!this.overlay) return;
 
@@ -1478,7 +1478,7 @@ class DSOFullscreen {
     window.addEventListener('resize', () => { if (this.visible) this._resize(); });
   }
 
-  /* ══════════════ KEYBOARD SHORTCUTS ══════════════ */
+  /* -------------- KEYBOARD SHORTCUTS -------------- */
   _onKeyDown(e) {
     if (!this.visible || !this.inst) return;
 
@@ -1702,7 +1702,7 @@ class DSOFullscreen {
     }
   }
 
-  /* ══════════════ CURSOR DRAG ══════════════ */
+  /* -------------- CURSOR DRAG -------------- */
   _onCursorDragStart(e) {
     if (!this.canvas) return;
     const rect = this.canvas.getBoundingClientRect();

@@ -99,7 +99,7 @@ class App {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• GLOBAL ERROR HANDLING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- GLOBAL ERROR HANDLING ---------------------- */
   _initErrorHandlers() {
     window.addEventListener('error', (e) => {
       console.error('[ArduSim] Uncaught error:', e.error || e.message);
@@ -129,7 +129,7 @@ class App {
     this._hideLoadingOverlay();
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• UI BINDING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- UI BINDING ---------------------- */
   _bindUi() {
     const get = id => document.getElementById(id);
 
@@ -244,6 +244,8 @@ class App {
     zoomOutBtn?.addEventListener('click', () => this.canvas?.zoomOut());
     fitViewBtn?.addEventListener('click', () => this.canvas?.fitView());
     canvasFullscreenBtn?.addEventListener('click', () => this._toggleCanvasFullscreen());
+    const editorFullscreenBtn = get('btn-editor-fullscreen');
+    editorFullscreenBtn?.addEventListener('click', () => this._toggleEditorFullscreen());
     undoBtn?.addEventListener('click', () => this.canvas?.undo());
     redoBtn?.addEventListener('click', () => this.canvas?.redo());
     oscClearBtn?.addEventListener('click', () => this.osc?.clear());
@@ -424,6 +426,10 @@ class App {
           this._toggleCanvasFullscreen();
           return;
         }
+        if (document.body.classList.contains('editor-fullscreen')) {
+          this._toggleEditorFullscreen();
+          return;
+        }
         if (window.GuideManager?.isOpen?.()) {
           window.GuideManager.close();
           return;
@@ -457,7 +463,7 @@ class App {
     });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CANVAS INIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- CANVAS INIT ---------------------- */
   _initCanvas() {
     const canvasEl = document.getElementById('circuit-canvas');
     const wrapperEl = document.getElementById('canvas-wrapper');
@@ -486,7 +492,7 @@ class App {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• BOARD SELECTOR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- BOARD SELECTOR ---------------------- */
   _initBoardSelector() {
     const settings = window.StorageManager?.loadSettings?.() || {};
     const board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148'].includes(settings.board) ? settings.board : 'arduino_uno';
@@ -536,7 +542,7 @@ class App {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SERIAL INIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- SERIAL INIT ---------------------- */
   _initSerial() {
     if (window.SerialMonitorClass) {
       this.serial = new window.SerialMonitorClass();
@@ -545,7 +551,7 @@ class App {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• OUTPUT / DEBUG INIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- OUTPUT / DEBUG INIT ---------------------- */
   _initOutput() {
     if (window.OutputPanelClass) {
       this.output = new window.OutputPanelClass();
@@ -554,7 +560,7 @@ class App {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DUAL-BOARD SUPPORT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- DUAL-BOARD SUPPORT ---------------------- */
   _initSim2() {
     if (window.ArduinoSimulator) {
       this.sim2 = new window.ArduinoSimulator();
@@ -850,7 +856,7 @@ void loop() {
 }`;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SIMULATOR EVENTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- SIMULATOR EVENTS ---------------------- */
   _attachSimulatorEvents() {
     // Buffer serial output per-simulator so [Board] tag appears once per line
     this._serialBuf1 = '';
@@ -1417,7 +1423,7 @@ void loop() {
     };
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RUN / STOP / PAUSE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- RUN / STOP / PAUSE ---------------------- */
   async run() {
     if (!this.editor) return;
     const code = this.editor.getCombinedCode();
@@ -1567,7 +1573,7 @@ void loop() {
     this.editor?.formatCode();
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PROJECT NAME â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- PROJECT NAME ---------------------- */
   getProjectName() {
     return this._projectName || 'Untitled Project';
   }
@@ -1579,7 +1585,7 @@ void loop() {
     if (el) el.value = this._projectName;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SAVE / DOWNLOAD / LOAD / SHARE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- SAVE / DOWNLOAD / LOAD / SHARE ---------------------- */
   saveProject() {
     const files = this.editor?.getAllFiles?.() || { 'sketch.ino': '' };
     const board2Code = this._getBoard2Code();
@@ -1636,7 +1642,7 @@ void loop() {
     window.StorageManager?.shareUrl(files, circuitData, board2Code);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SAVED PROJECTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- SAVED PROJECTS ---------------------- */
   async _syncProjectsFromServer() {
     try {
       const result = await window.StorageManager?.syncFromServer?.();
@@ -1750,7 +1756,7 @@ _newProject() {
     this.output?.log('New project created', 'system');
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• AUTO-SAVE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- AUTO-SAVE ---------------------- */
   _triggerAutoSave() {
     if (!this._autoSaveDebounced) {
       this._autoSaveDebounced = window.Utils?.debounce((files, circuit, b2) => {
@@ -1766,7 +1772,7 @@ _newProject() {
     this._autoSaveDebounced(files, circuit, board2Code);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• COMPONENT LIBRARY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- COMPONENT LIBRARY ---------------------- */
   _renderComponentLibrary() {
     const container = document.getElementById('components-container');
     if (!container || !window.ArduinoComponents?.COMPONENT_CATALOG) return;
@@ -1918,7 +1924,7 @@ _newProject() {
     });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CANVAS SUMMARY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- CANVAS SUMMARY ---------------------- */
   _refreshCanvasSummary() {
     const compEl = document.getElementById('canvas-comp-count');
     const wireEl = document.getElementById('canvas-wire-count');
@@ -1929,7 +1935,7 @@ _newProject() {
     if (wireEl) wireEl.textContent = `${nw} wire${nw !== 1 ? 's' : ''}`;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RESTORE PROJECT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- RESTORE PROJECT ---------------------- */
   _restoreProject() {
     const project = window.StorageManager?.autoLoad?.();
     if (project) {
@@ -1972,7 +1978,7 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RUNNING STATE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- RUNNING STATE ---------------------- */
   _setRunningState(running) {
     this.isRunning = running;
     const runBtn   = document.getElementById('btn-run');
@@ -2012,7 +2018,7 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PIN MONITOR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- PIN MONITOR ---------------------- */
   _updatePinMonitor() {
     const grid = document.getElementById('pin-monitor-grid');
     if (!grid || !this.sim) return;
@@ -2115,7 +2121,7 @@ _newProject() {
     });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• BEFORE UNLOAD GUARD â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- BEFORE UNLOAD GUARD ---------------------- */
   _setupBeforeUnloadGuard() {
     window.addEventListener('beforeunload', (e) => {
       if (window.StorageManager?.isDirty()) {
@@ -2126,7 +2132,7 @@ _newProject() {
     });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LOADING OVERLAY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- LOADING OVERLAY ---------------------- */
   _hideLoadingOverlay() {
     const overlay = document.getElementById('loading-overlay');
     if (!overlay) return;
@@ -2136,7 +2142,7 @@ _newProject() {
     }, 400);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• THEME â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- THEME ---------------------- */
   _toggleTheme(iconDark, iconLight) {
     const body = document.body;
     const isDark = body.classList.contains('dark-theme');
@@ -2162,7 +2168,7 @@ _newProject() {
     if (iconLight) iconLight.classList.toggle('hidden', darkMode);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• STATUS BAR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- STATUS BAR ---------------------- */
   _updateStatus(msg) {
     const el = document.getElementById('sim-status-text');
     if (el) el.textContent = msg;
@@ -2173,7 +2179,7 @@ _newProject() {
     if (el) el.textContent = `● ${msg}`;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- MODALS ---------------------- */
   _showModal(modalId) {
     const overlay = document.getElementById('modal-overlay');
     const modal   = document.getElementById(modalId);
@@ -2273,7 +2279,7 @@ _newProject() {
     this._closePropsModal();
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• CONTEXT MENU â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- CONTEXT MENU ---------------------- */
   _showContextMenu(inst, x, y) {
     this._closeContextMenu();
     const menu = document.getElementById('canvas-context-menu');
@@ -2406,7 +2412,7 @@ _newProject() {
     if (menu) { menu.classList.add('hidden'); menu.classList.remove('active'); }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• HEADER DROPDOWNS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- HEADER DROPDOWNS ---------------------- */
   _closeHeaderDropdowns() {
     document.querySelectorAll('.hdr-dropdown.open').forEach(dd => {
       dd.classList.remove('open');
@@ -2421,7 +2427,7 @@ _newProject() {
     });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PANEL TOGGLES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- PANEL TOGGLES ---------------------- */
   _togglePanel(panelId, button, collapseTitle, expandTitle) {
     const panel = document.getElementById(panelId);
     if (!panel) return;
@@ -2487,10 +2493,10 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• VIEW FOCUS MODES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- VIEW FOCUS MODES ---------------------- */
   _setView(view) {
-    // Exit canvas fullscreen if active
-    document.body.classList.remove('canvas-fullscreen');
+    // Exit fullscreen modes if active
+    document.body.classList.remove('canvas-fullscreen', 'editor-fullscreen');
     if (this._activeView === view) {
       // Clicking the active view restores the default layout
       this._activeView = null;
@@ -2554,7 +2560,22 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DEFAULT LAYOUT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  _toggleEditorFullscreen() {
+    const isFullscreen = document.body.classList.toggle('editor-fullscreen');
+    const btn = document.getElementById('btn-editor-fullscreen');
+    if (btn) btn.title = isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen Editor (Esc to exit)';
+    if (isFullscreen) {
+      document.body.classList.remove('canvas-fullscreen');
+      if (this._activeView) {
+        document.body.classList.remove('view-code', 'view-circuit', 'view-serial');
+        this._activeView = null;
+        this._updateViewButtons();
+      }
+      if (this.editor) this.editor.layout();
+    }
+  }
+
+  /* ---------------------- DEFAULT LAYOUT ---------------------- */
   _initDefaultLayout() {
     const LS_KEY = 'ardusim-layout';
     let saved = {};
@@ -2570,7 +2591,7 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PANEL RESIZERS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- PANEL RESIZERS ---------------------- */
   _initResizers() {
     const LS_KEY = 'ardusim-layout';
     let saved = {};
@@ -2601,7 +2622,9 @@ _newProject() {
         e.preventDefault();
         if (document.body.classList.contains('view-code') ||
             document.body.classList.contains('view-circuit') ||
-            document.body.classList.contains('view-serial')) return;
+            document.body.classList.contains('view-serial') ||
+            document.body.classList.contains('canvas-fullscreen') ||
+            document.body.classList.contains('editor-fullscreen')) return;
         const startX = e.clientX;
         const startW = panel.getBoundingClientRect().width;
         const minW = 120;
@@ -2641,7 +2664,9 @@ _newProject() {
         e.preventDefault();
         if (document.body.classList.contains('view-code') ||
             document.body.classList.contains('view-circuit') ||
-            document.body.classList.contains('view-serial')) return;
+            document.body.classList.contains('view-serial') ||
+            document.body.classList.contains('canvas-fullscreen') ||
+            document.body.classList.contains('editor-fullscreen')) return;
         if (bottomPanel.classList.contains('collapsed')) {
           bottomPanel.classList.remove('collapsed');
           document.body.classList.remove('bottom-collapsed');
@@ -2690,7 +2715,7 @@ _newProject() {
     if (button) button.textContent = paused ? 'Resume' : 'Pause';
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• VERIFY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- VERIFY ---------------------- */
   async verify() {
     if (!this.editor) return;
     const code = this.editor.getCombinedCode();
@@ -2728,14 +2753,14 @@ _newProject() {
     return false;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• OSCILLOSCOPE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- OSCILLOSCOPE ---------------------- */
   _initOscilloscope() {
     const oscCanvas = document.getElementById('oscilloscope-canvas');
     if (!oscCanvas || !window.OscilloscopeClass) return;
     this.osc = new window.OscilloscopeClass(oscCanvas);
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DSO FULLSCREEN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- DSO FULLSCREEN ---------------------- */
   openDSOFullscreen(comp) {
     if (!window.DSOFullscreen) return;
     if (!this._dsoFS) {
@@ -2748,7 +2773,7 @@ _newProject() {
     if (this._dsoFS) this._dsoFS.close();
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• LOGIC ANALYZER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- LOGIC ANALYZER ---------------------- */
   _initLogicAnalyzer() {
     const laCanvas = document.getElementById('logic-analyzer-canvas');
     if (!laCanvas || !window.LogicAnalyzerClass) return;
@@ -2757,7 +2782,7 @@ _newProject() {
     if (statusEl) statusEl.textContent = 'Ready';
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SERIAL PLOTTER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- SERIAL PLOTTER ---------------------- */
   _initPlotter() {
     const plotterCanvas = document.getElementById('plotter-canvas');
     if (!plotterCanvas || !window.SerialPlotterClass) return;
@@ -2772,13 +2797,13 @@ _newProject() {
     });
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• WEB BROWSER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- WEB BROWSER ---------------------- */
   _initWebBrowser() {
     if (!window.WebBrowserClass) return;
     this.webBrowser = new window.WebBrowserClass();
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• EXAMPLES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- EXAMPLES ---------------------- */
   async _renderExamples() {
     const container = document.getElementById('examples-grid');
     if (!container) return;
@@ -2941,7 +2966,7 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PROPERTIES MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- PROPERTIES MODAL ---------------------- */
   openPropsModal(comp) {
     this._propsComp = comp;
     const title   = document.getElementById('modal-props-title');
@@ -3124,7 +3149,7 @@ _newProject() {
     this._propsComp = null;
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TOAST STACK â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- TOAST STACK ---------------------- */
   showToast(msg, type = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -3157,7 +3182,7 @@ _newProject() {
     }
   }
 
-  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MOBILE SUPPORT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+  /* ---------------------- MOBILE SUPPORT ---------------------- */
   _initMobile() {
     this._isMobile = window.matchMedia('(max-width: 768px)').matches;
     this._openSheet = null;

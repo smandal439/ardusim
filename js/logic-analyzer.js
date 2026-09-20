@@ -1,8 +1,8 @@
-/* ═══════════════════════════════════════════════════════
+/* -------------------------------------------------------
    logic-analyzer.js — Multi-channel digital Logic Analyzer
    Captures and displays digital pin states (HIGH/LOW) over time.
    Dual cursor measurement: frequency, period, duty cycle.
-   ═══════════════════════════════════════════════════════ */
+   ------------------------------------------------------- */
 
 'use strict';
 

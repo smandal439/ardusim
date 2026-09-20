@@ -1,4 +1,4 @@
-/* ═══════════════════════════════════════════════════════
+/* -------------------------------------------------------
    plotter.js — Serial Plotter (like the Arduino IDE Serial Plotter)
    Graphs numeric values sent over Serial.
    Supported formats per line:
@@ -6,7 +6,7 @@
      - "temp:25.5 humidity:60"     → labeled series
      - "12,34,56"                  → comma separated
    Lines starting with "[" (ArduSim system logs) are ignored.
-   ═══════════════════════════════════════════════════════ */
+   ------------------------------------------------------- */
 
 'use strict';
 

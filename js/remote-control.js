@@ -1,8 +1,8 @@
-/* ═══════════════════════════════════════════════════════
+/* -------------------------------------------------------
    remote-control.js — Simulator-side MQTT bridge
    Creates a dedicated MQTT connection to relay pin
    commands between a phone remote and the simulator.
-   ═══════════════════════════════════════════════════════ */
+   ------------------------------------------------------- */
 
 'use strict';
 

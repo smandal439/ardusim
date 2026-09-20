@@ -1,9 +1,9 @@
-/* ═══════════════════════════════════════════════════════
+/* -------------------------------------------------------
    api.js — Frontend client for the ArduSim Node backend
    Talks to the REST API served by server.js (same origin).
    When the app is opened without the backend (e.g. file://),
    every call falls back gracefully and returns empty results.
-   ═══════════════════════════════════════════════════════ */
+   ------------------------------------------------------- */
 
 'use strict';
 
