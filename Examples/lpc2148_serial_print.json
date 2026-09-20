@@ -1,28 +1,30 @@
 {
-  "id": "lpc2148_serial_print",
-  "name": "LPC2148 Serial Print",
-  "icon": "🔧",
-  "desc": "A custom LPC2148 Serial Print circuit example.",
-  "tags": [
-    "custom",
-    "circuit"
-  ],
-  "circuit": {
-    "components": [
-      {
-        "id": "comp_1789888476336_diwzw",
-        "type": "lpc2148",
-        "x": 55,
-        "y": 405,
-        "rotation": 0,
-        "props": {
-          "label": "LPC2148"
-        }
-      }
-    ],
-    "wires": []
-  },
-  "files": {
-    "sketch.ino": "/* \n * LPC2148 SmartX Board - UART0 Hello World \n * Sends \"Hello LPC2148\" to the Serial Monitor. \n * Uses register-level UART0 at 9600 baud. \n */ \n\n#include <LPC214x.h>\n\n// Simple delay function in milliseconds (Assumes 60MHz CCLK)\nvoid delay_ms(unsigned int ms) {\n    unsigned int i, j;\n    for (i = 0; i < ms; i++) {\n        for (j = 0; j < 7500; j++); \n    }\n}\n\nvoid UART0_Init(unsigned int baud) {\n    unsigned int divisor = 15000000 / (16 * baud); // Assumes PCLK = 15MHz\n    \n    // Configure P0.0 as TXD0 and P0.1 as RXD0\n    PINSEL0 |= (1 << 1) | (1 << 3);\n    PINSEL0 &= ~((1 << 0) | (1 << 2));\n    \n    U0LCR = 0x83;                  // Enable DLAB, 8-bit character length\n    U0DLL = divisor & 0xFF;        // Lower byte of divisor\n    U0DLM = (divisor >> 8) & 0xFF; // Upper byte of divisor\n    U0LCR = 0x03;                  // Disable DLAB, keep 8-bit length\n    U0FCR = 0x07;                  // Enable and clear FIFO\n}\n\nvoid UART0_SendChar(unsigned char ch) {\n    while (!(U0LSR & 0x20));       // Wait until THR is empty (THRE bit)\n    U0THR = ch;                    // Transmit character\n}\n\n// Optimized string printing function\nvoid UART0_SendString(char *str) {\n    while (*str) {                 // Loop until the null terminator ('\\0') is reached\n        UART0_SendChar(*str++);    // Send the current character and move pointer to next\n    }\n}\n\nint main(void) {\n    // String literal handles the null terminator automatically\n    char msg[] = \"Hello LPC2148\\r\\n\"; \n    \n    UART0_Init(9600);\n    UART0_SendString(msg);\n    \n    while (1) {\n        // Echo back received characters\n        if (U0LSR & 0x01) {        // Check RDR bit (Receiver Data Ready)\n            unsigned char ch = U0RBR;\n            UART0_SendChar(ch);\n        }\n        delay_ms(10);\n    }\n}\n"
-  }
+    "id":  "lpc2148_serial_print",
+    "name":  "LPC2148 Serial Print",
+    "icon":  "ðŸ”§",
+    "desc":  "A custom LPC2148 Serial Print circuit example.",
+    "tags":  [
+                 "custom",
+                 "circuit"
+             ],
+    "circuit":  {
+                    "components":  [
+                                       {
+                                           "id":  "comp_1789888476336_diwzw",
+                                           "type":  "lpc2148",
+                                           "x":  55,
+                                           "y":  405,
+                                           "rotation":  0,
+                                           "props":  {
+                                                         "label":  "LPC2148"
+                                                     }
+                                       }
+                                   ],
+                    "wires":  [
+
+                              ]
+                },
+    "files":  {
+                  "sketch.ino":  "/* \n * LPC2148 SmartX Board - UART0 Hello World \n * Sends \"Hello LPC2148\" to the Serial Monitor. \n * Uses register-level UART0 at 9600 baud. \n */ \n\n#include \u003cLPC214x.h\u003e\n\n// Simple delay function in milliseconds (Assumes 60MHz CCLK)\nvoid delay_ms(unsigned int ms) {\n    unsigned int i, j;\n    for (i = 0; i \u003c ms; i++) {\n        for (j = 0; j \u003c 7500; j++); \n    }\n}\n\nvoid UART0_Init(unsigned int baud) {\n    unsigned int divisor = 15000000 / (16 * baud); // Assumes PCLK = 15MHz\n    \n    // Configure P0.0 as TXD0 and P0.1 as RXD0\n    PINSEL0 |= (1 \u003c\u003c 1) | (1 \u003c\u003c 3);\n    PINSEL0 \u0026= ~((1 \u003c\u003c 0) | (1 \u003c\u003c 2));\n    \n    U0LCR = 0x83;                  // Enable DLAB, 8-bit character length\n    U0DLL = divisor \u0026 0xFF;        // Lower byte of divisor\n    U0DLM = (divisor \u003e\u003e 8) \u0026 0xFF; // Upper byte of divisor\n    U0LCR = 0x03;                  // Disable DLAB, keep 8-bit length\n    U0FCR = 0x07;                  // Enable and clear FIFO\n}\n\nvoid UART0_SendChar(unsigned char ch) {\n    while (!(U0LSR \u0026 0x20));       // Wait until THR is empty (THRE bit)\n    U0THR = ch;                    // Transmit character\n}\n\nint main(void) {\n    char msg[] = \"Hello LPC2148\\r\\n\"; \n    unsigned int idx;\n    \n    UART0_Init(9600);\n    \n    // Send each character using array indexing (avoids pointer dereference)\n    for (idx = 0; idx \u003c sizeof(msg); idx++) {\n        UART0_SendChar(msg[idx]);\n    }\n    \n    while (1) {\n        // Echo back received characters\n        if (U0LSR \u0026 0x01) {        // Check RDR bit (Receiver Data Ready)\n            unsigned char ch = U0RBR;\n            UART0_SendChar(ch);\n        }\n        delay_ms(10);\n    }\n}"
+              }
 }

@@ -130,8 +130,8 @@ window.ArduinoLibs['LPC2148'] = {
     function _hx(name) { return '0x' + R[name].toString(16); }
 
     return [
-      [/\bdelay_ms\s*\(/g, 'await delay('],
-      [/\bdelay_us\s*\(/g, 'await delayMicroseconds('],
+      [/\b(?<!function\s)delay_ms\s*\(/g, 'await delay('],
+      [/\b(?<!function\s)delay_us\s*\(/g, 'await delayMicroseconds('],
 
       // Compound assignments: REG |=/&=/^=/<</>>=/&=~/&= EXPR
       // Must capture the full expression up to ; or //
