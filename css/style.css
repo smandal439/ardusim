@@ -734,7 +734,7 @@ body.view-serial #resizer-bottom { display: none; }
   flex-shrink: 0;
   background: transparent;
   transition: background var(--trans-fast);
-  z-index: 5;
+  position: relative;
 }
 .file-explorer-resizer:hover,
 .file-explorer-resizer.dragging {
@@ -744,8 +744,8 @@ body.view-serial #resizer-bottom { display: none; }
   content: '';
   position: absolute;
   top: 0;
-  left: -3px;
-  right: -3px;
+  left: -2px;
+  right: -2px;
   bottom: 0;
 }
 .file-item {
