@@ -48,9 +48,56 @@ int main(void) {
 void SystemClock_Config(void) {
 }`,
 
+  I8085_DEFAULT_CODE: `; Intel 8085 - Blink LED on PB.5
+; LED toggles every ~500ms
+
+        MVI A, 20H       ; Enable PB5 output
+        OUT 00H          ; Configure PB as output
+
+LOOP:   MVI A, 20H       ; Set PB5 HIGH
+        OUT 01H          ; Write to PB
+        MVI B, FFH       ; Delay counter
+DLY1:   MVI C, FFH
+DLY2:   DCR C
+        JNZ DLY2
+        DCR B
+        JNZ DLY1
+
+        MVI A, 00H       ; Set PB5 LOW
+        OUT 01H          ; Write to PB
+        MVI B, FFH
+DLY3:   MVI C, FFH
+DLY4:   DCR C
+        JNZ DLY4
+        DCR B
+        JNZ DLY3
+
+        JMP LOOP         ; Repeat`,
+
+  I8051_DEFAULT_CODE: `; Intel 8051 - Blink LED on P1.7
+; LED toggles every ~500ms
+
+        ORG 0000H
+
+LOOP:   CLR P1.7         ; LED ON (active low)
+        ACALL DELAY
+        SETB P1.7        ; LED OFF
+        ACALL DELAY
+        SJMP LOOP
+
+DELAY:  MOV R2, #0FFH
+DL1:    MOV R3, #0FFH
+DL2:    DJNZ R3, DL2
+        DJNZ R2, DL1
+        RET
+        END`,
+
   _getDefaultCode() {
     const board = window.App?.canvas?.boardType || 'arduino_uno';
-    return board === 'stm32f746_disco' ? this.STM32_DEFAULT_CODE : this.DEFAULT_CODE;
+    if (board === 'stm32f746_disco') return this.STM32_DEFAULT_CODE;
+    if (board === 'intel_8085') return this.I8085_DEFAULT_CODE;
+    if (board === 'intel_8051') return this.I8051_DEFAULT_CODE;
+    return this.DEFAULT_CODE;
   },
 
   init() {

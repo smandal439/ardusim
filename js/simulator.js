@@ -1557,6 +1557,45 @@ class ArduinoSimulator {
       if (code.length > 100_000) {
         return { ok: false, error: 'Code exceeds maximum length (100 KB). Please shorten your sketch.' };
       }
+
+      // Assembly mode: code already transpiled to JSON by the board plugin
+      if (code.startsWith('//__8085_ASM_DATA__') || code.startsWith('//__8051_ASM_DATA__')) {
+        const is8085 = code.startsWith('//__8085_ASM_DATA__');
+        const jsonStr = code.replace(/^\/\/__[0-9A-Z_]+__\n/, '');
+        const data = JSON.parse(jsonStr);
+        const asmLib = is8085 ? window.ArduinoLibs['Intel8085'] : window.ArduinoLibs['Intel8051'];
+        if (!asmLib || !asmLib.runtime) {
+          return { ok: false, error: (is8085 ? 'Intel 8085' : 'Intel 8051') + ' library not loaded.' };
+        }
+        const runtimeFns = asmLib.runtime(this);
+        const binBytes = [];
+        for (let i = 0; i < data.binary.length; i++) {
+          binBytes.push(data.binary.charCodeAt(i) & 0xFF);
+        }
+        if (is8085) {
+          if (!runtimeFns._init8085) {
+            return { ok: false, error: 'Intel 8085 init function not found.' };
+          }
+          runtimeFns._init8085(data.hex, data.binary);
+          this._asmRuntime = runtimeFns;
+          this._asmBoard = 'intel_8085';
+        } else {
+          if (!runtimeFns._init8051) {
+            return { ok: false, error: 'Intel 8051 init function not found.' };
+          }
+          runtimeFns._init8051(data.hex, data.binary);
+          this._asmRuntime = runtimeFns;
+          this._asmBoard = 'intel_8051';
+        }
+        this._assemblyMode = true;
+        this._compiledCtx = null;
+        this._compiledJs = code;
+        return { ok: true, compiledJs: code, assemblyMode: true };
+      }
+
+      this._assemblyMode = false;
+      this._asmRuntime = null;
+      this._asmBoard = null;
       const js = this.transpile(code);
       const ctx = this.buildContext();
       const rawKeys = Object.keys(ctx);
@@ -1658,6 +1697,47 @@ class ArduinoSimulator {
     this.isPaused = false;
     this._resumeAudio();
     const runId = ++this._runSeq;
+
+    // Assembly mode: run CPU step loop instead of setup/loop
+    if (this._assemblyMode && this._asmRuntime) {
+      const asmRt = this._asmRuntime;
+      const stepFn = this._asmBoard === 'intel_8085' ? asmRt._step8085 : asmRt._step8051;
+      this._serialLog('[ArduSim] Simulation started\n', 'system');
+      if (this.onStart) this.onStart();
+      this._fpsInterval = setInterval(() => this._tickFps(), 500);
+      let hadError = false;
+      try {
+        while (this.isRunning && runId === this._runSeq) {
+          if (this.isPaused) {
+            await new Promise(resolve => { this._resumeResolve = resolve; });
+          }
+          for (let i = 0; i < 5000; i++) {
+            if (!stepFn()) break;
+          }
+          this._loopCount++;
+          this.simTime += 1;
+          await new Promise(r => setTimeout(r, 0));
+        }
+      } catch (err) {
+        if (err && err.message !== 'SIMULATION_STOPPED') {
+          hadError = true;
+          const friendly = this._friendlyError(err.message ? err.message : String(err), err instanceof Error ? err : undefined);
+          this._emitError(friendly);
+          this._serialLog('[Error] ' + friendly + '\n', 'error');
+        }
+      } finally {
+        if (runId === this._runSeq) {
+          if (this._fpsInterval) { clearInterval(this._fpsInterval); this._fpsInterval = null; }
+          if (this._resumeResolve) { const r = this._resumeResolve; this._resumeResolve = null; r(); }
+        }
+      }
+      if (runId === this._runSeq) {
+        this.isRunning = false;
+        this._serialLog('[ArduSim] Simulation stopped\n', 'system');
+        if (this.onStop) this.onStop();
+      }
+      return !hadError;
+    }
 
     const { keys, vals, fn } = this._compiledCtx;
 
@@ -2021,7 +2101,7 @@ class ArduinoSimulator {
   }
 
   setBoard(board) {
-    this.board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148'].includes(board) ? board : 'arduino_uno';
+    this.board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'intel_8085', 'intel_8051'].includes(board) ? board : 'arduino_uno';
   }
 
   /* ΀l΀l FPS tracking ΀l΀l */

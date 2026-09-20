@@ -381,7 +381,9 @@ class ElectricalEngine {
       case 'arduino_nano':
       case 'esp32_devkit_v1':
       case 'stm32f746_disco':
-      case 'lpc2148': {
+      case 'lpc2148':
+      case 'intel_8085':
+      case 'intel_8051': {
         const maxV = (inst.type === 'esp32_devkit_v1' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148') ? 3.3 : 5.0;
         const sim = window.ArduinoSim;
 

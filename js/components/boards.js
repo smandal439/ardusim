@@ -2025,3 +2025,304 @@ defComp({
 
 
 
+
+/* ──────────────────── Intel 8085 Board ──────────────────── */
+defComp({
+  id: 'intel_8085',
+  name: 'Intel 8085',
+  category: 'Boards',
+  icon: '🔲',
+  desc: 'Intel 8085 8-bit microprocessor with 64KB address space',
+  width: 380,
+  height: 300,
+  defaultProps: { label: '8085' },
+  pins: [
+    { id:'PA.0', label:'PA0', type:PIN_TYPE.DIGITAL, x:10, y:30, side:'left' },
+    { id:'PA.1', label:'PA1', type:PIN_TYPE.DIGITAL, x:10, y:42, side:'left' },
+    { id:'PA.2', label:'PA2', type:PIN_TYPE.DIGITAL, x:10, y:54, side:'left' },
+    { id:'PA.3', label:'PA3', type:PIN_TYPE.DIGITAL, x:10, y:66, side:'left' },
+    { id:'PA.4', label:'PA4', type:PIN_TYPE.DIGITAL, x:10, y:78, side:'left' },
+    { id:'PA.5', label:'PA5', type:PIN_TYPE.DIGITAL, x:10, y:90, side:'left' },
+    { id:'PA.6', label:'PA6', type:PIN_TYPE.DIGITAL, x:10, y:102, side:'left' },
+    { id:'PA.7', label:'PA7', type:PIN_TYPE.DIGITAL, x:10, y:114, side:'left' },
+    { id:'PB.0', label:'PB0', type:PIN_TYPE.DIGITAL, x:10, y:140, side:'left' },
+    { id:'PB.1', label:'PB1', type:PIN_TYPE.DIGITAL, x:10, y:152, side:'left' },
+    { id:'PB.2', label:'PB2', type:PIN_TYPE.DIGITAL, x:10, y:164, side:'left' },
+    { id:'PB.3', label:'PB3', type:PIN_TYPE.DIGITAL, x:10, y:176, side:'left' },
+    { id:'PB.4', label:'PB4', type:PIN_TYPE.DIGITAL, x:10, y:188, side:'left' },
+    { id:'PB.5', label:'PB5', type:PIN_TYPE.DIGITAL, x:10, y:200, side:'left' },
+    { id:'PB.6', label:'PB6', type:PIN_TYPE.DIGITAL, x:10, y:212, side:'left' },
+    { id:'PB.7', label:'PB7', type:PIN_TYPE.DIGITAL, x:10, y:224, side:'left' },
+    { id:'PC.0', label:'PC0', type:PIN_TYPE.DIGITAL, x:370, y:30, side:'right' },
+    { id:'PC.1', label:'PC1', type:PIN_TYPE.DIGITAL, x:370, y:42, side:'right' },
+    { id:'PC.2', label:'PC2', type:PIN_TYPE.DIGITAL, x:370, y:54, side:'right' },
+    { id:'PC.3', label:'PC3', type:PIN_TYPE.DIGITAL, x:370, y:66, side:'right' },
+    { id:'PC.4', label:'PC4', type:PIN_TYPE.DIGITAL, x:370, y:78, side:'right' },
+    { id:'PC.5', label:'PC5', type:PIN_TYPE.DIGITAL, x:370, y:90, side:'right' },
+    { id:'PC.6', label:'PC6', type:PIN_TYPE.DIGITAL, x:370, y:102, side:'right' },
+    { id:'PC.7', label:'PC7', type:PIN_TYPE.DIGITAL, x:370, y:114, side:'right' },
+    { id:'VCC', label:'VCC', type:PIN_TYPE.POWER, x:370, y:260, side:'right' },
+    { id:'GND', label:'GND', type:PIN_TYPE.GND,   x:370, y:272, side:'right' },
+    { id:'CLK', label:'CLK', type:PIN_TYPE.SIGNAL, x:10, y:260, side:'left' },
+    { id:'RST', label:'RST', type:PIN_TYPE.SIGNAL, x:10, y:272, side:'left' },
+  ],
+  draw(inst, ctx, W, H) {
+    ctx.save();
+    ctx.fillStyle = '#0a3e1a';
+    roundRect(ctx, 0, 0, W, H, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#1a5e2a';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, 0, 0, W, H, 6);
+    ctx.stroke();
+    ctx.strokeStyle = '#1a5e2a';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(20,30); ctx.lineTo(60,30); ctx.lineTo(60,50); ctx.lineTo(110,50);
+    ctx.moveTo(20,90); ctx.lineTo(50,90); ctx.lineTo(50,130); ctx.lineTo(110,130);
+    ctx.moveTo(360,30); ctx.lineTo(320,30); ctx.lineTo(320,50); ctx.lineTo(270,50);
+    ctx.moveTo(360,90); ctx.lineTo(330,90); ctx.lineTo(330,130); ctx.lineTo(270,130);
+    ctx.stroke();
+    ctx.fillStyle = '#1a1a2e';
+    roundRect(ctx, 110, 40, 160, 200, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1;
+    roundRect(ctx, 110, 40, 160, 200, 4);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(190, 48, 8, 0, Math.PI);
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = '#666';
+    ctx.beginPath();
+    ctx.arc(128, 58, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#888';
+    ctx.font = 'bold 14px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Intel', 190, 110);
+    ctx.fillText('8085', 190, 130);
+    ctx.font = '9px monospace';
+    ctx.fillText('CPU', 190, 148);
+    ctx.fillStyle = '#8b7355';
+    roundRect(ctx, 150, 255, 30, 14, 2);
+    ctx.fill();
+    ctx.fillStyle = '#ddd';
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('XTAL', 165, 265);
+    ctx.fillStyle = '#ff3333';
+    ctx.beginPath();
+    ctx.arc(340, 170, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#66ff66';
+    ctx.beginPath();
+    ctx.arc(340, 185, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#aaa';
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('PWR', 350, 173);
+    ctx.fillText('RDY', 350, 188);
+    ctx.fillStyle = '#777';
+    ctx.font = '8px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('PA0-PA7', 190, 75);
+    ctx.fillText('PB0-PB7', 190, 200);
+    var pinsList = this.pins;
+    ctx.font = 'bold 6px monospace';
+    for (var pli = 0; pli < pinsList.length; pli++) {
+      var pin = pinsList[pli];
+      if (pin.side !== 'left' && pin.side !== 'right') continue;
+      var pw = ctx.measureText(pin.label).width + 6;
+      var bx = pin.side === 'left' ? pin.x - 2 - pw : pin.x + 2;
+      var bgColor = 'rgba(10,46,26,0.9)';
+      if (pin.type === PIN_TYPE.POWER) bgColor = 'rgba(160,30,30,0.9)';
+      else if (pin.type === PIN_TYPE.GND) bgColor = 'rgba(35,35,40,0.9)';
+      else if (pin.type === PIN_TYPE.SIGNAL) bgColor = 'rgba(50,50,80,0.9)';
+      ctx.fillStyle = bgColor;
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 3;
+      roundRect(ctx, bx, pin.y - 4.5, pw, 9, 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#e6edf3';
+      ctx.textAlign = pin.side === 'left' ? 'right' : 'left';
+      ctx.fillText(pin.label, bx + (pin.side === 'left' ? pw - 3 : 3), pin.y + 2);
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Intel 8085 Microprocessor', W / 2, 12);
+    ctx.fillStyle = 'rgb(255,255,255)';
+    ctx.font = '8px monospace';
+    ctx.fillText('8-bit  |  64KB Memory  |  3MHz', W / 2, H - 14);
+    if (inst && inst.selected) {
+      ctx.setLineDash([5, 4]);
+      ctx.strokeStyle = '#00d4ff';
+      ctx.lineWidth = 2;
+      roundRect(ctx, -2, -2, W + 4, H + 4, 12);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+  }
+});
+
+/* ──────────────────── Intel 8051 Board ──────────────────── */
+defComp({
+  id: 'intel_8051',
+  name: 'Intel 8051',
+  category: 'Boards',
+  icon: '🔲',
+  desc: 'Intel 8051 8-bit microcontroller with 4 ports',
+  width: 380,
+  height: 320,
+  defaultProps: { label: '8051' },
+  pins: [
+    { id:'P0.0', label:'P0.0', type:PIN_TYPE.DIGITAL, x:10, y:30, side:'left' },
+    { id:'P0.1', label:'P0.1', type:PIN_TYPE.DIGITAL, x:10, y:42, side:'left' },
+    { id:'P0.2', label:'P0.2', type:PIN_TYPE.DIGITAL, x:10, y:54, side:'left' },
+    { id:'P0.3', label:'P0.3', type:PIN_TYPE.DIGITAL, x:10, y:66, side:'left' },
+    { id:'P0.4', label:'P0.4', type:PIN_TYPE.DIGITAL, x:10, y:78, side:'left' },
+    { id:'P0.5', label:'P0.5', type:PIN_TYPE.DIGITAL, x:10, y:90, side:'left' },
+    { id:'P0.6', label:'P0.6', type:PIN_TYPE.DIGITAL, x:10, y:102, side:'left' },
+    { id:'P0.7', label:'P0.7', type:PIN_TYPE.DIGITAL, x:10, y:114, side:'left' },
+    { id:'P1.0', label:'P1.0', type:PIN_TYPE.DIGITAL, x:10, y:140, side:'left' },
+    { id:'P1.1', label:'P1.1', type:PIN_TYPE.DIGITAL, x:10, y:152, side:'left' },
+    { id:'P1.2', label:'P1.2', type:PIN_TYPE.DIGITAL, x:10, y:164, side:'left' },
+    { id:'P1.3', label:'P1.3', type:PIN_TYPE.DIGITAL, x:10, y:176, side:'left' },
+    { id:'P1.4', label:'P1.4', type:PIN_TYPE.DIGITAL, x:10, y:188, side:'left' },
+    { id:'P1.5', label:'P1.5', type:PIN_TYPE.DIGITAL, x:10, y:200, side:'left' },
+    { id:'P1.6', label:'P1.6', type:PIN_TYPE.DIGITAL, x:10, y:212, side:'left' },
+    { id:'P1.7', label:'P1.7', type:PIN_TYPE.DIGITAL, x:10, y:224, side:'left' },
+    { id:'P2.0', label:'P2.0', type:PIN_TYPE.DIGITAL, x:370, y:30, side:'right' },
+    { id:'P2.1', label:'P2.1', type:PIN_TYPE.DIGITAL, x:370, y:42, side:'right' },
+    { id:'P2.2', label:'P2.2', type:PIN_TYPE.DIGITAL, x:370, y:54, side:'right' },
+    { id:'P2.3', label:'P2.3', type:PIN_TYPE.DIGITAL, x:370, y:66, side:'right' },
+    { id:'P2.4', label:'P2.4', type:PIN_TYPE.DIGITAL, x:370, y:78, side:'right' },
+    { id:'P2.5', label:'P2.5', type:PIN_TYPE.DIGITAL, x:370, y:90, side:'right' },
+    { id:'P2.6', label:'P2.6', type:PIN_TYPE.DIGITAL, x:370, y:102, side:'right' },
+    { id:'P2.7', label:'P2.7', type:PIN_TYPE.DIGITAL, x:370, y:114, side:'right' },
+    { id:'P3.0', label:'P3.0', type:PIN_TYPE.DIGITAL, x:370, y:140, side:'right' },
+    { id:'P3.1', label:'P3.1', type:PIN_TYPE.DIGITAL, x:370, y:152, side:'right' },
+    { id:'P3.2', label:'P3.2', type:PIN_TYPE.DIGITAL, x:370, y:164, side:'right' },
+    { id:'P3.3', label:'P3.3', type:PIN_TYPE.DIGITAL, x:370, y:176, side:'right' },
+    { id:'P3.4', label:'P3.4', type:PIN_TYPE.DIGITAL, x:370, y:188, side:'right' },
+    { id:'P3.5', label:'P3.5', type:PIN_TYPE.DIGITAL, x:370, y:200, side:'right' },
+    { id:'P3.6', label:'P3.6', type:PIN_TYPE.DIGITAL, x:370, y:212, side:'right' },
+    { id:'P3.7', label:'P3.7', type:PIN_TYPE.DIGITAL, x:370, y:224, side:'right' },
+    { id:'VCC', label:'VCC', type:PIN_TYPE.POWER, x:370, y:280, side:'right' },
+    { id:'GND', label:'GND', type:PIN_TYPE.GND,   x:370, y:292, side:'right' },
+    { id:'XTAL1', label:'XTAL1', type:PIN_TYPE.SIGNAL, x:10, y:280, side:'left' },
+    { id:'XTAL2', label:'XTAL2', type:PIN_TYPE.SIGNAL, x:10, y:292, side:'left' },
+    { id:'RST', label:'RST', type:PIN_TYPE.SIGNAL, x:190, y:292, side:'top' },
+  ],
+  draw(inst, ctx, W, H) {
+    ctx.save();
+    ctx.fillStyle = '#1a0a3e';
+    roundRect(ctx, 0, 0, W, H, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#2a1a5e';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, 0, 0, W, H, 6);
+    ctx.stroke();
+    ctx.strokeStyle = '#2a1a5e';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(20,30); ctx.lineTo(60,30); ctx.lineTo(60,50); ctx.lineTo(110,50);
+    ctx.moveTo(20,90); ctx.lineTo(50,90); ctx.lineTo(50,130); ctx.lineTo(110,130);
+    ctx.moveTo(360,30); ctx.lineTo(320,30); ctx.lineTo(320,50); ctx.lineTo(270,50);
+    ctx.moveTo(360,90); ctx.lineTo(330,90); ctx.lineTo(330,130); ctx.lineTo(270,130);
+    ctx.stroke();
+    ctx.fillStyle = '#1a1a2e';
+    roundRect(ctx, 110, 40, 160, 210, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1;
+    roundRect(ctx, 110, 40, 160, 210, 4);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(190, 48, 8, 0, Math.PI);
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = '#666';
+    ctx.beginPath();
+    ctx.arc(128, 58, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#888';
+    ctx.font = 'bold 14px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Intel', 190, 110);
+    ctx.fillText('8051', 190, 130);
+    ctx.font = '9px monospace';
+    ctx.fillText('MCU', 190, 148);
+    ctx.fillStyle = '#8b7355';
+    roundRect(ctx, 150, 270, 30, 14, 2);
+    ctx.fill();
+    ctx.fillStyle = '#ddd';
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('XTAL', 165, 280);
+    ctx.fillStyle = '#ff3333';
+    ctx.beginPath();
+    ctx.arc(340, 240, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#66ff66';
+    ctx.beginPath();
+    ctx.arc(340, 255, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#aaa';
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('PWR', 350, 243);
+    ctx.fillText('RUN', 350, 258);
+    ctx.fillStyle = '#777';
+    ctx.font = '8px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('P0', 130, 75);
+    ctx.fillText('P1', 130, 200);
+    ctx.fillText('P2', 250, 75);
+    ctx.fillText('P3', 250, 200);
+    var pinsList = this.pins;
+    ctx.font = 'bold 6px monospace';
+    for (var pli = 0; pli < pinsList.length; pli++) {
+      var pin = pinsList[pli];
+      if (pin.side !== 'left' && pin.side !== 'right') continue;
+      var pw = ctx.measureText(pin.label).width + 6;
+      var bx = pin.side === 'left' ? pin.x - 2 - pw : pin.x + 2;
+      var bgColor = 'rgba(26,10,62,0.9)';
+      if (pin.type === PIN_TYPE.POWER) bgColor = 'rgba(160,30,30,0.9)';
+      else if (pin.type === PIN_TYPE.GND) bgColor = 'rgba(35,35,40,0.9)';
+      else if (pin.type === PIN_TYPE.SIGNAL) bgColor = 'rgba(50,50,80,0.9)';
+      ctx.fillStyle = bgColor;
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 3;
+      roundRect(ctx, bx, pin.y - 4.5, pw, 9, 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#e6edf3';
+      ctx.textAlign = pin.side === 'left' ? 'right' : 'left';
+      ctx.fillText(pin.label, bx + (pin.side === 'left' ? pw - 3 : 3), pin.y + 2);
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Intel 8051 Microcontroller', W / 2, 12);
+    ctx.fillStyle = 'rgb(255,255,255)';
+    ctx.font = '8px monospace';
+    ctx.fillText('8-bit  |  4 Ports  |  12MHz', W / 2, H - 14);
+    if (inst && inst.selected) {
+      ctx.setLineDash([5, 4]);
+      ctx.strokeStyle = '#00d4ff';
+      ctx.lineWidth = 2;
+      roundRect(ctx, -2, -2, W + 4, H + 4, 12);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+  }
+});

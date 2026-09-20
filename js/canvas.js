@@ -200,7 +200,7 @@ class CircuitCanvas {
     const sim2 = window.App && window.App.sim2;
     if (!sim2) return sim1;
     if (boards.length < 2) return sim1;
-    const boardTypes = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148'];
+    const boardTypes = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'intel_8085', 'intel_8051'];
     if (boardTypes.includes(inst.type)) {
       const idx = boards.indexOf(inst);
       return idx === 1 ? sim2 : sim1;
@@ -319,7 +319,7 @@ class CircuitCanvas {
       }
 
       // Pin label (only when zoomed in enough) — boards have baked-in labels
-      const isBoard = inst.type === 'arduino_uno' || inst.type === 'esp32_devkit_v1' || inst.type === 'arduino_nano' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148';
+      const isBoard = inst.type === 'arduino_uno' || inst.type === 'esp32_devkit_v1' || inst.type === 'arduino_nano' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148' || inst.type === 'intel_8085' || inst.type === 'intel_8051';
       if (this.zoom >= 1 && !isBoard) {
         ctx.fillStyle = '#888';
         ctx.font = `${8 / this.zoom}px Inter, sans-serif`;
@@ -2797,12 +2797,12 @@ class CircuitCanvas {
 
   // Get whichever microcontroller board instance is placed (first one found)
   getBoardInst() {
-    return this.components.find(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano' || c.type === 'stm32f746_disco' || c.type === 'lpc2148') || null;
+    return this.components.find(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano' || c.type === 'stm32f746_disco' || c.type === 'lpc2148' || c.type === 'intel_8085' || c.type === 'intel_8051') || null;
   }
 
   // Get all board instances on the canvas
   getAllBoardInsts() {
-    return this.components.filter(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano' || c.type === 'stm32f746_disco' || c.type === 'lpc2148');
+    return this.components.filter(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano' || c.type === 'stm32f746_disco' || c.type === 'lpc2148' || c.type === 'intel_8085' || c.type === 'intel_8051');
   }
 
   // Get board instance by index (0-based)
@@ -2844,7 +2844,7 @@ class CircuitCanvas {
     // (func_gen, sensors, etc.) propagate to pinStates ← _emitPinChange ← interrupts
     const sim = window.ArduinoSim;
     if (sim && this.engine.pinToNet) {
-      const arduinoTypes = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'stm32f746_disco', 'lpc2148'];
+      const arduinoTypes = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'stm32f746_disco', 'lpc2148', 'intel_8085', 'intel_8051'];
       for (const inst of this.components) {
         if (!arduinoTypes.includes(inst.type)) continue;
         const maxV = (inst.type === 'esp32_devkit_v1' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148') ? 3.3 : 5.0;

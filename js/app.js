@@ -495,7 +495,7 @@ class App {
   /* ---------------------- BOARD SELECTOR ---------------------- */
   _initBoardSelector() {
     const settings = window.StorageManager?.loadSettings?.() || {};
-    const board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148'].includes(settings.board) ? settings.board : 'arduino_uno';
+    const board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'intel_8085', 'intel_8051'].includes(settings.board) ? settings.board : 'arduino_uno';
     this.sim.setBoard(board);
     const sel = document.getElementById('board-select');
     if (sel) sel.value = board;
@@ -523,8 +523,8 @@ class App {
   }
 
   _setBoard(board) {
-    const b = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148'].includes(board) ? board : 'arduino_uno';
-    const boardName = b === 'esp32_devkit_v1' ? 'ESP32 DevKit V1' : b === 'arduino_nano' ? 'Arduino Nano' : b === 'stm32f746_disco' ? 'STM32F746G-DISCO' : b === 'lpc2148' ? 'LPC2148 SmartX' : 'Arduino Uno';
+    const b = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'intel_8085', 'intel_8051'].includes(board) ? board : 'arduino_uno';
+    const boardName = b === 'esp32_devkit_v1' ? 'ESP32 DevKit V1' : b === 'arduino_nano' ? 'Arduino Nano' : b === 'stm32f746_disco' ? 'STM32F746G-DISCO' : b === 'lpc2148' ? 'LPC2148 SmartX' : b === 'intel_8085' ? 'Intel 8085' : b === 'intel_8051' ? 'Intel 8051' : 'Arduino Uno';
     this.sim.setBoard(b);
     window.StorageManager?.saveSettings?.({ ...(window.StorageManager.loadSettings() || {}), board: b });
 
@@ -2067,6 +2067,8 @@ _newProject() {
     const esp32 = boardType === 'esp32_devkit_v1';
     const nano  = boardType === 'arduino_nano';
     const stm32 = boardType === 'stm32f746_disco';
+    const i8085 = boardType === 'intel_8085';
+    const i8051 = boardType === 'intel_8051';
     const unoPins = [
       { key: 'pin_0',  label: 'D0' },  { key: 'pin_1',  label: 'D1' },
       { key: 'pin_2',  label: 'D2' },  { key: 'pin_3',  label: 'D3~' },
@@ -2079,7 +2081,37 @@ _newProject() {
       { key: 'pin_16', label: 'A2' },  { key: 'pin_17', label: 'A3' },
       { key: 'pin_18', label: 'A4' },  { key: 'pin_19', label: 'A5' },
     ];
-    const pins = esp32 ? [
+    const pins = i8085 ? [
+      { key: 'pin_PA.0', label: 'PA0' }, { key: 'pin_PA.1', label: 'PA1' },
+      { key: 'pin_PA.2', label: 'PA2' }, { key: 'pin_PA.3', label: 'PA3' },
+      { key: 'pin_PA.4', label: 'PA4' }, { key: 'pin_PA.5', label: 'PA5' },
+      { key: 'pin_PA.6', label: 'PA6' }, { key: 'pin_PA.7', label: 'PA7' },
+      { key: 'pin_PB.0', label: 'PB0' }, { key: 'pin_PB.1', label: 'PB1' },
+      { key: 'pin_PB.2', label: 'PB2' }, { key: 'pin_PB.3', label: 'PB3' },
+      { key: 'pin_PB.4', label: 'PB4' }, { key: 'pin_PB.5', label: 'PB5' },
+      { key: 'pin_PB.6', label: 'PB6' }, { key: 'pin_PB.7', label: 'PB7' },
+      { key: 'pin_PC.0', label: 'PC0' }, { key: 'pin_PC.1', label: 'PC1' },
+      { key: 'pin_PC.2', label: 'PC2' }, { key: 'pin_PC.3', label: 'PC3' },
+      { key: 'pin_PC.4', label: 'PC4' }, { key: 'pin_PC.5', label: 'PC5' },
+      { key: 'pin_PC.6', label: 'PC6' }, { key: 'pin_PC.7', label: 'PC7' },
+    ] : i8051 ? [
+      { key: 'pin_P0.0', label: 'P0.0' }, { key: 'pin_P0.1', label: 'P0.1' },
+      { key: 'pin_P0.2', label: 'P0.2' }, { key: 'pin_P0.3', label: 'P0.3' },
+      { key: 'pin_P0.4', label: 'P0.4' }, { key: 'pin_P0.5', label: 'P0.5' },
+      { key: 'pin_P0.6', label: 'P0.6' }, { key: 'pin_P0.7', label: 'P0.7' },
+      { key: 'pin_P1.0', label: 'P1.0' }, { key: 'pin_P1.1', label: 'P1.1' },
+      { key: 'pin_P1.2', label: 'P1.2' }, { key: 'pin_P1.3', label: 'P1.3' },
+      { key: 'pin_P1.4', label: 'P1.4' }, { key: 'pin_P1.5', label: 'P1.5' },
+      { key: 'pin_P1.6', label: 'P1.6' }, { key: 'pin_P1.7', label: 'P1.7' },
+      { key: 'pin_P2.0', label: 'P2.0' }, { key: 'pin_P2.1', label: 'P2.1' },
+      { key: 'pin_P2.2', label: 'P2.2' }, { key: 'pin_P2.3', label: 'P2.3' },
+      { key: 'pin_P2.4', label: 'P2.4' }, { key: 'pin_P2.5', label: 'P2.5' },
+      { key: 'pin_P2.6', label: 'P2.6' }, { key: 'pin_P2.7', label: 'P2.7' },
+      { key: 'pin_P3.0', label: 'P3.0' }, { key: 'pin_P3.1', label: 'P3.1' },
+      { key: 'pin_P3.2', label: 'P3.2' }, { key: 'pin_P3.3', label: 'P3.3' },
+      { key: 'pin_P3.4', label: 'P3.4' }, { key: 'pin_P3.5', label: 'P3.5' },
+      { key: 'pin_P3.6', label: 'P3.6' }, { key: 'pin_P3.7', label: 'P3.7' },
+    ] : esp32 ? [
       { key: 'pin_2',  label: 'D2 · L' },  { key: 'pin_4',  label: 'D4' },
       { key: 'pin_5',  label: 'D5' },      { key: 'pin_12', label: 'D12' },
       { key: 'pin_13', label: 'D13' },     { key: 'pin_14', label: 'D14' },
