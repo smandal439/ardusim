@@ -639,6 +639,7 @@ DL2:    DJNZ R3, DL2
     this._fallbackTA = ta;
     this.files = {};
     this._fileStates = {};
+    this._openTabs = new Set();
     this.activeFile = 'sketch.ino';
     this.files['sketch.ino'] = { content: ta.value, model: null };
     this._fileStates['sketch.ino'] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
@@ -730,6 +731,7 @@ DL2:    DJNZ R3, DL2
     this.monacoReady = false;
     this.files = {};
     this._fileStates = {};
+    this._openTabs = new Set();
     this.activeFile = 'sketch.ino';
     this.files['sketch.ino'] = { content: ta.value, model: null };
     this._fileStates['sketch.ino'] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
@@ -754,12 +756,14 @@ DL2:    DJNZ R3, DL2
     const existingFiles = this.files && Object.keys(this.files).length > 0 ? { ...this.files } : null;
     this.files = {};
     this._fileStates = {};
+    this._openTabs = new Set();
     if (existingFiles) {
       for (const [name, entry] of Object.entries(existingFiles)) {
         const lang = this._getLanguageForFile(name);
         const model = monaco.editor.createModel(entry.content || '', lang);
         this.files[name] = { content: entry.content || '', model };
         this._fileStates[name] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
+        this._openTabs.add(name);
       }
       const first = Object.keys(this.files)[0];
       this.activeFile = first || null;
@@ -778,7 +782,11 @@ DL2:    DJNZ R3, DL2
     const model = monaco.editor.createModel(content, lang);
     this.files[name] = { content, model };
     this._fileStates[name] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
-    if (activate) this.openFile(name);
+    if (!this._openTabs) this._openTabs = new Set();
+    if (activate) {
+      this._openTabs.add(name);
+      this.openFile(name);
+    }
     this._renderFileExplorer();
     this._renderTabs();
     return model;
@@ -790,6 +798,8 @@ DL2:    DJNZ R3, DL2
       this._saveFileState(this.activeFile);
     }
     this.activeFile = name;
+    if (!this._openTabs) this._openTabs = new Set();
+    this._openTabs.add(name);
     if (this.editor && this.files[name].model) {
       this.editor.setModel(this.files[name].model);
       this._restoreFileState(name);
@@ -830,6 +840,7 @@ DL2:    DJNZ R3, DL2
     const model = this.files[name].model;
     delete this.files[name];
     delete this._fileStates[name];
+    this._openTabs?.delete(name);
     if (model) model.dispose();
 
     if (this.activeFile === name) {
@@ -909,6 +920,7 @@ DL2:    DJNZ R3, DL2
         const model = this.files[name].model;
         delete this.files[name];
         delete this._fileStates[name];
+        this._openTabs?.delete(name);
         if (model) model.dispose();
       }
     }
@@ -928,6 +940,7 @@ DL2:    DJNZ R3, DL2
           this._fileStates[name] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
         }
       }
+      this._openTabs?.add(name);
     }
     const target = activateName || Object.keys(this.files)[0];
     if (target && this.files[target]) {
@@ -1070,8 +1083,9 @@ DL2:    DJNZ R3, DL2
     const tabsEl = document.getElementById('editor-tabs');
     if (!tabsEl) return;
     tabsEl.innerHTML = '';
+    if (!this._openTabs) this._openTabs = new Set();
 
-    const names = Object.keys(this.files).sort((a, b) => {
+    const names = Object.keys(this.files).filter(n => this._openTabs.has(n)).sort((a, b) => {
       const aIno = a.endsWith('.ino') ? 0 : 1;
       const bIno = b.endsWith('.ino') ? 0 : 1;
       if (aIno !== bIno) return aIno - bIno;
@@ -1098,11 +1112,12 @@ DL2:    DJNZ R3, DL2
       if (closeBtn) {
         closeBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          if (Object.keys(this.files).length <= 1) {
-            if (window.App?.showToast) window.App.showToast('Cannot close the last file', 'warning');
-            return;
+          this._openTabs.delete(name);
+          if (name === this.activeFile) {
+            const remaining = names.filter(n => n !== name);
+            if (remaining.length > 0) this.openFile(remaining[0]);
           }
-          this.deleteFile(name);
+          this._renderTabs();
         });
       }
 
@@ -1926,6 +1941,7 @@ DL2:    DJNZ R3, DL2
     }
     this.files = {};
     this._fileStates = {};
+    this._openTabs = new Set();
     if (this._fallbackTA) {
       this._fallbackTA.remove();
       this._fallbackTA = null;
