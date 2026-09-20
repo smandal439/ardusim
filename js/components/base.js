@@ -373,7 +373,7 @@ function getComponentPins(inst) {
 const COMPONENT_CATALOG = [
   { category: 'Boards', ids: ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148'] },
   {
-    category: 'Output', ids: ['multi_led_array', 'rgb_led', 'buzzer', 'seg7', 'lcd1602', 'lcd1602_i2c', 'lcd2004_i2c', 'oled_ssd1306', 'neopixel', 'neopixel_strip', 'neopixel_ring', 'neopixel_8x8_matrix', 'bulb_12v', 'max7219', 'ili9341'],
+    category: 'Output',     ids: ['multi_led_array', 'rgb_led', 'buzzer', 'seg7', 'lcd1602', 'lcd1602_i2c', 'lcd2004_i2c', 'oled_ssd1306', 'neopixel', 'neopixel_strip', 'neopixel_ring', 'neopixel_8x8_matrix', 'bulb_12v', 'max7219', 'ili9341', 'u8g2_oled', 'tft_display', 'ir_led'],
     dropdown: {
       id: 'led', label: 'LED', icon: '💡', desc: 'Light Emitting Diode',
       variants: [
@@ -386,10 +386,10 @@ const COMPONENT_CATALOG = [
       ]
     }
   },
-  { category: 'Input', ids: ['push_button', 'potentiometer', 'joystick', 'keypad_4x4', 'rotary_encoder', 'dip_switch', 'ir_remote'] },
+  { category: 'Input', ids: ['push_button', 'potentiometer', 'joystick', 'keypad_4x4', 'rotary_encoder', 'dip_switch', 'ir_remote', 'ir_receiver'] },
   { category: 'Actuators', ids: ['servo', 'dc_motor', 'relay', 'stepper_28byj', 'l298n', 'servo_continuous', 'tb6600', 'nema17'] },
   { category: 'Audio', ids: ['max98357a', 'speaker_4ohm', 'dfplayer_mini'] },
-  { category: 'Sensors', ids: ['dht11', 'hcsr04', 'ldr', 'pir', 'mpu6050', 'ds3231', 'ir_obstacle', 'flex_sensor', 'thermistor', 'lm35_sensor', 'bme280', 'vl53l0x', 'rc522', 'ir_receiver', 'ir_led', 'hc05', 'gps_neo6m', 'hx711', 'water_flow_sensor', 'load_cell', 'bh1750', 'ina219', 'max6675', 'u8g2_oled', 'tft_display'] },
+  { category: 'Sensors', ids: ['dht11', 'hcsr04', 'ldr', 'pir', 'mpu6050', 'ds3231', 'ir_obstacle', 'flex_sensor', 'thermistor', 'lm35_sensor', 'bme280', 'vl53l0x', 'hx711', 'water_flow_sensor', 'load_cell', 'bh1750', 'ina219', 'max6675'] },
   { category: 'Passive', ids: ['resistor', 'capacitor', 'breadboard', 'breadboard_small', 'diode_1n4007'] },
   { category: 'Power', ids: ['power_5v', 'power_gnd', 'mb102_power', 'bench_power_supply'] },
   {
@@ -414,7 +414,7 @@ const COMPONENT_CATALOG = [
       ]
     }
   },
-  { category: 'Communication', ids: ['wifi_module', 'lora_module', 'sd_card'] },
+  { category: 'Communication', ids: ['wifi_module', 'lora_module', 'sd_card', 'hc05', 'gps_neo6m', 'rc522'] },
   {
     category: 'Instruments',
     ids: ['multimeter', 'func_gen', 'dso_4ch'],

@@ -2372,7 +2372,7 @@ defComp({
 defComp({
   id: 'rc522',
   name: 'RC522 RFID Reader',
-  category: 'Sensors',
+  category: 'Communication',
   icon: '💳',
   desc: 'RC522 13.56MHz RFID tag reader (SPI). For access control and security gate simulations',
   width: 60,
@@ -2464,7 +2464,7 @@ defComp({
 defComp({
   id: 'ir_receiver',
   name: 'IR Receiver TSOP4838',
-  category: 'Sensors',
+  category: 'Input',
   icon: '📲',
   desc: 'TSOP4838 38kHz IR receiver module. Decodes NEC/RC5 infrared remote control signals',
   width: 30,
@@ -2543,7 +2543,7 @@ defComp({
 defComp({
   id: 'hc05',
   name: 'HC-05 Bluetooth',
-  category: 'Sensors',
+  category: 'Communication',
   icon: 'ᚼᛒ',
   desc: 'HC-05 serial-to-Bluetooth transceiver module (ZS-040 breakout). For mobile app communication',
   width: 54,
@@ -3311,7 +3311,7 @@ defComp({
 defComp({
   id: 'gps_neo6m',
   name: 'GPS NEO-6M/8M',
-  category: 'Sensors',
+  category: 'Communication',
   icon: '🛰️',
   desc: 'NEO-6M/8M GPS module with TinyGPS++ simulation — provides latitude, longitude, altitude, satellites, speed, time, and live NMEA stream via UART',
   width: 64,
@@ -5059,7 +5059,7 @@ registerComponent('max6675', MAX6675Component);
 defComp({
   id: 'u8g2_oled',
   name: 'U8g2 OLED Display',
-  category: 'Sensors',
+  category: 'Output',
   icon: '🖥️',
   desc: 'Monochrome OLED display (128x64 SSD1306/SH1106) via U8g2 library. I2C or SPI interface.',
   width: 64,
@@ -5161,7 +5161,7 @@ registerComponent('u8g2_oled', U8g2Component);
 defComp({
   id: 'tft_display',
   name: 'TFT_eSPI Display',
-  category: 'Sensors',
+  category: 'Output',
   icon: '🖥️',
   desc: 'Color TFT display (ILI9341/ST7789, 240x320) via TFT_eSPI library. SPI interface with touch support.',
   width: 72,
@@ -5277,7 +5277,7 @@ registerComponent('tft_display', TFTDisplayComponent);
 defComp({
   id: 'ir_led',
   name: 'IR LED',
-  category: 'Sensors',
+  category: 'Output',
   icon: '🔴',
   desc: 'Infrared LED transmitter — emits IR light when driven HIGH. Pairs with the IR Receiver TSOP4838.',
   width: 30,
