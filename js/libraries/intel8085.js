@@ -60,9 +60,9 @@ window.ArduinoLibs['Intel8085'] = {
             var iv = window.CircuitCanvas._readDigitalInput(b.id, pid);
             if (iv !== undefined && iv !== null) {
               if (iv & 1) val |= (1 << i); }}
-        if (pn === 'PA') cpu.portA = val;
-        if (pn === 'PB') cpu.portB = val;
-        if (pn === 'PC') cpu.portC = val;
+        if (pn === 'PA') cpu.ports[0] = val;
+        if (pn === 'PB') cpu.ports[1] = val;
+        if (pn === 'PC') cpu.ports[2] = val;
       }); }
     return {
       _init8085: function (hex, bin) {
@@ -103,7 +103,7 @@ window.ArduinoLibs['Intel8085'] = {
           E: cpu.E, H: cpu.H, L: cpu.L,
           SP: cpu.SP, PC: cpu.PC,
           Flags: (cpu.F & 128 ? 'S ' : '') + (cpu.F & 64 ? 'Z ' : '') + (cpu.F & 16 ? 'AC ' : '') + (cpu.F & 4 ? 'P ' : '') + (cpu.F & 1 ? 'CY' : ''),
-          portA: cpu.portA, portB: cpu.portB, portC: cpu.portC
+          portA: cpu.ports[0], portB: cpu.ports[1], portC: cpu.ports[2]
         };
         return !cpu.halted;
       },
@@ -114,7 +114,7 @@ window.ArduinoLibs['Intel8085'] = {
           'E': cpu.E, 'H': cpu.H, 'L': cpu.L,
           'SP': cpu.SP, 'PC': cpu.PC,
           'Flags': (cpu.F & 128 ? 'S ' : '') + (cpu.F & 64 ? 'Z ' : '') + (cpu.F & 16 ? 'AC ' : '') + (cpu.F & 4 ? 'P ' : '') + (cpu.F & 1 ? 'CY' : ''),
-          'portA': cpu.portA, 'portB': cpu.portB, 'portC': cpu.portC
+          'portA': cpu.ports[0], 'portB': cpu.ports[1], 'portC': cpu.ports[2]
         };
       }
     };
