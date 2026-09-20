@@ -1125,12 +1125,39 @@ body.view-serial #resizer-bottom { display: none; }
   padding: 6px 10px 4px;
 }
 .comp-group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: var(--text-muted);
   margin-bottom: 4px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  transition: background var(--trans-fast);
+  user-select: none;
+}
+.comp-group-title:hover {
+  background: var(--bg-hover);
+}
+.collapse-arrow {
+  font-size: 9px;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.comp-group.collapsed .collapse-arrow {
+  transform: rotate(-90deg);
+}
+.comp-group.collapsed .comp-item,
+.comp-group.collapsed .comp-dropdown,
+.comp-group.collapsed .comp-dropdown-menu {
+  display: none !important;
+}
+.comp-group.collapsed .comp-group-title {
+  margin-bottom: 0;
 }
 
 .comp-item {

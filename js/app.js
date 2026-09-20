@@ -1887,6 +1887,8 @@ _newProject() {
 
   _filterComponents(term) {
     const query = (term || '').toLowerCase().replace(/[\s\-_]+/g, ' ');
+    const isSearching = query.length > 0;
+
     // Filter regular comp-items
     document.querySelectorAll('.comp-item:not(.comp-dropdown)').forEach(item => {
       const text = item.dataset.search || item.textContent.toLowerCase();
@@ -1903,6 +1905,16 @@ _newProject() {
       const hasVisibleDropdowns = Array.from(group.querySelectorAll('.comp-dropdown-item')).some(item => item.style.display !== 'none');
       const hasVisibleDropdown = group.querySelector('.comp-dropdown') && hasVisibleDropdowns;
       group.style.display = (hasVisibleItems || hasVisibleDropdown) ? '' : 'none';
+      // Auto-expand collapsed groups when searching, restore on clear
+      if (isSearching) {
+        group.classList.remove('collapsed');
+      } else {
+        const cat = group.querySelector('.comp-group-title')?.textContent?.trim();
+        if (cat) {
+          const cs = JSON.parse(localStorage.getItem('ardusim_comp_collapsed') || '{}');
+          if (cs[cat]) group.classList.add('collapsed');
+        }
+      }
     });
   }
 
