@@ -205,6 +205,10 @@ class App {
     });
     const remoteBtn = get('btn-remote');
     remoteBtn?.addEventListener('click', () => this._showRemoteModal());
+    const logoIcon = get('logo-icon');
+    logoIcon?.addEventListener('click', () => {
+      window.GuideManager?.open('home');
+    });
     const helpComponentsBtn = get('btn-help-components');
     helpComponentsBtn?.addEventListener('click', () => {
       this._closeHeaderDropdowns();
