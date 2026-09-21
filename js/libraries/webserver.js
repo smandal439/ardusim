@@ -24,6 +24,24 @@ window.ArduinoLibs['WebServer'] = {
     HTTP_ANY: 'ANY',
   },
   runtime: function(self) {
+    function _serveRootPage(cfg) {
+      if (!cfg.routes.length) return;
+      var rootRoute = cfg.routes[0];
+      self._webResp = null;
+      cfg._routeParams = {};
+      Promise.resolve()
+        .then(function() { return rootRoute.handler(); })
+        .then(function() {
+          var resp = self._webResp || { code: 200, type: 'text/html', content: '' };
+          if (resp.type.indexOf('html') !== -1 && resp.content && self._emitWebPage) {
+            self._emitWebPage({ code: resp.code, type: resp.type, content: resp.content, url: rootRoute.path, method: rootRoute.method });
+          }
+        })
+        .catch(function(e) {
+          if (self._serialLog) self._serialLog('[WebServer] Root page error: ' + (e && e.message ? e.message : e) + '\n', 'system');
+        });
+    }
+
     return {
       serverBegin: function(server) {
         self._serialLog('[WebServer] Server started on port ' + (server && server.port ? server.port : 80) + '\n', 'system');
@@ -64,6 +82,8 @@ window.ArduinoLibs['WebServer'] = {
                     self._serialLog('[WebServer] ' + route.method + ' ' + route.path + ' -> ' + resp.code + '\n', 'system');
                     if (resp.type.indexOf('html') !== -1 && resp.content && self._emitWebPage) {
                       self._emitWebPage({ code: resp.code, type: resp.type, content: resp.content, url: route.path, method: route.method });
+                    } else if (cleanPath !== '/') {
+                      _serveRootPage(cfg);
                     }
                   })
                   .catch(function(e) {
@@ -94,7 +114,6 @@ window.ArduinoLibs['WebServer'] = {
         var cfg = self._web;
         if (!cfg || !cfg.routes.length) return;
         if (!cfg._pendingRequests) cfg._pendingRequests = [];
-        var now = Date.now();
         if (cfg._pendingRequests.length > 0) {
           var req = cfg._pendingRequests.shift();
           self._webResp = null;
@@ -106,6 +125,8 @@ window.ArduinoLibs['WebServer'] = {
               if (self._serialLog) self._serialLog('[WebServer] ' + req.route.method + ' ' + req.route.path + ' -> ' + resp.code + ' (' + resp.type + ')\n', 'system');
               if (resp.type.indexOf('html') !== -1 && resp.content && self._emitWebPage) {
                 self._emitWebPage({ code: resp.code, type: resp.type, content: resp.content, url: req.route.path, method: req.route.method });
+              } else if (req.route.path !== '/') {
+                _serveRootPage(cfg);
               }
             })
             .catch(function(e) {
@@ -113,21 +134,7 @@ window.ArduinoLibs['WebServer'] = {
             });
         } else if (!cfg._servedInitial && cfg._started) {
           cfg._servedInitial = true;
-          cfg._routeParams = {};
-          self._webResp = null;
-          var rootRoute = cfg.routes[0];
-          Promise.resolve()
-            .then(function() { return rootRoute.handler(); })
-            .then(function() {
-              var resp = self._webResp || { code: 200, type: 'text/html', content: '' };
-              if (self._serialLog) self._serialLog('[WebServer] Initial page served: ' + resp.code + '\n', 'system');
-              if (resp.type.indexOf('html') !== -1 && resp.content && self._emitWebPage) {
-                self._emitWebPage({ code: resp.code, type: resp.type, content: resp.content, url: rootRoute.path, method: rootRoute.method });
-              }
-            })
-            .catch(function(e) {
-              if (self._serialLog) self._serialLog('[WebServer] Initial page error: ' + (e && e.message ? e.message : e) + '\n', 'system');
-            });
+          _serveRootPage(cfg);
         }
       },
     };
