@@ -2525,7 +2525,7 @@ window.loadExamplesFromFiles = async function () {
     'dip_switch_and_led_array', 'dip_switch_binary', 'dmm_current', 'dmm_resistance', 'dmm_voltage', 'ds3231_rtc_clock',
     'ds3231_rtc_clock_sync_with_ntp', 'dso_oscilloscope', 'dual_core_mqtt', 'esp32_blink', 'esp32_dual_core_blink', 'esp32_fade',
     'esp32_freertos_queue', 'esp32_gpio_control', 'esp32_gpio_control_dashboard', 'esp32_hub75_matrixpaneli2s_dma', 'esp32_i2s_local_radio_player', 'esp32_i2s_music_player',
-    'esp32_i2s_online_radio_player', 'esp32_mqtt_pub_sub', 'esp32_ntp_clock_lcd', 'esp32_sd_songs_player', 'esp32_server', 'esp_now_dip_switch_to_8_led',
+    'esp32_i2s_online_radio_player', 'esp32_mqtt_pub_sub', 'esp32_ntp_clock_lcd', 'esp32_sd_songs_player', 'esp32_server',  'esp32_web_server','esp_now_dip_switch_to_8_led',
     'esp_now_sender_with_receiver', 'espnow_led_control', 'espnow_receiver', 'espnow_sender', 'fade', 'fade_led_pwm', 'flex_sensor_bending_measurement',
     'func_gen_dual', 'func_gen_led', 'gps_neo_6m_8m_tracker', 'hc05_bluetooth_led', 'http_slider_pwm', 'hx711_load_cell_with_lcd_display',
     'ic_nand_test', 'ili9341', 'ina219_solar_tracker', 'intel_8085_blink', 'intel_8085_counter', 'intel_8085_serial_hello',
