@@ -1852,12 +1852,65 @@ class ArduinoSimulator {
 
   /* Start execution of already-compiled code (non-blocking, for dual-board parallel run) */
   _startExecution() {
-    if (!this._compiledCtx) return;
+    if (!this._compiledCtx && !this._assemblyMode) return;
     this.sessionId = Math.random().toString(36).slice(2, 18);
     this.isRunning = true;
     this.isPaused = false;
     this._resumeAudio();
     const runId = ++this._runSeq;
+    this._interrupts = {};
+    this._prevPinValues = {};
+
+    // Assembly mode: run CPU step loop instead of setup/loop
+    if (this._assemblyMode && this._asmRuntime) {
+      const asmRt = this._asmRuntime;
+      const stepFn = this._asmBoard === 'intel_8085' ? asmRt._step8085 : asmRt._step8051;
+      if (!stepFn) {
+        this._serialLog('[Error] Assembly step function not found for ' + this._asmBoard + '\n', 'error');
+        this.isRunning = false;
+        return;
+      }
+      this._serialLog('[ArduSim] Simulation started\n', 'system');
+      if (this.onStart) this.onStart();
+      this._fpsInterval = setInterval(() => this._tickFps(), 500);
+      const self = this;
+      (async () => {
+        let hadError = false;
+        try {
+          while (self.isRunning && runId === self._runSeq) {
+            if (self.isPaused) {
+              await new Promise(resolve => { self._resumeResolve = resolve; });
+            }
+            for (let i = 0; i < 5000; i++) {
+              if (!stepFn()) break;
+            }
+            self._loopCount++;
+            self.simTime += 1;
+            await new Promise(r => setTimeout(r, 0));
+          }
+        } catch (err) {
+          if (err && err.message !== 'SIMULATION_STOPPED') {
+            hadError = true;
+            const friendly = self._friendlyError(err.message ? err.message : String(err), err instanceof Error ? err : undefined);
+            self._emitError(friendly);
+            self._serialLog('[Error] ' + friendly + '\n', 'error');
+          }
+        } finally {
+          if (runId === self._runSeq) {
+            if (self._fpsInterval) { clearInterval(self._fpsInterval); self._fpsInterval = null; }
+            if (self._resumeResolve) { const r = self._resumeResolve; self._resumeResolve = null; r(); }
+          }
+        }
+        if (runId === self._runSeq) {
+          self.isRunning = false;
+          self._serialLog('[ArduSim] Simulation stopped\n', 'system');
+          if (self.onStop) self.onStop();
+        }
+      })();
+      return;
+    }
+
+    // Normal Arduino mode
     const { keys, vals, fn } = this._compiledCtx;
     this._interrupts = {};
     this._prevPinValues = {};

@@ -405,6 +405,7 @@ const COMPONENT_CATALOG = [
         { id: 'ic_74hc74', name: '74HC74 Dual DFF', icon: '⮗' },
         { id: 'ic_74hc47', name: '74HC47 BCD→7Seg', icon: '⮗' },
         { id: 'ic_74hc148', name: '74HC148 Encoder', icon: '⮗' },
+        { id: 'ic_8255', name: 'Intel 8255 PPI', icon: '🔲' },
         { id: 'ic_74hc595', name: '74HC595 Shift Reg', icon: '⮗' },
         { id: 'ic_74hc138', name: '74HC138 Decoder', icon: '⮗' },
         { id: 'ic_74hc165', name: '74HC165 PISO', icon: '⮗' },

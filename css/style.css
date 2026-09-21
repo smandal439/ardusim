@@ -1786,6 +1786,143 @@ body.file-explorer-collapsed .file-explorer-expand {
 .pin-row.pin-high .pin-bar-fill { background: var(--wire-high); }
 .pin-row.pin-pwm .pin-bar-fill  { background: var(--wire-pwm); }
 
+/* ═══════════════ REGISTER VIEWER ═══════════════ */
+.register-viewer {
+  display: flex;
+  gap: 16px;
+  padding: 10px;
+  overflow-x: auto;
+  flex: 1;
+  height: 100%;
+  align-items: flex-start;
+}
+.register-viewer::-webkit-scrollbar { height: 4px; }
+.register-viewer::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.reg-section {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 160px;
+  flex-shrink: 0;
+}
+.reg-section-title {
+  font: bold 10px var(--font-mono);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 2px;
+}
+.reg-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font: 11px var(--font-mono);
+  transition: all 0.15s ease;
+}
+.reg-cell:hover { border-color: var(--border); background: var(--bg-hover); }
+.reg-cell .reg-name {
+  color: var(--text-muted);
+  min-width: 40px;
+  font-weight: 600;
+}
+.reg-cell .reg-hex {
+  color: var(--accent, #00e5ff);
+  font-weight: 700;
+  min-width: 28px;
+  text-align: right;
+}
+.reg-cell .reg-dec {
+  color: var(--text-secondary);
+  min-width: 32px;
+  text-align: right;
+  font-size: 10px;
+}
+.reg-cell .reg-bin {
+  color: var(--text-muted);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+}
+.reg-cell.changed { background: rgba(255,238,0,0.08); border-color: rgba(255,238,0,0.3); }
+.reg-cell.changed .reg-hex { color: #ffee00; }
+.reg-cell .flag-on { color: #00ff44; font-weight: 700; }
+.reg-cell .flag-off { color: var(--text-muted); font-weight: 400; }
+
+/* ═══════════════ MEMORY / SFR VIEWER ═══════════════ */
+.memory-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+.memory-label {
+  font: 10px var(--font-mono);
+  color: var(--text-muted);
+}
+.memory-viewer {
+  font: 11px var(--font-mono);
+  padding: 8px;
+  overflow: auto;
+  flex: 1;
+  height: calc(100% - 34px);
+}
+.memory-viewer::-webkit-scrollbar { width: 4px; height: 4px; }
+.memory-viewer::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.mem-header {
+  display: grid;
+  grid-template-columns: 60px repeat(16, 1fr);
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 4px;
+  margin-bottom: 2px;
+}
+.mem-row {
+  display: grid;
+  grid-template-columns: 60px repeat(16, 1fr);
+  line-height: 1.9;
+}
+.mem-addr {
+  color: var(--text-muted);
+  font-size: 10px;
+  padding-right: 6px;
+  text-align: right;
+}
+.mem-byte {
+  color: var(--accent, #00e5ff);
+  text-align: center;
+  cursor: default;
+  border-radius: 2px;
+  transition: color 0.15s;
+}
+.mem-byte.zero { color: var(--text-muted); opacity: 0.4; }
+.mem-byte.pc-hl { background: rgba(0,229,255,0.12); }
+.mem-byte.changed { color: #ffee00; font-weight: 700; }
+.mem-sfr-label {
+  color: #ff9800;
+  font-size: 8px;
+  margin-left: 1px;
+  vertical-align: super;
+}
+.mem-ascii {
+  grid-column: 2 / -1;
+  font-size: 9px;
+  color: var(--text-muted);
+  padding-top: 2px;
+  white-space: pre;
+  letter-spacing: 1px;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 4px;
+}
+
 /* ═══════════════ MODALS ═══════════════ */
 .modal-overlay {
   position: fixed;

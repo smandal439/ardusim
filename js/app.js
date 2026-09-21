@@ -28,6 +28,9 @@ class App {
     this._examplesObserver = null;
     this._savedQuery = '';
     this.remote = null;
+    this._activeBottomTab = 'serial';
+    this._regViewerBuilt = false;
+    this._memViewerBuilt = false;
     // Dual-board support
     this._activeBoard = 0; // 0 = Board 1 (primary), 1 = Board 2 (secondary)
     this._board2Code = ''; // stores Board 2 code (Board 1 uses editor)
@@ -530,6 +533,7 @@ class App {
   _getActiveBoardType() {
     const boardInst = this.canvas?.getBoardInst?.();
     if (boardInst) return boardInst.type;
+    if (this.sim?._asmBoard) return this.sim._asmBoard;
     return this.sim.board || 'arduino_uno';
   }
 
@@ -913,6 +917,12 @@ void loop() {
       this._updateCompileStatus(this.sim2 && this.sim2.isRunning ? 'Running (2 boards)' : 'Running');
       this._updateStatus('Simulation running');
       this.output?.log('Compile OK — running simulation', 'success');
+      // Build register and memory viewers for 8085/8051
+      const board = this._getActiveBoardType();
+      if (board === 'intel_8085' || board === 'intel_8051') {
+        this._buildRegisterViewer();
+        this._buildMemoryViewer();
+      }
       // Start remote control bridge
       if (this.remote && this.sim.sessionId) {
         this.remote.start(this.sim.sessionId);
@@ -945,6 +955,11 @@ void loop() {
       }
       if (this.la && !this.la.paused) {
         this.la.sample(simTime, this.sim.pinStates);
+      }
+      // Update register and memory viewers for 8085/8051 assembly mode
+      if (this.sim._assemblyMode) {
+        this._updateRegisters();
+        this._updateMemory();
       }
       // Keep the Pin Monitor live even when an input component changes without
       // causing an Arduino output pin event.
@@ -2179,6 +2194,185 @@ _newProject() {
     });
   }
 
+  /* ---------------------- REGISTER VIEWER ---------------------- */
+  _buildRegisterViewer() {
+    const cpuSec = document.getElementById('reg-section-cpu');
+    const flagSec = document.getElementById('reg-section-flags');
+    const portSec = document.getElementById('reg-section-ports');
+    const extraSec = document.getElementById('reg-section-extra');
+    if (!cpuSec || !flagSec || !portSec || !extraSec) return;
+    cpuSec.innerHTML = '<div class="reg-section-title">CPU Registers</div>';
+    flagSec.innerHTML = '<div class="reg-section-title">Flags</div>';
+    portSec.innerHTML = '<div class="reg-section-title">Ports</div>';
+    extraSec.innerHTML = '<div class="reg-section-title">Special</div>';
+    cpuSec.innerHTML = '<div class="reg-section-title">CPU Registers</div>';
+    flagSec.innerHTML = '<div class="reg-section-title">Flags</div>';
+    portSec.innerHTML = '<div class="reg-section-title">Ports</div>';
+    extraSec.innerHTML = '<div class="reg-section-title">Special</div>';
+    const board = this._getActiveBoardType();
+    const is8085 = board === 'intel_8085';
+    const is8051 = board === 'intel_8051';
+    if (!is8085 && !is8051) {
+      cpuSec.innerHTML += '<div class="reg-cell"><span class="reg-name" style="color:var(--text-muted)">No registers for this board</span></div>';
+      return;
+    }
+    if (is8085) {
+      ['A','B','C','D','E','H','L','SP','PC'].forEach(r => {
+        cpuSec.innerHTML += `<div class="reg-cell" data-reg="${r}"><span class="reg-name">${r}</span><span class="reg-hex">--</span><span class="reg-dec">-</span><span class="reg-bin">--------</span></div>`;
+      });
+      ['S','Z','AC','P','CY'].forEach(f => {
+        flagSec.innerHTML += `<div class="reg-cell" data-reg="F_${f}"><span class="reg-name">${f}</span><span class="reg-hex">-</span></div>`;
+      });
+      ['PA_val','PB_val','PC_val'].forEach(p => {
+        portSec.innerHTML += `<div class="reg-cell" data-reg="${p}"><span class="reg-name">${p.replace('_val','')}</span><span class="reg-hex">--</span><span class="reg-dec">-</span><span class="reg-bin">--------</span></div>`;
+      });
+    } else {
+      ['ACC','B','SP','PC','DPTR'].forEach(r => {
+        cpuSec.innerHTML += `<div class="reg-cell" data-reg="${r}"><span class="reg-name">${r}</span><span class="reg-hex">--</span><span class="reg-dec">-</span><span class="reg-bin">--------</span></div>`;
+      });
+      ['CY','AC','F0','RS1','RS0','OV','P'].forEach(f => {
+        flagSec.innerHTML += `<div class="reg-cell" data-reg="F_${f}"><span class="reg-name">${f}</span><span class="reg-hex">-</span></div>`;
+      });
+      ['P0','P1','P2','P3'].forEach(p => {
+        portSec.innerHTML += `<div class="reg-cell" data-reg="${p}"><span class="reg-name">${p}</span><span class="reg-hex">--</span><span class="reg-dec">-</span><span class="reg-bin">--------</span></div>`;
+      });
+      ['IE','IP','TCON','TMOD','TH0','TL0','TH1','TL1','SCON'].forEach(s => {
+        extraSec.innerHTML += `<div class="reg-cell" data-reg="${s}"><span class="reg-name">${s}</span><span class="reg-hex">--</span><span class="reg-dec">-</span></div>`;
+      });
+    }
+  }
+
+  _updateRegisters() {
+    if (!this.sim || !this.sim.isRunning) return;
+    const board = this._getActiveBoardType();
+    const is8085 = board === 'intel_8085';
+    const is8051 = board === 'intel_8051';
+    if (!is8085 && !is8051) return;
+    // Auto-build if DOM not ready
+    if (!document.querySelector('.reg-cell[data-reg="ACC"]') && !document.querySelector('.reg-cell[data-reg="A"]')) {
+      this._buildRegisterViewer();
+    }
+    let regs = null;
+    if (is8085) {
+      regs = this.sim._asmRuntime?._8085_getRegisters?.() || this.sim._8085Registers;
+    } else {
+      regs = this.sim._asmRuntime?._8051_getRegisters?.() || this.sim._8051Registers;
+    }
+    if (!regs) return;
+    const toHex = (v, w) => (v >>> 0).toString(16).toUpperCase().padStart(w || 2, '0');
+    const toBin = (v) => (v >>> 0).toString(2).padStart(8, '0').slice(-8);
+    const updateCell = (name, val, isFlag) => {
+      const el = document.querySelector(`.reg-cell[data-reg="${name}"]`);
+      if (!el) return;
+      const hexEl = el.querySelector('.reg-hex');
+      const decEl = el.querySelector('.reg-dec');
+      const binEl = el.querySelector('.reg-bin');
+      if (isFlag) {
+        const prev = hexEl.textContent;
+        hexEl.textContent = val ? '1' : '0';
+        hexEl.className = val ? 'reg-hex flag-on' : 'reg-hex flag-off';
+        if (prev !== hexEl.textContent && prev !== '--') { el.classList.add('changed'); setTimeout(() => el.classList.remove('changed'), 300); }
+      } else {
+        const prev = hexEl.textContent;
+        hexEl.textContent = '0x' + toHex(val);
+        if (decEl) decEl.textContent = val;
+        if (binEl) binEl.textContent = toBin(val);
+        if (prev !== hexEl.textContent && prev !== '--') { el.classList.add('changed'); setTimeout(() => el.classList.remove('changed'), 300); }
+      }
+    };
+    if (is8085) {
+      updateCell('A', regs.A); updateCell('B', regs.B); updateCell('C', regs.C);
+      updateCell('D', regs.D); updateCell('E', regs.E); updateCell('H', regs.H);
+      updateCell('L', regs.L); updateCell('SP', regs.SP); updateCell('PC', regs.PC);
+      updateCell('F_S', (regs.S)); updateCell('F_Z', (regs.Z));
+      updateCell('F_AC', (regs.AC)); updateCell('F_P', (regs.P)); updateCell('F_CY', (regs.CY));
+      updateCell('PA_val', regs.PA); updateCell('PB_val', regs.PB); updateCell('PC_val', regs.PC_port !== undefined ? regs.PC_port : 0);
+    } else {
+      updateCell('ACC', regs.ACC); updateCell('B', regs.B);
+      updateCell('SP', regs.SP); updateCell('PC', regs.PC);
+      updateCell('DPTR', regs.DPTR);
+      updateCell('F_CY', regs.CY); updateCell('F_AC', regs.AC);
+      updateCell('F_F0', regs.F0); updateCell('F_RS1', regs.RS1);
+      updateCell('F_RS0', regs.RS0); updateCell('F_OV', regs.OV);
+      updateCell('F_P', regs.P);
+      updateCell('P0', regs.P0); updateCell('P1', regs.P1);
+      updateCell('P2', regs.P2); updateCell('P3', regs.P3);
+      ['IE','IP','TCON','TMOD','TH0','TL0','TH1','TL1','SCON'].forEach(s => {
+        if (regs[s] !== undefined) updateCell(s, regs[s]);
+      });
+    }
+  }
+
+  /* ---------------------- MEMORY / SFR VIEWER ---------------------- */
+  _buildMemoryViewer() {
+    const viewer = document.getElementById('memory-viewer');
+    if (!viewer) return;
+    const board = this._getActiveBoardType();
+    const is8085 = board === 'intel_8085';
+    const is8051 = board === 'intel_8051';
+    if (!is8085 && !is8051) {
+      viewer.innerHTML = '<div style="padding:10px;color:var(--text-muted)">No memory viewer for this board</div>';
+      return;
+    }
+    let html = '<div class="mem-header"><span></span>';
+    for (let i = 0; i < 16; i++) html += `<span>${i.toString(16).toUpperCase()}</span>`;
+    html += '</div>';
+    for (let row = 0; row < 16; row++) {
+      const addr = row * 16;
+      html += `<div class="mem-row" data-row="${row}"><span class="mem-addr">${addr.toString(16).toUpperCase().padStart(4, '0')}</span>`;
+      for (let col = 0; col < 16; col++) {
+        html += `<span class="mem-byte" data-addr="${addr + col}">--</span>`;
+      }
+      html += '</div>';
+    }
+    viewer.innerHTML = html;
+    this._memoryPrev = {};
+    this._memoryView = 'ram';
+    const sel = document.getElementById('memory-view-select');
+    if (sel) sel.addEventListener('change', (e) => { this._memoryView = e.target.value; this._memoryPrev = {}; });
+  }
+
+  _updateMemory() {
+    if (!this.sim || !this.sim.isRunning) return;
+    const board = this._getActiveBoardType();
+    const is8085 = board === 'intel_8085';
+    const is8051 = board === 'intel_8051';
+    if (!is8085 && !is8051) return;
+    // Auto-build if DOM not ready
+    if (!document.querySelector('.mem-byte[data-addr="0"]')) {
+      this._buildMemoryViewer();
+    }
+    let regs = null;
+    if (is8085) {
+      regs = this.sim._asmRuntime?._8085_getRegisters?.() || this.sim._8085Registers;
+    } else {
+      regs = this.sim._asmRuntime?._8051_getRegisters?.() || this.sim._8051Registers;
+    }
+    if (!regs) return;
+    let bytes = null;
+    if (is8085 && this.sim._asmRuntime?._8085_getMemoryPage) {
+      bytes = this.sim._asmRuntime._8085_getMemoryPage(0, 256);
+    } else if (is8051 && this.sim._asmRuntime?._8051_getMemoryPage) {
+      bytes = this.sim._asmRuntime._8051_getMemoryPage(0, 128);
+    }
+    if (!bytes) return;
+    const pc = regs.PC !== undefined ? regs.PC : 0;
+    for (let i = 0; i < bytes.length && i < 256; i++) {
+      const el = document.querySelector(`.mem-byte[data-addr="${i}"]`);
+      if (!el) continue;
+      const hex = bytes[i].toString(16).toUpperCase().padStart(2, '0');
+      const prev = this._memoryPrev[i];
+      el.textContent = hex;
+      el.className = 'mem-byte';
+      if (bytes[i] === 0) el.classList.add('zero');
+      if (i >= (pc & 0xFFF0) && i < ((pc & 0xFFF0) + 16)) el.classList.add('pc-hl');
+      if (prev !== undefined && prev !== bytes[i]) el.classList.add('changed');
+      this._memoryPrev[i] = bytes[i];
+    }
+    const status = document.getElementById('memory-status');
+    if (status) status.textContent = `PC: 0x${pc.toString(16).toUpperCase().padStart(4, '0')}`;
+  }
+
   /* ---------------------- BEFORE UNLOAD GUARD ---------------------- */
   _setupBeforeUnloadGuard() {
     window.addEventListener('beforeunload', (e) => {
@@ -2542,13 +2736,22 @@ _newProject() {
     if (!target) return;
     document.querySelectorAll('.btm-tab').forEach(tab => tab.classList.toggle('active', tab === button));
     document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.toggle('active', pane.id === `pane-${target}`));
+    this._activeBottomTab = target;
     if (target === 'pins') this._updatePinMonitor();
+    if (target === 'registers') { this._buildRegisterViewer(); this._updateRegisters(); }
+    if (target === 'memory') { this._buildMemoryViewer(); this._updateMemory(); }
     if (target === 'oscilloscope' && this.osc) {
       this.osc.refreshProbeOptions(document.getElementById('osc-ch1'), document.getElementById('osc-ch2'));
     }
     if (target === 'logic-analyzer' && this.la) {
       this.la.refreshProbeOptions();
     }
+  }
+
+  _isTabActive(name) {
+    if (this._activeBottomTab === name) return true;
+    const pane = document.getElementById('pane-' + name);
+    return pane && pane.classList.contains('active');
   }
 
   /* ---------------------- VIEW FOCUS MODES ---------------------- */

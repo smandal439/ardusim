@@ -491,7 +491,13 @@
                     height="13" viewBox="0 0 16 16" fill="currentColor">
                     <path
                         d="M8.235.055a.498.498 0 0 0-.47 0l-7.5 4A.5.5 0 0 0 0 4.5v7a.5.5 0 0 0 .265.445l7.5 4a.498.498 0 0 0 .47 0l7.5-4A.5.5 0 0 0 16 11.5v-7a.5.5 0 0 0-.265-.445z" />
-                </svg> Pin Monitor </button> <button class="btm-tab" id="tab-webbrowser" data-tab="webbrowser"> <svg
+                </svg> Pin Monitor </button> <button class="btm-tab" id="tab-registers" data-tab="registers"> <svg width="13"
+                    height="13" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M2 2h4v4H2zm6 0h4v4H8zM2 8h4v4H2zm6 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/>
+                </svg> Registers </button> <button class="btm-tab" id="tab-memory" data-tab="memory"> <svg width="13"
+                    height="13" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-.5a.5.5 0 0 0-.5.5v12a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5V2a.5.5 0 0 0-.5-.5zM4 4h1v2H4zm2 0h1v2H6zm2 0h1v2H8zm2 0h1v2h-1zm2 0h1v2h-1zM4 7h1v2H4zm2 0h1v2H6zm2 0h1v2H8zm2 0h1v2h-1zm2 0h1v2h-1zM4 10h1v2H4zm2 0h1v2H6zm2 0h1v2H8zm2 0h1v2h-1zm2 0h1v2h-1z"/>
+                </svg> Memory </button> <button class="btm-tab" id="tab-webbrowser" data-tab="webbrowser"> <svg
                     width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
                     <path
                         d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7.5-6.923c-.67.204-1.335.82-1.887 1.855A8 8 0 0 0 1 8c0 .313.04.618.113.912.552 1.035 1.217 1.65 1.887 1.855V15a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm2-1a1 1 0 0 0-1 1v.937l.001.002.06.033A1 1 0 0 0 2 13v.937l-.001.002-.06.033A8 8 0 0 0 8 16a8 8 0 0 0 5.938-2.033l-.06-.033V13a1 1 0 0 0 1-1V4.661l-.001-.002-.06-.033A1 1 0 0 0 13 4V3.346l-.001-.002-.06-.033A8 8 0 0 0 8 1a8 8 0 0 0-5.938 2.033l.06.033V3a1 1 0 0 0-1 1" />
@@ -858,6 +864,33 @@
             </div> <!-- Pin Monitor -->
             <div class="tab-pane" id="pane-pins">
                 <div class="pin-monitor-grid" id="pin-monitor-grid"> <!-- Rendered by JS --> </div>
+            </div> <!-- Register Viewer -->
+            <div class="tab-pane" id="pane-registers">
+                <div class="register-viewer" id="register-viewer">
+                    <div class="reg-section" id="reg-section-cpu">
+                        <div class="reg-section-title">CPU Registers</div>
+                    </div>
+                    <div class="reg-section" id="reg-section-flags">
+                        <div class="reg-section-title">Flags</div>
+                    </div>
+                    <div class="reg-section" id="reg-section-ports">
+                        <div class="reg-section-title">Ports</div>
+                    </div>
+                    <div class="reg-section" id="reg-section-extra">
+                        <div class="reg-section-title">Extra</div>
+                    </div>
+                </div>
+            </div> <!-- Memory / SFR Viewer -->
+            <div class="tab-pane" id="pane-memory">
+                <div class="memory-toolbar">
+                    <span class="memory-label">View:</span>
+                    <select class="serial-select" id="memory-view-select">
+                        <option value="ram">RAM (0x00-0xFF)</option>
+                        <option value="sfr">SFR Registers</option>
+                    </select>
+                    <span class="la-status" id="memory-status">Ready</span>
+                </div>
+                <div class="memory-viewer" id="memory-viewer"></div>
             </div> <!-- Web Browser -->
             <div class="tab-pane" id="pane-webbrowser">
                 <div class="webbrowser-toolbar">
@@ -1355,6 +1388,7 @@
     <script src="js/components/passive.js?v=20260826-1"></script>
     <script src="js/components/power.js?v=20260825-2"></script>
     <script src="js/components/ics.js?v=20260825-2"></script>
+    <script src="js/components/ic_8255.js?v=20260921-1"></script>
     <script src="js/components/audio.js?v=20260903-1"></script>
     <script src="js/components/communication.js?v=20260913-1"></script>
     <script src="js/dsp.js?v=20260901-1"></script>
