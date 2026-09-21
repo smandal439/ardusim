@@ -2782,14 +2782,71 @@ class CircuitCanvas {
 
   exportPNG() {
     try {
-      // Render to a temp canvas with white background
+      const SCALE = 3;
+      const PADDING = 40;
+
+      // Compute bounding box of all components
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const inst of this.components) {
+        const def = window.ArduinoComponents?.COMPONENT_DEFS?.[inst.type];
+        if (!def) continue;
+        minX = Math.min(minX, inst.x - 20);
+        minY = Math.min(minY, inst.y - 20);
+        maxX = Math.max(maxX, inst.x + (def.width || 120) + 20);
+        maxY = Math.max(maxY, inst.y + (def.height || 80) + 20);
+      }
+      if (!Number.isFinite(minX)) { minX = 0; minY = 0; maxX = 400; maxY = 300; }
+
+      const cw = maxX - minX;
+      const ch = maxY - minY;
+      const outW = Math.ceil((cw + PADDING * 2) * SCALE);
+      const outH = Math.ceil((ch + PADDING * 2) * SCALE);
+
       const tmp = document.createElement('canvas');
-      tmp.width = this.canvas.width;
-      tmp.height = this.canvas.height;
+      tmp.width = outW;
+      tmp.height = outH;
       const tc = tmp.getContext('2d');
+
+      // Dark background
       tc.fillStyle = '#0d1117';
-      tc.fillRect(0, 0, tmp.width, tmp.height);
-      tc.drawImage(this.canvas, 0, 0);
+      tc.fillRect(0, 0, outW, outH);
+
+      // Compute zoom to fit circuit
+      const fitZoom = Math.min(outW / (cw + PADDING * 2), outH / (ch + PADDING * 2)) / SCALE;
+      const tx = (outW - cw * fitZoom * SCALE) / 2 - minX * fitZoom * SCALE;
+      const ty = (outH - ch * fitZoom * SCALE) / 2 - minY * fitZoom * SCALE;
+
+      tc.save();
+      tc.scale(SCALE, SCALE);
+      tc.translate(tx / SCALE, ty / SCALE);
+      tc.scale(fitZoom, fitZoom);
+
+      // Draw grid
+      const G = this.GRID;
+      const invZ = 1 / fitZoom;
+      const gsX = Math.floor((-tx / SCALE) * invZ / G) * G;
+      const gsY = Math.floor((-ty / SCALE) * invZ / G) * G;
+      const geX = gsX + (outW / SCALE * invZ) + G;
+      const geY = gsY + (outH / SCALE * invZ) + G;
+      tc.strokeStyle = 'rgba(255,255,255,0.04)';
+      tc.lineWidth = 0.5;
+      for (let x = gsX; x <= geX; x += G) {
+        tc.beginPath(); tc.moveTo(x, gsY); tc.lineTo(x, geY); tc.stroke();
+      }
+      for (let y = gsY; y <= geY; y += G) {
+        tc.beginPath(); tc.moveTo(gsX, y); tc.lineTo(geX, y); tc.stroke();
+      }
+
+      // Draw wires
+      this._drawWires(tc);
+
+      // Draw components
+      this._drawComponents(tc);
+
+      try { this._drawInteractives(tc); } catch (_e) { /* guard */ }
+
+      tc.restore();
+
       const a = document.createElement('a');
       a.href = tmp.toDataURL('image/png');
       a.download = 'circuit.png';
