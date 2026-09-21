@@ -1732,11 +1732,14 @@ class ArduinoSimulator {
           if (this.isPaused) {
             await new Promise(resolve => { this._resumeResolve = resolve; });
           }
+          let alive = false;
           for (let i = 0; i < 5000; i++) {
             if (!stepFn()) break;
+            alive = true;
           }
           this._loopCount++;
           this.simTime += 1;
+          if (!alive) break;
           await new Promise(r => setTimeout(r, 0));
         }
       } catch (err) {
@@ -1882,11 +1885,14 @@ class ArduinoSimulator {
             if (self.isPaused) {
               await new Promise(resolve => { self._resumeResolve = resolve; });
             }
+            let alive = false;
             for (let i = 0; i < 5000; i++) {
               if (!stepFn()) break;
+              alive = true;
             }
             self._loopCount++;
             self.simTime += 1;
+            if (!alive) break;
             await new Promise(r => setTimeout(r, 0));
           }
         } catch (err) {
@@ -2007,6 +2013,7 @@ class ArduinoSimulator {
     this.isPaused = false;
     this._i2sNextAudioTime = 0;
     this._runSeq++;
+    if (this._fpsInterval) { clearInterval(this._fpsInterval); this._fpsInterval = null; }
     // Close any live MQTT connections
     for (const c of this._mqttOpen) {
       try { c.end(true); } catch (e) { /* noop */ }

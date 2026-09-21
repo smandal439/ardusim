@@ -2223,8 +2223,8 @@ _newProject() {
       ['S','Z','AC','P','CY'].forEach(f => {
         flagSec.innerHTML += `<div class="reg-cell" data-reg="F_${f}"><span class="reg-name">${f}</span><span class="reg-hex">-</span></div>`;
       });
-      ['PA_val','PB_val','PC_val'].forEach(p => {
-        portSec.innerHTML += `<div class="reg-cell" data-reg="${p}"><span class="reg-name">${p.replace('_val','')}</span><span class="reg-hex">--</span><span class="reg-dec">-</span><span class="reg-bin">--------</span></div>`;
+      [['PA_val','PA'],['PB_val','PB'],['PC_val','PC (Port)']].forEach(([id,label]) => {
+        portSec.innerHTML += `<div class="reg-cell" data-reg="${id}"><span class="reg-name">${label}</span><span class="reg-hex">--</span><span class="reg-dec">-</span><span class="reg-bin">--------</span></div>`;
       });
     } else {
       ['ACC','B','SP','PC','DPTR'].forEach(r => {

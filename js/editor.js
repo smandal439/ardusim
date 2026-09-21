@@ -1231,7 +1231,7 @@ DL2:    DJNZ R3, DL2
         const minW = 100;
         const maxW = 350;
         const onMove = (ev) => {
-          let w = ev.clientX - startX;
+          let w = startW + (ev.clientX - startX);
           w = Math.max(minW, Math.min(maxW, w));
           fileExplorer.style.width = `${w}px`;
         };
