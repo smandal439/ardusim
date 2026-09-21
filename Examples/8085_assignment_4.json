@@ -1,0 +1,28 @@
+{
+  "id": "8085_assignment_4",
+  "name": "8085 assignment 4",
+  "icon": "🔧",
+  "desc": "A custom 8085 assignment 4 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790006818923_yi4u2",
+        "type": "intel_8085",
+        "x": 185,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "label": "8085"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": "\nMVI A,23H\nMVI B,09H\nANA B\n\nhlt"
+  }
+}

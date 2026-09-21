@@ -1,0 +1,28 @@
+{
+  "id": "8085_assignment_5",
+  "name": "8085 assignment 5",
+  "icon": "🔧",
+  "desc": "A custom 8085 assignment 5 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790006818923_yi4u2",
+        "type": "intel_8085",
+        "x": 185,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "label": "8085"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": "\nLXI H,9008H\nMVI M,42H ; // MOVE 42H INTO THE MEMORY LOCATION SPECIFIED BY HL REGISTER PAIR.\nLDA 9008H\nCMA\nADI 01H\nSTA 9008H\n\n\nhlt"
+  }
+}
