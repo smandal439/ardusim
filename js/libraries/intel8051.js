@@ -34,10 +34,15 @@ window.ArduinoLibs['Intel8051'] = {
       var defs = window.ArduinoComponents.COMPONENT_DEFS;
       if (!defs || !defs[b.type]) return;
       var pins = ['P0','P1','P2','P3'][port] + '.';
+      var base = 200 + port * 10;
       for (var i = 0; i < 8; i++) {
         var pid = pins + i;
           var pin = defs[b.type].pins.find(function(p) { return p.id === pid; });
-          if (pin) { window.CircuitCanvas._writeDigitalOutput(b.id, pid, (val >> i) & 1); }}
+          if (pin) {
+            var nv = (val >> i) & 1;
+            window.CircuitCanvas._writeDigitalOutput(b.id, pid, nv);
+            if (self._emitPinChange) self._emitPinChange('pin_' + (base + i), nv ? 255 : 0);
+          }}
     }
     function readPort(port, pin) {
       var b = window.CircuitCanvas.getBoardInst();
@@ -125,8 +130,21 @@ window.ArduinoLibs['Intel8051'] = {
           'PSW': cpu.PSW, 'Flags': flags.join(' '),
           'P0': cpu.P0, 'P1': cpu.P1, 'P2': cpu.P2, 'P3': cpu.P3,
           'R0': cpu._rR(0), 'R1': cpu._rR(1), 'R2': cpu._rR(2), 'R3': cpu._rR(3),
-          'R4': cpu._rR(4), 'R5': cpu._rR(5), 'R6': cpu._rR(6), 'R7': cpu._rR(7)
+          'R4': cpu._rR(4), 'R5': cpu._rR(5), 'R6': cpu._rR(6), 'R7': cpu._rR(7),
+          'IE': cpu.IE, 'IP': cpu.IP, 'TCON': cpu.TCON, 'TMOD': cpu.TMOD,
+          'TH0': cpu.TH0, 'TL0': cpu.TL0, 'TH1': cpu.TH1, 'TL1': cpu.TL1,
+          'SCON': cpu.SCON, 'PCON': cpu.PCON,
+          'CY': (cpu.PSW >> 7) & 1, 'AC': (cpu.PSW >> 6) & 1,
+          'F0': (cpu.PSW >> 5) & 1, 'RS1': (cpu.PSW >> 3) & 1,
+          'RS0': (cpu.PSW >> 2) & 1, 'OV': (cpu.PSW >> 1) & 1,
+          'P': cpu.PSW & 1
         };
+      },
+      _8051_getMemoryPage: function (addr, len) {
+        if (!cpu) return null;
+        var out = [];
+        for (var i = 0; i < (len || 128); i++) out.push(cpu.ram[(addr + i) & 0x7F]);
+        return out;
       }
     };
   }

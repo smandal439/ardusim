@@ -123,16 +123,15 @@ class CircuitCanvas {
       this.updateSimState({});
     }
 
-    // Sample oscilloscope and logic analyzer from probe components even in standalone mode
-    if (this._hasStandalonePower && !sim?.isRunning) {
-      const app = window.App;
-      if (app) {
-        if (app.osc && !app.osc.paused) {
-          app.osc.sample(performance.now(), {});
-        }
-        if (app.la && !app.la.paused) {
-          app.la.sample(performance.now(), {});
-        }
+    // Sample oscilloscope and logic analyzer from probe components — always,
+    // so probe-based channels work during both running and stopped states
+    const app = window.App;
+    if (app) {
+      if (app.osc && !app.osc.paused) {
+        app.osc.sample(performance.now(), {});
+      }
+      if (app.la && !app.la.paused) {
+        app.la.sample(performance.now(), {});
       }
     }
 

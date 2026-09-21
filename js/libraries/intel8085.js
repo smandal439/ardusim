@@ -31,10 +31,15 @@ window.ArduinoLibs['Intel8085'] = {
       if (!defs || !defs[b.type]) return;
       var portNames = ['PA', 'PB', 'PC'];
       var pins = portNames[port] + '.';
+      var base = 200 + port * 10;
       for (var i = 0; i < 8; i++) {
         var pid = pins + i;
           var pin = defs[b.type].pins.find(function(p) { return p.id === pid; });
-          if (pin) { window.CircuitCanvas._writeDigitalOutput(b.id, pid, (val >> i) & 1); }}
+          if (pin) {
+            var nv = (val >> i) & 1;
+            window.CircuitCanvas._writeDigitalOutput(b.id, pid, nv);
+            if (self._emitPinChange) self._emitPinChange('pin_' + (base + i), nv ? 255 : 0);
+          }}
     }
     function readPort(port, bit) {
       var b = window.CircuitCanvas.getBoardInst();
@@ -120,8 +125,16 @@ window.ArduinoLibs['Intel8085'] = {
           'E': cpu.E, 'H': cpu.H, 'L': cpu.L,
           'SP': cpu.SP, 'PC': cpu.PC,
           'Flags': (cpu.F & 128 ? 'S ' : '') + (cpu.F & 64 ? 'Z ' : '') + (cpu.F & 16 ? 'AC ' : '') + (cpu.F & 4 ? 'P ' : '') + (cpu.F & 1 ? 'CY' : ''),
-          'portA': cpu.ports[0], 'portB': cpu.ports[1], 'portC': cpu.ports[2]
+          'PA': cpu.ports[0], 'PB': cpu.ports[1], 'PC_port': cpu.ports[2],
+          'S': (cpu.F >> 7) & 1, 'Z': (cpu.F >> 6) & 1, 'AC': (cpu.F >> 4) & 1,
+          'P': (cpu.F >> 2) & 1, 'CY': cpu.F & 1
         };
+      },
+      _8085_getMemoryPage: function (addr, len) {
+        if (!cpu) return null;
+        var out = [];
+        for (var i = 0; i < (len || 256); i++) out.push(cpu.memory[(addr + i) & 0xFFFF]);
+        return out;
       }
     };
   }
