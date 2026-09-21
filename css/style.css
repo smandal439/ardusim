@@ -193,8 +193,8 @@ kbd {
 }
 
 .logo-name {
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 18px;
+  font-weight: 900;
   letter-spacing: -0.5px;
   background: linear-gradient(135deg, #00e5ff, #00979c);
   -webkit-background-clip: text;
@@ -203,9 +203,9 @@ kbd {
 }
 
 .logo-tag {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-weight: 400;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
   letter-spacing: 0.3px;
   text-transform: uppercase;
 }
@@ -280,8 +280,8 @@ kbd {
   gap: 6px;
   padding: 6px 12px;
   border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   transition: all var(--trans-fast);
   white-space: nowrap;
   flex-shrink: 0;
@@ -392,7 +392,7 @@ kbd {
   gap: 8px;
   padding: 7px 10px;
   border-radius: var(--radius-sm);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
   background: transparent;
@@ -425,7 +425,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   gap: 6px;
   flex-shrink: 0;
 }
-.speed-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+.speed-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
 
 .board-ctrl {
   display: flex;
@@ -468,8 +468,8 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .sim-status-dot.error  { background: var(--stop-color); }
 
 .sim-status-sep { color: var(--text-muted); }
-#sim-time { font-family: var(--font-mono); font-size: 11px; color: var(--accent); }
-#compile-status { font-size: 11px; transition: color var(--trans-fast); }
+#sim-time { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--accent); }
+#compile-status { font-size: 12px; font-weight: 600; transition: color var(--trans-fast); }
 #compile-status.ok    { color: var(--run-color); }
 #compile-status.error { color: var(--stop-color); }
 #compile-status.warn  { color: var(--warn-color); }
@@ -625,6 +625,11 @@ body.view-serial #resizer-bottom { display: none; }
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   background: var(--bg-panel-alt);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .panel-title {
@@ -717,10 +722,10 @@ body.file-explorer-collapsed .file-explorer-expand {
   align-items: center;
   padding: 6px 10px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted, #667);
+  letter-spacing: 0.6px;
+  color: var(--text-secondary, #8b949e);
   border-bottom: 1px solid var(--border-color, #2a2a4a);
   background: var(--bg-panel, #1a1a2e);
   flex-shrink: 0;
@@ -1208,11 +1213,11 @@ body.file-explorer-collapsed .file-explorer-expand {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   margin-bottom: 4px;
   cursor: pointer;
   padding: 2px 4px;
@@ -1283,7 +1288,7 @@ body.file-explorer-collapsed .file-explorer-expand {
 .comp-info { flex: 1; min-width: 0; }
 .comp-name {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -1405,8 +1410,8 @@ body.file-explorer-collapsed .file-explorer-expand {
   gap: 6px;
   padding: 4px 12px;
   border-radius: var(--radius-sm);
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text-secondary);
   transition: all var(--trans-fast);
 }
