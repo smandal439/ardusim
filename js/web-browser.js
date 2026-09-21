@@ -80,7 +80,7 @@ class WebBrowser {
         if (!link) return;
 
         var href = link.getAttribute('href');
-        if (!href || href.startsWith('http') || href.startsWith('#') || href === '/') return;
+        if (!href || href.startsWith('http') || href.startsWith('#')) return;
 
         e.preventDefault();
         e.stopPropagation();

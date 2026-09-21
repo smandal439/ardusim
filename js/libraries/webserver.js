@@ -27,9 +27,11 @@ window.ArduinoLibs['WebServer'] = {
     return {
       serverBegin: function(server) {
         self._serialLog('[WebServer] Server started on port ' + (server && server.port ? server.port : 80) + '\n', 'system');
+        var cfg = self._web;
+        if (cfg) cfg._started = true;
       },
       serverOn: function(server, path, m3, m4) {
-        var cfg = (self._web = self._web || { port: 80, routes: [] });
+        var cfg = (self._web = self._web || { port: 80, routes: [], _pendingRequests: [] });
         var handler = typeof m3 === 'function' ? m3 : m4;
         var method = typeof m3 === 'function' ? 'GET' : String(m3 || 'GET').replace('HTTP_', '');
         if (typeof handler === 'function') {
@@ -38,9 +40,7 @@ window.ArduinoLibs['WebServer'] = {
         } else {
           self._serialLog('[WebServer] on("' + path + '"): handler is not a function - route ignored\n', 'system');
         }
-        // Set up browser navigation trigger (executes handler immediately)
         if (!cfg._triggerRoute) {
-          cfg._pendingRequests = [];
           cfg._triggerRoute = function(targetPath) {
             var cleanPath = targetPath;
             var params = {};
@@ -93,8 +93,9 @@ window.ArduinoLibs['WebServer'] = {
       serverHandleClient: function(server) {
         var cfg = self._web;
         if (!cfg || !cfg.routes.length) return;
-        // Process pending requests queued by the WebBrowser fetch interceptor
-        while (cfg._pendingRequests && cfg._pendingRequests.length > 0) {
+        if (!cfg._pendingRequests) cfg._pendingRequests = [];
+        var now = Date.now();
+        if (cfg._pendingRequests.length > 0) {
           var req = cfg._pendingRequests.shift();
           self._webResp = null;
           cfg._routeParams = req.params;
@@ -109,6 +110,23 @@ window.ArduinoLibs['WebServer'] = {
             })
             .catch(function(e) {
               if (self._serialLog) self._serialLog('[WebServer] ' + req.route.method + ' ' + req.route.path + ' handler error: ' + (e && e.message ? e.message : e) + '\n', 'system');
+            });
+        } else if (!cfg._servedInitial && cfg._started) {
+          cfg._servedInitial = true;
+          cfg._routeParams = {};
+          self._webResp = null;
+          var rootRoute = cfg.routes[0];
+          Promise.resolve()
+            .then(function() { return rootRoute.handler(); })
+            .then(function() {
+              var resp = self._webResp || { code: 200, type: 'text/html', content: '' };
+              if (self._serialLog) self._serialLog('[WebServer] Initial page served: ' + resp.code + '\n', 'system');
+              if (resp.type.indexOf('html') !== -1 && resp.content && self._emitWebPage) {
+                self._emitWebPage({ code: resp.code, type: resp.type, content: resp.content, url: rootRoute.path, method: rootRoute.method });
+              }
+            })
+            .catch(function(e) {
+              if (self._serialLog) self._serialLog('[WebServer] Initial page error: ' + (e && e.message ? e.message : e) + '\n', 'system');
             });
         }
       },
