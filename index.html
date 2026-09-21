@@ -887,7 +887,13 @@
                     <select class="serial-select" id="memory-view-select">
                         <option value="ram">RAM (0x00-0xFF)</option>
                         <option value="sfr">SFR Registers</option>
+                        <option value="xram">External Memory (XRAM)</option>
                     </select>
+                    <span class="memory-label" id="memory-xram-addr-label" style="display:none">Go to:</span>
+                    <input type="text" class="webbrowser-url" id="memory-xram-addr" style="display:none;width:80px" placeholder="0000" maxlength="4" />
+                    <button class="serial-btn" id="btn-memory-xram-go" style="display:none" title="Go to address">Go</button>
+                    <button class="serial-btn" id="btn-memory-xram-prev" style="display:none" title="Previous page">&lt;</button>
+                    <button class="serial-btn" id="btn-memory-xram-next" style="display:none" title="Next page">&gt;</button>
                     <span class="la-status" id="memory-status">Ready</span>
                 </div>
                 <div class="memory-viewer" id="memory-viewer"></div>

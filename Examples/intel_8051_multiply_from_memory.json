@@ -1,0 +1,31 @@
+{
+  "id": "intel_8051_multiply_from_memory",
+  "name": "intel 8051 multiply from memory",
+  "icon": "🔧",
+  "desc": "A simple example of multiplying two numbers stored in memory using the Intel 8051 microcontroller. The program multiplies two numbers located at memory addresses 8600H and 8601H, and stores the result in memory addresses 8700H (higher byte) and 8701H (lower byte).",
+  "tags": [
+    "custom",
+    "circuit",
+    "8051",
+    "assembly",
+    "multiply"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789999351040_ntd1u",
+        "type": "intel_8051",
+        "x": 160,
+        "y": 125,
+        "rotation": 0,
+        "props": {
+          "label": "8051"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": "MOV DPTR, #8600H    ; Point DPTR to first input address\nMOVX A, @DPTR       ; Move first number into Accumulator A\nMOV B, A            ; Move first number into Register B\n\nMOV DPTR, #8601H    ; Point DPTR to second input address\nMOVX A, @DPTR       ; Move second number into Accumulator A\n\nMUL AB              ; Multiply A and B (A x B -> B:A)\n\nMOV DPTR, #8701H    ; Point DPTR to lower byte result address\nMOVX @DPTR, A       ; Save lower byte (from A)\n\nMOV DPTR, #8700H    ; Point DPTR to higher byte result address\nMOV A, B            ; Move higher byte into A\nMOVX @DPTR, A       ; Save higher byte (from B)\n\nHERE: SJMP HERE     ; Stop program execution\n"
+  }
+}

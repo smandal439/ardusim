@@ -79,6 +79,7 @@ window.ArduinoLibs['Intel8085'] = {
         if (pn === 'PC') cpu.ports[2] = val;
       }); }
     return {
+      _pinMonitor: pinMonitor,
       _init8085: function (hex, bin) {
         if (!window.Intel8085Emulator) {
           self._serialLog('[8085] Emulator not loaded\n', 'error'); return false; }
@@ -98,7 +99,6 @@ window.ArduinoLibs['Intel8085'] = {
       },
       _step8085: function () {
         if (!cpu || cpu.halted) return false;
-        pinMonitor();
         for (var i = 0; i < 10; i++) {
           if (cpu.halted) break;
           cpu.step();

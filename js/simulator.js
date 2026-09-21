@@ -1734,6 +1734,7 @@ class ArduinoSimulator {
             await new Promise(resolve => { this._resumeResolve = resolve; });
           }
           let alive = false;
+          if (asmRt._pinMonitor) asmRt._pinMonitor();
           for (let i = 0; i < 5000; i++) {
             if (!stepFn()) break;
             alive = true;
@@ -1886,6 +1887,7 @@ class ArduinoSimulator {
               await new Promise(resolve => { self._resumeResolve = resolve; });
             }
             let alive = false;
+            if (asmRt._pinMonitor) asmRt._pinMonitor();
             for (let i = 0; i < 5000; i++) {
               if (!stepFn()) break;
               alive = true;

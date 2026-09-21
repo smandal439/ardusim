@@ -1906,6 +1906,21 @@ body.file-explorer-collapsed .file-explorer-expand {
 .mem-byte.zero { color: var(--text-muted); opacity: 0.4; }
 .mem-byte.pc-hl { background: rgba(0,229,255,0.12); }
 .mem-byte.changed { color: #ffee00; font-weight: 700; }
+.mem-byte.xram-editable { cursor: pointer; }
+.mem-byte.xram-editable:hover { background: rgba(0,229,255,0.08); outline: 1px solid rgba(0,229,255,0.3); }
+.mem-edit-input {
+  width: 18px;
+  height: 14px;
+  background: #1a1a2e;
+  color: #00e5ff;
+  border: 1px solid #00e5ff;
+  border-radius: 2px;
+  font-size: 9px;
+  font-family: Consolas, 'Courier New', monospace;
+  text-align: center;
+  padding: 0;
+  outline: none;
+}
 .mem-sfr-label {
   color: #ff9800;
   font-size: 8px;

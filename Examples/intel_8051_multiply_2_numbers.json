@@ -1,0 +1,28 @@
+{
+  "id": "intel_8051_multiply_2_numbers",
+  "name": "intel 8051 multiply 2 numbers",
+  "icon": "🔧",
+  "desc": "A simple example of multiplying two numbers using the Intel 8051 microcontroller. The program multiplies two immediate hexadecimal numbers (25H and 04H) and stores the result in registers A and B.",
+  "tags": [
+    "custom",
+    "circuit","8051","assembly","multiply"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1789999031841_jh1h9",
+        "type": "intel_8051",
+        "x": 140,
+        "y": 215,
+        "rotation": 0,
+        "props": {
+          "label": "8051"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": "MOV A, #25H      ; Load immediate hexadecimal number 25H into Accumulator A\nMOV B, #04H      ; Load immediate hexadecimal number 04H into Register B\n\nMUL AB           ; Multiply A and B (25H * 04H = 0094H)\n                 ; Lower byte (94H) is stored in A\n                 ; Higher byte (00H) is stored in B\n\nMOV R0, A        ; Optional: Move lower byte result to Register 0\nMOV R1, B        ; Optional: Move higher byte result to Register 1\n\nHERE: SJMP HERE  ; End of program loop\n"
+  }
+}

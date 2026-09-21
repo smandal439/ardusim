@@ -82,6 +82,7 @@ window.ArduinoLibs['Intel8051'] = {
         if (pn === 'P3') cpu.P3 = (cpu.P3 & 0xF0) | (val & 0x0F);
       }); }
     return {
+      _pinMonitor: pinMonitor,
       _init8051: function (hex, bin) {
         cpu = new window.Intel8051Emulator();
         cpu._portWriteCb = syncPort;
@@ -96,7 +97,6 @@ window.ArduinoLibs['Intel8051'] = {
       },
       _step8051: function () {
         if (!cpu || cpu.halted) return false;
-        pinMonitor();
         for (var i = 0; i < 10; i++) {
           if (cpu.halted) break;
           cpu.step();
@@ -148,6 +148,16 @@ window.ArduinoLibs['Intel8051'] = {
         var out = [];
         for (var i = 0; i < (len || 128); i++) out.push(cpu.ram[(addr + i) & 0x7F]);
         return out;
+      },
+      _8051_getXramPage: function (addr, len) {
+        if (!cpu) return null;
+        var out = [];
+        for (var i = 0; i < (len || 256); i++) out.push(cpu.xram[(addr + i) & 0xFFFF]);
+        return out;
+      },
+      _8051_setXramByte: function (addr, val) {
+        if (!cpu) return;
+        cpu.xram[addr & 0xFFFF] = val & 0xFF;
       }
     };
   }

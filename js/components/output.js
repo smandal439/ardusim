@@ -223,10 +223,46 @@ class LEDComponent extends Component {
   }
 
   update(canvas) {
-    // Use new ElectricalEngine API
     const source = this.getSource('anode');
-    const hasGnd = this.hasGround('cathode');
-    console.log('[PWM-DBG] LED update:', this.id, 'source=', source, 'hasGnd=', hasGnd, 'pinStates_D16=', window.ArduinoSim?.pinStates?.pin_16);
+    let hasGnd = this.hasGround('cathode');
+    let gndFromPin = null;
+
+    if (!hasGnd && source && source.voltage > 0) {
+      const engine = this.engine;
+      if (engine && engine.wires) {
+        for (const wire of engine.wires) {
+          let otherInst = null, otherPin = null;
+          if (wire.from.instId === this.id && wire.from.pinId === 'cathode') {
+            otherInst = wire.to.instId; otherPin = wire.to.pinId;
+          } else if (wire.to.instId === this.id && wire.to.pinId === 'cathode') {
+            otherInst = wire.from.instId; otherPin = wire.from.pinId;
+          }
+          if (otherInst && otherPin) {
+            const ps = window.ArduinoSim && window.ArduinoSim.pinStates;
+            if (ps) {
+              const defs = window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS;
+              const comp = engine.components && engine.components.find(c => c.id === otherInst);
+              if (comp && defs && defs[comp.type]) {
+                const def = defs[comp.type];
+                const pinDef = def.pins && def.pins.find(p => p.id === otherPin);
+                if (pinDef) {
+                  const pinNum = window.CircuitCanvas && window.CircuitCanvas._getConnectedPinNum
+                    ? window.CircuitCanvas._getConnectedPinNum(otherInst, otherPin) : null;
+                  if (pinNum !== null && pinNum !== undefined) {
+                    const pv = ps['pin_' + pinNum];
+                    if (pv !== undefined && pv === 0) {
+                      hasGnd = true;
+                      gndFromPin = { instId: otherInst, pinId: otherPin };
+                    }
+                  }
+                }
+              }
+            }
+          }
+          if (hasGnd) break;
+        }
+      }
+    }
 
     if (!hasGnd || !source || source.voltage <= 0) {
       this.runtimeState.val = 0;
@@ -251,11 +287,15 @@ class LEDComponent extends Component {
         }
         // Find a ground pin reachable from the cathode
         let gndInstId = null, gndPinId = null;
+        if (gndFromPin && gndFromPin.instId) {
+          gndInstId = gndFromPin.instId;
+          gndPinId = gndFromPin.pinId;
+        }
         const cathodeNet = this.getNet('cathode');
-        if (cathodeNet && cathodeNet.grounds.length > 0) {
+        if (!gndInstId && cathodeNet && cathodeNet.grounds.length > 0) {
           gndInstId = cathodeNet.grounds[0].instId;
           gndPinId = cathodeNet.grounds[0].pinId;
-        } else if (engine.components) {
+        } else if (!gndInstId && engine.components) {
           // Ground is not on cathode net — search all components for ground pins
           for (const comp of engine.components) {
             const t = comp.type;

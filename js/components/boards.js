@@ -2154,6 +2154,22 @@ defComp({
       ctx.textAlign = pin.side === 'left' ? 'right' : 'left';
       ctx.fillText(pin.label, bx + (pin.side === 'left' ? pw - 3 : 3), pin.y + 2);
     }
+    // On-board LEDs — one per pin, beside each pin label
+    var ps = (sim && sim.pinStates) || {};
+    var ledHue = ['#ff3333','#ff6633','#ff9933','#ffcc33','#ffff33','#ccff33','#66ff33','#33ff33'];
+    var pinsList2 = this.pins;
+    for (var li = 0; li < pinsList2.length; li++) {
+      var lp = pinsList2[li];
+      if (lp.type !== PIN_TYPE.DIGITAL) continue;
+      var portNum, bitNum;
+      if (lp.id.startsWith('PA.')) { portNum = 0; bitNum = parseInt(lp.id.slice(3)); }
+      else if (lp.id.startsWith('PB.')) { portNum = 1; bitNum = parseInt(lp.id.slice(3)); }
+      else if (lp.id.startsWith('PC.')) { portNum = 2; bitNum = parseInt(lp.id.slice(3)); }
+      else continue;
+      var pinVal = (ps['pin_' + (200 + portNum * 10 + bitNum)] || 0) > 0;
+      var lx = lp.side === 'left' ? 48 : 322;
+      drawLED_on_board(ctx, lx, lp.y, pinVal ? ledHue[bitNum] : '#222', 3);
+    }
     ctx.fillStyle = 'rgba(255,255,255,0.2)';
     ctx.font = 'bold 8px monospace';
     ctx.textAlign = 'center';
@@ -2311,6 +2327,23 @@ defComp({
       ctx.fillStyle = '#e6edf3';
       ctx.textAlign = pin.side === 'left' ? 'right' : 'left';
       ctx.fillText(pin.label, bx + (pin.side === 'left' ? pw - 3 : 3), pin.y + 2);
+    }
+    // On-board LEDs — one per pin, beside each pin label
+    var ps = (sim && sim.pinStates) || {};
+    var ledHue2 = ['#ff3333','#ff6633','#ff9933','#ffcc33','#ffff33','#ccff33','#66ff33','#33ff33'];
+    var pinsList2 = this.pins;
+    for (var li = 0; li < pinsList2.length; li++) {
+      var lp = pinsList2[li];
+      if (lp.type !== PIN_TYPE.DIGITAL) continue;
+      var portNum, bitNum;
+      if (lp.id.startsWith('P0.')) { portNum = 0; bitNum = parseInt(lp.id.slice(3)); }
+      else if (lp.id.startsWith('P1.')) { portNum = 1; bitNum = parseInt(lp.id.slice(3)); }
+      else if (lp.id.startsWith('P2.')) { portNum = 2; bitNum = parseInt(lp.id.slice(3)); }
+      else if (lp.id.startsWith('P3.')) { portNum = 3; bitNum = parseInt(lp.id.slice(3)); }
+      else continue;
+      var pinVal = (ps['pin_' + (200 + portNum * 10 + bitNum)] || 0) > 0;
+      var lx = lp.side === 'left' ? 48 : 322;
+      drawLED_on_board(ctx, lx, lp.y, pinVal ? ledHue2[bitNum] : '#222', 3);
     }
     ctx.fillStyle = 'rgba(255,255,255,0.2)';
     ctx.font = 'bold 8px monospace';
