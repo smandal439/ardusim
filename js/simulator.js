@@ -1064,6 +1064,7 @@ class ArduinoSimulator {
           const maxDuty = (cfg && cfg.maxDuty) || 255;
           const v = Math.max(0, Math.min(255, Math.round((Number(duty) || 0) / maxDuty * 255)));
           self.pinStates[`pin_${pin}`] = v;
+          console.log('[PWM-DBG] ledcWrite pin=' + pin + ' duty=' + duty + ' v=' + v + ' channels=' + JSON.stringify(Object.keys(self._ledcChannels)));
           self._emitPinChange(`pin_${pin}`, v);
         },
         ledcRead(channelOrPin) {
@@ -1739,8 +1740,7 @@ class ArduinoSimulator {
           }
           this._loopCount++;
           this.simTime += 1;
-          if (!alive) break;
-          await new Promise(r => setTimeout(r, 0));
+          await new Promise(r => setTimeout(r, alive ? 0 : 100));
         }
       } catch (err) {
         if (err && err.message !== 'SIMULATION_STOPPED') {
@@ -1892,8 +1892,7 @@ class ArduinoSimulator {
             }
             self._loopCount++;
             self.simTime += 1;
-            if (!alive) break;
-            await new Promise(r => setTimeout(r, 0));
+            await new Promise(r => setTimeout(r, alive ? 0 : 100));
           }
         } catch (err) {
           if (err && err.message !== 'SIMULATION_STOPPED') {

@@ -226,6 +226,7 @@ class LEDComponent extends Component {
     // Use new ElectricalEngine API
     const source = this.getSource('anode');
     const hasGnd = this.hasGround('cathode');
+    console.log('[PWM-DBG] LED update:', this.id, 'source=', source, 'hasGnd=', hasGnd, 'pinStates_D16=', window.ArduinoSim?.pinStates?.pin_16);
 
     if (!hasGnd || !source || source.voltage <= 0) {
       this.runtimeState.val = 0;
@@ -258,7 +259,7 @@ class LEDComponent extends Component {
           // Ground is not on cathode net — search all components for ground pins
           for (const comp of engine.components) {
             const t = comp.type;
-            if (t === 'arduino_uno' || t === 'arduino_nano' || t === 'esp32_devkit_v1' || t === 'stm32f746_disco' || t === 'lpc2148') {
+            if (t === 'arduino_uno' || t === 'arduino_nano' || t === 'esp32_devkit_v1' || t === 'stm32f746_disco' || t === 'lpc2148' || t === 'intel_8085' || t === 'intel_8051') {
               for (const pid of ['GND1', 'GND2', 'GND_D', 'GND']) {
                 if (engine.measureResistance(this.id, 'cathode', comp.id, pid) < Infinity) {
                   gndInstId = comp.id; gndPinId = pid; break;

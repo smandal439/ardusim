@@ -76,9 +76,13 @@ window.ArduinoLibs['WebServer'] = {
                 var route = cfg.routes[i];
                 self._webResp = null;
                 Promise.resolve()
-                  .then(function() { return route.handler(); })
+                  .then(function() {
+                    console.log('[PWM-DBG] handler start:', route.path, JSON.stringify(params));
+                    return route.handler();
+                  })
                   .then(function() {
                     var resp = self._webResp || { code: 200, type: 'text/plain', content: '' };
+                    console.log('[PWM-DBG] handler done:', route.path, 'resp=', resp.type, 'pin_16=', self.pinStates?.pin_16);
                     self._serialLog('[WebServer] ' + route.method + ' ' + route.path + ' -> ' + resp.code + '\n', 'system');
                     if (resp.type.indexOf('html') !== -1 && resp.content && self._emitWebPage) {
                       self._emitWebPage({ code: resp.code, type: resp.type, content: resp.content, url: route.path, method: route.method });
