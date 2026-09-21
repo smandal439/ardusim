@@ -28,7 +28,10 @@ window.ArduinoLibs['Intel8051'] = {
   runtime: function (self) {
     var cpu = null;
     var serialBuf = '';
+    var lastSync = [-1, -1, -1, -1];
     function syncPort(port, val) {
+      if (val === lastSync[port]) return;
+      lastSync[port] = val;
       var b = window.CircuitCanvas.getBoardInst();
       if (!b) return;
       var defs = window.ArduinoComponents.COMPONENT_DEFS;
