@@ -223,45 +223,39 @@ class LEDComponent extends Component {
   }
 
   update(canvas) {
-    const source = this.getSource('anode');
-    let hasGnd = this.hasGround('cathode');
+    let source, hasGnd;
+    try {
+      source = this.getSource('anode');
+      hasGnd = this.hasGround('cathode');
+    } catch(e) { return; }
     let gndFromPin = null;
 
     if (!hasGnd && source && source.voltage > 0) {
-      const engine = this.engine;
-      if (engine && engine.wires) {
-        for (const wire of engine.wires) {
-          let otherInst = null, otherPin = null;
-          if (wire.from.instId === this.id && wire.from.pinId === 'cathode') {
-            otherInst = wire.to.instId; otherPin = wire.to.pinId;
-          } else if (wire.to.instId === this.id && wire.to.pinId === 'cathode') {
-            otherInst = wire.from.instId; otherPin = wire.from.pinId;
-          }
-          if (otherInst && otherPin) {
-            const ps = window.ArduinoSim && window.ArduinoSim.pinStates;
-            if (ps) {
-              const defs = window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS;
-              const comp = engine.components && engine.components.find(c => c.id === otherInst);
-              if (comp && defs && defs[comp.type]) {
-                const def = defs[comp.type];
-                const pinDef = def.pins && def.pins.find(p => p.id === otherPin);
-                if (pinDef) {
-                  const pinNum = window.CircuitCanvas && window.CircuitCanvas._getConnectedPinNum
-                    ? window.CircuitCanvas._getConnectedPinNum(otherInst, otherPin) : null;
-                  if (pinNum !== null && pinNum !== undefined) {
-                    const pv = ps['pin_' + pinNum];
-                    if (pv !== undefined && pv === 0) {
-                      hasGnd = true;
-                      gndFromPin = { instId: otherInst, pinId: otherPin };
-                    }
-                  }
+      try {
+        const engine = this.engine;
+        if (engine && engine.wires) {
+          for (const wire of engine.wires) {
+            if (!wire || !wire.from || !wire.to) continue;
+            let otherInst = null, otherPin = null;
+            if (wire.from.instId === this.id && wire.from.pinId === 'cathode') {
+              otherInst = wire.to.instId; otherPin = wire.to.pinId;
+            } else if (wire.to.instId === this.id && wire.to.pinId === 'cathode') {
+              otherInst = wire.from.instId; otherPin = wire.from.pinId;
+            }
+            if (otherInst && otherPin && window.CircuitCanvas && window.CircuitCanvas._getConnectedPinNum) {
+              const pinNum = window.CircuitCanvas._getConnectedPinNum(otherInst, otherPin);
+              if (pinNum !== null && pinNum !== undefined) {
+                const ps = window.ArduinoSim && window.ArduinoSim.pinStates;
+                if (ps && ps['pin_' + pinNum] === 0) {
+                  hasGnd = true;
+                  gndFromPin = { instId: otherInst, pinId: otherPin };
                 }
               }
             }
+            if (hasGnd) break;
           }
-          if (hasGnd) break;
         }
-      }
+      } catch(e) {}
     }
 
     if (!hasGnd || !source || source.voltage <= 0) {

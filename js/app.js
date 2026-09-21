@@ -922,7 +922,13 @@ void loop() {
       if (board === 'intel_8085' || board === 'intel_8051') {
         this._buildRegisterViewer();
         this._buildMemoryViewer();
-        if (board === 'intel_8051') this._applyXramData();
+        if (board === 'intel_8051') {
+          this._applyXramData();
+          if (this._memoryView === 'xram') {
+            this._memoryPrev = {};
+            this._rebuildXramGrid();
+          }
+        }
       }
       // Start remote control bridge
       if (this.remote && this.sim.sessionId) {
@@ -2328,17 +2334,22 @@ _newProject() {
     }
     viewer.innerHTML = html;
     this._memoryPrev = {};
-    this._memoryView = 'ram';
-    this._xramPageAddr = 0;
     if (!this._xramUserdata) this._xramUserdata = {};
+    if (this._memoryView === undefined) this._memoryView = 'ram';
+    if (this._xramPageAddr === undefined) this._xramPageAddr = 0;
     const sel = document.getElementById('memory-view-select');
-    if (sel) sel.addEventListener('change', (e) => {
-      this._memoryView = e.target.value;
-      this._memoryPrev = {};
-      this._xramPageAddr = 0;
-      this._updateXramControls();
-      this._rebuildXramGrid();
-    });
+    if (sel && !sel._xramBound) {
+      sel._xramBound = true;
+      sel.value = this._memoryView;
+      sel.addEventListener('change', (e) => {
+        this._memoryView = e.target.value;
+        this._memoryPrev = {};
+        if (this._memoryView === 'xram') {
+          this._updateXramControls();
+          this._rebuildXramGrid();
+        }
+      });
+    }
     this._setupXramControls();
   }
 
@@ -2412,7 +2423,8 @@ _newProject() {
 
   _attachXramEditHandlers() {
     const viewer = document.getElementById('memory-viewer');
-    if (!viewer) return;
+    if (!viewer || viewer._xramEditBound) return;
+    viewer._xramEditBound = true;
     viewer.addEventListener('dblclick', (e) => {
       const cell = e.target.closest('.mem-byte.xram-editable');
       if (!cell) return;
@@ -2428,7 +2440,10 @@ _newProject() {
       cell.appendChild(input);
       input.focus();
       input.select();
+      let committed = false;
       const commit = () => {
+        if (committed) return;
+        committed = true;
         let hex = input.value.trim();
         if (hex !== '') {
           let num = parseInt(hex, 16);
@@ -2445,7 +2460,7 @@ _newProject() {
         }
         input.remove();
       };
-      input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') commit(); if (ev.key === 'Escape') { cell.textContent = curVal; input.remove(); } });
+      input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') commit(); if (ev.key === 'Escape') { committed = true; cell.textContent = curVal; input.remove(); } });
       input.addEventListener('blur', commit);
     });
   }
@@ -2464,12 +2479,13 @@ _newProject() {
     const is8085 = board === 'intel_8085';
     const is8051 = board === 'intel_8051';
     if (!is8085 && !is8051) return;
-    // Auto-build if DOM not ready
-    if (!document.querySelector('.mem-byte[data-addr="0"]')) {
+    const viewer = document.getElementById('memory-viewer');
+    if (!viewer) return;
+    if (!viewer.querySelector('.mem-byte')) {
       this._buildMemoryViewer();
     }
     if (this._memoryView === 'xram' && is8051) {
-      this._applyXramData();
+      if (this.sim && this.sim.isRunning) this._applyXramData();
       const base = this._xramPageAddr || 0;
       let bytes = null;
       if (this.sim && this.sim.isRunning && this.sim._asmRuntime?._8051_getXramPage) {
@@ -2483,7 +2499,7 @@ _newProject() {
       if (!bytes) return;
       for (let i = 0; i < bytes.length; i++) {
         const absAddr = base + i;
-        const el = document.querySelector(`.mem-byte[data-addr="${absAddr}"]`);
+        const el = viewer.querySelector(`.mem-byte[data-addr="${absAddr}"]`);
         if (!el) continue;
         if (el.querySelector('input')) continue;
         const hex = bytes[i].toString(16).toUpperCase().padStart(2, '0');

@@ -8,7 +8,7 @@ window.ArduinoLibs = window.ArduinoLibs || {};
 window.ArduinoLibs['LiquidCrystal'] = {
   classes: ['LiquidCrystal'],
   includes: ['<LiquidCrystal.h>'],
-  priority: 100,
+  priority: 98,
 
   transpile: [
     [/(\w+)\.begin\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)/g, function(m, v, a, b) { if (/^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|SoftwareSerial|Serial2|Serial1|dht)$/i.test(v)) return m; return '_a.lcdBegin(' + v + ', ' + a + ', ' + b + ')'; }],

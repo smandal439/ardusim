@@ -17,6 +17,7 @@ window.ArduinoLibs = window.ArduinoLibs || {};
 window.ArduinoLibs['ArduinoJson'] = {
   classes: ['StaticJsonDocument', 'DynamicJsonDocument', 'JsonDocument'],
   includes: ['<ArduinoJson.h>'],
+  priority: 100,
   transpile: [
     // deserializeJson(doc, input) → doc._deserialize(input)
     [/\bdeserializeJson\s*\(([^,]+),\s*([^)]+)\)/g, '$1._deserialize($2)'],
@@ -33,7 +34,7 @@ window.ArduinoLibs['ArduinoJson'] = {
     // doc.size() → doc._size()
     [/\.size\s*\(\s*\)/g, '._size()'],
     // doc.clear() → doc._clear()  (skip LCD/display objects — they have their own clear)
-    [/(\w+)\.clear\s*\(\s*\)/g, function(m, v) { if (/^(lcd|display|screen|tft|oled)$/i.test(v)) return m; return v + '._clear()'; }],
+    [/(\w+)\.clear\s*\(\s*\)/g, function(m, v) { if (/^(lcd|display|screen|tft|oled|lcd\d*|my\w*lcd|my\w*display|my\w*screen|my\w*tft|my\w*oled)$/i.test(v)) return m; return v + '._clear()'; }],
     // doc.shrinkToFit() → no-op
     [/\.shrinkToFit\s*\(\s*\)/g, '._noop()'],
     // doc.overflowed() → doc._overflowed()

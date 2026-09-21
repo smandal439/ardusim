@@ -1,0 +1,189 @@
+{
+  "id": "esp32_i2s_online_radio_player2",
+  "name": "ESP32 I2S Online Radio Player2",
+  "icon": "🔧",
+  "desc": "A custom ESP32 I2S Online Radio Player2 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "esp",
+        "type": "esp32_devkit_v1",
+        "x": 350,
+        "y": 50,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32"
+        }
+      },
+      {
+        "id": "amp",
+        "type": "max98357a",
+        "x": 600,
+        "y": 160,
+        "rotation": 0,
+        "props": {
+          "label": "MAX98357A",
+          "gain": "12dB",
+          "channel_mode": "stereo_mix"
+        }
+      },
+      {
+        "id": "spk",
+        "type": "speaker_4ohm",
+        "x": 750,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "SPEAKER",
+          "impedance": 4,
+          "power_rating": 3
+        }
+      },
+      {
+        "id": "wifi_hotspot_1",
+        "type": "wifi_module",
+        "x": 530,
+        "y": 30,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_WiFi",
+          "password": "ArduSim@123",
+          "channel": 6,
+          "ipAddress": "192.168.1.1",
+          "txPower": 20,
+          "security": "WPA2-PSK",
+          "hidden": false
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w_bclk",
+        "from": {
+          "instId": "esp",
+          "pinId": "D26"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "bclk"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_lrc",
+        "from": {
+          "instId": "esp",
+          "pinId": "D25"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "lrc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_din",
+        "from": {
+          "instId": "esp",
+          "pinId": "D22"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "din"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_5v",
+        "from": {
+          "instId": "esp",
+          "pinId": "VIN"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "vin"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_gnd",
+        "from": {
+          "instId": "esp",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_sd",
+        "from": {
+          "instId": "amp",
+          "pinId": "sd"
+        },
+        "to": {
+          "instId": "amp",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_out_p",
+        "from": {
+          "instId": "amp",
+          "pinId": "out_p"
+        },
+        "to": {
+          "instId": "spk",
+          "pinId": "pos"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_out_n",
+        "from": {
+          "instId": "amp",
+          "pinId": "out_n"
+        },
+        "to": {
+          "instId": "spk",
+          "pinId": "neg"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "#include \"WiFi.h\"\n#include \"Audio.h\"\n\n// Define I2S Pins\n#define I2S_BCLK 26\n#define I2S_LRC  25\n#define I2S_DOUT 22\n\nAudio audio;\n\n// Wi-Fi Credentials\nconst char* ssid     = \"ArduSim_WiFi\";\nconst char* password = \"ArduSim@123\";\n\n// Streaming URL (MP3 / AAC web radio stream)\nconst char* streamUrl = \"http://stream.zeno.fm/f3wvbb28g2zuv\";\n\nvoid setup() {\n    Serial.begin(115200);\n\n    // Connect to Wi-Fi\n    WiFi.disconnect();\n    WiFi.mode(WIFI_STA);\n    WiFi.begin(ssid, password);\n\n    Serial.print(\"Connecting to WiFi\");\n    while (WiFi.status() != WL_CONNECTED) {\n        delay(500);\n        Serial.print(\".\");\n    }\n    Serial.println(\"\\nConnected to WiFi!\");\n\n    // Initialize I2S Audio\n    audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);\n    audio.setVolume(12); // Volume level from 0 to 21\n\n    // Connect to the web radio stream\n    audio.connecttohost(streamUrl);\n}\n\nvoid loop() {\n    // Keep processing the audio stream buffer\n    audio.loop();\n}\n\n// Optional callback functions to print track metadata\nvoid audio_info(const char *info) {\n    Serial.print(\"info: \"); \n    Serial.println(info);\n}\n\nvoid audio_showstreamtitle(const char *title) {\n    Serial.print(\"Now Playing: \"); \n    Serial.println(title);\n}"
+  }
+}

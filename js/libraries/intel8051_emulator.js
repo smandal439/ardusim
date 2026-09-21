@@ -42,7 +42,7 @@ if(a===0x88){this.TCON=v;return;}if(a===0x89){this.TMOD=v;return;}
 if(a===0x8C){this.TH0=v;return;}if(a===0x8A){this.TL0=v;return;}
 if(a===0x8D){this.TH1=v;return;}if(a===0x8B){this.TL1=v;return;}
 if(a===0x98){this.SCON=v;return;}if(a===0x87){this.PCON=v;return;}
-if(a===0x99){if(this._serialLogCb)this._serialLogCb(String.fromCharCode(v));return;}
+if(a===0x99){if(this._serialLogCb)this._serialLogCb(String.fromCharCode(v));this.SCON|=0x02;return;}
 this.ram[a]=v;},
 _sync:function(p,v){
 var c=window.CircuitCanvas;if(!c)return;
