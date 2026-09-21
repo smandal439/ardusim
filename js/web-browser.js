@@ -96,10 +96,26 @@ class WebBrowser {
         var origFetch = win.fetch.bind(win);
         win.fetch = function(input, init) {
           var url = typeof input === 'string' ? input : (input && input.url) || '';
-          if (window.parent && window.parent.ArduinoSim && window.parent.ArduinoSim._emitWebNavigate) {
-            window.parent.ArduinoSim._emitWebNavigate(url);
+          var sim = window.parent && window.parent.ArduinoSim;
+          if (sim && sim._web && sim._web._triggerRoute) {
+            sim._web._triggerRoute(url);
           }
-          return Promise.resolve(new Response('OK', { status: 200, headers: { 'Content-Type': 'text/plain' } }));
+          // Wait for the handler to execute and produce a response
+          return new Promise(function(resolve) {
+            var checks = 0;
+            var poll = function() {
+              var resp = (sim && sim._webResp) || null;
+              if (resp || checks++ > 20) {
+                resolve(new Response((resp && resp.content) || 'OK', {
+                  status: (resp && resp.code) || 200,
+                  headers: { 'Content-Type': (resp && resp.type) || 'text/plain' }
+                }));
+              } else {
+                setTimeout(poll, 10);
+              }
+            };
+            poll();
+          });
         };
       }
     } catch (e) {
