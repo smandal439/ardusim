@@ -382,9 +382,11 @@ class ElectricalEngine {
       case 'esp32_devkit_v1':
       case 'stm32f746_disco':
       case 'lpc2148':
+      case 'pico2w':
       case 'intel_8085':
       case 'intel_8051': {
-        const maxV = (inst.type === 'esp32_devkit_v1' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148') ? 3.3 : 5.0;
+        const is3v3 = (inst.type === 'esp32_devkit_v1' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148' || inst.type === 'pico2w');
+        const maxV = is3v3 ? 3.3 : 5.0;
         const sim = window.ArduinoSim;
 
         // Iterate over all pins on this component that have nets
@@ -394,15 +396,15 @@ class ElectricalEngine {
 
           if (pinId === '5V' || pinId === 'VIN' || pinId === '5V2' || pinId === 'VCC' || pinId === 'VBUS') {
             addSource(pinId, '5v', 5.0, 255);
-          } else if (pinId === '3V3') {
+          } else if (pinId === '3V3' || pinId === '3V3OUT') {
             addSource(pinId, '3v3', 3.3, 168);
-          } else if (pinId === 'GND1' || pinId === 'GND2' || pinId === 'GND_D' || pinId === 'GND') {
+          } else if (pinId === 'GND1' || pinId === 'GND2' || pinId === 'GND3' || pinId === 'GND4' || pinId === 'GND5' || pinId === 'GND6' || pinId === 'GND7' || pinId === 'GND_D' || pinId === 'GND' || pinId === 'AGND') {
             addGround(pinId, 'gnd');
           } else {
             const pinNum = this._canvas?._pinToNumber?.(pinId);
             if (pinNum != null) {
               const pinMode = sim?.pinModes?.[`pin_${pinNum}`];
-              if (pinMode === 'INPUT' || pinMode === 'INPUT_PULLUP') {
+              if (pinMode === 'INPUT' || pinMode === 'INPUT_PULLUP' || pinMode === 'INPUT_PULLDOWN') {
                 // Input pins are passive readers — don't drive the electrical graph.
                 // Their solved voltages are fed back to pinStates in updateSimState.
               } else {
