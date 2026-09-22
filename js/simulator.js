@@ -2527,7 +2527,8 @@ window.loadExamplesFromFiles = async function () {
   } catch (e) { /* static hosting uses the bundled fallback list */ }
 
   const files = [
-    '7408_test_with_logic_analyzer', '8085_assignment_1', '8085_assignment_10', '8085_assignment_2', '8085_assignment_3', '8085_assignment_4',
+    '7408_test_with_logic_analyzer', '8051_assignment_1', '8051_assignment_2', '8051_assignment_3', '8051_assignment_4', '8085_assignment_1',
+    '8085_assignment_10', '8085_assignment_11', '8085_assignment_12', '8085_assignment_2', '8085_assignment_3', '8085_assignment_4',
     '8085_assignment_5', '8085_assignment_6', '8085_assignment_7', '8085_assignment_8', '8085_assignment_9', 'add_2_number',
     'and_gate', 'astable_555', 'bh1750_light_sensor', 'blink', 'bluetooth_serial_bridge', 'button',
     'buzzer_melody', 'coap_client', 'coap_dip_switch_to_8_led', 'coap_simple_server', 'continuous_rotation_servo_control_by_pot', 'counter',
