@@ -1041,7 +1041,6 @@ class ArduinoSimulator {
         ledcAttach(pin, freq, resolution) {
           // Modern (v3+) ESP32 core API: ledcAttach(pin, freq, resolution)
           const res = Number(resolution) || 8;
-          console.log('[PWM-DBG] ledcAttach pin=' + pin + ' freq=' + freq + ' res=' + res);
           self._ledcChannels[Number(pin)] = {
             pin: Number(pin),
             freq: Number(freq) || 5000,
@@ -1065,7 +1064,6 @@ class ArduinoSimulator {
           const maxDuty = (cfg && cfg.maxDuty) || 255;
           const v = Math.max(0, Math.min(255, Math.round((Number(duty) || 0) / maxDuty * 255)));
           self.pinStates[`pin_${pin}`] = v;
-          console.log('[PWM-DBG] ledcWrite pin=' + pin + ' duty=' + duty + ' v=' + v + ' channels=' + JSON.stringify(Object.keys(self._ledcChannels)));
           self._emitPinChange(`pin_${pin}`, v);
         },
         ledcRead(channelOrPin) {

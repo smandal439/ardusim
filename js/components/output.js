@@ -337,7 +337,7 @@ class LEDComponent extends Component {
       const vSource = source.voltage;
       const vf = 2.0;
       const rawVal = source.rawVal;
-      const isPWM = source.type === 'digital' && rawVal > 1 && rawVal < 255;
+      const isPWM = source.type === 'digital' && rawVal > 1 && rawVal <= 255;
 
       if (isPWM) {
         const frac = rawVal / 255;

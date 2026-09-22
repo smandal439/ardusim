@@ -752,7 +752,9 @@ DL2:    DJNZ R3, DL2
 
   _getDefaultSketchName() {
     const board = window.App?.canvas?.getBoardInst?.()?.type || window.App?.sim?.board || 'arduino_uno';
-    return (board === 'intel_8085' || board === 'intel_8051') ? 'sketch.asm' : 'sketch.ino';
+    if (board === 'intel_8085' || board === 'intel_8051') return 'sketch.asm';
+    if (board === 'stm32f746_disco' || board === 'lpc2148') return 'sketch.c';
+    return 'sketch.ino';
   },
 
   _getFileExt(name) {

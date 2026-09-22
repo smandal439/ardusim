@@ -60,7 +60,6 @@ window.ArduinoLibs['WebServer'] = {
         }
         if (!cfg._triggerRoute) {
           cfg._triggerRoute = function(targetPath) {
-            console.log('[PWM-DBG] _triggerRoute called:', targetPath, 'routes=', cfg.routes.length);
             var cleanPath = targetPath;
             var params = {};
             var qIdx = targetPath.indexOf('?');
@@ -78,16 +77,14 @@ window.ArduinoLibs['WebServer'] = {
                 self._webResp = null;
                 Promise.resolve()
                   .then(function() {
-                    console.log('[PWM-DBG] handler start:', route.path, JSON.stringify(params));
                     return route.handler();
                   })
                   .then(function() {
                     var resp = self._webResp || { code: 200, type: 'text/plain', content: '' };
-                    console.log('[PWM-DBG] handler done:', route.path, 'resp=', resp.type, 'pin_16=', self.pinStates?.pin_16);
                     self._serialLog('[WebServer] ' + route.method + ' ' + route.path + ' -> ' + resp.code + '\n', 'system');
                     if (resp.type.indexOf('html') !== -1 && resp.content && self._emitWebPage) {
                       self._emitWebPage({ code: resp.code, type: resp.type, content: resp.content, url: route.path, method: route.method });
-                    } else if (cleanPath !== '/') {
+                    } else if (cleanPath !== '/' && !self._webResp) {
                       _serveRootPage(cfg);
                     }
                   })
@@ -106,9 +103,10 @@ window.ArduinoLibs['WebServer'] = {
       },
       serverArg: function(server, name) {
         var cfg = self._web;
-        var val = (cfg && cfg._routeParams && cfg._routeParams[name] !== undefined) ? cfg._routeParams[name] : '';
-        console.log('[PWM-DBG] serverArg(' + name + ') =', JSON.stringify(val), 'routeParams=', JSON.stringify(cfg && cfg._routeParams));
-        return val;
+        if (cfg && cfg._routeParams && cfg._routeParams[name] !== undefined) {
+          return cfg._routeParams[name];
+        }
+        return '';
       },
       serverHasArg: function(server, name) {
         var cfg = self._web;
@@ -129,7 +127,7 @@ window.ArduinoLibs['WebServer'] = {
               if (self._serialLog) self._serialLog('[WebServer] ' + req.route.method + ' ' + req.route.path + ' -> ' + resp.code + ' (' + resp.type + ')\n', 'system');
               if (resp.type.indexOf('html') !== -1 && resp.content && self._emitWebPage) {
                 self._emitWebPage({ code: resp.code, type: resp.type, content: resp.content, url: req.route.path, method: req.route.method });
-              } else if (req.route.path !== '/') {
+              } else if (req.route.path !== '/' && !self._webResp) {
                 _serveRootPage(cfg);
               }
             })

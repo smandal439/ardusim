@@ -539,7 +539,9 @@ class App {
 
   _getDefaultSketchName() {
     const board = this._getActiveBoardType();
-    return (board === 'intel_8085' || board === 'intel_8051') ? 'sketch.asm' : 'sketch.ino';
+    if (board === 'intel_8085' || board === 'intel_8051') return 'sketch.asm';
+    if (board === 'stm32f746_disco' || board === 'lpc2148') return 'sketch.c';
+    return 'sketch.ino';
   }
 
   // Sync sim.board (and the board selector UI) with the board actually placed
