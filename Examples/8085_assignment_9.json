@@ -1,0 +1,28 @@
+{
+  "id": "8085_assignment_9",
+  "name": "8085 assignment 9",
+  "icon": "🔧",
+  "desc": "A custom 8085 assignment 9 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790006818923_yi4u2",
+        "type": "intel_8085",
+        "x": 185,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "label": "8085"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": ";Write a program to generate first 10 numbers of the FIBONACCI Series.\r\n\r\n;This program generates the FIBONACCI series. \r\n;The series is. 0 1 1 2 3 5 8 13 21 34.\r\n;the first  two numbers of the series 0and 1.\r\n; The third number is computed as 0 + 1 = 1.\r\n;fourth number is 1 + 1 =2.fifth number is 1+2=3 and so on .\r\n\r\n\r\nORG 9000H       ; Program starting address\r\n\r\nMVI D, 08H      ; Initialize loop counter to 8 (since 2 numbers are already stored)\r\nMVI B, 00H      ; First Fibonacci number (Previous)\r\nMVI C, 01H      ; Second Fibonacci number (Current)\r\nLXI H, 0800H    ; Initialize HL pair as a memory pointer to 0800H\r\n\r\nMOV M, B        ; Store 1st number (00H) at 0800H\r\nINX H           ; Move pointer to 0801H\r\nMOV M, C        ; Store 2nd number (01H) at 0801H\r\n\r\nNEXT:\r\nMOV A, B        ; Load the previous number into Accumulator\r\nADD C           ; Add the current number (A = B + C)\r\nMOV B, C        ; Update previous number: B now gets the value of C\r\nMOV C, A        ; Update current number: C now gets the new sum (A)\r\nINX H           ; Advance memory pointer to the next location\r\nMOV M, A        ; Store the newly generated Fibonacci number into memory\r\nDCR D           ; Decrement the loop counter\r\nJNZ NEXT        ; Repeat the loop if counter D is not zero\r\n\r\nRST 1           ; Terminate the program (or use HLT)\r\n\r\n\r\n\r\n\r\n\r\n;Memory Output MapWhen you execute this program, \r\n;memory locations starting from 0800H will be \r\n;populated with the first 10 Fibonacci numbers\r\n; in hexadecimal format:\r\n;Memory Address      Hex Value     Decimal Equivalent\r\n;0800H               00H                  0\r\n;0801H               01H                  1\r\n;0802H               01H                  1\r\n;0803H               02H                  2\r\n;0804H               03H                  3\r\n;0805H               05H                  5\r\n;0806H               08H                  8\r\n;0807H               0DH                  13\r\n;0808H               15H                  21\r\n;0809H               22H                  34\r\n"
+  }
+}
