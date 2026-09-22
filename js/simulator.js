@@ -702,7 +702,7 @@ class ArduinoSimulator {
         pinMode(pin, mode) {
           const key = `pin_${pin}`;
           self.pinModes[key] = mode;
-          const val = self.pinStates[key] !== undefined ? self.pinStates[key] : (mode === 'INPUT_PULLUP' ? 1 : 0);
+          const val = self.pinStates[key] !== undefined ? self.pinStates[key] : (mode === 'INPUT_PULLUP' ? 1 : (mode === 'INPUT_PULLDOWN' ? 0 : 0));
           self._emitPinChange(key, val);
         },
         digitalWrite(pin, val) {
@@ -1107,7 +1107,7 @@ class ArduinoSimulator {
 
       /* Global constants */
       HIGH: 1, LOW: 0,
-      INPUT: 'INPUT', OUTPUT: 'OUTPUT', INPUT_PULLUP: 'INPUT_PULLUP',
+      INPUT: 'INPUT', OUTPUT: 'OUTPUT', INPUT_PULLUP: 'INPUT_PULLUP', INPUT_PULLDOWN: 'INPUT_PULLDOWN',
       RISING: 'RISING', FALLING: 'FALLING', CHANGE: 'CHANGE',
       A0: this.board === 'esp32_devkit_v1' ? 36 : this.board === 'stm32f746_disco' ? 14 : 14,
       A1: this.board === 'esp32_devkit_v1' ? 39 : this.board === 'stm32f746_disco' ? 15 : 15,
