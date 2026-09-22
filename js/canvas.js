@@ -3032,7 +3032,7 @@ class CircuitCanvas {
                   inst.runtimeState._warnedBlown = true;
                   if (window.OutputPanel) {
                     window.OutputPanel.log(
-                      `LED (${inst.id}) is over-current (~${Math.round(iLed)} mA) without a current-limiting resistor and has blown! Add a 220Î© resistor in series.`,
+                      `LED (${inst.id}) is over-current (~${Math.round(iLed)} mA) without a current-limiting resistor and has blown! Add a 220Ω resistor in series.`,
                       'warn'
                     );
                   }
@@ -3471,9 +3471,9 @@ class CircuitCanvas {
 
           const _getOhms = (c) => {
             let v = c.runtimeState?.value ?? c.props?.value ?? 0;
-            const u = c.runtimeState?.unit || c.props?.unit || 'Î©';
-            if (u === 'kÎ©') v *= 1e3;
-            if (u === 'MÎ©') v *= 1e6;
+            const u = c.runtimeState?.unit || c.props?.unit || 'Ω';
+            if (u === 'kΩ') v *= 1e3;
+            if (u === 'MΩ') v *= 1e6;
             return v;
           };
           const _getFarads = (c) => {
@@ -4283,7 +4283,7 @@ class CircuitCanvas {
                 switch (comp.type) {
                   case 'resistor':
                     r = (Number(comp.props?.value) || 220)
-                      * (comp.props?.unit === 'kÎ©' ? 1e3 : comp.props?.unit === 'MÎ©' ? 1e6 : 1);
+                      * (comp.props?.unit === 'kΩ' ? 1e3 : comp.props?.unit === 'MΩ' ? 1e6 : 1);
                     break;
                   case 'bulb_12v': r = 12; break;
                   case 'led': case 'led_green': case 'led_blue':
@@ -4723,7 +4723,7 @@ class CircuitCanvas {
 
       // 3. Resistor internal pass-through (p1 <-> p2)
       if (inst.type === 'resistor') {
-        const rVal = (Number(inst.props.value) || 220) * (inst.props.unit === 'kÎ©' ? 1e3 : inst.props.unit === 'MÎ©' ? 1e6 : 1);
+        const rVal = (Number(inst.props.value) || 220) * (inst.props.unit === 'kΩ' ? 1e3 : inst.props.unit === 'MΩ' ? 1e6 : 1);
         const otherPin = current.pinId === 'p1' ? 'p2' : 'p1';
         queue.push({
           instId: inst.id,
@@ -4732,7 +4732,7 @@ class CircuitCanvas {
         });
       }
 
-      // 3b. 12V Bulb internal pass-through (anode -> cathode only, ~12Î© nominal)
+      // 3b. 12V Bulb internal pass-through (anode -> cathode only, ~12Ω nominal)
       // Directional: only allows trace in forward current direction (anode←cathode)
       // to prevent cross-circuit leakage through shared rails
       if (inst.type === 'bulb_12v' && !skipInternalTypes.includes('bulb_12v')) {
