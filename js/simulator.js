@@ -2526,9 +2526,9 @@ window.loadExamplesFromFiles = async function () {
   } catch (e) { /* static hosting uses the bundled fallback list */ }
 
   const files = [
-    '7408_test_with_logic_analyzer', '8051_assignment_1', '8051_assignment_2', '8051_assignment_3', '8051_assignment_4', '8085_assignment_1',
-    '8085_assignment_10', '8085_assignment_11', '8085_assignment_12', '8085_assignment_2', '8085_assignment_3', '8085_assignment_4',
-    '8085_assignment_5', '8085_assignment_6', '8085_assignment_7', '8085_assignment_8', '8085_assignment_9', 'add_2_number',
+    '7408_test_with_logic_analyzer', '8051_addition', '8051_array_maximum', '8051_copy_block', '8051_port_control', '8085_16bit_multiplication',
+    '8085_2s_complement', '8085_8bit_addition', '8085_bitwise_and', '8085_block_data_transfer', '8085_data_exchange', '8085_exchange_memory',
+    '8085_fibonacci', '8085_load_add', '8085_load_copy', '8085_sorting_ascending', '8085_sorting_descending', 'add_2_number',
     'and_gate', 'astable_555', 'bh1750_light_sensor', 'blink', 'bluetooth_serial_bridge', 'button',
     'buzzer_melody', 'coap_client', 'coap_dip_switch_to_8_led', 'coap_simple_server', 'continuous_rotation_servo_control_by_pot', 'counter',
     'current_divider', 'dc_motor_speed', 'dht11_temperature_humidity', 'dip_switch_and_led_array', 'dip_switch_binary', 'dmm_current',
@@ -2537,7 +2537,7 @@ window.loadExamplesFromFiles = async function () {
     'esp32_hub75_matrixpaneli2s_dma', 'esp32_i2s_local_radio_player', 'esp32_i2s_music_player', 'esp32_i2s_online_radio_player', 'esp32_i2s_online_radio_player copy', 'esp32_i2s_online_radio_player2',
     'esp32_mqtt_pub_sub', 'esp32_ntp_clock_lcd', 'esp32_sd_songs_player', 'esp32_server', 'esp32_web_server', 'esp_now_dip_switch_to_8_led',
     'esp_now_sender_with_receiver', 'espnow_led_control', 'espnow_receiver', 'espnow_sender', 'fade_led_pwm', 'flex_sensor_bending_measurement',
-    'func_gen_dual', 'func_gen_led', 'gps_neo_6m_8m_tracker', 'hc05_bluetooth_led', 'http_slider_pwm', 'hx711_load_cell_with_lcd_display',
+    'func_gen_dual', 'func_gen_led', 'gps_neo_6m_8m_tracker', 'hc05_bluetooth_led', 'http_slider_pwm_led', 'hx711_load_cell_with_lcd_display',
     'ic_nand_test', 'ili9341', 'ina219_solar_tracker', 'intel_8051_blink', 'intel_8051_counter', 'intel_8051_multiply_2_numbers',
     'intel_8051_multiply_from_memory', 'intel_8051_serial_hello', 'intel_8085_blink', 'intel_8085_counter', 'intel_8085_serial_hello', 'interrupts_test',
     'interrupts_test copy', 'inverting_amplifier', 'ir_dfplayer_remote', 'ir_obstacle_sensor_led_alert', 'ir_remote_decode', 'ir_remote_decoder',
