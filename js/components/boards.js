@@ -2363,3 +2363,329 @@ defComp({
     ctx.restore();
   }
 });
+
+/* ──────────────────── Raspberry Pi Pico 2 W ──────────────────── */
+defComp({
+  id: 'pico2w',
+  name: 'Raspberry Pi Pico 2 W',
+  category: 'Boards',
+  icon: '📡',
+  desc: 'RP2350 dual-core 150MHz Cortex-M33 with WiFi + Bluetooth',
+  width: 130,
+  height: 280,
+  defaultProps: { label: 'Pico 2 W' },
+  pins: [
+    // Left side (top to bottom) — physical pins 1-20
+    { id: 'GP0',  label: 'GP0',  type: PIN_TYPE.PWM,   x: 16, y: 32,  side: 'left', gpio: 0 },
+    { id: 'GP1',  label: 'GP1',  type: PIN_TYPE.PWM,   x: 16, y: 45,  side: 'left', gpio: 1 },
+    { id: 'GND1', label: 'GND',  type: PIN_TYPE.GND,   x: 16, y: 58 },
+    { id: 'GP2',  label: 'GP2',  type: PIN_TYPE.PWM,   x: 16, y: 71,  side: 'left', gpio: 2 },
+    { id: 'GP3',  label: 'GP3',  type: PIN_TYPE.PWM,   x: 16, y: 84,  side: 'left', gpio: 3 },
+    { id: 'GP4',  label: 'GP4',  type: PIN_TYPE.PWM,   x: 16, y: 97,  side: 'left', gpio: 4 },
+    { id: 'GP5',  label: 'GP5',  type: PIN_TYPE.PWM,   x: 16, y: 110, side: 'left', gpio: 5 },
+    { id: 'GND2', label: 'GND',  type: PIN_TYPE.GND,   x: 16, y: 123 },
+    { id: 'GP6',  label: 'GP6',  type: PIN_TYPE.PWM,   x: 16, y: 136, side: 'left', gpio: 6 },
+    { id: 'GP7',  label: 'GP7',  type: PIN_TYPE.PWM,   x: 16, y: 149, side: 'left', gpio: 7 },
+    { id: 'GP8',  label: 'GP8',  type: PIN_TYPE.PWM,   x: 16, y: 162, side: 'left', gpio: 8 },
+    { id: 'GP9',  label: 'GP9',  type: PIN_TYPE.PWM,   x: 16, y: 175, side: 'left', gpio: 9 },
+    { id: 'GND3', label: 'GND',  type: PIN_TYPE.GND,   x: 16, y: 188 },
+    { id: 'GP10', label: 'GP10', type: PIN_TYPE.PWM,   x: 16, y: 201, side: 'left', gpio: 10 },
+    { id: 'GP11', label: 'GP11', type: PIN_TYPE.PWM,   x: 16, y: 214, side: 'left', gpio: 11 },
+    { id: 'GP12', label: 'GP12', type: PIN_TYPE.PWM,   x: 16, y: 227, side: 'left', gpio: 12 },
+    { id: 'GP13', label: 'GP13', type: PIN_TYPE.PWM,   x: 16, y: 240, side: 'left', gpio: 13 },
+    { id: 'GND4', label: 'GND',  type: PIN_TYPE.GND,   x: 16, y: 253 },
+    { id: 'GP14', label: 'GP14', type: PIN_TYPE.PWM,   x: 16, y: 266, side: 'left', gpio: 14 },
+    { id: 'GP15', label: 'GP15', type: PIN_TYPE.PWM,   x: 16, y: 279, side: 'left', gpio: 15 },
+    // Right side (bottom to top) — physical pins 21-40
+    { id: 'GP16',    label: 'GP16',    type: PIN_TYPE.PWM,   x: 114, y: 279, side: 'right', gpio: 16 },
+    { id: 'GP17',    label: 'GP17',    type: PIN_TYPE.PWM,   x: 114, y: 266, side: 'right', gpio: 17 },
+    { id: 'GND5',    label: 'GND',     type: PIN_TYPE.GND,   x: 114, y: 253 },
+    { id: 'GP18',    label: 'GP18',    type: PIN_TYPE.PWM,   x: 114, y: 240, side: 'right', gpio: 18 },
+    { id: 'GP19',    label: 'GP19',    type: PIN_TYPE.PWM,   x: 114, y: 227, side: 'right', gpio: 19 },
+    { id: 'GP20',    label: 'GP20',    type: PIN_TYPE.PWM,   x: 114, y: 214, side: 'right', gpio: 20 },
+    { id: 'GP21',    label: 'GP21',    type: PIN_TYPE.PWM,   x: 114, y: 201, side: 'right', gpio: 21 },
+    { id: 'GND6',    label: 'GND',     type: PIN_TYPE.GND,   x: 114, y: 188 },
+    { id: 'GP22',    label: 'GP22',    type: PIN_TYPE.PWM,   x: 114, y: 175, side: 'right', gpio: 22 },
+    { id: 'RUN',     label: 'RUN',     type: PIN_TYPE.SIGNAL, x: 114, y: 162, side: 'right' },
+    { id: 'GP26',    label: 'GP26',    type: PIN_TYPE.ANALOG, x: 114, y: 149, side: 'right', gpio: 26 },
+    { id: 'GP27',    label: 'GP27',    type: PIN_TYPE.ANALOG, x: 114, y: 136, side: 'right', gpio: 27 },
+    { id: 'AGND',    label: 'AGND',    type: PIN_TYPE.GND,   x: 114, y: 123 },
+    { id: 'GP28',    label: 'GP28',    type: PIN_TYPE.ANALOG, x: 114, y: 110, side: 'right', gpio: 28 },
+    { id: 'ADCREF',  label: 'VREF',    type: PIN_TYPE.SIGNAL, x: 114, y: 97,  side: 'right' },
+    { id: '3V3OUT',  label: '3V3',     type: PIN_TYPE.POWER,  x: 114, y: 84,  side: 'right' },
+    { id: '3V3EN',   label: '3V3EN',   type: PIN_TYPE.SIGNAL, x: 114, y: 71,  side: 'right' },
+    { id: 'GND7',    label: 'GND',     type: PIN_TYPE.GND,   x: 114, y: 58 },
+    { id: 'VSYS',    label: 'VSYS',    type: PIN_TYPE.POWER,  x: 114, y: 45,  side: 'right' },
+    { id: 'VBUS',    label: 'VBUS',    type: PIN_TYPE.POWER,  x: 114, y: 32,  side: 'right' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y, width: W, height: H } = inst;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // ── PCB Body (Raspberry Pi signature dark green) ──
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, '#0a3d2a');
+    grad.addColorStop(0.3, '#0c4530');
+    grad.addColorStop(0.6, '#0b4028');
+    grad.addColorStop(1, '#083020');
+    ctx.fillStyle = grad;
+    roundRect(ctx, 0, 0, W, H, 4);
+    ctx.fill();
+
+    ctx.shadowColor = 'rgba(0,100,60,0.08)';
+    ctx.shadowBlur = 6;
+    ctx.strokeStyle = '#1a5c3e';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, 0, 0, W, H, 4);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // ── Silkscreen Frame ──
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    roundRect(ctx, 2, 2, W - 4, H - 4, 3);
+    ctx.stroke();
+
+    // ── RP2350 Chip ──
+    const chipX = 35, chipY = 95, chipW = 60, chipH = 55;
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(ctx, chipX, chipY, chipW, chipH, 3);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    const chipGrad = ctx.createLinearGradient(chipX, chipY, chipX, chipY + chipH);
+    chipGrad.addColorStop(0, '#2a2a2a');
+    chipGrad.addColorStop(0.5, '#222');
+    chipGrad.addColorStop(1, '#1a1a1a');
+    ctx.fillStyle = chipGrad;
+    roundRect(ctx, chipX, chipY, chipW, chipH, 3);
+    ctx.fill();
+
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 0.5;
+    roundRect(ctx, chipX, chipY, chipW, chipH, 3);
+    ctx.stroke();
+
+    // Pin 1 dot
+    ctx.fillStyle = '#555';
+    ctx.beginPath();
+    ctx.arc(chipX + 6, chipY + 6, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#888';
+    ctx.font = 'bold 7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('RP2350', chipX + chipW / 2, chipY + chipH / 2 - 4);
+    ctx.font = '5px monospace';
+    ctx.fillStyle = '#666';
+    ctx.fillText('Dual M33 · 150MHz', chipX + chipW / 2, chipY + chipH / 2 + 8);
+
+    // ── CYW43439 Wireless Chip ──
+    const wifiChipX = 40, wifiChipY = 162, wifiChipW = 50, wifiChipH = 20;
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 6;
+    ctx.fillStyle = '#1e1e1e';
+    roundRect(ctx, wifiChipX, wifiChipY, wifiChipW, wifiChipH, 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = '#555';
+    ctx.font = '5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('CYW43439', wifiChipX + wifiChipW / 2, wifiChipY + wifiChipH / 2 + 2);
+
+    // ── Antenna Trace (bottom edge) ──
+    ctx.strokeStyle = '#c8b06a';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    const antY = H - 18;
+    ctx.moveTo(20, antY);
+    for (let i = 0; i < 6; i++) {
+      ctx.lineTo(25 + i * 8, antY - (i % 2 === 0 ? 8 : 0));
+    }
+    ctx.lineTo(W - 20, antY);
+    ctx.stroke();
+
+    // ── Micro USB Connector (top center) ──
+    const usbW = 22, usbH = 14;
+    ctx.fillStyle = '#5a6370';
+    roundRect(ctx, W / 2 - usbW / 2, -usbH + 4, usbW, usbH, 2);
+    ctx.fill();
+    ctx.fillStyle = '#2a2f36';
+    roundRect(ctx, W / 2 - 7, -usbH + 8, 14, 6, 1);
+    ctx.fill();
+    ctx.fillStyle = '#c8b06a';
+    for (let i = 0; i < 4; i++) {
+      roundRect(ctx, W / 2 - 5 + i * 3, -usbH + 10, 1.5, 3, 0.5);
+      ctx.fill();
+    }
+
+    // ── BOOTSEL Button ──
+    ctx.fillStyle = '#222';
+    roundRect(ctx, W / 2 - 22, 14, 16, 8, 2);
+    ctx.fill();
+    ctx.fillStyle = '#666';
+    roundRect(ctx, W / 2 - 20, 16, 12, 4, 1);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = 'bold 4px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('BOOTSEL', W / 2 - 14, 12);
+
+    // ── Crystal Oscillator ──
+    ctx.fillStyle = '#0d0d0d';
+    roundRect(ctx, 25, 78, 12, 6, 1);
+    ctx.fill();
+    ctx.fillStyle = '#aaa';
+    ctx.font = '3px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('12MHz', 31, 82);
+
+    // ── Header Strips ──
+    const pinsList = inst.pins || this.pins || [];
+    const leftYs = pinsList.filter(p => p.side === 'left').map(p => p.y);
+    const rightYs = pinsList.filter(p => p.side === 'right').map(p => p.y);
+
+    const drawVertHeader = (hx, holeYs, holeX) => {
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = '#0a2818';
+      roundRect(ctx, hx, 28, 14, H - 54, 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      for (const hy of holeYs) {
+        ctx.fillStyle = '#c8b06a';
+        ctx.shadowColor = 'rgba(200,176,106,0.2)';
+        ctx.shadowBlur = 3;
+        ctx.beginPath();
+        ctx.arc(holeX, hy, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#0a0a0c';
+        ctx.beginPath();
+        ctx.arc(holeX, hy, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    drawVertHeader(4, leftYs, 11);
+    drawVertHeader(112, rightYs, 119);
+
+    // ── Pin Labels ──
+    ctx.font = 'bold 5px monospace';
+    for (const pin of pinsList) {
+      const pw = ctx.measureText(pin.label).width + 4;
+      const bx = pin.side === 'left' ? pin.x - 3 - pw : pin.x + 3;
+
+      let bgColor = 'rgba(6,12,18,0.85)';
+      if (pin.type === PIN_TYPE.POWER) bgColor = 'rgba(180,40,40,0.8)';
+      else if (pin.type === PIN_TYPE.GND) bgColor = 'rgba(40,40,40,0.8)';
+      else if (pin.type === PIN_TYPE.ANALOG) bgColor = 'rgba(30,80,120,0.8)';
+      else if (pin.type === PIN_TYPE.PWM) bgColor = 'rgba(20,90,50,0.8)';
+
+      ctx.fillStyle = bgColor;
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 2;
+      roundRect(ctx, bx, pin.y - 3.5, pw, 7, 1.5);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#dbe4ea';
+      ctx.textAlign = pin.side === 'left' ? 'right' : 'left';
+      ctx.fillText(pin.label, bx + (pin.side === 'left' ? pw - 2 : 2), pin.y + 1.5);
+    }
+
+    // ── Built-in LED (GPIO25) ──
+    const ledCx = 55, ledCy = 212;
+    const lit = sim && sim.pinStates && (sim.pinStates.pin_25 || 0) > 0;
+    drawLED_on_board(ctx, ledCx, ledCy, lit ? '#ff3333' : '#442222', 4);
+    ctx.fillStyle = '#8b949e';
+    ctx.font = 'bold 5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('L', ledCx, ledCy + 10);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '4px monospace';
+    ctx.fillText('GP25', ledCx, ledCy - 6);
+
+    // ── WiFi STATUS ICON ──
+    const wifiX = W / 2;
+    const wifiY = 230;
+    const wifiOn = sim && (sim._wifiConnected || sim.wifiConnected);
+    const wifiColor = wifiOn ? '#00f0ff' : '#667788';
+
+    ctx.save();
+    const bgW2 = 36, bgH2 = 28;
+    const bgX2 = wifiX - bgW2 / 2;
+    const bgY2 = wifiY - 13;
+
+    ctx.fillStyle = '#061a10';
+    roundRect(ctx, bgX2, bgY2, bgW2, bgH2, 3);
+    ctx.fill();
+
+    ctx.strokeStyle = wifiOn ? 'rgba(0,240,255,0.6)' : 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1;
+    roundRect(ctx, bgX2, bgY2, bgW2, bgH2, 3);
+    ctx.stroke();
+
+    if (wifiOn) {
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 8;
+    }
+
+    ctx.strokeStyle = wifiColor;
+    ctx.fillStyle = wifiColor;
+    ctx.lineCap = 'round';
+
+    ctx.beginPath();
+    ctx.arc(wifiX, wifiY, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    [4, 7, 10].forEach(r => {
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(wifiX, wifiY, r, -Math.PI * 0.75, -Math.PI * 0.25);
+      ctx.stroke();
+    });
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = wifiOn ? '#00f0ff' : '#8899aa';
+    ctx.font = 'bold 6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('WiFi', wifiX, wifiY + 11);
+    ctx.restore();
+
+    // ── Board Name ──
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.font = 'bold 9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Pico 2 W', W / 2, H - 8);
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.font = '6px monospace';
+    ctx.fillText('RP2350 · WiFi+BLE', W / 2, H - 1);
+    ctx.shadowBlur = 0;
+
+    // ── Selection Outline ──
+    if (inst.selected) {
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = 15;
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      roundRect(ctx, -3, -3, W + 6, H + 6, 6);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.shadowBlur = 0;
+    }
+
+    ctx.restore();
+  }
+});

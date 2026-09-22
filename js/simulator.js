@@ -484,6 +484,12 @@ class ArduinoSimulator {
       js = js.replace(/\bA0\b/g, '26');
       js = js.replace(/\bA1\b/g, '27');
       js = js.replace(/\bA2\b/g, '28');
+    } else if (this.board === 'pico2w') {
+      // Raspberry Pi Pico 2 W: LED on GP25, ADC on GP26-28
+      js = js.replace(/\bLED_BUILTIN\b/g, '25');
+      js = js.replace(/\bA0\b/g, '26');
+      js = js.replace(/\bA1\b/g, '27');
+      js = js.replace(/\bA2\b/g, '28');
     } else {
       js = js.replace(/\bLED_BUILTIN\b/g, '13');
       js = js.replace(/\bA0\b/g, '14');
@@ -2182,7 +2188,7 @@ class ArduinoSimulator {
   }
 
   setBoard(board) {
-    this.board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'intel_8085', 'intel_8051'].includes(board) ? board : 'arduino_uno';
+    this.board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051'].includes(board) ? board : 'arduino_uno';
   }
 
   /* ΀l΀l FPS tracking ΀l΀l */
