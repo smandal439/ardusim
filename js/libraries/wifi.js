@@ -47,6 +47,8 @@ window.ArduinoLibs['WiFi'] = {
     [/\bWiFi\.encryptionType\s*\(/g, '_a.wifiEncryptionType('],
     // WiFi.BSSIDstr(i) → _a.wifiBSSIDstr(i)
     [/\bWiFi\.BSSIDstr\s*\(/g, '_a.wifiBSSIDstr('],
+    // WiFi.scanDelete() → _a.wifiScanDelete()
+    [/\bWiFi\.scanDelete\s*\(/g, '_a.wifiScanDelete('],
   ],
 
   constants: {
@@ -238,6 +240,10 @@ window.ArduinoLibs['WiFi'] = {
         var scan = self._wifiScanResults || [];
         if (idx >= 0 && idx < scan.length) return scan[idx].bssid || '00:00:00:00:00:00';
         return '00:00:00:00:00:00';
+      },
+
+      wifiScanDelete: function() {
+        self._wifiScanResults = [];
       },
     };
   },
