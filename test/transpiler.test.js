@@ -31,6 +31,13 @@ const src = fs.readFileSync(srcPath, 'utf8');
 // We need to evaluate the class definition so it's available for testing
 eval(src);
 
+// Load core library plugins the transpiler relies on (Serial, Wire, etc.)
+const libsDir = path.resolve(__dirname, '..', 'js', 'libraries');
+for (const libFile of ['serial.js', 'wire.js']) {
+  const libPath = path.join(libsDir, libFile);
+  if (fs.existsSync(libPath)) eval(fs.readFileSync(libPath, 'utf8'));
+}
+
 const sim = new window.ArduinoSimulator();
 
 describe('transpile() — basic transformations', () => {
@@ -42,8 +49,10 @@ describe('transpile() — basic transformations', () => {
 
   it('removes #define and substitutes values', () => {
     const result = sim.transpile('#define LED 13\nvoid loop() { int x = LED; }');
-    expect(result).not.toContain('#define');
+    // Active #define directives are removed (kept only as // or /* */ comments)
+    expect(result).not.toMatch(/^\s*#define\s/m);
     expect(result).toContain('13');
+    expect(result).toContain('let x = 13');
   });
 
   it('converts void function declarations to async', () => {
@@ -80,8 +89,8 @@ describe('transpile() — Arduino-specific patterns', () => {
   });
 
   it('converts Wire.begin() to _a.wireBegin()', () => {
-    // The transpiler handles this via plugin rules
-    const result = sim.transpile('void setup() { Wire.begin(); }');
+    // Wire plugin only activates when <Wire.h> is included
+    const result = sim.transpile('#include <Wire.h>\nvoid setup() { Wire.begin(); }');
     expect(result).toContain('wireBegin');
   });
 
@@ -143,7 +152,8 @@ describe('transpile() — library plugins', () => {
       },
       runtime: function() { return {}; },
     };
-    const result = sim.transpile('SimpleBME280 bme;\nvoid setup() { bme.begin(); }');
+    // Plugin only activates when its #include header is present
+    const result = sim.transpile('#include <SimpleBME280.h>\nSimpleBME280 bme;\nvoid setup() { bme.begin(); }');
     expect(result).toContain('new SimpleBME280');
     expect(result).toContain('bme280Begin');
   });
@@ -184,5 +194,6 @@ describe('transpile() — edge cases', () => {
   it('handles pointer types', () => {
     const result = sim.transpile('void loop() { char *ptr; }');
     expect(result).toContain('let ptr');
+    expect(result).not.toContain('char *ptr');
   });
 });

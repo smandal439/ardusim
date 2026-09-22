@@ -271,12 +271,18 @@ class LEDComponent extends Component {
       let pathR = 0;
       const engine = this.engine;
       if (engine) {
-        // Find the source pin that feeds the anode
-        let srcInstId = null, srcPinId = null;
-        const srcNet = this.getNet('anode');
-        if (srcNet) {
-          for (const src of srcNet.sources) {
-            if (src.instId) { srcInstId = src.instId; srcPinId = src.pinId; break; }
+        // Find the source pin that feeds the anode.
+        // Prefer `source` from getSource('anode'): it BFS-traverses resistive
+        // adjacency, so it finds sources behind series resistors. Looking only
+        // at srcNet.sources misses them (resistors split nets).
+        let srcInstId = source?.instId ?? null;
+        let srcPinId = source?.pinId ?? null;
+        if (!srcInstId) {
+          const srcNet = this.getNet('anode');
+          if (srcNet) {
+            for (const src of srcNet.sources) {
+              if (src.instId) { srcInstId = src.instId; srcPinId = src.pinId; break; }
+            }
           }
         }
         // Find a ground pin reachable from the cathode
@@ -293,8 +299,11 @@ class LEDComponent extends Component {
           // Ground is not on cathode net — search all components for ground pins
           for (const comp of engine.components) {
             const t = comp.type;
-            if (t === 'arduino_uno' || t === 'arduino_nano' || t === 'esp32_devkit_v1' || t === 'stm32f746_disco' || t === 'lpc2148' || t === 'intel_8085' || t === 'intel_8051') {
-              for (const pid of ['GND1', 'GND2', 'GND_D', 'GND']) {
+            if (t === 'arduino_uno' || t === 'arduino_nano' || t === 'esp32_devkit_v1' || t === 'stm32f746_disco' || t === 'lpc2148' || t === 'pico2w' || t === 'intel_8085' || t === 'intel_8051') {
+              const boardGnds = t === 'pico2w'
+                ? ['GND1', 'GND2', 'GND3', 'GND4', 'GND5', 'GND6', 'GND7', 'AGND']
+                : ['GND1', 'GND2', 'GND_D', 'GND'];
+              for (const pid of boardGnds) {
                 if (engine.measureResistance(this.id, 'cathode', comp.id, pid) < Infinity) {
                   gndInstId = comp.id; gndPinId = pid; break;
                 }

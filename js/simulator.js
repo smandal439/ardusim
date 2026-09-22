@@ -271,8 +271,12 @@ class ArduinoSimulator {
     js = js.replace(/\bconst\s+async\b/g, 'async');
     // Strip const before type keywords: const int x = 5; -> int x = 5;
     js = js.replace(new RegExp(`\\bconst\\s+((?:unsigned\\s+)?(?:${_typePat}))\\s*\\*?\\s*`, 'g'), '$1 ');
-    // char* name[] = { ... } -> var name = [ ... ]  (C-style string array, single or multi-line)
+    // type *name[] = { ... } -> var name = [ ... ]  (C-style string array, single or multi-line)
     js = js.replace(/\bchar\s*\*\s+(\w+)\s*\[\s*\]\s*=\s*\{([\s\S]*?)\}\s*;/g, 'var $1 = [$2]');
+    // type *name; -> let name;  (pointer declaration without initializer)
+    js = js.replace(new RegExp(`\\b(?:const\\s+)?(?:unsigned\\s+)?(?:${_typePat})\\s*\\*\\s*(\\w+)\\s*;`, 'g'), 'let $1;');
+    // type *name = ...; -> let name = ...;  (pointer declaration with initializer)
+    js = js.replace(new RegExp(`\\b(?:const\\s+)?(?:unsigned\\s+)?(?:${_typePat})\\s*\\*\\s*(\\w+)\\s*=`, 'g'), 'let $1 =');
     // char name[] = { ... } -> var name = [ ... ]  (after const* stripping removes the *)
     js = js.replace(/\bchar\s+(\w+)\s*\[\s*\]\s*=\s*\{([\s\S]*?)\}\s*;/g, 'var $1 = [$2]');
     // Type name[size]; -> let name = [];  (C-style array declaration, NOT followed by = {)
