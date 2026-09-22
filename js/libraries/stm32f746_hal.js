@@ -621,6 +621,11 @@ window.ArduinoLibs['STM32F746'] = {
       0x40012800: 3,
     };
 
+    var ADC_CR2_ADON = (1 << 0);
+    var ADC_CR2_SWSTART = (1 << 30);
+    var ADC_SR_EOC = (1 << 1);
+    var ADC_SR_STRT = (1 << 4);
+
     var REVERSE_PORT_PIN = {};
     Object.keys(PORT_PIN_MAP).forEach(function (key) {
       REVERSE_PORT_PIN[PORT_PIN_MAP[key]] = key;
