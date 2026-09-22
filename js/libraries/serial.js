@@ -118,26 +118,26 @@ window.ArduinoLibs['Serial'] = {
       },
       serialPrint: function(val, fmt) {
         var str;
-        if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
+        if (typeof val === 'number' && !Number.isInteger(val)) {
+          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
+          str = val.toFixed(dec);
+        } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
         else if (fmt === 2) str = parseInt(val).toString(2);
         else if (fmt === 8) str = parseInt(val).toString(8);
-        else if (typeof val === 'number' && !Number.isInteger(val)) {
-          var dec = fmt !== undefined ? fmt : 2;
-          str = val.toFixed(dec);
-        } else str = String(val);
+        else str = String(val);
         self._serialLog(str, 'data');
         _uartTxStr(str);
       },
       serialPrintln: function(val, fmt) {
         var str;
         if (val === undefined) str = '';
-        else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
+        else if (typeof val === 'number' && !Number.isInteger(val)) {
+          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
+          str = val.toFixed(dec);
+        } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
         else if (fmt === 2) str = parseInt(val).toString(2);
         else if (fmt === 8) str = parseInt(val).toString(8);
-        else if (typeof val === 'number' && !Number.isInteger(val)) {
-          var dec = fmt !== undefined ? fmt : 2;
-          str = val.toFixed(dec);
-        } else str = String(val);
+        else str = String(val);
         self._serialLog(str + '\n', 'data');
         _uartTxStr(str + '\n');
       },
@@ -266,26 +266,26 @@ window.ArduinoLibs['Serial'] = {
       serial1Begin: function(baud) { self.serialBaud = baud; self._serialLog('[Serial1] Opened at ' + baud + ' baud\n', 'system'); _setPin(9, 1); _setPin(10, 1); },
       serial1Print: function(val, fmt) {
         var str;
-        if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
+        if (typeof val === 'number' && !Number.isInteger(val)) {
+          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
+          str = val.toFixed(dec);
+        } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
         else if (fmt === 2) str = parseInt(val).toString(2);
         else if (fmt === 8) str = parseInt(val).toString(8);
-        else if (typeof val === 'number' && !Number.isInteger(val)) {
-          var dec = fmt !== undefined ? fmt : 2;
-          str = val.toFixed(dec);
-        } else str = String(val);
+        else str = String(val);
         self._serialLog(str, 'data');
         _setPin(9, 1); for (var i = 0; i < str.length; i++) { _setPin(9, 0); for (var b = 0; b < 8; b++) { _setPin(9, (str.charCodeAt(i) >> b) & 1); } _setPin(9, 1); }
       },
       serial1Println: function(val, fmt) {
         var str;
         if (val === undefined) str = '';
-        else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
+        else if (typeof val === 'number' && !Number.isInteger(val)) {
+          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
+          str = val.toFixed(dec);
+        } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
         else if (fmt === 2) str = parseInt(val).toString(2);
         else if (fmt === 8) str = parseInt(val).toString(8);
-        else if (typeof val === 'number' && !Number.isInteger(val)) {
-          var dec = fmt !== undefined ? fmt : 2;
-          str = val.toFixed(dec);
-        } else str = String(val);
+        else str = String(val);
         self._serialLog(str + '\n', 'data');
         _setPin(9, 1); var s = str + '\n'; for (var i = 0; i < s.length; i++) { _setPin(9, 0); for (var b = 0; b < 8; b++) { _setPin(9, (s.charCodeAt(i) >> b) & 1); } _setPin(9, 1); }
       },
@@ -301,26 +301,26 @@ window.ArduinoLibs['Serial'] = {
       serial2Begin: function(baud) { self.serialBaud = baud; self._serialLog('[Serial2] Opened at ' + baud + ' baud\n', 'system'); _setPin(16, 1); _setPin(17, 1); },
       serial2Print: function(val, fmt) {
         var str;
-        if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
+        if (typeof val === 'number' && !Number.isInteger(val)) {
+          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
+          str = val.toFixed(dec);
+        } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
         else if (fmt === 2) str = parseInt(val).toString(2);
         else if (fmt === 8) str = parseInt(val).toString(8);
-        else if (typeof val === 'number' && !Number.isInteger(val)) {
-          var dec = fmt !== undefined ? fmt : 2;
-          str = val.toFixed(dec);
-        } else str = String(val);
+        else str = String(val);
         self._serialLog(str, 'data');
         _setPin(16, 1); for (var i = 0; i < str.length; i++) { _setPin(16, 0); for (var b = 0; b < 8; b++) { _setPin(16, (str.charCodeAt(i) >> b) & 1); } _setPin(16, 1); }
       },
       serial2Println: function(val, fmt) {
         var str;
         if (val === undefined) str = '';
-        else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
+        else if (typeof val === 'number' && !Number.isInteger(val)) {
+          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
+          str = val.toFixed(dec);
+        } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
         else if (fmt === 2) str = parseInt(val).toString(2);
         else if (fmt === 8) str = parseInt(val).toString(8);
-        else if (typeof val === 'number' && !Number.isInteger(val)) {
-          var dec = fmt !== undefined ? fmt : 2;
-          str = val.toFixed(dec);
-        } else str = String(val);
+        else str = String(val);
         self._serialLog(str + '\n', 'data');
         _setPin(16, 1); var s = str + '\n'; for (var i = 0; i < s.length; i++) { _setPin(16, 0); for (var b = 0; b < 8; b++) { _setPin(16, (s.charCodeAt(i) >> b) & 1); } _setPin(16, 1); }
       },

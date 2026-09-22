@@ -42,7 +42,7 @@ class ArduinoSimulator {
     this._runSeq = 0;
     // Infinite-loop guard: max iterations per real-second without a delay
     this._iterSinceDelay = 0;
-    this._MAX_TIGHT_ITERS = 50000;
+    this._MAX_TIGHT_ITERS = 1000;
     // EEPROM simulation (512 bytes)
     this._eeprom = new Uint8Array(512);
     // ESP32 LEDC PWM channel registry: channel -> { pin, freq, resolution, maxDuty }
@@ -421,9 +421,14 @@ class ArduinoSimulator {
         '$1 = _idiv($2, $3);'
       );
       // Match: standalone expr / expr inside parentheses: (a / b) or func(a / b)
+      // Skip if either operand is a float literal (contains '.') — C++ does
+      // floating-point division when any operand is float, not integer division.
       js = js.replace(
         new RegExp(`\\((${_tok})\\s*/\\s*(${_tok})\\)`, 'g'),
-        '(_idiv($1, $2))'
+        (match, a, b) => {
+          if (a.includes('.') || b.includes('.')) return match;
+          return `(_idiv(${a}, ${b}))`;
+        }
       );
     }
 
@@ -832,8 +837,9 @@ class ArduinoSimulator {
                 const lpcMap = { 26: 'AIN0', 27: 'AIN1', 28: 'AIN2', 29: 'AIN3', 30: 'AIN4', 31: 'AIN5', 32: 'AIN6', 33: 'AIN7' };
                 label = lpcMap[pinNum] || null;
               } else if (board.type === 'pico2w') {
-                // RP2350: GP26=ADC0, GP27=ADC1, GP28=ADC2, GP29=ADC3
-                const picoMap = { 26: 'A0', 27: 'A1', 28: 'A2', 29: 'A3' };
+                // RP2350: GP26=ADC0, GP27=ADC1, GP28=ADC2 — use board pin IDs
+                // (not Arduino-style A0 aliases) so _getWireTarget can find wires.
+                const picoMap = { 26: 'GP26', 27: 'GP27', 28: 'GP28' };
                 label = picoMap[pinNum] || null;
               }
 

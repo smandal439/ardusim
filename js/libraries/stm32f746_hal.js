@@ -544,6 +544,24 @@ window.ArduinoLibs['STM32F746'] = {
     rules.push([/\b__NOP\s*\(\)/g, '_noop()']);
     rules.push([/\b__WFI\s*\(\)/g, '_noop()']);
 
+    // Detect busy-wait on UART SR (TXE=0x80, RXNE=0x20) and inject yield
+    rules.push([/while\s*\(\s*!\s*\(\s*_regR\s*\(\s*(0x40011000|0x40004400|0x40004800|0x40004C00|0x40005000|0x40011400)\s*\)\s*&\s*(0x[0-9A-Fa-f]+)\s*\)\s*\)\s*;/g,
+      function(m, addr, mask) {
+        return 'while (!(_regR(' + addr + ') & ' + mask + ')) { await new Promise(r => setTimeout(r, 0)); }';
+      }]);
+
+    // Busy-wait on SPI SR (TXE=0x02, RXNE=0x01, BSY=0x80)
+    rules.push([/while\s*\(\s*!\s*\(\s*_regR\s*\(\s*(0x40013008|0x40003808|0x40003C08|0x40013408)\s*\)\s*&\s*(0x[0-9A-Fa-f]+)\s*\)\s*\)\s*;/g,
+      function(m, addr, mask) {
+        return 'while (!(_regR(' + addr + ') & ' + mask + ')) { await new Promise(r => setTimeout(r, 0)); }';
+      }]);
+
+    // Busy-wait on I2C SR1 (TXE=0x80, RXNE=0x40, SB=0x01, BTF=0x04)
+    rules.push([/while\s*\(\s*!\s*\(\s*_regR\s*\(\s*(0x40005414|0x40005814|0x40005C14)\s*\)\s*&\s*(0x[0-9A-Fa-f]+)\s*\)\s*\)\s*;/g,
+      function(m, addr, mask) {
+        return 'while (!(_regR(' + addr + ') & ' + mask + ')) { await new Promise(r => setTimeout(r, 0)); }';
+      }]);
+
     rules.push([/\bHAL_GetTick\s*\(/g, '_hal_getTick(']);
     rules.push([/\bHAL_IncTick\s*\(\)/g, '_hal_incTick()']);
 
@@ -708,6 +726,10 @@ window.ArduinoLibs['STM32F746'] = {
       }
 
       if (UART_BASES[addr]) {
+        var offset = _getOffset(addr);
+        if (offset === 0x00) {
+          queueMicrotask(function() {});
+        }
         return regs[addr] | 0x00C0;
       }
 

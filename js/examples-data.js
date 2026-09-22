@@ -16961,7 +16961,8 @@ window.EXAMPLE_SKETCHES = [
           "width": 40,
           "height": 70,
           "props": {
-            "value": 10,
+            "value": 512,
+            "maxValue": 1023,
             "unit": "kΩ"
           },
           "runtimeState": {},
@@ -16978,7 +16979,7 @@ window.EXAMPLE_SKETCHES = [
           },
           "to": {
             "instId": "pot1",
-            "pinId": "p1"
+            "pinId": "vcc"
           },
           "color": "#ff3333",
           "waypoints": []
@@ -17000,7 +17001,7 @@ window.EXAMPLE_SKETCHES = [
           "id": "w3",
           "from": {
             "instId": "pot1",
-            "pinId": "p3"
+            "pinId": "gnd"
           },
           "to": {
             "instId": "b1",

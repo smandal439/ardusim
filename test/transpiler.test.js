@@ -197,3 +197,22 @@ describe('transpile() — edge cases', () => {
     expect(result).not.toContain('char *ptr');
   });
 });
+
+describe('transpile() — integer division (_idiv)', () => {
+  it('does not wrap float-literal division with _idiv', () => {
+    const result = sim.transpile('void loop() { float voltage = raw * (3.3 / 1023.0); }');
+    expect(result).not.toContain('_idiv');
+    expect(result).toContain('raw * (3.3 / 1023.0)');
+  });
+
+  it('wraps int-typed variable division with _idiv', () => {
+    const result = sim.transpile('void loop() { int raw = analogRead(26); int half = raw / 2; }');
+    expect(result).toContain('_idiv(raw, 2)');
+  });
+
+  it('does not wrap mixed int/float-literal division with _idiv', () => {
+    const result = sim.transpile('void loop() { int raw = analogRead(26); float v = (raw / 1023.0); }');
+    expect(result).not.toContain('_idiv');
+    expect(result).toContain('raw / 1023.0');
+  });
+});
