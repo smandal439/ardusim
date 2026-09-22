@@ -1568,6 +1568,29 @@ class ArduinoSimulator {
       }
     }
 
+    // Re-apply the board-specific plugin's runtime LAST so its _regR/_regW
+    // override other board plugins that also export those names (e.g. LPC2148
+    // vs STM32F746 both provide _regW with empty includes, so both are active).
+    // Without this, the first-loaded board plugin wins top-level _regW and the
+    // active board's register logic (ADC EOC, UART TXE, etc.) never runs.
+    const _boardPluginMap = {
+      stm32f746_disco: 'STM32F746',
+      lpc2148: 'LPC2148',
+    };
+    const _boardPluginName = _boardPluginMap[this.board];
+    if (_boardPluginName && plugins[_boardPluginName] && plugins[_boardPluginName].runtime) {
+      const _brt = plugins[_boardPluginName].runtime(self);
+      if (_brt && typeof _brt === 'object') {
+        Object.assign(result._a, _brt);
+        for (const [rk, rv] of Object.entries(_brt)) {
+          if (typeof rv === 'function') result[rk] = rv;
+        }
+      }
+      if (plugins[_boardPluginName].constants) {
+        Object.assign(result, plugins[_boardPluginName].constants);
+      }
+    }
+
     // Expose _idiv as a top-level function for integer division (C++ int / int -> truncation)
     result._idiv = result._a._idiv;
 

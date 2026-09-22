@@ -1,0 +1,59 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mC:/Users/SUSHANTA/Desktop/Project/Online Circuit Simulator[39m
+
+ [32m✓[39m test/transpiler.test.js [2m([22m[2m28 tests[22m[2m)[22m[32m 82[2mms[22m[39m
+[90mstderr[2m | test/api.test.js[2m > [22m[2mREST API
+[22m[39mServer stderr: node:internal/errors:542
+      throw error;
+      ^
+
+RangeError [ERR_SOCKET_BAD_PORT]: options.port should be >= 0 and < 65536. Received type number (72076).
+    at Server.listen (node:net:2160:5)
+    at Object.<anonymous> (C:\Users\SUSHANTA\Desktop\Project\Online Circuit Simulator\server.js:454:8)
+    at Module._compile (node:internal/modules/cjs/loader:1871:14)
+    at Object..js (node:internal/modules/cjs/loader:2002:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'ERR_SOCKET_BAD_PORT'
+}
+
+Node.js v24.18.0
+
+
+ [31m❯[39m test/api.test.js [2m([22m[2m11 tests[22m[2m | [22m[33m11 skipped[39m[2m)[22m[33m 10043[2mms[22m[39m
+   [2m[90m↓[39m[22m REST API[2m > [22mGET /api/health returns 200
+   [2m[90m↓[39m[22m REST API[2m > [22mGET /api/host returns IP and port
+   [2m[90m↓[39m[22m REST API[2m > [22mGET /api/projects returns array
+   [2m[90m↓[39m[22m REST API[2m > [22mPOST /api/projects creates a project
+   [2m[90m↓[39m[22m REST API[2m > [22mPOST /api/projects with invalid body returns 400
+   [2m[90m↓[39m[22m REST API[2m > [22mPOST /api/projects with non-JSON content type returns 415
+   [2m[90m↓[39m[22m REST API[2m > [22mGET /api/projects/:id returns project or 404
+   [2m[90m↓[39m[22m REST API[2m > [22mDELETE /api/projects/:id removes project
+   [2m[90m↓[39m[22m REST API[2m > [22mGET /api/examples returns array
+   [2m[90m↓[39m[22m REST API[2m > [22mGET /api/unknown returns 404
+   [2m[90m↓[39m[22m REST API[2m > [22mGET / returns HTML
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/api.test.js[2m > [22mREST API
+[31m[1mError[22m: Hook timed out in 10000ms.
+If this is a long-running hook, pass a timeout value as the last argument or configure it globally with "hookTimeout".[39m
+[36m [2m❯[22m test/api.test.js:[2m41:12[22m[39m
+    [90m 39| [39m
+    [90m 40| [39m[34mdescribe[39m([32m'REST API'[39m[33m,[39m () [33m=>[39m {
+    [90m 41| [39m  [34mbeforeAll[39m([35masync[39m () [33m=>[39m {
+    [90m   | [39m           [31m^[39m
+    [90m 42| [39m    [90m// Start the server on a random port[39m
+    [90m 43| [39m    [35mconst[39m port [33m=[39m [34m30000[39m [33m+[39m [33mMath[39m[33m.[39m[34mfloor[39m([33mMath[39m[33m.[39m[34mrandom[39m() [33m*[39m [34m50000[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m28 passed[39m[22m[2m | [22m[33m11 skipped[39m[90m (39)[39m
+[2m   Start at [22m 23:01:15
+[2m   Duration [22m 11.38s[2m (transform 154ms, setup 0ms, collect 300ms, tests 10.12s, environment 1ms, prepare 907ms)[22m
+

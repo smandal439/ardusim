@@ -544,24 +544,6 @@ window.ArduinoLibs['STM32F746'] = {
     rules.push([/\b__NOP\s*\(\)/g, '_noop()']);
     rules.push([/\b__WFI\s*\(\)/g, '_noop()']);
 
-    // Detect busy-wait on UART SR (TXE=0x80, RXNE=0x20) and inject yield
-    rules.push([/while\s*\(\s*!\s*\(\s*_regR\s*\(\s*(0x40011000|0x40004400|0x40004800|0x40004C00|0x40005000|0x40011400)\s*\)\s*&\s*(0x[0-9A-Fa-f]+)\s*\)\s*\)\s*;/g,
-      function(m, addr, mask) {
-        return 'while (!(_regR(' + addr + ') & ' + mask + ')) { await new Promise(r => setTimeout(r, 0)); }';
-      }]);
-
-    // Busy-wait on SPI SR (TXE=0x02, RXNE=0x01, BSY=0x80)
-    rules.push([/while\s*\(\s*!\s*\(\s*_regR\s*\(\s*(0x40013008|0x40003808|0x40003C08|0x40013408)\s*\)\s*&\s*(0x[0-9A-Fa-f]+)\s*\)\s*\)\s*;/g,
-      function(m, addr, mask) {
-        return 'while (!(_regR(' + addr + ') & ' + mask + ')) { await new Promise(r => setTimeout(r, 0)); }';
-      }]);
-
-    // Busy-wait on I2C SR1 (TXE=0x80, RXNE=0x40, SB=0x01, BTF=0x04)
-    rules.push([/while\s*\(\s*!\s*\(\s*_regR\s*\(\s*(0x40005414|0x40005814|0x40005C14)\s*\)\s*&\s*(0x[0-9A-Fa-f]+)\s*\)\s*\)\s*;/g,
-      function(m, addr, mask) {
-        return 'while (!(_regR(' + addr + ') & ' + mask + ')) { await new Promise(r => setTimeout(r, 0)); }';
-      }]);
-
     rules.push([/\bHAL_GetTick\s*\(/g, '_hal_getTick(']);
     rules.push([/\bHAL_IncTick\s*\(\)/g, '_hal_incTick()']);
 
@@ -585,6 +567,40 @@ window.ArduinoLibs['STM32F746'] = {
 
     rules.push([new RegExp('(?<!_reg[WR]\\()' + periphFieldPat, 'g'),
      function (m, p, f) { return '_regR(' + _pfx(p,f) + ')'; }]);
+
+    // Busy-wait yield injection — MUST run AFTER periph-field → _regR conversion
+    // so the patterns below can match the generated _regR(addr) calls.
+    // Without a yield, these tight while loops freeze the browser main thread.
+
+    // UART SR (TXE=0x80, RXNE=0x20) — USART1/2/3, UART4/5, USART6
+    rules.push([/while\s*\(\s*!\s*\(\s*_regR\s*\(\s*(0x40011000|0x40004400|0x40004800|0x40004C00|0x40005000|0x40011400)\s*\)\s*&\s*(0x[0-9A-Fa-f]+|USART_SR_\w+|ADC_SR_\w+)\s*\)\s*\)\s*;/g,
+      function(m, addr, mask) {
+        return 'while (!(_regR(' + addr + ') & ' + mask + ')) { await new Promise(r => setTimeout(r, 0)); }';
+      }]);
+
+    // ADC SR (EOC=0x02) — ADC1/2/3
+    rules.push([/while\s*\(\s*!\s*\(\s*_regR\s*\(\s*(0x40012000|0x40012400|0x40012800)\s*\)\s*&\s*(0x[0-9A-Fa-f]+|ADC_SR_\w+)\s*\)\s*\)\s*;/g,
+      function(m, addr, mask) {
+        return 'while (!(_regR(' + addr + ') & ' + mask + ')) { await new Promise(r => setTimeout(r, 0)); }';
+      }]);
+
+    // SPI SR (TXE=0x02, RXNE=0x01, BSY=0x80)
+    rules.push([/while\s*\(\s*!\s*\(\s*_regR\s*\(\s*(0x40013008|0x40003808|0x40003C08|0x40013408)\s*\)\s*&\s*(0x[0-9A-Fa-f]+|SPI_SR_\w+)\s*\)\s*\)\s*;/g,
+      function(m, addr, mask) {
+        return 'while (!(_regR(' + addr + ') & ' + mask + ')) { await new Promise(r => setTimeout(r, 0)); }';
+      }]);
+
+    // I2C SR1 (TXE=0x80, RXNE=0x40, SB=0x01, BTF=0x04)
+    rules.push([/while\s*\(\s*!\s*\(\s*_regR\s*\(\s*(0x40005414|0x40005814|0x40005C14)\s*\)\s*&\s*(0x[0-9A-Fa-f]+|I2C_SR\w*)\s*\)\s*\)\s*;/g,
+      function(m, addr, mask) {
+        return 'while (!(_regR(' + addr + ') & ' + mask + ')) { await new Promise(r => setTimeout(r, 0)); }';
+      }]);
+
+    // Generic safety net: any remaining empty-body busy-wait on _regR gets a yield
+    rules.push([/while\s*\(\s*!\s*\(\s*_regR\s*\(\s*(0x[0-9A-Fa-f]+)\s*\)\s*&\s*([^)]+)\)\s*\)\s*;/g,
+      function(m, addr, mask) {
+        return 'while (!(_regR(' + addr + ') & ' + mask + ')) { await new Promise(r => setTimeout(r, 0)); }';
+      }]);
 
     rules.push([/\*\s*\(\s*\(\s*volatile\s+(?:unsigned\s+)?(?:long|int|short|char)\s*\*\s*\)\s*(0x[0-9A-Fa-f]+)\s*\)\s*=\s*([^;]+)/g,
      '_regW($1, ($2))']);
@@ -796,6 +812,21 @@ window.ArduinoLibs['STM32F746'] = {
 
       var portLetter = _getPortLetter(addr);
       var offset = _getOffset(addr);
+
+      // ADC CR2: SWSTART with ADON set → mark conversion complete (EOC on SR)
+      // Without this, `while (!(ADC1->SR & ADC_SR_EOC))` spins forever and freezes the browser.
+      var _adcBases = [0x40012000, 0x40012400, 0x40012800];
+      for (var ai = 0; ai < _adcBases.length; ai++) {
+        if (addr === (_adcBases[ai] + 0x08)) { // CR2 offset = 0x08
+          if ((val & ADC_CR2_ADON) && (val & ADC_CR2_SWSTART)) {
+            var srAddr = _adcBases[ai];
+            regs[srAddr] = (regs[srAddr] || 0) | ADC_SR_EOC;
+            // Hardware clears SWSTART after starting conversion
+            regs[addr] = val & ~ADC_CR2_SWSTART;
+          }
+          break;
+        }
+      }
 
       if (portLetter && offset === 0x14) {
         for (var bit = 0; bit < 16; bit++) {

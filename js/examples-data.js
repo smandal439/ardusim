@@ -16961,8 +16961,7 @@ window.EXAMPLE_SKETCHES = [
           "width": 40,
           "height": 70,
           "props": {
-            "value": 512,
-            "maxValue": 1023,
+            "value": 10,
             "unit": "kΩ"
           },
           "runtimeState": {},
@@ -16979,7 +16978,7 @@ window.EXAMPLE_SKETCHES = [
           },
           "to": {
             "instId": "pot1",
-            "pinId": "vcc"
+            "pinId": "p1"
           },
           "color": "#ff3333",
           "waypoints": []
@@ -17001,7 +17000,7 @@ window.EXAMPLE_SKETCHES = [
           "id": "w3",
           "from": {
             "instId": "pot1",
-            "pinId": "gnd"
+            "pinId": "p3"
           },
           "to": {
             "instId": "b1",
@@ -17013,188 +17012,6 @@ window.EXAMPLE_SKETCHES = [
       ]
     },
     "code": "/*\n * Pico 2 W — Analog Read\n * Reads potentiometer on GP26 (ADC0)\n * Displays value on Serial Monitor\n */\n\n#define POT_PIN 26\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Analog Read ready!\");\n}\n\nvoid loop() {\n  int raw = analogRead(POT_PIN);\n  float voltage = raw * (3.3 / 1023.0);\n  Serial.print(\"Raw: \");\n  Serial.print(raw);\n  Serial.print(\"  Voltage: \");\n  Serial.print(voltage, 2);\n  Serial.println(\" V\");\n  delay(200);\n}"
-  },
-  {
-    "id": "pico2w_blink",
-    "name": "Pico 2 W Blink",
-    "icon": "📡",
-    "desc": "Blink an LED on GP15. The LED turns on for one second, then off for one second, repeatedly.",
-    "tags": [
-      "beginner",
-      "output",
-      "led",
-      "pico2w"
-    ],
-    "circuit": {
-      "components": [
-        {
-          "id": "b1",
-          "type": "pico2w",
-          "x": 200,
-          "y": 100,
-          "width": 130,
-          "height": 280,
-          "props": {
-            "label": "Pico 2 W"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "led1",
-          "type": "led",
-          "x": 385,
-          "y": 200,
-          "width": 30,
-          "height": 60,
-          "props": {
-            "color": "#ff3333",
-            "colorName": "Red"
-          },
-          "runtimeState": {
-            "val": 0,
-            "lit": false,
-            "brightness": 0,
-            "current_mA": 0,
-            "overload": false,
-            "blown": false,
-            "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "r1",
-          "type": "resistor",
-          "x": 390,
-          "y": 290,
-          "width": 20,
-          "height": 60,
-          "props": {
-            "value": 220,
-            "unit": "Ω"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        }
-      ],
-      "wires": [
-        {
-          "id": "w1",
-          "from": {
-            "instId": "b1",
-            "pinId": "GP15"
-          },
-          "to": {
-            "instId": "led1",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": []
-        },
-        {
-          "id": "w2",
-          "from": {
-            "instId": "led1",
-            "pinId": "cathode"
-          },
-          "to": {
-            "instId": "r1",
-            "pinId": "p1"
-          },
-          "color": null,
-          "waypoints": []
-        },
-        {
-          "id": "w3",
-          "from": {
-            "instId": "r1",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "b1",
-            "pinId": "GND4"
-          },
-          "color": null,
-          "waypoints": []
-        }
-      ]
-    },
-    "code": "/*\n * Pico 2 W Blink\n * Blinks an LED on GP15\n */\n\n#define LED_PIN 15\n\nvoid setup() {\n  pinMode(LED_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Pico 2 W Blink started!\");\n}\n\nvoid loop() {\n  digitalWrite(LED_PIN, HIGH);\n  Serial.println(\"LED ON\");\n  delay(1000);\n\n  digitalWrite(LED_PIN, LOW);\n  Serial.println(\"LED OFF\");\n  delay(1000);\n}"
-  },
-  {
-    "id": "pico_2_w_blink_fixed",
-    "name": "Pico 2 W Blink (Fixed)",
-    "icon": "🔧",
-    "circuit": {
-      "components": [
-        {
-          "id": "b1",
-          "type": "pico2w",
-          "x": 200,
-          "y": 100,
-          "props": {
-            "label": "Pico 2 W"
-          }
-        },
-        {
-          "id": "led1",
-          "type": "led",
-          "x": 385,
-          "y": 200,
-          "props": {
-            "color": "#ff3333"
-          }
-        },
-        {
-          "id": "r1",
-          "type": "resistor",
-          "x": 390,
-          "y": 290,
-          "props": {
-            "value": 220,
-            "unit": "Ω"
-          }
-        }
-      ],
-      "wires": [
-        {
-          "from": {
-            "instId": "b1",
-            "pinId": "GP15"
-          },
-          "to": {
-            "instId": "led1",
-            "pinId": "anode"
-          }
-        },
-        {
-          "from": {
-            "instId": "led1",
-            "pinId": "cathode"
-          },
-          "to": {
-            "instId": "r1",
-            "pinId": "p1"
-          }
-        },
-        {
-          "from": {
-            "instId": "r1",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "b1",
-            "pinId": "GND5"
-          }
-        }
-      ]
-    },
-    "files": {
-      "sketch.ino": "/* Pico 2 W Blink */\n#define LED_PIN 15\nvoid setup() { pinMode(LED_PIN, OUTPUT); Serial.begin(115200); }\nvoid loop() { digitalWrite(LED_PIN, HIGH); delay(1000); digitalWrite(LED_PIN, LOW); delay(1000); }"
-    }
   },
   {
     "id": "pico2w_blink",
