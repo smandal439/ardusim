@@ -1,0 +1,62 @@
+{
+  "id": "pico2w_counter",
+  "name": "Pico 2 W Binary Counter",
+  "icon": "📡",
+  "desc": "Count from 0 to 255 in binary on 8 LEDs connected to GP0-GP7. Each LED represents one bit.",
+  "tags": ["beginner", "output", "led", "counter", "pico2w"],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "pico2w",
+        "x": 300,
+        "y": 80,
+        "width": 130,
+        "height": 280,
+        "props": { "label": "Pico 2 W" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "led0", "type": "led", "x": 115, "y": 110, "width": 30, "height": 60, "props": { "color": "#ff3333", "colorName": "Red" }, "runtimeState": { "val": 0, "lit": false, "brightness": 0, "current_mA": 0, "overload": false, "blown": false, "_warnedBlown": false }, "selected": false, "rotation": 0
+      },
+      {
+        "id": "led1", "type": "led", "x": 115, "y": 160, "width": 30, "height": 60, "props": { "color": "#ff8800", "colorName": "Orange" }, "runtimeState": { "val": 0, "lit": false, "brightness": 0, "current_mA": 0, "overload": false, "blown": false, "_warnedBlown": false }, "selected": false, "rotation": 0
+      },
+      {
+        "id": "led2", "type": "led", "x": 115, "y": 210, "width": 30, "height": 60, "props": { "color": "#ffff00", "colorName": "Yellow" }, "runtimeState": { "val": 0, "lit": false, "brightness": 0, "current_mA": 0, "overload": false, "blown": false, "_warnedBlown": false }, "selected": false, "rotation": 0
+      },
+      {
+        "id": "led3", "type": "led", "x": 115, "y": 260, "width": 30, "height": 60, "props": { "color": "#00ff00", "colorName": "Green" }, "runtimeState": { "val": 0, "lit": false, "brightness": 0, "current_mA": 0, "overload": false, "blown": false, "_warnedBlown": false }, "selected": false, "rotation": 0
+      },
+      {
+        "id": "r0", "type": "resistor", "x": 120, "y": 95, "width": 20, "height": 60, "props": { "value": 220, "unit": "Ω" }, "runtimeState": {}, "selected": false, "rotation": 90
+      },
+      {
+        "id": "r1", "type": "resistor", "x": 120, "y": 145, "width": 20, "height": 60, "props": { "value": 220, "unit": "Ω" }, "runtimeState": {}, "selected": false, "rotation": 90
+      },
+      {
+        "id": "r2", "type": "resistor", "x": 120, "y": 195, "width": 20, "height": 60, "props": { "value": 220, "unit": "Ω" }, "runtimeState": {}, "selected": false, "rotation": 90
+      },
+      {
+        "id": "r3", "type": "resistor", "x": 120, "y": 245, "width": 20, "height": 60, "props": { "value": 220, "unit": "Ω" }, "runtimeState": {}, "selected": false, "rotation": 90
+      }
+    ],
+    "wires": [
+      { "id": "w1", "from": { "instId": "b1", "pinId": "GP0" }, "to": { "instId": "led0", "pinId": "anode" }, "color": null, "waypoints": [] },
+      { "id": "w2", "from": { "instId": "b1", "pinId": "GP1" }, "to": { "instId": "led1", "pinId": "anode" }, "color": null, "waypoints": [] },
+      { "id": "w3", "from": { "instId": "b1", "pinId": "GP2" }, "to": { "instId": "led2", "pinId": "anode" }, "color": null, "waypoints": [] },
+      { "id": "w4", "from": { "instId": "b1", "pinId": "GP3" }, "to": { "instId": "led3", "pinId": "anode" }, "color": null, "waypoints": [] },
+      { "id": "w5", "from": { "instId": "led0", "pinId": "cathode" }, "to": { "instId": "r0", "pinId": "p1" }, "color": null, "waypoints": [] },
+      { "id": "w6", "from": { "instId": "led1", "pinId": "cathode" }, "to": { "instId": "r1", "pinId": "p1" }, "color": null, "waypoints": [] },
+      { "id": "w7", "from": { "instId": "led2", "pinId": "cathode" }, "to": { "instId": "r2", "pinId": "p1" }, "color": null, "waypoints": [] },
+      { "id": "w8", "from": { "instId": "led3", "pinId": "cathode" }, "to": { "instId": "r3", "pinId": "p1" }, "color": null, "waypoints": [] },
+      { "id": "w9", "from": { "instId": "r0", "pinId": "p2" }, "to": { "instId": "b1", "pinId": "GND1" }, "color": null, "waypoints": [] },
+      { "id": "w10", "from": { "instId": "r1", "pinId": "p2" }, "to": { "instId": "b1", "pinId": "GND1" }, "color": null, "waypoints": [] },
+      { "id": "w11", "from": { "instId": "r2", "pinId": "p2" }, "to": { "instId": "b1", "pinId": "GND1" }, "color": null, "waypoints": [] },
+      { "id": "w12", "from": { "instId": "r3", "pinId": "p2" }, "to": { "instId": "b1", "pinId": "GND1" }, "color": null, "waypoints": [] }
+    ]
+  },
+  "code": "/*\n * Pico 2 W — Binary Counter\n * Counts 0-255 in binary on GP0-GP7\n * 4 LEDs shown; extend to 8 for full byte\n */\n\n#define NUM_LEDS 4\nint ledPins[] = {0, 1, 2, 3};\n\nvoid setup() {\n  for (int i = 0; i < NUM_LEDS; i++) {\n    pinMode(ledPins[i], OUTPUT);\n  }\n  Serial.begin(115200);\n  Serial.println(\"Binary Counter started!\");\n}\n\nvoid loop() {\n  for (int count = 0; count < 16; count++) {\n    for (int i = 0; i < NUM_LEDS; i++) {\n      digitalWrite(ledPins[i], (count >> i) & 1);\n    }\n    Serial.print(\"Count: \");\n    Serial.println(count);\n    delay(500);\n  }\n}"
+}

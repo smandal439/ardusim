@@ -1,0 +1,41 @@
+{
+  "id": "pico2w_analog_read",
+  "name": "Pico 2 W Analog Read",
+  "icon": "📡",
+  "desc": "Read a potentiometer on GP26 (ADC0) and display the value on the Serial Monitor. Maps 0-3.3V to 0-1023.",
+  "tags": ["beginner", "analog", "input", "adc", "pico2w"],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "pico2w",
+        "x": 250,
+        "y": 100,
+        "width": 130,
+        "height": 280,
+        "props": { "label": "Pico 2 W" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "pot1",
+        "type": "potentiometer",
+        "x": 90,
+        "y": 180,
+        "width": 40,
+        "height": 70,
+        "props": { "value": 10, "unit": "kΩ" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      { "id": "w1", "from": { "instId": "b1", "pinId": "3V3OUT" }, "to": { "instId": "pot1", "pinId": "p1" }, "color": "#ff3333", "waypoints": [] },
+      { "id": "w2", "from": { "instId": "pot1", "pinId": "wiper" }, "to": { "instId": "b1", "pinId": "GP26" }, "color": "#00cc44", "waypoints": [] },
+      { "id": "w3", "from": { "instId": "pot1", "pinId": "p3" }, "to": { "instId": "b1", "pinId": "AGND" }, "color": "#333333", "waypoints": [] }
+    ]
+  },
+  "code": "/*\n * Pico 2 W — Analog Read\n * Reads potentiometer on GP26 (ADC0)\n * Displays value on Serial Monitor\n */\n\n#define POT_PIN 26\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Analog Read ready!\");\n}\n\nvoid loop() {\n  int raw = analogRead(POT_PIN);\n  float voltage = raw * (3.3 / 1023.0);\n  Serial.print(\"Raw: \");\n  Serial.print(raw);\n  Serial.print(\"  Voltage: \");\n  Serial.print(voltage, 2);\n  Serial.println(\" V\");\n  delay(200);\n}"
+}

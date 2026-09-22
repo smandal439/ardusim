@@ -1,0 +1,25 @@
+{
+  "id": "pico2w_serial_hello",
+  "name": "Pico 2 W Serial Hello",
+  "icon": "📡",
+  "desc": "Print hello messages and a running counter to the Serial Monitor at 115200 baud.",
+  "tags": ["beginner", "serial", "communication", "pico2w"],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "pico2w",
+        "x": 200,
+        "y": 100,
+        "width": 130,
+        "height": 280,
+        "props": { "label": "Pico 2 W" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": []
+  },
+  "code": "/*\n * Pico 2 W — Serial Hello\n * Prints messages and counter to Serial Monitor\n */\n\nint counter = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println(\"==================\");\n  Serial.println(\"  Pico 2 W Ready\");\n  Serial.println(\"  RP2350 @ 150MHz\");\n  Serial.println(\"==================\");\n}\n\nvoid loop() {\n  Serial.print(\"Hello from Pico 2 W! Counter: \");\n  Serial.println(counter);\n  counter++;\n  delay(1000);\n}"
+}

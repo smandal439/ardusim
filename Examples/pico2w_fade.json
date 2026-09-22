@@ -1,0 +1,53 @@
+{
+  "id": "pico2w_fade",
+  "name": "Pico 2 W PWM Fade",
+  "icon": "📡",
+  "desc": "Fade an LED connected to GP15 using PWM. The brightness ramps up and down smoothly using analogWrite.",
+  "tags": ["beginner", "output", "led", "pwm", "pico2w"],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "pico2w",
+        "x": 250,
+        "y": 100,
+        "width": 130,
+        "height": 280,
+        "props": { "label": "Pico 2 W" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 420,
+        "y": 190,
+        "width": 30,
+        "height": 60,
+        "props": { "color": "#ff3333", "colorName": "Red" },
+        "runtimeState": { "val": 0, "lit": false, "brightness": 0, "current_mA": 0, "overload": false, "blown": false, "_warnedBlown": false },
+        "selected": false,
+        "rotation": 0
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 425,
+        "y": 280,
+        "width": 20,
+        "height": 60,
+        "props": { "value": 220, "unit": "Ω" },
+        "runtimeState": {},
+        "selected": false,
+        "rotation": 0
+      }
+    ],
+    "wires": [
+      { "id": "w1", "from": { "instId": "b1", "pinId": "GP15" }, "to": { "instId": "led1", "pinId": "anode" }, "color": null, "waypoints": [] },
+      { "id": "w2", "from": { "instId": "led1", "pinId": "cathode" }, "to": { "instId": "r1", "pinId": "p1" }, "color": null, "waypoints": [] },
+      { "id": "w3", "from": { "instId": "r1", "pinId": "p2" }, "to": { "instId": "b1", "pinId": "GND4" }, "color": null, "waypoints": [] }
+    ]
+  },
+  "code": "/*\n * Pico 2 W — PWM Fade\n * Fades an LED on GP15 using analogWrite\n */\n\n#define LED_PIN 15\n\nint brightness = 0;\nint fadeAmount = 5;\n\nvoid setup() {\n  pinMode(LED_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"PWM Fade started!\");\n}\n\nvoid loop() {\n  analogWrite(LED_PIN, brightness);\n  Serial.print(\"Brightness: \");\n  Serial.println(brightness);\n\n  brightness += fadeAmount;\n  if (brightness <= 0 || brightness >= 255) {\n    fadeAmount = -fadeAmount;\n  }\n  delay(30);\n}"
+}
