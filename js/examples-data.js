@@ -18303,6 +18303,184 @@ window.EXAMPLE_SKETCHES = [
     }
   },
   {
+    "id": "pico_8led",
+    "name": "8-LED Array with Pico",
+    "icon": "🔧",
+    "desc": "A custom 8-LED Array circuit example for Pico.",
+    "tags": [
+      "custom",
+      "circuit",
+      "led",
+      "pico",
+      "blink",
+      "array"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1790087330558_gv77o",
+          "type": "pico2w",
+          "x": 215,
+          "y": 255,
+          "rotation": 0,
+          "props": {
+            "label": "Pico 2 W"
+          }
+        },
+        {
+          "id": "comp_1790087449460_tjxtv",
+          "type": "multi_led_array",
+          "x": 385,
+          "y": 335,
+          "rotation": 0,
+          "props": {
+            "label": "8-LED ARRAY"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "wire_1790087454224_4l9yc",
+          "from": {
+            "instId": "comp_1790087330558_gv77o",
+            "pinId": "GND5"
+          },
+          "to": {
+            "instId": "comp_1790087449460_tjxtv",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790087457261_v0p0n",
+          "from": {
+            "instId": "comp_1790087330558_gv77o",
+            "pinId": "GP18"
+          },
+          "to": {
+            "instId": "comp_1790087449460_tjxtv",
+            "pinId": "l8"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790087459604_oea8o",
+          "from": {
+            "instId": "comp_1790087330558_gv77o",
+            "pinId": "GP19"
+          },
+          "to": {
+            "instId": "comp_1790087449460_tjxtv",
+            "pinId": "l7"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790087462387_1yt2a",
+          "from": {
+            "instId": "comp_1790087330558_gv77o",
+            "pinId": "GP20"
+          },
+          "to": {
+            "instId": "comp_1790087449460_tjxtv",
+            "pinId": "l6"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790087464518_5p4bh",
+          "from": {
+            "instId": "comp_1790087330558_gv77o",
+            "pinId": "GP21"
+          },
+          "to": {
+            "instId": "comp_1790087449460_tjxtv",
+            "pinId": "l5"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790087467291_ztxu7",
+          "from": {
+            "instId": "comp_1790087330558_gv77o",
+            "pinId": "GP22"
+          },
+          "to": {
+            "instId": "comp_1790087449460_tjxtv",
+            "pinId": "l4"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790087477689_jvxh4",
+          "from": {
+            "instId": "comp_1790087330558_gv77o",
+            "pinId": "GP26"
+          },
+          "to": {
+            "instId": "comp_1790087449460_tjxtv",
+            "pinId": "l3"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790087480264_c0pco",
+          "from": {
+            "instId": "comp_1790087330558_gv77o",
+            "pinId": "GP27"
+          },
+          "to": {
+            "instId": "comp_1790087449460_tjxtv",
+            "pinId": "l2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790087482729_xeezb",
+          "from": {
+            "instId": "comp_1790087330558_gv77o",
+            "pinId": "GP28"
+          },
+          "to": {
+            "instId": "comp_1790087449460_tjxtv",
+            "pinId": "l1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "int led_array[]={18 ,19,20,21,22,26,27,28};\nvoid setup() {\n  for (int i = 0; i < 8; i++) {\n    pinMode(led_array[i], OUTPUT);\n  }\n}\n\nvoid loop() {\n  for (int i = 0; i < 8; i++) {\n    digitalWrite(led_array[i], HIGH);\n    delay(1000);\n  }\n  for (int i = 7; i >=0; i--) {\n    digitalWrite(led_array[i], LOW);\n    delay(1000);\n  }\n\n}"
+    }
+  },
+  {
     "id": "pir_alarm",
     "name": "PIR Motion Alarm",
     "icon": "🚶",
