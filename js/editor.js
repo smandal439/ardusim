@@ -822,7 +822,7 @@ DL2:    DJNZ R3, DL2
   renameFile(oldName, newName) {
     if (!this.files[oldName] || oldName === newName) return false;
     if (this.files[newName]) return false;
-    if (!/\.(ino|h|cpp|c)$/i.test(newName)) return false;
+    if (!/\.(ino|h|cpp|c|asm)$/i.test(newName)) return false;
 
     const entry = this.files[oldName];
     const state = this._fileStates[oldName];
@@ -862,6 +862,12 @@ DL2:    DJNZ R3, DL2
     }
     if (window.StorageManager) window.StorageManager.markDirty();
     return true;
+  },
+
+  renameSketchFile(newName) {
+    const oldName = Object.keys(this.files).find(n => /^sketch\.(ino|asm|c)$/i.test(n));
+    if (!oldName || oldName === newName) return false;
+    return this.renameFile(oldName, newName);
   },
 
   getAllFiles() {
@@ -1265,7 +1271,8 @@ DL2:    DJNZ R3, DL2
   },
 
   _promptNewFile() {
-    const ext = this._getDefaultSketchName().endsWith('.asm') ? '.asm' : '.ino';
+    const def = this._getDefaultSketchName();
+    const ext = def.endsWith('.asm') ? '.asm' : def.endsWith('.c') ? '.c' : '.ino';
     let name = 'new_file' + ext;
     let counter = 1;
     while (this.files[name]) {

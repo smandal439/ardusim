@@ -563,6 +563,10 @@ class App {
     this.sim.setBoard(b);
     window.StorageManager?.saveSettings?.({ ...(window.StorageManager.loadSettings() || {}), board: b });
 
+    // Rename the sketch file to match the new board's extension
+    const newSketchName = this._getDefaultSketchName();
+    this.editor?.renameSketchFile?.(newSketchName);
+
     // Rebuild the pin monitor for the new pin set
     this._pinMonitorBoard = null;
 
@@ -1801,7 +1805,8 @@ _newProject() {
     this.canvas?.clearCanvas();
     if (this.editor?.loadFiles) {
       const sketchName = this._getDefaultSketchName();
-      this.editor.loadFiles({ [sketchName]: EditorManager.DEFAULT_CODE }, sketchName);
+      const defaultCode = this.editor?.getDefaultCode?.() || EditorManager.DEFAULT_CODE;
+      this.editor.loadFiles({ [sketchName]: defaultCode }, sketchName);
     } else {
       this.editor?.setCode(EditorManager.DEFAULT_CODE);
     }
@@ -3412,6 +3417,9 @@ _newProject() {
       }
       this._syncBoardFromCanvas();
       this._refreshCanvasSummary();
+      // Update editor sketch filename and default code for the new board
+      const sketchName = this._getDefaultSketchName();
+      this.editor?.renameSketchFile?.(sketchName);
       setTimeout(() => this.canvas.fitView(), 80);
     }
   }

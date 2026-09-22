@@ -13,6 +13,16 @@ const StorageManager = {
   _lastSavedAt: null,
   _isDirty: false,
 
+  _getDefaultSketchFilename() {
+    try {
+      const settings = JSON.parse(localStorage.getItem(this.LS_SETTINGS_KEY) || '{}');
+      const board = settings.board || 'arduino_uno';
+      if (board === 'intel_8085' || board === 'intel_8051') return 'sketch.asm';
+      if (board === 'stm32f746_disco' || board === 'lpc2148') return 'sketch.c';
+    } catch (e) { /* ignore */ }
+    return 'sketch.ino';
+  },
+
   /* ── Mark project as dirty (unsaved) ── */
   markDirty() {
     this._isDirty = true;
@@ -44,7 +54,7 @@ const StorageManager = {
     // v1.0/v1.1 → v2.0: migrate single code string to files dict
     if (!project.files || typeof project.files !== 'object' || Object.keys(project.files).length === 0) {
       const code = typeof project.code === 'string' ? project.code : '';
-      project.files = { 'sketch.ino': code };
+      project.files = { [this._getDefaultSketchFilename()]: code };
       delete project.code;
     }
 
@@ -60,7 +70,7 @@ const StorageManager = {
       version:  this.VERSION,
       savedAt:  new Date().toISOString(),
       name:     projectName,
-      files:    files || { 'sketch.ino': '' },
+      files:    files || { [this._getDefaultSketchFilename()]: '' },
       circuit:  circuitData,
       board2Code,
     };
@@ -158,7 +168,7 @@ const StorageManager = {
       version:  this.VERSION,
       savedAt:  new Date().toISOString(),
       name:     projectName,
-      files:    files || { 'sketch.ino': '' },
+      files:    files || { [this._getDefaultSketchFilename()]: '' },
       circuit:  circuitData,
     };
     if (board2Code) project.board2Code = board2Code;
@@ -279,7 +289,7 @@ const StorageManager = {
     // Arduino IDE requires: FolderName/FolderName.ino (names must match)
     const folderName = projectName.replace(/[^a-zA-Z0-9_\- ]/g, '').replace(/\s+/g, '_').replace(/^_|_$/g, '') || 'ArduSim_Project';
 
-    const allFiles = files || { 'sketch.ino': '' };
+    const allFiles = files || { [this._getDefaultSketchFilename()]: '' };
 
     // Find the main .ino file and rename it to match the folder
     const inoEntries = Object.entries(allFiles).filter(([n]) => n.endsWith('.ino'));
@@ -341,7 +351,7 @@ const StorageManager = {
       desc: description || `A custom ${name} circuit example.`,
       tags: String(tags || '').split(',').map(tag => tag.trim()).filter(Boolean),
       circuit: circuitData,
-      files: files || { 'sketch.ino': '' },
+      files: files || { [this._getDefaultSketchFilename()]: '' },
     };
     if (board2Code) example.board2Code = board2Code;
     const json = JSON.stringify(example, null, 2);
@@ -390,7 +400,7 @@ const StorageManager = {
     try {
       const project = {
         version:   this.VERSION,
-        files:     files || { 'sketch.ino': '' },
+        files:     files || { [this._getDefaultSketchFilename()]: '' },
         circuit:   circuitData,
         name:      projectName,
         savedAt:   Date.now(),
