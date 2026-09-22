@@ -4611,6 +4611,34 @@ class CircuitCanvas {
         continue;
       }
 
+      // 1d. Raspberry Pi Pico 2 W Pins (3.3V logic)
+      if (inst.type === 'pico2w') {
+        const pinId = current.pinId;
+        if (pinId === 'GND1' || pinId === 'GND2' || pinId === 'GND3' || pinId === 'GND4' || pinId === 'GND5' || pinId === 'GND6' || pinId === 'GND7' || pinId === 'AGND') {
+          grounds.push({ type: 'gnd', instId: inst.id, pinId, resistance: current.resistance });
+        } else if (pinId === 'VBUS') {
+          sources.push({ type: '5v', voltage: 5.0, rawVal: 255, resistance: current.resistance });
+        } else if (pinId === '3V3OUT' || pinId === '3V3') {
+          sources.push({ type: '3v3', voltage: 3.3, rawVal: 168, resistance: current.resistance });
+        } else if (pinId === 'VSYS' || pinId === '3V3EN' || pinId === 'RUN' || pinId === 'ADCREF') {
+          // System pins — not user GPIOs
+        } else {
+          // GPIO (GP0—GP28)
+          const pinNum = this._pinToNumber(pinId);
+          const pinKey = `pin_${pinNum}`;
+          const sim = window.ArduinoSim;
+          const rawVal = sim && sim.pinStates ? (sim.pinStates[pinKey] || 0) : 0;
+
+          if (rawVal > 0) {
+            const voltage = 3.3 * (rawVal > 1 ? (rawVal / 255) : 1.0);
+            sources.push({ type: 'digital', pinNum, pinKey, voltage, rawVal, resistance: current.resistance });
+          } else {
+            grounds.push({ type: 'digital_low', pinNum, pinKey, resistance: current.resistance });
+          }
+        }
+        continue;
+      }
+
       // 1c. Intel 8085 / 8051 Pins
       if (inst.type === 'intel_8085' || inst.type === 'intel_8051') {
         const pinId = current.pinId;
@@ -4857,6 +4885,9 @@ class CircuitCanvas {
     }
     if (inst.type === 'esp32_devkit_v1') {
       return pinId === 'GND1' || pinId === 'GND2' || pinId === 'GND';
+    }
+    if (inst.type === 'pico2w') {
+      return pinId === 'GND1' || pinId === 'GND2' || pinId === 'GND3' || pinId === 'GND4' || pinId === 'GND5' || pinId === 'GND6' || pinId === 'GND7' || pinId === 'AGND';
     }
     if (inst.type === 'intel_8085' || inst.type === 'intel_8051') {
       return pinId === 'GND' || pinId === 'GND1' || pinId === 'GND2';
