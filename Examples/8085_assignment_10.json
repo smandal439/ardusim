@@ -1,0 +1,28 @@
+{
+  "id": "8085_assignment_10",
+  "name": "8085 assignment 10",
+  "icon": "🔧",
+  "desc": "A custom 8085 assignment 10 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790006818923_yi4u2",
+        "type": "intel_8085",
+        "x": 185,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "label": "8085"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": ";a set of three readings are stored in memory location starting \r\n;from 9050H, sort the readings in ascending order.\r\n\r\n\r\nORG 8000H           ; Program starting address\r\n\r\nSTART:\r\n  LXI H, 9050H        ; Initialize memory pointer to the start of the data\r\n  MVI D, 00H          ; Clear swap flag (D = 00H means no swap occurred)\r\n  MVI C, 02H          ; Initialize loop counter for 3 elements (Requires 2 comparisons)\r\n\r\nCHECK:\r\n  MOV A, M            ; Load current element into Accumulator\r\n  INX H               ; Move pointer to the next element\r\n  CMP M               ; Compare current element (A) with next element (M)\r\n  JC NEXTBYTE         ; If A < M, it's already in ascending order, skip swap\r\n  JZ NEXTBYTE         ; If A == M, skip swap\r\n\r\n; --- Swap Logic ---\r\n  MOV B, M            ; Save next element in temporary register B\r\n  MOV M, A            ; Move current element (A) into next element's position\r\n  DCX H               ; Move pointer back to current element's position\r\n  MOV M, B            ; Move saved element (B) into current element's position\r\n  INX H               ; Restore pointer to next element to continue array scan\r\n  MVI D, 01H          ; Set swap flag to 01H (indicating a swap took place)\r\n\r\nNEXTBYTE:\r\n  DCR C               ; Decrement comparison counter\r\n  JNZ CHECK           ; If C is not zero, check the next pair of bytes\r\n\r\n; --- Pass Complete: Check Swap Flag ---\r\n  MOV A, D            ; Move swap flag to Accumulator\r\n  CPI 01H             ; Check if a swap occurred (Is D == 01H?)\r\n  JZ START            ; If yes, restart a new pass to ensure fully sorted\r\n\r\nRST 1               ; Terminate the program cleanly\r\n\r\n; --- Data Segment Definitions ---\r\nORG 9050H\r\nDB 87H, 56H, 75H    ; Array to be sorted\r\n"
+  }
+}
