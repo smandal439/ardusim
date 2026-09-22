@@ -3,7 +3,7 @@
   "name": "Pico 2 W Button",
   "icon": "📡",
   "desc": "Read a button on GP14 and toggle the built-in LED on GP25. Press the button to change LED state.",
-  "tags": ["beginner", "input", "button", "pico2w"],
+  "tags": ["beginner", "input", "button", "pico2w","raspberry pi pico 2 w"],
   "circuit": {
     "components": [
       {

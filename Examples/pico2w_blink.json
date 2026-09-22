@@ -7,7 +7,7 @@
     "beginner",
     "output",
     "led",
-    "pico2w"
+    "pico2w","raspberry pi pico 2 w"
   ],
   "circuit": {
     "components": [

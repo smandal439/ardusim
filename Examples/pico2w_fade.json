@@ -3,7 +3,7 @@
   "name": "Pico 2 W PWM Fade",
   "icon": "📡",
   "desc": "Fade an LED connected to GP15 using PWM. The brightness ramps up and down smoothly using analogWrite.",
-  "tags": ["beginner", "output", "led", "pwm", "pico2w"],
+  "tags": ["beginner", "output", "led", "pwm", "pico2w","raspberry pi pico 2 w"],
   "circuit": {
     "components": [
       {

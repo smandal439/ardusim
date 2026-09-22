@@ -3,7 +3,7 @@
   "name": "Pico 2 W RGB LED",
   "icon": "📡",
   "desc": "Cycle through colors on an RGB LED connected to GP10 (Red), GP11 (Green), GP12 (Blue) using PWM.",
-  "tags": ["beginner", "output", "led", "rgb", "pwm", "pico2w"],
+  "tags": ["beginner", "output", "led", "rgb", "pwm", "pico2w","raspberry pi pico 2 w"],
   "circuit": {
     "components": [
       {

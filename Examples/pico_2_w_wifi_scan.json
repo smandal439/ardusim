@@ -1,11 +1,14 @@
 {
-  "id": "pico_2_w_wifi_scan",
+  "id": "pico2w_wifi_scan",
   "name": "Pico 2 W WiFi Scan",
-  "icon": "🔧",
-  "desc": "A custom Pico 2 W WiFi Scan circuit example.",
+  "icon": "📡",
+  "desc": "Scan for nearby WiFi networks using the CYW43439 wireless chip and print results to Serial Monitor.",
   "tags": [
-    "custom",
-    "circuit"
+    "intermediate",
+    "wireless",
+    "wifi",
+    "network",
+    "pico2w","raspberry pi pico 2 w"
   ],
   "circuit": {
     "components": [
