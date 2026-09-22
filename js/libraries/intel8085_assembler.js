@@ -150,7 +150,11 @@ window.Intel8085Assembler = (function () {
             var lbl = (parts[idx + 1] || '').trim().toUpperCase();
             if (labels[lbl] !== undefined) ld = labels[lbl];
           }
-          if (ld === null) { err(i, 'Invalid LXI data'); continue; }
+          if (ld === null) {
+            var lt = (parts[idx + 1] || '').trim().toUpperCase();
+            fixups.push({ offset: out.length + 1, tokens: [lt], size: 2 });
+            out.push(0x01 + RP_LXI[lrp] * 0x10); out.push(0); out.push(0); pc += 3; continue;
+          }
           out.push(0x01 + RP_LXI[lrp] * 0x10);
           out.push(ld & 0xFF); out.push((ld >> 8) & 0xFF); pc += 3; continue;
         }
@@ -161,7 +165,11 @@ window.Intel8085Assembler = (function () {
             var lbl = (parts[idx] || '').trim().toUpperCase();
             if (labels[lbl] !== undefined) av = labels[lbl];
           }
-          if (av === null) { err(i, 'Invalid address'); continue; }
+          if (av === null) {
+            var at = (parts[idx] || '').trim().toUpperCase();
+            fixups.push({ offset: out.length + 1, tokens: [at], size: 2 });
+            out.push(mem16[mn]); out.push(0); out.push(0); pc += 3; continue;
+          }
           out.push(mem16[mn]); out.push(av & 0xFF); out.push((av >> 8) & 0xFF); pc += 3; continue;
         }
         if (mn === 'LDAX' || mn === 'STAX') {
@@ -185,7 +193,11 @@ window.Intel8085Assembler = (function () {
           var jv = parseNum(parts[idx] || '');
           if (jv === null && labels[parts[idx] ? parts[idx].trim().toUpperCase() : ''] !== undefined)
             jv = labels[parts[idx].trim().toUpperCase()];
-          if (jv === null) { err(i, 'Invalid jump address'); continue; }
+          if (jv === null) {
+            var jt = (parts[idx] || '').trim().toUpperCase();
+            fixups.push({ offset: out.length + 1, tokens: [jt], size: 2 });
+            out.push(jmpMap[mn]); out.push(0); out.push(0); pc += 3; continue;
+          }
           out.push(jmpMap[mn]); out.push(jv & 0xFF); out.push((jv >> 8) & 0xFF); pc += 3; continue;
         }
         var callMap = { CALL: 0xCD, CC: 0xDC, CNC: 0xD4, CZ: 0xCC, CNZ: 0xC4, CP: 0xF4, CM: 0xFC, CPE: 0xEC, CPO: 0xE4 };
@@ -193,7 +205,11 @@ window.Intel8085Assembler = (function () {
           var cv = parseNum(parts[idx] || '');
           if (cv === null && labels[parts[idx] ? parts[idx].trim().toUpperCase() : ''] !== undefined)
             cv = labels[parts[idx].trim().toUpperCase()];
-          if (cv === null) { err(i, 'Invalid call address'); continue; }
+          if (cv === null) {
+            var ct = (parts[idx] || '').trim().toUpperCase();
+            fixups.push({ offset: out.length + 1, tokens: [ct], size: 2 });
+            out.push(callMap[mn]); out.push(0); out.push(0); pc += 3; continue;
+          }
           out.push(callMap[mn]); out.push(cv & 0xFF); out.push((cv >> 8) & 0xFF); pc += 3; continue;
         }
         err(i, 'Unknown instruction: ' + mn);
