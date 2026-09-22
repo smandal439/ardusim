@@ -16934,7 +16934,8 @@ window.EXAMPLE_SKETCHES = [
       "analog",
       "input",
       "adc",
-      "pico2w"
+      "pico2w",
+      "raspberry pi pico 2 w"
     ],
     "circuit": {
       "components": [
@@ -17013,16 +17014,9 @@ window.EXAMPLE_SKETCHES = [
     "code": "/*\n * Pico 2 W — Analog Read\n * Reads potentiometer on GP26 (ADC0)\n * Displays value on Serial Monitor\n */\n\n#define POT_PIN 26\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Analog Read ready!\");\n}\n\nvoid loop() {\n  int raw = analogRead(POT_PIN);\n  float voltage = raw * (3.3 / 1023.0);\n  Serial.print(\"Raw: \");\n  Serial.print(raw);\n  Serial.print(\"  Voltage: \");\n  Serial.print(voltage, 2);\n  Serial.println(\" V\");\n  delay(200);\n}"
   },
   {
-    "id": "pico2w_blink",
-    "name": "Pico 2 W Blink",
-    "icon": "📡",
-    "desc": "Blink the built-in LED on a Raspberry Pi Pico 2 W. The LED on GP25 turns on for one second, then off for one second, repeatedly.",
-    "tags": [
-      "beginner",
-      "output",
-      "led",
-      "pico2w"
-    ],
+    "id": "pico_2_w_blink_fixed",
+    "name": "Pico 2 W Blink (Fixed)",
+    "icon": "🔧",
     "circuit": {
       "components": [
         {
@@ -17030,57 +17024,32 @@ window.EXAMPLE_SKETCHES = [
           "type": "pico2w",
           "x": 200,
           "y": 100,
-          "width": 130,
-          "height": 280,
           "props": {
             "label": "Pico 2 W"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "led1",
           "type": "led",
           "x": 385,
           "y": 200,
-          "width": 30,
-          "height": 60,
           "props": {
-            "color": "#ff3333",
-            "colorName": "Red"
-          },
-          "runtimeState": {
-            "val": 0,
-            "lit": false,
-            "brightness": 0,
-            "current_mA": 0,
-            "overload": false,
-            "blown": false,
-            "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+            "color": "#ff3333"
+          }
         },
         {
           "id": "r1",
           "type": "resistor",
           "x": 390,
           "y": 290,
-          "width": 20,
-          "height": 60,
           "props": {
             "value": 220,
             "unit": "Ω"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          }
         }
       ],
       "wires": [
         {
-          "id": "w1",
           "from": {
             "instId": "b1",
             "pinId": "GP15"
@@ -17088,12 +17057,9 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "led1",
             "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": []
+          }
         },
         {
-          "id": "w2",
           "from": {
             "instId": "led1",
             "pinId": "cathode"
@@ -17101,32 +17067,29 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "r1",
             "pinId": "p1"
-          },
-          "color": null,
-          "waypoints": []
+          }
         },
         {
-          "id": "w3",
           "from": {
             "instId": "r1",
             "pinId": "p2"
           },
           "to": {
             "instId": "b1",
-            "pinId": "GND4"
-          },
-          "color": null,
-          "waypoints": []
+            "pinId": "GND5"
+          }
         }
       ]
     },
-    "code": "/*\n * Pico 2 W Blink\n * Blinks the built-in LED on GP25\n */\n\n#define LED_PIN 25\n\nvoid setup() {\n  pinMode(LED_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Pico 2 W Blink started!\");\n}\n\nvoid loop() {\n  digitalWrite(LED_PIN, HIGH);\n  Serial.println(\"LED ON\");\n  delay(1000);\n\n  digitalWrite(LED_PIN, LOW);\n  Serial.println(\"LED OFF\");\n  delay(1000);\n}"
+    "files": {
+      "sketch.ino": "/* Pico 2 W Blink */\n#define LED_PIN 15\nvoid setup() { pinMode(LED_PIN, OUTPUT); Serial.begin(115200); }\nvoid loop() { digitalWrite(LED_PIN, HIGH); delay(1000); digitalWrite(LED_PIN, LOW); delay(1000); }"
+    }
   },
   {
     "id": "pico2w_button",
     "name": "Pico 2 W Button",
     "icon": "📡",
-    "desc": "Read a button on GP14 and toggle the built-in LED on GP25. Press the button to change LED state.",
+    "desc": "Read a button on GP14 and toggle an LED on GP15. Press the button to change LED state.",
     "tags": [
       "beginner",
       "input",
@@ -17164,6 +17127,29 @@ window.EXAMPLE_SKETCHES = [
           "rotation": 0
         },
         {
+          "id": "led1",
+          "type": "led",
+          "x": 420,
+          "y": 190,
+          "width": 30,
+          "height": 60,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          },
+          "runtimeState": {
+            "val": 0,
+            "lit": false,
+            "brightness": 0,
+            "current_mA": 0,
+            "overload": false,
+            "blown": false,
+            "_warnedBlown": false
+          },
+          "selected": false,
+          "rotation": 0
+        },
+        {
           "id": "r1",
           "type": "resistor",
           "x": 155,
@@ -17173,6 +17159,21 @@ window.EXAMPLE_SKETCHES = [
           "props": {
             "value": 10,
             "unit": "kΩ"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "r2",
+          "type": "resistor",
+          "x": 425,
+          "y": 280,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
           },
           "runtimeState": {},
           "selected": false,
@@ -17231,10 +17232,49 @@ window.EXAMPLE_SKETCHES = [
           },
           "color": "#333333",
           "waypoints": []
+        },
+        {
+          "id": "w5",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP15"
+          },
+          "to": {
+            "instId": "led1",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w6",
+          "from": {
+            "instId": "led1",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "r2",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w7",
+          "from": {
+            "instId": "r2",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND4"
+          },
+          "color": null,
+          "waypoints": []
         }
       ]
     },
-    "code": "/*\n * Pico 2 W — Button Input\n * Press button on GP14 to toggle built-in LED on GP25\n */\n\n#define BTN_PIN 14\n#define LED_PIN 25\n\nbool ledState = false;\nbool lastBtn = HIGH;\n\nvoid setup() {\n  pinMode(BTN_PIN, INPUT_PULLDOWN);\n  pinMode(LED_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Button toggle ready!\");\n}\n\nvoid loop() {\n  bool btn = digitalRead(BTN_PIN);\n  if (btn == HIGH && lastBtn == LOW) {\n    ledState = !ledState;\n    digitalWrite(LED_PIN, ledState ? HIGH : LOW);\n    Serial.println(ledState ? \"LED ON\" : \"LED OFF\");\n    delay(50);\n  }\n  lastBtn = btn;\n  delay(10);\n}"
+    "code": "/*\n * Pico 2 W — Button Input\n * Press button on GP14 to toggle LED on GP15\n */\n\n#define BTN_PIN 14\n#define LED_PIN 15\n\nbool ledState = false;\nbool lastBtn = HIGH;\n\nvoid setup() {\n  pinMode(BTN_PIN, INPUT_PULLDOWN);\n  pinMode(LED_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Button toggle ready!\");\n}\n\nvoid loop() {\n  bool btn = digitalRead(BTN_PIN);\n  if (btn == HIGH && lastBtn == LOW) {\n    ledState = !ledState;\n    digitalWrite(LED_PIN, ledState ? HIGH : LOW);\n    Serial.println(ledState ? \"LED ON\" : \"LED OFF\");\n    delay(50);\n  }\n  lastBtn = btn;\n  delay(10);\n}"
   },
   {
     "id": "pico2w_counter",
@@ -17246,7 +17286,8 @@ window.EXAMPLE_SKETCHES = [
       "output",
       "led",
       "counter",
-      "pico2w"
+      "pico2w",
+      "raspberry pi pico 2 w"
     ],
     "circuit": {
       "components": [
@@ -17588,7 +17629,8 @@ window.EXAMPLE_SKETCHES = [
       "output",
       "led",
       "pwm",
-      "pico2w"
+      "pico2w",
+      "raspberry pi pico 2 w"
     ],
     "circuit": {
       "components": [
@@ -17700,7 +17742,8 @@ window.EXAMPLE_SKETCHES = [
       "led",
       "rgb",
       "pwm",
-      "pico2w"
+      "pico2w",
+      "raspberry pi pico 2 w"
     ],
     "circuit": {
       "components": [
@@ -17885,7 +17928,8 @@ window.EXAMPLE_SKETCHES = [
       "beginner",
       "serial",
       "communication",
-      "pico2w"
+      "pico2w",
+      "raspberry pi pico 2 w"
     ],
     "circuit": {
       "components": [
@@ -17918,7 +17962,8 @@ window.EXAMPLE_SKETCHES = [
       "wireless",
       "wifi",
       "network",
-      "pico2w"
+      "pico2w",
+      "raspberry pi pico 2 w"
     ],
     "circuit": {
       "components": [
@@ -17940,6 +17985,102 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "code": "/*\n * Pico 2 W — WiFi Scan\n * Scans for nearby WiFi networks\n * Uses the onboard CYW43439 wireless chip\n */\n\n#include <WiFi.h>\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n\n  Serial.println(\"\\n=== Pico 2 W WiFi Scanner ===\");\n  Serial.println(\"Initializing WiFi...\");\n\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println(\"Scan starting...\\n\");\n}\n\nvoid loop() {\n  int n = WiFi.scanNetworks();\n\n  if (n == 0) {\n    Serial.println(\"No networks found.\");\n  } else {\n    Serial.print(n);\n    Serial.println(\" network(s) found:\\n\");\n    for (int i = 0; i < n; i++) {\n      Serial.print(\"  \");\n      Serial.print(i + 1);\n      Serial.print(\". \");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(\"  (RSSI: \");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(\" dBm)  Channel: \");\n      Serial.print(WiFi.channel(i));\n      Serial.print(\"  Encryption: \");\n      Serial.println(WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? \"Open\" : \"Secured\");\n    }\n  }\n\n  Serial.println(\"\\n--- Scan complete. Next scan in 10s ---\\n\");\n  WiFi.scanDelete();\n  delay(10000);\n}"
+  },
+  {
+    "id": "pico2w_wifi_scan",
+    "name": "Pico 2 W WiFi Scan",
+    "icon": "📡",
+    "desc": "Scan for nearby WiFi networks using the CYW43439 wireless chip and print results to Serial Monitor.",
+    "tags": [
+      "intermediate",
+      "wireless",
+      "wifi",
+      "network",
+      "pico2w",
+      "raspberry pi pico 2 w"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "pico2w",
+          "x": 200,
+          "y": 100,
+          "rotation": 0,
+          "props": {
+            "label": "Pico 2 W"
+          }
+        },
+        {
+          "id": "comp_1790075702655_j5dl7",
+          "type": "wifi_module",
+          "x": 370,
+          "y": 105,
+          "rotation": 0,
+          "props": {
+            "ssid": "ArduSim_Network",
+            "password": "password123",
+            "channel": 6,
+            "ipAddress": "192.168.4.1",
+            "txPower": 20,
+            "security": "WPA2-PSK",
+            "hidden": false
+          }
+        },
+        {
+          "id": "comp_1790075703898_7giq6",
+          "type": "wifi_module",
+          "x": 370,
+          "y": 225,
+          "rotation": 0,
+          "props": {
+            "ssid": "ArduSim_Network",
+            "password": "password123",
+            "channel": 6,
+            "ipAddress": "192.168.4.1",
+            "txPower": 20,
+            "security": "WPA2-PSK",
+            "hidden": false
+          }
+        },
+        {
+          "id": "comp_1790075705246_ajthd",
+          "type": "wifi_module",
+          "x": 80,
+          "y": 80,
+          "rotation": 0,
+          "props": {
+            "ssid": "ArduSim_Network",
+            "password": "password123",
+            "channel": 6,
+            "ipAddress": "192.168.4.1",
+            "txPower": 20,
+            "security": "WPA2-PSK",
+            "hidden": false
+          }
+        },
+        {
+          "id": "comp_1790075706825_4w0te",
+          "type": "wifi_module",
+          "x": 90,
+          "y": 250,
+          "rotation": 0,
+          "props": {
+            "ssid": "ArduSim_Network",
+            "password": "password123",
+            "channel": 6,
+            "ipAddress": "192.168.4.1",
+            "txPower": 20,
+            "security": "WPA2-PSK",
+            "hidden": false
+          }
+        }
+      ],
+      "wires": []
+    },
+    "files": {
+      "sketch.ino": "/*\n * Pico 2 W — WiFi Scan\n * Scans for nearby WiFi networks\n * Uses the onboard CYW43439 wireless chip\n */\n\n#include <WiFi.h>\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n\n  Serial.println(\"\\n=== Pico 2 W WiFi Scanner ===\");\n  Serial.println(\"Initializing WiFi...\");\n\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println(\"Scan starting...\\n\");\n}\n\nvoid loop() {\n  int n = WiFi.scanNetworks();\n\n  if (n == 0) {\n    Serial.println(\"No networks found.\");\n  } else {\n    Serial.print(n);\n    Serial.println(\" network(s) found:\\n\");\n    for (int i = 0; i < n; i++) {\n      Serial.print(\"  \");\n      Serial.print(i + 1);\n      Serial.print(\". \");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(\"  (RSSI: \");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(\" dBm)  Channel: \");\n      Serial.print(WiFi.channel(i));\n      Serial.print(\"  Encryption: \");\n      Serial.println(WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? \"Open\" : \"Secured\");\n    }\n  }\n\n  Serial.println(\"\\n--- Scan complete. Next scan in 10s ---\\n\");\n  WiFi.scanDelete();\n  delay(10000);\n}"
+    }
   },
   {
     "id": "pir_alarm",
