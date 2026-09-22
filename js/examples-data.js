@@ -16925,6 +16925,1023 @@ window.EXAMPLE_SKETCHES = [
     }
   },
   {
+    "id": "pico2w_analog_read",
+    "name": "Pico 2 W Analog Read",
+    "icon": "📡",
+    "desc": "Read a potentiometer on GP26 (ADC0) and display the value on the Serial Monitor. Maps 0-3.3V to 0-1023.",
+    "tags": [
+      "beginner",
+      "analog",
+      "input",
+      "adc",
+      "pico2w"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "pico2w",
+          "x": 250,
+          "y": 100,
+          "width": 130,
+          "height": 280,
+          "props": {
+            "label": "Pico 2 W"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "pot1",
+          "type": "potentiometer",
+          "x": 90,
+          "y": 180,
+          "width": 40,
+          "height": 70,
+          "props": {
+            "value": 10,
+            "unit": "kΩ"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "3V3OUT"
+          },
+          "to": {
+            "instId": "pot1",
+            "pinId": "p1"
+          },
+          "color": "#ff3333",
+          "waypoints": []
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "pot1",
+            "pinId": "wiper"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GP26"
+          },
+          "color": "#00cc44",
+          "waypoints": []
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "pot1",
+            "pinId": "p3"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "AGND"
+          },
+          "color": "#333333",
+          "waypoints": []
+        }
+      ]
+    },
+    "code": "/*\n * Pico 2 W — Analog Read\n * Reads potentiometer on GP26 (ADC0)\n * Displays value on Serial Monitor\n */\n\n#define POT_PIN 26\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Analog Read ready!\");\n}\n\nvoid loop() {\n  int raw = analogRead(POT_PIN);\n  float voltage = raw * (3.3 / 1023.0);\n  Serial.print(\"Raw: \");\n  Serial.print(raw);\n  Serial.print(\"  Voltage: \");\n  Serial.print(voltage, 2);\n  Serial.println(\" V\");\n  delay(200);\n}"
+  },
+  {
+    "id": "pico2w_blink",
+    "name": "Pico 2 W Blink",
+    "icon": "📡",
+    "desc": "Blink the built-in LED on a Raspberry Pi Pico 2 W. The LED on GP25 turns on for one second, then off for one second, repeatedly.",
+    "tags": [
+      "beginner",
+      "output",
+      "led",
+      "pico2w"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "pico2w",
+          "x": 200,
+          "y": 100,
+          "width": 130,
+          "height": 280,
+          "props": {
+            "label": "Pico 2 W"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "led1",
+          "type": "led",
+          "x": 385,
+          "y": 200,
+          "width": 30,
+          "height": 60,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          },
+          "runtimeState": {
+            "val": 0,
+            "lit": false,
+            "brightness": 0,
+            "current_mA": 0,
+            "overload": false,
+            "blown": false,
+            "_warnedBlown": false
+          },
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "r1",
+          "type": "resistor",
+          "x": 390,
+          "y": 290,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP15"
+          },
+          "to": {
+            "instId": "led1",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "led1",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "r1",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "r1",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND4"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ]
+    },
+    "code": "/*\n * Pico 2 W Blink\n * Blinks the built-in LED on GP25\n */\n\n#define LED_PIN 25\n\nvoid setup() {\n  pinMode(LED_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Pico 2 W Blink started!\");\n}\n\nvoid loop() {\n  digitalWrite(LED_PIN, HIGH);\n  Serial.println(\"LED ON\");\n  delay(1000);\n\n  digitalWrite(LED_PIN, LOW);\n  Serial.println(\"LED OFF\");\n  delay(1000);\n}"
+  },
+  {
+    "id": "pico2w_button",
+    "name": "Pico 2 W Button",
+    "icon": "📡",
+    "desc": "Read a button on GP14 and toggle the built-in LED on GP25. Press the button to change LED state.",
+    "tags": [
+      "beginner",
+      "input",
+      "button",
+      "pico2w"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "pico2w",
+          "x": 250,
+          "y": 100,
+          "width": 130,
+          "height": 280,
+          "props": {
+            "label": "Pico 2 W"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "btn1",
+          "type": "push_button",
+          "x": 100,
+          "y": 230,
+          "width": 40,
+          "height": 40,
+          "props": {
+            "label": "BTN"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "r1",
+          "type": "resistor",
+          "x": 155,
+          "y": 290,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 10,
+            "unit": "kΩ"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "3V3OUT"
+          },
+          "to": {
+            "instId": "btn1",
+            "pinId": "p1"
+          },
+          "color": "#ff3333",
+          "waypoints": []
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "btn1",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GP14"
+          },
+          "color": "#00cc44",
+          "waypoints": []
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "btn1",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "r1",
+            "pinId": "p1"
+          },
+          "color": "#00cc44",
+          "waypoints": []
+        },
+        {
+          "id": "w4",
+          "from": {
+            "instId": "r1",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND4"
+          },
+          "color": "#333333",
+          "waypoints": []
+        }
+      ]
+    },
+    "code": "/*\n * Pico 2 W — Button Input\n * Press button on GP14 to toggle built-in LED on GP25\n */\n\n#define BTN_PIN 14\n#define LED_PIN 25\n\nbool ledState = false;\nbool lastBtn = HIGH;\n\nvoid setup() {\n  pinMode(BTN_PIN, INPUT_PULLDOWN);\n  pinMode(LED_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Button toggle ready!\");\n}\n\nvoid loop() {\n  bool btn = digitalRead(BTN_PIN);\n  if (btn == HIGH && lastBtn == LOW) {\n    ledState = !ledState;\n    digitalWrite(LED_PIN, ledState ? HIGH : LOW);\n    Serial.println(ledState ? \"LED ON\" : \"LED OFF\");\n    delay(50);\n  }\n  lastBtn = btn;\n  delay(10);\n}"
+  },
+  {
+    "id": "pico2w_counter",
+    "name": "Pico 2 W Binary Counter",
+    "icon": "📡",
+    "desc": "Count from 0 to 255 in binary on 8 LEDs connected to GP0-GP7. Each LED represents one bit.",
+    "tags": [
+      "beginner",
+      "output",
+      "led",
+      "counter",
+      "pico2w"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "pico2w",
+          "x": 300,
+          "y": 80,
+          "width": 130,
+          "height": 280,
+          "props": {
+            "label": "Pico 2 W"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "led0",
+          "type": "led",
+          "x": 115,
+          "y": 110,
+          "width": 30,
+          "height": 60,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          },
+          "runtimeState": {
+            "val": 0,
+            "lit": false,
+            "brightness": 0,
+            "current_mA": 0,
+            "overload": false,
+            "blown": false,
+            "_warnedBlown": false
+          },
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "led1",
+          "type": "led",
+          "x": 115,
+          "y": 160,
+          "width": 30,
+          "height": 60,
+          "props": {
+            "color": "#ff8800",
+            "colorName": "Orange"
+          },
+          "runtimeState": {
+            "val": 0,
+            "lit": false,
+            "brightness": 0,
+            "current_mA": 0,
+            "overload": false,
+            "blown": false,
+            "_warnedBlown": false
+          },
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "led2",
+          "type": "led",
+          "x": 115,
+          "y": 210,
+          "width": 30,
+          "height": 60,
+          "props": {
+            "color": "#ffff00",
+            "colorName": "Yellow"
+          },
+          "runtimeState": {
+            "val": 0,
+            "lit": false,
+            "brightness": 0,
+            "current_mA": 0,
+            "overload": false,
+            "blown": false,
+            "_warnedBlown": false
+          },
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "led3",
+          "type": "led",
+          "x": 115,
+          "y": 260,
+          "width": 30,
+          "height": 60,
+          "props": {
+            "color": "#00ff00",
+            "colorName": "Green"
+          },
+          "runtimeState": {
+            "val": 0,
+            "lit": false,
+            "brightness": 0,
+            "current_mA": 0,
+            "overload": false,
+            "blown": false,
+            "_warnedBlown": false
+          },
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "r0",
+          "type": "resistor",
+          "x": 120,
+          "y": 95,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 90
+        },
+        {
+          "id": "r1",
+          "type": "resistor",
+          "x": 120,
+          "y": 145,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 90
+        },
+        {
+          "id": "r2",
+          "type": "resistor",
+          "x": 120,
+          "y": 195,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 90
+        },
+        {
+          "id": "r3",
+          "type": "resistor",
+          "x": 120,
+          "y": 245,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 90
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP0"
+          },
+          "to": {
+            "instId": "led0",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP1"
+          },
+          "to": {
+            "instId": "led1",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP2"
+          },
+          "to": {
+            "instId": "led2",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w4",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP3"
+          },
+          "to": {
+            "instId": "led3",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w5",
+          "from": {
+            "instId": "led0",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "r0",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w6",
+          "from": {
+            "instId": "led1",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "r1",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w7",
+          "from": {
+            "instId": "led2",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "r2",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w8",
+          "from": {
+            "instId": "led3",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "r3",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w9",
+          "from": {
+            "instId": "r0",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w10",
+          "from": {
+            "instId": "r1",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w11",
+          "from": {
+            "instId": "r2",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w12",
+          "from": {
+            "instId": "r3",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND1"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ]
+    },
+    "code": "/*\n * Pico 2 W — Binary Counter\n * Counts 0-255 in binary on GP0-GP7\n * 4 LEDs shown; extend to 8 for full byte\n */\n\n#define NUM_LEDS 4\nint ledPins[] = {0, 1, 2, 3};\n\nvoid setup() {\n  for (int i = 0; i < NUM_LEDS; i++) {\n    pinMode(ledPins[i], OUTPUT);\n  }\n  Serial.begin(115200);\n  Serial.println(\"Binary Counter started!\");\n}\n\nvoid loop() {\n  for (int count = 0; count < 16; count++) {\n    for (int i = 0; i < NUM_LEDS; i++) {\n      digitalWrite(ledPins[i], (count >> i) & 1);\n    }\n    Serial.print(\"Count: \");\n    Serial.println(count);\n    delay(500);\n  }\n}"
+  },
+  {
+    "id": "pico2w_fade",
+    "name": "Pico 2 W PWM Fade",
+    "icon": "📡",
+    "desc": "Fade an LED connected to GP15 using PWM. The brightness ramps up and down smoothly using analogWrite.",
+    "tags": [
+      "beginner",
+      "output",
+      "led",
+      "pwm",
+      "pico2w"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "pico2w",
+          "x": 250,
+          "y": 100,
+          "width": 130,
+          "height": 280,
+          "props": {
+            "label": "Pico 2 W"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "led1",
+          "type": "led",
+          "x": 420,
+          "y": 190,
+          "width": 30,
+          "height": 60,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          },
+          "runtimeState": {
+            "val": 0,
+            "lit": false,
+            "brightness": 0,
+            "current_mA": 0,
+            "overload": false,
+            "blown": false,
+            "_warnedBlown": false
+          },
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "r1",
+          "type": "resistor",
+          "x": 425,
+          "y": 280,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP15"
+          },
+          "to": {
+            "instId": "led1",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "led1",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "r1",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "r1",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND4"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ]
+    },
+    "code": "/*\n * Pico 2 W — PWM Fade\n * Fades an LED on GP15 using analogWrite\n */\n\n#define LED_PIN 15\n\nint brightness = 0;\nint fadeAmount = 5;\n\nvoid setup() {\n  pinMode(LED_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"PWM Fade started!\");\n}\n\nvoid loop() {\n  analogWrite(LED_PIN, brightness);\n  Serial.print(\"Brightness: \");\n  Serial.println(brightness);\n\n  brightness += fadeAmount;\n  if (brightness <= 0 || brightness >= 255) {\n    fadeAmount = -fadeAmount;\n  }\n  delay(30);\n}"
+  },
+  {
+    "id": "pico2w_rgb_led",
+    "name": "Pico 2 W RGB LED",
+    "icon": "📡",
+    "desc": "Cycle through colors on an RGB LED connected to GP10 (Red), GP11 (Green), GP12 (Blue) using PWM.",
+    "tags": [
+      "beginner",
+      "output",
+      "led",
+      "rgb",
+      "pwm",
+      "pico2w"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "pico2w",
+          "x": 250,
+          "y": 100,
+          "width": 130,
+          "height": 280,
+          "props": {
+            "label": "Pico 2 W"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "rgb1",
+          "type": "rgb_led",
+          "x": 420,
+          "y": 180,
+          "width": 40,
+          "height": 50,
+          "props": {},
+          "runtimeState": {
+            "r": 0,
+            "g": 0,
+            "b": 0
+          },
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "rr",
+          "type": "resistor",
+          "x": 425,
+          "y": 145,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "rg",
+          "type": "resistor",
+          "x": 445,
+          "y": 145,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "rb",
+          "type": "resistor",
+          "x": 465,
+          "y": 145,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP10"
+          },
+          "to": {
+            "instId": "rr",
+            "pinId": "p1"
+          },
+          "color": "#ff0000",
+          "waypoints": []
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP11"
+          },
+          "to": {
+            "instId": "rg",
+            "pinId": "p1"
+          },
+          "color": "#00ff00",
+          "waypoints": []
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP12"
+          },
+          "to": {
+            "instId": "rb",
+            "pinId": "p1"
+          },
+          "color": "#0000ff",
+          "waypoints": []
+        },
+        {
+          "id": "w4",
+          "from": {
+            "instId": "rr",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "rgb1",
+            "pinId": "R"
+          },
+          "color": "#ff0000",
+          "waypoints": []
+        },
+        {
+          "id": "w5",
+          "from": {
+            "instId": "rg",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "rgb1",
+            "pinId": "G"
+          },
+          "color": "#00ff00",
+          "waypoints": []
+        },
+        {
+          "id": "w6",
+          "from": {
+            "instId": "rb",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "rgb1",
+            "pinId": "B"
+          },
+          "color": "#0000ff",
+          "waypoints": []
+        },
+        {
+          "id": "w7",
+          "from": {
+            "instId": "rgb1",
+            "pinId": "common"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND4"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ]
+    },
+    "code": "/*\n * Pico 2 W — RGB LED Color Cycle\n * Cycles through R, G, B, and mixed colors\n * using PWM on GP10, GP11, GP12\n */\n\n#define RED_PIN   10\n#define GREEN_PIN 11\n#define BLUE_PIN  12\n\nvoid setColor(int r, int g, int b) {\n  analogWrite(RED_PIN, r);\n  analogWrite(GREEN_PIN, g);\n  analogWrite(BLUE_PIN, b);\n}\n\nvoid setup() {\n  pinMode(RED_PIN, OUTPUT);\n  pinMode(GREEN_PIN, OUTPUT);\n  pinMode(BLUE_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"RGB LED Color Cycle!\");\n}\n\nvoid loop() {\n  // Red\n  setColor(255, 0, 0);\n  Serial.println(\"RED\");\n  delay(1000);\n\n  // Green\n  setColor(0, 255, 0);\n  Serial.println(\"GREEN\");\n  delay(1000);\n\n  // Blue\n  setColor(0, 0, 255);\n  Serial.println(\"BLUE\");\n  delay(1000);\n\n  // Yellow (R+G)\n  setColor(255, 255, 0);\n  Serial.println(\"YELLOW\");\n  delay(1000);\n\n  // Cyan (G+B)\n  setColor(0, 255, 255);\n  Serial.println(\"CYAN\");\n  delay(1000);\n\n  // Magenta (R+B)\n  setColor(255, 0, 255);\n  Serial.println(\"MAGENTA\");\n  delay(1000);\n\n  // White (R+G+B)\n  setColor(255, 255, 255);\n  Serial.println(\"WHITE\");\n  delay(1000);\n\n  // Off\n  setColor(0, 0, 0);\n  delay(500);\n}"
+  },
+  {
+    "id": "pico2w_serial_hello",
+    "name": "Pico 2 W Serial Hello",
+    "icon": "📡",
+    "desc": "Print hello messages and a running counter to the Serial Monitor at 115200 baud.",
+    "tags": [
+      "beginner",
+      "serial",
+      "communication",
+      "pico2w"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "pico2w",
+          "x": 200,
+          "y": 100,
+          "width": 130,
+          "height": 280,
+          "props": {
+            "label": "Pico 2 W"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        }
+      ],
+      "wires": []
+    },
+    "code": "/*\n * Pico 2 W — Serial Hello\n * Prints messages and counter to Serial Monitor\n */\n\nint counter = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println(\"==================\");\n  Serial.println(\"  Pico 2 W Ready\");\n  Serial.println(\"  RP2350 @ 150MHz\");\n  Serial.println(\"==================\");\n}\n\nvoid loop() {\n  Serial.print(\"Hello from Pico 2 W! Counter: \");\n  Serial.println(counter);\n  counter++;\n  delay(1000);\n}"
+  },
+  {
+    "id": "pico2w_wifi_scan",
+    "name": "Pico 2 W WiFi Scan",
+    "icon": "📡",
+    "desc": "Scan for nearby WiFi networks using the CYW43439 wireless chip and print results to Serial Monitor.",
+    "tags": [
+      "intermediate",
+      "wireless",
+      "wifi",
+      "network",
+      "pico2w"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "pico2w",
+          "x": 200,
+          "y": 100,
+          "width": 130,
+          "height": 280,
+          "props": {
+            "label": "Pico 2 W"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        }
+      ],
+      "wires": []
+    },
+    "code": "/*\n * Pico 2 W — WiFi Scan\n * Scans for nearby WiFi networks\n * Uses the onboard CYW43439 wireless chip\n */\n\n#include <WiFi.h>\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n\n  Serial.println(\"\\n=== Pico 2 W WiFi Scanner ===\");\n  Serial.println(\"Initializing WiFi...\");\n\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println(\"Scan starting...\\n\");\n}\n\nvoid loop() {\n  int n = WiFi.scanNetworks();\n\n  if (n == 0) {\n    Serial.println(\"No networks found.\");\n  } else {\n    Serial.print(n);\n    Serial.println(\" network(s) found:\\n\");\n    for (int i = 0; i < n; i++) {\n      Serial.print(\"  \");\n      Serial.print(i + 1);\n      Serial.print(\". \");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(\"  (RSSI: \");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(\" dBm)  Channel: \");\n      Serial.print(WiFi.channel(i));\n      Serial.print(\"  Encryption: \");\n      Serial.println(WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? \"Open\" : \"Secured\");\n    }\n  }\n\n  Serial.println(\"\\n--- Scan complete. Next scan in 10s ---\\n\");\n  WiFi.scanDelete();\n  delay(10000);\n}"
+  },
+  {
     "id": "pir_alarm",
     "name": "PIR Motion Alarm",
     "icon": "🚶",
