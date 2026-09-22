@@ -1,0 +1,92 @@
+{
+  "id": "pico_2_w_wifi_scan",
+  "name": "Pico 2 W WiFi Scan",
+  "icon": "🔧",
+  "desc": "A custom Pico 2 W WiFi Scan circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "pico2w",
+        "x": 200,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "Pico 2 W"
+        }
+      },
+      {
+        "id": "comp_1790075702655_j5dl7",
+        "type": "wifi_module",
+        "x": 370,
+        "y": 105,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_Network",
+          "password": "password123",
+          "channel": 6,
+          "ipAddress": "192.168.4.1",
+          "txPower": 20,
+          "security": "WPA2-PSK",
+          "hidden": false
+        }
+      },
+      {
+        "id": "comp_1790075703898_7giq6",
+        "type": "wifi_module",
+        "x": 370,
+        "y": 225,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_Network",
+          "password": "password123",
+          "channel": 6,
+          "ipAddress": "192.168.4.1",
+          "txPower": 20,
+          "security": "WPA2-PSK",
+          "hidden": false
+        }
+      },
+      {
+        "id": "comp_1790075705246_ajthd",
+        "type": "wifi_module",
+        "x": 80,
+        "y": 80,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_Network",
+          "password": "password123",
+          "channel": 6,
+          "ipAddress": "192.168.4.1",
+          "txPower": 20,
+          "security": "WPA2-PSK",
+          "hidden": false
+        }
+      },
+      {
+        "id": "comp_1790075706825_4w0te",
+        "type": "wifi_module",
+        "x": 90,
+        "y": 250,
+        "rotation": 0,
+        "props": {
+          "ssid": "ArduSim_Network",
+          "password": "password123",
+          "channel": 6,
+          "ipAddress": "192.168.4.1",
+          "txPower": 20,
+          "security": "WPA2-PSK",
+          "hidden": false
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": "/*\n * Pico 2 W — WiFi Scan\n * Scans for nearby WiFi networks\n * Uses the onboard CYW43439 wireless chip\n */\n\n#include <WiFi.h>\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n\n  Serial.println(\"\\n=== Pico 2 W WiFi Scanner ===\");\n  Serial.println(\"Initializing WiFi...\");\n\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println(\"Scan starting...\\n\");\n}\n\nvoid loop() {\n  int n = WiFi.scanNetworks();\n\n  if (n == 0) {\n    Serial.println(\"No networks found.\");\n  } else {\n    Serial.print(n);\n    Serial.println(\" network(s) found:\\n\");\n    for (int i = 0; i < n; i++) {\n      Serial.print(\"  \");\n      Serial.print(i + 1);\n      Serial.print(\". \");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(\"  (RSSI: \");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(\" dBm)  Channel: \");\n      Serial.print(WiFi.channel(i));\n      Serial.print(\"  Encryption: \");\n      Serial.println(WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? \"Open\" : \"Secured\");\n    }\n  }\n\n  Serial.println(\"\\n--- Scan complete. Next scan in 10s ---\\n\");\n  WiFi.scanDelete();\n  delay(10000);\n}"
+  }
+}
