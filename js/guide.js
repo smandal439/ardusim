@@ -3786,6 +3786,61 @@ const GUIDE_HOME = {
 };
 
 /* ------------------------------------------------------------------------------------------------
+   GUIDE_SCRIPTS — Developer utility scripts documentation
+   When & why to use each script in the scripts/ folder.
+------------------------------------------------------------------------------------------------ */
+
+const GUIDE_SCRIPTS = [
+  {
+    id: 'build-examples-data',
+    name: 'build-examples-data.js',
+    batch: 'build-examples.bat',
+    when: 'After adding, removing, or editing any Examples/*.json file.',
+    why: 'Bundles all 184 example JSON files into a single js/examples-data.js file (~782 KB). This is loaded with the page on GitHub Pages so examples appear instantly — zero extra network requests. Without this, the browser would fetch 184 individual JSON files sequentially, which is slow on static hosting.',
+    usage: 'Double-click build-examples.bat, or run: node scripts/build-examples-data.js',
+    output: 'Generates js/examples-data.js containing window.EXAMPLE_SKETCHES = [...].',
+    note: 'Commit the generated file to git so GitHub Pages serves it. The Node.js dev server ignores it and reads from disk directly.',
+  },
+  {
+    id: 'update-examples-list',
+    name: 'update-examples-list.js',
+    batch: 'update-examples.bat',
+    when: 'After adding or removing Examples/*.json files — before committing.',
+    why: 'Updates the hardcoded const files = [...] array inside js/simulator.js to match the current set of example filenames. This array is the fallback list used when the embedded bundle is not available (e.g. running directly from file:// without a server).',
+    usage: 'Double-click update-examples.bat, or run: node scripts/update-examples-list.js',
+    output: 'Edits the const files = [...] block in js/simulator.js in place.',
+    note: 'If you use build-examples.bat, this step is technically redundant — but keeps the fallback list in sync.',
+  },
+  {
+    id: 'add-wifi-hotspot',
+    name: 'add_wifi_hotspot.js',
+    when: 'After adding a new WiFi-based example (WiFi.begin, MQTT, HTTP server, etc.).',
+    why: 'Automatically adds a wifi_module component to the circuit layout of all WiFi-related example JSON files. The hotspot is positioned near the ESP32 board and configured with the correct SSID/password for that example.',
+    usage: 'Run: node scripts/add_wifi_hotspot.js',
+    output: 'Modifies example JSON files in place, adding a wifi_module component to each.',
+    note: 'Only runs on files listed in the WIFI_EXAMPLES array inside the script. Add new entries there when adding new WiFi examples.',
+  },
+  {
+    id: 'extract-examples',
+    name: 'extract_examples.js',
+    when: 'One-time migration: when converting from inline examples in simulator.js to individual JSON files.',
+    why: 'Reads the old EXAMPLE_CIRCUITS and EXAMPLE_SKETCHES blocks embedded in simulator.js and writes each example as a separate JSON file in the examples/ folder. This was used during the initial project restructuring.',
+    usage: 'Run: node scripts/extract_examples.js',
+    output: 'Creates individual JSON files in the examples/ directory.',
+    note: 'This is a one-time migration script. After running it, the examples should be managed as individual JSON files in Examples/.',
+  },
+  {
+    id: 'remove-examples',
+    name: 'remove_examples.js',
+    when: 'One-time cleanup: after extracting examples to individual JSON files.',
+    why: 'Removes the large EXAMPLE_CIRCUITS and EXAMPLE_SKETCHES data blocks from js/simulator.js. This reduces the file size and keeps example data in individual JSON files instead of a single monolithic script.',
+    usage: 'Run: node scripts/remove_examples.js',
+    output: 'Edits js/simulator.js, removing the inline example data blocks.',
+    note: 'Only run this after extract_examples.js has successfully created the individual JSON files. This is a one-time migration script.',
+  },
+];
+
+/* ------------------------------------------------------------------------------------------------
    GUIDE MANAGER — renders Home / Components / Tutorials
 ------------------------------------------------------------------------------------------------ */
 
@@ -3833,7 +3888,7 @@ class GuideManager {
     this._activeTab = tab;
     document.querySelectorAll('.guide-tab').forEach(t =>
       t.classList.toggle('active', t.dataset.tab === tab));
-    ['home', 'components', 'libraries', 'tutorials'].forEach(t => {
+    ['home', 'components', 'libraries', 'tutorials', 'scripts'].forEach(t => {
       const pane = document.getElementById(`guide-pane-${t}`);
       if (pane) pane.classList.toggle('active', t === tab);
     });
@@ -3841,6 +3896,7 @@ class GuideManager {
     if (tab === 'components') this._renderComponents();
     if (tab === 'libraries') this._renderLibraries();
     if (tab === 'tutorials') this._renderTutorials();
+    if (tab === 'scripts') this._renderScripts();
     const body = document.getElementById('guide-body');
     if (body) body.scrollTop = 0;
   }
@@ -4365,6 +4421,49 @@ class GuideManager {
     });
   }
 
+  /* --- Dev Scripts --- */
+  _renderScripts() {
+    const root = document.getElementById('guide-pane-scripts');
+    if (!root) return;
+
+    root.innerHTML = `
+      <div class="gt-head">
+        <h2>🛠️ Developer Scripts</h2>
+        <p>Utility scripts in the <code>scripts/</code> folder for managing examples and project data. These are run from the project root with Node.js.</p>
+      </div>
+      <div class="gs-list">
+        ${GUIDE_SCRIPTS.map(s => `
+          <div class="gs-card">
+            <div class="gs-card-header">
+              <div class="gs-card-title">
+                <span class="gs-icon">⚙️</span>
+                <h3>${this._esc(s.name)}</h3>
+                ${s.batch ? `<code class="gs-batch">${this._esc(s.batch)}</code>` : ''}
+              </div>
+            </div>
+            <div class="gs-card-body">
+              <div class="gs-field">
+                <span class="gs-label">When to run</span>
+                <p>${this._esc(s.when)}</p>
+              </div>
+              <div class="gs-field">
+                <span class="gs-label">Why</span>
+                <p>${this._esc(s.why)}</p>
+              </div>
+              <div class="gs-field">
+                <span class="gs-label">Usage</span>
+                <pre class="gs-cmd"><code>${this._esc(s.usage)}</code></pre>
+              </div>
+              <div class="gs-field">
+                <span class="gs-label">Output</span>
+                <p>${this._esc(s.output)}</p>
+              </div>
+              ${s.note ? `<div class="gs-note">💡 ${this._esc(s.note)}</div>` : ''}
+            </div>
+          </div>`).join('')}
+      </div>`;
+  }
+
   /* --- actions that talk to the app --- */
   _placeComponent(id) {
     const app = window.App;
@@ -4431,7 +4530,7 @@ class GuideManager {
 
 /* --- expose --- */
 window.GuideManager = new GuideManager();
-window.GuideManagerData = { GUIDE_COMPONENTS, GUIDE_TUTORIALS, GUIDE_HOME };
+window.GuideManagerData = { GUIDE_COMPONENTS, GUIDE_TUTORIALS, GUIDE_HOME, GUIDE_SCRIPTS };
 window.GuidePinDescs = (function () {
   // flat map: component id -> pin id -> { label, type, desc }
   const map = {};
