@@ -537,6 +537,11 @@ class App {
     return this.sim.board || 'arduino_uno';
   }
 
+  _getDefaultSketchName() {
+    const board = this._getActiveBoardType();
+    return (board === 'intel_8085' || board === 'intel_8051') ? 'sketch.asm' : 'sketch.ino';
+  }
+
   // Sync sim.board (and the board selector UI) with the board actually placed
   // on the canvas, so LED_BUILTIN / A0—A5 map to the right pins.
   _syncBoardFromCanvas() {
@@ -1635,21 +1640,21 @@ void loop() {
 
   /* ---------------------- SAVE / DOWNLOAD / LOAD / SHARE ---------------------- */
   saveProject() {
-    const files = this.editor?.getAllFiles?.() || { 'sketch.ino': '' };
+    const files = this.editor?.getAllFiles?.() || { [this._getDefaultSketchName()]: '' };
     const board2Code = this._getBoard2Code();
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
     window.StorageManager?.saveToLibrary(files, circuitData, this._projectName, board2Code);
   }
 
   downloadProject() {
-    const files = this.editor?.getAllFiles?.() || { 'sketch.ino': '' };
+    const files = this.editor?.getAllFiles?.() || { [this._getDefaultSketchName()]: '' };
     const board2Code = this._getBoard2Code();
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
     window.StorageManager?.downloadProject(files, circuitData, this._projectName, board2Code);
   }
 
   downloadProjectZip() {
-    const files = this.editor?.getAllFiles?.() || { 'sketch.ino': '' };
+    const files = this.editor?.getAllFiles?.() || { [this._getDefaultSketchName()]: '' };
     const board2Code = this._getBoard2Code();
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
     window.StorageManager?.downloadProjectZip(files, circuitData, this._projectName, board2Code);
@@ -1662,7 +1667,7 @@ void loop() {
     if (description === null) return;
     const tags = window.prompt('Tags, separated by commas:', 'custom, circuit');
     if (tags === null) return;
-    const files = this.editor?.getAllFiles?.() || { 'sketch.ino': '' };
+    const files = this.editor?.getAllFiles?.() || { [this._getDefaultSketchName()]: '' };
     const board2Code = this._getBoard2Code();
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
     window.StorageManager?.downloadExample(files, circuitData, name.trim(), description.trim(), tags, board2Code);
@@ -1673,7 +1678,7 @@ void loop() {
       if (this.editor && project.files) {
         this.editor.loadFiles(project.files);
       } else if (this.editor && project.code) {
-        this.editor.loadFiles({ 'sketch.ino': project.code });
+        this.editor.loadFiles({ [this._getDefaultSketchName()]: project.code });
       }
       this._setBoard2Code(project.board2Code || '');
       if (this.canvas) this.canvas.deserialize(project.circuit || { components: [], wires: [] });
@@ -1684,7 +1689,7 @@ void loop() {
   }
 
   shareProject() {
-    const files = this.editor?.getAllFiles?.() || { 'sketch.ino': '' };
+    const files = this.editor?.getAllFiles?.() || { [this._getDefaultSketchName()]: '' };
     const board2Code = this._getBoard2Code();
     const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
     window.StorageManager?.shareUrl(files, circuitData, board2Code);
@@ -1764,7 +1769,7 @@ void loop() {
     if (this.editor && p.files) {
       this.editor.loadFiles(p.files);
     } else if (this.editor && p.code) {
-      this.editor.loadFiles({ 'sketch.ino': p.code });
+      this.editor.loadFiles({ [this._getDefaultSketchName()]: p.code });
     }
     if (this.canvas) this.canvas.deserialize(p.circuit || { components: [], wires: [] });
     this._board2Code = p.board2Code || '';
@@ -1780,7 +1785,7 @@ void loop() {
   _downloadSavedProject(id) {
     const p = (window.StorageManager?.getSavedProjects() || []).find(x => x.id === id);
     if (!p) return;
-    const files = p.files || (p.code ? { 'sketch.ino': p.code } : { 'sketch.ino': '' });
+    const files = p.files || (p.code ? { [this._getDefaultSketchName()]: p.code } : { [this._getDefaultSketchName()]: '' });
     window.StorageManager?.downloadProject(files, p.circuit || { components: [], wires: [] }, p.name || 'Untitled Project', p.board2Code || '');
   }
 
@@ -1793,7 +1798,8 @@ _newProject() {
     // Reset the canvas and editor to a fresh state
     this.canvas?.clearCanvas();
     if (this.editor?.loadFiles) {
-      this.editor.loadFiles({ 'sketch.ino': EditorManager.DEFAULT_CODE }, 'sketch.ino');
+      const sketchName = this._getDefaultSketchName();
+      this.editor.loadFiles({ [sketchName]: EditorManager.DEFAULT_CODE }, sketchName);
     } else {
       this.editor?.setCode(EditorManager.DEFAULT_CODE);
     }
@@ -1814,7 +1820,7 @@ _newProject() {
         this._autoSaveTimer = setTimeout(() => window.StorageManager?.autoSave(files, circuit, this._projectName || 'Untitled Project', b2), 2000);
       });
     }
-    const files = this.editor?.getAllFiles?.() || { 'sketch.ino': this.editor?.getCode?.() || '' };
+    const files = this.editor?.getAllFiles?.() || { [this._getDefaultSketchName()]: this.editor?.getCode?.() || '' };
     const board2Code = this._getBoard2Code();
     const circuit = this.canvas?.serialize() || { components: [], wires: [] };
     this._autoSaveDebounced(files, circuit, board2Code);
@@ -1990,7 +1996,7 @@ _newProject() {
       if (this.editor && project.files) {
         this.editor.loadFiles(project.files);
       } else if (this.editor && project.code) {
-        this.editor.loadFiles({ 'sketch.ino': project.code });
+        this.editor.loadFiles({ [this._getDefaultSketchName()]: project.code });
       }
       this._setBoard2Code(project.board2Code || '');
       if (this.canvas) this.canvas.deserialize(project.circuit || { components: [], wires: [] });
@@ -2007,7 +2013,7 @@ _newProject() {
       if (this.editor && shared.files) {
         this.editor.loadFiles(shared.files);
       } else if (this.editor && shared.code) {
-        this.editor.loadFiles({ 'sketch.ino': shared.code });
+        this.editor.loadFiles({ [this._getDefaultSketchName()]: shared.code });
       }
       this._board2Code = shared.board2Code || '';
       const b2ta = document.getElementById('board2-code-textarea');
@@ -3325,7 +3331,7 @@ _newProject() {
         if (this.editor && example.files) {
           this.editor.loadFiles(example.files);
         } else if (this.editor) {
-          this.editor.loadFiles({ 'sketch.ino': example.code || '' });
+          this.editor.loadFiles({ [this._getDefaultSketchName()]: example.code || '' });
         }
         this._setBoard2Code(example.board2Code || '');
         this._board1FilesCache = null;
@@ -3367,7 +3373,7 @@ _newProject() {
     if (this.editor && ex.files) {
       this.editor.loadFiles(ex.files);
     } else if (this.editor) {
-      this.editor.loadFiles({ 'sketch.ino': ex.code || '' });
+      this.editor.loadFiles({ [this._getDefaultSketchName()]: ex.code || '' });
     }
     this._setBoard2Code(ex.board2Code || '');
     this._board1FilesCache = null;

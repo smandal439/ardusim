@@ -1885,6 +1885,9 @@ body.file-explorer-collapsed .file-explorer-expand {
   padding-bottom: 4px;
   margin-bottom: 2px;
 }
+.mem-header > span:not(:first-child) {
+  text-align: center;
+}
 .mem-row {
   display: grid;
   grid-template-columns: 60px repeat(16, 1fr);

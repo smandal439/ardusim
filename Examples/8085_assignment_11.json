@@ -1,0 +1,28 @@
+{
+  "id": "8085_assignment_11",
+  "name": "8085 assignment 11",
+  "icon": "🔧",
+  "desc": "A custom 8085 assignment 11 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790006818923_yi4u2",
+        "type": "intel_8085",
+        "x": 120,
+        "y": 375,
+        "rotation": 0,
+        "props": {
+          "label": "8085"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": "; a set of three readings are stored in memory\n; location starting from 9050H, sort the readings \n; in descending order.\n\n\nORG 8000H\nSTART:    LXI H, 9050H    ; Initialize HL pair to point to the start of the data\n          MVI D, 00H      ; Clear D register (D acts as a swap flag: 00 = no swap, 01 = swap occurred)\n          MVI C, 02H      ; Initialize counter C = N-1 = 2 (for 3 data bytes)\n\nCHECK:    MOV A, M        ; Move current byte from memory to Accumulator\n          INX H           ; Point to the next memory location\n          CMP M           ; Compare Accumulator with the next byte\n          JNC NEXTBYTE    ; If Accumulator >= Memory, no swap is needed (keeps descending order)\n\n          ; --- Swap Logic (if Accumulator < Memory) ---\n          MOV B, M        ; Temporary store next byte in B\n          MOV M, A        ; Move smaller byte to next memory location\n          DCX H           ; Move pointer back to current location\n          MOV M, B        ; Move larger byte to current memory location\n          INX H           ; Restore pointer to the next location\n          MVI D, 01H      ; Set swap flag D = 01H to indicate a change was made\n\nNEXTBYTE: DCR C           ; Decrement loop counter\n          JNZ CHECK       ; If C != 0, repeat the comparison for the next pair\n\n          MOV A, D        ; Move swap flag to Accumulator\n          RRC             ; Rotate right to shift the LSb of D into the Carry flag\n          JC START        ; If Carry = 1 (swap occurred), repeat the entire pass\n          RST 1           ; Terminate the program if no swaps occurred\n\n; --- Data Section ---\nORG 9050H\nDB 87H, 56H, 75H          ; Input data\n"
+  }
+}

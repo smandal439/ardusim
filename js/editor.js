@@ -637,12 +637,13 @@ DL2:    DJNZ R3, DL2
     ta.style.cssText = `width:100%;height:100%;background:#0d1117;color:#e6edf3;font-family:'JetBrains Mono',monospace;font-size:13px;padding:12px;border:none;outline:none;resize:none;`;
     container.appendChild(ta);
     this._fallbackTA = ta;
+    const sketchName = this._getDefaultSketchName();
     this.files = {};
     this._fileStates = {};
     this._openTabs = new Set();
-    this.activeFile = 'sketch.ino';
-    this.files['sketch.ino'] = { content: ta.value, model: null };
-    this._fileStates['sketch.ino'] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
+    this.activeFile = sketchName;
+    this.files[sketchName] = { content: ta.value, model: null };
+    this._fileStates[sketchName] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
     if (window.App) window.App.onEditorReady(this.loadFromUrlHash());
   },
 
@@ -722,19 +723,20 @@ DL2:    DJNZ R3, DL2
       this._saveTimer = setTimeout(() => {
         if (window.CircuitCanvas && window.StorageManager && window.App) {
           const projectName = window.App.getProjectName ? window.App.getProjectName() : 'Untitled Project';
-          const files = this.activeFile ? { [this.activeFile]: ta.value } : { 'sketch.ino': ta.value };
+          const files = this.activeFile ? { [this.activeFile]: ta.value } : { [this._getDefaultSketchName()]: ta.value };
           window.StorageManager.autoSave(files, window.CircuitCanvas.serialize(), projectName);
         }
       }, 2000);
     });
 
     this.monacoReady = false;
+    const sketchName2 = this._getDefaultSketchName();
     this.files = {};
     this._fileStates = {};
     this._openTabs = new Set();
-    this.activeFile = 'sketch.ino';
-    this.files['sketch.ino'] = { content: ta.value, model: null };
-    this._fileStates['sketch.ino'] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
+    this.activeFile = sketchName2;
+    this.files[sketchName2] = { content: ta.value, model: null };
+    this._fileStates[sketchName2] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
     if (window.App) window.App.onEditorReady(this.loadFromUrlHash());
   },
 
@@ -744,7 +746,13 @@ DL2:    DJNZ R3, DL2
 
   _getLanguageForFile(name) {
     if (name.endsWith('.ino') || name.endsWith('.cpp') || name.endsWith('.c') || name.endsWith('.h')) return 'arduino';
+    if (name.endsWith('.asm') || name.endsWith('.s')) return 'plaintext';
     return 'plaintext';
+  },
+
+  _getDefaultSketchName() {
+    const board = window.App?.canvas?.getBoardInst?.()?.type || window.App?.sim?.board || 'arduino_uno';
+    return (board === 'intel_8085' || board === 'intel_8051') ? 'sketch.asm' : 'sketch.ino';
   },
 
   _getFileExt(name) {
@@ -769,7 +777,7 @@ DL2:    DJNZ R3, DL2
       this.activeFile = first || null;
       if (first) this.editor.setModel(this.files[first].model);
     } else {
-      this.createFile('sketch.ino', this._getDefaultCode(), true);
+      this.createFile(this._getDefaultSketchName(), this._getDefaultCode(), true);
     }
     this._renderFileExplorer();
     this._renderTabs();
@@ -871,6 +879,7 @@ DL2:    DJNZ R3, DL2
     const parts = [];
     const headerNames = names.filter(n => n.endsWith('.h')).sort();
     const cppNames = names.filter(n => n.endsWith('.cpp') || n.endsWith('.c')).sort();
+    const asmNames = names.filter(n => n.endsWith('.asm') || n.endsWith('.s')).sort();
     const inoNames = names.filter(n => n.endsWith('.ino')).sort();
 
     const getContent = (n) => {
@@ -880,6 +889,7 @@ DL2:    DJNZ R3, DL2
 
     for (const n of headerNames) parts.push(getContent(n));
     for (const n of cppNames) parts.push(getContent(n));
+    for (const n of asmNames) parts.push(getContent(n));
     for (const n of inoNames) parts.push(getContent(n));
 
     return parts.join('\n\n');
@@ -977,9 +987,9 @@ DL2:    DJNZ R3, DL2
     list.innerHTML = '';
 
     const names = Object.keys(this.files).sort((a, b) => {
-      const aIno = a.endsWith('.ino') ? 0 : 1;
-      const bIno = b.endsWith('.ino') ? 0 : 1;
-      if (aIno !== bIno) return aIno - bIno;
+      const aMain = (a.endsWith('.ino') || a.endsWith('.asm') || a.endsWith('.s')) ? 0 : 1;
+      const bMain = (b.endsWith('.ino') || b.endsWith('.asm') || b.endsWith('.s')) ? 0 : 1;
+      if (aMain !== bMain) return aMain - bMain;
       return a.localeCompare(b);
     });
 
@@ -1050,8 +1060,8 @@ DL2:    DJNZ R3, DL2
     itemEl.classList.remove('file-item-renaming');
     const newName = (input.value || '').trim();
     if (!newName || newName === oldName) return;
-    if (!/\.(ino|h|cpp|c)$/i.test(newName)) {
-      if (window.App && window.App.showToast) window.App.showToast('File must end with .ino, .h, .cpp, or .c', 'warning');
+    if (!/\.(ino|h|cpp|c|asm|s)$/i.test(newName)) {
+      if (window.App && window.App.showToast) window.App.showToast('File must end with .ino, .h, .cpp, .c, .asm, or .s', 'warning');
       return;
     }
     if (this.files[newName]) {
@@ -1086,9 +1096,9 @@ DL2:    DJNZ R3, DL2
     if (!this._openTabs) this._openTabs = new Set();
 
     const names = Object.keys(this.files).filter(n => this._openTabs.has(n)).sort((a, b) => {
-      const aIno = a.endsWith('.ino') ? 0 : 1;
-      const bIno = b.endsWith('.ino') ? 0 : 1;
-      if (aIno !== bIno) return aIno - bIno;
+      const aMain = (a.endsWith('.ino') || a.endsWith('.asm') || a.endsWith('.s')) ? 0 : 1;
+      const bMain = (b.endsWith('.ino') || b.endsWith('.asm') || b.endsWith('.s')) ? 0 : 1;
+      if (aMain !== bMain) return aMain - bMain;
       return a.localeCompare(b);
     });
 
@@ -1253,10 +1263,11 @@ DL2:    DJNZ R3, DL2
   },
 
   _promptNewFile() {
-    let name = 'new_file.ino';
+    const ext = this._getDefaultSketchName().endsWith('.asm') ? '.asm' : '.ino';
+    let name = 'new_file' + ext;
     let counter = 1;
     while (this.files[name]) {
-      name = `new_file_${counter}.ino`;
+      name = `new_file_${counter}${ext}`;
       counter++;
     }
     this.createFile(name, '', true);
@@ -1392,7 +1403,7 @@ DL2:    DJNZ R3, DL2
       if (payload.files && typeof payload.files === 'object') {
         this.loadFiles(payload.files);
       } else if (payload.code) {
-        this.loadFiles({ 'sketch.ino': payload.code });
+        this.loadFiles({ [this._getDefaultSketchName()]: payload.code });
       }
 
       if (payload.circuit && window.CircuitCanvas && window.CircuitCanvas.deserialize) {
