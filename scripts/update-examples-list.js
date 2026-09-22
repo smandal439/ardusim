@@ -1,6 +1,5 @@
 //npm run update-examples   for updating the list of examples in simulator.js
 
-#!/usr/bin/env node
 'use strict';
 const fs = require('fs');
 const path = require('path');

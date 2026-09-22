@@ -1,6 +1,6 @@
 ﻿'use strict';
 window.Intel8085Assembler = (function () {
-  var REG = { A: 7, B: 0, C: 1, D: 2, E: 3, H: 5, L: 6, M: 7 };
+  var REG = { A: 7, B: 0, C: 1, D: 2, E: 3, H: 4, L: 5, M: 6 };
   var RP_LXI = { B: 0, D: 1, H: 2, SP: 3 };
   var RP_PP = { B: 0, D: 1, H: 2, PSW: 3 };
   var REG_BASE = { ADD: 0x80, ADC: 0x88, SUB: 0x90, SBB: 0x98, ANA: 0xA0, XRA: 0xA8, ORA: 0xB0, CMP: 0xB8 };
@@ -39,7 +39,7 @@ window.Intel8085Assembler = (function () {
 
     function err(ln, msg) { errors.push({ line: ln + 1, message: msg }); }
 
-    function runPass() {
+    function runPass(boundarySink) {
       var pc = org, out = [];
       for (var i = 0; i < lines.length; i++) {
         var parts = tokenize(lines[i]);
@@ -51,7 +51,14 @@ window.Intel8085Assembler = (function () {
         }
         if (idx >= parts.length) continue;
         var mn = parts[idx].toUpperCase(); idx++;
-        if (mn === 'ORG') { var ov = parseNum(parts[idx] || ''); if (ov !== null) { org = ov; pc = ov; } continue; }
+        if (mn === 'ORG') {
+          var ov = parseNum(parts[idx] || '');
+          if (ov !== null) {
+            if (boundarySink) boundarySink.push({ addr: ov, offset: out.length });
+            org = ov; pc = ov;
+          }
+          continue;
+        }
         if (mn === 'END') break;
         if (mn === 'EQU') continue;
         if (mn === 'DB') {
@@ -75,19 +82,14 @@ window.Intel8085Assembler = (function () {
           }
           continue;
         }
-        // NOP
         if (mn === 'NOP') { out.push(0x00); pc++; continue; }
-        // HLT
         if (mn === 'HLT') { out.push(0x76); pc++; continue; }
-        // EI DI
         if (mn === 'EI') { out.push(0xFB); pc++; continue; }
         if (mn === 'DI') { out.push(0xF3); pc++; continue; }
-        // XCHG SPHL PCHL XTHL
         if (mn === 'XCHG') { out.push(0xEB); pc++; continue; }
         if (mn === 'SPHL') { out.push(0xF9); pc++; continue; }
         if (mn === 'PCHL') { out.push(0xE9); pc++; continue; }
         if (mn === 'XTHL') { out.push(0xE3); pc++; continue; }
-        // RLC RRC RAL RAR CMA STC CMC DAA
         if (mn === 'RLC') { out.push(0x07); pc++; continue; }
         if (mn === 'RRC') { out.push(0x0F); pc++; continue; }
         if (mn === 'RAL') { out.push(0x17); pc++; continue; }
@@ -96,10 +98,8 @@ window.Intel8085Assembler = (function () {
         if (mn === 'STC') { out.push(0x37); pc++; continue; }
         if (mn === 'CMC') { out.push(0x3F); pc++; continue; }
         if (mn === 'DAA') { out.push(0x27); pc++; continue; }
-        // RET and conditional returns
         var retMap = { RET: 0xC9, RC: 0xD8, RNC: 0xD0, RZ: 0xC8, RNZ: 0xC0, RP: 0xF0, RM: 0xF8, RPE: 0xE8, RPO: 0xE0 };
         if (mn in retMap) { out.push(retMap[mn]); pc++; continue; }
-        // RST
         if (mn === 'RST') {
           var rn = parts[idx] ? parts[idx].trim() : '';
           var rnVal = -1;
@@ -108,39 +108,33 @@ window.Intel8085Assembler = (function () {
           if (rnVal < 0 || rnVal > 7) { err(i, 'Invalid RST: ' + rn); continue; }
           out.push(0xC7 + rnVal * 8); pc++; continue;
         }
-        // IN OUT
         if (mn === 'IN' || mn === 'OUT') {
           var pv = parseNum(parts[idx] || '');
           if (pv === null) { err(i, 'Invalid port'); continue; }
           out.push(mn === 'IN' ? 0xDB : 0xD3);
           out.push(pv & 0xFF); pc += 2; continue;
         }
-        // ADI ACI SUI SBI ANI XRI ORI CPI
         var immMap = { ADI: 0xC6, ACI: 0xCE, SUI: 0xD6, SBI: 0xDE, ANI: 0xE6, XRI: 0xEE, ORI: 0xF6, CPI: 0xFE };
         if (mn in immMap) {
           var iv = parseNum(parts[idx] || '');
           if (iv === null) { err(i, 'Invalid immediate'); continue; }
           out.push(immMap[mn]); out.push(iv & 0xFF); pc += 2; continue;
         }
-        // INR DCR
         if (mn === 'INR' || mn === 'DCR') {
           var rr = (parts[idx] || '').toUpperCase();
           if (!(rr in REG)) { err(i, 'Invalid register: ' + rr); continue; }
           out.push((mn === 'INR' ? 0x04 : 0x05) + REG[rr] * 8); pc++; continue;
         }
-        // ADD ADC SUB SBB ANA XRA ORA CMP
         if (mn in REG_BASE) {
           var sr = (parts[idx] || '').toUpperCase();
           if (!(sr in REG)) { err(i, 'Invalid register: ' + sr); continue; }
           out.push(REG_BASE[mn] + REG[sr]); pc++; continue;
         }
-        // MOV
         if (mn === 'MOV') {
           var d = REG[(parts[idx] || '').toUpperCase()], s = REG[(parts[idx + 1] || '').toUpperCase()];
           if (d === undefined || s === undefined) { err(i, 'Invalid MOV operands'); continue; }
           out.push(0x40 + d * 8 + s); pc++; continue;
         }
-        // MVI
         if (mn === 'MVI') {
           var mr = (parts[idx] || '').toUpperCase();
           if (!(mr in REG)) { err(i, 'Invalid MVI register: ' + mr); continue; }
@@ -148,7 +142,6 @@ window.Intel8085Assembler = (function () {
           if (md === null) { err(i, 'Invalid MVI data'); continue; }
           out.push(0x06 + REG[mr] * 8); out.push(md & 0xFF); pc += 2; continue;
         }
-        // LXI
         if (mn === 'LXI') {
           var lrp = (parts[idx] || '').toUpperCase();
           if (!(lrp in RP_LXI)) { err(i, 'Invalid LXI pair: ' + lrp); continue; }
@@ -161,7 +154,6 @@ window.Intel8085Assembler = (function () {
           out.push(0x01 + RP_LXI[lrp] * 0x10);
           out.push(ld & 0xFF); out.push((ld >> 8) & 0xFF); pc += 3; continue;
         }
-        // LDA STA LHLD SHLD
         var mem16 = { LDA: 0x3A, STA: 0x32, LHLD: 0x2A, SHLD: 0x22 };
         if (mn in mem16) {
           var av = parseNum(parts[idx] || '');
@@ -172,26 +164,22 @@ window.Intel8085Assembler = (function () {
           if (av === null) { err(i, 'Invalid address'); continue; }
           out.push(mem16[mn]); out.push(av & 0xFF); out.push((av >> 8) & 0xFF); pc += 3; continue;
         }
-        // LDAX STAX
         if (mn === 'LDAX' || mn === 'STAX') {
           var lrp2 = (parts[idx] || '').toUpperCase();
           if (!(lrp2 in RP_PP)) { err(i, 'Invalid pair: ' + lrp2); continue; }
           out.push((mn === 'LDAX' ? 0x0A : 0x02) + RP_PP[lrp2] * 0x10); pc++; continue;
         }
-        // INX DCX DAD
         var rp16 = { INX: 0x03, DCX: 0x0B, DAD: 0x09 };
         if (mn in rp16) {
           var rrp = (parts[idx] || '').toUpperCase();
           if (!(rrp in RP_LXI)) { err(i, 'Invalid pair: ' + rrp); continue; }
           out.push(rp16[mn] + RP_LXI[rrp] * 0x10); pc++; continue;
         }
-        // PUSH POP
         if (mn === 'PUSH' || mn === 'POP') {
           var ppr = (parts[idx] || '').toUpperCase();
           if (!(ppr in RP_PP)) { err(i, 'Invalid pair: ' + ppr); continue; }
           out.push((mn === 'PUSH' ? 0xC5 : 0xC1) + RP_PP[ppr] * 0x10); pc++; continue;
         }
-        // JMP and conditional jumps
         var jmpMap = { JMP: 0xC3, JC: 0xDA, JNC: 0xD2, JZ: 0xCA, JNZ: 0xC2, JP: 0xF2, JM: 0xFA, JPE: 0xEA, JPO: 0xE2 };
         if (mn in jmpMap) {
           var jv = parseNum(parts[idx] || '');
@@ -200,7 +188,6 @@ window.Intel8085Assembler = (function () {
           if (jv === null) { err(i, 'Invalid jump address'); continue; }
           out.push(jmpMap[mn]); out.push(jv & 0xFF); out.push((jv >> 8) & 0xFF); pc += 3; continue;
         }
-        // CALL and conditional calls
         var callMap = { CALL: 0xCD, CC: 0xDC, CNC: 0xD4, CZ: 0xCC, CNZ: 0xC4, CP: 0xF4, CM: 0xFC, CPE: 0xEC, CPO: 0xE4 };
         if (mn in callMap) {
           var cv = parseNum(parts[idx] || '');
@@ -214,13 +201,11 @@ window.Intel8085Assembler = (function () {
       return out;
     }
 
-    // Pass 1
-    runPass();
-    var pass1 = output.slice();
-    // Pass 2 (labels now collected)
+    runPass(null);
     errors = [];
-    output = runPass();
-    // Apply fixups
+    fixups = [];
+    var boundaries = [];
+    output = runPass(boundaries);
     for (var f = 0; f < fixups.length; f++) {
       var fx = fixups[f];
       var fv = parseNum(fx.tokens[0]);
@@ -231,7 +216,16 @@ window.Intel8085Assembler = (function () {
         else { output[fx.offset] = fv & 0xFF; output[fx.offset + 1] = (fv >> 8) & 0xFF; }
       }
     }
-    return { code: new Uint8Array(output), errors: errors, labels: labels, entryPoint: org };
+    var segments = [];
+    for (var s = 0; s < boundaries.length; s++) {
+      var start = boundaries[s].offset;
+      var end = (s + 1 < boundaries.length) ? boundaries[s + 1].offset : output.length;
+      segments.push({ addr: boundaries[s].addr, data: output.slice(start, end) });
+    }
+    if (segments.length === 0 && output.length > 0) {
+      segments.push({ addr: 0, data: output.slice() });
+    }
+    return { code: new Uint8Array(output), errors: errors, labels: labels, entryPoint: org, segments: segments };
   }
 
   return { assemble: assemble };

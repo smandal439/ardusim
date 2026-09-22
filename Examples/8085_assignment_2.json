@@ -2,10 +2,11 @@
   "id": "8085_assignment_2",
   "name": "8085 assignment 2",
   "icon": "🔧",
-  "desc": "A custom 8085 assignment 2 circuit example.",
+  "desc": "This is a simple 8085 assembly language program that loads the value 44H into register A and the value 08H into register B. It then adds the contents of register A and B and halts the program.",
   "tags": [
-    "custom",
-    "circuit"
+    "8085",
+    "assembly",
+    "program"
   ],
   "circuit": {
     "components": [
@@ -23,6 +24,6 @@
     "wires": []
   },
   "files": {
-    "sketch.ino": "\nMVI A,44H    \t\t\t\t\t\nMVI B,08H\t\t\t\t\t\nADD B\t\t\t\t\t\t\n\n\nhlt"
+    "sketch.ino": ";  LOAD 44H to A register and 08H to B register. \n;  ADD the contents of register A and B. \n\n; CODE:\nMVI A,44H    \t\t\t\t\t\nMVI B,08H\t\t\t\t\t\nADD B\t\t\t\t\t\t\nHLT\n\n; END OF CODE"
   }
 }

@@ -2,10 +2,11 @@
   "id": "8085_assignment_1",
   "name": "8085 assignment 1",
   "icon": "🔧",
-  "desc": "A custom 8085 assignment 1 circuit example.",
+  "desc": "This is a simple 8085 assembly language program that loads the value 23H into register D and the value 5643H into register BC. It then copies the content of register D to register A and halts the program.",
   "tags": [
-    "custom",
-    "circuit"
+    "8085",
+    "assembly",
+    "program"
   ],
   "circuit": {
     "components": [
@@ -23,6 +24,6 @@
     "wires": []
   },
   "files": {
-    "sketch.ino": "MVI D,23H\nLXI B,5643H\nMOV A,D\nhlt"
+    "sketch.ino": "; LOAD 23H to register D and 5643H to register BC. \n; Copy the content of D register to A register.\n\n;CODE:\nMVI D,23H\nLXI B,5643H\nMOV A,D\nHLT\n\n;END OF CODE"
   }
 }

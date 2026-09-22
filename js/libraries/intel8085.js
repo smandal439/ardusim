@@ -19,7 +19,11 @@ window.ArduinoLibs['Intel8085'] = {
     for (var k in result.code) { bytes.push(result.code[k] & 0xFF); }
     var hex = bytes.map(function(b) { return ('0' + b.toString(16)).slice(-2).toUpperCase(); }).join(' ');
     var binary = String.fromCharCode.apply(null, bytes);
-    return '//__8085_ASM_DATA__\n' + JSON.stringify({hex: hex, binary: binary});
+    var segs = (result.segments || []).map(function(s) {
+      var sbytes = []; for (var j = 0; j < s.data.length; j++) sbytes.push(s.data[j] & 0xFF);
+      return { addr: s.addr, hex: sbytes.map(function(b){return ('0'+b.toString(16)).slice(-2).toUpperCase();}).join(' '), binary: String.fromCharCode.apply(null, sbytes) };
+    });
+    return '//__8085_ASM_DATA__\n' + JSON.stringify({hex: hex, binary: binary, segments: segs});
   },
   runtime: function (self) {
     var cpu = null;
@@ -80,7 +84,7 @@ window.ArduinoLibs['Intel8085'] = {
       }); }
     return {
       _pinMonitor: pinMonitor,
-      _init8085: function (hex, bin) {
+      _init8085: function (hex, bin, segments) {
         if (!window.Intel8085Emulator) {
           self._serialLog('[8085] Emulator not loaded\n', 'error'); return false; }
         cpu = new window.Intel8085Emulator();
@@ -90,10 +94,18 @@ window.ArduinoLibs['Intel8085'] = {
         };
         cpu._portReadCb = readPort;
         cpu._serialLogCb = function(ch) { serialBuf += ch; };
-        var bytes = [];
-        for (var i = 0; i < bin.length; i++) {
-          bytes.push(bin.charCodeAt(i) & 0xFF); }
-        cpu.load(bytes, 0);
+        if (segments && segments.length > 0) {
+          for (var s = 0; s < segments.length; s++) {
+            var seg = segments[s];
+            var sbytes = [];
+            for (var i = 0; i < seg.binary.length; i++) sbytes.push(seg.binary.charCodeAt(i) & 0xFF);
+            cpu.load(sbytes, seg.addr);
+          }
+        } else {
+          var bytes = [];
+          for (var i = 0; i < bin.length; i++) bytes.push(bin.charCodeAt(i) & 0xFF);
+          cpu.load(bytes, 0);
+        }
         self._8085Registers = {};
         return true;
       },

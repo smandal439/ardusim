@@ -926,7 +926,7 @@ void loop() {
           this._applyXramData();
           if (this._memoryView === 'xram') {
             this._memoryPrev = {};
-            this._rebuildXramGrid();
+            this._rebuildMemGrid();
           }
         }
       }
@@ -2324,8 +2324,9 @@ _newProject() {
     let html = '<div class="mem-header"><span></span>';
     for (let i = 0; i < 16; i++) html += `<span>${i.toString(16).toUpperCase()}</span>`;
     html += '</div>';
+    const base = this._xramPageAddr || 0;
     for (let row = 0; row < 16; row++) {
-      const addr = row * 16;
+      const addr = base + row * 16;
       html += `<div class="mem-row" data-row="${row}"><span class="mem-addr">${addr.toString(16).toUpperCase().padStart(4, '0')}</span>`;
       for (let col = 0; col < 16; col++) {
         html += `<span class="mem-byte" data-addr="${addr + col}">--</span>`;
@@ -2344,16 +2345,14 @@ _newProject() {
       sel.addEventListener('change', (e) => {
         this._memoryView = e.target.value;
         this._memoryPrev = {};
-        if (this._memoryView === 'xram') {
-          this._updateXramControls();
-          this._rebuildXramGrid();
-        }
+        this._rebuildMemGrid();
       });
     }
-    this._setupXramControls();
+    this._setupMemControls();
+    this._updateMemControls();
   }
 
-  _setupXramControls() {
+  _setupMemControls() {
     const goBtn = document.getElementById('btn-memory-xram-go');
     const prevBtn = document.getElementById('btn-memory-xram-prev');
     const nextBtn = document.getElementById('btn-memory-xram-next');
@@ -2365,7 +2364,7 @@ _newProject() {
         if (!isNaN(val)) {
           this._xramPageAddr = val & 0xFFF00;
           this._memoryPrev = {};
-          this._rebuildXramGrid();
+          this._rebuildMemGrid();
         }
       });
       addrInput.addEventListener('keydown', (e) => {
@@ -2378,7 +2377,7 @@ _newProject() {
         this._xramPageAddr = (this._xramPageAddr - 256) & 0xFFFF;
         this._xramPageAddr &= 0xFFF00;
         this._memoryPrev = {};
-        this._rebuildXramGrid();
+        this._rebuildMemGrid();
       });
     }
     if (nextBtn && !nextBtn._xramBound) {
@@ -2387,20 +2386,21 @@ _newProject() {
         this._xramPageAddr = (this._xramPageAddr + 256) & 0xFFFF;
         this._xramPageAddr &= 0xFFF00;
         this._memoryPrev = {};
-        this._rebuildXramGrid();
+        this._rebuildMemGrid();
       });
     }
   }
 
-  _updateXramControls() {
-    const isXram = this._memoryView === 'xram';
+  _updateMemControls() {
+    const board = this._getActiveBoardType();
+    const show = board === 'intel_8085' || board === 'intel_8051';
     ['memory-xram-addr-label', 'memory-xram-addr', 'btn-memory-xram-go', 'btn-memory-xram-prev', 'btn-memory-xram-next'].forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.style.display = isXram ? '' : 'none';
+      if (el) el.style.display = show ? '' : 'none';
     });
   }
 
-  _rebuildXramGrid() {
+  _rebuildMemGrid() {
     const viewer = document.getElementById('memory-viewer');
     if (!viewer) return;
     const base = this._xramPageAddr;
@@ -2527,28 +2527,30 @@ _newProject() {
       regs = this.sim._asmRuntime?._8051_getRegisters?.() || this.sim._8051Registers;
     }
     if (!regs) return;
+    const base = this._xramPageAddr || 0;
     let bytes = null;
     if (is8085 && this.sim._asmRuntime?._8085_getMemoryPage) {
-      bytes = this.sim._asmRuntime._8085_getMemoryPage(0, 256);
+      bytes = this.sim._asmRuntime._8085_getMemoryPage(base, 256);
     } else if (is8051 && this.sim._asmRuntime?._8051_getMemoryPage) {
-      bytes = this.sim._asmRuntime._8051_getMemoryPage(0, 128);
+      bytes = this.sim._asmRuntime._8051_getMemoryPage(base, 128);
     }
     if (!bytes) return;
     const pc = regs.PC !== undefined ? regs.PC : 0;
     for (let i = 0; i < bytes.length && i < 256; i++) {
-      const el = document.querySelector(`.mem-byte[data-addr="${i}"]`);
+      const absAddr = base + i;
+      const el = document.querySelector(`.mem-byte[data-addr="${absAddr}"]`);
       if (!el) continue;
       const hex = bytes[i].toString(16).toUpperCase().padStart(2, '0');
-      const prev = this._memoryPrev[i];
+      const prev = this._memoryPrev[absAddr];
       el.textContent = hex;
       el.className = 'mem-byte';
       if (bytes[i] === 0) el.classList.add('zero');
-      if (i >= (pc & 0xFFF0) && i < ((pc & 0xFFF0) + 16)) el.classList.add('pc-hl');
+      if (absAddr >= (pc & 0xFFF0) && absAddr < ((pc & 0xFFF0) + 16)) el.classList.add('pc-hl');
       if (prev !== undefined && prev !== bytes[i]) el.classList.add('changed');
-      this._memoryPrev[i] = bytes[i];
+      this._memoryPrev[absAddr] = bytes[i];
     }
     const status = document.getElementById('memory-status');
-    if (status) status.textContent = `PC: 0x${pc.toString(16).toUpperCase().padStart(4, '0')}`;
+    if (status) status.textContent = `PC: 0x${pc.toString(16).toUpperCase().padStart(4, '0')} | Page: 0x${base.toString(16).toUpperCase().padStart(4, '0')}`;
   }
 
   /* ---------------------- BEFORE UNLOAD GUARD ---------------------- */

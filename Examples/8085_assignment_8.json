@@ -1,0 +1,28 @@
+{
+  "id": "8085_assignment_8",
+  "name": "8085 assignment 8",
+  "icon": "🔧",
+  "desc": "A custom 8085 assignment 8 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790006818923_yi4u2",
+        "type": "intel_8085",
+        "x": 185,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "label": "8085"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": ";Load 9BH and A7H in registers D & E respectively.\r\n; Add the numbers. If some is grater than FFH\r\n; display 01H at output port 00,Otherwise,\r\n; display the sum add output port 01.\r\n\r\nORG 5000H           ; Program starting address\r\n\r\nMVI D, 9BH          ; Load 9BH directly into Register D\r\nMVI E, A7H          ; Load A7H directly into Register E\r\n\r\nMOV A, D            ; Move contents of D to Accumulator (A = 9BH)\r\nADD E               ; Add contents of E to Accumulator (A = A + E)\r\n\r\nJC DISPLAY          ; If Carry flag = 1 (Sum > FFH), jump to DISPLAY\r\nOUT 01H             ; Otherwise, display the valid sum at Port 01H\r\nHLT                 ; Terminate the program\r\n\r\nDISPLAY:\r\nMVI A, 01H          ; Load 01H into Accumulator\r\nOUT 00H             ; Display 01H at Port 00H\r\nHLT                 ; Terminate the program\r\n"
+  }
+}

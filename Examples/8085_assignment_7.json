@@ -1,0 +1,28 @@
+{
+  "id": "8085_assignment_7",
+  "name": "8085 assignment 7",
+  "icon": "🔧",
+  "desc": "A custom 8085 assignment 7 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790006818923_yi4u2",
+        "type": "intel_8085",
+        "x": 185,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "label": "8085"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": ";Write an ALP to exchange the contents of the memory\r\n; location 8000H to 8003H.\r\n\r\nORG 0000H       ; Program begins at code memory 0000H\r\n\r\nLDA 8000H       ; Load the contents of 8000H into Accumulator (A)\r\nMOV B, A        ; Save the contents of A into Register B\r\nLDA 8003H       ; Load the contents of 8003H into Accumulator (A)\r\nSTA 8000H       ; Store the contents of A into 8000H\r\nMOV A, B        ; Move the temporary value from B back to Accumulator (A)\r\nSTA 8003H       ; Store the contents of A into 8003H\r\n\r\nHLT             ; Halt the program Execution\r\n\r\n; --- Data Segment Definitions ---\r\nORG 8000H       ; Force assembler to jump to memory address 8000H\r\nDB 42H          ; Define byte at 8000H (Decimal 66 or Hex 42H)\r\n\r\nORG 8003H       ; Force assembler to jump to memory address 8003H\r\nDB 24H          ; Define byte at 8003H (Decimal 36 or Hex 24H)\r\n\r\n"
+  }
+}

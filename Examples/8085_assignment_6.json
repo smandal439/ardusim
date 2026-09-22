@@ -1,0 +1,28 @@
+{
+  "id": "8085_assignment_6",
+  "name": "8085 assignment 6",
+  "icon": "🔧",
+  "desc": "A custom 8085 assignment 6 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790006818923_yi4u2",
+        "type": "intel_8085",
+        "x": 185,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "label": "8085"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": "; 16 8 bit  of data are stored in memory location\n;  4050H to 405FH.Transfer the entire block of data\n; to new memory location starting at 4870H.\n\n;CODE:\n       ORG 8000H\n       LXI H,4050H\n       LXI D,4870H\n       MVI B,10H\nLOOP:  MOV A,M\n       STAX D\n       INX H\n       INX D\n       DCR B\n       JNZ LOOP\n       HLT\n       ORG 4050H\n       DB 01H,01H,02H,03H,04H,05H,06H,07H,08H,09H,0AH,0BH,0CH,0DH,0EH,0FH\n       END"
+  }
+}

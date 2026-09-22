@@ -2,10 +2,11 @@
   "id": "8085_assignment_4",
   "name": "8085 assignment 4",
   "icon": "🔧",
-  "desc": "A custom 8085 assignment 4 circuit example.",
+  "desc": "This is a simple 8085 assembly language program that loads the value 23H into register A and the value 09H into register B. It then performs a bitwise AND operation on the contents of registers A and B and halts the program.",
   "tags": [
-    "custom",
-    "circuit"
+    "8085",
+    "assembly",
+    "program"
   ],
   "circuit": {
     "components": [
@@ -23,6 +24,6 @@
     "wires": []
   },
   "files": {
-    "sketch.ino": "\nMVI A,23H\nMVI B,09H\nANA B\n\nhlt"
+    "sketch.ino": ";. Load 23H to A register and 09H toB register. \n;AND the contents of Register A and B.\n\n;CODE:\n\nMVI A,23H\nMVI B,09H\nANA B\n\nHLT\n\n; END OF CODE"
   }
 }

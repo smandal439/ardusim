@@ -73,6 +73,14 @@ window.Intel8085Emulator = (function () {
       if(op>=0xA8&&op<=0xAF){this._xraOp(this.getReg(op&7));return 4;}
       if(op>=0xB0&&op<=0xB7){this._oraOp(this.getReg(op&7));return 4;}
       if(op>=0xB8&&op<=0xBF){this._cmpOp(this.getReg(op&7));return 4;}
+      if(op===0x02){this.memory[(this.B<<8)|this.C]=this.A;return 7;}
+      if(op===0x12){this.memory[(this.D<<8)|this.E]=this.A;return 7;}
+      if(op===0x0A){this.A=this.memory[(this.B<<8)|this.C];return 7;}
+      if(op===0x1A){this.A=this.memory[(this.D<<8)|this.E];return 7;}
+      if(op===0x32){lo=this.memory[this.PC];hi=this.memory[(this.PC+1)&0xFFFF];this.PC=(this.PC+2)&0xFFFF;this.memory[(hi<<8)|lo]=this.A;return 13;}
+      if(op===0x3A){lo=this.memory[this.PC];hi=this.memory[(this.PC+1)&0xFFFF];this.PC=(this.PC+2)&0xFFFF;this.A=this.memory[(hi<<8)|lo];return 13;}
+      if(op===0x22){lo=this.memory[this.PC];hi=this.memory[(this.PC+1)&0xFFFF];this.PC=(this.PC+2)&0xFFFF;var ea=(hi<<8)|lo;this.memory[ea]=this.L;this.memory[(ea+1)&0xFFFF]=this.H;return 16;}
+      if(op===0x2A){lo=this.memory[this.PC];hi=this.memory[(this.PC+1)&0xFFFF];this.PC=(this.PC+2)&0xFFFF;var sa=(hi<<8)|lo;this.L=this.memory[sa];this.H=this.memory[(sa+1)&0xFFFF];return 16;}
       if(op===0xC6||op===0xCE||op===0xD6||op===0xDE||op===0xE6||op===0xEE||op===0xF6||op===0xFE){
         v=this.memory[this.PC];this.PC=(this.PC+1)&0xFFFF;
         if(op===0xC6)this._addOp(v);else if(op===0xCE)this._adcOp(v);else if(op===0xD6)this._subOp(v);else if(op===0xDE)this._sbbOp(v);
