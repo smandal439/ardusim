@@ -2,10 +2,11 @@
   "id": "8085_assignment_6",
   "name": "8085 assignment 6",
   "icon": "🔧",
-  "desc": "A custom 8085 assignment 6 circuit example.",
+  "desc": "This program transfers a block of data from one memory location to another.",
   "tags": [
-    "custom",
-    "circuit"
+    "8085",
+    "assembly",
+    "memory transfer"
   ],
   "circuit": {
     "components": [

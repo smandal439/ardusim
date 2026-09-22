@@ -2,10 +2,11 @@
   "id": "8085_assignment_11",
   "name": "8085 assignment 11",
   "icon": "🔧",
-  "desc": "A custom 8085 assignment 11 circuit example.",
+  "desc": "This program sorts a set of three readings stored in memory starting from 9050H in descending order. It uses a simple comparison and swap method to arrange the values correctly.",
   "tags": [
-    "custom",
-    "circuit"
+    "8085",
+    "assembly",
+    "sorting"
   ],
   "circuit": {
     "components": [

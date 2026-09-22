@@ -1,0 +1,28 @@
+{
+  "id": "8085_assignment_12",
+  "name": "8085 assignment 12",
+  "icon": "🔧",
+  "desc": "This program performs a binary multiplication of a 16-bit number by an 8-bit number using the Shift-and-Add method. Specifically, it multiplies the 16-bit multiplicand stored at 9000H by the 8-bit multiplier stored at 9002H, saving the 16-bit result at 9003H",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790006818923_yi4u2",
+        "type": "intel_8085",
+        "x": 120,
+        "y": 375,
+        "rotation": 0,
+        "props": {
+          "label": "8085"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": ";write an ALP to multiply two 8 bit number by shift and add method.\n\nORG 8000H\n8000: LHLD 9000H    ; Load 16-bit Multiplicand into HL pair (HL = 0008H)\n8003: XCHG          ; Copy Multiplicand to DE pair (DE = 0008H)\n8004: LDA 9002H     ; Load 8-bit Multiplier into Accumulator (A = AAH)\n8007: LXI H, 0000H  ; Clear HL pair to accumulate the partial product (HL = 0000H)\n800A: MVI C, 08H    ; Initialize loop counter for 8 bits (C = 08H)\n\nLOOP: \n800C: DAD H         ; Shift HL (partial product) left by 1 bit (Multiply by 2)\n800D: RAL           ; Rotate Accumulator (multiplier) left through Carry\n800E: JNC 8012H     ; If Carry = 0, skip the addition (Jump to NEXT)\n8011: DAD D         ; If Carry = 1, add Multiplicand (DE) to Partial Product (HL)\n\nNEXT: \n8012: DCR C         ; Decrement bit counter\n8013: JNZ 800CH     ; If C != 0, repeat loop for next bit\n8016: SHLD 9003H    ; Store final 16-bit product at memory 9003H-9004H\n8019: HLT           ; Halt execution\n\n; --- Data Section ---\nORG 9000H\n9000: DB 08H        ; Lower byte of Multiplicand\n9001: DB 00H        ; Higher byte of Multiplicand (Combined: 0008H)\n9002: DB AAH        ; 8-bit Multiplier\n"
+  }
+}
