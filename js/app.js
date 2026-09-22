@@ -522,7 +522,7 @@ class App {
   /* ---------------------- BOARD SELECTOR ---------------------- */
   _initBoardSelector() {
     const settings = window.StorageManager?.loadSettings?.() || {};
-    const board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'intel_8085', 'intel_8051'].includes(settings.board) ? settings.board : 'arduino_uno';
+    const board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051'].includes(settings.board) ? settings.board : 'arduino_uno';
     this.sim.setBoard(board);
     const sel = document.getElementById('board-select');
     if (sel) sel.value = board;
@@ -558,8 +558,8 @@ class App {
   }
 
   _setBoard(board) {
-    const b = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'intel_8085', 'intel_8051'].includes(board) ? board : 'arduino_uno';
-    const boardName = b === 'esp32_devkit_v1' ? 'ESP32 DevKit V1' : b === 'arduino_nano' ? 'Arduino Nano' : b === 'stm32f746_disco' ? 'STM32F746G-DISCO' : b === 'lpc2148' ? 'LPC2148 SmartX' : b === 'intel_8085' ? 'Intel 8085' : b === 'intel_8051' ? 'Intel 8051' : 'Arduino Uno';
+    const b = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051'].includes(board) ? board : 'arduino_uno';
+    const boardName = b === 'esp32_devkit_v1' ? 'ESP32 DevKit V1' : b === 'arduino_nano' ? 'Arduino Nano' : b === 'stm32f746_disco' ? 'STM32F746G-DISCO' : b === 'lpc2148' ? 'LPC2148 SmartX' : b === 'pico2w' ? 'Pico 2 W' : b === 'intel_8085' ? 'Intel 8085' : b === 'intel_8051' ? 'Intel 8051' : 'Arduino Uno';
     this.sim.setBoard(b);
     window.StorageManager?.saveSettings?.({ ...(window.StorageManager.loadSettings() || {}), board: b });
 
@@ -572,7 +572,7 @@ class App {
 
     // If the canvas only holds the default starter circuit, reload it for the new board
     const comps = this.canvas?.components || [];
-    const hasOnlyStarterBoard = comps.length === 1 && (comps[0].type === 'arduino_uno' || comps[0].type === 'esp32_devkit_v1' || comps[0].type === 'arduino_nano' || comps[0].type === 'stm32f746_disco' || comps[0].type === 'lpc2148' || comps[0].type === 'intel_8085' || comps[0].type === 'intel_8051');
+    const hasOnlyStarterBoard = comps.length === 1 && (comps[0].type === 'arduino_uno' || comps[0].type === 'esp32_devkit_v1' || comps[0].type === 'arduino_nano' || comps[0].type === 'stm32f746_disco' || comps[0].type === 'lpc2148' || comps[0].type === 'pico2w' || comps[0].type === 'intel_8085' || comps[0].type === 'intel_8051');
     if (hasOnlyStarterBoard || comps.length === 0) {
       this._loadExampleCircuit('blink');
       this.showToast(`${boardName} starter circuit loaded`, 'success');
