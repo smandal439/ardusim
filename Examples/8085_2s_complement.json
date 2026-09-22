@@ -1,6 +1,6 @@
 {
-  "id": "8085_assignment_5",
-  "name": "8085 assignment 5",
+  "id": "8085_2s_complement",
+  "name": "8085 2's Complement",
   "icon": "🔧",
   "desc": "This is a simple 8085 assembly language program that stores the value 42H in memory location 9000H, finds the 2's complement of the number, and stores it back in memory location 9008H.",
   "tags": [

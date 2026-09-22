@@ -1,12 +1,12 @@
 {
-  "id": "8085_assignment_10",
-  "name": "8085 assignment 10",
+  "id": "8085_sorting_ascending",
+  "name": "8085 Sorting (Ascending)",
   "icon": "🔧",
   "desc": "This program sorts a set of three readings stored in memory starting from 9050H in ascending order. It uses a simple comparison and swap method to arrange the values correctly.",
   "tags": [
     "8085",
     "assembly",
-    "sorting"
+    "sorting","ascending"
   ],
   "circuit": {
     "components": [

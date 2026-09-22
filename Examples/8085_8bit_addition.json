@@ -1,12 +1,13 @@
 {
-  "id": "8085_assignment_8",
-  "name": "8085 assignment 8",
+  "id": "8085_8bit_addition",
+  "name": "8085 8-bit Addition",
   "icon": "🔧",
   "desc": "This program adds two 8-bit numbers and displays the result or an error message based on the carry flag.",
   "tags": [
     "8085",
     "assembly",
-    "arithmetic"
+    "arithmetic",
+    "addition"
   ],
   "circuit": {
     "components": [

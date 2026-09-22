@@ -1,11 +1,14 @@
 {
-  "id": "8051_assignment_1",
-  "name": "8051 ASSIGNMENT 1",
+  "id": "8051_addition",
+  "name": "8051 Addition Example",
   "icon": "🔧",
-  "desc": "A custom 8051 ASSIGNMENT 1 circuit example.",
+  "desc": "This is a simple 8051 assembly language program that adds two 8-bit numbers and stores the result in internal RAM. The program starts at the reset vector (address 0000H) and performs the following steps:\n\n1. Load the first number (25H) into Register 0 (R0).\n2. Load the second number (34H) into the Accumulator (A).\n3. Add the content of R0 to the Accumulator.\n4. Store the final result in RAM address 30H.\n5. End the program.\n\nThis program demonstrates basic arithmetic operations and data storage in the 8051 microcontroller.",
   "tags": [
     "custom",
-    "circuit"
+    "circuit",
+    "assembly",
+    "8051",
+    "addition"
   ],
   "circuit": {
     "components": [

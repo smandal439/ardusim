@@ -1,6 +1,6 @@
 {
-  "id": "8085_assignment_9",
-  "name": "8085 assignment 9",
+  "id": "8085_fibonacci",
+  "name": "8085 Fibonacci Series",
   "icon": "🔧",
   "desc": "This program generates the first 10 numbers of the Fibonacci series.",
   "tags": [

@@ -1,11 +1,15 @@
 {
-  "id": "8051_assignment_4",
-  "name": "8051 ASSIGNMENT 4",
+  "id": "8051_array_maximum",
+  "name": "8051 Array Maximum Example",
   "icon": "🔧",
-  "desc": "A custom 8051 ASSIGNMENT 4 circuit example.",
+  "desc": "This is a simple 8051 assembly language program that scans an array of 4 numbers and finds the largest value.",
   "tags": [
     "custom",
-    "circuit"
+    "circuit",
+    "assembly",
+    "8051",
+    "array",
+    "maximum"
   ],
   "circuit": {
     "components": [

@@ -1041,6 +1041,7 @@ class ArduinoSimulator {
         ledcAttach(pin, freq, resolution) {
           // Modern (v3+) ESP32 core API: ledcAttach(pin, freq, resolution)
           const res = Number(resolution) || 8;
+          console.log('[PWM-DBG] ledcAttach pin=' + pin + ' freq=' + freq + ' res=' + res);
           self._ledcChannels[Number(pin)] = {
             pin: Number(pin),
             freq: Number(freq) || 5000,

@@ -1,6 +1,6 @@
 {
-  "id": "8085_assignment_4",
-  "name": "8085 assignment 4",
+  "id": "8085_bitwise_and",
+  "name": "8085 Bitwise AND",
   "icon": "🔧",
   "desc": "This is a simple 8085 assembly language program that loads the value 23H into register A and the value 09H into register B. It then performs a bitwise AND operation on the contents of registers A and B and halts the program.",
   "tags": [

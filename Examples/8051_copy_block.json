@@ -1,12 +1,15 @@
 {
-  "id": "8051_assignment_2",
-  "name": "8051 ASSIGNMENT 2",
+  "id": "8051_copy_block",
+  "name": "8051 Copy Block Example",
   "icon": "🔧",
-  "desc": "A custom 8051 ASSIGNMENT 2 circuit example.",
+  "desc": "This is a simple 8051 assembly language program that copies a block of 5 data bytes from one memory location to another. The program starts at the reset vector (address 0000H) and performs the following steps:\n\n1. Load the source address (30H) into Register 0 (R0).\n2. Load the destination address (40H) into Register 1 (R1).\n3. Load the counter value (5) into Register 2 (R2).\n4. Copy each byte from the source address to the destination address using a loop.\n5. End the program.\n\nThis program demonstrates basic data manipulation and memory operations in the 8051 microcontroller.",
   "tags": [
     "custom",
-    "circuit"
-  ],
+    "circuit",
+    "assembly",
+    "8051",
+    "copy"
+  ],    
   "circuit": {
     "components": [
       {

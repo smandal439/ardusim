@@ -1,12 +1,12 @@
 {
-  "id": "8085_assignment_7",
-  "name": "8085 assignment 7",
+  "id": "8085_exchange_memory",
+  "name": "8085 Exchange Memory",
   "icon": "🔧",
   "desc": "This program exchanges the contents of two memory locations.",
   "tags": [
     "8085",
     "assembly",
-    "memory"
+    "memory","exchange"
   ],
   "circuit": {
     "components": [

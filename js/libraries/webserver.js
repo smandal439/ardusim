@@ -60,6 +60,7 @@ window.ArduinoLibs['WebServer'] = {
         }
         if (!cfg._triggerRoute) {
           cfg._triggerRoute = function(targetPath) {
+            console.log('[PWM-DBG] _triggerRoute called:', targetPath, 'routes=', cfg.routes.length);
             var cleanPath = targetPath;
             var params = {};
             var qIdx = targetPath.indexOf('?');
@@ -105,10 +106,9 @@ window.ArduinoLibs['WebServer'] = {
       },
       serverArg: function(server, name) {
         var cfg = self._web;
-        if (cfg && cfg._routeParams && cfg._routeParams[name] !== undefined) {
-          return cfg._routeParams[name];
-        }
-        return '';
+        var val = (cfg && cfg._routeParams && cfg._routeParams[name] !== undefined) ? cfg._routeParams[name] : '';
+        console.log('[PWM-DBG] serverArg(' + name + ') =', JSON.stringify(val), 'routeParams=', JSON.stringify(cfg && cfg._routeParams));
+        return val;
       },
       serverHasArg: function(server, name) {
         var cfg = self._web;

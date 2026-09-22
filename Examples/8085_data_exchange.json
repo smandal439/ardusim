@@ -1,6 +1,6 @@
 {
-  "id": "8085_assignment_3",
-  "name": "8085 assignment 3",
+  "id": "8085_data_exchange",
+  "name": "8085 Data Exchange",
   "icon": "🔧",
   "desc": "This is a simple 8085 assembly language program that loads the data 8423H and 8596H in register pair DE and HL. It then exchanges the numbers and halts the program.",
   "tags": [

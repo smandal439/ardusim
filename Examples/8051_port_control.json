@@ -1,11 +1,14 @@
 {
-  "id": "8051_assignment_3",
-  "name": "8051 ASSIGNMENT 3",
+  "id": "8051_port_control",
+  "name": "8051 Port Control Example",
   "icon": "🔧",
-  "desc": "A custom 8051 ASSIGNMENT 3 circuit example.",
+  "desc": "This is a simple 8051 assembly language program that creates a continuous loop to turn Port 1 pins completely ON and OFF. The program starts at the reset vector (address 0000H) and performs the following steps:\n\n1. Turn all pins of Port 1 HIGH (ON).\n2. Call a delay subroutine to create a visible delay.\n3. Turn all pins of Port 1 LOW (OFF).\n4. Call the delay subroutine again.\n5. Repeat the process indefinitely using a short jump back to the start of the loop.\n\nThis program demonstrates basic control of I/O ports and the use of subroutines in the 8051 microcontroller.",
   "tags": [
     "custom",
-    "circuit"
+    "circuit",
+    "assembly",
+    "8051",
+    "port control"
   ],
   "circuit": {
     "components": [
