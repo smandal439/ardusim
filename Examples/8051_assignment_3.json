@@ -1,0 +1,28 @@
+{
+  "id": "8051_assignment_3",
+  "name": "8051 ASSIGNMENT 3",
+  "icon": "🔧",
+  "desc": "A custom 8051 ASSIGNMENT 3 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790063012093_5c5zo",
+        "type": "intel_8051",
+        "x": 60,
+        "y": 500,
+        "rotation": 0,
+        "props": {
+          "label": "8051"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.asm": ";This program creates a continuous loop that turns \n;Port 1 pins completely ON and OFF. (To make this \n;visible on a real chip, you would normally insert \n;a delay loop between the states)\n\nORG 0000H\nHERE:\nMOV P1, #0FFH     ; Turn all pins of Port 1 HIGH (ON)\nACALL DELAY       ; Call a delay subroutine (assumed written below)\nMOV P1, #00H      ; Turn all pins of Port 1 LOW (OFF)\nACALL DELAY       ; Call delay again\nSJMP HERE         ; Short Jump back to 'HERE' for an infinite loop\n\n; --- Simple Delay Subroutine ---\nDELAY:\nMOV R3, #0FFH\nLOOP: \nDJNZ R3, LOOP     ; Decrement R3 until it hits 0\nRET               ; Return to the main program\n\nEND\n"
+  }
+}

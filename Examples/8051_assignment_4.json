@@ -1,0 +1,28 @@
+{
+  "id": "8051_assignment_4",
+  "name": "8051 ASSIGNMENT 4",
+  "icon": "🔧",
+  "desc": "A custom 8051 ASSIGNMENT 4 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790063012093_5c5zo",
+        "type": "intel_8051",
+        "x": 60,
+        "y": 500,
+        "rotation": 0,
+        "props": {
+          "label": "8051"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.asm": ";This program scans a small array of 4 numbers stored in\n; RAM starting at 40H and finds the largest value, saving it in R5.\n\nORG 0000H\nMOV R0, #40H      ; Point R0 to start of the array\nMOV R2, #04H      ; Set loop counter for 4 items\nMOV A, #00H       ; Clear Accumulator (acts as the current maximum)\n\nCHECK:\nCLR C             ; Clear carry flag before subtraction\nMOV R1, A         ; Backup current maximum in R1\nSUBB A, @R0       ; Subtract array element from Accumulator\nJNC SKIP          ; If Acc was larger, no carry generated -> skip update\n\nUPDATE:\nMOV A, @R0        ; If array element was larger, load it as new max\nSJMP NEXT\n\nSKIP:\nMOV A, R1         ; Restore the previous maximum back into Accumulator\n\nNEXT:\nINC R0            ; Point to next element\nDJNZ R2, CHECK    ; Repeat for all elements\n\nMOV R5, A         ; Store the final largest number in R5\nEND\n"
+  }
+}

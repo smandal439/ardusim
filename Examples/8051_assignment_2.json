@@ -1,0 +1,28 @@
+{
+  "id": "8051_assignment_2",
+  "name": "8051 ASSIGNMENT 2",
+  "icon": "🔧",
+  "desc": "A custom 8051 ASSIGNMENT 2 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790063012093_5c5zo",
+        "type": "intel_8051",
+        "x": 60,
+        "y": 500,
+        "rotation": 0,
+        "props": {
+          "label": "8051"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.asm": ";This program copies a block of 5 data bytes starting\n; from memory location 30H to another block starting at 40H.\n\nORG 0000H\nMOV R0, #30H      ; R0 points to the source RAM address\nMOV R1, #40H      ; R1 points to the destination RAM address\nMOV R2, #05H      ; R2 acts as a counter (5 bytes to copy)\n\nBACK: \nMOV A, @R0        ; Copy byte from address in R0 to Accumulator\nMOV @R1, A        ; Copy byte from Accumulator to address in R1\nINC R0            ; Increment source pointer\nINC R1            ; Increment destination pointer\nDJNZ R2, BACK     ; Decrement counter R2; if not zero, jump to BACK\n\nEND\n\n\n"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "id": "8051_assignment_1",
+  "name": "8051 ASSIGNMENT 1",
+  "icon": "🔧",
+  "desc": "A custom 8051 ASSIGNMENT 1 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790063012093_5c5zo",
+        "type": "intel_8051",
+        "x": 60,
+        "y": 500,
+        "rotation": 0,
+        "props": {
+          "label": "8051"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.asm": "ORG 0000H         ; Reset vector (program starts here)\nMOV R0, #25H      ; Load first number (25H) into Register 0\nMOV A, #34H       ; Load second number (34H) into Accumulator\nADD A, R0         ; Add content of R0 to Accumulator (A = A + R0)\nMOV 30H, A        ; Store the final result in RAM address 30H\nEND               ; End of the program\n\n;This program adds two 8-bit numbers stored in registers and \n;saves the result in internal RAM location 30H"
+  }
+}
