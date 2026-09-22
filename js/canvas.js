@@ -4322,7 +4322,7 @@ class CircuitCanvas {
               if (redHasSrc && comHasSrc) {
                 displayText = 'Err';
                 displayUnit = '';
-                displayMode = 'Î©';
+                displayMode = 'Ω';
               } else {
                 const totalR = this._measureResistanceBetween(inst.id, 'probe_red', inst.id, 'probe_com');
                 if (totalR < Infinity && totalR > 0) {
@@ -4332,11 +4332,11 @@ class CircuitCanvas {
                   else if (totalR >= 1e3) { disp = totalR / 1e3; pfx = 'k'; }
                   const decimals = disp >= 100 ? 1 : 2;
                   displayText = disp.toFixed(decimals);
-                  displayUnit = pfx + 'Î©';
+                  displayUnit = pfx + 'Ω';
                   displayMode = 'AUTO';
                 } else {
                   displayText = 'O.L';
-                  displayUnit = 'MÎ©';
+                  displayUnit = 'MΩ';
                   displayMode = 'AUTO';
                 }
               }
@@ -4347,11 +4347,11 @@ class CircuitCanvas {
               const threshold = 40;
               if (totalR <= threshold && totalR > 0) {
                 displayText = totalR.toFixed(1);
-                displayUnit = 'Î©';
+                displayUnit = 'Ω';
                 displayBeep = true;
               } else {
                 displayText = 'O.L';
-                displayUnit = 'Î©';
+                displayUnit = 'Ω';
                 displayBeep = false;
               }
               displayMode = 'CONT';
