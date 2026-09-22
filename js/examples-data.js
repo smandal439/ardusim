@@ -17952,6 +17952,159 @@ window.EXAMPLE_SKETCHES = [
     "code": "/*\n * Pico 2 W — PWM Fade\n * Fades an LED on GP15 using analogWrite\n */\n\n#define LED_PIN 15\n\nint brightness = 0;\nint fadeAmount = 5;\n\nvoid setup() {\n  pinMode(LED_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"PWM Fade started!\");\n}\n\nvoid loop() {\n  analogWrite(LED_PIN, brightness);\n  Serial.print(\"Brightness: \");\n  Serial.println(brightness);\n\n  brightness += fadeAmount;\n  if (brightness <= 0 || brightness >= 255) {\n    fadeAmount = -fadeAmount;\n  }\n  delay(30);\n}"
   },
   {
+    "id": "pico_pwm",
+    "name": "pico PWM",
+    "icon": "🔧",
+    "desc": "A custom pico PWM circuit example.",
+    "tags": [
+      "custom",
+      "circuit"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1790089953492_mzwiv",
+          "type": "pico2w",
+          "x": 180,
+          "y": 165,
+          "rotation": 0,
+          "props": {
+            "label": "Pico 2 W"
+          }
+        },
+        {
+          "id": "comp_1790090069310_map8x",
+          "type": "led_green",
+          "x": 375,
+          "y": 300,
+          "rotation": 0,
+          "props": {
+            "color": "#33ff66",
+            "colorName": "Green"
+          }
+        },
+        {
+          "id": "comp_1790090075909_498uz",
+          "type": "resistor",
+          "x": 415,
+          "y": 360,
+          "rotation": 0,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          }
+        },
+        {
+          "id": "comp_1790090144412_mxrhs",
+          "type": "potentiometer",
+          "x": 395,
+          "y": 190,
+          "rotation": 0,
+          "props": {
+            "value": 512,
+            "maxValue": 1023,
+            "resistance": 10000
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "wire_1790090082187_hfjpt",
+          "from": {
+            "instId": "comp_1790089953492_mzwiv",
+            "pinId": "GP22"
+          },
+          "to": {
+            "instId": "comp_1790090069310_map8x",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790090083606_h779w",
+          "from": {
+            "instId": "comp_1790090069310_map8x",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "comp_1790090075909_498uz",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790090086061_csgtt",
+          "from": {
+            "instId": "comp_1790089953492_mzwiv",
+            "pinId": "GND5"
+          },
+          "to": {
+            "instId": "comp_1790090075909_498uz",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790090154734_ywebi",
+          "from": {
+            "instId": "comp_1790089953492_mzwiv",
+            "pinId": "GP27"
+          },
+          "to": {
+            "instId": "comp_1790090144412_mxrhs",
+            "pinId": "wiper"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790090158705_jkhhf",
+          "from": {
+            "instId": "comp_1790089953492_mzwiv",
+            "pinId": "3V3OUT"
+          },
+          "to": {
+            "instId": "comp_1790090144412_mxrhs",
+            "pinId": "vcc"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790090168079_j0ixc",
+          "from": {
+            "instId": "comp_1790089953492_mzwiv",
+            "pinId": "GND7"
+          },
+          "to": {
+            "instId": "comp_1790090144412_mxrhs",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "void setup() {\n  Serial.begin(115200);\n  pinMode(22, OUTPUT);\n\n}\n\nvoid loop() {\n  for (int i = 0; i <=255; i++) {\n\n    Serial.println(i);\n    analogWrite(22, i);\n    delay(100);\n  }\n  for (int i = 255; i >=0; i--) {\n\n    Serial.println(i);\n    analogWrite(22, i);\n    delay(100);\n  }\n}"
+    }
+  },
+  {
     "id": "pico2w_rgb_led",
     "name": "Pico 2 W RGB LED",
     "icon": "📡",
@@ -18171,40 +18324,6 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "code": "/*\n * Pico 2 W — Serial Hello\n * Prints messages and counter to Serial Monitor\n */\n\nint counter = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println(\"==================\");\n  Serial.println(\"  Pico 2 W Ready\");\n  Serial.println(\"  RP2350 @ 150MHz\");\n  Serial.println(\"==================\");\n}\n\nvoid loop() {\n  Serial.print(\"Hello from Pico 2 W! Counter: \");\n  Serial.println(counter);\n  counter++;\n  delay(1000);\n}"
-  },
-  {
-    "id": "pico2w_wifi_scan",
-    "name": "Pico 2 W WiFi Scan",
-    "icon": "📡",
-    "desc": "Scan for nearby WiFi networks using the CYW43439 wireless chip and print results to Serial Monitor.",
-    "tags": [
-      "intermediate",
-      "wireless",
-      "wifi",
-      "network",
-      "pico2w",
-      "raspberry pi pico 2 w"
-    ],
-    "circuit": {
-      "components": [
-        {
-          "id": "b1",
-          "type": "pico2w",
-          "x": 200,
-          "y": 100,
-          "width": 130,
-          "height": 280,
-          "props": {
-            "label": "Pico 2 W"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        }
-      ],
-      "wires": []
-    },
-    "code": "/*\n * Pico 2 W — WiFi Scan\n * Scans for nearby WiFi networks\n * Uses the onboard CYW43439 wireless chip\n */\n\n#include <WiFi.h>\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n\n  Serial.println(\"\\n=== Pico 2 W WiFi Scanner ===\");\n  Serial.println(\"Initializing WiFi...\");\n\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println(\"Scan starting...\\n\");\n}\n\nvoid loop() {\n  int n = WiFi.scanNetworks();\n\n  if (n == 0) {\n    Serial.println(\"No networks found.\");\n  } else {\n    Serial.print(n);\n    Serial.println(\" network(s) found:\\n\");\n    for (int i = 0; i < n; i++) {\n      Serial.print(\"  \");\n      Serial.print(i + 1);\n      Serial.print(\". \");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(\"  (RSSI: \");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(\" dBm)  Channel: \");\n      Serial.print(WiFi.channel(i));\n      Serial.print(\"  Encryption: \");\n      Serial.println(WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? \"Open\" : \"Secured\");\n    }\n  }\n\n  Serial.println(\"\\n--- Scan complete. Next scan in 10s ---\\n\");\n  WiFi.scanDelete();\n  delay(10000);\n}"
   },
   {
     "id": "pico2w_wifi_scan",
