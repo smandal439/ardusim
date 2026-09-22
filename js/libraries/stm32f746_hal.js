@@ -636,8 +636,8 @@ window.ArduinoLibs['STM32F746'] = {
       'G_11': 'pin_7', 'G_12': 'pin_8',
       'B_8': 'pin_9', 'B_10': 'pin_10',
       'E_5': 'pin_11', 'E_6': 'pin_12',
-      'B_9': 'pin_14', 'B_7': 'pin_15',
-      'A_4': 'pin_15', 'A_5': 'pin_16',
+      'B_7': 'pin_15',
+      'A_0': 'pin_14', 'A_4': 'pin_15', 'A_5': 'pin_16',
       'A_6': 'pin_17', 'A_7': 'pin_18',
       'C_4': 'pin_19',
     };
@@ -879,6 +879,26 @@ window.ArduinoLibs['STM32F746'] = {
       for (var u = 0; u < uartDrAddrs.length; u++) {
         if (addr === uartDrAddrs[u]) {
           _uartHandler(uartDrAddrs[u] - 0x04, val & 0xFF);
+        }
+      }
+
+      // TIM4 PWM: CCR1-4 → PD12-PD15 (D3-D6) duty cycle 0-255
+      // TIM4 base 0x40000800; CCR1@0x34 CCR2@0x38 CCR3@0x3C CCR4@0x40
+      if (addr >= 0x40000834 && addr <= 0x40000840) {
+        var ccrIdx = Math.floor((addr - 0x40000834) / 4); // 0..3 → CH1..CH4
+        var arr = regs[0x4000082C] || 0;
+        var duty = 0;
+        if (arr > 0) {
+          duty = Math.max(0, Math.min(255, Math.round((val * 256) / (arr + 1))));
+        } else if (val > 0) {
+          duty = 255;
+        }
+        // TIM4_CH1=PD12(D3), CH2=PD13(D4), CH3=PD14(D5), CH4=PD15(D6)
+        var tim4PinKeys = ['D_12', 'D_13', 'D_14', 'D_15'];
+        var tim4PinName = PORT_PIN_MAP[tim4PinKeys[ccrIdx]];
+        if (tim4PinName && self.pinStates[tim4PinName] !== duty) {
+          self.pinStates[tim4PinName] = duty;
+          self._emitPinChange(tim4PinName, duty);
         }
       }
 
