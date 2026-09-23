@@ -35,6 +35,25 @@ window.ArduinoLibs['ArduinoJson'] = {
     // doc.containsKey("key") → doc._containsKey("key")
     [/\.containsKey\s*\(/g, '._containsKey('],
     // doc.is<T>() / doc.is() → doc._isType()
+    // doc["key"].as<T>() → doc._asPath("key")  (run BEFORE bare .as rule)
+    // field access returns a raw value with no _asType method
+    [/([A-Za-z_$][\w$]*(?:\s*\[\s*"[^"]+"\s*\])+\s*)\.as\s*(?:<[^>]*>)?\s*\(\s*\)/g, function(m, expr) {
+      const keys = [];
+      const re = /\[\s*"([^"]+)"\s*\]/g;
+      let k;
+      while ((k = re.exec(expr))) keys.push("'" + k[1] + "'");
+      const obj = expr.replace(/\s*\[\s*"[^"]+"\s*\]/g, "");
+      return obj + "._asPath(" + keys.join(",") + ")";
+    }],
+    // doc["key"].is<T>() → doc._isPath("key")  (run BEFORE bare .is rule)
+    [/([A-Za-z_$][\w$]*(?:\s*\[\s*"[^"]+"\s*\])+\s*)\.is\s*(?:<[^>]*>)?\s*\(\s*\)/g, function(m, expr) {
+      const keys = [];
+      const re = /\[\s*"([^"]+)"\s*\]/g;
+      let k;
+      while ((k = re.exec(expr))) keys.push("'" + k[1] + "'");
+      const obj = expr.replace(/\s*\[\s*"[^"]+"\s*\]/g, "");
+      return obj + "._isPath(" + keys.join(",") + ")";
+    }],
     [/\.is\s*(?:<[^>]*>)?\s*\(\s*\)/g, '._isType()'],
     // doc.as<T>() / doc.as() → doc._asType()  (e.g. .as<String>(), .as<float>())
     [/\.as\s*(?:<[^>]*>)?\s*\(\s*\)/g, '._asType()'],
@@ -139,6 +158,24 @@ window.ArduinoLibs['ArduinoJson'] = {
       },
       _isType: function() { return true; },
       _asType: function() { return this._data; },
+      // doc["a"]["b"].as<T>() → doc._asPath("a","b")
+      _asPath: function() {
+        let v = this._data;
+        for (let i = 0; i < arguments.length; i++) {
+          if (v == null) return undefined;
+          v = v[arguments[i]];
+        }
+        return v;
+      },
+      // doc["key"].is<T>() → doc._isPath("key")
+      _isPath: function() {
+        let v = this._data;
+        for (let i = 0; i < arguments.length; i++) {
+          if (v == null || typeof v !== 'object') return false;
+          v = v[arguments[i]];
+        }
+        return v !== undefined && v !== null;
+      },
       _size: function() {
         if (Array.isArray(this._data)) return this._data.length;
         if (typeof this._data === 'object' && this._data !== null) return Object.keys(this._data).length;
