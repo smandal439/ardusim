@@ -2914,14 +2914,14 @@ class CircuitCanvas {
       const arduinoTypes = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051'];
       for (const inst of this.components) {
         if (!arduinoTypes.includes(inst.type)) continue;
-        const maxV = (inst.type === 'esp32_devkit_v1' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148') ? 3.3 : 5.0;
+        const maxV = (inst.type === 'esp32_devkit_v1' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148' || inst.type === 'pico2w') ? 3.3 : 5.0;
         for (const [pinKey, net] of this.engine.pinToNet) {
           if (!pinKey.startsWith(inst.id + ':')) continue;
           const pinId = pinKey.slice(inst.id.length + 1);
           const pinNum = this._pinToNumber(pinId);
           if (pinNum == null) continue;
           const mode = sim.pinModes?.[`pin_${pinNum}`];
-          if (mode !== 'INPUT' && mode !== 'INPUT_PULLUP') continue;
+          if (mode !== 'INPUT' && mode !== 'INPUT_PULLUP') continue; // TEMP-REVERT
 
           let voltage = net.voltage || 0;
           if (mode === 'INPUT_PULLUP'

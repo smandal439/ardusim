@@ -18169,7 +18169,7 @@ window.EXAMPLE_SKETCHES = [
           "id": "w2",
           "from": {
             "instId": "btn1",
-            "pinId": "p2"
+            "pinId": "p3"
           },
           "to": {
             "instId": "b1",
@@ -18182,7 +18182,7 @@ window.EXAMPLE_SKETCHES = [
           "id": "w3",
           "from": {
             "instId": "btn1",
-            "pinId": "p2"
+            "pinId": "p3"
           },
           "to": {
             "instId": "r1",

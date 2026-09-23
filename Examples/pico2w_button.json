@@ -69,8 +69,8 @@
     ],
     "wires": [
       { "id": "w1", "from": { "instId": "b1", "pinId": "3V3OUT" }, "to": { "instId": "btn1", "pinId": "p1" }, "color": "#ff3333", "waypoints": [] },
-      { "id": "w2", "from": { "instId": "btn1", "pinId": "p2" }, "to": { "instId": "b1", "pinId": "GP14" }, "color": "#00cc44", "waypoints": [] },
-      { "id": "w3", "from": { "instId": "btn1", "pinId": "p2" }, "to": { "instId": "r1", "pinId": "p1" }, "color": "#00cc44", "waypoints": [] },
+      { "id": "w2", "from": { "instId": "btn1", "pinId": "p3" }, "to": { "instId": "b1", "pinId": "GP14" }, "color": "#00cc44", "waypoints": [] },
+      { "id": "w3", "from": { "instId": "btn1", "pinId": "p3" }, "to": { "instId": "r1", "pinId": "p1" }, "color": "#00cc44", "waypoints": [] },
       { "id": "w4", "from": { "instId": "r1", "pinId": "p2" }, "to": { "instId": "b1", "pinId": "GND4" }, "color": "#333333", "waypoints": [] },
       { "id": "w5", "from": { "instId": "b1", "pinId": "GP15" }, "to": { "instId": "led1", "pinId": "anode" }, "color": null, "waypoints": [] },
       { "id": "w6", "from": { "instId": "led1", "pinId": "cathode" }, "to": { "instId": "r2", "pinId": "p1" }, "color": null, "waypoints": [] },
