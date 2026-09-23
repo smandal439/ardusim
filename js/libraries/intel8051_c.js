@@ -921,6 +921,28 @@ function codegen(ast) {
     throw err(0, 'bad compare');
   }
 
+  /* True when genExpr(e, false) leaves its result in DPTR:DPH (16-bit) rather than A. */
+  function exprIsWide(e) {
+    if (!e) return false;
+    if (e.k === 'id') {
+      var sym = lookup(e.name);
+      return !!(sym && !sym.isBit && (isIntType(sym.type) || sym.size === 2));
+    }
+    if (e.k === 'postinc' || e.k === 'postdec' || e.k === 'preinc' || e.k === 'predec') {
+      if (e.e.k !== 'id') return false;
+      var s2 = lookup(e.e.name);
+      return !!(s2 && !s2.isBit && (isIntType(s2.type) || s2.size === 2));
+    }
+    if (e.k === 'num') return e.v > 255;
+    if (e.k === 'call') {
+      var fn = e.fn && e.fn.k === 'id' ? funcs[e.fn.name] : null;
+      return !!(fn && isIntType(fn.type));
+    }
+    if (e.k === 'assign') return e.l && e.l.k === 'id' && exprIsWide(e.l);
+    if (e.k === 'cond') return exprIsWide(e.a) || exprIsWide(e.b);
+    return false;
+  }
+
   function genCondJmp(e, ifTrue, label) {
     if (e.k === 'bin' && ['==','!=','<','>','<=','>='].indexOf(e.op) >= 0) {
       genExpr(e.l, false);
@@ -957,7 +979,13 @@ function codegen(ast) {
       genCondJmp(e.e, !ifTrue, label);
       return;
     }
+    var wide = exprIsWide(e);
     genExpr(e, false);
+    if (wide) {
+      // 16-bit result is in DPTR:DPH -- test the whole word, not just A.
+      emit('  MOV A, DPL');
+      emit('  ORL A, DPH');
+    }
     if (ifTrue) emit('  JNZ ' + label);
     else emit('  JZ ' + label);
   }

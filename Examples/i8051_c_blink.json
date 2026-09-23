@@ -17,6 +17,6 @@
     ]
   },
   "files": {
-    "sketch.c": "#include <reg51.h>\n\nsbit LED = P1^7;\n\nvoid delay(unsigned int n) {\n  while (n--) ;\n}\n\nvoid main(void) {\n  while (1) {\n    LED = 0;          /* LED ON  (active low) */\n    delay(20000);\n    LED = 1;          /* LED OFF */\n    delay(20000);\n  }\n}\n"
+    "sketch.c": "#include <reg51.h>\n\nsbit LED = P1^7;\n\n/* Nested-loop delay: ~0.3 s per call at simulator speed */\nvoid delay(unsigned int n) {\n  unsigned char i;\n  while (n--) {\n    for (i = 0; i < 250; i++) ;\n  }\n}\n\nvoid main(void) {\n  while (1) {\n    LED = 0;          /* LED ON  (active low) */\n    delay(500);\n    LED = 1;          /* LED OFF */\n    delay(500);\n  }\n}\n"
   }
 }

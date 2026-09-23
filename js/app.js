@@ -705,12 +705,135 @@ class App {
       }
 
       // OLED (SSD1306 I2C) display events
-      for (const inst of insts) {
-        if (inst.type === 'ssd1306_128x64_i2c' && type === 'oled_power') {
-          this.canvas.emitEvent?.('oled_draw', { ...data, __board2: true });
+      this._handleOledEvents(insts, type, data);
+    };
+  }
+
+  _handleOledEvents(insts, type, data) {
+    if (!this.canvas) return;
+    for (const inst of insts) {
+      if (inst.type !== 'oled_ssd1306') continue;
+
+      // SDA/SCL wiring check — skip if not wired to a board
+      if (this.canvas._getConnectedPinNum) {
+        const sdaPin = this.canvas._getConnectedPinNum(inst.id, 'sda');
+        const sclPin = this.canvas._getConnectedPinNum(inst.id, 'scl');
+        if (sdaPin === null || sclPin === null) continue;
+      }
+
+      // Address-based routing — skip if event addr doesn't match this OLED
+      if (data && data.addr != null) {
+        const raw = String(inst.props && inst.props.address || '0x3C').trim();
+        const instAddr = raw.startsWith('0x') || raw.startsWith('0X')
+          ? parseInt(raw, 16) || 0x3C
+          : Number(raw) || 0x3C;
+        const evtAddr = Number(data.addr) || 0;
+        if (instAddr !== evtAddr) continue;
+      }
+
+      if (!inst.runtimeState) inst.runtimeState = {};
+      const o = inst.runtimeState.oled || (inst.runtimeState.oled = {
+        power: false,
+        invert: false,
+        pixels: new Uint8Array(128 * 64),
+        texts: [],
+      });
+      const setPx = (px, py, v) => {
+        if (px >= 0 && px < 128 && py >= 0 && py < 64) o.pixels[py * 128 + px] = v ? 1 : 0;
+      };
+      const drawLinePx = (x0, y0, x1, y1) => {
+        let dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0);
+        const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+        let err = dx + dy;
+        for (;;) {
+          setPx(x0, y0, 1);
+          if (x0 === x1 && y0 === y1) break;
+          const e2 = 2 * err;
+          if (e2 >= dy) { err += dy; x0 += sx; }
+          if (e2 <= dx) { err += dx; y0 += sy; }
+        }
+      };
+
+      if (type === 'oled_power') {
+        o.power = true;
+      } else if (type === 'oled_draw' && data) {
+        const op = data.op;
+        if (op === 'clear') {
+          o.pixels.fill(0);
+          o.texts = [];
+        } else if (op === 'invert') {
+          o.invert = !!data.invert;
+        } else if (op === 'print') {
+          o.texts.push({
+            x: data.cursor ? data.cursor.col : 0,
+            y: data.cursor ? data.cursor.row : 0,
+            text: String(data.text !== undefined ? data.text : ''),
+            size: data.size || 1,
+            color: data.color === 0 ? 0 : 1,
+          });
+        } else if (op === 'pixel') {
+          setPx(data.x, data.y, data.color !== undefined ? data.color : 1);
+        } else if (op === 'line') {
+          drawLinePx(data.x0, data.y0, data.x1, data.y1);
+        } else if (op === 'rect') {
+          const x = data.x, y = data.y, w = data.w, h = data.h;
+          drawLinePx(x, y, x + w, y);
+          drawLinePx(x, y + h, x + w, y + h);
+          drawLinePx(x, y, x, y + h);
+          drawLinePx(x + w, y, x + w, y + h);
+        } else if (op === 'fillRect') {
+          for (let py = data.y; py < data.y + data.h; py++) {
+            for (let px = data.x; px < data.x + data.w; px++) setPx(px, py, 1);
+          }
+        } else if (op === 'circle') {
+          const cx = data.x, cy = data.y, r = data.r;
+          let xx = r, yy = 0, err = 1 - r;
+          while (xx >= yy) {
+            setPx(cx + xx, cy + yy, 1); setPx(cx - xx, cy + yy, 1);
+            setPx(cx + xx, cy - yy, 1); setPx(cx - xx, cy - yy, 1);
+            setPx(cx + yy, cy + xx, 1); setPx(cx - yy, cy + xx, 1);
+            setPx(cx + yy, cy - xx, 1); setPx(cx - yy, cy - xx, 1);
+            yy++;
+            if (err < 0) err += 2 * yy + 1;
+            else { xx--; err += 2 * (yy - xx) + 1; }
+          }
+        } else if (op === 'fillCircle') {
+          const cx = data.x, cy = data.y, r = data.r;
+          for (let yy = -r; yy <= r; yy++) {
+            for (let xx = -r; xx <= r; xx++) {
+              if (xx * xx + yy * yy <= r * r) setPx(cx + xx, cy + yy, 1);
+            }
+          }
+        } else if (op === 'fillScreen') {
+          o.pixels.fill(data.color ? 1 : 0);
+        } else if (op === 'triangle') {
+          drawLinePx(data.x0, data.y0, data.x1, data.y1);
+          drawLinePx(data.x1, data.y1, data.x2, data.y2);
+          drawLinePx(data.x2, data.y2, data.x0, data.y0);
+        } else if (op === 'fillTriangle') {
+          const pts = [[data.x0, data.y0], [data.x1, data.y1], [data.x2, data.y2]];
+          pts.sort((a, b) => a[1] - b[1]);
+          const [x0, y0] = pts[0], [x1, y1] = pts[1], [x2, y2] = pts[2];
+          const fillHalf = (ya, yb, xa, xb, xc) => {
+            if (ya === yb) return;
+            for (let yy = ya; yy < yb; yy++) {
+              const t = (yy - ya) / (yb - ya);
+              const m02 = xa + (xc - xa) * ((yy - y0) / (y2 - y0 || 1));
+              const m01 = xa + (xb - xa) * t;
+              const minX = Math.floor(Math.min(m02, m01));
+              const maxX = Math.ceil(Math.max(m02, m01));
+              for (let xx = minX; xx <= maxX; xx++) setPx(xx, yy, 1);
+            }
+          };
+          fillHalf(y0, y1, x0, x1, x2);
+          fillHalf(y1, y2, x1, x2, x0);
+        } else if (op === 'dim') {
+          // Dim is a brightness hint — ignore for now
+        } else if (op === 'contrast') {
+          // Contrast — ignore for simulation
         }
       }
-    };
+    }
   }
 
   _bindBoard2TabUI() {
@@ -1079,129 +1202,7 @@ void loop() {
       }
 
       // OLED (SSD1306 I2C) display events — maintains a 128Ã—64 framebuffer
-      for (const inst of insts) {
-        if (inst.type !== 'oled_ssd1306') continue;
-
-        // SDA/SCL wiring check — skip if not wired to a board
-        if (this.canvas._getConnectedPinNum) {
-          const sdaPin = this.canvas._getConnectedPinNum(inst.id, 'sda');
-          const sclPin = this.canvas._getConnectedPinNum(inst.id, 'scl');
-          if (sdaPin === null || sclPin === null) continue;
-        }
-
-        // Address-based routing — skip if event addr doesn't match this OLED
-        if (data && data.addr != null) {
-          const raw = String(inst.props && inst.props.address || '0x3C').trim();
-          const instAddr = raw.startsWith('0x') || raw.startsWith('0X')
-            ? parseInt(raw, 16) || 0x3C
-            : Number(raw) || 0x3C;
-          const evtAddr = Number(data.addr) || 0;
-          if (instAddr !== evtAddr) continue;
-        }
-
-        if (!inst.runtimeState) inst.runtimeState = {};
-        const o = inst.runtimeState.oled || (inst.runtimeState.oled = {
-          power: false,
-          invert: false,
-          pixels: new Uint8Array(128 * 64),
-          texts: [],
-        });
-        const setPx = (px, py, v) => {
-          if (px >= 0 && px < 128 && py >= 0 && py < 64) o.pixels[py * 128 + px] = v ? 1 : 0;
-        };
-        const drawLinePx = (x0, y0, x1, y1) => {
-          let dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0);
-          const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
-          let err = dx + dy;
-          for (;;) {
-            setPx(x0, y0, 1);
-            if (x0 === x1 && y0 === y1) break;
-            const e2 = 2 * err;
-            if (e2 >= dy) { err += dy; x0 += sx; }
-            if (e2 <= dx) { err += dx; y0 += sy; }
-          }
-        };
-
-        if (type === 'oled_power') {
-          o.power = true;
-        } else if (type === 'oled_draw' && data) {
-          const op = data.op;
-          if (op === 'clear') {
-            o.pixels.fill(0);
-            o.texts = [];
-          } else if (op === 'invert') {
-            o.invert = !!data.invert;
-          } else if (op === 'print') {
-            o.texts.push({
-              x: data.cursor ? data.cursor.col : 0,
-              y: data.cursor ? data.cursor.row : 0,
-              text: String(data.text !== undefined ? data.text : ''),
-              size: data.size || 1,
-              color: data.color === 0 ? 0 : 1,
-            });
-          } else if (op === 'pixel') {
-            setPx(data.x, data.y, data.color !== undefined ? data.color : 1);
-          } else if (op === 'line') {
-            drawLinePx(data.x0, data.y0, data.x1, data.y1);
-          } else if (op === 'rect') {
-            const x = data.x, y = data.y, w = data.w, h = data.h;
-            drawLinePx(x, y, x + w, y);
-            drawLinePx(x, y + h, x + w, y + h);
-            drawLinePx(x, y, x, y + h);
-            drawLinePx(x + w, y, x + w, y + h);
-          } else if (op === 'fillRect') {
-            for (let py = data.y; py < data.y + data.h; py++) {
-              for (let px = data.x; px < data.x + data.w; px++) setPx(px, py, 1);
-            }
-          } else if (op === 'circle') {
-            const cx = data.x, cy = data.y, r = data.r;
-            let xx = r, yy = 0, err = 1 - r;
-            while (xx >= yy) {
-              setPx(cx + xx, cy + yy, 1); setPx(cx - xx, cy + yy, 1);
-              setPx(cx + xx, cy - yy, 1); setPx(cx - xx, cy - yy, 1);
-              setPx(cx + yy, cy + xx, 1); setPx(cx - yy, cy + xx, 1);
-              setPx(cx + yy, cy - xx, 1); setPx(cx - yy, cy - xx, 1);
-              yy++;
-              if (err < 0) err += 2 * yy + 1;
-              else { xx--; err += 2 * (yy - xx) + 1; }
-            }
-          } else if (op === 'fillCircle') {
-            const cx = data.x, cy = data.y, r = data.r;
-            for (let yy = -r; yy <= r; yy++) {
-              for (let xx = -r; xx <= r; xx++) {
-                if (xx * xx + yy * yy <= r * r) setPx(cx + xx, cy + yy, 1);
-              }
-            }
-          } else if (op === 'fillScreen') {
-            o.pixels.fill(data.color ? 1 : 0);
-          } else if (op === 'triangle') {
-            drawLinePx(data.x0, data.y0, data.x1, data.y1);
-            drawLinePx(data.x1, data.y1, data.x2, data.y2);
-            drawLinePx(data.x2, data.y2, data.x0, data.y0);
-          } else if (op === 'fillTriangle') {
-            const pts = [[data.x0, data.y0], [data.x1, data.y1], [data.x2, data.y2]];
-            pts.sort((a, b) => a[1] - b[1]);
-            const [x0, y0] = pts[0], [x1, y1] = pts[1], [x2, y2] = pts[2];
-            const fillHalf = (ya, yb, xa, xb, xc) => {
-              if (ya === yb) return;
-              for (let yy = ya; yy < yb; yy++) {
-                const t = (yy - ya) / (yb - ya);
-                const m02 = xa + (xc - xa) * ((yy - y0) / (y2 - y0 || 1));
-                const m01 = xa + (xb - xa) * t;
-                const minX = Math.floor(Math.min(m02, m01));
-                const maxX = Math.ceil(Math.max(m02, m01));
-                for (let xx = minX; xx <= maxX; xx++) setPx(xx, yy, 1);
-              }
-            };
-            fillHalf(y0, y1, x0, x1, x2);
-            fillHalf(y1, y2, x1, x2, x0);
-          } else if (op === 'dim') {
-            // Dim is a brightness hint — ignore for now
-          } else if (op === 'contrast') {
-            // Contrast — ignore for simulation
-          }
-        }
-      }
+      this._handleOledEvents(insts, type, data);
 
       // TFT (ILI9341 240Ã—320 SPI) display events — maintains a 320Ã—240 RGB framebuffer
       // Also supports STM32F746G-DISCO onboard LCD (480Ã—272 framebuffer)

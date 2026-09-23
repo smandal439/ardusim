@@ -286,7 +286,8 @@ window.Intel8051Assembler = (function () {
               else if (isImm(r2)) { emit(0x75); emit(d1); emit(immVal(r2)); idx++; }
               else if (isReg(r2)) { emit(0x88 + rNum(r2)); emit(d1); idx++; }
               else if (isAtRi(r2)) { emit(0x86 + parseInt(r2[2])); emit(d1); idx++; }
-              else { emit(0x85); emit(d1); emit(dirVal(r2)); idx++; }
+              // MOV dest_direct, src_direct -> 85 src_direct dest_direct (Keil/Intel encoding)
+              else { emit(0x85); emit(dirVal(r2)); emit(d1); idx++; }
             }
             break;
 

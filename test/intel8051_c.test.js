@@ -249,6 +249,40 @@ describe('compile + execute', () => {
     expect(cpu.P1 & 0x80).toBe(0);
     expect(cpu._intPrioStack.length).toBe(0);
   });
+
+  it('16-bit while(n--) runs the full count through MOV direct,direct', () => {
+    const asm = compileAsm(`
+      void main() {
+        unsigned int n;
+        unsigned char c;
+        n = 5;
+        c = 0;
+        while (n--) c++;
+        P1 = c;
+        while (1);
+      }
+    `);
+    const cpu = runAsm(asm, 5000);
+    // n = 5 -> body runs for old values 5,4,3,2,1
+    expect(cpu.P1).toBe(5);
+  });
+
+  it('Examples/i8051_c_blink.json toggles P1.7 (regression: LED not blinking)', () => {
+    const raw = fs.readFileSync(path.join(root, 'Examples/i8051_c_blink.json'), 'utf8').replace(/^\uFEFF/, '');
+    const src = JSON.parse(raw).files['sketch.c'];
+    const asm = compileAsm(src);
+    const a = window.Intel8051Assembler.assemble(asm);
+    const cpu = new window.Intel8051Emulator();
+    cpu.load(Array.from(a.code));
+    let toggles = 0;
+    let last = cpu.P1 & 0x80;
+    for (let i = 0; i < 4_000_000 && toggles < 2; i++) {
+      cpu.step();
+      const bit = cpu.P1 & 0x80;
+      if (bit !== last) { toggles += 1; last = bit; }
+    }
+    expect(toggles).toBe(2);
+  });
 });
 
 describe('error reporting', () => {

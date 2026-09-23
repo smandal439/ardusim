@@ -219,6 +219,30 @@ describe('Interrupt controller', () => {
   });
 });
 
+describe('MOV direct, direct (0x85)', () => {
+  it('encodes source before destination (Keil: 85 src_direct dest_direct)', () => {
+    const bytes = asm(`
+      ORG 0000H
+      MOV 40H, 30H
+    `);
+    expect(bytes.slice(0, 3)).toEqual([0x85, 0x30, 0x40]);
+  });
+
+  it('copies the source RAM byte to the destination RAM byte at runtime', () => {
+    const cpu = new window.Intel8051Emulator();
+    cpu.load(asm(`
+      ORG 0000H
+      MOV 40H, 30H
+      MOV 31H, 32H
+    `));
+    cpu.ram[0x30] = 0xAB;
+    cpu.ram[0x32] = 0xCD;
+    run(cpu, 2);
+    expect(cpu.ram[0x40]).toBe(0xAB);
+    expect(cpu.ram[0x31]).toBe(0xCD);
+  });
+});
+
 describe('reset clears IRQ state', () => {
   it('reset empties priority stack and pin history', () => {
     const cpu = new window.Intel8051Emulator();
