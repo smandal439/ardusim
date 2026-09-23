@@ -224,6 +224,34 @@ window.EXAMPLE_SKETCHES = [
     }
   },
   {
+    "id": "8051_all_led_on",
+    "name": "8051 all led on",
+    "icon": "🔧",
+    "desc": "A custom 8051 all led on circuit example.",
+    "tags": [
+      "custom",
+      "circuit"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1790173516101_ws2oe",
+          "type": "intel_8051",
+          "x": 825,
+          "y": 215,
+          "rotation": 0,
+          "props": {
+            "label": "8051"
+          }
+        }
+      ],
+      "wires": []
+    },
+    "files": {
+      "sketch.c": "ORG 0000H         ; Origin, start of program\nMOV P0, #0FFH     ; Move 11111111b to Port 0 (sets all 8 pins high)\nMOV P1, #0FFH     ; Move 11111111b to Port 1 (sets all 8 pins high)\nMOV P2, #0FFH     ; Move 11111111b to Port 2 (sets all 8 pins high)\nMOV P3, #0FFH     ; Move 11111111b to Port 3 (sets all 8 pins high)\n\nHERE: SJMP HERE   ; Infinite loop to keep the program running\nEND               ; End of the program\n"
+    }
+  },
+  {
     "id": "8051_array_maximum",
     "name": "8051 Array Maximum Example",
     "icon": "🔧",
@@ -405,6 +433,247 @@ window.EXAMPLE_SKETCHES = [
     },
     "files": {
       "sketch.ino": ";Load 9BH and A7H in registers D & E respectively.\r\n; Add the numbers. If some is grater than FFH\r\n; display 01H at output port 00,Otherwise,\r\n; display the sum add output port 01.\r\n\r\nORG 5000H           ; Program starting address\r\n\r\nMVI D, 9BH          ; Load 9BH directly into Register D\r\nMVI E, A7H          ; Load A7H directly into Register E\r\n\r\nMOV A, D            ; Move contents of D to Accumulator (A = 9BH)\r\nADD E               ; Add contents of E to Accumulator (A = A + E)\r\n\r\nJC DISPLAY          ; If Carry flag = 1 (Sum > FFH), jump to DISPLAY\r\nOUT 01H             ; Otherwise, display the valid sum at Port 01H\r\nHLT                 ; Terminate the program\r\n\r\nDISPLAY:\r\nMVI A, 01H          ; Load 01H into Accumulator\r\nOUT 00H             ; Display 01H at Port 00H\r\nHLT                 ; Terminate the program\r\n"
+    }
+  },
+  {
+    "id": "8085_all_led_on",
+    "name": "8085 all led on",
+    "icon": "🔧",
+    "desc": "A custom 8085 all led on circuit example.",
+    "tags": [
+      "custom",
+      "circuit"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1790175319702_dq497",
+          "type": "intel_8085",
+          "x": 640,
+          "y": 215,
+          "rotation": 0,
+          "props": {
+            "label": "8085"
+          }
+        },
+        {
+          "id": "comp_1790175549663_mb0k7",
+          "type": "multi_led_array",
+          "x": 1045,
+          "y": 145,
+          "rotation": 0,
+          "props": {
+            "label": "8-LED ARRAY"
+          }
+        },
+        {
+          "id": "comp_1790175610234_2fk5z",
+          "type": "led",
+          "x": 560,
+          "y": 280,
+          "rotation": 0,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          }
+        },
+        {
+          "id": "comp_1790175622269_a8yi4",
+          "type": "resistor",
+          "x": 565,
+          "y": 375,
+          "rotation": 0,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "wire_1790175565708_ujzx4",
+          "from": {
+            "instId": "comp_1790175319702_dq497",
+            "pinId": "PC.0"
+          },
+          "to": {
+            "instId": "comp_1790175549663_mb0k7",
+            "pinId": "l1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790175570785_v8h6x",
+          "from": {
+            "instId": "comp_1790175319702_dq497",
+            "pinId": "PC.1"
+          },
+          "to": {
+            "instId": "comp_1790175549663_mb0k7",
+            "pinId": "l2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790175572985_58nja",
+          "from": {
+            "instId": "comp_1790175319702_dq497",
+            "pinId": "PC.2"
+          },
+          "to": {
+            "instId": "comp_1790175549663_mb0k7",
+            "pinId": "l3"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790175575003_0m7fb",
+          "from": {
+            "instId": "comp_1790175319702_dq497",
+            "pinId": "PC.3"
+          },
+          "to": {
+            "instId": "comp_1790175549663_mb0k7",
+            "pinId": "l4"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790175577136_abj6o",
+          "from": {
+            "instId": "comp_1790175319702_dq497",
+            "pinId": "PC.4"
+          },
+          "to": {
+            "instId": "comp_1790175549663_mb0k7",
+            "pinId": "l5"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790175579356_hny71",
+          "from": {
+            "instId": "comp_1790175319702_dq497",
+            "pinId": "PC.5"
+          },
+          "to": {
+            "instId": "comp_1790175549663_mb0k7",
+            "pinId": "l6"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790175581501_9gwh9",
+          "from": {
+            "instId": "comp_1790175319702_dq497",
+            "pinId": "PC.6"
+          },
+          "to": {
+            "instId": "comp_1790175549663_mb0k7",
+            "pinId": "l7"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790175583601_y2r3t",
+          "from": {
+            "instId": "comp_1790175319702_dq497",
+            "pinId": "PC.7"
+          },
+          "to": {
+            "instId": "comp_1790175549663_mb0k7",
+            "pinId": "l8"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790175589136_yap3s",
+          "from": {
+            "instId": "comp_1790175319702_dq497",
+            "pinId": "GND"
+          },
+          "to": {
+            "instId": "comp_1790175549663_mb0k7",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790175625542_8bimt",
+          "from": {
+            "instId": "comp_1790175622269_a8yi4",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "comp_1790175610234_2fk5z",
+            "pinId": "cathode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790175632764_aawm4",
+          "from": {
+            "instId": "comp_1790175319702_dq497",
+            "pinId": "GND"
+          },
+          "to": {
+            "instId": "comp_1790175622269_a8yi4",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790175635800_2zx5o",
+          "from": {
+            "instId": "comp_1790175319702_dq497",
+            "pinId": "PA.0"
+          },
+          "to": {
+            "instId": "comp_1790175610234_2fk5z",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.asm": "MVI A, 80H    ; Load control word: all ports as output, Mode 0\nOUT 03H       ; Send control word to 8255 CWR\nMVI A, FFH    ; Load accumulator with FFH (Use 00H if Common Anode)\nOUT 00H       ; Send data to Port A to turn ON all LEDs\nOUT 01H       ; Send data to Port B to turn ON all LEDs\nOUT 02H       ; Send data to Port C to turn ON all LEDs\nHLT           ; Stop execution\n"
     }
   },
   {
@@ -22110,7 +22379,7 @@ window.EXAMPLE_SKETCHES = [
         }
       ]
     },
-    "code": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\nvoid ADC1_Init(void);\nuint32_t ADC1_Read(void);\nvoid TIM4_PWM_Init(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n  ADC1_Init();\n  TIM4_PWM_Init();\n\n  while (1) {\n    uint32_t val = ADC1_Read();          // 0..4095\n    TIM4->CCR3 = val >> 4;              // 0..255 duty → PD14 (D5)\n    HAL_Delay(50);\n  }\n}\n\nvoid ADC1_Init(void) {\n  RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;\n  GPIOA->MODER |= (3 << (0 * 2));\n  ADC1->CR2 = 0;\n  ADC1->SQR3 = 0;\n  ADC1->CR2 |= ADC_CR2_ADON;\n}\n\nuint32_t ADC1_Read(void) {\n  ADC1->CR2 |= ADC_CR2_SWSTART;\n  while (!(ADC1->SR & ADC_SR_EOC));\n  return ADC1->DR;\n}\n\nvoid TIM4_PWM_Init(void) {\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;\n  RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;\n\n  // PD14 → TIM4_CH3 (AF2)\n  GPIOD->MODER &= ~(3 << (14 * 2));\n  GPIOD->MODER |= (2 << (14 * 2));\n  GPIOD->AFRH &= ~(0xF << ((14 - 8) * 4));\n  GPIOD->AFRH |= (2 << ((14 - 8) * 4));\n\n  // PWM mode 1 on CH3\n  TIM4->CCMR2 &= ~(0xFF << 0);\n  TIM4->CCMR2 |= (6 << 4);\n  TIM4->CCER |= (1 << 8);\n  TIM4->PSC = 0;\n  TIM4->ARR = 255;\n  TIM4->CR1 |= TIM_CR1_ARPE | TIM_CR1_CEN;\n  TIM4->EGR |= TIM_EGR_UG;\n}\n\nvoid SystemClock_Config(void) {\n}"
+    "code": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\nvoid ADC1_Init(void);\nuint32_t ADC1_Read(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n  ADC1_Init();\n\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOIEN;\n  GPIOI->MODER |= (1 << (0 * 2));\n\n  while (1) {\n    uint32_t val = ADC1_Read();\n    if (val > 2048) {\n      GPIOI->ODR |= (1 << 0);\n    } else {\n      GPIOI->ODR &= ~(1 << 0);\n    }\n    HAL_Delay(100);\n  }\n}\n\nvoid ADC1_Init(void) {\n  RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;\n  GPIOA->MODER |= (3 << (0 * 2));\n  ADC1->CR2 = 0;\n  ADC1->SQR3 = 0;\n  ADC1->CR2 |= ADC_CR2_ADON;\n}\n\nuint32_t ADC1_Read(void) {\n  ADC1->CR2 |= ADC_CR2_SWSTART;\n  while (!(ADC1->SR & ADC_SR_EOC));\n  return ADC1->DR;\n}\n\nvoid SystemClock_Config(void) {\n}"
   },
   {
     "id": "stm32f746_register_uart",
