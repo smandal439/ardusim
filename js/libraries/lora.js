@@ -15,13 +15,16 @@
 //
 window.ArduinoLibs = window.ArduinoLibs || {};
 window.ArduinoLibs['LoRa'] = {
-  priority: 57,
+  // Lower number = runs earlier; must beat SD (default 50) so LoRa.print()
+  // is rewritten before SD's broad (\w+).print() rule can hijack it.
+  priority: 10,
   classes: [],
   includes: ['<LoRa.h>'],
 
   transpile: [
     // LoRa.setPins(ssPin, rstPin, dio0Pin) → (no-op, simulated SPI)
-    [/\bLoRa\.setPins\s*\([^)]*\)/g, '/* LoRa.setPins() - simulated */'],
+    // Require non-empty args so the replacement comment's empty () won't re-match on the 2nd pass
+    [/\bLoRa\.setPins\s*\([^)]+\)/g, '/* LoRa.setPins() - simulated */'],
 
     // LoRa.begin(freq) → _a.loraBegin(freq)
     // Also handles scientific notation like 868E6, 915E6
@@ -295,10 +298,12 @@ window.ArduinoLibs['LoRa'] = {
         self._serialLog('[LoRa] TX Power=' + _txPower + 'dBm  Sensitivity=' + _calcSensitivity() + 'dBm\n', 'system');
         self._serialLog('[LoRa] Bit Rate=' + (_calcBitRate() / 1000).toFixed(1) + ' kbps\n', 'system');
 
-        // Report nearby nodes
+        // Report nearby nodes (only library board nodes — skip component-bus string IDs)
         var peerCount = 0;
         for (var nid in bus.nodes) {
-          if (parseInt(nid) !== _myNodeId && bus.nodes[nid].initialized) {
+          var peerIdx = parseInt(nid, 10);
+          if (!isNaN(peerIdx) && String(peerIdx) === String(nid) &&
+              peerIdx !== _myNodeId && bus.nodes[nid].initialized) {
             peerCount++;
           }
         }
@@ -306,7 +311,7 @@ window.ArduinoLibs['LoRa'] = {
           self._serialLog('[LoRa] Found ' + peerCount + ' peer(s) on same frequency\n', 'system');
         }
 
-        return 0;
+        return 1; // success (matches LoRa.h: 1 = ok, 0 = fail)
       },
 
       loraSetSpreadingFactor: function(sf) {
@@ -440,11 +445,14 @@ window.ArduinoLibs['LoRa'] = {
           ' | SF' + _spreadingFactor + ' BW' + (_bandwidth / 1000) + 'k | ' + airtime + 'ms\n', 'system');
         self._serialLog('[LoRa] Payload: ' + _dataToStr(payload) + '\n', 'system');
 
-        // Deliver to all other nodes on the same frequency with matching sync word
-        // If IQ inversion is enabled, only deliver to nodes with matching IQ setting
+        // Deliver to all other board nodes on the same frequency with matching sync word.
+        // The bus is shared with communication.js component nodes (string IDs like
+        // "lora_tx") — only deliver to numeric library board indexes.
         var delivered = false;
         for (var nid in bus.nodes) {
-          if (parseInt(nid) !== _myNodeId) {
+          var destIdx = parseInt(nid, 10);
+          if (isNaN(destIdx) || String(destIdx) !== String(nid)) continue;
+          if (destIdx !== _myNodeId) {
             var target = bus.nodes[nid];
             if (target.initialized && target.frequency === _frequency &&
                 target.syncWord === _syncWord && target.simulator) {
@@ -456,7 +464,7 @@ window.ArduinoLibs['LoRa'] = {
               var rssi = myNode ? _calcRssi(target.x || 0, target.y || 0) : -50;
               var snr = myNode ? _calcSnr(target.x || 0, target.y || 0) : 0;
 
-              (function(t, r, s, pkt, at) {
+              (function(t, r, s, pkt, at, boardNum) {
                 setTimeout(function() {
                   // Store packet in target's RX buffer
                   t._rxBuffer = Array.from(pkt);
@@ -464,10 +472,10 @@ window.ArduinoLibs['LoRa'] = {
                   t._lastPacketSnr = s;
                   t._lastPacketAirtime = at;
 
-                  self._serialLog('[LoRa] → Delivered to Board ' + (parseInt(nid) + 1) +
+                  self._serialLog('[LoRa] → Delivered to Board ' + boardNum +
                     ' | RSSI=' + r + 'dBm SNR=' + s + 'dB\n', 'system');
                 }, Math.max(5, airtime / (self.speed || 1)));
-              })(target, rssi, snr, payload, airtime);
+              })(target, rssi, snr, payload, airtime, destIdx + 1);
 
               delivered = true;
             }

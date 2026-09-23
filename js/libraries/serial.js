@@ -107,6 +107,37 @@ window.ArduinoLibs['Serial'] = {
       for (var i = 0; i < str.length; i++) { _uartTxByte(str.charCodeAt(i) & 0xFF); }
       _setPin(tx, 1); /* idle HIGH */
     }
+    /* Convert value for Serial.print*. C char[] buffers are number arrays —
+       String(array) would join with commas ("123,34,...") instead of decoding. */
+    function _serialToString(val) {
+      if (val == null) return '';
+      if (typeof val === 'object' && typeof val.length === 'number' &&
+          !(typeof val === 'string')) {
+        // Prefer custom toString (set by ArduinoJson char-buf fill)
+        if (val.toString !== Array.prototype.toString && val.toString !== Object.prototype.toString) {
+          return String(val);
+        }
+        // Number array → decode as C string until NUL
+        var looksBytes = false;
+        var end = Math.min(val.length, 512);
+        for (var i = 0; i < end; i++) {
+          var c = val[i];
+          if (c === 0) { looksBytes = i > 0; break; }
+          if (typeof c === 'number' && c >= 0 && c <= 255) looksBytes = true;
+          else if (typeof c !== 'number') { looksBytes = false; break; }
+        }
+        if (looksBytes) {
+          var s = '';
+          for (var j = 0; j < val.length; j++) {
+            var b = val[j];
+            if (b === 0 || b === undefined || b === null) break;
+            s += String.fromCharCode(b & 0xff);
+          }
+          return s;
+        }
+      }
+      return String(val);
+    }
 
     return {
       /* Serial */
@@ -124,7 +155,7 @@ window.ArduinoLibs['Serial'] = {
         } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
         else if (fmt === 2) str = parseInt(val).toString(2);
         else if (fmt === 8) str = parseInt(val).toString(8);
-        else str = String(val);
+        else str = _serialToString(val);
         self._serialLog(str, 'data');
         _uartTxStr(str);
       },
@@ -137,7 +168,7 @@ window.ArduinoLibs['Serial'] = {
         } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
         else if (fmt === 2) str = parseInt(val).toString(2);
         else if (fmt === 8) str = parseInt(val).toString(8);
-        else str = String(val);
+        else str = _serialToString(val);
         self._serialLog(str + '\n', 'data');
         _uartTxStr(str + '\n');
       },

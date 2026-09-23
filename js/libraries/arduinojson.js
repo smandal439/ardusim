@@ -19,18 +19,25 @@ window.ArduinoLibs['ArduinoJson'] = {
   includes: ['<ArduinoJson.h>'],
   priority: 100,
   transpile: [
+    // StaticJsonDocument<128> doc; → var doc = new StaticJsonDocument(128)
+    // (the generic class-constructor pass cannot match template args)
+    [/\b(StaticJsonDocument|DynamicJsonDocument)\s*<\s*(\d+)\s*>\s+(\w+)\s*;/g, 'var $3 = new $1($2)'],
+    // DeserializationError err = ... → var err = ...  (strip C++ result type)
+    [/\bDeserializationError\s+(\w+)\s*=/g, 'var $1 ='],
     // deserializeJson(doc, input) → doc._deserialize(input)
     [/\bdeserializeJson\s*\(([^,]+),\s*([^)]+)\)/g, '$1._deserialize($2)'],
     // serializeJson(doc, output) → doc._serialize(output)
-    [/\bserializeJson\s*\(([^,]+),\s*([^)]+)\)/g, '$1._serialize($2)'],
+    // Also 3-arg form: serializeJson(doc, buf, sizeof(buf)) — drop size arg
+    // Nested parens in sizeof(...) handled via ([^()]|\([^)]*\))*
+    [/\bserializeJson\s*\(([^,]+),\s*([^,)]+)(?:\s*,\s*(?:[^()]|\([^)]*\))*)?\)/g, '$1._serialize($2)'],
     // serializeJsonPretty(doc, output) → doc._serializePretty(output)
-    [/\bserializeJsonPretty\s*\(([^,]+),\s*([^)]+)\)/g, '$1._serializePretty($2)'],
+    [/\bserializeJsonPretty\s*\(([^,]+),\s*([^,)]+)(?:\s*,\s*(?:[^()]|\([^)]*\))*)?\)/g, '$1._serializePretty($2)'],
     // doc.containsKey("key") → doc._containsKey("key")
     [/\.containsKey\s*\(/g, '._containsKey('],
-    // doc.is<T>() → doc._isType()
-    [/\.is\s*\(\s*\)/g, '._isType()'],
-    // doc.as<T>() → doc._asType()
-    [/\.as\s*\(\s*\)/g, '._asType()'],
+    // doc.is<T>() / doc.is() → doc._isType()
+    [/\.is\s*(?:<[^>]*>)?\s*\(\s*\)/g, '._isType()'],
+    // doc.as<T>() / doc.as() → doc._asType()  (e.g. .as<String>(), .as<float>())
+    [/\.as\s*(?:<[^>]*>)?\s*\(\s*\)/g, '._asType()'],
     // doc.size() → doc._size()
     [/\.size\s*\(\s*\)/g, '._size()'],
     // doc.clear() → doc._clear()  (skip LCD/display objects — they have their own clear)
@@ -43,8 +50,8 @@ window.ArduinoLibs['ArduinoJson'] = {
     [/\.memoryUsage\s*\(\s*\)/g, '._memoryUsage()'],
     // doc.capacity() → doc._capacity()
     [/\.capacity\s*\(\s*\)/g, '._capacity()'],
-    // doc.to<T>() → doc._to()
-    [/\.to\s*\(\s*\)/g, '._to()'],
+    // doc.to<T>() / doc.to() → doc._to()
+    [/\.to\s*(?:<[^>]*>)?\s*\(\s*\)/g, '._to()'],
   ],
 
   constants: {
@@ -57,14 +64,59 @@ window.ArduinoLibs['ArduinoJson'] = {
 
   constructor: function(capacity) {
     const cap = Number(capacity) || 256;
+    // Coerce sketch input to a JSON string. Handles C char[] buffers that
+    // hold byte values (e.g. filled by LoRa.read / serial) — String(array)
+    // would join with commas and break JSON.parse.
+    function _coerceJsonInput(input) {
+      if (typeof input === 'string') return input;
+      if (input == null) return '';
+      // Typed or plain array of byte/char values → decode until NUL
+      if (typeof input === 'object' && typeof input.length === 'number') {
+        let s = '';
+        for (let i = 0; i < input.length; i++) {
+          const c = input[i];
+          if (c === 0 || c === undefined || c === null) break;
+          s += (typeof c === 'number') ? String.fromCharCode(c & 0xff) : String(c);
+        }
+        return s;
+      }
+      return String(input);
+    }
+    // Fill a JS array as a C char[]: store char codes, null-terminate, and
+    // give it a toString so Serial.println / LoRa.print print the JSON string
+    // instead of "123,34,105,..."
+    function _fillCharBuf(buf, str) {
+      if (buf == null) return;
+      if (typeof buf === 'string') return; // cannot mutate
+      if (typeof buf !== 'object') return;
+      const n = typeof buf.length === 'number' ? buf.length : str.length;
+      for (let i = 0; i < str.length && i < n; i++) {
+        buf[i] = str.charCodeAt(i);
+      }
+      // null-terminate if there's room (array pre-filled with 0s otherwise)
+      if (str.length < n) buf[str.length] = 0;
+      if (Array.isArray(buf) || typeof buf.length === 'number') {
+        buf.toString = function () {
+          let s = '';
+          for (let i = 0; i < this.length; i++) {
+            const c = this[i];
+            if (c === 0 || c === undefined || c === null) break;
+            s += (typeof c === 'number' ? String.fromCharCode(c & 0xff) : String(c));
+          }
+          return s;
+        };
+        buf.valueOf = buf.toString;
+      }
+    }
     const doc = {
       __class: 'ArduinoJson',
       _data: {},
       _cap: cap,
       // Parse JSON string into the document
+      // Accepts: string, or C char[] as number array (byte values from LoRa.read etc.)
       _deserialize: function(input) {
         try {
-          const str = typeof input === 'string' ? input : String(input);
+          const str = _coerceJsonInput(input);
           this._data = JSON.parse(str);
           return 0; // DeserializationOk
         } catch (e) {
@@ -74,20 +126,12 @@ window.ArduinoLibs['ArduinoJson'] = {
       // Serialize document to string (fills char array)
       _serialize: function(output) {
         const str = JSON.stringify(this._data);
-        if (typeof output === 'object' && output !== null) {
-          for (let i = 0; i < str.length && i < output.length; i++) {
-            output[i] = str.charCodeAt(i);
-          }
-        }
+        _fillCharBuf(output, str);
         return str.length;
       },
       _serializePretty: function(output) {
         const str = JSON.stringify(this._data, null, 2);
-        if (typeof output === 'object' && output !== null) {
-          for (let i = 0; i < str.length && i < output.length; i++) {
-            output[i] = str.charCodeAt(i);
-          }
-        }
+        _fillCharBuf(output, str);
         return str.length;
       },
       _containsKey: function(key) {
@@ -114,7 +158,9 @@ window.ArduinoLibs['ArduinoJson'] = {
         return target._data[prop];
       },
       set: function(target, prop, value) {
-        if (prop in target && prop !== '_data') {
+        if (prop === '_data') {
+          target._data = value;
+        } else if (prop in target) {
           target[prop] = value;
         } else {
           target._data[prop] = value;

@@ -75,6 +75,7 @@ window.ArduinoLibs['Adafruit_SSD1306'] = {
         this.addr = _addr;
         var s = getSelf();
         if (s) s._emitEvent('oled_power', { addr: _addr });
+        return true; // success (matches Adafruit_SSD1306::begin)
       },
 
       print: function (msg) {

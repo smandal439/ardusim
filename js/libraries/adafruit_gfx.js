@@ -1,5 +1,12 @@
 // js/libraries/adafruit_gfx.js
 window.ArduinoLibs = window.ArduinoLibs || {};
+
+// Objects that implement GFX methods as real instance methods (SSD1306 etc.)
+// or that must not be hijacked by the global GFX rewrite.
+function _skipGfx(v) {
+  return /^(Serial|Wire|SPI|EEPROM|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1|display|oled|screen|tft|lcd\d*|u8g2|my\w*lcd|my\w*display|my\w*screen|my\w*tft|my\w*oled)$/i.test(v);
+}
+
 window.ArduinoLibs['Adafruit_GFX'] = {
   priority: 99,
 
@@ -8,29 +15,31 @@ window.ArduinoLibs['Adafruit_GFX'] = {
   includes: ['<Adafruit_GFX.h>'],
 
   // Transpile rules: [regex, replacement]
+  // MUST capture the object name — a bare /\.drawLine(/ match would turn
+  // `display.drawLine(` into `display_a.gfxDrawLine(` (missing dot).
+  // Skip display-like objects (SSD1306 etc.) so their real methods run.
   transpile: [
-    [/\.drawPixel\s*\(/g, '_a.gfxDrawPixel('],
-    [/\.drawLine\s*\(/g, '_a.gfxDrawLine('],
-    [/\.drawFastHLine\s*\(/g, '_a.gfxDrawFastHLine('],
-    [/\.drawFastVLine\s*\(/g, '_a.gfxDrawFastVLine('],
-    [/\.drawRect\s*\(/g, '_a.gfxDrawRect('],
-    [/\.fillRect\s*\(/g, '_a.gfxFillRect('],
-    [/\.fillScreen\s*\(/g, '_a.gfxFillScreen('],
-    [/\.drawCircle\s*\(/g, '_a.gfxDrawCircle('],
-    [/\.fillCircle\s*\(/g, '_a.gfxFillCircle('],
-    [/\.drawTriangle\s*\(/g, '_a.gfxDrawTriangle('],
-    [/\.fillTriangle\s*\(/g, '_a.gfxFillTriangle('],
-    [/\.setCursor\s*\(/g, '_a.gfxSetCursor('],
-    [/\.setTextColor\s*\(/g, '_a.gfxSetTextColor('],
-    [/\.setTextSize\s*\(/g, '_a.gfxSetTextSize('],
-    [/\.setTextWrap\s*\(/g, '_a.gfxSetTextWrap('],
-    [/\.setRotation\s*\(/g, '_a.gfxSetRotation('],
-    [/\.print\s*\(/g, '_a.gfxPrint('],
-    [/\.println\s*\(/g, '_a.gfxPrintln('],
-    [/\.width\s*\(\s*\)/g, '_a.gfxWidth()'],
-    [/\.height\s*\(\s*\)/g, '_a.gfxHeight()'],
-    [/\.getRotation\s*\(\s*\)/g, '_a. gfxGetRotation()'],
-
+    [/(\w+)\.drawPixel\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxDrawPixel('; }],
+    [/(\w+)\.drawLine\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxDrawLine('; }],
+    [/(\w+)\.drawFastHLine\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxDrawFastHLine('; }],
+    [/(\w+)\.drawFastVLine\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxDrawFastVLine('; }],
+    [/(\w+)\.drawRect\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxDrawRect('; }],
+    [/(\w+)\.fillRect\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxFillRect('; }],
+    [/(\w+)\.fillScreen\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxFillScreen('; }],
+    [/(\w+)\.drawCircle\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxDrawCircle('; }],
+    [/(\w+)\.fillCircle\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxFillCircle('; }],
+    [/(\w+)\.drawTriangle\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxDrawTriangle('; }],
+    [/(\w+)\.fillTriangle\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxFillTriangle('; }],
+    [/(\w+)\.setCursor\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxSetCursor('; }],
+    [/(\w+)\.setTextColor\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxSetTextColor('; }],
+    [/(\w+)\.setTextSize\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxSetTextSize('; }],
+    [/(\w+)\.setTextWrap\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxSetTextWrap('; }],
+    [/(\w+)\.setRotation\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxSetRotation('; }],
+    [/(\w+)\.print\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxPrint('; }],
+    [/(\w+)\.println\s*\(/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxPrintln('; }],
+    [/(\w+)\.width\s*\(\s*\)/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxWidth()'; }],
+    [/(\w+)\.height\s*\(\s*\)/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxHeight()'; }],
+    [/(\w+)\.getRotation\s*\(\s*\)/g, function (m, v) { if (_skipGfx(v)) return m; return '_a.gfxGetRotation()'; }],
   ],
 
   // Runtime functions — merged into _a object

@@ -9594,10 +9594,16 @@ window.EXAMPLE_SKETCHES = [
     "id": "http_slider_pwm_led",
     "name": "http slider pwm led",
     "icon": "🔧",
-    "desc": "A custom http slider pwm led circuit example.",
+    "desc": "This example demonstrates how to control the brightness of an LED connected to an ESP32 using a web interface. The ESP32 hosts a simple web page with a slider that allows users to adjust the LED's brightness in real-time via PWM (Pulse Width Modulation).",
     "tags": [
       "custom",
-      "circuit"
+      "circuit",
+      "http",
+      "slider",
+      "pwm",
+      "led",
+      "esp32",
+      "webserver"
     ],
     "circuit": {
       "components": [

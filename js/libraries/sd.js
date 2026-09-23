@@ -31,17 +31,17 @@ window.ArduinoLibs['SD'] = {
     }],
     // file.println(data)
     [/(\w+)\.println\s*\(([^)]*)\)/g, function(m, v, a) {
-      if (/^(Serial|Wire|SPI|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m;
+      if (/^(Serial|Wire|SPI|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1|LoRa|display|lcd\d*|screen|tft|oled)$/i.test(v)) return m;
       return '_a.sdPrintln(' + v + ', ' + a + ')';
     }],
     // file.print(data)
     [/(\w+)\.print\s*\(([^)]*)\)/g, function(m, v, a) {
-      if (/^(Serial|Wire|SPI|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m;
+      if (/^(Serial|Wire|SPI|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1|LoRa|display|lcd\d*|screen|tft|oled)$/i.test(v)) return m;
       return '_a.sdPrint(' + v + ', ' + a + ')';
     }],
     // file.write(data)
     [/(\w+)\.write\s*\(([^)]*)\)/g, function(m, v, a) {
-      if (/^(Serial|Wire|SPI|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1)$/i.test(v)) return m;
+      if (/^(Serial|Wire|SPI|WiFi|client|http|stream|server|SoftwareSerial|Serial2|Serial1|LoRa|display|lcd\d*|screen|tft|oled)$/i.test(v)) return m;
       return '_a.sdWrite(' + v + ', ' + a + ')';
     }],
     // file.close()

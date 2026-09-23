@@ -84,7 +84,7 @@ window.ArduinoLibs['WebServer'] = {
                     self._serialLog('[WebServer] ' + route.method + ' ' + route.path + ' -> ' + resp.code + '\n', 'system');
                     if (resp.type.indexOf('html') !== -1 && resp.content && self._emitWebPage) {
                       self._emitWebPage({ code: resp.code, type: resp.type, content: resp.content, url: route.path, method: route.method });
-                    } else if (cleanPath !== '/' && !self._webResp) {
+                    } else if (cleanPath !== '/') {
                       _serveRootPage(cfg);
                     }
                   })
