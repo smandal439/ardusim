@@ -405,11 +405,12 @@ defComp({
       const crc = inst.props.crcEnabled !== false ? 1 : 0;
 
       const tSymbol = (Math.pow(2, sf) / bw) * 1000; // ms per symbol
-      const tPreamble = (preambleLen + 4.25) * tSymbol;
-      
-      const payloadBits = 8 * payloadLen - 4 * sf + 28 + 16 * crc;
-      const bitsPerSymbol = 4 * (sf - (sf >= 11 ? 2 : 0));
-      const payloadSymbols = 8 + Math.max(Math.ceil(payloadBits / bitsPerSymbol) * cr, 0);
+      const tPreamble = (preambleLen + 4.25 + 0.25) * tSymbol;
+
+      const de = sf >= 11 ? 1 : 0; // low data rate optimize
+      const payloadNumerator = 8 * payloadLen - 4 * sf + 28 + 16 * crc + (4 * (sf - 2 * de)) / sf;
+      const bitsPerSymbol = 4 * (sf - 2 * de);
+      const payloadSymbols = 8 + Math.max(0, Math.ceil(payloadNumerator / bitsPerSymbol)) * cr;
       const airtimeMs = Math.round(tPreamble + (payloadSymbols * tSymbol));
 
       // Register / update node on the central bus

@@ -1,4 +1,4 @@
-﻿{
+{
   "id": "lora_weather_station",
   "name": "LoRa Weather Station (Sensor TX + Receiver Display)",
   "icon": "📡",
@@ -8,7 +8,7 @@
     "weather",
     "iot",
     "sensor",
-    "dht22",
+    "dht11",
     "oled",
     "esp32",
     "long-range",
@@ -20,7 +20,7 @@
     "components": [
       {
         "id": "tx_board",
-        "type": "esp32",
+        "type": "esp32_devkit_v1",
         "x": 150,
         "y": 200,
         "props": {
@@ -48,17 +48,17 @@
       },
       {
         "id": "dht22",
-        "type": "dht22",
+        "type": "dht11",
         "x": 50,
         "y": 350,
         "props": {
-          "label": "DHT22 Sensor"
+          "label": "DHT Sensor"
         },
         "rotation": 0
       },
       {
         "id": "rx_board",
-        "type": "esp32",
+        "type": "esp32_devkit_v1",
         "x": 700,
         "y": 200,
         "props": {
@@ -86,13 +86,11 @@
       },
       {
         "id": "oled",
-        "type": "ssd1306",
+        "type": "oled_ssd1306",
         "x": 870,
         "y": 350,
         "props": {
-          "address": "0x3C",
-          "width": 128,
-          "height": 64
+          "address": "0x3C"
         },
         "rotation": 0
       }
@@ -105,10 +103,10 @@
       {"id":"w_dio_tx","from":{"instId":"lora_tx","pinId":"DIO0"},"to":{"instId":"tx_board","pinId":"D26"},"color":"#9c27b0","waypoints":[]},
       {"id":"w_rst_tx","from":{"instId":"lora_tx","pinId":"RST"},"to":{"instId":"tx_board","pinId":"D14"},"color":"#f44336","waypoints":[]},
       {"id":"w_3v3_tx","from":{"instId":"lora_tx","pinId":"3V3"},"to":{"instId":"tx_board","pinId":"3V3"},"color":"#f44336","waypoints":[]},
-      {"id":"w_gnd_tx","from":{"instId":"lora_tx","pinId":"GND"},"to":{"instId":"tx_board","pinId":"GND"},"color":"#333333","waypoints":[]},
-      {"id":"w_dht_data","from":{"instId":"dht22","pinId":"DATA"},"to":{"instId":"tx_board","pinId":"D4"},"color":"#2196f3","waypoints":[]},
-      {"id":"w_dht_vcc","from":{"instId":"dht22","pinId":"VCC"},"to":{"instId":"tx_board","pinId":"3V3"},"color":"#f44336","waypoints":[]},
-      {"id":"w_dht_gnd","from":{"instId":"dht22","pinId":"GND"},"to":{"instId":"tx_board","pinId":"GND"},"color":"#333333","waypoints":[]},
+      {"id":"w_gnd_tx","from":{"instId":"lora_tx","pinId":"GND"},"to":{"instId":"tx_board","pinId":"GND1"},"color":"#333333","waypoints":[]},
+      {"id":"w_dht_data","from":{"instId":"dht22","pinId":"data"},"to":{"instId":"tx_board","pinId":"D4"},"color":"#2196f3","waypoints":[]},
+      {"id":"w_dht_vcc","from":{"instId":"dht22","pinId":"vcc"},"to":{"instId":"tx_board","pinId":"3V3"},"color":"#f44336","waypoints":[]},
+      {"id":"w_dht_gnd","from":{"instId":"dht22","pinId":"gnd"},"to":{"instId":"tx_board","pinId":"GND2"},"color":"#333333","waypoints":[]},
       {"id":"w_sck_rx","from":{"instId":"lora_rx","pinId":"SCK"},"to":{"instId":"rx_board","pinId":"D18"},"color":"#00bcd4","waypoints":[]},
       {"id":"w_miso_rx","from":{"instId":"lora_rx","pinId":"MISO"},"to":{"instId":"rx_board","pinId":"D19"},"color":"#4caf50","waypoints":[]},
       {"id":"w_mosi_rx","from":{"instId":"lora_rx","pinId":"MOSI"},"to":{"instId":"rx_board","pinId":"D23"},"color":"#ff9800","waypoints":[]},
@@ -116,11 +114,11 @@
       {"id":"w_dio_rx","from":{"instId":"lora_rx","pinId":"DIO0"},"to":{"instId":"rx_board","pinId":"D26"},"color":"#9c27b0","waypoints":[]},
       {"id":"w_rst_rx","from":{"instId":"lora_rx","pinId":"RST"},"to":{"instId":"rx_board","pinId":"D14"},"color":"#f44336","waypoints":[]},
       {"id":"w_3v3_rx","from":{"instId":"lora_rx","pinId":"3V3"},"to":{"instId":"rx_board","pinId":"3V3"},"color":"#f44336","waypoints":[]},
-      {"id":"w_gnd_rx","from":{"instId":"lora_rx","pinId":"GND"},"to":{"instId":"rx_board","pinId":"GND"},"color":"#333333","waypoints":[]},
-      {"id":"w_oled_sda","from":{"instId":"oled","pinId":"SDA"},"to":{"instId":"rx_board","pinId":"D21"},"color":"#4caf50","waypoints":[]},
-      {"id":"w_oled_scl","from":{"instId":"oled","pinId":"SCL"},"to":{"instId":"rx_board","pinId":"D22"},"color":"#2196f3","waypoints":[]},
-      {"id":"w_oled_vcc","from":{"instId":"oled","pinId":"VCC"},"to":{"instId":"rx_board","pinId":"3V3"},"color":"#f44336","waypoints":[]},
-      {"id":"w_oled_gnd","from":{"instId":"oled","pinId":"GND"},"to":{"instId":"rx_board","pinId":"GND"},"color":"#333333","waypoints":[]}
+      {"id":"w_gnd_rx","from":{"instId":"lora_rx","pinId":"GND"},"to":{"instId":"rx_board","pinId":"GND1"},"color":"#333333","waypoints":[]},
+      {"id":"w_oled_sda","from":{"instId":"oled","pinId":"sda"},"to":{"instId":"rx_board","pinId":"D21"},"color":"#4caf50","waypoints":[]},
+      {"id":"w_oled_scl","from":{"instId":"oled","pinId":"scl"},"to":{"instId":"rx_board","pinId":"D22"},"color":"#2196f3","waypoints":[]},
+      {"id":"w_oled_vcc","from":{"instId":"oled","pinId":"vcc"},"to":{"instId":"rx_board","pinId":"3V3"},"color":"#f44336","waypoints":[]},
+      {"id":"w_oled_gnd","from":{"instId":"oled","pinId":"gnd"},"to":{"instId":"rx_board","pinId":"GND2"},"color":"#333333","waypoints":[]}
     ]
   },
   "code": "/*\n * LoRa Weather Station - TRANSMITTER (Board 1)\n * ESP32 + SX1276/RFM95W + DHT22\n *\n * Reads temperature, humidity, and battery voltage.\n * Sends a JSON payload over LoRa every 30 seconds.\n * Designed for remote / battery-powered deployment.\n *\n * Libraries needed:\n *   - LoRa by Sandeep Mistry\n *   - DHT sensor library by Adafruit\n *   - ArduinoJson (for JSON serialization)\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n#include <DHT.h>\n#include <ArduinoJson.h>\n\n// --- Pin Definitions (ESP32 + LoRa SX1276) ---\n#define LORA_SS     5\n#define LORA_RST    14\n#define LORA_DIO0   26\n#define DHT_PIN     4\n#define BATT_ADC    34    // Battery voltage divider -> ADC pin\n\n// --- LoRa Parameters ---\n#define LORA_FREQ      868E6   // 868 MHz (EU) - change to 915E6 for US\n#define SF             10      // Spreading Factor (7-12). Higher = longer range, slower.\n#define BW             125000  // Bandwidth in Hz\n#define CR             5       // Coding Rate 4/5\n#define TX_POWER       17      // dBm (max 20 for SX1276)\n#define SYNC_WORD      0x12    // Sync word to filter own packets\n#define TX_INTERVAL_MS 30000   // Send every 30 seconds\n\n// --- DHT22 ---\n#define DHT_TYPE DHT22\nDHT dht(DHT_PIN, DHT_TYPE);\n\n// --- Battery voltage divider ratio ---\n// If using a 2:1 divider (R1=100k, R2=100k):\nconst float BATT_DIVIDER = 2.0;\nconst float ADC_VREF = 3.3;\nconst int ADC_RESOLUTION = 4095;\n\n// --- Packet counter ---\nunsigned long packetCount = 0;\n\n// --- Deep-sleep duration (set to 0 to disable) ---\n#define SLEEP_SECONDS 0   // Set >0 for deep-sleep between transmissions\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println();\n  Serial.println(\"========================================\");\n  Serial.println(\"  LoRa Weather Station - Transmitter\");\n  Serial.println(\"========================================\");\n\n  // DHT22\n  dht.begin();\n  Serial.println(\"[INIT] DHT22 sensor ready.\");\n\n  // LoRa\n  SPI.begin(18, 19, 23, LORA_SS);  // SCK, MISO, MOSI, SS\n  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);\n\n  if (!LoRa.begin(LORA_FREQ)) {\n    Serial.println(\"[ERROR] LoRa init failed!\");\n    while (1) { delay(1000); }\n  }\n\n  // LoRa configuration\n  LoRa.setSpreadingFactor(SF);\n  LoRa.setSignalBandwidth(BW);\n  LoRa.setCodingRate4(CR);\n  LoRa.setTxPower(TX_POWER);\n  LoRa.setSyncWord(SYNC_WORD);\n  LoRa.enableCrc();\n  LoRa.setPreambleLength(8);\n\n  Serial.println(\"[INIT] LoRa radio configured.\");\n  Serial.print(\"  Frequency : \"); Serial.print(LORA_FREQ / 1E6); Serial.println(\" MHz\");\n  Serial.print(\"  SF        : \"); Serial.println(SF);\n  Serial.print(\"  Bandwidth : \"); Serial.print(BW / 1000); Serial.println(\" kHz\");\n  Serial.print(\"  TX Power  : \"); Serial.print(TX_POWER); Serial.println(\" dBm\");\n  Serial.println(\"---\");\n}\n\nfloat readBatteryVoltage() {\n  int raw = analogRead(BATT_ADC);\n  float voltage = (raw / (float)ADC_RESOLUTION) * ADC_VREF * BATT_DIVIDER;\n  return voltage;\n}\n\nvoid loop() {\n  packetCount++;\n\n  // Read sensors\n  float temperature = dht.readTemperature();   // Celsius\n  float humidity    = dht.readHumidity();\n  float batteryV    = readBatteryVoltage();\n\n  // Check DHT read errors\n  bool dhtError = isnan(temperature) || isnan(humidity);\n\n  // Build JSON payload\n  StaticJsonDocument<128> doc;\n  doc[\"id\"]    = \"ws-01\";          // Station ID\n  doc[\"pkt\"]   = packetCount;\n  doc[\"temp\"]  = dhtError ? -999.0 : round(temperature * 10.0) / 10.0;\n  doc[\"hum\"]   = dhtError ? -1.0   : round(humidity * 10.0) / 10.0;\n  doc[\"bat\"]   = round(batteryV * 100.0) / 100.0;\n\n  char payload[128];\n  serializeJson(doc, payload, sizeof(payload));\n\n  // Print to local serial\n  Serial.print(\"[TX #\"); Serial.print(packetCount); Serial.print(\"] \");\n  Serial.println(payload);\n\n  // Send over LoRa\n  LoRa.beginPacket();\n  LoRa.print(payload);\n  LoRa.endPacket();\n\n  Serial.println(\"  -> Packet sent!\");\n  Serial.println(\"---\");\n\n  // Deep-sleep mode (optional, uncomment below to enable)\n  // #if SLEEP_SECONDS > 0\n  //   LoRa.sleep();\n  //   esp_sleep_enable_timer_wakeup(SLEEP_SECONDS * 1000000ULL);\n  //   esp_deep_sleep_start();\n  // #endif\n\n  delay(TX_INTERVAL_MS);\n}",

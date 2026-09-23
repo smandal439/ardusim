@@ -539,7 +539,14 @@ class App {
 
   _getDefaultSketchName() {
     const board = this._getActiveBoardType();
-    if (board === 'intel_8085' || board === 'intel_8051') return 'sketch.asm';
+    if (board === 'intel_8085') return 'sketch.asm';
+    if (board === 'intel_8051') {
+      const files = window.EditorManager?.files || {};
+      const c = files['sketch.c']?.content || '';
+      const a = files['sketch.asm']?.content || '';
+      if (window.Intel8051C && (window.Intel8051C.sniff(c) || window.Intel8051C.sniff(a))) return 'sketch.c';
+      return 'sketch.asm';
+    }
     if (board === 'stm32f746_disco' || board === 'lpc2148') return 'sketch.c';
     return 'sketch.ino';
   }

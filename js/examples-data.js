@@ -227,10 +227,11 @@ window.EXAMPLE_SKETCHES = [
     "id": "8051_all_led_on",
     "name": "8051 all led on",
     "icon": "🔧",
-    "desc": "A custom 8051 all led on circuit example.",
+    "desc": "This example demonstrates how to turn on all the LEDs connected to the ports of an 8051 microcontroller. The program sets all pins of Port 0, Port 1, Port 2, and Port 3 to high (logic level 1), which will turn on any LEDs connected to these ports. The program then enters an infinite loop to keep the microcontroller running.",
     "tags": [
-      "custom",
-      "circuit"
+      "8051",
+      "led",
+      "on"
     ],
     "circuit": {
       "components": [
@@ -439,10 +440,11 @@ window.EXAMPLE_SKETCHES = [
     "id": "8085_all_led_on",
     "name": "8085 all led on",
     "icon": "🔧",
-    "desc": "A custom 8085 all led on circuit example.",
+    "desc": "This example demonstrates how to turn on all the LEDs connected to the ports of an 8085 microprocessor. The program configures the 8255 PPI (Programmable Peripheral Interface) to set all pins of Port A, Port B, and Port C to high (logic level 1), which will turn on any LEDs connected to these ports. The program then halts execution after sending the data to the ports.",
     "tags": [
-      "custom",
-      "circuit"
+      "8085",
+      "led",
+      "on"
     ],
     "circuit": {
       "components": [
@@ -9943,6 +9945,234 @@ window.EXAMPLE_SKETCHES = [
     "code": "#include \"HX711.h\"\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\n// HX711 pins\nconst int HX711_DT  = 3;\nconst int HX711_SCK = 2;\n\nHX711 scale(HX711_DT, HX711_SCK);\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nfloat calibration_factor = 2280.0;\nfloat weight = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"Digital Scale\");\n  lcd.setCursor(0, 1);\n  lcd.print(\"Calibrating...\");\n\n  scale.set_scale(calibration_factor);\n  scale.tare();\n\n  delay(1000);\n  lcd.clear();\n  lcd.setCursor(0, 0);\n  lcd.print(\"Weight:\");\n}\n\nvoid loop() {\n  weight = scale.get_units(5);\n  if (weight < 0) weight = 0;\n\n  lcd.setCursor(0, 1);\n  lcd.print(\"                \");\n  lcd.setCursor(0, 1);\n  lcd.print(weight, 1);\n  lcd.print(\" kg\");\n\n  Serial.print(\"Weight: \");\n  Serial.print(weight, 1);\n  Serial.println(\" kg\");\n\n  delay(300);\n}"
   },
   {
+    "id": "i8051_c_blink",
+    "name": "8051 C Blink (Keil C51)",
+    "icon": "💡",
+    "desc": "Intel 8051 in Keil C51 dialect: blink LED on P1.7 using sbit, for-loops, and a delay function.",
+    "tags": [
+      "8051",
+      "c",
+      "keil",
+      "beginner",
+      "LED",
+      "intel8051"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "intel_8051",
+          "x": 200,
+          "y": 100,
+          "width": 380,
+          "height": 320,
+          "props": {
+            "label": "8051"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "led1",
+          "type": "led",
+          "x": 60,
+          "y": 240,
+          "width": 30,
+          "height": 60,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          },
+          "runtimeState": {
+            "val": 0,
+            "lit": false,
+            "brightness": 0,
+            "current_mA": 0,
+            "overload": false,
+            "blown": false,
+            "_warnedBlown": false
+          },
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "r1",
+          "type": "resistor",
+          "x": 65,
+          "y": 345,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "VCC"
+          },
+          "to": {
+            "instId": "r1",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "r1",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "led1",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "led1",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "P1.7"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ]
+    },
+    "files": {
+      "sketch.c": "#include <reg51.h>\n\nsbit LED = P1^7;\n\nvoid delay(unsigned int n) {\n  while (n--) ;\n}\n\nvoid main(void) {\n  while (1) {\n    LED = 0;          /* LED ON  (active low) */\n    delay(20000);\n    LED = 1;          /* LED OFF */\n    delay(20000);\n  }\n}\n"
+    }
+  },
+  {
+    "id": "i8051_c_timer0_isr",
+    "name": "8051 C Timer0 ISR",
+    "icon": "⏱️",
+    "desc": "Intel 8051 Keil C51: Timer0 mode-1 interrupt (interrupt 1) toggles LED on P1.7.",
+    "tags": [
+      "8051",
+      "c",
+      "keil",
+      "timer",
+      "interrupt",
+      "intel8051"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "intel_8051",
+          "x": 200,
+          "y": 100,
+          "width": 380,
+          "height": 320,
+          "props": {
+            "label": "8051"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "led1",
+          "type": "led",
+          "x": 60,
+          "y": 240,
+          "width": 30,
+          "height": 60,
+          "props": {
+            "color": "#33ff66",
+            "colorName": "Green"
+          },
+          "runtimeState": {
+            "val": 0,
+            "lit": false,
+            "brightness": 0,
+            "current_mA": 0,
+            "overload": false,
+            "blown": false,
+            "_warnedBlown": false
+          },
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "r1",
+          "type": "resistor",
+          "x": 65,
+          "y": 345,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "VCC"
+          },
+          "to": {
+            "instId": "r1",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "r1",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "led1",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "led1",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "P1.7"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ]
+    },
+    "files": {
+      "sketch.c": "#include <reg51.h>\n\nsbit LED = P1^7;\nunsigned char ticks;\n\nvoid timer0_isr(void) interrupt 1 {\n  TH0 = 0x3C;       /* reload for ~50ms @ 12MHz */\n  TL0 = 0xB0;\n  ticks++;\n  if (ticks >= 20) {\n    ticks = 0;\n    LED = ~LED;      /* toggle LED */\n  }\n}\n\nvoid main(void) {\n  ticks = 0;\n  TMOD = 0x01;       /* Timer0 mode 1 (16-bit) */\n  TH0 = 0x3C;\n  TL0 = 0xB0;\n  IE = 0x82;         /* EA | ET0 */\n  TR0 = 1;           /* start Timer0 */\n  while (1) ;\n}\n"
+    }
+  },
+  {
     "id": "ic_nand_test",
     "name": "74HC00 NAND Gate Test",
     "icon": "🔲",
@@ -10687,6 +10917,119 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "code": "; Intel 8051 - Serial Hello World\n; Sends 'Hello 8051' to the serial monitor\n; Uses timer baud rate setup and SBUF output\n\n        ORG 0000H\n\n        ; Setup timer for serial baud rate\n        MOV TMOD, #20H   ; Timer1, Mode 2 (8-bit auto-reload)\n        MOV TH1, #0FDH   ; 9600 baud @ 11.0592MHz\n        MOV SCON, #50H   ; Mode 1, REN=1 (8-bit UART)\n        SETB TR1          ; Start Timer1\n\n        MOV DPTR, #MSG   ; DPTR = message pointer\n\nNEXT:   CLR A             ; Clear A for MOVC\n        MOVC A, @A+DPTR  ; Load next character\n        JZ DONE          ; If null, done\n        MOV SBUF, A      ; Send character\n        JNB TI, $        ; Wait for TX complete\n        CLR TI           ; Clear TI flag\n        INC DPTR         ; Next character\n        SJMP NEXT        ; Loop\n\nDONE:   SJMP $           ; Halt (infinite loop)\n\nMSG:    DB 'Hello 8051', 0DH, 0AH, 00H\n        END"
+  },
+  {
+    "id": "intel_8051_timer0_interrupt",
+    "name": "8051 Timer0 Interrupt (ASM)",
+    "icon": "⏱️",
+    "desc": "Intel 8051 assembly: Timer0 mode-1 overflow ISR at vector 000BH toggles P1.7.",
+    "tags": [
+      "8051",
+      "assembly",
+      "timer",
+      "interrupt",
+      "intel8051"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "intel_8051",
+          "x": 200,
+          "y": 100,
+          "width": 380,
+          "height": 320,
+          "props": {
+            "label": "8051"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "led1",
+          "type": "led",
+          "x": 60,
+          "y": 240,
+          "width": 30,
+          "height": 60,
+          "props": {
+            "color": "#ffff33",
+            "colorName": "Yellow"
+          },
+          "runtimeState": {
+            "val": 0,
+            "lit": false,
+            "brightness": 0,
+            "current_mA": 0,
+            "overload": false,
+            "blown": false,
+            "_warnedBlown": false
+          },
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "r1",
+          "type": "resistor",
+          "x": 65,
+          "y": 345,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "VCC"
+          },
+          "to": {
+            "instId": "r1",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "r1",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "led1",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "led1",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "P1.7"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ]
+    },
+    "files": {
+      "sketch.asm": "; Intel 8051 - Timer0 interrupt toggles LED on P1.7\n; Timer0 mode 1 (16-bit), reload ~50ms, vector at 000BH\n\n        ORG 0000H\n        LJMP MAIN\n\n        ORG 000BH            ; Timer0 overflow vector\nISR:    PUSH PSW\n        PUSH ACC\n        MOV  TH0, #3CH       ; reload values\n        MOV  TL0, #0B0H\n        CPL  P1.7            ; toggle LED\n        POP  ACC\n        POP  PSW\n        RETI\n\n        ORG 0030H\nMAIN:   MOV  TMOD, #01H      ; Timer0 mode 1\n        MOV  TH0, #3CH\n        MOV  TL0, #0B0H\n        SETB ET0             ; enable Timer0 interrupt\n        SETB EA              ; global enable\n        SETB TR0             ; start timer\nLOOP:   SJMP LOOP            ; idle, ISR does the work\n        END"
+    }
   },
   {
     "id": "intel_8085_blink",
@@ -14224,6 +14567,408 @@ window.EXAMPLE_SKETCHES = [
     },
     "code": "/*\n * LoRa Sender — Board 1\n * Sends a counter message every 2 seconds\n * Uses LoRa.h library with SX1276/RFM95W module\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n\n#define SS_PIN   10\n#define RST_PIN  9\n#define DIO0_PIN 2\n\nint counter = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"LoRa Sender Starting...\");\n\n  LoRa.setPins(SS_PIN, RST_PIN, DIO0_PIN);\n\n  if (!LoRa.begin(868E6)) {\n    Serial.println(\"LoRa init failed!\");\n    while (1);\n  }\n\n  LoRa.setSpreadingFactor(7);\n  LoRa.setSignalBandwidth(125000);\n  LoRa.setCodingRate4(5);\n  LoRa.setTxPower(14);\n  LoRa.setSyncWord(0x12);\n  LoRa.enableCrc();\n\n  Serial.println(\"LoRa Sender ready!\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  counter++;\n\n  Serial.print(\"Sending packet #\");\n  Serial.println(counter);\n\n  LoRa.beginPacket();\n  LoRa.print(\"Hello #\");\n  LoRa.print(counter);\n  LoRa.endPacket();\n\n  Serial.println(\"Packet sent!\");\n  Serial.println(\"---\");\n\n  delay(2000);\n}",
     "board2Code": "/*\n * LoRa Receiver — Board 2\n * Receives packets from the Sender board\n * Displays message content and RSSI/SNR on Serial Monitor\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n\n#define SS_PIN   10\n#define RST_PIN  9\n#define DIO0_PIN 2\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"LoRa Receiver Starting...\");\n\n  LoRa.setPins(SS_PIN, RST_PIN, DIO0_PIN);\n\n  if (!LoRa.begin(868E6)) {\n    Serial.println(\"LoRa init failed!\");\n    while (1);\n  }\n\n  LoRa.setSpreadingFactor(7);\n  LoRa.setSignalBandwidth(125000);\n  LoRa.setCodingRate4(5);\n  LoRa.setSyncWord(0x12);\n  LoRa.enableCrc();\n\n  Serial.println(\"LoRa Receiver ready — waiting for packets...\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  int packetSize = LoRa.parsePacket();\n\n  if (packetSize) {\n    Serial.print(\"Received packet: \");\n\n    String message = \"\";\n    while (LoRa.available()) {\n      message += (char)LoRa.read();\n    }\n    Serial.println(message);\n\n    int rssi = LoRa.packetRssi();\n    float snr = LoRa.packetSnr();\n\n    Serial.print(\"RSSI: \");\n    Serial.print(rssi);\n    Serial.println(\" dBm\");\n\n    Serial.print(\"SNR: \");\n    Serial.print(snr);\n    Serial.println(\" dB\");\n\n    Serial.println(\"---\");\n  }\n}"
+  },
+  {
+    "id": "lora_weather_station",
+    "name": "LoRa Weather Station (Sensor TX + Receiver Display)",
+    "icon": "📡",
+    "desc": "A practical LoRa long-range weather monitoring system. The Transmitter (ESP32) reads DHT22 temperature/humidity sensor and battery voltage via ADC, then sends a JSON payload every 30 seconds over LoRa. The Receiver (ESP32) decodes the packet, displays live readings on an SSD1306 OLED, and logs to Serial. Demonstrates real-world IoT: low-power TX, JSON payloads, OLED display, and signal quality monitoring (RSSI/SNR).",
+    "tags": [
+      "lora",
+      "weather",
+      "iot",
+      "sensor",
+      "dht11",
+      "oled",
+      "esp32",
+      "long-range",
+      "sx1276",
+      "rfm95",
+      "intermediate"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "tx_board",
+          "type": "esp32_devkit_v1",
+          "x": 150,
+          "y": 200,
+          "props": {
+            "label": "LoRa TX - Weather Station"
+          },
+          "rotation": 0
+        },
+        {
+          "id": "lora_tx",
+          "type": "lora_module",
+          "x": 50,
+          "y": 80,
+          "props": {
+            "frequency": 868000000,
+            "spreadingFactor": 10,
+            "bandwidth": 125000,
+            "codingRate": 5,
+            "txPower": 17,
+            "syncWord": 18,
+            "crcEnabled": true,
+            "preambleLen": 8,
+            "payloadLen": 64
+          },
+          "rotation": 0
+        },
+        {
+          "id": "dht22",
+          "type": "dht11",
+          "x": 50,
+          "y": 350,
+          "props": {
+            "label": "DHT Sensor"
+          },
+          "rotation": 0
+        },
+        {
+          "id": "rx_board",
+          "type": "esp32_devkit_v1",
+          "x": 700,
+          "y": 200,
+          "props": {
+            "label": "LoRa RX - Display Station"
+          },
+          "rotation": 0
+        },
+        {
+          "id": "lora_rx",
+          "type": "lora_module",
+          "x": 850,
+          "y": 80,
+          "props": {
+            "frequency": 868000000,
+            "spreadingFactor": 10,
+            "bandwidth": 125000,
+            "codingRate": 5,
+            "txPower": 17,
+            "syncWord": 18,
+            "crcEnabled": true,
+            "preambleLen": 8,
+            "payloadLen": 64
+          },
+          "rotation": 0
+        },
+        {
+          "id": "oled",
+          "type": "oled_ssd1306",
+          "x": 870,
+          "y": 350,
+          "props": {
+            "address": "0x3C"
+          },
+          "rotation": 0
+        }
+      ],
+      "wires": [
+        {
+          "id": "w_sck_tx",
+          "from": {
+            "instId": "lora_tx",
+            "pinId": "SCK"
+          },
+          "to": {
+            "instId": "tx_board",
+            "pinId": "D18"
+          },
+          "color": "#00bcd4",
+          "waypoints": []
+        },
+        {
+          "id": "w_miso_tx",
+          "from": {
+            "instId": "lora_tx",
+            "pinId": "MISO"
+          },
+          "to": {
+            "instId": "tx_board",
+            "pinId": "D19"
+          },
+          "color": "#4caf50",
+          "waypoints": []
+        },
+        {
+          "id": "w_mosi_tx",
+          "from": {
+            "instId": "lora_tx",
+            "pinId": "MOSI"
+          },
+          "to": {
+            "instId": "tx_board",
+            "pinId": "D23"
+          },
+          "color": "#ff9800",
+          "waypoints": []
+        },
+        {
+          "id": "w_nss_tx",
+          "from": {
+            "instId": "lora_tx",
+            "pinId": "NSS"
+          },
+          "to": {
+            "instId": "tx_board",
+            "pinId": "D5"
+          },
+          "color": "#e91e63",
+          "waypoints": []
+        },
+        {
+          "id": "w_dio_tx",
+          "from": {
+            "instId": "lora_tx",
+            "pinId": "DIO0"
+          },
+          "to": {
+            "instId": "tx_board",
+            "pinId": "D26"
+          },
+          "color": "#9c27b0",
+          "waypoints": []
+        },
+        {
+          "id": "w_rst_tx",
+          "from": {
+            "instId": "lora_tx",
+            "pinId": "RST"
+          },
+          "to": {
+            "instId": "tx_board",
+            "pinId": "D14"
+          },
+          "color": "#f44336",
+          "waypoints": []
+        },
+        {
+          "id": "w_3v3_tx",
+          "from": {
+            "instId": "lora_tx",
+            "pinId": "3V3"
+          },
+          "to": {
+            "instId": "tx_board",
+            "pinId": "3V3"
+          },
+          "color": "#f44336",
+          "waypoints": []
+        },
+        {
+          "id": "w_gnd_tx",
+          "from": {
+            "instId": "lora_tx",
+            "pinId": "GND"
+          },
+          "to": {
+            "instId": "tx_board",
+            "pinId": "GND1"
+          },
+          "color": "#333333",
+          "waypoints": []
+        },
+        {
+          "id": "w_dht_data",
+          "from": {
+            "instId": "dht22",
+            "pinId": "data"
+          },
+          "to": {
+            "instId": "tx_board",
+            "pinId": "D4"
+          },
+          "color": "#2196f3",
+          "waypoints": []
+        },
+        {
+          "id": "w_dht_vcc",
+          "from": {
+            "instId": "dht22",
+            "pinId": "vcc"
+          },
+          "to": {
+            "instId": "tx_board",
+            "pinId": "3V3"
+          },
+          "color": "#f44336",
+          "waypoints": []
+        },
+        {
+          "id": "w_dht_gnd",
+          "from": {
+            "instId": "dht22",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "tx_board",
+            "pinId": "GND2"
+          },
+          "color": "#333333",
+          "waypoints": []
+        },
+        {
+          "id": "w_sck_rx",
+          "from": {
+            "instId": "lora_rx",
+            "pinId": "SCK"
+          },
+          "to": {
+            "instId": "rx_board",
+            "pinId": "D18"
+          },
+          "color": "#00bcd4",
+          "waypoints": []
+        },
+        {
+          "id": "w_miso_rx",
+          "from": {
+            "instId": "lora_rx",
+            "pinId": "MISO"
+          },
+          "to": {
+            "instId": "rx_board",
+            "pinId": "D19"
+          },
+          "color": "#4caf50",
+          "waypoints": []
+        },
+        {
+          "id": "w_mosi_rx",
+          "from": {
+            "instId": "lora_rx",
+            "pinId": "MOSI"
+          },
+          "to": {
+            "instId": "rx_board",
+            "pinId": "D23"
+          },
+          "color": "#ff9800",
+          "waypoints": []
+        },
+        {
+          "id": "w_nss_rx",
+          "from": {
+            "instId": "lora_rx",
+            "pinId": "NSS"
+          },
+          "to": {
+            "instId": "rx_board",
+            "pinId": "D5"
+          },
+          "color": "#e91e63",
+          "waypoints": []
+        },
+        {
+          "id": "w_dio_rx",
+          "from": {
+            "instId": "lora_rx",
+            "pinId": "DIO0"
+          },
+          "to": {
+            "instId": "rx_board",
+            "pinId": "D26"
+          },
+          "color": "#9c27b0",
+          "waypoints": []
+        },
+        {
+          "id": "w_rst_rx",
+          "from": {
+            "instId": "lora_rx",
+            "pinId": "RST"
+          },
+          "to": {
+            "instId": "rx_board",
+            "pinId": "D14"
+          },
+          "color": "#f44336",
+          "waypoints": []
+        },
+        {
+          "id": "w_3v3_rx",
+          "from": {
+            "instId": "lora_rx",
+            "pinId": "3V3"
+          },
+          "to": {
+            "instId": "rx_board",
+            "pinId": "3V3"
+          },
+          "color": "#f44336",
+          "waypoints": []
+        },
+        {
+          "id": "w_gnd_rx",
+          "from": {
+            "instId": "lora_rx",
+            "pinId": "GND"
+          },
+          "to": {
+            "instId": "rx_board",
+            "pinId": "GND1"
+          },
+          "color": "#333333",
+          "waypoints": []
+        },
+        {
+          "id": "w_oled_sda",
+          "from": {
+            "instId": "oled",
+            "pinId": "sda"
+          },
+          "to": {
+            "instId": "rx_board",
+            "pinId": "D21"
+          },
+          "color": "#4caf50",
+          "waypoints": []
+        },
+        {
+          "id": "w_oled_scl",
+          "from": {
+            "instId": "oled",
+            "pinId": "scl"
+          },
+          "to": {
+            "instId": "rx_board",
+            "pinId": "D22"
+          },
+          "color": "#2196f3",
+          "waypoints": []
+        },
+        {
+          "id": "w_oled_vcc",
+          "from": {
+            "instId": "oled",
+            "pinId": "vcc"
+          },
+          "to": {
+            "instId": "rx_board",
+            "pinId": "3V3"
+          },
+          "color": "#f44336",
+          "waypoints": []
+        },
+        {
+          "id": "w_oled_gnd",
+          "from": {
+            "instId": "oled",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "rx_board",
+            "pinId": "GND2"
+          },
+          "color": "#333333",
+          "waypoints": []
+        }
+      ]
+    },
+    "code": "/*\n * LoRa Weather Station - TRANSMITTER (Board 1)\n * ESP32 + SX1276/RFM95W + DHT22\n *\n * Reads temperature, humidity, and battery voltage.\n * Sends a JSON payload over LoRa every 30 seconds.\n * Designed for remote / battery-powered deployment.\n *\n * Libraries needed:\n *   - LoRa by Sandeep Mistry\n *   - DHT sensor library by Adafruit\n *   - ArduinoJson (for JSON serialization)\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n#include <DHT.h>\n#include <ArduinoJson.h>\n\n// --- Pin Definitions (ESP32 + LoRa SX1276) ---\n#define LORA_SS     5\n#define LORA_RST    14\n#define LORA_DIO0   26\n#define DHT_PIN     4\n#define BATT_ADC    34    // Battery voltage divider -> ADC pin\n\n// --- LoRa Parameters ---\n#define LORA_FREQ      868E6   // 868 MHz (EU) - change to 915E6 for US\n#define SF             10      // Spreading Factor (7-12). Higher = longer range, slower.\n#define BW             125000  // Bandwidth in Hz\n#define CR             5       // Coding Rate 4/5\n#define TX_POWER       17      // dBm (max 20 for SX1276)\n#define SYNC_WORD      0x12    // Sync word to filter own packets\n#define TX_INTERVAL_MS 30000   // Send every 30 seconds\n\n// --- DHT22 ---\n#define DHT_TYPE DHT22\nDHT dht(DHT_PIN, DHT_TYPE);\n\n// --- Battery voltage divider ratio ---\n// If using a 2:1 divider (R1=100k, R2=100k):\nconst float BATT_DIVIDER = 2.0;\nconst float ADC_VREF = 3.3;\nconst int ADC_RESOLUTION = 4095;\n\n// --- Packet counter ---\nunsigned long packetCount = 0;\n\n// --- Deep-sleep duration (set to 0 to disable) ---\n#define SLEEP_SECONDS 0   // Set >0 for deep-sleep between transmissions\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println();\n  Serial.println(\"========================================\");\n  Serial.println(\"  LoRa Weather Station - Transmitter\");\n  Serial.println(\"========================================\");\n\n  // DHT22\n  dht.begin();\n  Serial.println(\"[INIT] DHT22 sensor ready.\");\n\n  // LoRa\n  SPI.begin(18, 19, 23, LORA_SS);  // SCK, MISO, MOSI, SS\n  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);\n\n  if (!LoRa.begin(LORA_FREQ)) {\n    Serial.println(\"[ERROR] LoRa init failed!\");\n    while (1) { delay(1000); }\n  }\n\n  // LoRa configuration\n  LoRa.setSpreadingFactor(SF);\n  LoRa.setSignalBandwidth(BW);\n  LoRa.setCodingRate4(CR);\n  LoRa.setTxPower(TX_POWER);\n  LoRa.setSyncWord(SYNC_WORD);\n  LoRa.enableCrc();\n  LoRa.setPreambleLength(8);\n\n  Serial.println(\"[INIT] LoRa radio configured.\");\n  Serial.print(\"  Frequency : \"); Serial.print(LORA_FREQ / 1E6); Serial.println(\" MHz\");\n  Serial.print(\"  SF        : \"); Serial.println(SF);\n  Serial.print(\"  Bandwidth : \"); Serial.print(BW / 1000); Serial.println(\" kHz\");\n  Serial.print(\"  TX Power  : \"); Serial.print(TX_POWER); Serial.println(\" dBm\");\n  Serial.println(\"---\");\n}\n\nfloat readBatteryVoltage() {\n  int raw = analogRead(BATT_ADC);\n  float voltage = (raw / (float)ADC_RESOLUTION) * ADC_VREF * BATT_DIVIDER;\n  return voltage;\n}\n\nvoid loop() {\n  packetCount++;\n\n  // Read sensors\n  float temperature = dht.readTemperature();   // Celsius\n  float humidity    = dht.readHumidity();\n  float batteryV    = readBatteryVoltage();\n\n  // Check DHT read errors\n  bool dhtError = isnan(temperature) || isnan(humidity);\n\n  // Build JSON payload\n  StaticJsonDocument<128> doc;\n  doc[\"id\"]    = \"ws-01\";          // Station ID\n  doc[\"pkt\"]   = packetCount;\n  doc[\"temp\"]  = dhtError ? -999.0 : round(temperature * 10.0) / 10.0;\n  doc[\"hum\"]   = dhtError ? -1.0   : round(humidity * 10.0) / 10.0;\n  doc[\"bat\"]   = round(batteryV * 100.0) / 100.0;\n\n  char payload[128];\n  serializeJson(doc, payload, sizeof(payload));\n\n  // Print to local serial\n  Serial.print(\"[TX #\"); Serial.print(packetCount); Serial.print(\"] \");\n  Serial.println(payload);\n\n  // Send over LoRa\n  LoRa.beginPacket();\n  LoRa.print(payload);\n  LoRa.endPacket();\n\n  Serial.println(\"  -> Packet sent!\");\n  Serial.println(\"---\");\n\n  // Deep-sleep mode (optional, uncomment below to enable)\n  // #if SLEEP_SECONDS > 0\n  //   LoRa.sleep();\n  //   esp_sleep_enable_timer_wakeup(SLEEP_SECONDS * 1000000ULL);\n  //   esp_deep_sleep_start();\n  // #endif\n\n  delay(TX_INTERVAL_MS);\n}",
+    "board2Code": "/*\n * LoRa Weather Station - RECEIVER (Board 2)\n * ESP32 + SX1276/RFM95W + SSD1306 OLED\n *\n * Receives JSON weather packets from the Transmitter.\n * Displays temperature, humidity, battery, and signal\n * quality (RSSI/SNR) on a 128x64 OLED display.\n * Also logs all data to Serial Monitor.\n *\n * Libraries needed:\n *   - LoRa by Sandeep Mistry\n *   - Adafruit SSD1306\n *   - Adafruit GFX Library\n *   - ArduinoJson (for JSON deserialization)\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>\n#include <ArduinoJson.h>\n\n// --- Pin Definitions (ESP32 + LoRa SX1276) ---\n#define LORA_SS     5\n#define LORA_RST    14\n#define LORA_DIO0   26\n\n// --- OLED ---\n#define SCREEN_WIDTH  128\n#define SCREEN_HEIGHT 64\n#define OLED_SDA      21\n#define OLED_SCL      22\n#define OLED_RST      -1   // -1 if not connected\n\n// --- LoRa Parameters (must match Transmitter) ---\n#define LORA_FREQ   868E6\n#define SF          10\n#define BW          125000\n#define CR          5\n#define SYNC_WORD   0x12\n\n// --- Display ---\nAdafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);\n\n// --- Packet tracking ---\nunsigned long rxCount = 0;\nunsigned long lastPacketTime = 0;\nconst long TIMEOUT_MS = 90000;  // 90s without a packet = stale\n\n// --- Last known values ---\nfloat lastTemp     = -999;\nfloat lastHum      = -1;\nfloat lastBat      = 0;\nfloat lastRSSI     = 0;\nfloat lastSNR      = 0;\nString lastStationId = \"--\";\n\nvoid drawHeader() {\n  display.setTextSize(1);\n  display.setTextColor(SSD1306_WHITE);\n  display.setCursor(0, 0);\n  display.print(\"LoRa Weather Station\");\n  display.drawLine(0, 10, 127, 10, SSD1306_WHITE);\n}\n\nvoid updateDisplay() {\n  display.clearDisplay();\n  drawHeader();\n\n  display.setTextSize(1);\n\n  // Station ID + packet count\n  display.setCursor(0, 14);\n  display.print(\"Station: \");\n  display.print(lastStationId);\n  display.print(\"  #\");\n  display.print(rxCount);\n\n  // Temperature\n  display.setCursor(0, 26);\n  display.print(\"Temp : \");\n  if (lastTemp > -900) {\n    display.print(lastTemp, 1);\n    display.print(\" C\");\n  } else {\n    display.print(\"ERR\");\n  }\n\n  // Humidity\n  display.setCursor(0, 36);\n  display.print(\"Hum  : \");\n  if (lastHum >= 0) {\n    display.print(lastHum, 1);\n    display.print(\" %\");\n  } else {\n    display.print(\"ERR\");\n  }\n\n  // Battery\n  display.setCursor(0, 46);\n  display.print(\"Batt : \");\n  display.print(lastBat, 2);\n  display.print(\" V\");\n\n  // Signal quality\n  display.setCursor(0, 56);\n  display.print(\"RSSI:\");\n  display.print((int)lastRSSI);\n  display.print(\"  SNR:\");\n  display.print(lastSNR, 1);\n\n  // Stale indicator\n  if (millis() - lastPacketTime > TIMEOUT_MS && lastPacketTime > 0) {\n    display.setTextSize(1);\n    display.setCursor(100, 14);\n    display.print(\"STALE\");\n  }\n\n  display.display();\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println();\n  Serial.println(\"========================================\");\n  Serial.println(\"  LoRa Weather Station - Receiver\");\n  Serial.println(\"========================================\");\n\n  // OLED reset\n  if (OLED_RST > 0) {\n    pinMode(OLED_RST, OUTPUT);\n    digitalWrite(OLED_RST, LOW);\n    delay(20);\n    digitalWrite(OLED_RST, HIGH);\n  }\n\n  Wire.begin(OLED_SDA, OLED_SCL);\n  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {\n    Serial.println(\"[ERROR] OLED init failed!\");\n    while (1) { delay(1000); }\n  }\n  display.clearDisplay();\n  display.setTextSize(1);\n  display.setTextColor(SSD1306_WHITE);\n  display.setCursor(0, 0);\n  display.println(\"Waiting for LoRa...\");\n  display.display();\n  Serial.println(\"[INIT] OLED display ready.\");\n\n  // LoRa\n  SPI.begin(18, 19, 23, LORA_SS);\n  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);\n\n  if (!LoRa.begin(LORA_FREQ)) {\n    Serial.println(\"[ERROR] LoRa init failed!\");\n    while (1) { delay(1000); }\n  }\n\n  LoRa.setSpreadingFactor(SF);\n  LoRa.setSignalBandwidth(BW);\n  LoRa.setCodingRate4(CR);\n  LoRa.setSyncWord(SYNC_WORD);\n  LoRa.enableCrc();\n\n  Serial.println(\"[INIT] LoRa radio configured.\");\n  Serial.print(\"  Listening on \"); Serial.print(LORA_FREQ / 1E6); Serial.println(\" MHz\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  int packetSize = LoRa.parsePacket();\n\n  if (packetSize) {\n    rxCount++;\n    lastPacketTime = millis();\n\n    // Read the raw payload\n    char buffer[128];\n    int idx = 0;\n    while (LoRa.available() && idx < (int)sizeof(buffer) - 1) {\n      buffer[idx++] = (char)LoRa.read();\n    }\n    buffer[idx] = 0;\n\n    // Signal quality\n    lastRSSI = LoRa.packetRssi();\n    lastSNR  = LoRa.packetSnr();\n\n    // Parse JSON\n    StaticJsonDocument<128> doc;\n    DeserializationError err = deserializeJson(doc, buffer);\n\n    if (!err) {\n      lastStationId = doc[\"id\"].as<String>();\n      lastTemp      = doc[\"temp\"].as<float>();\n      lastHum       = doc[\"hum\"].as<float>();\n      lastBat       = doc[\"bat\"].as<float>();\n\n      // Serial log\n      Serial.print(\"[RX #\"); Serial.print(rxCount); Serial.print(\"] \");\n      Serial.print(\"Station:\"); Serial.print(lastStationId);\n      Serial.print(\" Temp:\"); Serial.print(lastTemp, 1);\n      Serial.print(\"C  Hum:\"); Serial.print(lastHum, 1);\n      Serial.print(\"%  Bat:\"); Serial.print(lastBat, 2);\n      Serial.print(\"V  RSSI:\"); Serial.print((int)lastRSSI);\n      Serial.print(\"dBm  SNR:\"); Serial.print(lastSNR, 1);\n      Serial.println(\"dB\");\n    } else {\n      Serial.print(\"[RX] JSON parse error: \");\n      Serial.println(err.c_str());\n      Serial.print(\"  Raw: \");\n      Serial.println(buffer);\n    }\n\n    Serial.println(\"---\");\n    updateDisplay();\n  }\n}"
   },
   {
     "id": "lpc2148_all_leds",

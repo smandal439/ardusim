@@ -17,7 +17,18 @@ const StorageManager = {
     try {
       const settings = JSON.parse(localStorage.getItem(this.LS_SETTINGS_KEY) || '{}');
       const board = settings.board || 'arduino_uno';
-      if (board === 'intel_8085' || board === 'intel_8051') return 'sketch.asm';
+      if (board === 'intel_8085') return 'sketch.asm';
+      if (board === 'intel_8051') {
+        try {
+          const proj = JSON.parse(localStorage.getItem(this.LS_KEY) || '{}');
+          const files = proj.files || {};
+          const c = files['sketch.c']?.content || '';
+          const a = files['sketch.asm']?.content || '';
+          if (window.Intel8051C && window.Intel8051C.sniff(c)) return 'sketch.c';
+          if (window.Intel8051C && window.Intel8051C.sniff(a)) return 'sketch.c';
+        } catch (e2) { /* ignore */ }
+        return 'sketch.asm';
+      }
       if (board === 'stm32f746_disco' || board === 'lpc2148') return 'sketch.c';
     } catch (e) { /* ignore */ }
     return 'sketch.ino';

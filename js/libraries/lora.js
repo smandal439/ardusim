@@ -208,14 +208,16 @@ window.ArduinoLibs['LoRa'] = {
 
       var preambleSymbols = _preambleLength + 4.25 + 0.25;
       var headerBits = (ih === 0) ? 20 : 0;
-      var payloadSymbNb = 8 + Math.ceil(
+      var payloadSymbNb = 8 + Math.max(0, Math.ceil(
         (8 * payloadBytes - 4 * _spreadingFactor + 28 + 16 * crc - 20 * ih + (4 * (_spreadingFactor - 2 * de)) / _spreadingFactor) /
         (4 * (_spreadingFactor - 2 * de))
-      ) * (crVal);
-      var payloadBits = payloadSymbNb * _spreadingFactor;
+      )) * (crVal);
 
-      var totalTime = (preambleSymbols * Math.pow(2, _spreadingFactor) / _bandwidth +
-                       (payloadBits + headerBits) / (_bandwidth)) * 1000; // ms
+      // T_sym = 2^SF / BW; payload airtime = n_payload_symbols * T_sym
+      var tSymbol = Math.pow(2, _spreadingFactor) / _bandwidth;
+      var payloadTime = payloadSymbNb * tSymbol;
+      var headerTime = headerBits / _bandwidth;
+      var totalTime = (preambleSymbols * tSymbol + payloadTime + headerTime) * 1000; // ms
       return Math.max(1, Math.round(totalTime * 10) / 10);
     }
 

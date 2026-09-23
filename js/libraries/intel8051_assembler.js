@@ -69,8 +69,12 @@ window.Intel8051Assembler = (function () {
       var pc = org;
       if (collectLabels) labels = {};
 
-      function emit(b) { out.push(b & 0xFF); pc++; }
-      function emit16(v) { out.push(v & 0xFF); out.push((v >> 8) & 0xFF); pc += 2; }
+      function emit(b) {
+        while (out.length <= pc) out.push(0);
+        out[pc] = b & 0xFF;
+        pc++;
+      }
+      function emit16(v) { emit((v >> 8) & 0xFF); emit(v & 0xFF); }
 
       for (var i = 0; i < lines.length; i++) {
         var parts = tokenize(lines[i]);

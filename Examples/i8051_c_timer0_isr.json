@@ -1,0 +1,22 @@
+{
+  "id": "i8051_c_timer0_isr",
+  "name": "8051 C Timer0 ISR",
+  "icon": "\u23f1\ufe0f",
+  "desc": "Intel 8051 Keil C51: Timer0 mode-1 interrupt (interrupt 1) toggles LED on P1.7.",
+  "tags": ["8051", "c", "keil", "timer", "interrupt", "intel8051"],
+  "circuit": {
+    "components": [
+      { "id": "b1", "type": "intel_8051", "x": 200, "y": 100, "width": 380, "height": 320, "props": { "label": "8051" }, "runtimeState": {}, "selected": false, "rotation": 0 },
+      { "id": "led1", "type": "led", "x": 60, "y": 240, "width": 30, "height": 60, "props": { "color": "#33ff66", "colorName": "Green" }, "runtimeState": { "val": 0, "lit": false, "brightness": 0, "current_mA": 0, "overload": false, "blown": false, "_warnedBlown": false }, "selected": false, "rotation": 0 },
+      { "id": "r1", "type": "resistor", "x": 65, "y": 345, "width": 20, "height": 60, "props": { "value": 220, "unit": "\u03a9" }, "runtimeState": {}, "selected": false, "rotation": 0 }
+    ],
+    "wires": [
+      { "id": "w1", "from": { "instId": "b1", "pinId": "VCC" }, "to": { "instId": "r1", "pinId": "p1" }, "color": null, "waypoints": [] },
+      { "id": "w2", "from": { "instId": "r1", "pinId": "p2" }, "to": { "instId": "led1", "pinId": "anode" }, "color": null, "waypoints": [] },
+      { "id": "w3", "from": { "instId": "led1", "pinId": "cathode" }, "to": { "instId": "b1", "pinId": "P1.7" }, "color": null, "waypoints": [] }
+    ]
+  },
+  "files": {
+    "sketch.c": "#include <reg51.h>\n\nsbit LED = P1^7;\nunsigned char ticks;\n\nvoid timer0_isr(void) interrupt 1 {\n  TH0 = 0x3C;       /* reload for ~50ms @ 12MHz */\n  TL0 = 0xB0;\n  ticks++;\n  if (ticks >= 20) {\n    ticks = 0;\n    LED = ~LED;      /* toggle LED */\n  }\n}\n\nvoid main(void) {\n  ticks = 0;\n  TMOD = 0x01;       /* Timer0 mode 1 (16-bit) */\n  TH0 = 0x3C;\n  TL0 = 0xB0;\n  IE = 0x82;         /* EA | ET0 */\n  TR0 = 1;           /* start Timer0 */\n  while (1) ;\n}\n"
+  }
+}

@@ -2,10 +2,11 @@
   "id": "8085_all_led_on",
   "name": "8085 all led on",
   "icon": "🔧",
-  "desc": "A custom 8085 all led on circuit example.",
+  "desc": "This example demonstrates how to turn on all the LEDs connected to the ports of an 8085 microprocessor. The program configures the 8255 PPI (Programmable Peripheral Interface) to set all pins of Port A, Port B, and Port C to high (logic level 1), which will turn on any LEDs connected to these ports. The program then halts execution after sending the data to the ports.",
   "tags": [
-    "custom",
-    "circuit"
+    "8085",
+    "led",
+    "on"
   ],
   "circuit": {
     "components": [

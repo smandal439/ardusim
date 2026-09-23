@@ -13,12 +13,20 @@ window.ArduinoLibs['Intel8051'] = {
     LED: 17, BUTTON: 10, SPEAKER: 34, HIGH: 1, LOW: 0, INPUT: 0, OUTPUT: 1, INPUT_PULLUP: 2
   },
   transpile: function (code) {
+    if (typeof window.Intel8051C !== 'undefined' && window.Intel8051C.sniff(code)) {
+      var cr = window.Intel8051C.compile(code);
+      if (cr.error) return '//__ASM_ERROR__\n' + JSON.stringify({ error: 'C error line ' + cr.line + ': ' + cr.error });
+      code = cr.asm;
+    }
     if (typeof window.Intel8051Assembler === 'undefined') {
       return '//__ASM_ERROR__\n' + JSON.stringify({ error: 'Intel 8051 assembler not loaded!' }); }
     try { var result = window.Intel8051Assembler.assemble(code);
     } catch (e) { return '//__ASM_ERROR__\n' + JSON.stringify({ error: e.message }); }
     if (result.errors && result.errors.length > 0) {
-      return '//__ASM_ERROR__\n' + JSON.stringify({ error: result.errors.join('\n') }); }
+      var msgs = result.errors.map(function (er) {
+        return (er && er.line != null) ? ('line ' + er.line + ': ' + (er.message || er)) : String(er);
+      }).join('\n');
+      return '//__ASM_ERROR__\n' + JSON.stringify({ error: msgs }); }
     var bytes = [];
     for (var k in result.code) { bytes.push(result.code[k] & 0xFF); }
     var hex = bytes.map(function(b) { return ('0' + b.toString(16)).slice(-2).toUpperCase(); }).join(' ');

@@ -745,14 +745,28 @@ DL2:    DJNZ R3, DL2
     --------------------------------------------------------- */
 
   _getLanguageForFile(name) {
-    if (name.endsWith('.ino') || name.endsWith('.cpp') || name.endsWith('.c') || name.endsWith('.h')) return 'arduino';
     if (name.endsWith('.asm') || name.endsWith('.s')) return 'plaintext';
+    if (name.endsWith('.ino') || name.endsWith('.cpp') || name.endsWith('.c') || name.endsWith('.h')) {
+      if (window.Intel8051C && name === 'sketch.c') {
+        const active = window.App?.canvas?.getBoardInst?.()?.type || window.App?.sim?.board;
+        if (active === 'intel_8051') {
+          const content = this.files?.[name]?.content || this.getActiveContent?.() || '';
+          if (window.Intel8051C.sniff(content)) return 'arduino';
+        }
+      }
+      return 'arduino';
+    }
     return 'plaintext';
   },
 
   _getDefaultSketchName() {
     const board = window.App?.canvas?.getBoardInst?.()?.type || window.App?.sim?.board || 'arduino_uno';
-    if (board === 'intel_8085' || board === 'intel_8051') return 'sketch.asm';
+    if (board === 'intel_8085') return 'sketch.asm';
+    if (board === 'intel_8051') {
+      const content = this.files?.['sketch.c']?.content || this.files?.['sketch.asm']?.content || '';
+      if (window.Intel8051C && window.Intel8051C.sniff(content)) return 'sketch.c';
+      return 'sketch.asm';
+    }
     if (board === 'stm32f746_disco' || board === 'lpc2148') return 'sketch.c';
     return 'sketch.ino';
   },
