@@ -1,0 +1,28 @@
+{
+  "id": "8051_all_led_on",
+  "name": "8051 all led on",
+  "icon": "🔧",
+  "desc": "A custom 8051 all led on circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790173516101_ws2oe",
+        "type": "intel_8051",
+        "x": 825,
+        "y": 215,
+        "rotation": 0,
+        "props": {
+          "label": "8051"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.c": "ORG 0000H         ; Origin, start of program\nMOV P0, #0FFH     ; Move 11111111b to Port 0 (sets all 8 pins high)\nMOV P1, #0FFH     ; Move 11111111b to Port 1 (sets all 8 pins high)\nMOV P2, #0FFH     ; Move 11111111b to Port 2 (sets all 8 pins high)\nMOV P3, #0FFH     ; Move 11111111b to Port 3 (sets all 8 pins high)\n\nHERE: SJMP HERE   ; Infinite loop to keep the program running\nEND               ; End of the program\n"
+  }
+}

@@ -65,21 +65,20 @@ window.ArduinoLibs['Intel8051'] = {
       var defs = window.ArduinoComponents.COMPONENT_DEFS;
       if (!defs || !defs[b.type]) return;
       ['P0','P1','P2','P3'].forEach(function(pn) {
-        var val = 0;
+        var portIdx = { P0: 0, P1: 1, P2: 2, P3: 3 }[pn];
+        var cur = portIdx === 0 ? cpu.P0 : portIdx === 1 ? cpu.P1 : portIdx === 2 ? cpu.P2 : cpu.P3;
         for (var i = 0; i < 8; i++) {
           var pid = pn + '.' + i;
           var pin = defs[b.type].pins.find(function(p) { return p.id === pid; });
-          if (pin) {
-            var iv = window.CircuitCanvas._readDigitalInput(b.id, pid);
-            if (iv !== undefined && iv !== null) {
-              if (iv & 1) val |= (1 << i);
-            }
-          }
+          if (!pin) continue;
+          if (!window.CircuitCanvas._hasDigitalInputSource(b.id, pid)) continue;
+          var iv = window.CircuitCanvas._readDigitalInput(b.id, pid);
+          if (iv & 1) cur |= (1 << i); else cur &= ~(1 << i);
         }
-        if (pn === 'P0') cpu.P0 = (cpu.P0 & 0xF0) | (val & 0x0F);
-        if (pn === 'P1') cpu.P1 = val;
-        if (pn === 'P2') cpu.P2 = val;
-        if (pn === 'P3') cpu.P3 = (cpu.P3 & 0xF0) | (val & 0x0F);
+        if (portIdx === 0) cpu.P0 = cur & 0xFF;
+        if (portIdx === 1) cpu.P1 = cur & 0xFF;
+        if (portIdx === 2) cpu.P2 = cur & 0xFF;
+        if (portIdx === 3) cpu.P3 = cur & 0xFF;
       }); }
     return {
       _pinMonitor: pinMonitor,

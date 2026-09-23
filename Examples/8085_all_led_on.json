@@ -1,0 +1,241 @@
+{
+  "id": "8085_all_led_on",
+  "name": "8085 all led on",
+  "icon": "🔧",
+  "desc": "A custom 8085 all led on circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790175319702_dq497",
+        "type": "intel_8085",
+        "x": 640,
+        "y": 215,
+        "rotation": 0,
+        "props": {
+          "label": "8085"
+        }
+      },
+      {
+        "id": "comp_1790175549663_mb0k7",
+        "type": "multi_led_array",
+        "x": 1045,
+        "y": 145,
+        "rotation": 0,
+        "props": {
+          "label": "8-LED ARRAY"
+        }
+      },
+      {
+        "id": "comp_1790175610234_2fk5z",
+        "type": "led",
+        "x": 560,
+        "y": 280,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "comp_1790175622269_a8yi4",
+        "type": "resistor",
+        "x": 565,
+        "y": 375,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1790175565708_ujzx4",
+        "from": {
+          "instId": "comp_1790175319702_dq497",
+          "pinId": "PC.0"
+        },
+        "to": {
+          "instId": "comp_1790175549663_mb0k7",
+          "pinId": "l1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790175570785_v8h6x",
+        "from": {
+          "instId": "comp_1790175319702_dq497",
+          "pinId": "PC.1"
+        },
+        "to": {
+          "instId": "comp_1790175549663_mb0k7",
+          "pinId": "l2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790175572985_58nja",
+        "from": {
+          "instId": "comp_1790175319702_dq497",
+          "pinId": "PC.2"
+        },
+        "to": {
+          "instId": "comp_1790175549663_mb0k7",
+          "pinId": "l3"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790175575003_0m7fb",
+        "from": {
+          "instId": "comp_1790175319702_dq497",
+          "pinId": "PC.3"
+        },
+        "to": {
+          "instId": "comp_1790175549663_mb0k7",
+          "pinId": "l4"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790175577136_abj6o",
+        "from": {
+          "instId": "comp_1790175319702_dq497",
+          "pinId": "PC.4"
+        },
+        "to": {
+          "instId": "comp_1790175549663_mb0k7",
+          "pinId": "l5"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790175579356_hny71",
+        "from": {
+          "instId": "comp_1790175319702_dq497",
+          "pinId": "PC.5"
+        },
+        "to": {
+          "instId": "comp_1790175549663_mb0k7",
+          "pinId": "l6"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790175581501_9gwh9",
+        "from": {
+          "instId": "comp_1790175319702_dq497",
+          "pinId": "PC.6"
+        },
+        "to": {
+          "instId": "comp_1790175549663_mb0k7",
+          "pinId": "l7"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790175583601_y2r3t",
+        "from": {
+          "instId": "comp_1790175319702_dq497",
+          "pinId": "PC.7"
+        },
+        "to": {
+          "instId": "comp_1790175549663_mb0k7",
+          "pinId": "l8"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790175589136_yap3s",
+        "from": {
+          "instId": "comp_1790175319702_dq497",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "comp_1790175549663_mb0k7",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790175625542_8bimt",
+        "from": {
+          "instId": "comp_1790175622269_a8yi4",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1790175610234_2fk5z",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790175632764_aawm4",
+        "from": {
+          "instId": "comp_1790175319702_dq497",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "comp_1790175622269_a8yi4",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790175635800_2zx5o",
+        "from": {
+          "instId": "comp_1790175319702_dq497",
+          "pinId": "PA.0"
+        },
+        "to": {
+          "instId": "comp_1790175610234_2fk5z",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.asm": "MVI A, 80H    ; Load control word: all ports as output, Mode 0\nOUT 03H       ; Send control word to 8255 CWR\nMVI A, FFH    ; Load accumulator with FFH (Use 00H if Common Anode)\nOUT 00H       ; Send data to Port A to turn ON all LEDs\nOUT 01H       ; Send data to Port B to turn ON all LEDs\nOUT 02H       ; Send data to Port C to turn ON all LEDs\nHLT           ; Stop execution\n"
+  }
+}

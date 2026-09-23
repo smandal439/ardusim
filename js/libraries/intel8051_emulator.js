@@ -1,7 +1,7 @@
 'use strict';
 window.Intel8051Emulator = (function () {
 function Cpu(){this.ACC=0;this.B=0;this.SP=0x07;this.PC=0;this.DPL=0;this.DPH=0;this.PSW=0;
-this.P0=0xFF;this.P1=0xFF;this.P2=0xFF;this.P3=0xFF;
+this.P0=0x00;this.P1=0x00;this.P2=0x00;this.P3=0x00;
 this.IE=0;this.IP=0;this.TCON=0;this.TMOD=0;
 this.TH0=0;this.TL0=0;this.TH1=0;this.TL1=0;
 this.SCON=0;this.SBUF=0;this.PCON=0;
@@ -11,7 +11,7 @@ this._portWriteCb=null;this._portReadCb=null;this._serialLogCb=null;}
 var CY=0x80,AC=0x40,F0=0x20,RS1=0x08,RS0=0x04,OV=0x02,PB=0x01;
 function par(x){x^=x>>4;x^=x>>2;x^=x>>1;return(~x)&1;}
 Cpu.prototype={
-reset:function(){this.ACC=0;this.B=0;this.SP=0x07;this.PC=0;this.PSW=0;this.P0=0xFF;this.P1=0xFF;this.P2=0xFF;this.P3=0xFF;this.halted=false;this.cycles=0;},
+reset:function(){this.ACC=0;this.B=0;this.SP=0x07;this.PC=0;this.PSW=0;this.P0=0x00;this.P1=0x00;this.P2=0x00;this.P3=0x00;this.halted=false;this.cycles=0;},
 load:function(code,addr){addr=addr||0;for(var i=0;i<code.length;i++)this.xram[(addr+i)&0xFFFF]=code[i];},
 _bk:function(){return((this.PSW&RS1)>>2)+((this.PSW&RS0)>>4);},
 _rR:function(n){return n<8?this.ram[this._bk()*8+n]:0;},

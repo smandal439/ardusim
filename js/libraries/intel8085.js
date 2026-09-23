@@ -66,21 +66,17 @@ window.ArduinoLibs['Intel8085'] = {
       if (!b) return;
       var defs = window.ArduinoComponents.COMPONENT_DEFS;
       if (!defs || !defs[b.type]) return;
-      ['PA', 'PB', 'PC'].forEach(function(pn) {
-        var val = 0;
+      ['PA', 'PB', 'PC'].forEach(function(pn, pi) {
+        var cur = cpu.ports[pi];
         for (var i = 0; i < 8; i++) {
           var pid = pn + '.' + i;
           var pin = defs[b.type].pins.find(function(p) { return p.id === pid; });
-          if (pin) {
-            var iv = window.CircuitCanvas._readDigitalInput(b.id, pid);
-            if (iv !== undefined && iv !== null) {
-              if (iv & 1) val |= (1 << i);
-            }
-          }
+          if (!pin) continue;
+          if (!window.CircuitCanvas._hasDigitalInputSource(b.id, pid)) continue;
+          var iv = window.CircuitCanvas._readDigitalInput(b.id, pid);
+          if (iv & 1) cur |= (1 << i); else cur &= ~(1 << i);
         }
-        if (pn === 'PA') cpu.ports[0] = val;
-        if (pn === 'PB') cpu.ports[1] = val;
-        if (pn === 'PC') cpu.ports[2] = val;
+        cpu.ports[pi] = cur & 0xFF;
       }); }
     return {
       _pinMonitor: pinMonitor,

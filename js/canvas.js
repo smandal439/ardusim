@@ -5206,6 +5206,34 @@ class CircuitCanvas {
     return 0;
   }
 
+  _hasDigitalInputSource(fromInstId, pinId, visited = new Set()) {
+    const visitKey = `${fromInstId}:${pinId}`;
+    if (visited.has(visitKey)) return false;
+    visited.add(visitKey);
+    const wireTarget = this._getWireTarget(fromInstId, pinId);
+    if (!wireTarget) return false;
+    const other = wireTarget.inst;
+    const targetPin = wireTarget.pinId;
+    if (other.type === 'power_5v' || other.type === 'power_gnd') return true;
+    if (other.type === 'resistor') {
+      const otherPin = targetPin === 'p1' ? 'p2' : 'p1';
+      return this._hasDigitalInputSource(other.id, otherPin, visited);
+    }
+    if (other.type === 'push_button') {
+      const nextPin = (targetPin === 'p1' || targetPin === 'p2')
+        ? (targetPin === 'p1' ? 'p2' : 'p1')
+        : (targetPin === 'p3' ? 'p4' : 'p3');
+      return this._hasDigitalInputSource(other.id, nextPin, visited);
+    }
+    if (other.type === 'func_gen') return true;
+    if (other.type === 'potentiometer' && targetPin === 'wiper') return true;
+    const pn = this._getConnectedPinNum(fromInstId, pinId);
+    if (pn !== null) return true;
+    const icSpec = IC_OUTPUT_MAP[other.type];
+    if (icSpec && icSpec.pins.includes(targetPin)) return true;
+    return false;
+  }
+
   _readAnalogInput(fromInstId, pinId) {
     const wireTarget = this._getWireTarget(fromInstId, pinId);
     if (!wireTarget) return 0;
