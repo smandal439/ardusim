@@ -3,7 +3,7 @@
   "name": "Pico 2 W Binary Counter",
   "icon": "📡",
   "desc": "Count from 0 to 255 in binary on 8 LEDs connected to GP0-GP7. Each LED represents one bit.",
-  "tags": ["beginner", "output", "led", "counter", "pico2w","raspberry pi pico 2 w"],
+  "tags": ["beginner", "output", "led", "counter", "pico","pico2w","raspberry pi pico 2 w"],
   "circuit": {
     "components": [
       {

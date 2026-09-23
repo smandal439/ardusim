@@ -1,0 +1,159 @@
+{
+  "id": "pico_2_w_analog_read",
+  "name": "Pico 2 W Analog Read",
+  "icon": "🔧",
+  "desc": "Read analog value from potentiometer on GP26 (ADC0) and display it on Serial Monitor. Also, output the value to GP28 using PWM.",
+  "tags": [
+    "beginner",
+    "input",
+    "output",
+    "analog",
+    "pico",
+    "pico2w",
+    "raspberry pi pico 2 w","pwm","potentiometer"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "pico2w",
+        "x": 250,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "Pico 2 W"
+        }
+      },
+      {
+        "id": "pot1",
+        "type": "potentiometer",
+        "x": 90,
+        "y": 180,
+        "rotation": 0,
+        "props": {
+          "value": 10,
+          "maxValue": 1023,
+          "resistance": 10000,
+          "unit": "kΩ"
+        }
+      },
+      {
+        "id": "comp_1790184627240_u5j2g",
+        "type": "led",
+        "x": 425,
+        "y": 185,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "comp_1790184634239_407jm",
+        "type": "resistor",
+        "x": 430,
+        "y": 265,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "3V3OUT"
+        },
+        "to": {
+          "instId": "pot1",
+          "pinId": "p1"
+        },
+        "color": "#ff3333",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "pot1",
+          "pinId": "wiper"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GP26"
+        },
+        "color": "#00cc44",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "pot1",
+          "pinId": "p3"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "AGND"
+        },
+        "color": "#333333",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790184637219_xbegx",
+        "from": {
+          "instId": "comp_1790184634239_407jm",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1790184627240_u5j2g",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790184640995_y9502",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND5"
+        },
+        "to": {
+          "instId": "comp_1790184634239_407jm",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790184646922_nz546",
+        "from": {
+          "instId": "b1",
+          "pinId": "GP28"
+        },
+        "to": {
+          "instId": "comp_1790184627240_u5j2g",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "/*\n * Pico 2 W — Analog Read\n * Reads potentiometer on GP26 (ADC0)\n * Displays value on Serial Monitor\n */\n\n#define POT_PIN 26\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Analog Read ready!\");\n  pinMode(28, OUTPUT);\n}\n\nvoid loop() {\n  int raw = analogRead(POT_PIN);\n  analogWrite(28, map(raw, 0, 1023, 0, 255));\n  float voltage = raw * (3.3 / 1023.0);\n  Serial.print(\"Raw: \");\n  Serial.print(raw);\n  Serial.print(\"  Voltage: \");\n  Serial.print(voltage, 2);\n  Serial.println(\" V\");\n  delay(200);\n}"
+  }
+}

@@ -1,0 +1,256 @@
+{
+  "id": "pico_2_w_rgb_led",
+  "name": "Pico 2 W RGB LED",
+  "icon": "🔧",
+  "desc": "This example demonstrates how to use the Raspberry Pi Pico 2 W to control an RGB LED using PWM. The circuit connects the red, green, and blue pins of the RGB LED to GPIO pins GP10, GP11, and GP12 of the Pico 2 W, respectively. Each color channel is connected through a 220Ω resistor to limit the current. The common cathode of the RGB LED is connected to ground. The provided code cycles through various colors by adjusting the PWM values for each color channel.",
+  "tags": [
+    "custom",
+    "circuit",
+    "rgb led",
+    "pwm",
+    "raspberry pi pico 2 w",
+    "raspberry pi pico",
+    "pico 2 w",
+    "pico",
+    "led",
+    "color cycle"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "pico2w",
+        "x": 250,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "Pico 2 W"
+        }
+      },
+      {
+        "id": "rgb1",
+        "type": "rgb_led",
+        "x": 535,
+        "y": 225,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "rr",
+        "type": "resistor",
+        "x": 425,
+        "y": 145,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "rg",
+        "type": "resistor",
+        "x": 445,
+        "y": 145,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "rb",
+        "type": "resistor",
+        "x": 465,
+        "y": 145,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "GP10"
+        },
+        "to": {
+          "instId": "rr",
+          "pinId": "p1"
+        },
+        "color": "#ff0000",
+        "waypoints": [
+          {
+            "x": 405,
+            "y": 301
+          },
+          {
+            "x": 405,
+            "y": 121
+          },
+          {
+            "x": 435,
+            "y": 121
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "b1",
+          "pinId": "GP11"
+        },
+        "to": {
+          "instId": "rg",
+          "pinId": "p1"
+        },
+        "color": "#00ff00",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "b1",
+          "pinId": "GP12"
+        },
+        "to": {
+          "instId": "rb",
+          "pinId": "p1"
+        },
+        "color": "#0000ff",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "rr",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "rgb1",
+          "pinId": "R"
+        },
+        "color": "#ff0000",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "rg",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "rgb1",
+          "pinId": "G"
+        },
+        "color": "#00ff00",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "rb",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "rgb1",
+          "pinId": "B"
+        },
+        "color": "#0000ff",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w7",
+        "from": {
+          "instId": "rgb1",
+          "pinId": "common"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND4"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790183842010_t3b9h",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND5"
+        },
+        "to": {
+          "instId": "rgb1",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790183914004_wemys",
+        "from": {
+          "instId": "rgb1",
+          "pinId": "blue"
+        },
+        "to": {
+          "instId": "rb",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790183916764_eu6el",
+        "from": {
+          "instId": "rgb1",
+          "pinId": "green"
+        },
+        "to": {
+          "instId": "rg",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790183918745_0yy1x",
+        "from": {
+          "instId": "rgb1",
+          "pinId": "red"
+        },
+        "to": {
+          "instId": "rr",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "/*\n * Pico 2 W — RGB LED Color Cycle\n * Cycles through R, G, B, and mixed colors\n * using PWM on GP10, GP11, GP12\n */\n\n#define RED_PIN   10\n#define GREEN_PIN 11\n#define BLUE_PIN  12\n\nvoid setColor(int r, int g, int b) {\n  analogWrite(RED_PIN, r);\n  analogWrite(GREEN_PIN, g);\n  analogWrite(BLUE_PIN, b);\n}\n\nvoid setup() {\n  pinMode(RED_PIN, OUTPUT);\n  pinMode(GREEN_PIN, OUTPUT);\n  pinMode(BLUE_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"RGB LED Color Cycle!\");\n}\n\nvoid loop() {\n  // Red\n  setColor(255, 0, 0);\n  Serial.println(\"RED\");\n  delay(1000);\n\n  // Green\n  setColor(0, 255, 0);\n  Serial.println(\"GREEN\");\n  delay(1000);\n\n  // Blue\n  setColor(0, 0, 255);\n  Serial.println(\"BLUE\");\n  delay(1000);\n\n  // Yellow (R+G)\n  setColor(255, 255, 0);\n  Serial.println(\"YELLOW\");\n  delay(1000);\n\n  // Cyan (G+B)\n  setColor(0, 255, 255);\n  Serial.println(\"CYAN\");\n  delay(1000);\n\n  // Magenta (R+B)\n  setColor(255, 0, 255);\n  Serial.println(\"MAGENTA\");\n  delay(1000);\n\n  // White (R+G+B)\n  setColor(255, 255, 255);\n  Serial.println(\"WHITE\");\n  delay(1000);\n\n  // Off\n  setColor(0, 0, 0);\n  delay(500);\n}"
+  }
+}

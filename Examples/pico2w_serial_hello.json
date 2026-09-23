@@ -3,7 +3,7 @@
   "name": "Pico 2 W Serial Hello",
   "icon": "📡",
   "desc": "Print hello messages and a running counter to the Serial Monitor at 115200 baud.",
-  "tags": ["beginner", "serial", "communication", "pico2w","raspberry pi pico 2 w"],
+  "tags": ["beginner", "serial", "communication", "pico","pico2w","raspberry pi pico 2 w"],
   "circuit": {
     "components": [
       {

@@ -17945,95 +17945,6 @@ window.EXAMPLE_SKETCHES = [
     }
   },
   {
-    "id": "pico2w_analog_read",
-    "name": "Pico 2 W Analog Read",
-    "icon": "📡",
-    "desc": "Read a potentiometer on GP26 (ADC0) and display the value on the Serial Monitor. Maps 0-3.3V to 0-1023.",
-    "tags": [
-      "beginner",
-      "analog",
-      "input",
-      "adc",
-      "pico2w",
-      "raspberry pi pico 2 w"
-    ],
-    "circuit": {
-      "components": [
-        {
-          "id": "b1",
-          "type": "pico2w",
-          "x": 250,
-          "y": 100,
-          "width": 130,
-          "height": 280,
-          "props": {
-            "label": "Pico 2 W"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "pot1",
-          "type": "potentiometer",
-          "x": 90,
-          "y": 180,
-          "width": 40,
-          "height": 70,
-          "props": {
-            "value": 10,
-            "unit": "kΩ"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        }
-      ],
-      "wires": [
-        {
-          "id": "w1",
-          "from": {
-            "instId": "b1",
-            "pinId": "3V3OUT"
-          },
-          "to": {
-            "instId": "pot1",
-            "pinId": "p1"
-          },
-          "color": "#ff3333",
-          "waypoints": []
-        },
-        {
-          "id": "w2",
-          "from": {
-            "instId": "pot1",
-            "pinId": "wiper"
-          },
-          "to": {
-            "instId": "b1",
-            "pinId": "GP26"
-          },
-          "color": "#00cc44",
-          "waypoints": []
-        },
-        {
-          "id": "w3",
-          "from": {
-            "instId": "pot1",
-            "pinId": "p3"
-          },
-          "to": {
-            "instId": "b1",
-            "pinId": "AGND"
-          },
-          "color": "#333333",
-          "waypoints": []
-        }
-      ]
-    },
-    "code": "/*\n * Pico 2 W — Analog Read\n * Reads potentiometer on GP26 (ADC0)\n * Displays value on Serial Monitor\n */\n\n#define POT_PIN 26\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Analog Read ready!\");\n}\n\nvoid loop() {\n  int raw = analogRead(POT_PIN);\n  float voltage = raw * (3.3 / 1023.0);\n  Serial.print(\"Raw: \");\n  Serial.print(raw);\n  Serial.print(\"  Voltage: \");\n  Serial.print(voltage, 2);\n  Serial.println(\" V\");\n  delay(200);\n}"
-  },
-  {
     "id": "pico2w_blink",
     "name": "Pico 2 W Blink",
     "icon": "📡",
@@ -18041,6 +17952,7 @@ window.EXAMPLE_SKETCHES = [
     "tags": [
       "beginner",
       "output",
+      "pico",
       "led",
       "pico2w"
     ],
@@ -18152,6 +18064,7 @@ window.EXAMPLE_SKETCHES = [
       "beginner",
       "input",
       "button",
+      "pico",
       "pico2w"
     ],
     "circuit": {
@@ -18344,6 +18257,7 @@ window.EXAMPLE_SKETCHES = [
       "output",
       "led",
       "counter",
+      "pico",
       "pico2w",
       "raspberry pi pico 2 w"
     ],
@@ -18686,6 +18600,7 @@ window.EXAMPLE_SKETCHES = [
       "beginner",
       "output",
       "led",
+      "pico",
       "pwm",
       "pico2w",
       "raspberry pi pico 2 w"
@@ -18790,347 +18705,6 @@ window.EXAMPLE_SKETCHES = [
     "code": "/*\n * Pico 2 W — PWM Fade\n * Fades an LED on GP15 using analogWrite\n */\n\n#define LED_PIN 15\n\nint brightness = 0;\nint fadeAmount = 5;\n\nvoid setup() {\n  pinMode(LED_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"PWM Fade started!\");\n}\n\nvoid loop() {\n  analogWrite(LED_PIN, brightness);\n  Serial.print(\"Brightness: \");\n  Serial.println(brightness);\n\n  brightness += fadeAmount;\n  if (brightness <= 0 || brightness >= 255) {\n    fadeAmount = -fadeAmount;\n  }\n  delay(30);\n}"
   },
   {
-    "id": "pico_pwm",
-    "name": "pico PWM",
-    "icon": "🔧",
-    "desc": "A custom pico PWM circuit example.",
-    "tags": [
-      "custom",
-      "circuit"
-    ],
-    "circuit": {
-      "components": [
-        {
-          "id": "comp_1790089953492_mzwiv",
-          "type": "pico2w",
-          "x": 180,
-          "y": 165,
-          "rotation": 0,
-          "props": {
-            "label": "Pico 2 W"
-          }
-        },
-        {
-          "id": "comp_1790090069310_map8x",
-          "type": "led_green",
-          "x": 375,
-          "y": 300,
-          "rotation": 0,
-          "props": {
-            "color": "#33ff66",
-            "colorName": "Green"
-          }
-        },
-        {
-          "id": "comp_1790090075909_498uz",
-          "type": "resistor",
-          "x": 415,
-          "y": 360,
-          "rotation": 0,
-          "props": {
-            "value": 220,
-            "unit": "Ω"
-          }
-        },
-        {
-          "id": "comp_1790090144412_mxrhs",
-          "type": "potentiometer",
-          "x": 395,
-          "y": 190,
-          "rotation": 0,
-          "props": {
-            "value": 512,
-            "maxValue": 1023,
-            "resistance": 10000
-          }
-        }
-      ],
-      "wires": [
-        {
-          "id": "wire_1790090082187_hfjpt",
-          "from": {
-            "instId": "comp_1790089953492_mzwiv",
-            "pinId": "GP22"
-          },
-          "to": {
-            "instId": "comp_1790090069310_map8x",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": [],
-          "routeStyle": "orthogonal",
-          "bezierCtrl": null
-        },
-        {
-          "id": "wire_1790090083606_h779w",
-          "from": {
-            "instId": "comp_1790090069310_map8x",
-            "pinId": "cathode"
-          },
-          "to": {
-            "instId": "comp_1790090075909_498uz",
-            "pinId": "p1"
-          },
-          "color": null,
-          "waypoints": [],
-          "routeStyle": "orthogonal",
-          "bezierCtrl": null
-        },
-        {
-          "id": "wire_1790090086061_csgtt",
-          "from": {
-            "instId": "comp_1790089953492_mzwiv",
-            "pinId": "GND5"
-          },
-          "to": {
-            "instId": "comp_1790090075909_498uz",
-            "pinId": "p2"
-          },
-          "color": null,
-          "waypoints": [],
-          "routeStyle": "orthogonal",
-          "bezierCtrl": null
-        },
-        {
-          "id": "wire_1790090154734_ywebi",
-          "from": {
-            "instId": "comp_1790089953492_mzwiv",
-            "pinId": "GP27"
-          },
-          "to": {
-            "instId": "comp_1790090144412_mxrhs",
-            "pinId": "wiper"
-          },
-          "color": null,
-          "waypoints": [],
-          "routeStyle": "orthogonal",
-          "bezierCtrl": null
-        },
-        {
-          "id": "wire_1790090158705_jkhhf",
-          "from": {
-            "instId": "comp_1790089953492_mzwiv",
-            "pinId": "3V3OUT"
-          },
-          "to": {
-            "instId": "comp_1790090144412_mxrhs",
-            "pinId": "vcc"
-          },
-          "color": null,
-          "waypoints": [],
-          "routeStyle": "orthogonal",
-          "bezierCtrl": null
-        },
-        {
-          "id": "wire_1790090168079_j0ixc",
-          "from": {
-            "instId": "comp_1790089953492_mzwiv",
-            "pinId": "GND7"
-          },
-          "to": {
-            "instId": "comp_1790090144412_mxrhs",
-            "pinId": "gnd"
-          },
-          "color": null,
-          "waypoints": [],
-          "routeStyle": "orthogonal",
-          "bezierCtrl": null
-        }
-      ]
-    },
-    "files": {
-      "sketch.ino": "void setup() {\n  Serial.begin(115200);\n  pinMode(22, OUTPUT);\n\n}\n\nvoid loop() {\n  for (int i = 0; i <=255; i++) {\n\n    Serial.println(i);\n    analogWrite(22, i);\n    delay(100);\n  }\n  for (int i = 255; i >=0; i--) {\n\n    Serial.println(i);\n    analogWrite(22, i);\n    delay(100);\n  }\n}"
-    }
-  },
-  {
-    "id": "pico2w_rgb_led",
-    "name": "Pico 2 W RGB LED",
-    "icon": "📡",
-    "desc": "Cycle through colors on an RGB LED connected to GP10 (Red), GP11 (Green), GP12 (Blue) using PWM.",
-    "tags": [
-      "beginner",
-      "output",
-      "led",
-      "rgb",
-      "pwm",
-      "pico2w",
-      "raspberry pi pico 2 w"
-    ],
-    "circuit": {
-      "components": [
-        {
-          "id": "b1",
-          "type": "pico2w",
-          "x": 250,
-          "y": 100,
-          "width": 130,
-          "height": 280,
-          "props": {
-            "label": "Pico 2 W"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "rgb1",
-          "type": "rgb_led",
-          "x": 420,
-          "y": 180,
-          "width": 40,
-          "height": 50,
-          "props": {},
-          "runtimeState": {
-            "r": 0,
-            "g": 0,
-            "b": 0
-          },
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "rr",
-          "type": "resistor",
-          "x": 425,
-          "y": 145,
-          "width": 20,
-          "height": 60,
-          "props": {
-            "value": 220,
-            "unit": "Ω"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "rg",
-          "type": "resistor",
-          "x": 445,
-          "y": 145,
-          "width": 20,
-          "height": 60,
-          "props": {
-            "value": 220,
-            "unit": "Ω"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "rb",
-          "type": "resistor",
-          "x": 465,
-          "y": 145,
-          "width": 20,
-          "height": 60,
-          "props": {
-            "value": 220,
-            "unit": "Ω"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        }
-      ],
-      "wires": [
-        {
-          "id": "w1",
-          "from": {
-            "instId": "b1",
-            "pinId": "GP10"
-          },
-          "to": {
-            "instId": "rr",
-            "pinId": "p1"
-          },
-          "color": "#ff0000",
-          "waypoints": []
-        },
-        {
-          "id": "w2",
-          "from": {
-            "instId": "b1",
-            "pinId": "GP11"
-          },
-          "to": {
-            "instId": "rg",
-            "pinId": "p1"
-          },
-          "color": "#00ff00",
-          "waypoints": []
-        },
-        {
-          "id": "w3",
-          "from": {
-            "instId": "b1",
-            "pinId": "GP12"
-          },
-          "to": {
-            "instId": "rb",
-            "pinId": "p1"
-          },
-          "color": "#0000ff",
-          "waypoints": []
-        },
-        {
-          "id": "w4",
-          "from": {
-            "instId": "rr",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "rgb1",
-            "pinId": "R"
-          },
-          "color": "#ff0000",
-          "waypoints": []
-        },
-        {
-          "id": "w5",
-          "from": {
-            "instId": "rg",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "rgb1",
-            "pinId": "G"
-          },
-          "color": "#00ff00",
-          "waypoints": []
-        },
-        {
-          "id": "w6",
-          "from": {
-            "instId": "rb",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "rgb1",
-            "pinId": "B"
-          },
-          "color": "#0000ff",
-          "waypoints": []
-        },
-        {
-          "id": "w7",
-          "from": {
-            "instId": "rgb1",
-            "pinId": "common"
-          },
-          "to": {
-            "instId": "b1",
-            "pinId": "GND4"
-          },
-          "color": null,
-          "waypoints": []
-        }
-      ]
-    },
-    "code": "/*\n * Pico 2 W — RGB LED Color Cycle\n * Cycles through R, G, B, and mixed colors\n * using PWM on GP10, GP11, GP12\n */\n\n#define RED_PIN   10\n#define GREEN_PIN 11\n#define BLUE_PIN  12\n\nvoid setColor(int r, int g, int b) {\n  analogWrite(RED_PIN, r);\n  analogWrite(GREEN_PIN, g);\n  analogWrite(BLUE_PIN, b);\n}\n\nvoid setup() {\n  pinMode(RED_PIN, OUTPUT);\n  pinMode(GREEN_PIN, OUTPUT);\n  pinMode(BLUE_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"RGB LED Color Cycle!\");\n}\n\nvoid loop() {\n  // Red\n  setColor(255, 0, 0);\n  Serial.println(\"RED\");\n  delay(1000);\n\n  // Green\n  setColor(0, 255, 0);\n  Serial.println(\"GREEN\");\n  delay(1000);\n\n  // Blue\n  setColor(0, 0, 255);\n  Serial.println(\"BLUE\");\n  delay(1000);\n\n  // Yellow (R+G)\n  setColor(255, 255, 0);\n  Serial.println(\"YELLOW\");\n  delay(1000);\n\n  // Cyan (G+B)\n  setColor(0, 255, 255);\n  Serial.println(\"CYAN\");\n  delay(1000);\n\n  // Magenta (R+B)\n  setColor(255, 0, 255);\n  Serial.println(\"MAGENTA\");\n  delay(1000);\n\n  // White (R+G+B)\n  setColor(255, 255, 255);\n  Serial.println(\"WHITE\");\n  delay(1000);\n\n  // Off\n  setColor(0, 0, 0);\n  delay(500);\n}"
-  },
-  {
     "id": "pico2w_serial_hello",
     "name": "Pico 2 W Serial Hello",
     "icon": "📡",
@@ -19139,6 +18713,7 @@ window.EXAMPLE_SKETCHES = [
       "beginner",
       "serial",
       "communication",
+      "pico",
       "pico2w",
       "raspberry pi pico 2 w"
     ],
@@ -19172,6 +18747,7 @@ window.EXAMPLE_SKETCHES = [
       "intermediate",
       "wireless",
       "wifi",
+      "pico",
       "network",
       "pico2w",
       "raspberry pi pico 2 w"
@@ -19257,6 +18833,423 @@ window.EXAMPLE_SKETCHES = [
     },
     "files": {
       "sketch.ino": "/*\n * Pico 2 W — WiFi Scan\n * Scans for nearby WiFi networks\n * Uses the onboard CYW43439 wireless chip\n */\n\n#include <WiFi.h>\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n\n  Serial.println(\"\\n=== Pico 2 W WiFi Scanner ===\");\n  Serial.println(\"Initializing WiFi...\");\n\n  WiFi.mode(WIFI_STA);\n  WiFi.disconnect();\n  delay(100);\n\n  Serial.println(\"Scan starting...\\n\");\n}\n\nvoid loop() {\n  int n = WiFi.scanNetworks();\n\n  if (n == 0) {\n    Serial.println(\"No networks found.\");\n  } else {\n    Serial.print(n);\n    Serial.println(\" network(s) found:\\n\");\n    for (int i = 0; i < n; i++) {\n      Serial.print(\"  \");\n      Serial.print(i + 1);\n      Serial.print(\". \");\n      Serial.print(WiFi.SSID(i));\n      Serial.print(\"  (RSSI: \");\n      Serial.print(WiFi.RSSI(i));\n      Serial.print(\" dBm)  Channel: \");\n      Serial.print(WiFi.channel(i));\n      Serial.print(\"  Encryption: \");\n      Serial.println(WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? \"Open\" : \"Secured\");\n    }\n  }\n\n  Serial.println(\"\\n--- Scan complete. Next scan in 10s ---\\n\");\n  WiFi.scanDelete();\n  delay(10000);\n}"
+    }
+  },
+  {
+    "id": "pico_2_w_analog_read",
+    "name": "Pico 2 W Analog Read",
+    "icon": "🔧",
+    "desc": "Read analog value from potentiometer on GP26 (ADC0) and display it on Serial Monitor. Also, output the value to GP28 using PWM.",
+    "tags": [
+      "beginner",
+      "input",
+      "output",
+      "analog",
+      "pico",
+      "pico2w",
+      "raspberry pi pico 2 w",
+      "pwm",
+      "potentiometer"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "pico2w",
+          "x": 250,
+          "y": 100,
+          "rotation": 0,
+          "props": {
+            "label": "Pico 2 W"
+          }
+        },
+        {
+          "id": "pot1",
+          "type": "potentiometer",
+          "x": 90,
+          "y": 180,
+          "rotation": 0,
+          "props": {
+            "value": 10,
+            "maxValue": 1023,
+            "resistance": 10000,
+            "unit": "kΩ"
+          }
+        },
+        {
+          "id": "comp_1790184627240_u5j2g",
+          "type": "led",
+          "x": 425,
+          "y": 185,
+          "rotation": 0,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          }
+        },
+        {
+          "id": "comp_1790184634239_407jm",
+          "type": "resistor",
+          "x": 430,
+          "y": 265,
+          "rotation": 0,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "3V3OUT"
+          },
+          "to": {
+            "instId": "pot1",
+            "pinId": "p1"
+          },
+          "color": "#ff3333",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "pot1",
+            "pinId": "wiper"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GP26"
+          },
+          "color": "#00cc44",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "pot1",
+            "pinId": "p3"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "AGND"
+          },
+          "color": "#333333",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790184637219_xbegx",
+          "from": {
+            "instId": "comp_1790184634239_407jm",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "comp_1790184627240_u5j2g",
+            "pinId": "cathode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790184640995_y9502",
+          "from": {
+            "instId": "b1",
+            "pinId": "GND5"
+          },
+          "to": {
+            "instId": "comp_1790184634239_407jm",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790184646922_nz546",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP28"
+          },
+          "to": {
+            "instId": "comp_1790184627240_u5j2g",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "/*\n * Pico 2 W — Analog Read\n * Reads potentiometer on GP26 (ADC0)\n * Displays value on Serial Monitor\n */\n\n#define POT_PIN 26\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"Analog Read ready!\");\n  pinMode(28, OUTPUT);\n}\n\nvoid loop() {\n  int raw = analogRead(POT_PIN);\n  analogWrite(28, map(raw, 0, 1023, 0, 255));\n  float voltage = raw * (3.3 / 1023.0);\n  Serial.print(\"Raw: \");\n  Serial.print(raw);\n  Serial.print(\"  Voltage: \");\n  Serial.print(voltage, 2);\n  Serial.println(\" V\");\n  delay(200);\n}"
+    }
+  },
+  {
+    "id": "pico_2_w_rgb_led",
+    "name": "Pico 2 W RGB LED",
+    "icon": "🔧",
+    "desc": "This example demonstrates how to use the Raspberry Pi Pico 2 W to control an RGB LED using PWM. The circuit connects the red, green, and blue pins of the RGB LED to GPIO pins GP10, GP11, and GP12 of the Pico 2 W, respectively. Each color channel is connected through a 220Ω resistor to limit the current. The common cathode of the RGB LED is connected to ground. The provided code cycles through various colors by adjusting the PWM values for each color channel.",
+    "tags": [
+      "custom",
+      "circuit",
+      "rgb led",
+      "pwm",
+      "raspberry pi pico 2 w",
+      "raspberry pi pico",
+      "pico 2 w",
+      "pico",
+      "led",
+      "color cycle"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "pico2w",
+          "x": 250,
+          "y": 100,
+          "rotation": 0,
+          "props": {
+            "label": "Pico 2 W"
+          }
+        },
+        {
+          "id": "rgb1",
+          "type": "rgb_led",
+          "x": 535,
+          "y": 225,
+          "rotation": 0,
+          "props": {}
+        },
+        {
+          "id": "rr",
+          "type": "resistor",
+          "x": 425,
+          "y": 145,
+          "rotation": 0,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          }
+        },
+        {
+          "id": "rg",
+          "type": "resistor",
+          "x": 445,
+          "y": 145,
+          "rotation": 0,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          }
+        },
+        {
+          "id": "rb",
+          "type": "resistor",
+          "x": 465,
+          "y": 145,
+          "rotation": 0,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP10"
+          },
+          "to": {
+            "instId": "rr",
+            "pinId": "p1"
+          },
+          "color": "#ff0000",
+          "waypoints": [
+            {
+              "x": 405,
+              "y": 301
+            },
+            {
+              "x": 405,
+              "y": 121
+            },
+            {
+              "x": 435,
+              "y": 121
+            }
+          ],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP11"
+          },
+          "to": {
+            "instId": "rg",
+            "pinId": "p1"
+          },
+          "color": "#00ff00",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "b1",
+            "pinId": "GP12"
+          },
+          "to": {
+            "instId": "rb",
+            "pinId": "p1"
+          },
+          "color": "#0000ff",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w4",
+          "from": {
+            "instId": "rr",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "rgb1",
+            "pinId": "R"
+          },
+          "color": "#ff0000",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w5",
+          "from": {
+            "instId": "rg",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "rgb1",
+            "pinId": "G"
+          },
+          "color": "#00ff00",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w6",
+          "from": {
+            "instId": "rb",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "rgb1",
+            "pinId": "B"
+          },
+          "color": "#0000ff",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w7",
+          "from": {
+            "instId": "rgb1",
+            "pinId": "common"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND4"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790183842010_t3b9h",
+          "from": {
+            "instId": "b1",
+            "pinId": "GND5"
+          },
+          "to": {
+            "instId": "rgb1",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790183914004_wemys",
+          "from": {
+            "instId": "rgb1",
+            "pinId": "blue"
+          },
+          "to": {
+            "instId": "rb",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790183916764_eu6el",
+          "from": {
+            "instId": "rgb1",
+            "pinId": "green"
+          },
+          "to": {
+            "instId": "rg",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790183918745_0yy1x",
+          "from": {
+            "instId": "rgb1",
+            "pinId": "red"
+          },
+          "to": {
+            "instId": "rr",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "/*\n * Pico 2 W — RGB LED Color Cycle\n * Cycles through R, G, B, and mixed colors\n * using PWM on GP10, GP11, GP12\n */\n\n#define RED_PIN   10\n#define GREEN_PIN 11\n#define BLUE_PIN  12\n\nvoid setColor(int r, int g, int b) {\n  analogWrite(RED_PIN, r);\n  analogWrite(GREEN_PIN, g);\n  analogWrite(BLUE_PIN, b);\n}\n\nvoid setup() {\n  pinMode(RED_PIN, OUTPUT);\n  pinMode(GREEN_PIN, OUTPUT);\n  pinMode(BLUE_PIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"RGB LED Color Cycle!\");\n}\n\nvoid loop() {\n  // Red\n  setColor(255, 0, 0);\n  Serial.println(\"RED\");\n  delay(1000);\n\n  // Green\n  setColor(0, 255, 0);\n  Serial.println(\"GREEN\");\n  delay(1000);\n\n  // Blue\n  setColor(0, 0, 255);\n  Serial.println(\"BLUE\");\n  delay(1000);\n\n  // Yellow (R+G)\n  setColor(255, 255, 0);\n  Serial.println(\"YELLOW\");\n  delay(1000);\n\n  // Cyan (G+B)\n  setColor(0, 255, 255);\n  Serial.println(\"CYAN\");\n  delay(1000);\n\n  // Magenta (R+B)\n  setColor(255, 0, 255);\n  Serial.println(\"MAGENTA\");\n  delay(1000);\n\n  // White (R+G+B)\n  setColor(255, 255, 255);\n  Serial.println(\"WHITE\");\n  delay(1000);\n\n  // Off\n  setColor(0, 0, 0);\n  delay(500);\n}"
     }
   },
   {

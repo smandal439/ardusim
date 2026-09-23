@@ -3,7 +3,7 @@
   "name": "Pico 2 W Blink",
   "icon": "📡",
   "desc": "Blink an LED on GP15. The LED turns on for one second, then off for one second, repeatedly.",
-  "tags": ["beginner", "output", "led", "pico2w"],
+  "tags": ["beginner", "output", "pico","led", "pico2w"],
   "circuit": {
     "components": [
       {
