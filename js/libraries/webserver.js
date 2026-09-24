@@ -59,7 +59,8 @@ window.ArduinoLibs['WebServer'] = {
           self._serialLog('[WebServer] on("' + path + '"): handler is not a function - route ignored\n', 'system');
         }
         if (!cfg._triggerRoute) {
-          cfg._triggerRoute = function(targetPath) {
+          cfg._triggerRoute = function(targetPath, opts) {
+            var isAjax = !!(opts && opts.ajax);
             var cleanPath = targetPath;
             var params = {};
             var qIdx = targetPath.indexOf('?');
@@ -84,7 +85,10 @@ window.ArduinoLibs['WebServer'] = {
                     self._serialLog('[WebServer] ' + route.method + ' ' + route.path + ' -> ' + resp.code + '\n', 'system');
                     if (resp.type.indexOf('html') !== -1 && resp.content && self._emitWebPage) {
                       self._emitWebPage({ code: resp.code, type: resp.type, content: resp.content, url: route.path, method: route.method });
-                    } else if (cleanPath !== '/') {
+                    } else if (!isAjax && cleanPath !== '/') {
+                      // Navigation (link click): re-serve the dashboard so it
+                      // reflects the state the handler just changed.
+                      // AJAX (fetch): leave the current page alone.
                       _serveRootPage(cfg);
                     }
                   })

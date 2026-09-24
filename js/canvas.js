@@ -5308,7 +5308,18 @@ class CircuitCanvas {
 
   _readAnalogInput(fromInstId, pinId) {
     const wireTarget = this._getWireTarget(fromInstId, pinId);
-    if (!wireTarget) return 0;
+    if (!wireTarget) {
+      // No wire on this pin — an interactive value (e.g. a remote slider)
+      // may already sit in pinStates for board pins.
+      const from = this.components.find(c => c.id === fromInstId);
+      const boardTypes = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'lpc2148', 'stm32f746_disco', 'pico2w', 'intel_8085', 'intel_8051'];
+      if (from && boardTypes.includes(from.type)) {
+        const pn = this._pinToNumber(pinId);
+        const sim = window.ArduinoSim;
+        return (sim && sim.pinStates) ? (sim.pinStates[`pin_${pn}`] || 0) : 0;
+      }
+      return 0;
+    }
     const other = wireTarget.inst;
     if (other.type === 'power_5v') return 1023;
     if (other.type === 'power_gnd') return 0;
@@ -5332,6 +5343,18 @@ class CircuitCanvas {
       const value = other.runtimeState?.value ?? other.props?.value ?? 512;
       const maxValue = Number(other.props?.maxValue ?? 1023);
       return Math.max(0, Math.min(1023, Math.round((Number(value) / maxValue) * 1023)));
+    }
+
+    // Passive networks (voltage dividers fed by a battery, regulator rails…)
+    // aren't tracked in pinStates — read the solved nodal voltage instead.
+    if (this.engine && typeof this.engine.getVoltageAtPin === 'function') {
+      const v = this.engine.getVoltageAtPin(fromInstId, pinId);
+      if (Number.isFinite(v) && v > 0) {
+        const src = this.components.find(c => c.id === fromInstId);
+        const vRef = (src && (src.type === 'esp32_devkit_v1' || src.type === 'stm32f746_disco'
+          || src.type === 'lpc2148' || src.type === 'pico2w')) ? 3.3 : 5.0;
+        return Math.max(0, Math.min(1023, Math.round((v / vRef) * 1023)));
+      }
     }
 
     const pn = this._getConnectedPinNum(fromInstId, pinId);

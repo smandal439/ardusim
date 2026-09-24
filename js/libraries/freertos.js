@@ -9,7 +9,10 @@
 //   xSemaphoreCreateMutex, xSemaphoreCreateBinary, xSemaphoreTake, xSemaphoreGive,
 //   xEventGroupCreate, xEventGroupSetBits, xEventGroupWaitBits,
 //   portENTER_CRITICAL, portEXIT_CRITICAL,
-//   vTaskSuspendAll, xTaskResumeAll
+//   vTaskSuspendAll, xTaskResumeAll,
+//   esp_deep_sleep, esp_deep_sleep_start, esp_sleep_enable_timer_wakeup,
+//   esp_sleep_enable_ext0_wakeup, esp_sleep_enable_ext1_wakeup,
+//   esp_sleep_get_wakeup_cause
 window.ArduinoLibs = window.ArduinoLibs || {};
 window.ArduinoLibs['FreeRTOS'] = {
   priority: 40,
@@ -21,6 +24,8 @@ window.ArduinoLibs['FreeRTOS'] = {
     '<freertos/semphr.h>',
     '<freertos/event_groups.h>',
     '<freertos/timers.h>',
+    '<esp_sleep.h>',
+    '<esp_system.h>',
   ],
 
   transpile: [
@@ -91,6 +96,15 @@ window.ArduinoLibs['FreeRTOS'] = {
     [/(?<!\.)xEventGroupWaitBits\s*\(/g, 'await _a.xEventGroupWaitBits('],
     [/(?<!\.)xEventGroupGetBits\s*\(/g, '_a.xEventGroupGetBits('],
 
+    // ── ESP32 deep sleep API (they throw ESP_DEEPSLEEP to abort the current
+    //    boot, so they are synchronous — no await).
+    [/(?<!\.)esp_deep_sleep_start\s*\(/g, '_a.esp_deep_sleep_start('],
+    [/(?<!\.)esp_deep_sleep\s*\(/g, '_a.esp_deep_sleep('],
+    [/(?<!\.)esp_sleep_enable_timer_wakeup\s*\(/g, '_a.esp_sleep_enable_timer_wakeup('],
+    [/(?<!\.)esp_sleep_enable_ext0_wakeup\s*\(/g, '_a.esp_sleep_enable_ext0_wakeup('],
+    [/(?<!\.)esp_sleep_enable_ext1_wakeup\s*\(/g, '_a.esp_sleep_enable_ext1_wakeup('],
+    [/(?<!\.)esp_sleep_get_wakeup_cause\s*\(/g, '_a.esp_sleep_get_wakeup_cause('],
+
     // ── Type stripping for FreeRTOS-specific patterns
     [/\bportMUX_TYPE\s+(\w+)\s*=\s*portMUX_INITIALIZER_UNLOCKED\s*;/g, 'var $1 = {};'],
     [/\bportMUX_TYPE\s+(\w+)\s*;/g, 'var $1 = {};'],
@@ -123,6 +137,17 @@ window.ArduinoLibs['FreeRTOS'] = {
     errQUEUE_EMPTY: 0,
     pdPASS: 1,
     pdFAIL: 0,
+    // ESP32 deep sleep wakeup causes (esp_sleep_wakeup_cause_t)
+    ESP_SLEEP_WAKEUP_UNDEFINED: 0,
+    ESP_SLEEP_WAKEUP_ALL: 1,
+    ESP_SLEEP_WAKEUP_EXT0: 2,
+    ESP_SLEEP_WAKEUP_EXT1: 3,
+    ESP_SLEEP_WAKEUP_TIMER: 4,
+    ESP_SLEEP_WAKEUP_TOUCHPAD: 5,
+    ESP_SLEEP_WAKEUP_ULP: 6,
+    // esp_sleep_enable_ext1_wakeup() modes
+    ESP_EXT1_WAKEUP_ALL_LOW: 0,
+    ESP_EXT1_WAKEUP_ANY_HIGH: 1,
   },
 
   constructor: null,
@@ -140,6 +165,70 @@ window.ArduinoLibs['FreeRTOS'] = {
 
     function _currentCore() {
       return self._freertosCurrentCore || 0;
+    }
+
+    // Best-effort lookup of the task that is currently executing on the
+    // current core. Used ONLY for cosmetic state bookkeeping (running/blocked) —
+    // never for correctness, so a miss is harmless.
+    function _findCurrentTask() {
+      var core = _currentCore();
+      var tasks = self._freertosTasks[core];
+      if (!tasks) return null;
+      for (var i = 0; i < tasks.length; i++) {
+        if (tasks[i].state === 'running' && tasks[i]._promise) return tasks[i];
+      }
+      for (var j = 0; j < tasks.length; j++) {
+        var t = tasks[j];
+        if (t._promise && t.state !== 'suspended' && t.state !== 'terminated') return t;
+      }
+      return null;
+    }
+
+    // Starvation guard: a task that spins through immediate (already-resolved)
+    // awaits would starve the browser event loop. Every N tight iterations we
+    // force a real macrotask yield.
+    function _maybeYield() {
+      self._iterSinceDelay = (self._iterSinceDelay || 0) + 1;
+      if (self._iterSinceDelay > (self._MAX_TIGHT_ITERS || 1000)) {
+        self._iterSinceDelay = 0;
+        return new Promise(function(r) { setTimeout(r, 0); });
+      }
+      return null;
+    }
+
+    function _wakeTask(task) {
+      if (task) task.state = 'running';
+    }
+
+    // Abort the current boot and request a deep-sleep restart. The thrown
+    // sentinel is swallowed by run()/_startExecution(), which performs the
+    // sleep and re-invokes setup() with fresh global state.
+    function _deepsleepStart() {
+      var cause = 0;
+      var sleepMs = 0;
+
+      if (self._deepsleepTimerUs > 0) {
+        cause = 4; // ESP_SLEEP_WAKEUP_TIMER
+        sleepMs = Math.max(1, Math.round(self._deepsleepTimerUs / 1000));
+      } else if (self._deepsleepExt0) {
+        cause = 2; // ESP_SLEEP_WAKEUP_EXT0
+        sleepMs = 1000;
+      } else if (self._deepsleepExt1) {
+        cause = 3; // ESP_SLEEP_WAKEUP_EXT1
+        sleepMs = 1000;
+      }
+
+      if (cause === 0) {
+        self._serialLog('[ESP32] Deep sleep with no wakeup source configured // device will not wake\n', 'system');
+        self._deepsleepPending = { cause: 0, sleepMs: 0, forever: true };
+      } else {
+        self._serialLog('[ESP32] Deep sleep for ' + sleepMs + ' ms\n', 'system');
+        self._deepsleepPending = { cause: cause, sleepMs: sleepMs, forever: false };
+      }
+
+      var err = new Error('ESP_DEEPSLEEP');
+      err.isDeepSleep = true;
+      throw err;
     }
 
     // ══════════════ TASK MANAGEMENT ══════════════
@@ -199,7 +288,13 @@ window.ArduinoLibs['FreeRTOS'] = {
 
       // ── Task Control ──
       vTaskDelay: async function(ticks) {
-        if (ticks === 0 || ticks === undefined) return;
+        if (ticks === 0 || ticks === undefined) {
+          // vTaskDelay(0) is a pure yield on real hardware — it must hand the
+          // event loop back to the browser, otherwise a `while(true)` loop
+          // built on it starves every timer in the page.
+          await new Promise(function(r) { setTimeout(r, 0); });
+          return;
+        }
         var ms;
         if (ticks >= 0xFFFFFFF0) {
           ms = 60000;
@@ -246,14 +341,11 @@ window.ArduinoLibs['FreeRTOS'] = {
           taskHandle._task._promise = null;
           self._serialLog('[FreeRTOS] Task "' + taskHandle._task.name + '" deleted\n', 'system');
         } else if (taskHandle === null) {
-          var core = _currentCore();
-          var tasks = self._freertosTasks[core];
-          for (var i = tasks.length - 1; i >= 0; i--) {
-            if (tasks[i].state === 'running') {
-              tasks[i].state = 'terminated';
-              tasks[i]._promise = null;
-              break;
-            }
+          var selfTask = _findCurrentTask();
+          if (selfTask) {
+            selfTask.state = 'terminated';
+            selfTask._promise = null;
+            self._serialLog('[FreeRTOS] Task "' + selfTask.name + '" deleted\n', 'system');
           }
         }
       },
@@ -303,60 +395,60 @@ window.ArduinoLibs['FreeRTOS'] = {
         var q = queueHandle && queueHandle._queue ? queueHandle._queue : null;
         if (!q) return 0;
 
-        if (ticksToWait === 0 || ticksToWait === undefined) {
-          if (q.buffer.length < q.maxLength) {
-            q.buffer.push(data);
-            if (q.waitingReceivers.length > 0) {
-              var recvTask = q.waitingReceivers.shift();
-              recvTask.state = 'ready';
-              recvTask._waitResolve(data);
-              recvTask._waitResolve = null;
+        // Deliver to any waiting receiver (entries carry their own resolve(),
+        // so correctness never depends on finding the calling task).
+        function _deliverToReceiver() {
+          if (q.waitingReceivers.length === 0) return false;
+          var remaining = [];
+          var gave = false;
+          for (var i = 0; i < q.waitingReceivers.length; i++) {
+            var e = q.waitingReceivers[i];
+            if (e.peek) {
+              e.resolve(q.buffer[0]);
+              continue;
             }
-            return 1;
+            if (!gave) {
+              gave = true;
+              e.resolve(q.buffer.shift());
+              continue;
+            }
+            remaining.push(e);
           }
-          return 0;
+          q.waitingReceivers = remaining;
+          return gave;
         }
 
         if (q.buffer.length < q.maxLength) {
           q.buffer.push(data);
-          if (q.waitingReceivers.length > 0) {
-            var recvTask2 = q.waitingReceivers.shift();
-            recvTask2.state = 'ready';
-            recvTask2._waitResolve(q.buffer.shift());
-            recvTask2._waitResolve = null;
-          }
+          _deliverToReceiver();
           return 1;
         }
 
-        var task = null;
-        var core = _currentCore();
-        var tasks = self._freertosTasks[core];
-        for (var i = 0; i < tasks.length; i++) {
-          if (tasks[i].state === 'running') { task = tasks[i]; break; }
-        }
-        if (!task) return 0;
+        if (ticksToWait === 0 || ticksToWait === undefined) return 0;
 
-        task.state = 'blocked';
+        var task = _findCurrentTask();
+        if (task) task.state = 'blocked';
 
+        var entry = { task: task, data: data, resolve: null };
         var result = await new Promise(function(resolve) {
-          task._waitResolve = resolve;
-          q.waitingSenders.push({ task: task, data: data });
+          entry.resolve = resolve;
+          q.waitingSenders.push(entry);
 
           if (ticksToWait < 0xFFFFFFF0) {
             setTimeout(function() {
-              for (var j = q.waitingSenders.length - 1; j >= 0; j--) {
-                if (q.waitingSenders[j].task === task) {
-                  q.waitingSenders.splice(j, 1);
-                  task.state = 'ready';
-                  task._waitResolve = null;
-                  resolve(0);
-                  break;
-                }
+              var idx = q.waitingSenders.indexOf(entry);
+              if (idx !== -1) {
+                q.waitingSenders.splice(idx, 1);
+                _wakeTask(entry.task);
+                resolve(0);
               }
             }, ticksToWait / self.speed);
           }
         });
 
+        _wakeTask(task);
+        var y = _maybeYield();
+        if (y) await y;
         return result;
       },
 
@@ -364,74 +456,54 @@ window.ArduinoLibs['FreeRTOS'] = {
         var q = queueHandle && queueHandle._queue ? queueHandle._queue : null;
         if (!q) return null;
 
-        if (ticksToWait === 0 || ticksToWait === undefined) {
-          if (q.buffer.length > 0) {
-            var item = q.buffer.shift();
-            if (q.waitingSenders.length > 0) {
-              var sender = q.waitingSenders.shift();
-              q.buffer.push(sender.data);
-              sender.task.state = 'ready';
-              sender.task._waitResolve(1);
-              sender.task._waitResolve = null;
-            }
-            if (buffer && typeof buffer === 'object') {
-              buffer.val = item;
-            }
-            return item;
+        function _store(item) {
+          if (buffer && typeof buffer === 'object') buffer.val = item;
+          return item;
+        }
+
+        // Pull an item off the queue, handing our slot to one blocked sender.
+        function _take() {
+          var item = q.buffer.shift();
+          if (q.waitingSenders.length > 0) {
+            var sender = q.waitingSenders.shift();
+            q.buffer.push(sender.data);
+            _wakeTask(sender.task);
+            sender.resolve(1);
           }
-          return null;
+          return item;
         }
 
         if (q.buffer.length > 0) {
-          var item2 = q.buffer.shift();
-          if (q.waitingSenders.length > 0) {
-            var sender2 = q.waitingSenders.shift();
-            q.buffer.push(sender2.data);
-            sender2.task.state = 'ready';
-            sender2.task._waitResolve(1);
-            sender2.task._waitResolve = null;
-          }
-          if (buffer && typeof buffer === 'object') {
-            buffer.val = item2;
-          }
-          return item2;
+          var item = _take();
+          var y = _maybeYield();
+          if (y) await y;
+          return _store(item);
         }
 
-        var task = null;
-        var core = _currentCore();
-        var tasks = self._freertosTasks[core];
-        for (var i = 0; i < tasks.length; i++) {
-          if (tasks[i].state === 'running') { task = tasks[i]; break; }
-        }
-        if (!task) return null;
+        if (ticksToWait === 0 || ticksToWait === undefined) return null;
 
-        task.state = 'blocked';
+        var task = _findCurrentTask();
+        if (task) task.state = 'blocked';
 
-        var result2 = await new Promise(function(resolve) {
-          task._waitResolve = function(val) {
-            if (buffer && typeof buffer === 'object') {
-              buffer.val = val;
-            }
-            resolve(val);
-          };
-          q.waitingReceivers.push(task);
+        var entry = { task: task, peek: false, resolve: null };
+        var result = await new Promise(function(resolve) {
+          entry.resolve = function(val) { resolve(_store(val)); };
+          q.waitingReceivers.push(entry);
 
           if (ticksToWait < 0xFFFFFFF0) {
             setTimeout(function() {
-              for (var j = q.waitingReceivers.length - 1; j >= 0; j--) {
-                if (q.waitingReceivers[j] === task) {
-                  q.waitingReceivers.splice(j, 1);
-                  task.state = 'ready';
-                  task._waitResolve = null;
-                  resolve(null);
-                  break;
-                }
+              var idx = q.waitingReceivers.indexOf(entry);
+              if (idx !== -1) {
+                q.waitingReceivers.splice(idx, 1);
+                _wakeTask(entry.task);
+                resolve(null);
               }
             }, ticksToWait / self.speed);
           }
         });
 
-        return result2;
+        _wakeTask(task);
+        return result;
       },
 
       xQueuePeek: async function(queueHandle, buffer, ticksToWait) {
@@ -439,49 +511,38 @@ window.ArduinoLibs['FreeRTOS'] = {
         if (!q) return null;
 
         if (q.buffer.length > 0) {
-          var item = q.buffer[0];
-          if (buffer && typeof buffer === 'object') {
-            buffer.val = item;
-          }
-          return item;
+          if (buffer && typeof buffer === 'object') buffer.val = q.buffer[0];
+          var y0 = _maybeYield();
+          if (y0) await y0;
+          return q.buffer[0];
         }
 
-        if (ticksToWait === 0) return null;
+        if (ticksToWait === 0 || ticksToWait === undefined) return null;
 
-        var task = null;
-        var core = _currentCore();
-        var tasks = self._freertosTasks[core];
-        for (var i = 0; i < tasks.length; i++) {
-          if (tasks[i].state === 'running') { task = tasks[i]; break; }
-        }
-        if (!task) return null;
+        var task = _findCurrentTask();
+        if (task) task.state = 'blocked';
 
-        task.state = 'blocked';
-
+        var entry = { task: task, peek: true, resolve: null };
         var result = await new Promise(function(resolve) {
-          task._waitResolve = function(val) {
-            if (buffer && typeof buffer === 'object') {
-              buffer.val = val;
-            }
+          entry.resolve = function(val) {
+            if (buffer && typeof buffer === 'object') buffer.val = val;
             resolve(val);
           };
-          q.waitingReceivers.push({ task: task, peek: true });
+          q.waitingReceivers.push(entry);
 
           if (ticksToWait < 0xFFFFFFF0) {
             setTimeout(function() {
-              for (var j = q.waitingReceivers.length - 1; j >= 0; j--) {
-                if (q.waitingReceivers[j].task === task) {
-                  q.waitingReceivers.splice(j, 1);
-                  task.state = 'ready';
-                  task._waitResolve = null;
-                  resolve(null);
-                  break;
-                }
+              var idx = q.waitingReceivers.indexOf(entry);
+              if (idx !== -1) {
+                q.waitingReceivers.splice(idx, 1);
+                _wakeTask(entry.task);
+                resolve(null);
               }
             }, ticksToWait / self.speed);
           }
         });
 
+        _wakeTask(task);
         return result;
       },
 
@@ -518,40 +579,34 @@ window.ArduinoLibs['FreeRTOS'] = {
 
         if (semHandle.count > 0) {
           semHandle.count--;
+          var y0 = _maybeYield();
+          if (y0) await y0;
           return 1;
         }
 
         if (ticksToWait === 0) return 0;
 
-        var task = null;
-        var core = _currentCore();
-        var tasks = self._freertosTasks[core];
-        for (var i = 0; i < tasks.length; i++) {
-          if (tasks[i].state === 'running') { task = tasks[i]; break; }
-        }
-        if (!task) return 0;
+        var task = _findCurrentTask();
+        if (task) task.state = 'blocked';
 
-        task.state = 'blocked';
-
+        var entry = { task: task, resolve: null };
         var result = await new Promise(function(resolve) {
-          task._waitResolve = resolve;
-          semHandle.waiting.push(task);
+          entry.resolve = resolve;
+          semHandle.waiting.push(entry);
 
           if (ticksToWait < 0xFFFFFFF0) {
             setTimeout(function() {
-              for (var j = semHandle.waiting.length - 1; j >= 0; j--) {
-                if (semHandle.waiting[j] === task) {
-                  semHandle.waiting.splice(j, 1);
-                  task.state = 'ready';
-                  task._waitResolve = null;
-                  resolve(0);
-                  break;
-                }
+              var idx = semHandle.waiting.indexOf(entry);
+              if (idx !== -1) {
+                semHandle.waiting.splice(idx, 1);
+                _wakeTask(entry.task);
+                resolve(0);
               }
             }, ticksToWait / self.speed);
           }
         });
 
+        _wakeTask(task);
         return result;
       },
 
@@ -561,12 +616,9 @@ window.ArduinoLibs['FreeRTOS'] = {
         semHandle.count++;
 
         if (semHandle.waiting.length > 0) {
-          var task = semHandle.waiting.shift();
-          task.state = 'ready';
-          if (task._waitResolve) {
-            task._waitResolve(1);
-            task._waitResolve = null;
-          }
+          var entry = semHandle.waiting.shift();
+          _wakeTask(entry.task);
+          if (entry.resolve) entry.resolve(1);
           semHandle.count--;
         }
 
@@ -589,11 +641,8 @@ window.ArduinoLibs['FreeRTOS'] = {
             ? (eventGroup.bits & entry.bits) === entry.bits
             : (eventGroup.bits & entry.bits) !== 0;
           if (match) {
-            entry.task.state = 'ready';
-            if (entry.task._waitResolve) {
-              entry.task._waitResolve(eventGroup.bits);
-              entry.task._waitResolve = null;
-            }
+            _wakeTask(entry.task);
+            if (entry.resolve) entry.resolve(eventGroup.bits);
           } else {
             stillWaiting.push(entry);
           }
@@ -622,42 +671,74 @@ window.ArduinoLibs['FreeRTOS'] = {
           return eventGroup.bits;
         }
 
-        if (ticksToWait === 0) return eventGroup.bits;
+        if (ticksToWait === 0 || ticksToWait === undefined) return eventGroup.bits;
 
-        var task = null;
-        var core = _currentCore();
-        var tasks = self._freertosTasks[core];
-        for (var i = 0; i < tasks.length; i++) {
-          if (tasks[i].state === 'running') { task = tasks[i]; break; }
-        }
-        if (!task) return eventGroup.bits;
+        var task = _findCurrentTask();
+        if (task) task.state = 'blocked';
 
-        task.state = 'blocked';
-
+        var entry = { task: task, bits: bitsToWait, waitAll: waitAll, resolve: null };
         var result = await new Promise(function(resolve) {
-          task._waitResolve = resolve;
-          eventGroup.waiting.push({ task: task, bits: bitsToWait, waitAll: waitAll });
+          entry.resolve = resolve;
+          eventGroup.waiting.push(entry);
 
           if (ticksToWait < 0xFFFFFFF0) {
             setTimeout(function() {
-              for (var j = eventGroup.waiting.length - 1; j >= 0; j--) {
-                if (eventGroup.waiting[j].task === task) {
-                  eventGroup.waiting.splice(j, 1);
-                  task.state = 'ready';
-                  task._waitResolve = null;
-                  resolve(eventGroup.bits);
-                  break;
-                }
+              var idx = eventGroup.waiting.indexOf(entry);
+              if (idx !== -1) {
+                eventGroup.waiting.splice(idx, 1);
+                _wakeTask(entry.task);
+                resolve(eventGroup.bits);
               }
             }, ticksToWait / self.speed);
           }
         });
 
+        _wakeTask(task);
         return result;
       },
 
       xEventGroupGetBits: function(eventGroup) {
         return eventGroup ? eventGroup.bits : 0;
+      },
+
+      // ══════════════ ESP32 DEEP SLEEP ══════════════
+      // A deep-sleep call aborts the current boot by throwing a sentinel error
+      // that run()/_startExecution() recognise. They then advance the sim clock
+      // by the sleep duration, set the wakeup cause and re-run setup() — i.e.
+      // exactly what the silicon does on reset.
+      esp_sleep_enable_timer_wakeup: function(timeUs) {
+        self._deepsleepTimerUs = Math.max(0, Number(timeUs) || 0);
+        return 0;
+      },
+
+      esp_sleep_enable_ext0_wakeup: function(gpio, level) {
+        self._deepsleepExt0 = { gpio: Number(gpio) || 0, level: Number(level) ? 1 : 0 };
+        return 0;
+      },
+
+      esp_sleep_enable_ext1_wakeup: function(mask, mode) {
+        self._deepsleepExt1 = { mask: Number(mask) || 0, mode: Number(mode) || 0 };
+        return 0;
+      },
+
+      esp_sleep_disable_wakeup: function() {
+        self._deepsleepTimerUs = 0;
+        self._deepsleepExt0 = null;
+        self._deepsleepExt1 = null;
+        return 0;
+      },
+
+      esp_sleep_get_wakeup_cause: function() {
+        return self._deepsleepWakeupCause || 0;
+      },
+
+      esp_deep_sleep: function(timeUs) {
+        if (Number(timeUs) > 0) self._deepsleepTimerUs = Number(timeUs);
+        return _deepsleepStart();
+      },
+
+      esp_deep_sleep_start: function() {
+        return _deepsleepStart();
       },
 
       // ══════════════ SCHEDULER ══════════════
@@ -666,7 +747,8 @@ window.ArduinoLibs['FreeRTOS'] = {
       },
 
       _freertosRunCore: async function(coreId) {
-        while (self.isRunning) {
+        var spinGuard = 0;
+        while (self.isRunning && !self._deepsleepPending) {
           if (self._freertosSuspended) {
             await new Promise(function(r) { setTimeout(r, 1); });
             continue;
@@ -674,19 +756,45 @@ window.ArduinoLibs['FreeRTOS'] = {
 
           var tasks = self._freertosTasks[coreId];
 
-          // Start any ready tasks that aren't already running
+          // Start any ready tasks that aren't already running.
+          // `let` gives each iteration its own binding so the .then/.catch
+          // closures below always reference THEIR task, never the last one
+          // the loop visited (a `var` here silently corrupted task state).
           for (var i = 0; i < tasks.length; i++) {
-            var task = tasks[i];
+            let task = tasks[i];
             if (task.state === 'ready' && !task._promise) {
+              if (typeof task.asyncFn !== 'function') {
+                self._serialLog('[FreeRTOS] ERROR: Task "' + task.name + '" has no callable function\n', 'error');
+                task.state = 'terminated';
+                continue;
+              }
               task.state = 'running';
               self._freertosCurrentCore = coreId;
               self._freertosCurrentTask[coreId] = task;
 
-              task._promise = task.asyncFn(task.params).then(function() {
+              var started;
+              try {
+                started = Promise.resolve(task.asyncFn(task.params));
+              } catch (syncErr) {
+                self._serialLog('[FreeRTOS] Task "' + task.name + '" error: ' +
+                  (syncErr && syncErr.message ? syncErr.message : syncErr) + '\n', 'error');
+                task.state = 'terminated';
+                task._promise = null;
+                continue;
+              }
+
+              task._promise = started.then(function() {
                 task.state = 'terminated';
                 task._promise = null;
               }).catch(function(e) {
                 if (e && e.message === 'SIMULATION_STOPPED') {
+                  task._promise = null;
+                  return;
+                }
+                if (e && e.isDeepSleep) {
+                  // Deep sleep was requested from inside this task — the
+                  // scheduler loop exits via self._deepsleepPending.
+                  task.state = 'terminated';
                   task._promise = null;
                   return;
                 }
@@ -702,7 +810,13 @@ window.ArduinoLibs['FreeRTOS'] = {
 
           // Yield to browser event loop — this allows async continuations
           // (delay promises, queue waits, etc.) to resolve
-          await new Promise(function(r) { setTimeout(r, 0); });
+          spinGuard++;
+          if (spinGuard > 1000) {
+            spinGuard = 0;
+            await new Promise(function(r) { setTimeout(r, 1); });
+          } else {
+            await new Promise(function(r) { setTimeout(r, 0); });
+          }
         }
       },
 

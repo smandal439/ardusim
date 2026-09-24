@@ -83,6 +83,13 @@ class ArduinoSimulator {
     const active = {};
 
     for (const [name, lib] of Object.entries(all)) {
+      // The FreeRTOS plugin also carries the ESP32 deep-sleep / wakeup API,
+      // which the Arduino-ESP32 core exposes without an #include. Keep it
+      // active on ESP32 boards so `esp_deep_sleep()` just works.
+      if (name === 'FreeRTOS' && this.board === 'esp32_devkit_v1') {
+        active[name] = lib;
+        continue;
+      }
       // Plugins with no includes array (or empty) are always active
       if (!lib.includes || lib.includes.length === 0) {
         active[name] = lib;
@@ -828,7 +835,10 @@ class ArduinoSimulator {
                 const nanoMap = { 14: 'A0', 15: 'A1', 16: 'A2', 17: 'A3', 18: 'A4', 19: 'A5', 20: 'A6', 21: 'A7' };
                 label = nanoMap[pinNum] || null;
               } else if (board.type === 'esp32_devkit_v1') {
-                const espMap = { 36: 'A0', 39: 'A1', 34: 'A2', 35: 'A3', 32: 'A4', 33: 'A5' };
+                // ESP32 DevKit V1 pins carry raw GPIO ids (VP/VN/D34..D33).
+                // A wrong label (e.g. 'A2') never matches a wire pinId, so
+                // _readAnalogInput would always fall through to 0.
+                const espMap = { 36: 'VP', 39: 'VN', 34: 'D34', 35: 'D35', 32: 'D32', 33: 'D33' };
                 label = espMap[pinNum] || null;
               } else if (board.type === 'stm32f746_disco') {
                 const stmMap = { 14: 'A0', 15: 'A1', 16: 'A2', 17: 'A3', 18: 'A4', 19: 'A5' };
@@ -846,7 +856,11 @@ class ArduinoSimulator {
               if (label) {
                 const measured = Number(canvas._readAnalogInput(board.id, label));
                 if (Number.isFinite(measured)) {
-                  const adc = Math.max(0, Math.min(1023, Math.round(measured)));
+                  // _readAnalogInput returns 0..1023 (normalized). The ESP32
+                  // ADC is 12-bit on real hardware, so scale up to 0..4095.
+                  const adcMax = board.type === 'esp32_devkit_v1' ? 4095 : 1023;
+                  const scaled = adcMax === 1023 ? measured : (measured / 1023) * adcMax;
+                  const adc = Math.max(0, Math.min(adcMax, Math.round(scaled)));
                   if (self.pinStates[key] !== adc) {
                     self.pinStates[key] = adc;
                     self._emitPinChange(key, adc);
@@ -1103,8 +1117,10 @@ class ArduinoSimulator {
         analogReadMilliVolts(pin) {
           const v = self.pinStates[`pin_${pin}`];
           if (v === undefined || v === null) return 0;
-          // Simulation stores analog values in the 0-1023 range (10-bit)
-          return Math.round((Number(v) || 0) * 3300 / 1023);
+          // Simulation stores analog values in the board's ADC range
+          // (0-1023 for 10-bit boards, 0-4095 for the 12-bit ESP32 ADC).
+          const adcMax = self.board === 'esp32_devkit_v1' ? 4095 : 1023;
+          return Math.round((Number(v) || 0) * 3300 / adcMax);
         },
         analogReadMicroVolts(pin) { return this.analogReadMilliVolts(pin) * 1000; },
         touchRead(pin) { return 0; },
@@ -1172,6 +1188,16 @@ class ArduinoSimulator {
       pdTRUE: 1, pdFALSE: 0,
       pdPASS: 1, pdFAIL: 0,
       errQUEUE_FULL: 0, errQUEUE_EMPTY: 0,
+      // ESP32 deep sleep wakeup causes (also provided by the FreeRTOS plugin)
+      ESP_SLEEP_WAKEUP_UNDEFINED: 0,
+      ESP_SLEEP_WAKEUP_ALL: 1,
+      ESP_SLEEP_WAKEUP_EXT0: 2,
+      ESP_SLEEP_WAKEUP_EXT1: 3,
+      ESP_SLEEP_WAKEUP_TIMER: 4,
+      ESP_SLEEP_WAKEUP_TOUCHPAD: 5,
+      ESP_SLEEP_WAKEUP_ULP: 6,
+      ESP_EXT1_WAKEUP_ALL_LOW: 0,
+      ESP_EXT1_WAKEUP_ANY_HIGH: 1,
 
       /* Servo/LCD class stubs */
       Servo: function () { return {}; },
@@ -1730,17 +1756,13 @@ class ArduinoSimulator {
     this._interrupts = {};
     this._prevPinValues = {};
     // FreeRTOS dual-core state // reset on each run
-    this._freertosTasks = { 0: [], 1: [] };
-    this._freertosTaskRegistry = {};
-    this._freertosQueues = [];
-    this._freertosSemaphores = [];
-    this._freertosEventGroups = [];
-    this._freertosCurrentTask = {};
-    this._freertosCurrentCore = 0;
-    this._freertosCriticalSection = 0;
-    this._freertosSuspended = false;
-    this._freertosSuspendCount = 0;
-    window._freertosTaskRegistry = this._freertosTaskRegistry;
+    this._resetFreertosState();
+    this._deepsleepWakeupCause = 0;
+    this._deepsleepCount = 0;
+    this._deepsleepPending = null;
+    this._deepsleepTimerUs = 0;
+    this._deepsleepExt0 = null;
+    this._deepsleepExt1 = null;
     // Reset ESP-NOW bus for this board
     if (window._espnowBus) {
       // Remove this board's entry so it can re-register
@@ -1820,55 +1842,69 @@ class ArduinoSimulator {
     let hadError = false;
 
     try {
-      const { setup, loop } = fn(...vals);
+      let ctx = fn(...vals);
 
-      // Run setup once
-      await setup();
+      // One iteration per boot. A deep-sleep call aborts the current boot and
+      // loops back here after the simulated sleep, like a real reset.
+      for (;;) {
+        try {
+          // Run setup once
+          await ctx.setup();
 
-      // Check if FreeRTOS tasks were registered during setup()
-      const hasFreertosTasks = (this._freertosTasks[0].length + this._freertosTasks[1].length) > 0;
+          // Check if FreeRTOS tasks were registered during setup()
+          const hasFreertosTasks = (this._freertosTasks[0].length + this._freertosTasks[1].length) > 0;
 
-      if (hasFreertosTasks) {
-        // Register loop() as a task on Core 1 if no tasks exist on Core 1
-        if (this._freertosTasks[1].length === 0) {
-          this._freertosTaskRegistry['__loop_task'] = loop;
-          this._a.xTaskCreatePinnedToCore(loop, 'loopTask', 8192, null, 1, null, 1);
-        }
-        // Start FreeRTOS scheduler
-        this._serialLog('[FreeRTOS] Starting scheduler on 2 cores\n', 'system');
-        if (this._a._freertosScheduler) {
-          await this._a._freertosScheduler();
-        }
-      } else {
-        // Run loop repeatedly (original behavior)
-        let _lastLoopTime = performance.now();
-        while (this.isRunning && runId === this._runSeq) {
-          if (this.isPaused) {
-            await new Promise(resolve => { this._resumeResolve = resolve; });
-            _lastLoopTime = performance.now();
+          if (hasFreertosTasks) {
+            // Register loop() as a task on Core 1 if no tasks exist on Core 1
+            if (this._freertosTasks[1].length === 0) {
+              this._freertosTaskRegistry['__loop_task'] = ctx.loop;
+              this._a.xTaskCreatePinnedToCore(ctx.loop, 'loopTask', 8192, null, 1, null, 1);
+            }
+            // Start FreeRTOS scheduler
+            this._serialLog('[FreeRTOS] Starting scheduler on 2 cores\n', 'system');
+            if (this._a._freertosScheduler) {
+              await this._a._freertosScheduler();
+            }
+          } else {
+            // Run loop repeatedly (original behavior)
+            let _lastLoopTime = performance.now();
+            while (this.isRunning && runId === this._runSeq && !this._deepsleepPending) {
+              if (this.isPaused) {
+                await new Promise(resolve => { this._resumeResolve = resolve; });
+                _lastLoopTime = performance.now();
+              }
+              this._iterSinceDelay++;
+              // Infinite-loop guard: yield if no delay has been called in many iterations
+              if (this._iterSinceDelay > this._MAX_TIGHT_ITERS) {
+                this._iterSinceDelay = 0;
+                await new Promise(r => setTimeout(r, 1));
+                const _now = performance.now();
+                this.simTime += Math.max(1, Math.round(_now - _lastLoopTime));
+                _lastLoopTime = _now;
+              }
+              await ctx.loop();
+              this._loopCount++;
+              // Yield to UI thread // advance simTime by actual elapsed ms
+              await new Promise(r => setTimeout(r, 0));
+              const _now = performance.now();
+              // Only add elapsed time if delay() was NOT called during loop();
+              // delay() already advanced simTime and slept for real time,
+              // so adding again would double-count the delay period.
+              if (this._iterSinceDelay > 0) {
+                this.simTime += Math.max(1, Math.round(_now - _lastLoopTime));
+              }
+              _lastLoopTime = _now;
+            }
           }
-          this._iterSinceDelay++;
-          // Infinite-loop guard: yield if no delay has been called in many iterations
-          if (this._iterSinceDelay > this._MAX_TIGHT_ITERS) {
-            this._iterSinceDelay = 0;
-            await new Promise(r => setTimeout(r, 1));
-            const _now = performance.now();
-            this.simTime += Math.max(1, Math.round(_now - _lastLoopTime));
-            _lastLoopTime = _now;
-          }
-          await loop();
-          this._loopCount++;
-          // Yield to UI thread // advance simTime by actual elapsed ms
-          await new Promise(r => setTimeout(r, 0));
-          const _now = performance.now();
-          // Only add elapsed time if delay() was NOT called during loop();
-          // delay() already advanced simTime and slept for real time,
-          // so adding again would double-count the delay period.
-          if (this._iterSinceDelay > 0) {
-            this.simTime += Math.max(1, Math.round(_now - _lastLoopTime));
-          }
-          _lastLoopTime = _now;
+        } catch (err) {
+          // esp_deep_sleep()/esp_deep_sleep_start() abort the boot by design
+          if (!err || err.message !== 'ESP_DEEPSLEEP') throw err;
         }
+
+        if (!this._deepsleepPending) break;
+        if (!(await this._handleDeepSleepWake(runId))) break;
+        // Fresh global state for the next boot — the sketch is re-evaluated
+        ctx = fn(...vals);
       }
     } catch (err) {
       if (err && err.message !== 'SIMULATION_STOPPED') {
@@ -1898,6 +1934,67 @@ class ArduinoSimulator {
       if (this.onStop) this.onStop();
     }
     return !hadError;
+  }
+
+  /* Reset every FreeRTOS kernel object. Called on start and after each
+     deep-sleep wake so the next boot begins from a clean slate. */
+  _resetFreertosState() {
+    this._freertosTasks = { 0: [], 1: [] };
+    this._freertosTaskRegistry = {};
+    this._freertosQueues = [];
+    this._freertosSemaphores = [];
+    this._freertosEventGroups = [];
+    this._freertosCurrentTask = {};
+    this._freertosCurrentCore = 0;
+    this._freertosCriticalSection = 0;
+    this._freertosSuspended = false;
+    this._freertosSuspendCount = 0;
+    window._freertosTaskRegistry = this._freertosTaskRegistry;
+  }
+
+  /* Consume a pending deep sleep: advance the sim clock, record the wakeup
+     cause and clear all boot-local state. Returns false when the device
+     should stay asleep (no wakeup source / restart limit hit). */
+  async _handleDeepSleepWake(runId) {
+    const ds = this._deepsleepPending;
+    this._deepsleepPending = null;
+    if (!ds) return false;
+
+    if (runId !== this._runSeq) return false;
+
+    if (ds.forever) {
+      this._serialLog('[ESP32] Device stayed asleep // stopping simulation\n', 'system');
+      return false;
+    }
+
+    this._deepsleepCount = (this._deepsleepCount || 0) + 1;
+    if (this._deepsleepCount > 100) {
+      this._serialLog('[ESP32] Deep sleep restart limit (100) reached // stopping simulation\n', 'error');
+      return false;
+    }
+
+    this._deepsleepWakeupCause = ds.cause;
+    this.simTime += ds.sleepMs;
+    // The clock jumps by the full sleep, but only pause the UI briefly so a
+    // sketch that wakes every few minutes doesn't freeze the page.
+    await this._delayPromise(Math.min(ds.sleepMs, 250) / (this.speed || 1));
+    if (runId !== this._runSeq) return false;
+
+    const names = { 2: 'EXT0', 3: 'EXT1', 4: 'TIMER' };
+    this._serialLog(
+      '[ESP32] Woke up from deep sleep // cause: ' + (names[ds.cause] || 'UNDEFINED') +
+      ', slept ' + ds.sleepMs + ' ms\n', 'system');
+
+    // Boot-local state is wiped, exactly like a real reset
+    this._resetFreertosState();
+    this._delays = [];
+    this._iterSinceDelay = 0;
+    this._interrupts = {};
+    this._prevPinValues = {};
+    this._deepsleepTimerUs = 0;
+    this._deepsleepExt0 = null;
+    this._deepsleepExt1 = null;
+    return true;
   }
 
   /* Start execution of already-compiled code (non-blocking, for dual-board parallel run) */
@@ -1968,17 +2065,13 @@ class ArduinoSimulator {
     this._interrupts = {};
     this._prevPinValues = {};
     // FreeRTOS dual-core state // ensure initialized for _startExecution path
-    this._freertosTasks = { 0: [], 1: [] };
-    this._freertosTaskRegistry = {};
-    this._freertosQueues = [];
-    this._freertosSemaphores = [];
-    this._freertosEventGroups = [];
-    this._freertosCurrentTask = {};
-    this._freertosCurrentCore = 0;
-    this._freertosCriticalSection = 0;
-    this._freertosSuspended = false;
-    this._freertosSuspendCount = 0;
-    window._freertosTaskRegistry = this._freertosTaskRegistry;
+    this._resetFreertosState();
+    this._deepsleepWakeupCause = 0;
+    this._deepsleepCount = 0;
+    this._deepsleepPending = null;
+    this._deepsleepTimerUs = 0;
+    this._deepsleepExt0 = null;
+    this._deepsleepExt1 = null;
 
     this._serialLog('[ArduSim] Simulation started\n', 'system');
     if (this.onStart) this.onStart();
@@ -1990,48 +2083,61 @@ class ArduinoSimulator {
     (async () => {
       let hadError = false;
       try {
-        const { setup, loop } = fn(...vals);
-        await setup();
+        let ctx = fn(...vals);
 
-        // Check if FreeRTOS tasks were registered during setup()
-        const hasFreertosTasks = (self._freertosTasks[0].length + self._freertosTasks[1].length) > 0;
+        // One iteration per boot // deep sleep loops back here after waking
+        for (;;) {
+          try {
+            await ctx.setup();
 
-        if (hasFreertosTasks) {
-          // Register loop() as a task on Core 1 if no tasks exist on Core 1
-          if (self._freertosTasks[1].length === 0) {
-            self._freertosTaskRegistry['__loop_task'] = loop;
-            self._a.xTaskCreatePinnedToCore(loop, 'loopTask', 8192, null, 1, null, 1);
-          }
-          // Start FreeRTOS scheduler // runs both cores concurrently
-          self._serialLog('[FreeRTOS] Starting scheduler on 2 cores\n', 'system');
-          if (self._a._freertosScheduler) {
-            await self._a._freertosScheduler();
-          }
-        } else {
-          // Original behavior // single-threaded loop
-          let _lastLoopTime2 = performance.now();
-          while (self.isRunning && runId === self._runSeq) {
-            if (self.isPaused) {
-              await new Promise(resolve => { self._resumeResolve = resolve; });
-              _lastLoopTime2 = performance.now();
+            // Check if FreeRTOS tasks were registered during setup()
+            const hasFreertosTasks = (self._freertosTasks[0].length + self._freertosTasks[1].length) > 0;
+
+            if (hasFreertosTasks) {
+              // Register loop() as a task on Core 1 if no tasks exist on Core 1
+              if (self._freertosTasks[1].length === 0) {
+                self._freertosTaskRegistry['__loop_task'] = ctx.loop;
+                self._a.xTaskCreatePinnedToCore(ctx.loop, 'loopTask', 8192, null, 1, null, 1);
+              }
+              // Start FreeRTOS scheduler // runs both cores concurrently
+              self._serialLog('[FreeRTOS] Starting scheduler on 2 cores\n', 'system');
+              if (self._a._freertosScheduler) {
+                await self._a._freertosScheduler();
+              }
+            } else {
+              // Original behavior // single-threaded loop
+              let _lastLoopTime2 = performance.now();
+              while (self.isRunning && runId === self._runSeq && !self._deepsleepPending) {
+                if (self.isPaused) {
+                  await new Promise(resolve => { self._resumeResolve = resolve; });
+                  _lastLoopTime2 = performance.now();
+                }
+                self._iterSinceDelay++;
+                if (self._iterSinceDelay > self._MAX_TIGHT_ITERS) {
+                  self._iterSinceDelay = 0;
+                  await new Promise(r => setTimeout(r, 1));
+                  const _n2 = performance.now();
+                  self.simTime += Math.max(1, Math.round(_n2 - _lastLoopTime2));
+                  _lastLoopTime2 = _n2;
+                }
+                await ctx.loop();
+                self._loopCount++;
+                await new Promise(r => setTimeout(r, 0));
+                const _n2 = performance.now();
+                if (self._iterSinceDelay > 0) {
+                  self.simTime += Math.max(1, Math.round(_n2 - _lastLoopTime2));
+                }
+                _lastLoopTime2 = _n2;
+              }
             }
-            self._iterSinceDelay++;
-            if (self._iterSinceDelay > self._MAX_TIGHT_ITERS) {
-              self._iterSinceDelay = 0;
-              await new Promise(r => setTimeout(r, 1));
-              const _n2 = performance.now();
-              self.simTime += Math.max(1, Math.round(_n2 - _lastLoopTime2));
-              _lastLoopTime2 = _n2;
-            }
-            await loop();
-            self._loopCount++;
-            await new Promise(r => setTimeout(r, 0));
-            const _n2 = performance.now();
-            if (self._iterSinceDelay > 0) {
-              self.simTime += Math.max(1, Math.round(_n2 - _lastLoopTime2));
-            }
-            _lastLoopTime2 = _n2;
+          } catch (err) {
+            // esp_deep_sleep() aborts the boot by design
+            if (!err || err.message !== 'ESP_DEEPSLEEP') throw err;
           }
+
+          if (!self._deepsleepPending) break;
+          if (!(await self._handleDeepSleepWake(runId))) break;
+          ctx = fn(...vals);
         }
       } catch (err) {
         if (err && err.message !== 'SIMULATION_STOPPED') {
@@ -2586,7 +2692,7 @@ window.loadExamplesFromFiles = async function () {
     'bh1750_light_sensor', 'blink', 'bluetooth_serial_bridge', 'button', 'buzzer_melody', 'coap_client',
     'coap_dip_switch_to_8_led', 'coap_simple_server', 'continuous_rotation_servo_control_by_pot', 'counter', 'current_divider', 'dc_motor_speed',
     'dht11_temperature_humidity', 'dip_switch_and_led_array', 'dip_switch_binary', 'dmm_current', 'dmm_resistance', 'dmm_voltage',
-    'ds3231_rtc_clock', 'ds3231_rtc_clock_sync_with_ntp', 'dso_oscilloscope', 'dual_core_mqtt', 'esp32_blink', 'esp32_dual_core_blink',
+    'ds3231_rtc_clock', 'ds3231_rtc_clock_sync_with_ntp', 'dso_oscilloscope', 'dual_core_mqtt', 'esp32_blink', 'esp32_deep_sleep_timer', 'esp32_dual_core_blink',
     'esp32_fade', 'esp32_freertos_queue', 'esp32_gpio_control', 'esp32_gpio_control_dashboard', 'esp32_hub75_matrixpaneli2s_dma', 'esp32_i2s_local_radio_player',
     'esp32_i2s_music_player', 'esp32_i2s_online_radio_player', 'esp32_i2s_online_radio_player copy', 'esp32_i2s_online_radio_player2', 'esp32_mqtt_pub_sub', 'esp32_ntp_clock_lcd',
     'esp32_sd_songs_player', 'esp32_server', 'esp32_web_server', 'esp_now_dip_switch_to_8_led', 'esp_now_sender_with_receiver', 'espnow_led_control',

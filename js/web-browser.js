@@ -98,7 +98,7 @@ class WebBrowser {
           var url = typeof input === 'string' ? input : (input && input.url) || '';
           var sim = window.parent && window.parent.ArduinoSim;
           if (sim && sim._web && sim._web._triggerRoute) {
-            sim._web._triggerRoute(url);
+            sim._web._triggerRoute(url, { ajax: true });
           }
           // Wait for the handler to execute and produce a response
           return new Promise(function(resolve) {

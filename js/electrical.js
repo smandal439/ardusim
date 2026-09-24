@@ -479,16 +479,22 @@ class ElectricalEngine {
           const pinId = pinKey.slice(inst.id.length + 1);
 
           if (pinId === '5V' || pinId === 'VIN' || pinId === '5V2' || pinId === 'VCC' || pinId === 'VBUS') {
-            addSource(pinId, '5v', 5.0, 255);
+            // A battery wired straight to the supply rail IS the supply —
+            // don't override its voltage with the board's fixed 5 V rail.
+            if (!this._railHasBattery(inst.id, pinId)) addSource(pinId, '5v', 5.0, 255);
           } else if (pinId === '3V3' || pinId === '3V3OUT') {
-            addSource(pinId, '3v3', 3.3, 168);
+            if (!this._railHasBattery(inst.id, pinId)) addSource(pinId, '3v3', 3.3, 168);
           } else if (pinId === 'GND1' || pinId === 'GND2' || pinId === 'GND3' || pinId === 'GND4' || pinId === 'GND5' || pinId === 'GND6' || pinId === 'GND7' || pinId === 'GND_D' || pinId === 'GND' || pinId === 'AGND') {
             addGround(pinId, 'gnd');
           } else {
             const pinNum = this._canvas?._pinToNumber?.(pinId);
             if (pinNum != null) {
               const pinMode = sim?.pinModes?.[`pin_${pinNum}`];
-              if (pinMode === 'INPUT' || pinMode === 'INPUT_PULLUP' || pinMode === 'INPUT_PULLDOWN') {
+              // ESP32 GPIO34-39 are input-only: they can never drive the
+              // graph, so treat them as passive regardless of pinMode —
+              // otherwise an unconfigured ADC pin is grounded and reads 0 V.
+              const inputOnly = inst.type === 'esp32_devkit_v1' && pinNum >= 34 && pinNum <= 39;
+              if (inputOnly || pinMode === 'INPUT' || pinMode === 'INPUT_PULLUP' || pinMode === 'INPUT_PULLDOWN') {
                 // Input pins are passive readers — don't drive the electrical graph.
                 // Their solved voltages are fed back to pinStates in updateSimState.
               } else {
@@ -627,6 +633,21 @@ class ElectricalEngine {
    */
   getNetForPin(instId, pinId) {
     return this.pinToNet.get(`${instId}:${pinId}`) || null;
+  }
+
+  /**
+   * True when a battery component shares this pin's net (the battery is
+   * wired directly to the rail and must be treated as the supply).
+   */
+  _railHasBattery(instId, pinId) {
+    const net = this.getNetForPin(instId, pinId);
+    if (!net) return false;
+    for (const p of net.pins.values()) {
+      if (p.instId === instId) continue;
+      const other = this.components.find(c => c.id === p.instId);
+      if (other && other.type === 'battery') return true;
+    }
+    return false;
   }
 
   /**

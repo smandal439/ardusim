@@ -1,0 +1,24 @@
+{
+  "id": "esp32_deep_sleep_timer",
+  "name": "ESP32 Deep Sleep Timer Wakeup",
+  "icon": "😴",
+  "desc": "ESP32 deep sleep demo: wake from the timer every 5s and report the wakeup cause",
+  "tags": [
+    "esp32",
+    "deep-sleep",
+    "low-power",
+    "beginner"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "esp32_devkit_v1",
+        "x": 200,
+        "y": 100
+      }
+    ],
+    "wires": []
+  },
+  "code": "/*\n * ESP32 Deep Sleep - Timer Wakeup\n *\n * The ESP32 prints a banner, blinks the LED once, then goes to deep sleep\n * for 5 seconds. On wake it boots again from setup() and prints the wakeup\n * cause reported by esp_sleep_get_wakeup_cause().\n *\n * Deep sleep clears normal RAM, so bootCount restarts at 1 on every wake -\n * exactly what real hardware does. The wakeup cause is the reliable way to\n * tell that you actually slept.\n *\n * Try it:\n *   - Comment out esp_sleep_enable_timer_wakeup() and re-run: with no\n *     wakeup source configured the device stays asleep forever.\n */\n\n#include <esp_sleep.h>\n\nint bootCount = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(LED_BUILTIN, OUTPUT);\n\n  bootCount++;\n  Serial.println();\n  Serial.println(\"=== ESP32 booted ===\");\n  Serial.print(\"Boot number: \");\n  Serial.println(bootCount);\n\n  Serial.print(\"Wakeup cause: \");\n  Serial.println(esp_sleep_get_wakeup_cause());\n\n  // One blink so each boot is visible on the board too\n  digitalWrite(LED_BUILTIN, HIGH);\n  delay(200);\n  digitalWrite(LED_BUILTIN, LOW);\n\n  Serial.println(\"Going to deep sleep for 5000 ms ...\");\n  esp_sleep_enable_timer_wakeup(5000000);   // 5,000,000 microseconds\n  esp_deep_sleep_start();                   // does not return\n}\n\nvoid loop() {\n  // Never reached - esp_deep_sleep_start() powers down the chip\n}\n"
+}

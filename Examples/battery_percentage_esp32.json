@@ -1,0 +1,184 @@
+{
+  "id": "battery_percentage_esp32",
+  "name": "battery percentage esp32",
+  "icon": "🔧",
+  "desc": "A custom battery percentage esp32 circuit example.",
+  "tags": [
+    "custom",
+    "circuit",
+    "esp32",
+    "battery",
+    "percentage"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790274702062_i4hby",
+        "type": "esp32_devkit_v1",
+        "x": 720,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32"
+        }
+      },
+      {
+        "id": "comp_1790274718143_joggb",
+        "type": "battery",
+        "x": 455,
+        "y": 310,
+        "rotation": 3,
+        "props": {
+          "voltage": 3.7,
+          "capacity_mah": 5,
+          "r_int": 0.15
+        }
+      },
+      {
+        "id": "comp_1790274747832_3jei8",
+        "type": "resistor",
+        "x": 655,
+        "y": 275,
+        "rotation": 0,
+        "props": {
+          "value": 100,
+          "unit": "kΩ"
+        }
+      },
+      {
+        "id": "comp_1790274749260_xwqsb",
+        "type": "resistor",
+        "x": 655,
+        "y": 385,
+        "rotation": 0,
+        "props": {
+          "value": 100,
+          "unit": "kΩ"
+        }
+      },
+      {
+        "id": "comp_1790275065212_l7emv",
+        "type": "multimeter",
+        "x": 870,
+        "y": 215,
+        "rotation": 1,
+        "props": {
+          "mode": "V_DC",
+          "hold": false,
+          "rel": false,
+          "range_auto": true
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1790274769981_tz6xo",
+        "from": {
+          "instId": "comp_1790274718143_joggb",
+          "pinId": "neg"
+        },
+        "to": {
+          "instId": "comp_1790274749260_xwqsb",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790274772102_g5i9n",
+        "from": {
+          "instId": "comp_1790274749260_xwqsb",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1790274747832_3jei8",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790274774180_ru4a3",
+        "from": {
+          "instId": "comp_1790274718143_joggb",
+          "pinId": "pos"
+        },
+        "to": {
+          "instId": "comp_1790274747832_3jei8",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790274834488_chek8",
+        "from": {
+          "instId": "comp_1790274702062_i4hby",
+          "pinId": "GND1"
+        },
+        "to": {
+          "instId": "comp_1790274749260_xwqsb",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790275028667_bqy2t",
+        "from": {
+          "instId": "comp_1790274702062_i4hby",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "comp_1790274749260_xwqsb",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790275073671_cyyt4",
+        "from": {
+          "instId": "comp_1790274749260_xwqsb",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "comp_1790275065212_l7emv",
+          "pinId": "probe_com"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790275076154_ppqeb",
+        "from": {
+          "instId": "comp_1790274747832_3jei8",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "comp_1790275065212_l7emv",
+          "pinId": "probe_red"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "const int adcPin = 13; // Change to your GPIO pin\nconst float maxVoltage = 4.2; // Full battery\nconst float minVoltage = 2.5; // Empty battery\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(adcPin, INPUT);\n}\n\nvoid loop() {\n  // Read calibrated millivolts if available, or raw analog read\n  int rawValue = analogRead(adcPin);\n  \n  // Convert raw reading to voltage at the pin (ESP32 ADC is 12-bit: 4095 = 3.3V roughly, \n  // but analogReadMillivolts() is more accurate)\n  float pinVoltage = analogReadMilliVolts(adcPin) / 1000.0;\n  \n  // Reconstruct actual battery voltage based on your voltage divider ratio (e.g., multiplier of 2 for equal resistors)\n  float batteryVoltage = pinVoltage * 2.0; \n  \n  // Calculate percentage (Linear approximation)\n  int batteryPercentage = (int)((batteryVoltage - minVoltage) / (maxVoltage - minVoltage) * 100.0);\n  batteryPercentage = constrain(batteryPercentage, 0, 100);\n\n  Serial.print(\"Voltage: \");\n  Serial.print(batteryVoltage);\n  Serial.print(\" V  |  \");\n  Serial.print(batteryPercentage);\n  Serial.println(\" %\");\n  \n  delay(2000);\n}\n"
+  }
+}
