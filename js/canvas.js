@@ -1218,6 +1218,9 @@ class CircuitCanvas {
     value = Math.max(ctrl.min, Math.min(ctrl.max, value));
     inst.runtimeState = inst.runtimeState || {};
     inst.runtimeState[ctrl.field] = value;
+    if (inst.type === 'battery' && ctrl.field === 'voltage' && typeof window.batterySeedSoc === 'function') {
+      window.batterySeedSoc(inst);
+    }
   }
 
   _drawOverlays(ctx) {

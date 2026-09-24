@@ -155,8 +155,17 @@ const StorageManager = {
         if (!mig || !mig.id) continue;
         serverIds.add(mig.id);
         const idx = local.findIndex(l => l.id === mig.id);
-        if (idx >= 0) local[idx] = mig;
-        else local.unshift(mig);
+        if (idx >= 0) {
+          // Never let a server copy with empty code/files clobber a local copy that has code.
+          // (Older server rows stored only `code`, which could be empty after a files-only save.)
+          const hasContent = (p) => !!(p && p.files && Object.values(p.files).some(c => typeof c === 'string' && c.trim()));
+          if (!hasContent(mig) && hasContent(local[idx])) {
+            mig.files = local[idx].files;
+          }
+          local[idx] = mig;
+        } else {
+          local.unshift(mig);
+        }
       }
 
       localStorage.setItem(this.LS_SAVED_KEY, JSON.stringify(local));

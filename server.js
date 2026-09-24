@@ -178,21 +178,24 @@ db.exec(`
     name        TEXT NOT NULL,
     code        TEXT NOT NULL DEFAULT '',
     circuit     TEXT NOT NULL DEFAULT '{}',
-    board2_code TEXT NOT NULL DEFAULT ''
+    board2_code TEXT NOT NULL DEFAULT '',
+    files       TEXT NOT NULL DEFAULT ''
   );
 `);
 try { db.exec(`ALTER TABLE projects ADD COLUMN board2_code TEXT NOT NULL DEFAULT ''`); } catch (e) { /* column already exists */ }
+try { db.exec(`ALTER TABLE projects ADD COLUMN files TEXT NOT NULL DEFAULT ''`); } catch (e) { /* column already exists */ }
 
 const stmtInsert = db.prepare(`
-  INSERT INTO projects (id, version, saved_at, name, code, circuit, board2_code)
-  VALUES (?, ?, ?, ?, ?, ?, ?)
+  INSERT INTO projects (id, version, saved_at, name, code, circuit, board2_code, files)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT(id) DO UPDATE SET
     version    = excluded.version,
     saved_at   = excluded.saved_at,
     name       = excluded.name,
     code       = excluded.code,
     circuit    = excluded.circuit,
-    board2_code = excluded.board2_code
+    board2_code = excluded.board2_code,
+    files      = excluded.files
 `);
 const stmtAll    = db.prepare('SELECT * FROM projects ORDER BY saved_at DESC');
 const stmtCount  = db.prepare('SELECT COUNT(*) as cnt FROM projects');
@@ -204,7 +207,14 @@ function rowToProject(row) {
   if (!row) return null;
   let circuit = {};
   try { circuit = JSON.parse(row.circuit || '{}'); } catch (e) { circuit = {}; }
-  return {
+  let files = null;
+  try {
+    const parsed = row.files ? JSON.parse(row.files) : null;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && Object.keys(parsed).length > 0) {
+      files = parsed;
+    }
+  } catch (e) { files = null; }
+  const project = {
     id:         row.id,
     version:    row.version,
     savedAt:    row.saved_at,
@@ -213,6 +223,8 @@ function rowToProject(row) {
     circuit,
     board2Code: row.board2_code || '',
   };
+  if (files) project.files = files;
+  return project;
 }
 
 /* ── Helpers ── */
@@ -258,7 +270,21 @@ function readJsonBody(req, limit = MAX_BODY) {
 function sanitizeProject(body) {
   if (!body || typeof body !== 'object') return null;
   const name = typeof body.name === 'string' && body.name.trim() ? body.name.trim().slice(0, 200) : 'Untitled Project';
-  const code = typeof body.code === 'string' ? body.code.slice(0, 100_000) : '';
+  let files = null;
+  if (body.files && typeof body.files === 'object' && !Array.isArray(body.files)) {
+    files = {};
+    for (const [k, v] of Object.entries(body.files)) {
+      if (typeof k === 'string' && k.trim() && typeof v === 'string') {
+        files[k.slice(0, 200)] = v.slice(0, 200_000);
+      }
+    }
+    if (Object.keys(files).length === 0) files = null;
+  }
+  let code = typeof body.code === 'string' ? body.code.slice(0, 100_000) : '';
+  if (!code && files) {
+    const sketchKey = Object.keys(files).find(n => /\.(ino|c|cpp|asm|s|h)$/i.test(n)) || Object.keys(files)[0];
+    if (sketchKey) code = files[sketchKey].slice(0, 100_000);
+  }
   const board2Code = typeof body.board2Code === 'string' ? body.board2Code.slice(0, 100_000) : '';
   const circuit = body.circuit && typeof body.circuit === 'object'
     ? { components: Array.isArray(body.circuit.components) ? body.circuit.components.slice(0, 500) : [],
@@ -273,6 +299,7 @@ function sanitizeProject(body) {
     code,
     circuit,
     board2Code,
+    files,
   };
 }
 
@@ -401,7 +428,7 @@ const server = http.createServer(async (req, res) => {
       if (cnt >= MAX_PROJECTS) {
         stmtDeleteOldest.run();
       }
-      stmtInsert.run(project.id, project.version, project.savedAt, project.name, project.code, JSON.stringify(project.circuit), project.board2Code || '');
+      stmtInsert.run(project.id, project.version, project.savedAt, project.name, project.code, JSON.stringify(project.circuit), project.board2Code || '', project.files ? JSON.stringify(project.files) : '');
       return sendJson(res, 200, { project });
     } catch (e) {
       const status = e.message.includes('Unsupported Media Type') ? 415 : 400;

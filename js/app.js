@@ -3599,6 +3599,9 @@ _newProject() {
       this._propsComp.props[key] = val;
       // Sync runtimeState so draw() picks up the change immediately
       if (this._propsComp.runtimeState) this._propsComp.runtimeState[key] = val;
+      if (this._propsComp.type === 'battery' && key === 'voltage' && typeof window.batterySeedSoc === 'function') {
+        window.batterySeedSoc(this._propsComp);
+      }
       if (key === 'color' && input.tagName === 'SELECT') {
         const match = LED_COLORS.find(c => c.hex === val);
         if (match) this._propsComp.props.colorName = match.name;

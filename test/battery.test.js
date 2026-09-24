@@ -183,4 +183,75 @@ describe('Li-Ion battery component', () => {
     expect(edges.has('led1:anode')).toBe(true);
     expect(edges.has('led1:cathode')).toBe(true);
   });
+
+  it('drains voltage under load over simulation time', () => {
+    const cc = buildRig(example.circuit);
+    const batt = cc.components.find(c => c.id === 'batt1');
+    batt.props.capacity_mah = 1;
+    batt.runtimeState = {};
+    delete batt.runtimeState.voltage;
+    delete batt.runtimeState._soc;
+
+    const def = window.ArduinoComponents.COMPONENT_DEFS['battery'];
+    expect(typeof def.step).toBe('function');
+
+    const sim = { isRunning: true, simTime: 0 };
+    def.step(batt, sim);
+    cc.engine.buildGraph(cc.components, cc.wires);
+    cc.engine.solve(cc);
+
+    const v0 = batt.runtimeState.voltage;
+    expect(v0).toBeGreaterThan(3.0);
+
+    for (let t = 1000; t <= 60000; t += 1000) {
+      sim.simTime = t;
+      def.step(batt, sim);
+      cc.engine.buildGraph(cc.components, cc.wires);
+      cc.engine.solve(cc);
+    }
+
+    expect(batt.runtimeState.voltage).toBeLessThan(v0);
+    expect(batt.runtimeState._soc).toBeLessThan(1);
+  });
+
+  it('does not drain when open-circuit (no load current)', () => {
+    const open = {
+      components: [{ id: 'b1', type: 'battery', x: 0, y: 0, props: { voltage: 3.7, capacity_mah: 1 }, runtimeState: {} }],
+      wires: [],
+    };
+    const cc = buildRig(open);
+    const batt = cc.components[0];
+    const def = window.ArduinoComponents.COMPONENT_DEFS['battery'];
+    const sim = { isRunning: true, simTime: 0 };
+    def.step(batt, sim);
+    cc.engine.buildGraph(cc.components, cc.wires);
+    cc.engine.solve(cc);
+    const v0 = batt.runtimeState.voltage;
+
+    for (let t = 1000; t <= 10000; t += 1000) {
+      sim.simTime = t;
+      def.step(batt, sim);
+      cc.engine.buildGraph(cc.components, cc.wires);
+      cc.engine.solve(cc);
+    }
+    expect(batt.runtimeState.voltage).toBeCloseTo(v0, 5);
+    expect(batt.runtimeState._soc).toBeCloseTo(window.batterySocFromVoltage(3.7), 5);
+  });
+
+  it('recharges/resets when voltage is reassigned (slider/props)', () => {
+    const cc = buildRig(example.circuit);
+    const batt = cc.components.find(c => c.id === 'batt1');
+    batt.runtimeState = { voltage: 2.6, _soc: 0.05 };
+
+    window.batterySeedSoc(batt);
+    expect(batt.runtimeState._soc).toBeCloseTo(window.batterySocFromVoltage(2.6), 5);
+
+    batt.runtimeState.voltage = 4.2;
+    window.batterySeedSoc(batt);
+    expect(batt.runtimeState._soc).toBeCloseTo(1, 5);
+
+    const def = window.ArduinoComponents.COMPONENT_DEFS['battery'];
+    def.step(batt, { isRunning: true, simTime: 0 });
+    expect(batt.runtimeState.voltage).toBeCloseTo(4.2, 2);
+  });
 });

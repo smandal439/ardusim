@@ -67,92 +67,321 @@ defComp({
 });
 
 /* -------------- Li-Ion Battery (single cell, 3.7 V nominal) ------------------ */
+// defComp({
+//   id: 'battery',
+//   name: 'Li-Ion Battery',
+//   category: 'Power',
+//   icon: '🔋',
+//   desc: 'Single-cell Li-Ion battery, 3.7 V nominal (2.5–4.2 V) — POS (+) and NEG (−) terminals',
+//   width: 74,
+//   height: 44,
+//   defaultProps: {
+//     voltage: 3.7,
+//   },
+//   interactive: [
+//     { field: 'voltage', label: 'Voltage', min: 2.5, max: 4.2, step: 0.05, unit: 'V' },
+//   ],
+//   pins: [
+//     { id: 'pos', label: '+', type: PIN_TYPE.POWER, x: 72, y: 22, side: 'right' },
+//     { id: 'neg', label: '−', type: PIN_TYPE.GND, x: 2, y: 22, side: 'left' },
+//   ],
+//   draw(ctx, inst, sim) {
+//     const { x, y } = inst;
+//     const v = Number(inst.runtimeState?.voltage ?? inst.props?.voltage ?? 3.7);
+//     const soc = Math.max(0, Math.min(1, (v - 2.5) / (4.2 - 2.5)));
+//     const bodyX = 6, bodyY = 4, bodyW = 58, bodyH = 36, r = 6;
+
+//     ctx.save();
+//     ctx.translate(x, y);
+
+//     // Lead stubs
+//     ctx.strokeStyle = '#8a9099';
+//     ctx.lineWidth = 2.5;
+//     ctx.beginPath(); ctx.moveTo(0, 22); ctx.lineTo(bodyX, 22); ctx.stroke();
+//     ctx.beginPath(); ctx.moveTo(bodyX + bodyW, 22); ctx.lineTo(74, 22); ctx.stroke();
+
+//     // Positive nub
+//     ctx.fillStyle = '#b0b6bd';
+//     roundRect(ctx, bodyX + bodyW, 14, 8, 16, 2);
+//     ctx.fill();
+
+//     // Cell body
+//     const grad = ctx.createLinearGradient(0, bodyY, 0, bodyY + bodyH);
+//     grad.addColorStop(0, '#3d4652');
+//     grad.addColorStop(0.45, '#2a313b');
+//     grad.addColorStop(1, '#1a1f26');
+//     ctx.fillStyle = grad;
+//     roundRect(ctx, bodyX, bodyY, bodyW, bodyH, r);
+//     ctx.fill();
+//     ctx.strokeStyle = '#0e1116';
+//     ctx.lineWidth = 1;
+//     roundRect(ctx, bodyX, bodyY, bodyW, bodyH, r);
+//     ctx.stroke();
+
+//     // Charge-level bar
+//     const barX = bodyX + 4, barY = bodyY + bodyH - 9, barW = bodyW - 8, barH = 5;
+//     ctx.fillStyle = '#12161c';
+//     roundRect(ctx, barX, barY, barW, barH, 2);
+//     ctx.fill();
+//     if (soc > 0) {
+//       const fillW = Math.max(2, barW * soc);
+//       ctx.fillStyle = soc > 0.5 ? '#2e7d32' : soc > 0.2 ? '#f9a825' : '#c62828';
+//       roundRect(ctx, barX, barY, fillW, barH, 2);
+//       ctx.fill();
+//     }
+
+//     // Labels
+//     ctx.fillStyle = '#eceff1';
+//     ctx.font = 'bold 9px sans-serif';
+//     ctx.textAlign = 'center';
+//     ctx.fillText('Li-Ion', bodyX + bodyW / 2, bodyY + 14);
+//     ctx.fillStyle = '#90a4ae';
+//     ctx.font = '8px sans-serif';
+//     ctx.fillText(`${v.toFixed(2)} V`, bodyX + bodyW / 2, bodyY + 24);
+
+//     // + / − polarity marks
+//     ctx.fillStyle = '#ef5350';
+//     ctx.font = 'bold 11px sans-serif';
+//     ctx.textAlign = 'left';
+//     ctx.fillText('+', bodyX + bodyW + 10, 12);
+//     ctx.fillStyle = '#90a4ae';
+//     ctx.textAlign = 'right';
+//     ctx.fillText('−', bodyX - 2, 12);
+
+//     if (inst.selected) drawSelectionRect(ctx, -3, -1, 80, 46);
+//     ctx.restore();
+//   }
+// });
+/* ──────────────────── LI-ION BATTERY MODEL (ENHANCED) ──────────────────── */
+const BATT_V_MIN = 2.5;
+const BATT_V_MAX = 4.2;
+
+function batterySocFromVoltage(v) {
+  return Math.max(0, Math.min(1, (Number(v) - BATT_V_MIN) / (BATT_V_MAX - BATT_V_MIN)));
+}
+
+function batterySeedSoc(inst) {
+  inst.runtimeState = inst.runtimeState || {};
+  const v = inst.runtimeState.voltage ?? inst.props?.voltage ?? 3.7;
+  inst.runtimeState._soc = batterySocFromVoltage(v);
+  return inst.runtimeState._soc;
+}
+
+window.batterySeedSoc = batterySeedSoc;
+window.batterySocFromVoltage = batterySocFromVoltage;
+
 defComp({
   id: 'battery',
   name: 'Li-Ion Battery',
   category: 'Power',
   icon: '🔋',
-  desc: 'Single-cell Li-Ion battery, 3.7 V nominal (2.5–4.2 V) — POS (+) and NEG (−) terminals',
-  width: 74,
-  height: 44,
+  desc: 'Single-cell Li-Ion battery, 3.7 V nominal (2.5–4.2 V). Drains under load — lower Capacity (mAh) in Properties to see voltage drop faster. Drag Voltage to recharge/reset.',
+  width: 144,
+  height: 78,
   defaultProps: {
     voltage: 3.7,
+    capacity_mah: 5,
+    r_int: 0.15,
   },
   interactive: [
     { field: 'voltage', label: 'Voltage', min: 2.5, max: 4.2, step: 0.05, unit: 'V' },
   ],
   pins: [
-    { id: 'pos', label: '+', type: PIN_TYPE.POWER, x: 72, y: 22, side: 'right' },
-    { id: 'neg', label: '−', type: PIN_TYPE.GND, x: 2, y: 22, side: 'left' },
+    { id: 'pos', label: '+', type: PIN_TYPE.POWER, x: 142, y: 39, side: 'right' },
+    { id: 'neg', label: '−', type: PIN_TYPE.GND,   x: 2,  y: 39, side: 'left' },
   ],
+  step(inst, sim) {
+    const rs = inst.runtimeState = inst.runtimeState || {};
+    const props = inst.props || {};
+
+    const useSim = !!(sim && sim.isRunning && typeof sim.simTime === 'number');
+    const now = useSim
+      ? sim.simTime
+      : (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const base = useSim ? 'sim' : 'wall';
+
+    if (rs._timeBase !== base) {
+      rs._timeBase = base;
+      rs._lastTick = now;
+    }
+
+    const last = rs._lastTick;
+    rs._lastTick = now;
+    let dtMs = now - last;
+    // simTime reset (Run) or first frame / clock jump — skip integrate
+    if (!Number.isFinite(dtMs) || dtMs <= 0 || dtMs > 60000) dtMs = 0;
+
+    if (rs._soc == null) batterySeedSoc(inst);
+    let soc = Math.max(0, Math.min(1, rs._soc));
+
+    const capMah = Math.max(0.1, Number(rs.capacity_mah ?? props.capacity_mah ?? 5));
+    const rInt = Math.max(0, Number(rs.r_int ?? props.r_int ?? 0.15));
+
+    let iA = 0;
+    const engine = window.CircuitCanvas && window.CircuitCanvas.engine;
+    if (engine && typeof engine.calculateCurrent === 'function') {
+      const raw = engine.calculateCurrent(inst.id, 'pos', inst.id, 'neg');
+      if (Number.isFinite(raw)) iA = raw;
+    }
+    const iDis = Math.max(0, iA);
+
+    if (dtMs > 0 && iDis > 1e-6) {
+      const dAh = (iDis * (dtMs / 1000)) / 3600;
+      soc = Math.max(0, soc - dAh / (capMah / 1000));
+    }
+
+    rs._soc = soc;
+    const vOcv = BATT_V_MIN + soc * (BATT_V_MAX - BATT_V_MIN);
+    rs.voltage = Math.max(0, vOcv - iDis * rInt);
+  },
   draw(ctx, inst, sim) {
     const { x, y } = inst;
+    const W = 144, H = 78;
     const v = Number(inst.runtimeState?.voltage ?? inst.props?.voltage ?? 3.7);
-    const soc = Math.max(0, Math.min(1, (v - 2.5) / (4.2 - 2.5)));
-    const bodyX = 6, bodyY = 4, bodyW = 58, bodyH = 36, r = 6;
+    const soc = inst.runtimeState?._soc != null
+      ? Math.max(0, Math.min(1, inst.runtimeState._soc))
+      : batterySocFromVoltage(v);
+    const socPct = Math.round(soc * 100);
+
+    const bodyX = 18, bodyY = 9, bodyW = 102, bodyH = 60, r = 9;
 
     ctx.save();
     ctx.translate(x, y);
 
-    // Lead stubs
-    ctx.strokeStyle = '#8a9099';
-    ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.moveTo(0, 22); ctx.lineTo(bodyX, 22); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(bodyX + bodyW, 22); ctx.lineTo(74, 22); ctx.stroke();
+    // ── Terminal Lead Stubs ──
+    ctx.strokeStyle = '#78909c';
+    ctx.lineWidth = 3.5;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(0, 39); ctx.lineTo(bodyX, 39); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bodyX + bodyW + 12, 39); ctx.lineTo(W, 39); ctx.stroke();
 
-    // Positive nub
-    ctx.fillStyle = '#b0b6bd';
-    roundRect(ctx, bodyX + bodyW, 14, 8, 16, 2);
+    // ── Negative Terminal Metallic Cap (Left) ──
+    const negCapGrad = ctx.createLinearGradient(0, bodyY, 0, bodyY + bodyH);
+    negCapGrad.addColorStop(0, '#b0bec5');
+    negCapGrad.addColorStop(0.3, '#eceff1');
+    negCapGrad.addColorStop(0.7, '#90a4ae');
+    negCapGrad.addColorStop(1, '#546e7a');
+    ctx.fillStyle = negCapGrad;
+    roundRect(ctx, bodyX - 5, bodyY + 5, 8, bodyH - 10, 3);
     ctx.fill();
 
-    // Cell body
-    const grad = ctx.createLinearGradient(0, bodyY, 0, bodyY + bodyH);
-    grad.addColorStop(0, '#3d4652');
-    grad.addColorStop(0.45, '#2a313b');
-    grad.addColorStop(1, '#1a1f26');
-    ctx.fillStyle = grad;
+    // ── Positive Terminal Button Nipple (Right) ──
+    const posCapGrad = ctx.createLinearGradient(0, bodyY + 18, 0, bodyY + bodyH - 18);
+    posCapGrad.addColorStop(0, '#cfd8dc');
+    posCapGrad.addColorStop(0.4, '#ffffff');
+    posCapGrad.addColorStop(0.8, '#90a4ae');
+    posCapGrad.addColorStop(1, '#607d8b');
+    ctx.fillStyle = posCapGrad;
+    roundRect(ctx, bodyX + bodyW, 24, 11, 30, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#455a64';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Positive Insulation Ring
+    ctx.fillStyle = '#1e88e5';
+    roundRect(ctx, bodyX + bodyW - 3, 18, 5, 42, 2);
+    ctx.fill();
+
+    // ── Main Battery Sleeve (Metallic Cylinder Finish) ──
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 4;
+
+    const wrapGrad = ctx.createLinearGradient(0, bodyY, 0, bodyY + bodyH);
+    wrapGrad.addColorStop(0, '#1a232a');
+    wrapGrad.addColorStop(0.25, '#2c3b47');
+    wrapGrad.addColorStop(0.5, '#1e2830');
+    wrapGrad.addColorStop(0.8, '#141a20');
+    wrapGrad.addColorStop(1, '#0b0f13');
+    ctx.fillStyle = wrapGrad;
     roundRect(ctx, bodyX, bodyY, bodyW, bodyH, r);
     ctx.fill();
-    ctx.strokeStyle = '#0e1116';
-    ctx.lineWidth = 1;
+
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Body Border
+    ctx.strokeStyle = '#37474f';
+    ctx.lineWidth = 1.5;
     roundRect(ctx, bodyX, bodyY, bodyW, bodyH, r);
     ctx.stroke();
 
-    // Charge-level bar
-    const barX = bodyX + 4, barY = bodyY + bodyH - 9, barW = bodyW - 8, barH = 5;
-    ctx.fillStyle = '#12161c';
-    roundRect(ctx, barX, barY, barW, barH, 2);
+    // Cylindrical Glass Reflection Streak
+    const shineGrad = ctx.createLinearGradient(0, bodyY, 0, bodyY + bodyH / 2);
+    shineGrad.addColorStop(0, 'rgba(255, 255, 255, 0.18)');
+    shineGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = shineGrad;
+    roundRect(ctx, bodyX + 2, bodyY + 2, bodyW - 4, bodyH / 2 - 2, { tl: r, tr: r, bl: 0, br: 0 });
     ctx.fill();
+
+    // ── State of Charge (SOC) Bar Gauge ──
+    const barX = bodyX + 9, barY = bodyY + bodyH - 16, barW = bodyW - 18, barH = 9;
+    ctx.fillStyle = '#0a0d12';
+    roundRect(ctx, barX, barY, barW, barH, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#263238';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
     if (soc > 0) {
-      const fillW = Math.max(2, barW * soc);
-      ctx.fillStyle = soc > 0.5 ? '#2e7d32' : soc > 0.2 ? '#f9a825' : '#c62828';
-      roundRect(ctx, barX, barY, fillW, barH, 2);
+      const fillW = Math.max(4, barW * soc);
+      let socColor = '#00e676'; // High (>50%)
+      let socGlow = 'rgba(0, 230, 118, 0.4)';
+      if (soc <= 0.2) {
+        socColor = '#ff1744';  // Critical (<=20%)
+        socGlow = 'rgba(255, 23, 68, 0.4)';
+      } else if (soc <= 0.5) {
+        socColor = '#ffb300';  // Medium (20–50%)
+        socGlow = 'rgba(255, 179, 0, 0.4)';
+      }
+
+      ctx.fillStyle = socColor;
+      ctx.shadowColor = socGlow;
+      ctx.shadowBlur = 5;
+      roundRect(ctx, barX + 0.5, barY + 0.5, fillW - 1, barH - 1, 2);
       ctx.fill();
+      ctx.shadowBlur = 0;
     }
 
-    // Labels
+    // ── Text & Voltage / SOC % Readout ──
     ctx.fillStyle = '#eceff1';
-    ctx.font = 'bold 9px sans-serif';
+    ctx.font = 'bold 13px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Li-Ion', bodyX + bodyW / 2, bodyY + 14);
-    ctx.fillStyle = '#90a4ae';
-    ctx.font = '8px sans-serif';
-    ctx.fillText(`${v.toFixed(2)} V`, bodyX + bodyW / 2, bodyY + 24);
+    ctx.fillText('Li-Ion 18650', bodyX + bodyW / 2, bodyY + 20);
 
-    // + / − polarity marks
-    ctx.fillStyle = '#ef5350';
+    ctx.fillStyle = soc > 0.2 ? '#b0bec5' : '#ff8a80';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText(`${v.toFixed(2)}V · ${socPct}%`, bodyX + bodyW / 2, bodyY + 35);
+
+    // ── Terminal Polarity Badges ──
+    // Positive Badge (+)
+    ctx.fillStyle = '#e53935';
+    ctx.beginPath();
+    ctx.arc(bodyX + bodyW - 12, bodyY + 15, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 11px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('+', bodyX + bodyW + 10, 12);
-    ctx.fillStyle = '#90a4ae';
-    ctx.textAlign = 'right';
-    ctx.fillText('−', bodyX - 2, 12);
+    ctx.textAlign = 'center';
+    ctx.fillText('+', bodyX + bodyW - 12, bodyY + 19);
 
-    if (inst.selected) drawSelectionRect(ctx, -3, -1, 80, 46);
+    // Negative Badge (−)
+    ctx.fillStyle = '#455a64';
+    ctx.beginPath();
+    ctx.arc(bodyX + 12, bodyY + 15, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('−', bodyX + 12, bodyY + 19);
+
+    if (inst.selected && typeof drawSelectionRect === 'function') {
+      drawSelectionRect(ctx, -3, -2, W + 6, H + 4);
+    }
+
     ctx.restore();
   }
 });
-
 /* -------------- MB102 Breadboard Power Supply Module (3.3V / 5V Dual Rail) ------------------ */
 defComp({
   id: 'mb102_power',

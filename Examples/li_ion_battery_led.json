@@ -1,0 +1,199 @@
+{
+  "id": "li_ion_battery_led",
+  "name": "Li-Ion Battery LED",
+  "icon": "🔧",
+  "desc": "This is a simple circuit that demonstrates the use of a Li-Ion battery to power an LED. The circuit includes a resistor to limit the current through the LED and a multimeter to measure the voltage across the battery.",
+  "tags": [
+    "custom",
+    "circuit","battery",
+    "led",
+    "resistor",
+    "multimeter","drain current",
+    "voltage measurement"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "batt1",
+        "type": "battery",
+        "x": 125,
+        "y": 185,
+        "rotation": 0,
+        "props": {
+          "voltage": 3.7,
+          "capacity_mah": 5,
+          "r_int": 0.15
+        }
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 340,
+        "y": 170,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 470,
+        "y": 170,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "dmm1",
+        "type": "multimeter",
+        "x": 200,
+        "y": 90,
+        "rotation": 0,
+        "props": {
+          "mode": "V_DC",
+          "hold": false,
+          "rel": false,
+          "range_auto": true
+        }
+      },
+      {
+        "id": "comp_1790266856934_s9wp8",
+        "type": "resistor",
+        "x": 155,
+        "y": 95,
+        "rotation": 1,
+        "props": {
+          "value": 10,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "batt1",
+          "pinId": "pos"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "batt1",
+          "pinId": "neg"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "batt1",
+          "pinId": "pos"
+        },
+        "to": {
+          "instId": "dmm1",
+          "pinId": "probe_red"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "batt1",
+          "pinId": "neg"
+        },
+        "to": {
+          "instId": "dmm1",
+          "pinId": "probe_com"
+        },
+        "color": "#333333",
+        "waypoints": [
+          {
+            "x": 103,
+            "y": 211
+          },
+          {
+            "x": 103,
+            "y": 305
+          },
+          {
+            "x": 310,
+            "y": 305
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790266865081_xrxf9",
+        "from": {
+          "instId": "batt1",
+          "pinId": "neg"
+        },
+        "to": {
+          "instId": "comp_1790266856934_s9wp8",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790266866998_fkobz",
+        "from": {
+          "instId": "batt1",
+          "pinId": "pos"
+        },
+        "to": {
+          "instId": "comp_1790266856934_s9wp8",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "void setup() {\n  // Standalone battery circuit — no Arduino needed.\n}\nvoid loop() {\n  // Adjust the battery voltage in Properties to change LED brightness.\n}"
+  }
+}
