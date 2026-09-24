@@ -94,8 +94,8 @@
         "y": 240,
         "rotation": 0,
         "props": {
-          "value": 220,
-          "unit": "Ω"
+          "value": 100,
+          "unit": "kΩ"
         }
       },
       {
@@ -105,8 +105,8 @@
         "y": 335,
         "rotation": 0,
         "props": {
-          "value": 220,
-          "unit": "Ω"
+          "value": 100,
+          "unit": "kΩ"
         }
       },
       {
