@@ -4,7 +4,7 @@
   "icon": "🔧",
   "desc": "This example demonstrates how to turn on all the LEDs connected to the ports of an 8051 microcontroller. The program sets all pins of Port 0, Port 1, Port 2, and Port 3 to high (logic level 1), which will turn on any LEDs connected to these ports. The program then enters an infinite loop to keep the microcontroller running.",
   "tags": [
-    "8051","led","on"
+    "8051","led","on","assembly","microcontroller"
   ],
   "circuit": {
     "components": [

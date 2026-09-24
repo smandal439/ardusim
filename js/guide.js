@@ -936,6 +936,22 @@ void loop() {
     code: `// Power supplies need no code.`,
   },
 
+  battery: {
+    id: 'battery',
+    name: 'Li-Ion Battery',
+    icon: '🔋',
+    category: 'Power',
+    longDesc: 'Single-cell lithium-ion battery with 3.7 V nominal output (2.5 V empty to 4.2 V full). The body shows a live charge-level bar derived from the set voltage. POS is the positive terminal; NEG is ground-referenced.',
+    use: 'Portable / battery-powered circuits, learning voltage levels, powering LEDs and small loads without a bench supply.',
+    pins: {
+      pos: { label: '+', type: 'power', desc: 'Positive terminal (3.7 V nominal).' },
+      neg: { label: '−', type: 'gnd', desc: 'Negative terminal (ground reference).' },
+    },
+    props: { voltage: 'Cell voltage: 2.5 V (empty) to 4.2 V (full); default 3.7 V nominal.' },
+    wiring: 'POS → load positive, NEG → circuit ground (or load return path).',
+    code: '// Battery is passive — no code needed. Use analogRead() on a divider to sense cell voltage.',
+  },
+
   power_gnd: {
     id: 'power_gnd',
     name: 'GND',

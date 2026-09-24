@@ -8,7 +8,10 @@ window.EXAMPLE_SKETCHES = [
     "desc": "This is a simple test of the 7408 IC using a logic analyzer to observe the output. The 7408 is a quad 2-input AND gate IC. In this test, we will use two channels of a function generator to provide input signals to the AND gate and observe the output on the logic analyzer.",
     "tags": [
       "custom",
-      "circuit"
+      "circuit",
+      "7408",
+      "logic analyzer",
+      "function generator"
     ],
     "circuit": {
       "components": [
@@ -231,7 +234,9 @@ window.EXAMPLE_SKETCHES = [
     "tags": [
       "8051",
       "led",
-      "on"
+      "on",
+      "assembly",
+      "microcontroller"
     ],
     "circuit": {
       "components": [
@@ -1529,6 +1534,276 @@ window.EXAMPLE_SKETCHES = [
               "y": 440
             }
           ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "battery_in_series",
+    "name": "battery in series",
+    "icon": "🔧",
+    "desc": "A custom battery in series circuit example.",
+    "tags": [
+      "custom",
+      "circuit"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1790186959655_ffvgx",
+          "type": "battery",
+          "x": 385,
+          "y": 145,
+          "rotation": 0,
+          "props": {
+            "voltage": 3.7
+          }
+        },
+        {
+          "id": "comp_1790187008209_h2jw8",
+          "type": "battery",
+          "x": 480,
+          "y": 145,
+          "rotation": 0,
+          "props": {
+            "voltage": 3.7
+          }
+        },
+        {
+          "id": "comp_1790187011455_u57z2",
+          "type": "battery",
+          "x": 295,
+          "y": 145,
+          "rotation": 0,
+          "props": {
+            "voltage": 3.7
+          }
+        },
+        {
+          "id": "comp_1790187056783_qac3g",
+          "type": "multimeter",
+          "x": 310,
+          "y": -70,
+          "rotation": 0,
+          "props": {
+            "mode": "V_DC",
+            "hold": false,
+            "rel": false,
+            "range_auto": true
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "wire_1790187017001_ziiel",
+          "from": {
+            "instId": "comp_1790187011455_u57z2",
+            "pinId": "pos"
+          },
+          "to": {
+            "instId": "comp_1790186959655_ffvgx",
+            "pinId": "neg"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790187019251_8umc5",
+          "from": {
+            "instId": "comp_1790186959655_ffvgx",
+            "pinId": "pos"
+          },
+          "to": {
+            "instId": "comp_1790187008209_h2jw8",
+            "pinId": "neg"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790187066241_nxprk",
+          "from": {
+            "instId": "comp_1790187008209_h2jw8",
+            "pinId": "pos"
+          },
+          "to": {
+            "instId": "comp_1790187056783_qac3g",
+            "pinId": "probe_red"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790187069431_v8ze7",
+          "from": {
+            "instId": "comp_1790187011455_u57z2",
+            "pinId": "neg"
+          },
+          "to": {
+            "instId": "comp_1790187056783_qac3g",
+            "pinId": "probe_com"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "void setup() {\n\n}\n\nvoid loop() {\n\n}"
+    }
+  },
+  {
+    "id": "battery_led",
+    "name": "Li-Ion Battery LED",
+    "icon": "🔋",
+    "desc": "A single-cell Li-Ion battery (3.7 V nominal) lights an LED through a 220 Ω current-limiting resistor. No board or code needed — open the battery properties and slide the voltage between 2.5 V (empty) and 4.2 V (full) to watch the charge bar and LED brightness change.",
+    "tags": [
+      "battery",
+      "li-ion",
+      "led",
+      "resistor",
+      "standalone",
+      "power",
+      "beginner"
+    ],
+    "code": "void setup() {\n  // Standalone battery circuit — no Arduino needed.\n}\nvoid loop() {\n  // Adjust the battery voltage in Properties to change LED brightness.\n}",
+    "circuit": {
+      "components": [
+        {
+          "id": "batt1",
+          "type": "battery",
+          "x": 140,
+          "y": 200,
+          "width": 74,
+          "height": 44,
+          "props": {
+            "voltage": 3.7
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "r1",
+          "type": "resistor",
+          "x": 340,
+          "y": 170,
+          "width": 20,
+          "height": 60,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "led1",
+          "type": "led",
+          "x": 470,
+          "y": 170,
+          "width": 30,
+          "height": 60,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        },
+        {
+          "id": "dmm1",
+          "type": "multimeter",
+          "x": 200,
+          "y": 90,
+          "width": 120,
+          "height": 90,
+          "props": {
+            "mode": "V_DC",
+            "hold": false,
+            "rel": false,
+            "range_auto": true
+          },
+          "runtimeState": {},
+          "selected": false,
+          "rotation": 0
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "batt1",
+            "pinId": "pos"
+          },
+          "to": {
+            "instId": "r1",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "r1",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "led1",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "led1",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "batt1",
+            "pinId": "neg"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w4",
+          "from": {
+            "instId": "batt1",
+            "pinId": "pos"
+          },
+          "to": {
+            "instId": "dmm1",
+            "pinId": "probe_red"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w5",
+          "from": {
+            "instId": "batt1",
+            "pinId": "neg"
+          },
+          "to": {
+            "instId": "dmm1",
+            "pinId": "probe_com"
+          },
+          "color": "#333333",
+          "waypoints": []
         }
       ]
     }

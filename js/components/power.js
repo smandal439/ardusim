@@ -66,6 +66,93 @@ defComp({
   }
 });
 
+/* -------------- Li-Ion Battery (single cell, 3.7 V nominal) ------------------ */
+defComp({
+  id: 'battery',
+  name: 'Li-Ion Battery',
+  category: 'Power',
+  icon: '🔋',
+  desc: 'Single-cell Li-Ion battery, 3.7 V nominal (2.5–4.2 V) — POS (+) and NEG (−) terminals',
+  width: 74,
+  height: 44,
+  defaultProps: {
+    voltage: 3.7,
+  },
+  interactive: [
+    { field: 'voltage', label: 'Voltage', min: 2.5, max: 4.2, step: 0.05, unit: 'V' },
+  ],
+  pins: [
+    { id: 'pos', label: '+', type: PIN_TYPE.POWER, x: 72, y: 22, side: 'right' },
+    { id: 'neg', label: '−', type: PIN_TYPE.GND, x: 2, y: 22, side: 'left' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const v = Number(inst.runtimeState?.voltage ?? inst.props?.voltage ?? 3.7);
+    const soc = Math.max(0, Math.min(1, (v - 2.5) / (4.2 - 2.5)));
+    const bodyX = 6, bodyY = 4, bodyW = 58, bodyH = 36, r = 6;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Lead stubs
+    ctx.strokeStyle = '#8a9099';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(0, 22); ctx.lineTo(bodyX, 22); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bodyX + bodyW, 22); ctx.lineTo(74, 22); ctx.stroke();
+
+    // Positive nub
+    ctx.fillStyle = '#b0b6bd';
+    roundRect(ctx, bodyX + bodyW, 14, 8, 16, 2);
+    ctx.fill();
+
+    // Cell body
+    const grad = ctx.createLinearGradient(0, bodyY, 0, bodyY + bodyH);
+    grad.addColorStop(0, '#3d4652');
+    grad.addColorStop(0.45, '#2a313b');
+    grad.addColorStop(1, '#1a1f26');
+    ctx.fillStyle = grad;
+    roundRect(ctx, bodyX, bodyY, bodyW, bodyH, r);
+    ctx.fill();
+    ctx.strokeStyle = '#0e1116';
+    ctx.lineWidth = 1;
+    roundRect(ctx, bodyX, bodyY, bodyW, bodyH, r);
+    ctx.stroke();
+
+    // Charge-level bar
+    const barX = bodyX + 4, barY = bodyY + bodyH - 9, barW = bodyW - 8, barH = 5;
+    ctx.fillStyle = '#12161c';
+    roundRect(ctx, barX, barY, barW, barH, 2);
+    ctx.fill();
+    if (soc > 0) {
+      const fillW = Math.max(2, barW * soc);
+      ctx.fillStyle = soc > 0.5 ? '#2e7d32' : soc > 0.2 ? '#f9a825' : '#c62828';
+      roundRect(ctx, barX, barY, fillW, barH, 2);
+      ctx.fill();
+    }
+
+    // Labels
+    ctx.fillStyle = '#eceff1';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Li-Ion', bodyX + bodyW / 2, bodyY + 14);
+    ctx.fillStyle = '#90a4ae';
+    ctx.font = '8px sans-serif';
+    ctx.fillText(`${v.toFixed(2)} V`, bodyX + bodyW / 2, bodyY + 24);
+
+    // + / − polarity marks
+    ctx.fillStyle = '#ef5350';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('+', bodyX + bodyW + 10, 12);
+    ctx.fillStyle = '#90a4ae';
+    ctx.textAlign = 'right';
+    ctx.fillText('−', bodyX - 2, 12);
+
+    if (inst.selected) drawSelectionRect(ctx, -3, -1, 80, 46);
+    ctx.restore();
+  }
+});
+
 /* -------------- MB102 Breadboard Power Supply Module (3.3V / 5V Dual Rail) ------------------ */
 defComp({
   id: 'mb102_power',

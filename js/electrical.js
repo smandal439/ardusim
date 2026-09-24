@@ -454,7 +454,7 @@ class ElectricalEngine {
         break;
       }
       case 'battery': {
-        const voltage = inst.runtimeState?.voltage ?? inst.props?.voltage ?? 9;
+        const voltage = inst.runtimeState?.voltage ?? inst.props?.voltage ?? 3.7;
         addSource('pos', 'battery', voltage, 255);
         addGround('neg', 'gnd');
         break;

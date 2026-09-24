@@ -1,0 +1,122 @@
+{
+  "id": "battery_in_series",
+  "name": "battery in series",
+  "icon": "🔧",
+  "desc": "A custom battery in series circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790186959655_ffvgx",
+        "type": "battery",
+        "x": 385,
+        "y": 145,
+        "rotation": 0,
+        "props": {
+          "voltage": 3.7
+        }
+      },
+      {
+        "id": "comp_1790187008209_h2jw8",
+        "type": "battery",
+        "x": 480,
+        "y": 145,
+        "rotation": 0,
+        "props": {
+          "voltage": 3.7
+        }
+      },
+      {
+        "id": "comp_1790187011455_u57z2",
+        "type": "battery",
+        "x": 295,
+        "y": 145,
+        "rotation": 0,
+        "props": {
+          "voltage": 3.7
+        }
+      },
+      {
+        "id": "comp_1790187056783_qac3g",
+        "type": "multimeter",
+        "x": 310,
+        "y": -70,
+        "rotation": 0,
+        "props": {
+          "mode": "V_DC",
+          "hold": false,
+          "rel": false,
+          "range_auto": true
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1790187017001_ziiel",
+        "from": {
+          "instId": "comp_1790187011455_u57z2",
+          "pinId": "pos"
+        },
+        "to": {
+          "instId": "comp_1790186959655_ffvgx",
+          "pinId": "neg"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790187019251_8umc5",
+        "from": {
+          "instId": "comp_1790186959655_ffvgx",
+          "pinId": "pos"
+        },
+        "to": {
+          "instId": "comp_1790187008209_h2jw8",
+          "pinId": "neg"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790187066241_nxprk",
+        "from": {
+          "instId": "comp_1790187008209_h2jw8",
+          "pinId": "pos"
+        },
+        "to": {
+          "instId": "comp_1790187056783_qac3g",
+          "pinId": "probe_red"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790187069431_v8ze7",
+        "from": {
+          "instId": "comp_1790187011455_u57z2",
+          "pinId": "neg"
+        },
+        "to": {
+          "instId": "comp_1790187056783_qac3g",
+          "pinId": "probe_com"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "void setup() {\n\n}\n\nvoid loop() {\n\n}"
+  }
+}
