@@ -1809,6 +1809,190 @@ window.EXAMPLE_SKETCHES = [
     }
   },
   {
+    "id": "battery_percentage_esp32",
+    "name": "battery percentage esp32",
+    "icon": "🔧",
+    "desc": "A custom battery percentage esp32 circuit example.",
+    "tags": [
+      "custom",
+      "circuit",
+      "esp32",
+      "battery",
+      "percentage"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1790274702062_i4hby",
+          "type": "esp32_devkit_v1",
+          "x": 720,
+          "y": 205,
+          "rotation": 0,
+          "props": {
+            "label": "ESP32"
+          }
+        },
+        {
+          "id": "comp_1790274718143_joggb",
+          "type": "battery",
+          "x": 455,
+          "y": 310,
+          "rotation": 3,
+          "props": {
+            "voltage": 3.7,
+            "capacity_mah": 5,
+            "r_int": 0.15
+          }
+        },
+        {
+          "id": "comp_1790274747832_3jei8",
+          "type": "resistor",
+          "x": 655,
+          "y": 275,
+          "rotation": 0,
+          "props": {
+            "value": 100,
+            "unit": "kΩ"
+          }
+        },
+        {
+          "id": "comp_1790274749260_xwqsb",
+          "type": "resistor",
+          "x": 655,
+          "y": 385,
+          "rotation": 0,
+          "props": {
+            "value": 100,
+            "unit": "kΩ"
+          }
+        },
+        {
+          "id": "comp_1790275065212_l7emv",
+          "type": "multimeter",
+          "x": 870,
+          "y": 215,
+          "rotation": 1,
+          "props": {
+            "mode": "V_DC",
+            "hold": false,
+            "rel": false,
+            "range_auto": true
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "wire_1790274769981_tz6xo",
+          "from": {
+            "instId": "comp_1790274718143_joggb",
+            "pinId": "neg"
+          },
+          "to": {
+            "instId": "comp_1790274749260_xwqsb",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790274772102_g5i9n",
+          "from": {
+            "instId": "comp_1790274749260_xwqsb",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "comp_1790274747832_3jei8",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790274774180_ru4a3",
+          "from": {
+            "instId": "comp_1790274718143_joggb",
+            "pinId": "pos"
+          },
+          "to": {
+            "instId": "comp_1790274747832_3jei8",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790274834488_chek8",
+          "from": {
+            "instId": "comp_1790274702062_i4hby",
+            "pinId": "GND1"
+          },
+          "to": {
+            "instId": "comp_1790274749260_xwqsb",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790275028667_bqy2t",
+          "from": {
+            "instId": "comp_1790274702062_i4hby",
+            "pinId": "D13"
+          },
+          "to": {
+            "instId": "comp_1790274749260_xwqsb",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790275073671_cyyt4",
+          "from": {
+            "instId": "comp_1790274749260_xwqsb",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "comp_1790275065212_l7emv",
+            "pinId": "probe_com"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790275076154_ppqeb",
+          "from": {
+            "instId": "comp_1790274747832_3jei8",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "comp_1790275065212_l7emv",
+            "pinId": "probe_red"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "const int adcPin = 13; // Change to your GPIO pin\nconst float maxVoltage = 4.2; // Full battery\nconst float minVoltage = 2.5; // Empty battery\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(adcPin, INPUT);\n}\n\nvoid loop() {\n  // Read calibrated millivolts if available, or raw analog read\n  int rawValue = analogRead(adcPin);\n  \n  // Convert raw reading to voltage at the pin (ESP32 ADC is 12-bit: 4095 = 3.3V roughly, \n  // but analogReadMillivolts() is more accurate)\n  float pinVoltage = analogReadMilliVolts(adcPin) / 1000.0;\n  \n  // Reconstruct actual battery voltage based on your voltage divider ratio (e.g., multiplier of 2 for equal resistors)\n  float batteryVoltage = pinVoltage * 2.0; \n  \n  // Calculate percentage (Linear approximation)\n  int batteryPercentage = (int)((batteryVoltage - minVoltage) / (maxVoltage - minVoltage) * 100.0);\n  batteryPercentage = constrain(batteryPercentage, 0, 100);\n\n  Serial.print(\"Voltage: \");\n  Serial.print(batteryVoltage);\n  Serial.print(\" V  |  \");\n  Serial.print(batteryPercentage);\n  Serial.println(\" %\");\n  \n  delay(2000);\n}\n"
+    }
+  },
+  {
     "id": "bh1750_light_sensor",
     "name": "BH1750 Light Sensor",
     "icon": "☀️",
@@ -9887,124 +10071,6 @@ window.EXAMPLE_SKETCHES = [
           "waypoints": []
         }
       ]
-    }
-  },
-  {
-    "id": "http_slider_pwm_led",
-    "name": "http slider pwm led",
-    "icon": "🔧",
-    "desc": "This example demonstrates how to control the brightness of an LED connected to an ESP32 using a web interface. The ESP32 hosts a simple web page with a slider that allows users to adjust the LED's brightness in real-time via PWM (Pulse Width Modulation).",
-    "tags": [
-      "custom",
-      "circuit",
-      "http",
-      "slider",
-      "pwm",
-      "led",
-      "esp32",
-      "webserver"
-    ],
-    "circuit": {
-      "components": [
-        {
-          "id": "comp_1789493370784_cgl8h",
-          "type": "esp32_devkit_v1",
-          "x": 110,
-          "y": 420,
-          "rotation": 0,
-          "props": {
-            "label": "ESP32"
-          }
-        },
-        {
-          "id": "comp_1789493424966_bvlij",
-          "type": "led",
-          "x": 340,
-          "y": 510,
-          "rotation": 0,
-          "props": {
-            "color": "#ff3333",
-            "colorName": "Red"
-          }
-        },
-        {
-          "id": "comp_1789493438777_u5p2x",
-          "type": "resistor",
-          "x": 345,
-          "y": 605,
-          "rotation": 0,
-          "props": {
-            "value": 330,
-            "unit": "Ω"
-          }
-        },
-        {
-          "id": "comp_1789493482237_ddplw",
-          "type": "wifi_module",
-          "x": 305,
-          "y": 385,
-          "rotation": 0,
-          "props": {
-            "ssid": "ArduSim_Network",
-            "password": "Ardusim@123",
-            "channel": 6,
-            "ipAddress": "192.168.4.1",
-            "txPower": 20,
-            "security": "WPA2-PSK",
-            "hidden": false
-          }
-        }
-      ],
-      "wires": [
-        {
-          "id": "wire_1789493442278_03zsz",
-          "from": {
-            "instId": "comp_1789493370784_cgl8h",
-            "pinId": "GND2"
-          },
-          "to": {
-            "instId": "comp_1789493438777_u5p2x",
-            "pinId": "p2"
-          },
-          "color": null,
-          "waypoints": [],
-          "routeStyle": "orthogonal",
-          "bezierCtrl": null
-        },
-        {
-          "id": "wire_1789493443840_gyg8a",
-          "from": {
-            "instId": "comp_1789493438777_u5p2x",
-            "pinId": "p1"
-          },
-          "to": {
-            "instId": "comp_1789493424966_bvlij",
-            "pinId": "cathode"
-          },
-          "color": null,
-          "waypoints": [],
-          "routeStyle": "orthogonal",
-          "bezierCtrl": null
-        },
-        {
-          "id": "wire_1789493449117_t4mc9",
-          "from": {
-            "instId": "comp_1789493370784_cgl8h",
-            "pinId": "D16"
-          },
-          "to": {
-            "instId": "comp_1789493424966_bvlij",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": [],
-          "routeStyle": "orthogonal",
-          "bezierCtrl": null
-        }
-      ]
-    },
-    "files": {
-      "sketch.asm": "#include <WiFi.h>\n#include <WebServer.h>\n\nconst char* ssid = \"ArduSim_Network\";\nconst char* password = \"Ardusim@123\";\n\nWebServer server(80);\n\nconst int ledPin = 16;      // GPIO 16 assigned to LED\nconst int freq = 5000;      // 5 kHz PWM frequency\nconst int resolution = 8;   // 8-bit resolution (0-255)\n\nconst char htmlPage[] = R\"rawliteral(\n<!DOCTYPE html>\n<html>\n<head>\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>ESP32 LED Dimmer</title>\n  <style>\n    body { font-family: Arial; text-align: center; margin-top: 50px; background: #f4f4f4; }\n    h1 { color: #333; }\n    .slider { width: 80%; max-width: 400px; height: 25px; }\n    p { font-size: 1.2rem; }\n  </style>\n</head>\n<body>\n  <h1>ESP32 LED Brightness Control</h1>\n  <p>Brightness: <span id=\"valBox\">0</span></p>\n  <p><input type=\"range\" min=\"0\" max=\"255\" value=\"0\" class=\"slider\" id=\"pwmSlider\" oninput=\"updateSlider(this.value)\"></p>\n\n  <script>\n    function updateSlider(val) {\n      document.getElementById('valBox').innerHTML = val;\n      fetch('/slider?value=' + val).catch(err => console.error(err));\n    }\n  </script>\n</body>\n</html>\n)rawliteral\";\n\nvoid handleRoot() {\n  server.send(200, \"text/html\", htmlPage);\n}\n\nvoid handleSlider() {\n  if (server.hasArg(\"value\")) {\n    int sliderValue = server.arg(\"value\").toInt();\n    ledcWrite(ledPin, sliderValue); // Updates the PWM duty cycle\n  }\n  server.send(200, \"text/plain\", \"OK\");\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  \n  // Configure LED PWM for v3.x API\n  ledcAttach(ledPin, freq, resolution);\n  ledcWrite(ledPin, 0);\n\n  WiFi.begin(ssid, password);\n  while (WiFi.status() != WL_CONNECTED) {\n    delay(500);\n    Serial.print(\".\");\n  }\n  \n  Serial.println(\"\\nWiFi connected. IP address: \");\n  Serial.println(WiFi.localIP());\n\n  server.on(\"/\", handleRoot);\n  server.on(\"/slider\", handleSlider);\n  server.begin();\n}\n\nvoid loop() {\n  server.handleClient();\n}"
     }
   },
   {
