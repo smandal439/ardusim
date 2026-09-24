@@ -391,7 +391,7 @@ const COMPONENT_CATALOG = [
   { category: 'Audio', ids: ['max98357a', 'speaker_4ohm', 'dfplayer_mini'] },
   { category: 'Sensors', ids: ['dht11', 'hcsr04', 'ldr', 'pir', 'mpu6050', 'ds3231', 'ir_obstacle', 'flex_sensor', 'thermistor', 'lm35_sensor', 'bme280', 'vl53l0x', 'hx711', 'water_flow_sensor', 'load_cell', 'bh1750', 'ina219', 'max6675'] },
   { category: 'Passive', ids: ['resistor', 'capacitor', 'breadboard', 'breadboard_small', 'diode_1n4007'] },
-  { category: 'Power', ids: ['power_5v', 'power_gnd', 'mb102_power', 'bench_power_supply'] },
+  { category: 'Power', ids: ['power_5v', 'power_gnd', 'battery', 'mb102_power', 'bench_power_supply'] },
   {
     category: 'Digital ICs', ids: [],
     dropdown: {

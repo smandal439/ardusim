@@ -2591,7 +2591,7 @@ class CircuitCanvas {
     if (compEl) compEl.textContent = `${this.components.length} component${this.components.length !== 1 ? 's' : ''}`;
     if (wireEl) wireEl.textContent = `${this.wires.length} wire${this.wires.length !== 1 ? 's' : ''}`;
     // Detect standalone power sources so DMM/function-gen update without running Arduino sketch
-    const standaloneTypes = new Set(['power_5v', 'power_gnd', 'mb102_power', 'bench_power_supply', 'func_gen']);
+    const standaloneTypes = new Set(['power_5v', 'power_gnd', 'battery', 'mb102_power', 'bench_power_supply', 'func_gen']);
     this._hasStandalonePower = this.components.some(c => standaloneTypes.has(c.type));
     // Rebuild electrical graph
     this.engine.buildGraph(this.components, this.wires);
@@ -4671,6 +4671,19 @@ class CircuitCanvas {
         continue;
       }
 
+      if (inst.type === 'battery') {
+        const battV = this._getBatteryPosVoltage(inst);
+        if (current.pinId === 'pos' && battV > 0) {
+          sources.push({ type: 'battery', voltage: battV, rawVal: 255, resistance: current.resistance, instId: inst.id, pinId: 'pos' });
+        }
+        // Only the bottom cell of a series stack is a true ground;
+        // intermediate NEG pins sit at elevated potential.
+        if (current.pinId === 'neg' && !this._batteryNegIsIntermediate(inst)) {
+          grounds.push({ type: 'gnd', instId: inst.id, pinId: 'neg', resistance: current.resistance });
+        }
+        continue;
+      }
+
       // 2b. MB102 Breadboard Power Supply
       if (inst.type === 'mb102_power') {
         const mbPowered = Boolean(inst.runtimeState?.powered ?? inst.props?.powered ?? 1);
@@ -4876,6 +4889,62 @@ class CircuitCanvas {
     }
 
     return { sources, grounds };
+  }
+
+  /**
+   * Effective voltage at a battery's POS terminal.
+   * For series-cascaded batteries (POS of one wired to NEG of another) the
+   * voltages add up, so walk down to the bottom of the stack and sum.
+   */
+  _getBatteryPosVoltage(inst) {
+    const ownV = () => Number(inst.runtimeState?.voltage ?? inst.props?.voltage ?? 3.7);
+    const batteries = (this.components || []).filter(c => c.type === 'battery');
+    if (batteries.length <= 1) return ownV();
+
+    // belowMap: batteryId → battery it sits on top of (NEG wired to that POS)
+    const belowMap = new Map();
+    for (const b of batteries) {
+      for (const w of this.wires || []) {
+        let otherId = null;
+        if (w.from.instId === b.id && w.from.pinId === 'neg' && w.to.pinId === 'pos') {
+          otherId = w.to.instId;
+        } else if (w.to.instId === b.id && w.to.pinId === 'neg' && w.from.pinId === 'pos') {
+          otherId = w.from.instId;
+        }
+        if (otherId && batteries.some(x => x.id === otherId)) {
+          belowMap.set(b.id, otherId);
+          break;
+        }
+      }
+    }
+    if (belowMap.size === 0) return ownV();
+
+    // Walk down to the bottom of this battery's stack
+    const chain = [];
+    let current = inst;
+    const visited = new Set();
+    while (current && !visited.has(current.id)) {
+      visited.add(current.id);
+      chain.unshift(current);
+      const belowId = belowMap.get(current.id);
+      current = belowId ? batteries.find(b => b.id === belowId) : null;
+    }
+
+    // Sum voltages from the bottom up through this battery
+    let total = 0;
+    for (const b of chain) {
+      total += Number(b.runtimeState?.voltage ?? b.props?.voltage ?? 3.7);
+    }
+    return total;
+  }
+
+  /** True if this battery's NEG is wired to a lower battery's POS (series mid-cell). */
+  _batteryNegIsIntermediate(inst) {
+    for (const w of this.wires || []) {
+      if (w.from.instId === inst.id && w.from.pinId === 'neg' && w.to.pinId === 'pos') return true;
+      if (w.to.instId === inst.id && w.to.pinId === 'neg' && w.from.pinId === 'pos') return true;
+    }
+    return false;
   }
 
   // Quick check if a pin is a ground-type pin (for parallel path re-visiting)

@@ -140,6 +140,33 @@ describe('Li-Ion battery component', () => {
     expect(cc._isGroundPin({ type: 'battery', id: 'batt1' }, 'pos')).toBe(false);
   });
 
+  it('battery_in_series.json: multimeter reads stacked ~11.1 V', () => {
+    const series = JSON.parse(readSrc('Examples/battery_in_series.json'));
+    const cc = buildRig(series.circuit);
+    cc.engine.buildGraph(cc.components, cc.wires);
+    cc.engine.solve(cc);
+
+    const mm = cc.components.find(c => c.type === 'multimeter');
+    const vRed = cc.engine.getVoltageAtPin(mm.id, 'probe_red');
+    const vCom = cc.engine.getVoltageAtPin(mm.id, 'probe_com');
+    expect(vRed).toBeCloseTo(11.1, 1);
+    expect(vCom).toBeCloseTo(0, 3);
+    expect(vRed - vCom).toBeCloseTo(11.1, 1);
+
+    const redNet = cc._tracePinNet(mm.id, 'probe_red');
+    const comNet = cc._tracePinNet(mm.id, 'probe_com');
+    const bestRed = redNet.sources.reduce((m, s) => Math.max(m, s.voltage), 0);
+    expect(bestRed).toBeCloseTo(11.1, 1);
+    expect(comNet.grounds.length).toBeGreaterThanOrEqual(1);
+
+    const bottom = cc.components.find(c => c.id === 'comp_1790187011455_u57z2');
+    const mid = cc.components.find(c => c.id === 'comp_1790186959655_ffvgx');
+    const top = cc.components.find(c => c.id === 'comp_1790187008209_h2jw8');
+    expect(cc._getBatteryPosVoltage(bottom)).toBeCloseTo(3.7, 2);
+    expect(cc._getBatteryPosVoltage(mid)).toBeCloseTo(7.4, 2);
+    expect(cc._getBatteryPosVoltage(top)).toBeCloseTo(11.1, 2);
+  });
+
   it('example battery_led.json is valid and wired as a closed loop', () => {
     const types = new Set(example.circuit.components.map(c => c.type));
     expect(types.has('battery')).toBe(true);

@@ -259,6 +259,9 @@ class ElectricalEngine {
       this._classifyComponent(inst);
     }
 
+    // 1b. Stack series-cascaded batteries so their voltages add up
+    this._resolveBatteryStacks();
+
     // 2. Build adjacency list from resistive elements (resistors, bulbs, diodes, etc.)
     //    Each edge connects two nets with a resistance value.
     const adjacency = new Map(); // netId ← [{ net, resistance }]
@@ -359,6 +362,87 @@ class ElectricalEngine {
     // 5. Calculate equivalent resistance to ground for each net
     for (const [, net] of this.nets) {
       net.resistanceToGround = this._calcResistanceToGround(net);
+    }
+  }
+
+  /**
+   * Detect series-cascaded batteries (POS of one wired to NEG of another)
+   * and stack their voltages so the multimeter/load sees the sum.
+   *
+   * Only the bottom battery's NEG is a true 0 V ground; intermediate battery
+   * NEG pins sit at elevated potential and must not be marked as ground.
+   */
+  _resolveBatteryStacks() {
+    const batteries = this.components.filter(c => c.type === 'battery');
+    if (batteries.length <= 1) return;
+
+    const netId = (instId, pinId) => this.getNetForPin(instId, pinId)?.id;
+
+    // belowMap: batteryId → id of the battery it sits on top of
+    // (this battery's NEG shares a net with that battery's POS)
+    const belowMap = new Map();
+    for (const b of batteries) {
+      const negNetId = netId(b.id, 'neg');
+      if (!negNetId) continue;
+      for (const a of batteries) {
+        if (a.id === b.id) continue;
+        if (netId(a.id, 'pos') === negNetId) {
+          belowMap.set(b.id, a.id);
+          break;
+        }
+      }
+    }
+
+    // No series chain (single, parallel, or unconnected) — leave as-is
+    if (belowMap.size === 0) return;
+
+    // Cumulative voltage from the bottom of each stack up to this battery
+    const cumulative = new Map();
+    const computeCumulative = (battId, visited = new Set()) => {
+      if (cumulative.has(battId)) return cumulative.get(battId);
+      if (visited.has(battId)) return 0;
+      visited.add(battId);
+      const batt = batteries.find(b => b.id === battId);
+      const v = Number(batt.runtimeState?.voltage ?? batt.props?.voltage ?? 3.7);
+      const belowId = belowMap.get(battId);
+      const total = belowId ? computeCumulative(belowId, visited) + v : v;
+      cumulative.set(battId, total);
+      return total;
+    };
+    for (const b of batteries) computeCumulative(b.id);
+
+    for (const b of batteries) {
+      const cumV = cumulative.get(b.id);
+      const posNet = this.getNetForPin(b.id, 'pos');
+      const negNet = this.getNetForPin(b.id, 'neg');
+
+      // POS source voltage = stack voltage (not just this cell's voltage)
+      if (posNet) {
+        const existing = posNet.sources.find(s => s.type === 'battery' && s.instId === b.id);
+        if (existing) {
+          existing.voltage = cumV;
+        } else {
+          posNet.sources.push({
+            type: 'battery', voltage: cumV, rawVal: 255,
+            resistance: 0, instId: b.id, pinId: 'pos',
+          });
+        }
+      }
+
+      // Only the bottom battery (nothing sits on a chain below it via being
+      // a key of belowMap) keeps NEG as ground. Intermediate NEG pins float.
+      const isBottom = !belowMap.has(b.id);
+      if (negNet) {
+        if (isBottom) {
+          if (!negNet.grounds.some(g => g.instId === b.id && g.pinId === 'neg')) {
+            negNet.grounds.push({ instId: b.id, pinId: 'neg', resistance: 0 });
+          }
+        } else {
+          negNet.grounds = negNet.grounds.filter(
+            g => !(g.instId === b.id && g.pinId === 'neg')
+          );
+        }
+      }
     }
   }
 
