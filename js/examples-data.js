@@ -10074,6 +10074,124 @@ window.EXAMPLE_SKETCHES = [
     }
   },
   {
+    "id": "http_slider_pwm_led",
+    "name": "http slider pwm led",
+    "icon": "🔧",
+    "desc": "This example demonstrates how to control the brightness of an LED connected to an ESP32 using a web interface. The ESP32 hosts a simple web page with a slider that allows users to adjust the LED's brightness in real-time via PWM (Pulse Width Modulation).",
+    "tags": [
+      "custom",
+      "circuit",
+      "http",
+      "slider",
+      "pwm",
+      "led",
+      "esp32",
+      "webserver"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1789493370784_cgl8h",
+          "type": "esp32_devkit_v1",
+          "x": 110,
+          "y": 420,
+          "rotation": 0,
+          "props": {
+            "label": "ESP32"
+          }
+        },
+        {
+          "id": "comp_1789493424966_bvlij",
+          "type": "led",
+          "x": 340,
+          "y": 510,
+          "rotation": 0,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          }
+        },
+        {
+          "id": "comp_1789493438777_u5p2x",
+          "type": "resistor",
+          "x": 345,
+          "y": 605,
+          "rotation": 0,
+          "props": {
+            "value": 330,
+            "unit": "Ω"
+          }
+        },
+        {
+          "id": "comp_1789493482237_ddplw",
+          "type": "wifi_module",
+          "x": 305,
+          "y": 385,
+          "rotation": 0,
+          "props": {
+            "ssid": "ArduSim_Network",
+            "password": "Ardusim@123",
+            "channel": 6,
+            "ipAddress": "192.168.4.1",
+            "txPower": 20,
+            "security": "WPA2-PSK",
+            "hidden": false
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "wire_1789493442278_03zsz",
+          "from": {
+            "instId": "comp_1789493370784_cgl8h",
+            "pinId": "GND2"
+          },
+          "to": {
+            "instId": "comp_1789493438777_u5p2x",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1789493443840_gyg8a",
+          "from": {
+            "instId": "comp_1789493438777_u5p2x",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "comp_1789493424966_bvlij",
+            "pinId": "cathode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1789493449117_t4mc9",
+          "from": {
+            "instId": "comp_1789493370784_cgl8h",
+            "pinId": "D16"
+          },
+          "to": {
+            "instId": "comp_1789493424966_bvlij",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "#include <WiFi.h>\n#include <WebServer.h>\n\nconst char* ssid = \"ArduSim_Network\";\nconst char* password = \"Ardusim@123\";\n\nWebServer server(80);\n\nconst int ledPin = 16;      // GPIO 16 assigned to LED\nconst int freq = 5000;      // 5 kHz PWM frequency\nconst int resolution = 8;   // 8-bit resolution (0-255)\n\nconst char htmlPage[] = R\"rawliteral(\n<!DOCTYPE html>\n<html>\n<head>\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>ESP32 LED Dimmer</title>\n  <style>\n    body { font-family: Arial; text-align: center; margin-top: 50px; background: #f4f4f4; }\n    h1 { color: #333; }\n    .slider { width: 80%; max-width: 400px; height: 25px; }\n    p { font-size: 1.2rem; }\n  </style>\n</head>\n<body>\n  <h1>ESP32 LED Brightness Control</h1>\n  <p>Brightness: <span id=\"valBox\">0</span></p>\n  <p><input type=\"range\" min=\"0\" max=\"255\" value=\"0\" class=\"slider\" id=\"pwmSlider\" oninput=\"updateSlider(this.value)\"></p>\n\n  <script>\n    function updateSlider(val) {\n      document.getElementById('valBox').innerHTML = val;\n      fetch('/slider?value=' + val).catch(err => console.error(err));\n    }\n  </script>\n</body>\n</html>\n)rawliteral\";\n\nvoid handleRoot() {\n  server.send(200, \"text/html\", htmlPage);\n}\n\nvoid handleSlider() {\n  if (server.hasArg(\"value\")) {\n    int sliderValue = server.arg(\"value\").toInt();\n    ledcWrite(ledPin, sliderValue); // Updates the PWM duty cycle\n  }\n  server.send(200, \"text/plain\", \"OK\");\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  \n  // Configure LED PWM for v3.x API\n  ledcAttach(ledPin, freq, resolution);\n  ledcWrite(ledPin, 0);\n\n  WiFi.begin(ssid, password);\n  while (WiFi.status() != WL_CONNECTED) {\n    delay(500);\n    Serial.print(\".\");\n  }\n  \n  Serial.println(\"\\nWiFi connected. IP address: \");\n  Serial.println(WiFi.localIP());\n\n  server.on(\"/\", handleRoot);\n  server.on(\"/slider\", handleSlider);\n  server.begin();\n}\n\nvoid loop() {\n  server.handleClient();\n}"
+    }
+  },
+  {
     "id": "hx711_load_cell_with_lcd_display",
     "name": "HX711 Load Cell with LCD Display",
     "icon": "🔧",

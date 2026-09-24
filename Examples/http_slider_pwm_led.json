@@ -12,15 +12,7 @@
     "led",
     "esp32",
     "webserver"
-  ],
-    "circuit",
-    "http",
-    "slider",
-    "pwm",
-    "led",
-    "esp32",
-    "webserver"
-  ],
+  ],   
   "circuit": {
     "components": [
       {
