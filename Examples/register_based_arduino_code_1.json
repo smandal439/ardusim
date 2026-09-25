@@ -1,0 +1,52 @@
+{
+  "id": "register_based_arduino_code_1",
+  "name": "register based Arduino code 1",
+  "icon": "🔧",
+  "desc": "A custom register based Arduino code 1 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790348276488_alzpf",
+        "type": "arduino_uno",
+        "x": 30,
+        "y": 130,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "comp_1790350581794_5wwis",
+        "type": "power_5v",
+        "x": 190,
+        "y": 65,
+        "rotation": 0,
+        "props": {}
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1790350586510_wwprt",
+        "from": {
+          "instId": "comp_1790348276488_alzpf",
+          "pinId": "D4"
+        },
+        "to": {
+          "instId": "comp_1790350581794_5wwis",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "void setup() {\n  Serial.begin(9600);\n  DDRD &= ~(1 << 4); // Safely configure Pin 4 as INPUT\n}\n\nvoid loop() {\n  // Check if Bit 4 of PIND is a 1\n  if (PIND & (1 << 4)) {\n    Serial.println(\"Pin 4 is HIGH\");\n  }\n  delay(100);\n}\n"
+  }
+}

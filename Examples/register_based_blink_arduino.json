@@ -1,0 +1,28 @@
+{
+  "id": "register_based_blink_arduino",
+  "name": "register based blink Arduino",
+  "icon": "🔧",
+  "desc": "A custom register based blink Arduino circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790348276488_alzpf",
+        "type": "arduino_uno",
+        "x": 30,
+        "y": 130,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.ino": "void setup() {\n  // Set all pins on Port B (Pins 8 to 13) as OUTPUT\n  // B00100000 sets Pin 13 (Bit 5) as OUTPUT\n  DDRB = 0B00100000; \n}\n\nvoid loop() {\n  // Set Pin 13 HIGH safely using a bitwise OR (|) and bit shifting (<<)\nPORTB |= (1 << 5); \ndelay(1000);\n// Set Pin 13 LOW safely using a bitwise AND (&) and a bitwise NOT (~)\nPORTB &= ~(1 << 5); \ndelay(1000);\n}\n"
+  }
+}

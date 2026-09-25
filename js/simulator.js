@@ -159,6 +159,61 @@ class ArduinoSimulator {
       'void|bool|char|int|float|double|long|short|byte|boolean|unsigned|signed|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t|ssize_t';
     const _fullTypePat = _types ? _types.getFullTypeRegex().source.replace(/^/, '(?:').replace(/$/, '').replace(/\(\?:const\\s\+\)/g, '(?:const\\s+)?').replace(/\(\?:unsigned\\s\+\)/g, '(?:unsigned\\s+)?') : `(?:const\\s+)?(?:unsigned\\s+)?(?:${_typePat})\\s*\\*?\\s*`;
 
+    // 3a-3c. AVR register-sketch support (Uno/Nano style):
+    //   (a) binary constants   B00100000 -> 0b00100000   (Arduino binary.h)
+    //   (b) bit-number macros  PB5/DDB5/PINC3 -> 5       (avr/io.h), _BV(n) -> (1 << (n))
+    //   (c) DDRx/PORTx/PINx register accesses -> _a.avr* runtime helpers
+    //   cli()/sei() map to the Arduino interrupt APIs (the API pass gives them _a.).
+    //   Comments and string literals are replaced by \u0001-run placeholders while
+    //   the rewrites run, then restored, so "PORTB" inside text stays literal.
+    {
+      const _avrProtect = (src) => {
+        const store = [];
+        const text = src.replace(
+          /\/\/[^\n]*|\/\*[\s\S]*?\*\/|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`/g,
+          (m) => { store.push(m); return '\u0001'.repeat(store.length); });
+        return { text, store };
+      };
+      const _avrRestore = (text, store) =>
+        text.replace(/\u0001+/g, (m) => (store[m.length - 1] !== undefined ? store[m.length - 1] : m));
+      const _prot = _avrProtect(js);
+      let t = _prot.text;
+      // (a) binary constants -- skip names the sketch declares as variables
+      const _bDeclared = new Set();
+      t.replace(
+        new RegExp(`\\b(?:(?:const|static|volatile|unsigned|signed)\\s+)*(?:${_typePat})\\s+(B[01]+)\\b`, 'g'),
+        (_, n) => { _bDeclared.add(n); return _; });
+      t = t.replace(/\bB([01]{1,16})\b/g, (m, bits) => (_bDeclared.has(m) ? m : '0b' + bits));
+      // (b) _BV(n) and bit-number macros
+      t = t.replace(/\b_BV\s*\(\s*([^()]+?)\s*\)/g, '(1 << ($1))');
+      t = t.replace(/\b(?:DD|PORT|PIN)([BCD])([0-7])\b/g, '$2');
+      t = t.replace(/\bP([BCD])([0-7])\b/g, '$2');
+      // cli()/sei() -> bare Arduino names; the API mapping pass prefixes _a.
+      t = t.replace(/\bcli\s*\(/g, 'noInterrupts(');
+      t = t.replace(/\bsei\s*\(/g, 'interrupts(');
+      // (c) register accesses
+      const _avrRead = (k, p) =>
+        k === 'PIN' ? `_a.avrReadPin("${p}")` :
+        k === 'DDR' ? `_a.avrReadDdr("${p}")` : `_a.avrReadPort("${p}")`;
+      const _avrWrite = (k, p, expr) =>
+        k === 'PIN' ? `_a.avrTogglePort("${p}", (${expr}))` :
+        k === 'DDR' ? `_a.avrWriteDdr("${p}", (${expr}))` : `_a.avrWritePort("${p}", (${expr}))`;
+      // REG++ / REG-- (suffix) then ++REG / --REG (prefix)
+      t = t.replace(/\b(DDR|PORT|PIN)([BCD])[\s\u0001]*(\+\+|--)/g,
+        (_, k, p, op) => _avrWrite(k, p, `${_avrRead(k, p)} ${op === '++' ? '+' : '-'} 1`));
+      t = t.replace(/(\+\+|--)[\s\u0001]*\b(DDR|PORT|PIN)([BCD])\b/g,
+        (_, op, k, p) => _avrWrite(k, p, `${_avrRead(k, p)} ${op === '++' ? '+' : '-'} 1`));
+      // Compound assignment: REG op= expr;  ->  REG = REG op (expr)
+      t = t.replace(/\b(DDR|PORT|PIN)([BCD])[\s\u0001]*(\|\=|&\=|\^\=|\+\=|\-\=|<<\=|>>\=)[\s\u0001]*([^;]+?)(?=\s*;)/g,
+        (_, k, p, op, expr) => _avrWrite(k, p, `${_avrRead(k, p)} ${op.slice(0, -1)} (${expr})`));
+      // Simple assignment: REG = expr;
+      t = t.replace(/\b(DDR|PORT|PIN)([BCD])[\s\u0001]*=(?!=)[\s\u0001]*([^;]+?)(?=\s*;)/g,
+        (_, k, p, expr) => _avrWrite(k, p, expr));
+      // Bare reads
+      t = t.replace(/\b(DDR|PORT|PIN)([BCD])\b/g, (_, k, p) => _avrRead(k, p));
+      js = _avrRestore(t, _prot.store);
+    }
+
     // 4a. Pre-scan: track integer-typed variables BEFORE type stripping.
     const _intTypes = /^(?:unsigned\s+(?:long\s+|int\s+|short\s+|char\s+)|long\s+(?:long\s+|int\s+|long\s+)?|signed\s+(?:long\s+|int\s+|short\s+|char\s+)?|int|short|byte|char|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t|ssize_t)$/;
     const _intVarNames = new Set();
@@ -712,8 +767,65 @@ class ArduinoSimulator {
   buildContext() {
     const self = this;
 
+    // AVR register emulation (PORTx/DDRx/PINx) -- Uno/Nano port-to-pin map:
+    // PORTD -> D0-D7, PORTB -> D8-D13 (B6/B7 unexposed), PORTC -> A0-A5 (D14-D19).
+    const _avrPins = { D: [0, 1, 2, 3, 4, 5, 6, 7], B: [8, 9, 10, 11, 12, 13, null, null], C: [14, 15, 16, 17, 18, 19, null, null] };
+    const _avrGet = () => {
+      if (!self._avrState) self._avrState = { ddr: { D: 0, B: 0, C: 0 }, port: { D: 0, B: 0, C: 0 } };
+      return self._avrState;
+    };
+    const _avrA = () => self._a || result._a;
+
     const result = {
       _a: {
+        /* AVR registers -- DDRx sets direction (and re-applies the PORTx latch),
+           PORTx drives output bits / enables pull-ups on input bits, PINx reads */
+        avrWriteDdr(port, val) {
+          if (!_avrPins[port]) return;
+          const st = _avrGet();
+          const v = val & 0xFF;
+          st.ddr[port] = v;
+          for (let b = 0; b < 8; b++) {
+            const pin = _avrPins[port][b];
+            if (pin == null) continue;
+            if ((v >> b) & 1) {
+              _avrA().pinMode(pin, 'OUTPUT');
+              _avrA().digitalWrite(pin, (st.port[port] >> b) & 1);
+            } else {
+              _avrA().pinMode(pin, ((st.port[port] >> b) & 1) ? 'INPUT_PULLUP' : 'INPUT');
+            }
+          }
+        },
+        avrWritePort(port, val) {
+          if (!_avrPins[port]) return;
+          const st = _avrGet();
+          const v = val & 0xFF;
+          st.port[port] = v;
+          for (let b = 0; b < 8; b++) {
+            const pin = _avrPins[port][b];
+            if (pin == null) continue;
+            if ((st.ddr[port] >> b) & 1) _avrA().digitalWrite(pin, (v >> b) & 1);
+            else _avrA().pinMode(pin, ((v >> b) & 1) ? 'INPUT_PULLUP' : 'INPUT');
+          }
+        },
+        avrTogglePort(port, mask) {
+          if (!_avrPins[port]) return;
+          const st = _avrGet();
+          this.avrWritePort(port, (st.port[port] ^ (mask & 0xFF)) & 0xFF);
+        },
+        avrReadPort(port) { return _avrPins[port] ? (_avrGet().port[port] & 0xFF) : 0; },
+        avrReadDdr(port) { return _avrPins[port] ? (_avrGet().ddr[port] & 0xFF) : 0; },
+        avrReadPin(port) {
+          if (!_avrPins[port]) return 0;
+          const st = _avrGet();
+          let v = 0;
+          for (let b = 0; b < 8; b++) {
+            const pin = _avrPins[port][b];
+            if (pin == null) { if ((st.port[port] >> b) & 1) v |= (1 << b); continue; }
+            if (_avrA().digitalRead(pin)) v |= (1 << b);
+          }
+          return v;
+        },
         /* Pin control */
         pinMode(pin, mode) {
           const key = `pin_${pin}`;
@@ -1737,6 +1849,7 @@ class ArduinoSimulator {
     this.simTime = 0;
     this.pinStates = {};
     this.pinModes = {};
+    this._avrState = null; // DDRx/PORTx latch -- reset with the pins
     this._steppers = {};
     this._delays = [];
     this._wireTxAddr = null;
