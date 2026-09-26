@@ -2,7 +2,7 @@
   "id": "register_based_arduino_code2",
   "name": "register based Arduino code2",
   "icon": "🔧",
-  "desc": "This is a simple Arduino code that uses the PORTD register to control an 8-LED array connected to digital pins D0 to D7 of an Arduino Uno. The code sets the data direction register (DDRD) to output mode for all pins, and then in the loop, it shifts a single bit through the PORTD register to light up each LED in sequence from left to right and then back from right to left, creating a "running light" effect.",
+  "desc": "This is a simple Arduino code that uses the PORTD register to control an 8-LED array connected to digital pins D0 to D7 of an Arduino Uno. The code sets the data direction register (DDRD) to output mode for all pins, and then in the loop, it shifts a single bit through the PORTD register to light up each LED in sequence from left to right and then back from right to left, creating a 'running light' effect.",
   "tags": [
     "arduino",
     "led",
