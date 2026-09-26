@@ -21408,6 +21408,184 @@ window.EXAMPLE_SKETCHES = [
     }
   },
   {
+    "id": "register_based_arduino_code2",
+    "name": "register based Arduino code2",
+    "icon": "🔧",
+    "desc": "This is a simple Arduino code that uses the PORTD register to control an 8-LED array connected to digital pins D0 to D7 of an Arduino Uno. The code sets the data direction register (DDRD) to output mode for all pins, and then in the loop, it shifts a single bit through the PORTD register to light up each LED in sequence from left to right and then back from right to left, creating a 'running light' effect.",
+    "tags": [
+      "arduino",
+      "led",
+      "register",
+      "PORTD",
+      "DDRD",
+      "running light"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1790348276488_alzpf",
+          "type": "arduino_uno",
+          "x": 20,
+          "y": 185,
+          "rotation": 0,
+          "props": {
+            "label": "UNO"
+          }
+        },
+        {
+          "id": "comp_1790424705989_ad4wm",
+          "type": "multi_led_array",
+          "x": 20,
+          "y": 85,
+          "rotation": 0,
+          "props": {
+            "label": "8-LED ARRAY"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "wire_1790424713121_om9v0",
+          "from": {
+            "instId": "comp_1790348276488_alzpf",
+            "pinId": "D0"
+          },
+          "to": {
+            "instId": "comp_1790424705989_ad4wm",
+            "pinId": "l1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790424714505_bl8rp",
+          "from": {
+            "instId": "comp_1790348276488_alzpf",
+            "pinId": "D1"
+          },
+          "to": {
+            "instId": "comp_1790424705989_ad4wm",
+            "pinId": "l2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790424715888_5t6k8",
+          "from": {
+            "instId": "comp_1790348276488_alzpf",
+            "pinId": "D2"
+          },
+          "to": {
+            "instId": "comp_1790424705989_ad4wm",
+            "pinId": "l3"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790424717311_ve5dt",
+          "from": {
+            "instId": "comp_1790348276488_alzpf",
+            "pinId": "D3"
+          },
+          "to": {
+            "instId": "comp_1790424705989_ad4wm",
+            "pinId": "l4"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790424718872_5a8we",
+          "from": {
+            "instId": "comp_1790348276488_alzpf",
+            "pinId": "D4"
+          },
+          "to": {
+            "instId": "comp_1790424705989_ad4wm",
+            "pinId": "l5"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790424720457_2ymr5",
+          "from": {
+            "instId": "comp_1790348276488_alzpf",
+            "pinId": "D5"
+          },
+          "to": {
+            "instId": "comp_1790424705989_ad4wm",
+            "pinId": "l6"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790424722231_gxnk3",
+          "from": {
+            "instId": "comp_1790348276488_alzpf",
+            "pinId": "D6"
+          },
+          "to": {
+            "instId": "comp_1790424705989_ad4wm",
+            "pinId": "l7"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790424724069_augz6",
+          "from": {
+            "instId": "comp_1790348276488_alzpf",
+            "pinId": "D7"
+          },
+          "to": {
+            "instId": "comp_1790424705989_ad4wm",
+            "pinId": "l8"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790424727041_n3oxw",
+          "from": {
+            "instId": "comp_1790424705989_ad4wm",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "comp_1790348276488_alzpf",
+            "pinId": "GND_D"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "void setup() {\n  DDRD = 0xFF;\n}\n\nvoid loop() {\n  data=1;\n  for (int i = 0; i < 8; i++) {\n    PORTD=data<<i;\n    delay(100);\n  }\n  for (int i = 7; i >=0; i--) {\n    PORTD=data<<i;\n    delay(100);\n  }\n}\n"
+    }
+  },
+  {
     "id": "relay_control",
     "name": "Relay Control",
     "icon": "⚡",
