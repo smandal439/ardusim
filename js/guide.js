@@ -398,6 +398,45 @@ void loop(){
     exampleId: 'seg7_counter',
   },
 
+  tm1637: {
+    id: 'tm1637',
+    name: 'TM1637 4-Digit Display',
+    icon: '🕐',
+    category: 'Output',
+    longDesc: 'A 4-digit 7-segment clock module driven over a 2-wire serial interface (CLK + DIO) through the TM1637 chip — only two Arduino pins are needed for all four digits plus the clock colon. Add #include <TM1637Display.h> and use the TM1637Display class to show numbers, brightness levels and the colon.',
+    use: 'Digital clocks, counters, timers, meter readings — anywhere you need four digits from two pins.',
+    pins: {
+      gnd: { label: 'GND', type: 'gnd', desc: 'Ground — connect to board GND.' },
+      vcc: { label: 'VCC', type: 'power', desc: 'Supply — connect to 5V (or 3.3V).' },
+      dio: { label: 'DIO', type: 'digital', desc: 'Serial data line — connect to a digital pin (D3 in the example).' },
+      clk: { label: 'CLK', type: 'digital', desc: 'Serial clock line — connect to a digital pin (D2 in the example).' },
+    },
+    props: {
+      color: 'LED colour of the segments (red, green, blue, yellow, orange, white).',
+    },
+    wiring: 'VCC → 5V, GND → GND, CLK → D2, DIO → D3.',
+    code: `#include <TM1637Display.h>
+
+#define CLK 2
+#define DIO 3
+
+TM1637Display display(CLK, DIO);
+
+void setup() {
+  display.setBrightness(7);   // 0 (dim) to 7 (bright)
+}
+
+void loop() {
+  int h = 9, m = 45;                 // 09:45
+  display.showNumberDec(h * 100 + m, true);
+  display.showColonSegment();        // colon on
+  delay(500);
+  display.hideColonSegment();        // colon blinks at 1 Hz
+  delay(500);
+}`,
+    exampleId: 'tm1637_clock',
+  },
+
   lcd1602: {
     id: 'lcd1602',
     name: 'LCD 16°2',

@@ -373,7 +373,7 @@ function getComponentPins(inst) {
 const COMPONENT_CATALOG = [
   { category: 'Boards', ids: ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051'] },
   {
-    category: 'Output',     ids: ['multi_led_array', 'rgb_led', 'buzzer', 'seg7', 'lcd1602', 'lcd1602_i2c', 'lcd2004_i2c', 'oled_ssd1306', 'neopixel', 'neopixel_strip', 'neopixel_ring', 'neopixel_8x8_matrix', 'bulb_12v', 'max7219', 'ili9341', 'u8g2_oled', 'tft_display', 'ir_led'],
+    category: 'Output',     ids: ['multi_led_array', 'rgb_led', 'buzzer', 'seg7', 'tm1637', 'lcd1602', 'lcd1602_i2c', 'lcd2004_i2c', 'oled_ssd1306', 'neopixel', 'neopixel_strip', 'neopixel_ring', 'neopixel_8x8_matrix', 'bulb_12v', 'max7219', 'ili9341', 'u8g2_oled', 'tft_display', 'ir_led'],
     dropdown: {
       id: 'led', label: 'LED', icon: '💡', desc: 'Light Emitting Diode',
       variants: [

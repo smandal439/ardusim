@@ -1,0 +1,51 @@
+{
+  "id": "tm1637_clock",
+  "name": "TM1637 Clock",
+  "icon": "🕐",
+  "desc": "4-digit clock with blinking colon over the 2-wire TM1637 interface (CLK=D2, DIO=D3)",
+  "tags": [
+    "beginner",
+    "display",
+    "tm1637",
+    "clock"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 100
+      },
+      {
+        "id": "d1",
+        "type": "tm1637",
+        "x": 120,
+        "y": 320
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": { "instId": "b1", "pinId": "D2" },
+        "to": { "instId": "d1", "pinId": "CLK" }
+      },
+      {
+        "id": "w2",
+        "from": { "instId": "b1", "pinId": "D3" },
+        "to": { "instId": "d1", "pinId": "DIO" }
+      },
+      {
+        "id": "w3",
+        "from": { "instId": "b1", "pinId": "5V" },
+        "to": { "instId": "d1", "pinId": "VCC" }
+      },
+      {
+        "id": "w4",
+        "from": { "instId": "b1", "pinId": "GND1" },
+        "to": { "instId": "d1", "pinId": "GND" }
+      }
+    ]
+  },
+  "code": "/*\n * TM1637 4-Digit Clock — hours:minutes with a blinking colon\n * CLK -> D2, DIO -> D3, VCC -> 5V, GND -> GND\n */\n\n#include <TM1637Display.h>\n\n#define CLK 2\n#define DIO 3\n\nTM1637Display display(CLK, DIO);\n\nint hours = 9;\nint minutes = 45;\nunsigned long lastTick = 0;\nbool colonOn = false;\n\nvoid setup() {\n  display.setBrightness(7);   // 0 = dimmest, 7 = brightest\n}\n\nvoid loop() {\n  display.showNumberDec(hours * 100 + minutes, true);\n\n  // Blink the colon at 1 Hz\n  if (millis() - lastTick >= 500) {\n    lastTick = millis();\n    colonOn = !colonOn;\n    if (colonOn) display.showColonSegment();\n    else display.hideColonSegment();\n  }\n}"
+}

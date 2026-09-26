@@ -1123,6 +1123,192 @@ defComp({
   }
 });
 
+/* TM1637 4-DIGIT DISPLAY MODULE (clock board with colon) */
+defComp({
+  id: 'tm1637',
+  name: 'TM1637 4-Digit Display',
+  category: 'Output',
+  icon: '🕐',
+  desc: 'TM1637 4-digit 7-segment module with clock colon (CLK, DIO)',
+  width: 116,
+  height: 66,
+  defaultProps: { color: '#ff3333', colorName: 'Red' },
+  interactive: [
+    { field: 'color', label: 'LED Color', type: 'select', options: [
+      { value: '#ff3333', label: 'Red' },
+      { value: '#33ff66', label: 'Green' },
+      { value: '#3399ff', label: 'Blue' },
+      { value: '#ffee33', label: 'Yellow' },
+      { value: '#ff8833', label: 'Orange' },
+      { value: '#ffffff', label: 'White' },
+    ] },
+  ],
+  pins: [
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 16, y: 66, side: 'bottom' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 44, y: 66, side: 'bottom' },
+    { id: 'DIO', label: 'DIO', type: PIN_TYPE.DIGITAL, x: 72, y: 66, side: 'bottom' },
+    { id: 'CLK', label: 'CLK', type: PIN_TYPE.DIGITAL, x: 100, y: 66, side: 'bottom' },
+  ],
+  draw(ctx, inst) {
+    const { x, y } = inst;
+    const rs = inst.runtimeState || {};
+    const p = inst.props || {};
+    const hex = (typeof p.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(p.color)) ? p.color : '#ff3333';
+    const base = [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+    const mixc = (a, b2, t) => [0, 1, 2].map(i => Math.round(a[i] + (b2[i] - a[i]) * t));
+    const rgbs = (c) => `${c[0]},${c[1]},${c[2]}`;
+    const WHITE = [255, 255, 255], BLACK = [0, 0, 0];
+
+    const digits = Array.isArray(rs.digits) ? rs.digits : [0, 0, 0, 0];
+    const colon = rs.colon ? 1 : 0;
+    const briRaw = Number(rs.brightness);
+    const bri = (rs.brightness === undefined || rs.brightness === null) ? 7 : (isFinite(briRaw) ? Math.min(Math.max(briRaw, 0), 7) : 7);
+    const inten = (rs.on === false) ? 0 : 0.25 + 0.75 * (bri / 7);
+    const CELLS = [24, 46, 78, 100]; // digit centres
+    const CY = 28;
+    const GHOST = `rgba(${rgbs(mixc(base, BLACK, 0.78))},1)`;
+    const anyLit = inten > 0 && (colon || digits.some(d => d & 0xFF));
+    const pulse = anyLit ? 1 + Math.sin(Date.now() / 300) * 0.04 : 1;
+    const b = inten; // effective 0..1 brightness
+
+    // Segment geometry (b = bit index in the digit byte)
+    const hPath = (cx, cyRow) => {
+      ctx.moveTo(cx - 7, cyRow); ctx.lineTo(cx - 5, cyRow - 2); ctx.lineTo(cx + 5, cyRow - 2);
+      ctx.lineTo(cx + 7, cyRow); ctx.lineTo(cx + 5, cyRow + 2); ctx.lineTo(cx - 5, cyRow + 2);
+      ctx.closePath();
+    };
+    const vPath = (sx, top) => {
+      ctx.moveTo(sx, top); ctx.lineTo(sx + 1.5, top + 1.5); ctx.lineTo(sx + 1.5, top + 7.5);
+      ctx.lineTo(sx, top + 9); ctx.lineTo(sx - 1.5, top + 7.5); ctx.lineTo(sx - 1.5, top + 1.5);
+      ctx.closePath();
+    };
+    // [buildFn(cx), centroid cx, centroid cy, axis]
+    const segShapes = (cx) => ([
+      [() => hPath(cx, CY - 12), cx, CY - 12, 'h', 0], // A
+      [() => vPath(cx + 7, CY - 10), cx + 7, CY - 5, 'v', 1], // B
+      [() => vPath(cx + 7, CY + 1), cx + 7, CY + 6, 'v', 2], // C
+      [() => hPath(cx, CY + 12), cx, CY + 12, 'h', 3], // D
+      [() => vPath(cx - 7, CY + 1), cx - 7, CY + 6, 'v', 4], // E
+      [() => vPath(cx - 7, CY - 10), cx - 7, CY - 5, 'v', 5], // F
+      [() => hPath(cx, CY), cx, CY, 'h', 6], // G
+    ]);
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // ── Leads from the module pins into the PCB ──
+    ctx.strokeStyle = '#8f8f8f';
+    ctx.lineWidth = 1.5;
+    for (const lx of [16, 44, 72, 100]) {
+      ctx.beginPath(); ctx.moveTo(lx, 66); ctx.lineTo(lx, 55); ctx.stroke();
+    }
+
+    // ── Blue PCB with edge highlight ──
+    const pcb = ctx.createLinearGradient(0, 0, 0, 56);
+    pcb.addColorStop(0, '#2159b8');
+    pcb.addColorStop(1, '#123c88');
+    ctx.fillStyle = pcb;
+    roundRect(ctx, 0, 0, 116, 56, 4);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+    ctx.lineWidth = 1;
+    roundRect(ctx, 0.5, 0.5, 115, 55, 4);
+    ctx.stroke();
+
+    // Pin silkscreen labels
+    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+    ctx.font = '7px sans-serif';
+    ctx.textAlign = 'center';
+    for (const [lx, lbl] of [[16, 'GND'], [44, 'VCC'], [72, 'DIO'], [100, 'CLK']]) {
+      ctx.fillText(lbl, lx, 53);
+    }
+
+    // ── Black display window ──
+    ctx.fillStyle = '#0b0b0d';
+    roundRect(ctx, 6, 6, 104, 44, 3);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 1;
+    roundRect(ctx, 6.5, 6.5, 103, 43, 3);
+    ctx.stroke();
+
+    // ── Pass 1: ghost (unlit) segments, decimal points and colon dots ──
+    ctx.fillStyle = GHOST;
+    for (const cx of CELLS) {
+      for (const [path] of segShapes(cx)) { ctx.beginPath(); path(); ctx.fill(); }
+      ctx.beginPath(); ctx.arc(cx + 8.5, CY + 10, 1.5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(62, 24, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(62, 32, 2, 0, Math.PI * 2); ctx.fill();
+
+    if (inten > 0) {
+      // ── Pass 2: light spill from lit digits ──
+      CELLS.forEach((cx, i) => {
+        if (!(digits[i] & 0x7F)) return;
+        const hr = (15 + 7 * b) * pulse;
+        const halo = ctx.createRadialGradient(cx, CY, 0, cx, CY, hr);
+        halo.addColorStop(0, `rgba(${rgbs(base)},${(0.34 * b).toFixed(3)})`);
+        halo.addColorStop(0.45, `rgba(${rgbs(base)},${(0.12 * b).toFixed(3)})`);
+        halo.addColorStop(1, `rgba(${rgbs(base)},0)`);
+        ctx.fillStyle = halo;
+        ctx.beginPath(); ctx.arc(cx, CY, hr, 0, Math.PI * 2); ctx.fill();
+      });
+      if (colon) {
+        const hr = (11 + 5 * b) * pulse;
+        const halo = ctx.createRadialGradient(62, 28, 0, 62, 28, hr);
+        halo.addColorStop(0, `rgba(${rgbs(base)},${(0.34 * b).toFixed(3)})`);
+        halo.addColorStop(1, `rgba(${rgbs(base)},0)`);
+        ctx.fillStyle = halo;
+        ctx.beginPath(); ctx.arc(62, 28, hr, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // ── Pass 3: lit segments — edge-to-core gradient + glow ──
+      for (let i = 0; i < 4; i++) {
+        const byte = digits[i] & 0xFF;
+        if (!byte) continue;
+        for (const [path, sx, sy, axis, bit] of segShapes(CELLS[i])) {
+          if (!(byte & (1 << bit))) continue;
+          let grad;
+          if (axis === 'h') grad = ctx.createLinearGradient(0, sy - 2.5, 0, sy + 2.5);
+          else grad = ctx.createLinearGradient(sx - 2.5, 0, sx + 2.5, 0);
+          grad.addColorStop(0, `rgba(${rgbs(mixc(base, BLACK, 0.25))},${(0.35 + 0.65 * b).toFixed(3)})`);
+          grad.addColorStop(0.5, `rgba(${rgbs(mixc(base, WHITE, 0.45 + 0.5 * b))},${(0.5 + 0.5 * b).toFixed(3)})`);
+          grad.addColorStop(1, `rgba(${rgbs(mixc(base, BLACK, 0.25))},${(0.35 + 0.65 * b).toFixed(3)})`);
+          ctx.shadowColor = `rgba(${rgbs(base)},${(0.55 * b).toFixed(3)})`;
+          ctx.shadowBlur = (3 + 6 * b) * pulse;
+          ctx.fillStyle = grad;
+          ctx.beginPath(); path(); ctx.fill();
+        }
+        if (byte & 0x80) { // decimal point
+          const dg = ctx.createRadialGradient(CELLS[i] + 8.5, CY + 10, 0, CELLS[i] + 8.5, CY + 10, 2);
+          dg.addColorStop(0, `rgba(${rgbs(mixc(base, WHITE, 0.5 + 0.5 * b))},${(0.6 + 0.4 * b).toFixed(3)})`);
+          dg.addColorStop(1, `rgba(${rgbs(base)},${(0.5 + 0.5 * b).toFixed(3)})`);
+          ctx.shadowColor = `rgba(${rgbs(base)},${(0.55 * b).toFixed(3)})`;
+          ctx.shadowBlur = (3 + 5 * b) * pulse;
+          ctx.fillStyle = dg;
+          ctx.beginPath(); ctx.arc(CELLS[i] + 8.5, CY + 10, 1.5, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      // Colon dots
+      if (colon) {
+        for (const dy of [24, 32]) {
+          const cg = ctx.createRadialGradient(62, dy, 0, 62, dy, 2.5);
+          cg.addColorStop(0, `rgba(${rgbs(mixc(base, WHITE, 0.5 + 0.5 * b))},${(0.6 + 0.4 * b).toFixed(3)})`);
+          cg.addColorStop(1, `rgba(${rgbs(base)},${(0.5 + 0.5 * b).toFixed(3)})`);
+          ctx.shadowColor = `rgba(${rgbs(base)},${(0.55 * b).toFixed(3)})`;
+          ctx.shadowBlur = (3 + 5 * b) * pulse;
+          ctx.fillStyle = cg;
+          ctx.beginPath(); ctx.arc(62, dy, 2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.shadowBlur = 0;
+    }
+
+    if (inst.selected) drawSelectionRect(ctx, -1, -1, 118, 68);
+    ctx.restore();
+  }
+});
+
 /* -------------- LCD 16x2 (Parallel HD44780 - Large Realistic Design) ------------------ */
 
 defComp({

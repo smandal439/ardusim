@@ -24862,6 +24862,81 @@ window.EXAMPLE_SKETCHES = [
     "code": "/*\n * TB6600 Stepper Motor Driver Example\n *\n * Controls a NEMA 17 stepper motor using TB6600 driver.\n * Demonstrates pulse/direction control with variable speed.\n *\n * Wiring:\n *   Arduino D2  -> TB6600 PUL (Pulse)\n *   Arduino D3  -> TB6600 DIR (Direction)\n *   Arduino D4  -> TB6600 ENA (Enable)\n *   Arduino GND -> TB6600 GND\n *\n * TB6600 connects to NEMA 17 motor via:\n *   A+, A-, B+, B- terminals\n *\n * TB6600 Settings:\n *   - Microstep: 1/16 (DIP switches SW1-SW4)\n *   - Current: 1.5A (potentiometer adjustment)\n *   - Motor: NEMA 17 (1.8 deg step angle)\n *\n * Step Angle Calculation:\n *   Full step = 1.8 deg\n *   1/16 microstep = 1.8 / 16 = 0.1125 deg per microstep\n *   Steps per revolution = 360 / 0.1125 = 3200 microsteps\n */\n\n#include <TB6600.h>\n\n// Pin definitions\nconst int PUL_PIN = 2;   // Pulse pin\nconst int DIR_PIN = 3;   // Direction pin\nconst int ENA_PIN = 4;   // Enable pin\n\n// Create TB6600 driver instance\nTB6600 stepper(PUL_PIN, DIR_PIN, ENA_PIN);\n\n// Microstep setting (must match DIP switch configuration)\nconst int MICROSTEP = 16;\n\n// Steps per revolution for 1.8 deg stepper with 1/16 microstep\nconst int STEPS_PER_REV = 3200;\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"TB6600 Stepper Motor Control\");\n  Serial.println(\"==========================\");\n  \n  // Initialize the driver\n  stepper.begin();\n  stepper.setMicrostep(MICROSTEP);\n  stepper.setSpeed(800);\n  \n  Serial.print(\"Microstep: 1/\");\n  Serial.println(MICROSTEP);\n  Serial.print(\"Steps per revolution: \");\n  Serial.println(STEPS_PER_REV);\n  Serial.println();\n}\n\nvoid loop() {\n  // Example 1: Rotate clockwise at slow speed\n  Serial.println(\"[1] Rotating CW at 200 RPM...\");\n  stepper.setSpeed(200);\n  stepper.enable();\n  stepper.step(STEPS_PER_REV);\n  delay(1000);\n  \n  // Example 2: Rotate counter-clockwise at medium speed\n  Serial.println(\"[2] Rotating CCW at 400 RPM...\");\n  stepper.setSpeed(400);\n  stepper.step(-STEPS_PER_REV);\n  delay(1000);\n  \n  // Example 3: Rotate clockwise at high speed\n  Serial.println(\"[3] Rotating CW at 600 RPM...\");\n  stepper.setSpeed(600);\n  stepper.step(STEPS_PER_REV);\n  delay(1000);\n  \n  // Example 4: Partial rotation (90 degrees)\n  Serial.println(\"[4] Rotating 90 deg...\");\n  stepper.setSpeed(400);\n  stepper.step(STEPS_PER_REV / 4);\n  delay(500);\n  \n  // Example 5: Return to starting position\n  Serial.println(\"[5] Returning to start...\");\n  stepper.step(-STEPS_PER_REV / 4);\n  delay(1000);\n  \n  // Example 6: Disable motor (torque off)\n  Serial.println(\"[6] Motor disabled\");\n  stepper.disable();\n  delay(2000);\n  \n  // Re-enable for next cycle\n  Serial.println(\"[7] Motor re-enabled\");\n  stepper.enable();\n  delay(500);\n  \n  Serial.println(\"--- Cycle complete ---\");\n  Serial.println();\n  delay(1000);\n}"
   },
   {
+    "id": "tm1637_clock",
+    "name": "TM1637 Clock",
+    "icon": "🕐",
+    "desc": "4-digit clock with blinking colon over the 2-wire TM1637 interface (CLK=D2, DIO=D3)",
+    "tags": [
+      "beginner",
+      "display",
+      "tm1637",
+      "clock"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "arduino_uno",
+          "x": 200,
+          "y": 100
+        },
+        {
+          "id": "d1",
+          "type": "tm1637",
+          "x": 120,
+          "y": 320
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "D2"
+          },
+          "to": {
+            "instId": "d1",
+            "pinId": "CLK"
+          }
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "b1",
+            "pinId": "D3"
+          },
+          "to": {
+            "instId": "d1",
+            "pinId": "DIO"
+          }
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "b1",
+            "pinId": "5V"
+          },
+          "to": {
+            "instId": "d1",
+            "pinId": "VCC"
+          }
+        },
+        {
+          "id": "w4",
+          "from": {
+            "instId": "b1",
+            "pinId": "GND1"
+          },
+          "to": {
+            "instId": "d1",
+            "pinId": "GND"
+          }
+        }
+      ]
+    },
+    "code": "/*\n * TM1637 4-Digit Clock — hours:minutes with a blinking colon\n * CLK -> D2, DIO -> D3, VCC -> 5V, GND -> GND\n */\n\n#include <TM1637Display.h>\n\n#define CLK 2\n#define DIO 3\n\nTM1637Display display(CLK, DIO);\n\nint hours = 9;\nint minutes = 45;\nunsigned long lastTick = 0;\nbool colonOn = false;\n\nvoid setup() {\n  display.setBrightness(7);   // 0 = dimmest, 7 = brightest\n}\n\nvoid loop() {\n  display.showNumberDec(hours * 100 + minutes, true);\n\n  // Blink the colon at 1 Hz\n  if (millis() - lastTick >= 500) {\n    lastTick = millis();\n    colonOn = !colonOn;\n    if (colonOn) display.showColonSegment();\n    else display.hideColonSegment();\n  }\n}"
+  },
+  {
     "id": "traffic_light",
     "name": "Traffic Light",
     "icon": "🔧",

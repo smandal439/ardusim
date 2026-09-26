@@ -206,13 +206,13 @@ describe('seg7 — draw()', () => {
   const SEG_DEF = window.ArduinoComponents.COMPONENT_DEFS.seg7;
 
   function recordCtx() {
-    const state = { shadowBlur: 0, shadowBlurVals: [], fills: 0, gradients: 0 };
+    const state = { shadowBlur: 0, shadowBlurVals: [], fills: 0, gradients: 0, stopColors: [], fillStyleVals: [] };
     const ctx = new Proxy({ state }, {
       get(t, prop) {
         if (prop === 'state') return state;
         if (prop === 'measureText') return () => ({ width: 0 });
         if (prop === 'createLinearGradient' || prop === 'createRadialGradient') {
-          return () => { state.gradients++; return { addColorStop() {} }; };
+          return () => { state.gradients++; return { addColorStop(_stop, color) { state.stopColors.push(String(color)); } }; };
         }
         if (prop === 'fill') return () => { state.fills++; };
         if (prop in t) return t[prop];
@@ -220,6 +220,7 @@ describe('seg7 — draw()', () => {
       },
       set(t, prop, v) {
         if (prop === 'shadowBlur') state.shadowBlurVals.push(v);
+        if (prop === 'fillStyle' && typeof v === 'string') state.fillStyleVals.push(v);
         t[prop] = v;
         return true;
       },
@@ -227,7 +228,12 @@ describe('seg7 — draw()', () => {
     return ctx;
   }
 
-  const instAt = (segments) => ({ x: 0, y: 0, props: { commonAnode: false }, runtimeState: { segments }, selected: false });
+  const instAt = (segments, props = {}) => ({
+    x: 0, y: 0,
+    props: { commonAnode: false, color: '#ff3333', colorName: 'Red', brightness: 100, ...props },
+    runtimeState: { segments },
+    selected: false,
+  });
 
   it('renders an all-off display with ghost segments and no glow', () => {
     const ctx = recordCtx();
@@ -251,5 +257,68 @@ describe('seg7 — draw()', () => {
     const ctx = recordCtx();
     expect(() => SEG_DEF.draw(ctx, instAt({ A: true, DP: true }))).not.toThrow();
     expect(Math.max(...ctx.state.shadowBlurVals)).toBeGreaterThan(0);
+  });
+
+  it('tints lit segments with the selected colour', () => {
+    const green = recordCtx();
+    SEG_DEF.draw(green, instAt({ A: 1 }, { color: '#33ff66' }));
+    expect(green.state.stopColors.some(c => c.includes('51,255,102'))).toBe(true);
+
+    const red = recordCtx();
+    SEG_DEF.draw(red, instAt({ A: 1 }, { color: '#ff3333' }));
+    expect(red.state.stopColors.some(c => c.includes('255,51,51'))).toBe(true);
+    expect(red.state.stopColors.some(c => c.includes('51,255,102'))).toBe(false);
+  });
+
+  it('scales overall intensity with the brightness setting', () => {
+    const full = recordCtx();
+    SEG_DEF.draw(full, instAt({ A: 1 }, { brightness: 100 }));
+    const dim = recordCtx();
+    SEG_DEF.draw(dim, instAt({ A: 1 }, { brightness: 10 }));
+    const off = recordCtx();
+    SEG_DEF.draw(off, instAt({ A: 1 }, { brightness: 0 }));
+
+    expect(Math.max(...dim.state.shadowBlurVals)).toBeLessThan(Math.max(...full.state.shadowBlurVals));
+    expect(off.state.gradients).toBe(2); // body + sheen only — no halo, no lit fill
+    expect(Math.max(...off.state.shadowBlurVals)).toBe(0);
+  });
+
+  it('tolerates a string brightness (as stored by the properties modal)', () => {
+    const ctx = recordCtx();
+    SEG_DEF.draw(ctx, instAt({ A: 1 }, { brightness: '50' }));
+    expect(Math.max(...ctx.state.shadowBlurVals)).toBeGreaterThan(0);
+    expect(ctx.state.stopColors.some(c => c.includes('255,51,51'))).toBe(true);
+  });
+});
+
+describe('seg7 — pin layout & property menus', () => {
+  const DEF = window.ArduinoComponents.COMPONENT_DEFS.seg7;
+
+  it('spreads the bottom pins evenly across the full width', () => {
+    expect(DEF.pins.filter(p => p.side === 'bottom').map(p => p.id)).toEqual(['segG', 'dp', 'com']);
+    expect(DEF.pins.filter(p => p.side === 'bottom').map(p => p.x)).toEqual([8, 28, 48]);
+    expect(DEF.pins.filter(p => p.side === 'top').map(p => p.x)).toEqual([8, 16, 24, 32, 40, 48]);
+  });
+
+  it('keeps all pins inside the component body span', () => {
+    for (const pin of DEF.pins) expect(pin.x).toBeGreaterThanOrEqual(0);
+    expect(Math.max(...DEF.pins.map(p => p.x))).toBeLessThanOrEqual(DEF.width);
+  });
+
+  it('offers LED colour and brightness menus via interactive props', () => {
+    expect(DEF.defaultProps.color).toBe('#ff3333');
+    expect(DEF.defaultProps.colorName).toBe('Red');
+    expect(DEF.defaultProps.brightness).toBe(100);
+
+    const colorCtrl = (DEF.interactive || []).find(i => i.field === 'color');
+    expect(colorCtrl && colorCtrl.type).toBe('select');
+    const hexes = colorCtrl.options.map(o => o.value);
+    for (const h of ['#ff3333', '#33ff66', '#3399ff', '#ffee33', '#ff8833', '#ffffff']) {
+      expect(hexes).toContain(h);
+    }
+
+    const briCtrl = (DEF.interactive || []).find(i => i.field === 'brightness');
+    expect(briCtrl && briCtrl.type).toBe('select');
+    expect(briCtrl.options.map(o => o.value)).toEqual([100, 75, 50, 25, 10]);
   });
 });
