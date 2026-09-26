@@ -2,10 +2,14 @@
   "id": "register_based_blink_arduino",
   "name": "register based blink Arduino",
   "icon": "🔧",
-  "desc": "A custom register based blink Arduino circuit example.",
+  "desc": "This is a simple Arduino code that uses the PORTD register to control an LED connected to digital pin D4 of an Arduino Uno. The code sets the data direction register (DDRD) to output mode for pin D4, and then in the loop, it toggles the state of pin D4 by manipulating the PORTD register, creating a blinking effect for the LED.",
   "tags": [
-    "custom",
-    "circuit"
+    "arduino",
+    "led",
+    "register",
+    "PORTD",
+    "DDRD",
+    "blinking"
   ],
   "circuit": {
     "components": [

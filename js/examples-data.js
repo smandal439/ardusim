@@ -21322,6 +21322,92 @@ window.EXAMPLE_SKETCHES = [
     "code": "/*\nMFRC522 RFID Reader\t    ESP32\t          Description\nSDA\t                    GPIO 5\t        SPI signal input, I2C data line, or UART data input\nSCK\t                    GPIO 18\t        SPI clock\nMOSI\t                  GPIO 23\t        SPI data input\nMISO\t                  GPIO 19\t        SPI master-in-slave-out, I2C serial clock, or UART serial output\nIRQ\t                    Don’t connect\t  Interrupt pin; signals the microcontroller when an RFID tag is nearby\nGND\t                    GND\t\nRST\t                    GPIO 21\t        LOW signal to put the module in power-down mode; send a HIGH signal to reset the module\n3.3V\t                  3.3V\t          Power supply (2.5-3.3V)\n*/\n#include <MFRC522v2.h>\n#include <MFRC522DriverSPI.h>\n//#include <MFRC522DriverI2C.h>\n#include <MFRC522DriverPinSimple.h>\n#include <MFRC522Debug.h>\n\n// Learn more about using SPI/I2C or check the pin assigment for your board: https://github.com/OSSLibraries/Arduino_MFRC522v2#pin-layout\nMFRC522DriverPinSimple ss_pin(5);\n\nMFRC522DriverSPI driver{ss_pin}; // Create SPI driver\n//MFRC522DriverI2C driver{};     // Create I2C driver\nMFRC522 mfrc522{driver};         // Create MFRC522 instance\n\nvoid setup() {\n  Serial.begin(115200);  // Initialize serial communication\n  while (!Serial);       // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4).\n  \n  mfrc522.PCD_Init();    // Init MFRC522 board.\n  MFRC522Debug::PCD_DumpVersionToSerial(mfrc522, Serial);\t// Show details of PCD - MFRC522 Card Reader details.\n  Serial.println(F(\"Scan PICC to see UID, SAK, type, and data blocks...\"));\n}\n\nvoid loop() {\n  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.\n  if (!mfrc522.PICC_IsNewCardPresent()) {\n    return;\n  }\n\n  // Select one of the cards.\n  if (!mfrc522.PICC_ReadCardSerial()) {\n    return;\n  }\n\n  // Dump debug info about the card; PICC_HaltA() is automatically called.\n  MFRC522Debug::PICC_DumpToSerial(mfrc522, Serial, &(mfrc522.uid));\n\n  delay(2000);\n}"
   },
   {
+    "id": "register_based_arduino_code_1",
+    "name": "register based Arduino code 1",
+    "icon": "🔧",
+    "desc": "This is a simple Arduino code that uses the PIND register to read the state of digital pin D4 of an Arduino Uno. The code configures pin D4 as an input and continuously checks if the bit corresponding to pin D4 in the PIND register is set (indicating that the pin is HIGH). If the pin is HIGH, it prints a message to the serial monitor. This demonstrates how to use direct register manipulation to read the state of a digital input pin.",
+    "tags": [
+      "arduino",
+      "register",
+      "PIND",
+      "digital input"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1790348276488_alzpf",
+          "type": "arduino_uno",
+          "x": 30,
+          "y": 130,
+          "rotation": 0,
+          "props": {
+            "label": "UNO"
+          }
+        },
+        {
+          "id": "comp_1790350581794_5wwis",
+          "type": "power_5v",
+          "x": 190,
+          "y": 65,
+          "rotation": 0,
+          "props": {}
+        }
+      ],
+      "wires": [
+        {
+          "id": "wire_1790350586510_wwprt",
+          "from": {
+            "instId": "comp_1790348276488_alzpf",
+            "pinId": "D4"
+          },
+          "to": {
+            "instId": "comp_1790350581794_5wwis",
+            "pinId": "vcc"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "void setup() {\n  Serial.begin(9600);\n  DDRD &= ~(1 << 4); // Safely configure Pin 4 as INPUT\n}\n\nvoid loop() {\n  // Check if Bit 4 of PIND is a 1\n  if (PIND & (1 << 4)) {\n    Serial.println(\"Pin 4 is HIGH\");\n  }\n  delay(100);\n}\n"
+    }
+  },
+  {
+    "id": "register_based_blink_arduino",
+    "name": "register based blink Arduino",
+    "icon": "🔧",
+    "desc": "This is a simple Arduino code that uses the PORTD register to control an LED connected to digital pin D4 of an Arduino Uno. The code sets the data direction register (DDRD) to output mode for pin D4, and then in the loop, it toggles the state of pin D4 by manipulating the PORTD register, creating a blinking effect for the LED.",
+    "tags": [
+      "arduino",
+      "led",
+      "register",
+      "PORTD",
+      "DDRD",
+      "blinking"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1790348276488_alzpf",
+          "type": "arduino_uno",
+          "x": 30,
+          "y": 130,
+          "rotation": 0,
+          "props": {
+            "label": "UNO"
+          }
+        }
+      ],
+      "wires": []
+    },
+    "files": {
+      "sketch.ino": "void setup() {\n  // Set all pins on Port B (Pins 8 to 13) as OUTPUT\n  // B00100000 sets Pin 13 (Bit 5) as OUTPUT\n  DDRB = 0B00100000; \n}\n\nvoid loop() {\n  // Set Pin 13 HIGH safely using a bitwise OR (|) and bit shifting (<<)\nPORTB |= (1 << 5); \ndelay(1000);\n// Set Pin 13 LOW safely using a bitwise AND (&) and a bitwise NOT (~)\nPORTB &= ~(1 << 5); \ndelay(1000);\n}\n"
+    }
+  },
+  {
     "id": "relay_control",
     "name": "Relay Control",
     "icon": "⚡",

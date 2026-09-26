@@ -2,10 +2,12 @@
   "id": "register_based_arduino_code_1",
   "name": "register based Arduino code 1",
   "icon": "🔧",
-  "desc": "A custom register based Arduino code 1 circuit example.",
+  "desc": "This is a simple Arduino code that uses the PIND register to read the state of digital pin D4 of an Arduino Uno. The code configures pin D4 as an input and continuously checks if the bit corresponding to pin D4 in the PIND register is set (indicating that the pin is HIGH). If the pin is HIGH, it prints a message to the serial monitor. This demonstrates how to use direct register manipulation to read the state of a digital input pin.",
   "tags": [
-    "custom",
-    "circuit"
+    "arduino",
+    "register",
+    "PIND",
+    "digital input"
   ],
   "circuit": {
     "components": [
