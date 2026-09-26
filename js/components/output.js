@@ -969,50 +969,126 @@ defComp({
   draw(ctx, inst, sim) {
     const { x, y } = inst;
     const segs = inst.runtimeState && inst.runtimeState.segments ? inst.runtimeState.segments : {};
+    // runtimeState.segments holds brightness 0..1 (PWM-aware); booleans from
+    // older state paths are treated as full-on.
+    const bri = (k) => {
+      const v = segs[k];
+      if (!v) return 0;
+      const b = v === true ? 1 : Number(v);
+      return b > 0.01 ? Math.min(b, 1) : 0;
+    };
+    const lit = { A: bri('A'), B: bri('B'), C: bri('C'), D: bri('D'), E: bri('E'), F: bri('F'), G: bri('G'), DP: bri('DP') };
+    const anyLit = lit.A + lit.B + lit.C + lit.D + lit.E + lit.F + lit.G + lit.DP > 0;
+    const pulse = anyLit ? 1 + Math.sin(Date.now() / 300) * 0.04 : 1; // subtle LED breathing
 
     ctx.save();
     ctx.translate(x, y);
 
-    // Body
-    ctx.fillStyle = '#111';
-    roundRect(ctx, 2, 8, 46, 65, 4);
+    // ── Leads from the pins into the package ──
+    ctx.strokeStyle = '#8f8f8f';
+    ctx.lineWidth = 1.5;
+    for (const lx of [8, 16, 24, 32, 40, 48]) {
+      ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, 9); ctx.stroke();
+    }
+    for (const lx of [8, 16, 32]) {
+      ctx.beginPath(); ctx.moveTo(lx, 80); ctx.lineTo(lx, 72); ctx.stroke();
+    }
+
+    // ── Epoxy package: glossy dark body with edge highlight + sheen ──
+    const bodyGrad = ctx.createLinearGradient(0, 7, 0, 74);
+    bodyGrad.addColorStop(0, '#2a1d19');
+    bodyGrad.addColorStop(0.1, '#171110');
+    bodyGrad.addColorStop(1, '#080505');
+    ctx.fillStyle = bodyGrad;
+    roundRect(ctx, 2, 8, 46, 65, 5);
     ctx.fill();
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
     ctx.lineWidth = 1;
+    roundRect(ctx, 2.5, 8.5, 45, 64, 5);
     ctx.stroke();
-
-    // Draw 7 segments
-    const SEG_ON = '#ff2200';
-    const SEG_OFF = '#2a0000';
-    const sw = 5, sh = 18;
-    // Segment positions: a(top), b(top-right), c(bottom-right), d(bottom), e(bottom-left), f(top-left), g(middle)
-    const drawHSeg = (sy, active) => {
-      ctx.fillStyle = active ? SEG_ON : SEG_OFF;
-      ctx.beginPath();
-      ctx.moveTo(14, sy); ctx.lineTo(16, sy - 3); ctx.lineTo(36, sy - 3);
-      ctx.lineTo(38, sy); ctx.lineTo(36, sy + 3); ctx.lineTo(16, sy + 3);
-      ctx.closePath(); ctx.fill();
-    };
-    const drawVSeg = (sx, sy, active) => {
-      ctx.fillStyle = active ? SEG_ON : SEG_OFF;
-      ctx.beginPath();
-      ctx.moveTo(sx, sy); ctx.lineTo(sx + 3, sy + 2); ctx.lineTo(sx + 3, sy + 16);
-      ctx.lineTo(sx, sy + 18); ctx.lineTo(sx - 3, sy + 16); ctx.lineTo(sx - 3, sy + 2);
-      ctx.closePath(); ctx.fill();
-    };
-    drawHSeg(16, segs.A); // a - top
-    drawVSeg(38, 18, segs.B); // b - top right
-    drawVSeg(38, 38, segs.C); // c - bottom right
-    drawHSeg(56, segs.D); // d - bottom
-    drawVSeg(14, 38, segs.E); // e - bottom left
-    drawVSeg(14, 18, segs.F); // f - top left
-    drawHSeg(36, segs.G); // g - middle
-
-    // Decimal point
-    ctx.fillStyle = segs.DP ? SEG_ON : SEG_OFF;
-    ctx.beginPath();
-    ctx.arc(44, 59, 3, 0, Math.PI * 2);
+    const sheen = ctx.createLinearGradient(2, 8, 48, 73);
+    sheen.addColorStop(0, 'rgba(255,255,255,0.07)');
+    sheen.addColorStop(0.35, 'rgba(255,255,255,0.02)');
+    sheen.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sheen;
+    roundRect(ctx, 2, 8, 46, 65, 5);
     ctx.fill();
+
+    // ── Segment geometry (classic 8-layout with corner gaps) ──
+    const hPath = (cy) => { // horizontal a/g/d — tips at x14 and x38
+      ctx.moveTo(14, cy); ctx.lineTo(17, cy - 3); ctx.lineTo(35, cy - 3);
+      ctx.lineTo(38, cy); ctx.lineTo(35, cy + 3); ctx.lineTo(17, cy + 3);
+      ctx.closePath();
+    };
+    const vPath = (sx, sy) => { // vertical f/e/b/c — tips at sy and sy+16
+      ctx.moveTo(sx, sy); ctx.lineTo(sx + 3, sy + 3); ctx.lineTo(sx + 3, sy + 13);
+      ctx.lineTo(sx, sy + 16); ctx.lineTo(sx - 3, sy + 13); ctx.lineTo(sx - 3, sy + 3);
+      ctx.closePath();
+    };
+    // [path, centroid x, centroid y, across-axis ('h' = gradient runs vertically)
+    const SHAPES = [
+      [() => hPath(16), 26, 16, 'h', lit.A],   // a — top
+      [() => vPath(38, 19), 38, 27, 'v', lit.B], // b — top right
+      [() => vPath(38, 39), 38, 47, 'v', lit.C], // c — bottom right
+      [() => hPath(56), 26, 56, 'h', lit.D],   // d — bottom
+      [() => vPath(14, 39), 14, 47, 'v', lit.E], // e — bottom left
+      [() => vPath(14, 19), 14, 27, 'v', lit.F], // f — top left
+      [() => hPath(36), 26, 36, 'h', lit.G],   // g — middle
+    ];
+    const GHOST = '#4a1210'; // unlit segment — dark red, as on a real display
+
+    // Pass 1: ghost (unlit) segments
+    ctx.fillStyle = GHOST;
+    for (const [path] of SHAPES) { ctx.beginPath(); path(); ctx.fill(); }
+    ctx.beginPath(); ctx.arc(44, 59, 3, 0, Math.PI * 2); ctx.fill();
+
+    // Pass 2: light spill (halo) from each lit segment onto the face
+    for (const [, hx, hy, , b] of SHAPES) {
+      if (b <= 0.01) continue;
+      const hr = (12 + 8 * b) * pulse;
+      const halo = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr);
+      halo.addColorStop(0, `rgba(255,70,25,${(0.38 * b).toFixed(3)})`);
+      halo.addColorStop(0.45, `rgba(255,50,15,${(0.13 * b).toFixed(3)})`);
+      halo.addColorStop(1, 'rgba(255,40,10,0)');
+      ctx.fillStyle = halo;
+      ctx.beginPath(); ctx.arc(hx, hy, hr, 0, Math.PI * 2); ctx.fill();
+    }
+    if (lit.DP > 0.01) {
+      const hr = (9 + 6 * lit.DP) * pulse;
+      const halo = ctx.createRadialGradient(44, 59, 0, 44, 59, hr);
+      halo.addColorStop(0, `rgba(255,70,25,${(0.38 * lit.DP).toFixed(3)})`);
+      halo.addColorStop(1, 'rgba(255,40,10,0)');
+      ctx.fillStyle = halo;
+      ctx.beginPath(); ctx.arc(44, 59, hr, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Pass 3: lit segments — edge-to-core gradient (hot centre), glow shadow
+    for (const [path, hx, hy, axis, b] of SHAPES) {
+      if (b <= 0.01) continue;
+      let grad;
+      if (axis === 'h') grad = ctx.createLinearGradient(0, hy - 3.5, 0, hy + 3.5);
+      else grad = ctx.createLinearGradient(hx - 3.5, 0, hx + 3.5, 0);
+      grad.addColorStop(0, `rgba(196,34,12,${(0.35 + 0.65 * b).toFixed(3)})`);
+      grad.addColorStop(0.5, `rgba(255,${Math.round(120 + 135 * b)},${Math.round(60 + 150 * b)},${(0.5 + 0.5 * b).toFixed(3)})`);
+      grad.addColorStop(1, `rgba(196,34,12,${(0.35 + 0.65 * b).toFixed(3)})`);
+      ctx.shadowColor = `rgba(255,60,20,${(0.55 * b).toFixed(3)})`;
+      ctx.shadowBlur = (5 + 9 * b) * pulse;
+      ctx.fillStyle = grad;
+      ctx.beginPath(); path(); ctx.fill();
+    }
+    // Decimal point
+    if (lit.DP > 0.01) {
+      const b = lit.DP;
+      const rg = ctx.createRadialGradient(44, 59, 0, 44, 59, 3.2);
+      rg.addColorStop(0, `rgba(255,250,235,${(0.55 + 0.45 * b).toFixed(3)})`);
+      rg.addColorStop(0.55, `rgba(255,80,30,${(0.5 + 0.5 * b).toFixed(3)})`);
+      rg.addColorStop(1, `rgba(190,30,10,${(0.35 + 0.65 * b).toFixed(3)})`);
+      ctx.shadowColor = `rgba(255,60,20,${(0.55 * b).toFixed(3)})`;
+      ctx.shadowBlur = (5 + 8 * b) * pulse;
+      ctx.fillStyle = rg;
+      ctx.beginPath(); ctx.arc(44, 59, 3, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.shadowBlur = 0;
 
     if (inst.selected) drawSelectionRect(ctx, -1, 5, 52, 78);
     ctx.restore();

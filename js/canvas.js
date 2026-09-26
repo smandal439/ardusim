@@ -3226,14 +3226,40 @@ class CircuitCanvas {
         case 'seg7': {
           const segPins = ['segA', 'segB', 'segC', 'segD', 'segE', 'segF', 'segG', 'dp'];
           const segKeys = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'DP'];
+          const commonAnode = !!inst.props.commonAnode;
+          // Real display: COM must complete the circuit — common-cathode needs a
+          // path to ground, common-anode to a supply. If COM isn't wired at all
+          // we assume it's hooked up, so simple demo circuits keep working.
+          const comWired = this.wires.some(w =>
+            (w.from.instId === inst.id && w.from.pinId === 'com') ||
+            (w.to.instId === inst.id && w.to.pinId === 'com'));
+          let powered = true;
+          if (comWired) {
+            const comNet = this._tracePinNet(inst.id, 'com');
+            powered = commonAnode ? comNet.sources.length > 0 : comNet.grounds.length > 0;
+          }
           const segments = {};
           segPins.forEach((pinId, i) => {
+            let bright = 0;
             const pinNum = this._getConnectedPinNum(inst.id, pinId);
-            let on = false;
-            if (pinNum !== null && window.ArduinoSim && window.ArduinoSim.pinStates) {
-              on = !!window.ArduinoSim.pinStates[`pin_${pinNum}`];
+            if (powered && pinNum !== null && sim && sim.pinStates) {
+              const raw = sim.pinStates[`pin_${pinNum}`];
+              const mode = sim.pinModes ? sim.pinModes[`pin_${pinNum}`] : undefined;
+              const isInput = mode === 'INPUT' || mode === 'INPUT_PULLUP';
+              if (raw !== undefined && raw !== null) {
+                if (commonAnode) {
+                  // Common anode: segment lights when its pin SINKS (LOW). A
+                  // high-Z input can't sink current, so it stays dark even
+                  // though canvas feedback may have written a 0 into the pin.
+                  if (!isInput) bright = raw === 0 ? 1 : (raw <= 1 ? 0 : 1 - Math.min(raw / 255, 1));
+                } else if (raw > 0) {
+                  // Common cathode: lit when the pin SOURCES voltage. raw 1 =
+                  // digital HIGH (full), 2..255 = PWM duty -> brightness.
+                  bright = raw <= 1 ? 1 : Math.min(raw / 255, 1);
+                }
+              }
             }
-            segments[segKeys[i]] = on;
+            segments[segKeys[i]] = bright;
           });
           inst.runtimeState.segments = segments;
           break;
