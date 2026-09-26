@@ -137,8 +137,13 @@ class ArduinoSimulator {
     js = js.replace(/^\s*(?:const\s+)?(?:unsigned\s+)?(?:void|int|float|double|long|short|char|bool|boolean|byte|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t)\s+\w+\s*\([^)]*\)\s*;\s*$/gm, '');
 
     // 2b. C++11 raw string literals: R"delim(...)delim" -> `...`
+    //     Backslashes must be escaped first so they survive as literal
+    //     characters instead of becoming JS escape sequences (e.g. \n).
     js = js.replace(/\bR"([a-zA-Z0-9_]*)\(([\s\S]*?)\)\1"/g, (_, delim, content) => {
-      return '`' + content.replace(/\$/g, '\\$').replace(/`/g, '\\`') + '`';
+      return '`' + content
+        .replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/`/g, '\\`') + '`';
     });
 
     // 3. Apply #define substitutions (simple word replacement)

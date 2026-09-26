@@ -954,7 +954,24 @@ defComp({
   desc: 'Single-digit 7-segment LED display with decimal point',
   width: 50,
   height: 80,
-  defaultProps: { commonAnode: false },
+  defaultProps: { commonAnode: false, color: '#ff3333', colorName: 'Red', brightness: 100 },
+  interactive: [
+    { field: 'color', label: 'LED Color', type: 'select', options: [
+      { value: '#ff3333', label: 'Red' },
+      { value: '#33ff66', label: 'Green' },
+      { value: '#3399ff', label: 'Blue' },
+      { value: '#ffee33', label: 'Yellow' },
+      { value: '#ff8833', label: 'Orange' },
+      { value: '#ffffff', label: 'White' },
+    ] },
+    { field: 'brightness', label: 'Brightness', type: 'select', options: [
+      { value: 100, label: '100 %' },
+      { value: 75, label: '75 %' },
+      { value: 50, label: '50 %' },
+      { value: 25, label: '25 %' },
+      { value: 10, label: '10 %' },
+    ] },
+  ],
   pins: [
     { id: 'segA', label: 'A', type: PIN_TYPE.DIGITAL, x: 8, y: 0, side: 'top' },
     { id: 'segB', label: 'B', type: PIN_TYPE.DIGITAL, x: 16, y: 0, side: 'top' },
@@ -963,8 +980,8 @@ defComp({
     { id: 'segE', label: 'E', type: PIN_TYPE.DIGITAL, x: 40, y: 0, side: 'top' },
     { id: 'segF', label: 'F', type: PIN_TYPE.DIGITAL, x: 48, y: 0, side: 'top' },
     { id: 'segG', label: 'G', type: PIN_TYPE.DIGITAL, x: 8, y: 80, side: 'bottom' },
-    { id: 'dp', label: 'DP', type: PIN_TYPE.DIGITAL, x: 16, y: 80, side: 'bottom' },
-    { id: 'com', label: 'COM', type: PIN_TYPE.POWER, x: 32, y: 80, side: 'bottom' },
+    { id: 'dp', label: 'DP', type: PIN_TYPE.DIGITAL, x: 28, y: 80, side: 'bottom' },
+    { id: 'com', label: 'COM', type: PIN_TYPE.POWER, x: 48, y: 80, side: 'bottom' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -977,7 +994,18 @@ defComp({
       const b = v === true ? 1 : Number(v);
       return b > 0.01 ? Math.min(b, 1) : 0;
     };
-    const lit = { A: bri('A'), B: bri('B'), C: bri('C'), D: bri('D'), E: bri('E'), F: bri('F'), G: bri('G'), DP: bri('DP') };
+    const lit0 = { A: bri('A'), B: bri('B'), C: bri('C'), D: bri('D'), E: bri('E'), F: bri('F'), G: bri('G'), DP: bri('DP') };
+    // Properties menu: LED colour + brightness (0-100 %)
+    const p = inst.props || {};
+    const hex = (typeof p.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(p.color)) ? p.color : '#ff3333';
+    const base = [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+    const bNum = Number(p.brightness);
+    const inten = Number.isFinite(bNum) ? Math.min(Math.max(bNum, 0), 100) / 100 : 1;
+    const mixc = (a, b2, t) => [0, 1, 2].map(i => Math.round(a[i] + (b2[i] - a[i]) * t));
+    const rgbs = (c) => `${c[0]},${c[1]},${c[2]}`;
+    const WHITE = [255, 255, 255], BLACK = [0, 0, 0];
+    const lit = {};
+    for (const k of Object.keys(lit0)) lit[k] = lit0[k] * inten;
     const anyLit = lit.A + lit.B + lit.C + lit.D + lit.E + lit.F + lit.G + lit.DP > 0;
     const pulse = anyLit ? 1 + Math.sin(Date.now() / 300) * 0.04 : 1; // subtle LED breathing
 
@@ -990,7 +1018,7 @@ defComp({
     for (const lx of [8, 16, 24, 32, 40, 48]) {
       ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, 9); ctx.stroke();
     }
-    for (const lx of [8, 16, 32]) {
+    for (const lx of [8, 28, 48]) {
       ctx.beginPath(); ctx.moveTo(lx, 80); ctx.lineTo(lx, 72); ctx.stroke();
     }
 
@@ -1035,7 +1063,7 @@ defComp({
       [() => vPath(14, 19), 14, 27, 'v', lit.F], // f — top left
       [() => hPath(36), 26, 36, 'h', lit.G],   // g — middle
     ];
-    const GHOST = '#4a1210'; // unlit segment — dark red, as on a real display
+    const GHOST = `rgba(${rgbs(mixc(base, BLACK, 0.78))},1)`; // unlit segment — dark tint of the LED colour
 
     // Pass 1: ghost (unlit) segments
     ctx.fillStyle = GHOST;
@@ -1047,17 +1075,17 @@ defComp({
       if (b <= 0.01) continue;
       const hr = (12 + 8 * b) * pulse;
       const halo = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr);
-      halo.addColorStop(0, `rgba(255,70,25,${(0.38 * b).toFixed(3)})`);
-      halo.addColorStop(0.45, `rgba(255,50,15,${(0.13 * b).toFixed(3)})`);
-      halo.addColorStop(1, 'rgba(255,40,10,0)');
+      halo.addColorStop(0, `rgba(${rgbs(base)},${(0.38 * b).toFixed(3)})`);
+      halo.addColorStop(0.45, `rgba(${rgbs(base)},${(0.13 * b).toFixed(3)})`);
+      halo.addColorStop(1, `rgba(${rgbs(base)},0)`);
       ctx.fillStyle = halo;
       ctx.beginPath(); ctx.arc(hx, hy, hr, 0, Math.PI * 2); ctx.fill();
     }
     if (lit.DP > 0.01) {
       const hr = (9 + 6 * lit.DP) * pulse;
       const halo = ctx.createRadialGradient(44, 59, 0, 44, 59, hr);
-      halo.addColorStop(0, `rgba(255,70,25,${(0.38 * lit.DP).toFixed(3)})`);
-      halo.addColorStop(1, 'rgba(255,40,10,0)');
+      halo.addColorStop(0, `rgba(${rgbs(base)},${(0.38 * lit.DP).toFixed(3)})`);
+      halo.addColorStop(1, `rgba(${rgbs(base)},0)`);
       ctx.fillStyle = halo;
       ctx.beginPath(); ctx.arc(44, 59, hr, 0, Math.PI * 2); ctx.fill();
     }
@@ -1068,10 +1096,10 @@ defComp({
       let grad;
       if (axis === 'h') grad = ctx.createLinearGradient(0, hy - 3.5, 0, hy + 3.5);
       else grad = ctx.createLinearGradient(hx - 3.5, 0, hx + 3.5, 0);
-      grad.addColorStop(0, `rgba(196,34,12,${(0.35 + 0.65 * b).toFixed(3)})`);
-      grad.addColorStop(0.5, `rgba(255,${Math.round(120 + 135 * b)},${Math.round(60 + 150 * b)},${(0.5 + 0.5 * b).toFixed(3)})`);
-      grad.addColorStop(1, `rgba(196,34,12,${(0.35 + 0.65 * b).toFixed(3)})`);
-      ctx.shadowColor = `rgba(255,60,20,${(0.55 * b).toFixed(3)})`;
+      grad.addColorStop(0, `rgba(${rgbs(mixc(base, BLACK, 0.25))},${(0.35 + 0.65 * b).toFixed(3)})`);
+      grad.addColorStop(0.5, `rgba(${rgbs(mixc(base, WHITE, 0.45 + 0.5 * b))},${(0.5 + 0.5 * b).toFixed(3)})`);
+      grad.addColorStop(1, `rgba(${rgbs(mixc(base, BLACK, 0.25))},${(0.35 + 0.65 * b).toFixed(3)})`);
+      ctx.shadowColor = `rgba(${rgbs(base)},${(0.55 * b).toFixed(3)})`;
       ctx.shadowBlur = (5 + 9 * b) * pulse;
       ctx.fillStyle = grad;
       ctx.beginPath(); path(); ctx.fill();
@@ -1080,10 +1108,10 @@ defComp({
     if (lit.DP > 0.01) {
       const b = lit.DP;
       const rg = ctx.createRadialGradient(44, 59, 0, 44, 59, 3.2);
-      rg.addColorStop(0, `rgba(255,250,235,${(0.55 + 0.45 * b).toFixed(3)})`);
-      rg.addColorStop(0.55, `rgba(255,80,30,${(0.5 + 0.5 * b).toFixed(3)})`);
-      rg.addColorStop(1, `rgba(190,30,10,${(0.35 + 0.65 * b).toFixed(3)})`);
-      ctx.shadowColor = `rgba(255,60,20,${(0.55 * b).toFixed(3)})`;
+      rg.addColorStop(0, `rgba(${rgbs(mixc(base, WHITE, 0.5 + 0.5 * b))},${(0.55 + 0.45 * b).toFixed(3)})`);
+      rg.addColorStop(0.55, `rgba(${rgbs(base)},${(0.5 + 0.5 * b).toFixed(3)})`);
+      rg.addColorStop(1, `rgba(${rgbs(mixc(base, BLACK, 0.3))},${(0.35 + 0.65 * b).toFixed(3)})`);
+      ctx.shadowColor = `rgba(${rgbs(base)},${(0.55 * b).toFixed(3)})`;
       ctx.shadowBlur = (5 + 8 * b) * pulse;
       ctx.fillStyle = rg;
       ctx.beginPath(); ctx.arc(44, 59, 3, 0, Math.PI * 2); ctx.fill();

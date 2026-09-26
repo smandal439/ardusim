@@ -379,7 +379,11 @@ void loop() {
       dp: { label: 'DP', type: 'digital', desc: 'Decimal point segment.' },
       com: { label: 'COM', type: 'power', desc: 'Common pin — connect to GND (common cathode) or 5V (common anode).' },
     },
-    props: { commonAnode: 'true if the display is common-anode (COM to +5V).' },
+    props: {
+      commonAnode: 'true if the display is common-anode (COM to +5V).',
+      color: 'LED colour of the segments (red, green, blue, yellow, orange, white).',
+      brightness: 'Display brightness in percent (10–100).',
+    },
     wiring: 'A→D2, B→D3, C→D4, D→D5, E→D6, F→D7, G→D8 ; COM → GND.',
     code: `// segment patterns for digits 0-9 (a,b,c,d,e,f,g)
 byte digit[10] = { 0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F };

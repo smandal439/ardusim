@@ -3494,7 +3494,7 @@ _newProject() {
     }
 
     Object.entries(comp.props || {}).forEach(([key, value]) => {
-      if (isLED && key === 'colorName') return;
+      if (key === 'colorName') return; // derived from the colour select — never editable
 
       // Handle interactive select controls
       const iDef = interactiveDefs[key];
