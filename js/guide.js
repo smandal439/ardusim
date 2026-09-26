@@ -366,7 +366,7 @@ void loop() {
     name: '7-Segment Display',
     icon: '🔢',
     category: 'Output',
-    longDesc: 'A single digit made from seven LED bars (a–g) plus a decimal point. Each segment is a separate LED; lighting the right combination shows any digit 0–9 or some letters. The common pin (COM) completes the circuit — set commonAnode false for a common-cathode module.',
+    longDesc: 'A single digit made from seven LED bars (a–g) plus a decimal point. Each segment is a separate LED; lighting the right combination shows any digit 0–9 or some letters. The common pin (COM) completes the circuit — set commonAnode false for a common-cathode module. Drive a segment with analogWrite() to dim it (PWM brightness).',
     use: 'Numeric counters, clocks, scoreboards. Each segment maps to its own digital pin.',
     pins: {
       segA: { label: 'A', type: 'digital', desc: 'Top horizontal segment.' },
