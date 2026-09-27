@@ -2741,6 +2741,12 @@ class ArduinoSimulator {
           ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],
           ic_74hc47: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
           ic_74hc148: ['A0', 'A1', 'A2', 'GS', 'EO'],
+          ic_74hc02: ['Y1', 'Y2', 'Y3', 'Y4'],
+          ic_74hc86: ['Y1', 'Y2', 'Y3', 'Y4'],
+          ic_74hc139: ['Y0_1', 'Y1_1', 'Y2_1', 'Y3_1', 'Y0_2', 'Y1_2', 'Y2_2', 'Y3_2'],
+          ic_74hc153: ['Y1', 'Y2'],
+          ic_74hc164: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7'],
+          ic_74hc4017: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q59'],
           lm741: ['OUT'],
         };
         if (IC_OUT[other.type] && IC_OUT[other.type].includes(target.pinId)) {

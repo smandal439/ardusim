@@ -7,9 +7,11 @@
  *     decade counter with clock inhibit/reset/carry
  *   - draw() smoke test for each new def
  *   - example circuits: wire endpoints resolve to real component pins
+ *   - LA/probe output read path: getPinVoltage IC allow-lists + source-level
+ *     coverage of all duplicated IC-output maps (simulator/canvas/electrical)
  * Run: npx vitest run test/ics_digital.test.js
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -51,6 +53,8 @@ const { COMPONENT_CATALOG, COMPONENT_DEFS, getComponentClass, createComponent, P
   'js/components/ics.js',
   'js/components/ic_8255.js',
 ], ['COMPONENT_CATALOG', 'COMPONENT_DEFS', 'getComponentClass', 'createComponent', 'PIN_TYPE']);
+
+const { ArduinoSimulator } = loadScripts(['js/simulator.js'], ['ArduinoSimulator']);
 
 const NEW_IDS = ['ic_74hc02', 'ic_74hc86', 'ic_74hc139', 'ic_74hc153', 'ic_74hc164', 'ic_74hc4017'];
 const ALL_IDS = ['ic_555', 'ic_74hc00', 'ic_74hc02', 'ic_74hc04', 'ic_74hc08', 'ic_74hc32', 'ic_74hc86',
@@ -458,4 +462,56 @@ describe('digital IC example circuits', () => {
       expect(dataSrc.includes(`"${id}"`) || dataSrc.includes(`'${id}'`), `examples-data has ${id}`).toBe(true);
     }
   });
+});
+
+/* ═══════════════ probe / LA output read path ═══════════════ */
+describe('LA probe reads new IC outputs (getPinVoltage)', () => {
+  const sim = new ArduinoSimulator();
+  const probe = { id: 'la1', type: 'la_probe_ch1' };
+  const OUT_CASES = [
+    ['ic_74hc02', 'Y1'], ['ic_74hc02', 'Y4'],
+    ['ic_74hc86', 'Y1'], ['ic_74hc86', 'Y4'],
+    ['ic_74hc139', 'Y0_1'], ['ic_74hc139', 'Y3_2'],
+    ['ic_74hc153', 'Y1'], ['ic_74hc153', 'Y2'],
+    ['ic_74hc164', 'Q0'], ['ic_74hc164', 'Q7'],
+    ['ic_74hc4017', 'Q0'], ['ic_74hc4017', 'Q9'], ['ic_74hc4017', 'Q59'],
+  ];
+  let prevCanvas;
+  beforeEach(() => { prevCanvas = window.CircuitCanvas; });
+  afterEach(() => { window.CircuitCanvas = prevCanvas; });
+
+  function stubWireTo(type, pin, runtimeState) {
+    const target = { id: 't_ic', type, runtimeState };
+    window.CircuitCanvas = {
+      _getConnectedPinNum: () => null,
+      _getWireTarget: () => ({ inst: target, pinId: pin }),
+    };
+    return target;
+  }
+
+  for (const [type, pin] of OUT_CASES) {
+    it(`${type}.${pin}: HIGH -> 5V, LOW -> 0V at LA tip`, () => {
+      const t = stubWireTo(type, pin, { [pin]: 255 });
+      expect(sim.getPinVoltage(probe, 'tip')).toBe(5);
+      t.runtimeState[pin] = 0;
+      expect(sim.getPinVoltage(probe, 'tip')).toBe(0);
+    });
+  }
+
+  it('restores window.CircuitCanvas stub between tests', () => {
+    expect(window.CircuitCanvas === null || typeof window.CircuitCanvas === 'object').toBe(true);
+  });
+});
+
+describe('IC output allow-lists cover new ICs in every read path', () => {
+  const MAP_COUNTS = { 'js/simulator.js': 1, 'js/canvas.js': 4, 'js/electrical.js': 1 };
+  for (const [file, expected] of Object.entries(MAP_COUNTS)) {
+    it(`${file}: each new IC listed in ${expected} active map(s)`, () => {
+      const src = readSrc(file);
+      for (const id of NEW_IDS) {
+        const n = src.split(id + ": ['").length - 1;
+        expect(n, `${file} · ${id} appears in ${n} map(s), expected ${expected}`).toBe(expected);
+      }
+    });
+  }
 });
