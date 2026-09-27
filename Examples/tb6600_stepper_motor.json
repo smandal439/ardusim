@@ -1,0 +1,233 @@
+{
+  "id": "tb6600_stepper_motor",
+  "name": "TB6600 Stepper Motor",
+  "icon": "🔧",
+  "desc": "A custom TB6600 Stepper Motor circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 150,
+        "y": 120,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "tb1",
+        "type": "tb6600",
+        "x": 395,
+        "y": 140,
+        "rotation": 0,
+        "props": {
+          "microstep": 16,
+          "currentMA": 1500,
+          "enabled": true
+        }
+      },
+      {
+        "id": "m1",
+        "type": "nema17",
+        "x": 510,
+        "y": 140,
+        "rotation": 0,
+        "props": {
+          "angle": 0
+        }
+      },
+      {
+        "id": "comp_1790517866463_5kzlc",
+        "type": "bench_power_supply",
+        "x": 155,
+        "y": -155,
+        "rotation": 0,
+        "props": {
+          "powered": 1,
+          "outputEnabled": 1,
+          "voltageSet": 12,
+          "currentLimit": 2.5,
+          "actualCurrentPos": 0,
+          "actualCurrentNeg": 0,
+          "mode": "CV",
+          "actualCurrent5V": 0
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "b1",
+          "pinId": "D2"
+        },
+        "to": {
+          "instId": "tb1",
+          "pinId": "PUL"
+        },
+        "color": "#ff6600",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "b1",
+          "pinId": "D3"
+        },
+        "to": {
+          "instId": "tb1",
+          "pinId": "DIR"
+        },
+        "color": "#0066ff",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "b1",
+          "pinId": "D4"
+        },
+        "to": {
+          "instId": "tb1",
+          "pinId": "ENA"
+        },
+        "color": "#00cc00",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "tb1",
+          "pinId": "GND"
+        },
+        "color": "#333333",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "tb1",
+          "pinId": "A+"
+        },
+        "to": {
+          "instId": "m1",
+          "pinId": "A+"
+        },
+        "color": "#e53935",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "tb1",
+          "pinId": "A-"
+        },
+        "to": {
+          "instId": "m1",
+          "pinId": "A-"
+        },
+        "color": "#ff9800",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w7",
+        "from": {
+          "instId": "tb1",
+          "pinId": "B+"
+        },
+        "to": {
+          "instId": "m1",
+          "pinId": "B+"
+        },
+        "color": "#4caf50",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w8",
+        "from": {
+          "instId": "tb1",
+          "pinId": "B-"
+        },
+        "to": {
+          "instId": "m1",
+          "pinId": "B-"
+        },
+        "color": "#2196f3",
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790517762557_n0ut8",
+        "from": {
+          "instId": "b1",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "tb1",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790517894041_essnu",
+        "from": {
+          "instId": "comp_1790517866463_5kzlc",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "b1",
+          "pinId": "GND2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790517898265_j8sb0",
+        "from": {
+          "instId": "comp_1790517866463_5kzlc",
+          "pinId": "POS"
+        },
+        "to": {
+          "instId": "tb1",
+          "pinId": "VCC"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "/*\n * TB6600 Stepper Motor Driver Example\n *\n * Controls a NEMA 17 stepper motor using TB6600 driver.\n * Demonstrates pulse/direction control with variable speed.\n *\n * Wiring:\n *   Arduino D2  -> TB6600 PUL (Pulse)\n *   Arduino D3  -> TB6600 DIR (Direction)\n *   Arduino D4  -> TB6600 ENA (Enable)\n *   Arduino GND -> TB6600 GND\n *\n * TB6600 connects to NEMA 17 motor via:\n *   A+, A-, B+, B- terminals\n *\n * TB6600 Settings:\n *   - Microstep: 1/16 (DIP switches SW1-SW4)\n *   - Current: 1.5A (potentiometer adjustment)\n *   - Motor: NEMA 17 (1.8 deg step angle)\n *\n * Step Angle Calculation:\n *   Full step = 1.8 deg\n *   1/16 microstep = 1.8 / 16 = 0.1125 deg per microstep\n *   Steps per revolution = 360 / 0.1125 = 3200 microsteps\n */\n\n#include <TB6600.h>\n\n// Pin definitions\nconst int PUL_PIN = 2;   // Pulse pin\nconst int DIR_PIN = 3;   // Direction pin\nconst int ENA_PIN = 4;   // Enable pin\n\n// Create TB6600 driver instance\nTB6600 stepper(PUL_PIN, DIR_PIN, ENA_PIN);\n\n// Microstep setting (must match DIP switch configuration)\nconst int MICROSTEP = 16;\n\n// Steps per revolution for 1.8 deg stepper with 1/16 microstep\nconst int STEPS_PER_REV = 3200;\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"TB6600 Stepper Motor Control\");\n  Serial.println(\"==========================\");\n  \n  // Initialize the driver\n  stepper.begin();\n  stepper.setMicrostep(MICROSTEP);\n  stepper.setSpeed(800);\n  \n  Serial.print(\"Microstep: 1/\");\n  Serial.println(MICROSTEP);\n  Serial.print(\"Steps per revolution: \");\n  Serial.println(STEPS_PER_REV);\n  Serial.println();\n}\n\nvoid loop() {\n  // Example 1: Rotate clockwise at slow speed\n  Serial.println(\"[1] Rotating CW at 200 RPM...\");\n  stepper.setSpeed(200);\n  stepper.enable();\n  stepper.step(STEPS_PER_REV);\n  delay(1000);\n  \n  // Example 2: Rotate counter-clockwise at medium speed\n  Serial.println(\"[2] Rotating CCW at 400 RPM...\");\n  stepper.setSpeed(400);\n  stepper.step(-STEPS_PER_REV);\n  delay(1000);\n  \n  // Example 3: Rotate clockwise at high speed\n  Serial.println(\"[3] Rotating CW at 600 RPM...\");\n  stepper.setSpeed(600);\n  stepper.step(STEPS_PER_REV);\n  delay(1000);\n  \n  // Example 4: Partial rotation (90 degrees)\n  Serial.println(\"[4] Rotating 90 deg...\");\n  stepper.setSpeed(400);\n  stepper.step(STEPS_PER_REV / 4);\n  delay(500);\n  \n  // Example 5: Return to starting position\n  Serial.println(\"[5] Returning to start...\");\n  stepper.step(-STEPS_PER_REV / 4);\n  delay(1000);\n  \n  // Example 6: Disable motor (torque off)\n  Serial.println(\"[6] Motor disabled\");\n  stepper.disable();\n  delay(2000);\n  \n  // Re-enable for next cycle\n  Serial.println(\"[7] Motor re-enabled\");\n  stepper.enable();\n  delay(500);\n  \n  Serial.println(\"--- Cycle complete ---\");\n  Serial.println();\n  delay(1000);\n}"
+  }
+}
