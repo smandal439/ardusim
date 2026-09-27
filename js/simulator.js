@@ -2795,6 +2795,8 @@ class ArduinoSimulator {
         // Power rails / battery
         if (other.type === 'power_5v') return 5;
         if (other.type === 'power_gnd') return 0;
+        // Logic input tag acting as a wired source
+        if (other.type === 'logic_level_in') return (other.props && other.props.level) ? 5 : 0;
         if (other.type === 'battery') {
           if (far.pinId === 'neg') return 0;
           return Number(other.runtimeState?.voltage ?? other.props?.voltage ?? 3.7);

@@ -289,6 +289,547 @@ window.EXAMPLE_SKETCHES = [
     "code": "void setup() {\n   // Put your setup code here, to run once when the board starts:\n}\nvoid loop() {\n  // Put your main code here, to run repeatedly indefinitely:\n}"
   },
   {
+    "id": "555_timer_astable_led_blinker",
+    "name": "555 Timer Astable LED Blinker",
+    "icon": "🔧",
+    "desc": "A custom 555 Timer Astable LED Blinker circuit example.",
+    "tags": [
+      "custom",
+      "circuit"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "ic1",
+          "type": "ic_555",
+          "x": 300,
+          "y": 280,
+          "rotation": 0,
+          "props": {
+            "mode": "astable",
+            "frequency": 1000,
+            "dutyCycle": 50
+          }
+        },
+        {
+          "id": "vcc1",
+          "type": "power_5v",
+          "x": 245,
+          "y": 200,
+          "rotation": 0,
+          "props": {}
+        },
+        {
+          "id": "gnd1",
+          "type": "power_gnd",
+          "x": 220,
+          "y": 475,
+          "rotation": 0,
+          "props": {}
+        },
+        {
+          "id": "r1",
+          "type": "resistor",
+          "x": 400,
+          "y": 205,
+          "rotation": 1,
+          "props": {
+            "value": 10,
+            "unit": "kΩ"
+          }
+        },
+        {
+          "id": "r2",
+          "type": "resistor",
+          "x": 475,
+          "y": 235,
+          "rotation": 3,
+          "props": {
+            "value": 10,
+            "unit": "kΩ"
+          }
+        },
+        {
+          "id": "c1",
+          "type": "capacitor",
+          "x": 450,
+          "y": 360,
+          "rotation": 0,
+          "props": {
+            "value": 100,
+            "unit": "µF"
+          }
+        },
+        {
+          "id": "cv_cap",
+          "type": "capacitor",
+          "x": 350,
+          "y": 410,
+          "rotation": 0,
+          "props": {
+            "value": 0.1,
+            "unit": "µF"
+          }
+        },
+        {
+          "id": "led1",
+          "type": "led",
+          "x": 130,
+          "y": 270,
+          "rotation": 0,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          }
+        },
+        {
+          "id": "rled",
+          "type": "resistor",
+          "x": 125,
+          "y": 375,
+          "rotation": 0,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "vcc1",
+            "pinId": "vcc"
+          },
+          "to": {
+            "instId": "r1",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": [
+            {
+              "x": 410,
+              "y": 200
+            }
+          ],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 260,
+              "y": 246.61168720299747
+            },
+            "c2": {
+              "x": 410,
+              "y": 158.38831279700253
+            }
+          }
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "r1",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "ic1",
+            "pinId": "DIS"
+          },
+          "color": "#E0E0E0",
+          "waypoints": [
+            {
+              "x": 410,
+              "y": 304
+            },
+            {
+              "x": 287,
+              "y": 304
+            },
+            {
+              "x": 287,
+              "y": 256
+            },
+            {
+              "x": 317,
+              "y": 256
+            }
+          ],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 425,
+              "y": 318.2462715155885
+            },
+            "c2": {
+              "x": 317,
+              "y": 236.7537284844115
+            }
+          }
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "r2",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "ic1",
+            "pinId": "DIS"
+          },
+          "color": "#FF9800",
+          "waypoints": [],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 410,
+              "y": 303.4399312715284
+            },
+            "c2": {
+              "x": 317,
+              "y": 233.4399312715284
+            }
+          }
+        },
+        {
+          "id": "w4",
+          "from": {
+            "instId": "r2",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "ic1",
+            "pinId": "THR"
+          },
+          "color": "#FFC107",
+          "waypoints": [],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 415,
+              "y": 370
+            },
+            "c2": {
+              "x": 395,
+              "y": 195
+            }
+          }
+        },
+        {
+          "id": "w5",
+          "from": {
+            "instId": "ic1",
+            "pinId": "THR"
+          },
+          "to": {
+            "instId": "c1",
+            "pinId": "pos"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 334,
+              "y": 220.54110663660146
+            },
+            "c2": {
+              "x": 430,
+              "y": 285
+            }
+          }
+        },
+        {
+          "id": "w6",
+          "from": {
+            "instId": "ic1",
+            "pinId": "TRIG"
+          },
+          "to": {
+            "instId": "c1",
+            "pinId": "pos"
+          },
+          "color": "#4CAF50",
+          "waypoints": [
+            {
+              "x": 280,
+              "y": 340
+            },
+            {
+              "x": 280,
+              "y": 350
+            },
+            {
+              "x": 450,
+              "y": 350
+            }
+          ],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 317,
+              "y": 391.3305796483288
+            },
+            "c2": {
+              "x": 470,
+              "y": 278.6694203516712
+            }
+          }
+        },
+        {
+          "id": "w7",
+          "from": {
+            "instId": "c1",
+            "pinId": "neg"
+          },
+          "to": {
+            "instId": "gnd1",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 465,
+              "y": 500
+            },
+            "c2": {
+              "x": 380,
+              "y": 530
+            }
+          }
+        },
+        {
+          "id": "w8",
+          "from": {
+            "instId": "ic1",
+            "pinId": "GND"
+          },
+          "to": {
+            "instId": "gnd1",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 300,
+              "y": 395.6048778674269
+            },
+            "c2": {
+              "x": 200,
+              "y": 394.3951221325731
+            }
+          }
+        },
+        {
+          "id": "w9",
+          "from": {
+            "instId": "ic1",
+            "pinId": "VCC"
+          },
+          "to": {
+            "instId": "vcc1",
+            "pinId": "vcc"
+          },
+          "color": null,
+          "waypoints": [
+            {
+              "x": 280,
+              "y": 200
+            }
+          ],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 248.88760717129588,
+              "y": 265.290995837907
+            },
+            "c2": {
+              "x": 303.8876071712959,
+              "y": 265.290995837907
+            }
+          }
+        },
+        {
+          "id": "w10",
+          "from": {
+            "instId": "ic1",
+            "pinId": "RST"
+          },
+          "to": {
+            "instId": "vcc1",
+            "pinId": "vcc"
+          },
+          "color": "#F44336",
+          "waypoints": [
+            {
+              "x": 270,
+              "y": 210
+            }
+          ],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 269.27310332785464,
+              "y": 449.15911692947583
+            },
+            "c2": {
+              "x": 273.27310332785464,
+              "y": 319.15911692947583
+            }
+          }
+        },
+        {
+          "id": "w11",
+          "from": {
+            "instId": "ic1",
+            "pinId": "CV"
+          },
+          "to": {
+            "instId": "cv_cap",
+            "pinId": "pos"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 351,
+              "y": 227.87553357587245
+            },
+            "c2": {
+              "x": 395,
+              "y": 355
+            }
+          }
+        },
+        {
+          "id": "w12",
+          "from": {
+            "instId": "cv_cap",
+            "pinId": "neg"
+          },
+          "to": {
+            "instId": "gnd1",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [
+            {
+              "x": 360,
+              "y": 440
+            },
+            {
+              "x": 215,
+              "y": 440
+            }
+          ],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 360,
+              "y": 534.1248781675256
+            },
+            "c2": {
+              "x": 200,
+              "y": 395.8751218324744
+            }
+          }
+        },
+        {
+          "id": "w13",
+          "from": {
+            "instId": "ic1",
+            "pinId": "OUT"
+          },
+          "to": {
+            "instId": "led1",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": [
+            {
+              "x": 145,
+              "y": 280
+            }
+          ],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 341.9838734342168,
+              "y": 495.3394419307411
+            },
+            "c2": {
+              "x": 228.86028273537343,
+              "y": 237.9932599195172
+            }
+          }
+        },
+        {
+          "id": "w14",
+          "from": {
+            "instId": "led1",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "rled",
+            "pinId": "p1"
+          },
+          "color": "#00BCD4",
+          "waypoints": [],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 145,
+              "y": 370
+            },
+            "c2": {
+              "x": 135,
+              "y": 345
+            }
+          }
+        },
+        {
+          "id": "w15",
+          "from": {
+            "instId": "rled",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "gnd1",
+            "pinId": "gnd"
+          },
+          "color": "#424242",
+          "waypoints": [
+            {
+              "x": 140,
+              "y": 440
+            },
+            {
+              "x": 215,
+              "y": 440
+            }
+          ],
+          "routeStyle": "bezier",
+          "bezierCtrl": {
+            "c1": {
+              "x": 150,
+              "y": 495
+            },
+            "c2": {
+              "x": 165,
+              "y": 415
+            }
+          }
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "void setup() {\n  // 555 timer runs autonomously — no code needed!\n}\nvoid loop() {\n  // The 555 OUT pin drives the LED directly.\n  // Frequency is determined by R1, R2, and C:\n  //   f = 1.44 / ((R1 + 2*R2) * C)\n}"
+    }
+  },
+  {
     "id": "7402_test_with_logic_analyzer",
     "name": "7402 test with logic analyzer",
     "icon": "🔧",
@@ -2615,391 +3156,6 @@ window.EXAMPLE_SKETCHES = [
             "instId": "b1",
             "pinId": "GND1"
           }
-        }
-      ]
-    }
-  },
-  {
-    "id": "astable_555",
-    "name": "555 Timer Astable LED Blinker",
-    "icon": "⏱️",
-    "desc": "555 timer in astable mode blinks an LED — no Arduino code needed",
-    "tags": [
-      "ic",
-      "555",
-      "timer",
-      "oscillator",
-      "standalone"
-    ],
-    "code": "void setup() {\n  // 555 timer runs autonomously — no code needed!\n}\nvoid loop() {\n  // The 555 OUT pin drives the LED directly.\n  // Frequency is determined by R1, R2, and C:\n  //   f = 1.44 / ((R1 + 2*R2) * C)\n}",
-    "circuit": {
-      "components": [
-        {
-          "id": "ic1",
-          "type": "ic_555",
-          "x": 300,
-          "y": 280,
-          "width": 68,
-          "height": 50,
-          "props": {
-            "mode": "astable",
-            "frequency": 1000,
-            "dutyCycle": 50
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "vcc1",
-          "type": "power_5v",
-          "x": 340,
-          "y": 170,
-          "width": 30,
-          "height": 30,
-          "props": {},
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "gnd1",
-          "type": "power_gnd",
-          "x": 215,
-          "y": 290,
-          "width": 30,
-          "height": 30,
-          "props": {},
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "r1",
-          "type": "resistor",
-          "x": 400,
-          "y": 220,
-          "width": 20,
-          "height": 60,
-          "props": {
-            "value": 10,
-            "unit": "kΩ"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "r2",
-          "type": "resistor",
-          "x": 400,
-          "y": 350,
-          "width": 20,
-          "height": 60,
-          "props": {
-            "value": 10,
-            "unit": "kΩ"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "c1",
-          "type": "capacitor",
-          "x": 460,
-          "y": 340,
-          "width": 20,
-          "height": 60,
-          "props": {
-            "value": 100,
-            "unit": "µF"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "cv_cap",
-          "type": "capacitor",
-          "x": 350,
-          "y": 410,
-          "width": 20,
-          "height": 60,
-          "props": {
-            "value": 0.1,
-            "unit": "µF"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "led1",
-          "type": "led",
-          "x": 130,
-          "y": 270,
-          "width": 30,
-          "height": 60,
-          "props": {
-            "color": "#ff3333",
-            "colorName": "Red"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        },
-        {
-          "id": "rled",
-          "type": "resistor",
-          "x": 130,
-          "y": 370,
-          "width": 20,
-          "height": 60,
-          "props": {
-            "value": 220,
-            "unit": "Ω"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
-        }
-      ],
-      "wires": [
-        {
-          "id": "w1",
-          "from": {
-            "instId": "vcc1",
-            "pinId": "vcc"
-          },
-          "to": {
-            "instId": "r1",
-            "pinId": "p1"
-          },
-          "waypoints": [
-            {
-              "x": 355,
-              "y": 200
-            },
-            {
-              "x": 410,
-              "y": 200
-            }
-          ]
-        },
-        {
-          "id": "w2",
-          "from": {
-            "instId": "r1",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "ic1",
-            "pinId": "DIS"
-          },
-          "waypoints": []
-        },
-        {
-          "id": "w3",
-          "from": {
-            "instId": "r2",
-            "pinId": "p1"
-          },
-          "to": {
-            "instId": "ic1",
-            "pinId": "DIS"
-          },
-          "waypoints": []
-        },
-        {
-          "id": "w4",
-          "from": {
-            "instId": "r2",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "ic1",
-            "pinId": "THR"
-          },
-          "waypoints": []
-        },
-        {
-          "id": "w5",
-          "from": {
-            "instId": "ic1",
-            "pinId": "THR"
-          },
-          "to": {
-            "instId": "c1",
-            "pinId": "pos"
-          },
-          "waypoints": []
-        },
-        {
-          "id": "w6",
-          "from": {
-            "instId": "ic1",
-            "pinId": "TRIG"
-          },
-          "to": {
-            "instId": "c1",
-            "pinId": "pos"
-          },
-          "waypoints": [
-            {
-              "x": 280,
-              "y": 340
-            },
-            {
-              "x": 280,
-              "y": 350
-            },
-            {
-              "x": 450,
-              "y": 350
-            }
-          ]
-        },
-        {
-          "id": "w7",
-          "from": {
-            "instId": "c1",
-            "pinId": "neg"
-          },
-          "to": {
-            "instId": "gnd1",
-            "pinId": "gnd"
-          },
-          "waypoints": []
-        },
-        {
-          "id": "w8",
-          "from": {
-            "instId": "ic1",
-            "pinId": "GND"
-          },
-          "to": {
-            "instId": "gnd1",
-            "pinId": "gnd"
-          },
-          "waypoints": []
-        },
-        {
-          "id": "w9",
-          "from": {
-            "instId": "ic1",
-            "pinId": "VCC"
-          },
-          "to": {
-            "instId": "vcc1",
-            "pinId": "vcc"
-          },
-          "waypoints": [
-            {
-              "x": 280,
-              "y": 200
-            }
-          ]
-        },
-        {
-          "id": "w10",
-          "from": {
-            "instId": "ic1",
-            "pinId": "RST"
-          },
-          "to": {
-            "instId": "vcc1",
-            "pinId": "vcc"
-          },
-          "waypoints": [
-            {
-              "x": 265,
-              "y": 200
-            }
-          ]
-        },
-        {
-          "id": "w11",
-          "from": {
-            "instId": "ic1",
-            "pinId": "CV"
-          },
-          "to": {
-            "instId": "cv_cap",
-            "pinId": "pos"
-          },
-          "waypoints": []
-        },
-        {
-          "id": "w12",
-          "from": {
-            "instId": "cv_cap",
-            "pinId": "neg"
-          },
-          "to": {
-            "instId": "gnd1",
-            "pinId": "gnd"
-          },
-          "waypoints": [
-            {
-              "x": 360,
-              "y": 440
-            },
-            {
-              "x": 215,
-              "y": 440
-            }
-          ]
-        },
-        {
-          "id": "w13",
-          "from": {
-            "instId": "ic1",
-            "pinId": "OUT"
-          },
-          "to": {
-            "instId": "led1",
-            "pinId": "anode"
-          },
-          "waypoints": [
-            {
-              "x": 145,
-              "y": 280
-            }
-          ]
-        },
-        {
-          "id": "w14",
-          "from": {
-            "instId": "led1",
-            "pinId": "cathode"
-          },
-          "to": {
-            "instId": "rled",
-            "pinId": "p1"
-          },
-          "waypoints": []
-        },
-        {
-          "id": "w15",
-          "from": {
-            "instId": "rled",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "gnd1",
-            "pinId": "gnd"
-          },
-          "waypoints": [
-            {
-              "x": 140,
-              "y": 440
-            },
-            {
-              "x": 215,
-              "y": 440
-            }
-          ]
         }
       ]
     }
@@ -19134,6 +19290,257 @@ window.EXAMPLE_SKETCHES = [
     }
   },
   {
+    "id": "nano_pushbutton_led",
+    "name": "NANO PUSHBUTTON LED",
+    "icon": "🔧",
+    "desc": "Arduino Nano — turn on an LED when a pushbutton is pressed using direct register manipulation (no Arduino libraries)",
+    "tags": [
+      "custom",
+      "circuit",
+      "NANO",
+      "pushbutton",
+      "led",
+      "registers"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1790519707631_e981f",
+          "type": "arduino_nano",
+          "x": 45,
+          "y": 70,
+          "rotation": 0,
+          "props": {
+            "label": "NANO"
+          }
+        },
+        {
+          "id": "comp_1790519771673_lsnxy",
+          "type": "led",
+          "x": 300,
+          "y": 130,
+          "rotation": 0,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          }
+        },
+        {
+          "id": "comp_1790519797154_73xhv",
+          "type": "resistor",
+          "x": 210,
+          "y": 205,
+          "rotation": 0,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          }
+        },
+        {
+          "id": "comp_1790520271612_binra",
+          "type": "push_button",
+          "x": 135,
+          "y": 185,
+          "rotation": 0,
+          "props": {
+            "pressed": false,
+            "label": "BTN"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "wire_1790519788385_sysjv",
+          "from": {
+            "instId": "comp_1790519707631_e981f",
+            "pinId": "D6"
+          },
+          "to": {
+            "instId": "comp_1790519771673_lsnxy",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790519802142_b7vnx",
+          "from": {
+            "instId": "comp_1790519797154_73xhv",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "comp_1790519771673_lsnxy",
+            "pinId": "cathode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790519811556_f4prl",
+          "from": {
+            "instId": "comp_1790519707631_e981f",
+            "pinId": "GND2"
+          },
+          "to": {
+            "instId": "comp_1790519797154_73xhv",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790520277418_9y9fk",
+          "from": {
+            "instId": "comp_1790520271612_binra",
+            "pinId": "p3"
+          },
+          "to": {
+            "instId": "comp_1790519707631_e981f",
+            "pinId": "GND2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790520282026_r8xx8",
+          "from": {
+            "instId": "comp_1790519707631_e981f",
+            "pinId": "D4"
+          },
+          "to": {
+            "instId": "comp_1790520271612_binra",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "void setup() {\n  // 1. Set D6 (Bit 6) as OUTPUT\n  DDRD |= (1 << DDD6);\n  \n  // 2. Set D4 (Bit 4) as INPUT\n  DDRD &= ~(1 << DDD4);\n  \n  // 3. Enable internal pull-up resistor on D4 (keeps pin HIGH until button connects it to GND)\n  PORTD |= (1 << PORTD4);\n}\n\nvoid loop() {\n  // Read PIND register bit 4. If it's LOW (button pressed):\n  if (!(PIND & (1 << PIND4))) {\n    PORTD |= (1 << PORTD6);   // Set D6 HIGH (Turn LED ON)\n  } else {\n    PORTD &= ~(1 << PORTD6);  // Set D6 LOW (Turn LED OFF)\n  }\n}\n"
+    }
+  },
+  {
+    "id": "nano_pwm",
+    "name": "nano pwm",
+    "icon": "🔧",
+    "desc": "A custom nano pwm circuit example.",
+    "tags": [
+      "custom",
+      "circuit"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1790519707631_e981f",
+          "type": "arduino_nano",
+          "x": 45,
+          "y": 70,
+          "rotation": 0,
+          "props": {
+            "label": "NANO"
+          }
+        },
+        {
+          "id": "comp_1790519771673_lsnxy",
+          "type": "led",
+          "x": 285,
+          "y": 80,
+          "rotation": 0,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          }
+        },
+        {
+          "id": "comp_1790519797154_73xhv",
+          "type": "resistor",
+          "x": 210,
+          "y": 135,
+          "rotation": 1,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "wire_1790519788385_sysjv",
+          "from": {
+            "instId": "comp_1790519707631_e981f",
+            "pinId": "D6"
+          },
+          "to": {
+            "instId": "comp_1790519771673_lsnxy",
+            "pinId": "anode"
+          },
+          "color": "#9C27B0",
+          "waypoints": [
+            {
+              "x": 172,
+              "y": 55
+            },
+            {
+              "x": 300,
+              "y": 55
+            }
+          ],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790519802142_b7vnx",
+          "from": {
+            "instId": "comp_1790519797154_73xhv",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "comp_1790519771673_lsnxy",
+            "pinId": "cathode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790519811556_f4prl",
+          "from": {
+            "instId": "comp_1790519707631_e981f",
+            "pinId": "GND2"
+          },
+          "to": {
+            "instId": "comp_1790519797154_73xhv",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [
+            {
+              "x": 102,
+              "y": 165
+            }
+          ],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "void setup() {\n  Serial.begin(115200);\n}\n\nvoid loop() {\nfor (int i = 0; i < 255; i++) {\n  analogWrite(6, i);\n  delay(10);\n}\nfor (int i = 255; i >=0; i--) {\n  analogWrite(6, i);\n  delay(10);\n}\n}"
+    }
+  },
+  {
     "id": "neopixel_8x8_matrix_rainbow_2",
     "name": "NeoPixel 8x8 Matrix Rainbow 2",
     "icon": "🔧",
@@ -26326,6 +26733,240 @@ window.EXAMPLE_SKETCHES = [
       ]
     },
     "code": "/*\n * TB6600 Stepper Motor Driver Example\n *\n * Controls a NEMA 17 stepper motor using TB6600 driver.\n * Demonstrates pulse/direction control with variable speed.\n *\n * Wiring:\n *   Arduino D2  -> TB6600 PUL (Pulse)\n *   Arduino D3  -> TB6600 DIR (Direction)\n *   Arduino D4  -> TB6600 ENA (Enable)\n *   Arduino GND -> TB6600 GND\n *\n * TB6600 connects to NEMA 17 motor via:\n *   A+, A-, B+, B- terminals\n *\n * TB6600 Settings:\n *   - Microstep: 1/16 (DIP switches SW1-SW4)\n *   - Current: 1.5A (potentiometer adjustment)\n *   - Motor: NEMA 17 (1.8 deg step angle)\n *\n * Step Angle Calculation:\n *   Full step = 1.8 deg\n *   1/16 microstep = 1.8 / 16 = 0.1125 deg per microstep\n *   Steps per revolution = 360 / 0.1125 = 3200 microsteps\n */\n\n#include <TB6600.h>\n\n// Pin definitions\nconst int PUL_PIN = 2;   // Pulse pin\nconst int DIR_PIN = 3;   // Direction pin\nconst int ENA_PIN = 4;   // Enable pin\n\n// Create TB6600 driver instance\nTB6600 stepper(PUL_PIN, DIR_PIN, ENA_PIN);\n\n// Microstep setting (must match DIP switch configuration)\nconst int MICROSTEP = 16;\n\n// Steps per revolution for 1.8 deg stepper with 1/16 microstep\nconst int STEPS_PER_REV = 3200;\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"TB6600 Stepper Motor Control\");\n  Serial.println(\"==========================\");\n  \n  // Initialize the driver\n  stepper.begin();\n  stepper.setMicrostep(MICROSTEP);\n  stepper.setSpeed(800);\n  \n  Serial.print(\"Microstep: 1/\");\n  Serial.println(MICROSTEP);\n  Serial.print(\"Steps per revolution: \");\n  Serial.println(STEPS_PER_REV);\n  Serial.println();\n}\n\nvoid loop() {\n  // Example 1: Rotate clockwise at slow speed\n  Serial.println(\"[1] Rotating CW at 200 RPM...\");\n  stepper.setSpeed(200);\n  stepper.enable();\n  stepper.step(STEPS_PER_REV);\n  delay(1000);\n  \n  // Example 2: Rotate counter-clockwise at medium speed\n  Serial.println(\"[2] Rotating CCW at 400 RPM...\");\n  stepper.setSpeed(400);\n  stepper.step(-STEPS_PER_REV);\n  delay(1000);\n  \n  // Example 3: Rotate clockwise at high speed\n  Serial.println(\"[3] Rotating CW at 600 RPM...\");\n  stepper.setSpeed(600);\n  stepper.step(STEPS_PER_REV);\n  delay(1000);\n  \n  // Example 4: Partial rotation (90 degrees)\n  Serial.println(\"[4] Rotating 90 deg...\");\n  stepper.setSpeed(400);\n  stepper.step(STEPS_PER_REV / 4);\n  delay(500);\n  \n  // Example 5: Return to starting position\n  Serial.println(\"[5] Returning to start...\");\n  stepper.step(-STEPS_PER_REV / 4);\n  delay(1000);\n  \n  // Example 6: Disable motor (torque off)\n  Serial.println(\"[6] Motor disabled\");\n  stepper.disable();\n  delay(2000);\n  \n  // Re-enable for next cycle\n  Serial.println(\"[7] Motor re-enabled\");\n  stepper.enable();\n  delay(500);\n  \n  Serial.println(\"--- Cycle complete ---\");\n  Serial.println();\n  delay(1000);\n}"
+  },
+  {
+    "id": "tb6600_stepper_motor",
+    "name": "TB6600 Stepper Motor",
+    "icon": "🔧",
+    "desc": "This example demonstrates how to control a NEMA 17 stepper motor using a TB6600 driver with an Arduino Uno. The TB6600 is a high-performance stepper motor driver that supports microstepping and can handle higher current loads, making it suitable for precise motion control applications.\n\nThe circuit connects the Arduino to the TB6600 driver, which in turn drives the NEMA 17 stepper motor. The Arduino sends pulse and direction signals to the TB6600, allowing for controlled rotation of the motor. The example code includes various speed settings and demonstrates clockwise and counter-clockwise rotation, as well as enabling and disabling the motor.\n\nKey features of this example include:\n- Microstepping support (1/16 microstep)\n- Adjustable speed control\n- Direction control\n- Motor enable/disable functionality\n- Serial output for monitoring motor actions",
+    "tags": [
+      "motor",
+      "stepper_motor",
+      "tb6600"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "arduino_uno",
+          "x": 150,
+          "y": 120,
+          "rotation": 0,
+          "props": {
+            "label": "UNO"
+          }
+        },
+        {
+          "id": "tb1",
+          "type": "tb6600",
+          "x": 395,
+          "y": 140,
+          "rotation": 0,
+          "props": {
+            "microstep": 16,
+            "currentMA": 1500,
+            "enabled": true
+          }
+        },
+        {
+          "id": "m1",
+          "type": "nema17",
+          "x": 510,
+          "y": 140,
+          "rotation": 0,
+          "props": {
+            "angle": 0
+          }
+        },
+        {
+          "id": "comp_1790517866463_5kzlc",
+          "type": "bench_power_supply",
+          "x": 155,
+          "y": -155,
+          "rotation": 0,
+          "props": {
+            "powered": 1,
+            "outputEnabled": 1,
+            "voltageSet": 12,
+            "currentLimit": 2.5,
+            "actualCurrentPos": 0,
+            "actualCurrentNeg": 0,
+            "mode": "CV",
+            "actualCurrent5V": 0
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "D2"
+          },
+          "to": {
+            "instId": "tb1",
+            "pinId": "PUL"
+          },
+          "color": "#ff6600",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "b1",
+            "pinId": "D3"
+          },
+          "to": {
+            "instId": "tb1",
+            "pinId": "DIR"
+          },
+          "color": "#0066ff",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "b1",
+            "pinId": "D4"
+          },
+          "to": {
+            "instId": "tb1",
+            "pinId": "ENA"
+          },
+          "color": "#00cc00",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w4",
+          "from": {
+            "instId": "b1",
+            "pinId": "GND"
+          },
+          "to": {
+            "instId": "tb1",
+            "pinId": "GND"
+          },
+          "color": "#333333",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w5",
+          "from": {
+            "instId": "tb1",
+            "pinId": "A+"
+          },
+          "to": {
+            "instId": "m1",
+            "pinId": "A+"
+          },
+          "color": "#e53935",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w6",
+          "from": {
+            "instId": "tb1",
+            "pinId": "A-"
+          },
+          "to": {
+            "instId": "m1",
+            "pinId": "A-"
+          },
+          "color": "#ff9800",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w7",
+          "from": {
+            "instId": "tb1",
+            "pinId": "B+"
+          },
+          "to": {
+            "instId": "m1",
+            "pinId": "B+"
+          },
+          "color": "#4caf50",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w8",
+          "from": {
+            "instId": "tb1",
+            "pinId": "B-"
+          },
+          "to": {
+            "instId": "m1",
+            "pinId": "B-"
+          },
+          "color": "#2196f3",
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790517762557_n0ut8",
+          "from": {
+            "instId": "b1",
+            "pinId": "GND2"
+          },
+          "to": {
+            "instId": "tb1",
+            "pinId": "GND"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790517894041_essnu",
+          "from": {
+            "instId": "comp_1790517866463_5kzlc",
+            "pinId": "GND"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790517898265_j8sb0",
+          "from": {
+            "instId": "comp_1790517866463_5kzlc",
+            "pinId": "POS"
+          },
+          "to": {
+            "instId": "tb1",
+            "pinId": "VCC"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.ino": "/*\n * TB6600 Stepper Motor Driver Example\n *\n * Controls a NEMA 17 stepper motor using TB6600 driver.\n * Demonstrates pulse/direction control with variable speed.\n *\n * Wiring:\n *   Arduino D2  -> TB6600 PUL (Pulse)\n *   Arduino D3  -> TB6600 DIR (Direction)\n *   Arduino D4  -> TB6600 ENA (Enable)\n *   Arduino GND -> TB6600 GND\n *\n * TB6600 connects to NEMA 17 motor via:\n *   A+, A-, B+, B- terminals\n *\n * TB6600 Settings:\n *   - Microstep: 1/16 (DIP switches SW1-SW4)\n *   - Current: 1.5A (potentiometer adjustment)\n *   - Motor: NEMA 17 (1.8 deg step angle)\n *\n * Step Angle Calculation:\n *   Full step = 1.8 deg\n *   1/16 microstep = 1.8 / 16 = 0.1125 deg per microstep\n *   Steps per revolution = 360 / 0.1125 = 3200 microsteps\n */\n\n#include <TB6600.h>\n\n// Pin definitions\nconst int PUL_PIN = 2;   // Pulse pin\nconst int DIR_PIN = 3;   // Direction pin\nconst int ENA_PIN = 4;   // Enable pin\n\n// Create TB6600 driver instance\nTB6600 stepper(PUL_PIN, DIR_PIN, ENA_PIN);\n\n// Microstep setting (must match DIP switch configuration)\nconst int MICROSTEP = 16;\n\n// Steps per revolution for 1.8 deg stepper with 1/16 microstep\nconst int STEPS_PER_REV = 3200;\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial.println(\"TB6600 Stepper Motor Control\");\n  Serial.println(\"==========================\");\n  \n  // Initialize the driver\n  stepper.begin();\n  stepper.setMicrostep(MICROSTEP);\n  stepper.setSpeed(800);\n  \n  Serial.print(\"Microstep: 1/\");\n  Serial.println(MICROSTEP);\n  Serial.print(\"Steps per revolution: \");\n  Serial.println(STEPS_PER_REV);\n  Serial.println();\n}\n\nvoid loop() {\n  // Example 1: Rotate clockwise at slow speed\n  Serial.println(\"[1] Rotating CW at 200 RPM...\");\n  stepper.setSpeed(200);\n  stepper.enable();\n  stepper.step(STEPS_PER_REV);\n  delay(1000);\n  \n  // Example 2: Rotate counter-clockwise at medium speed\n  Serial.println(\"[2] Rotating CCW at 400 RPM...\");\n  stepper.setSpeed(400);\n  stepper.step(-STEPS_PER_REV);\n  delay(1000);\n  \n  // Example 3: Rotate clockwise at high speed\n  Serial.println(\"[3] Rotating CW at 600 RPM...\");\n  stepper.setSpeed(600);\n  stepper.step(STEPS_PER_REV);\n  delay(1000);\n  \n  // Example 4: Partial rotation (90 degrees)\n  Serial.println(\"[4] Rotating 90 deg...\");\n  stepper.setSpeed(400);\n  stepper.step(STEPS_PER_REV / 4);\n  delay(500);\n  \n  // Example 5: Return to starting position\n  Serial.println(\"[5] Returning to start...\");\n  stepper.step(-STEPS_PER_REV / 4);\n  delay(1000);\n  \n  // Example 6: Disable motor (torque off)\n  Serial.println(\"[6] Motor disabled\");\n  stepper.disable();\n  delay(2000);\n  \n  // Re-enable for next cycle\n  Serial.println(\"[7] Motor re-enabled\");\n  stepper.enable();\n  delay(500);\n  \n  Serial.println(\"--- Cycle complete ---\");\n  Serial.println();\n  delay(1000);\n}"
+    }
   },
   {
     "id": "tm1637_clock",

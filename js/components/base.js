@@ -394,6 +394,7 @@ const COMPONENT_CATALOG = [
     }
   },
   { category: 'Input', ids: ['push_button', 'potentiometer', 'joystick', 'keypad_4x4', 'rotary_encoder', 'dip_switch', 'ir_remote', 'ir_receiver'] },
+  { category: 'Logic', ids: ['logic_level_in', 'logic_level_out'] },
   { category: 'Actuators', ids: ['servo', 'dc_motor', 'relay', 'stepper_28byj', 'l298n', 'servo_continuous', 'tb6600', 'nema17'] },
   { category: 'Audio', ids: ['max98357a', 'speaker_4ohm', 'dfplayer_mini'] },
   { category: 'Sensors', ids: ['dht11', 'hcsr04', 'ldr', 'pir', 'mpu6050', 'ds3231', 'ir_obstacle', 'flex_sensor', 'thermistor', 'lm35_sensor', 'bme280', 'vl53l0x', 'hx711', 'water_flow_sensor', 'load_cell', 'bh1750', 'ina219', 'max6675', 'v_to_i_420ma', 'i_to_v_420ma'] },

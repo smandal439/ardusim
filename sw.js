@@ -2,7 +2,7 @@
    sw.js — Service Worker for ArduSim PWA
    ═══════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'ardusim-v42';
+const CACHE_NAME = 'ardusim-v43';
 
 // Compute base path dynamically so the SW works on both root domains
 // (ardusim.app) and GitHub Pages subpaths (/Online-Circuit-Simulator/).
@@ -46,6 +46,7 @@ const STATIC_ASSETS = [
   'js/components/passive.js',
   'js/components/power.js',
   'js/components/ics.js',
+  'js/components/logic_tag.js',
   'js/components/multimeter.js',
   'js/components/probe.js',
   'js/components/function_generator.js',

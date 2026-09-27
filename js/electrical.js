@@ -517,6 +517,11 @@ class ElectricalEngine {
         addSource('vcc', '5v', 5.0, 255);
         addGround('gnd', 'gnd');
         break;
+      case 'logic_level_in':
+        // Free logic input tag — drives the net as a constant 0/1 source
+        if (inst.props && inst.props.level) addSource('out', 'logic_high', 5.0, 255);
+        else addGround('out', 'logic_low');
+        break;
       case 'power_gnd':
         addGround('gnd', 'gnd');
         break;

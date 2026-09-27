@@ -180,6 +180,7 @@ class CircuitCanvas {
     ctx.scale(zoom, zoom);
 
     this._drawGrid(ctx);
+    this._drawLvlTags(ctx);
     this._drawWires(ctx);
     this._drawComponents(ctx);
     try { this._drawInteractives(ctx); } catch (_e) { /* guard interactive rendering */ }
@@ -359,7 +360,7 @@ class CircuitCanvas {
 
       // Pin label (only when zoomed in enough) — boards have baked-in labels
       const isBoard = inst.type === 'arduino_uno' || inst.type === 'esp32_devkit_v1' || inst.type === 'arduino_nano' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148' || inst.type === 'pico2w' || inst.type === 'intel_8085' || inst.type === 'intel_8051';
-      if (this.zoom >= 1 && !isBoard) {
+      if (this.zoom >= 1 && !isBoard && !def.hidePinLabels) {
         ctx.fillStyle = '#888';
         ctx.font = `${8 / this.zoom}px Inter, sans-serif`;
         ctx.textAlign = pin.side === 'top' ? 'center' : 'center';
@@ -1268,7 +1269,7 @@ class CircuitCanvas {
     if (this.zoom >= 0.7) {
       for (const inst of this.components) {
         const def = window.ArduinoComponents.COMPONENT_DEFS[inst.type];
-        if (!def) continue;
+        if (!def || def.hideLabel) continue;
         const labelText = inst.props.label || def.name;
         ctx.save();
         ctx.fillStyle = 'rgba(200,200,200,0.6)';
@@ -1278,6 +1279,147 @@ class CircuitCanvas {
         ctx.restore();
       }
     }
+  }
+
+  /* -------------- ON-CANVAS LOGIC TAGS -------------- */
+  // Position sync (attached tags follow their pin), dotted connector and
+  // hit-test rects. Runs at the start of each frame so pills, clicks and
+  // cursor feedback all use fresh positions.
+  _drawLvlTags(ctx) {
+    this._lvlTagRects = [];
+    const defs = (window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS) || {};
+    for (const inst of this.components) {
+      if (inst.type !== 'logic_level_in' && inst.type !== 'logic_level_out') continue;
+      const def = defs[inst.type];
+      if (!def) continue;
+      const a = inst.props && inst.props.attach;
+      if (a) {
+        const target = this.components.find(c => c.id === a.instId);
+        const tdef = target && defs[target.type];
+        const pin = tdef && (tdef.pins || []).find(p => p.id === a.pinId);
+        if (target && pin) {
+          const wp = this._pinWorldPos(target, pin);
+          const cx = target.x + tdef.width / 2;
+          const cy = target.y + tdef.height / 2;
+          let dx = wp.x - cx;
+          let dy = wp.y - cy;
+          const len = Math.hypot(dx, dy) || 1;
+          dx /= len;
+          dy /= len;
+          const ax = wp.x + dx * 20 - def.width / 2;
+          const ay = wp.y + dy * 20 - def.height / 2;
+          const beingDragged = this.mode === 'dragging' && this.dragging && this.dragging.inst === inst;
+          if (!beingDragged) {
+            inst.x = ax;
+            inst.y = ay;
+          }
+          ctx.save();
+          ctx.strokeStyle = 'rgba(245,185,66,0.6)';
+          ctx.lineWidth = 1 / this.zoom;
+          ctx.setLineDash([3 / this.zoom, 3 / this.zoom]);
+          ctx.beginPath();
+          ctx.moveTo(wp.x, wp.y);
+          ctx.lineTo(inst.x + def.width / 2, inst.y + def.height / 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.restore();
+        } else {
+          delete inst.props.attach; // stale target — detach
+        }
+      }
+      this._lvlTagRects.push({ inst, x: inst.x, y: inst.y, w: def.width, h: def.height });
+    }
+  }
+
+  _hitTestTag(wx, wy) {
+    const rects = this._lvlTagRects;
+    if (!rects || !rects.length) return null;
+    for (let i = rects.length - 1; i >= 0; i--) {
+      const r = rects[i];
+      if (wx >= r.x && wx <= r.x + r.w && wy >= r.y && wy <= r.y + r.h) return r;
+    }
+    return null;
+  }
+
+  // Snap a logic tag to the nearest classified IC pin within the attach
+  // threshold. Nearest pin wins — the tag only links when that pin's kind
+  // matches (input tag → input pin, output tag → output pin); otherwise
+  // the tag stays free / wireable.
+  _tryAttachTag(inst) {
+    if (!inst || (inst.type !== 'logic_level_in' && inst.type !== 'logic_level_out')) return;
+    const defs = (window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS) || {};
+    const def = defs[inst.type];
+    if (!def) return;
+    const isInput = inst.type === 'logic_level_in';
+    const cx = inst.x + def.width / 2;
+    const cy = inst.y + def.height / 2;
+    let best = null;
+    let bestKind = null;
+    let bestD = 24;
+    for (const t of this.components) {
+      if (t.id === inst.id) continue;
+      const tdef = defs[t.type];
+      if (!tdef || !Array.isArray(tdef.pins) || !tdef.pins.length) continue;
+      const tags = window.classifyICTags ? window.classifyICTags(t.type, tdef.pins) : null;
+      if (!tags) continue;
+      const inSet = new Set(tags.inputs || []);
+      const outSet = new Set(tags.outputs || []);
+      if (!inSet.size && !outSet.size) continue;
+      for (const p of tdef.pins) {
+        const kind = inSet.has(p.id) ? 'in' : (outSet.has(p.id) ? 'out' : null);
+        if (!kind) continue;
+        const wp = this._pinWorldPos(t, p);
+        const d = Math.hypot(wp.x - cx, wp.y - cy);
+        if (d < bestD) {
+          bestD = d;
+          best = { instId: t.id, pinId: p.id };
+          bestKind = kind;
+        }
+      }
+    }
+    if (!inst.props) inst.props = {};
+    const matches = best && ((isInput && bestKind === 'in') || (!isInput && bestKind === 'out'));
+    if (matches) inst.props.attach = best;
+    else delete inst.props.attach;
+  }
+
+  // Click (mouse-up without moving) on an input tag:
+  //  - attached: flip the forced level on the target IC pin
+  //  - free:     flip the tag's own source level
+  _toggleLogicTag(inst) {
+    if (!inst || inst.type !== 'logic_level_in') return;
+    if (!inst.props) inst.props = {};
+    const a = inst.props.attach;
+    if (a) {
+      const target = this.components.find(c => c.id === a.instId);
+      if (target) {
+        let cur = this._getForcedLevel(a.instId, a.pinId);
+        if (cur === null) cur = this._readDigitalInput(a.instId, a.pinId) ? 1 : 0;
+        if (!target.props) target.props = {};
+        if (!target.props.forcedInputs) target.props.forcedInputs = {};
+        target.props.forcedInputs[a.pinId] = cur ? 0 : 1;
+        this._onChanged();
+        return;
+      }
+      delete inst.props.attach;
+    }
+    inst.props.level = inst.props.level ? 0 : 1;
+    this._onChanged();
+  }
+
+  // Right-click release: clears the forced level on an attached input tag.
+  // Returns true when a force was released (caller should skip its menu).
+  _releaseLogicTag(inst) {
+    if (!inst || inst.type !== 'logic_level_in' || !inst.props) return false;
+    const a = inst.props.attach;
+    if (!a) return false;
+    if (this._getForcedLevel(a.instId, a.pinId) === null) return false;
+    const target = this.components.find(c => c.id === a.instId);
+    if (target && target.props && target.props.forcedInputs) {
+      delete target.props.forcedInputs[a.pinId];
+      this._onChanged();
+    }
+    return true;
   }
 
   /* -------------- COMPONENT MANAGEMENT -------------- */
@@ -1736,6 +1878,28 @@ class CircuitCanvas {
         return;
       }
 
+      // On-canvas logic tags take priority over the pins beneath them
+      if (this.mode !== 'wiring') {
+        const tagHit = this._hitTestTag(world.x, world.y);
+        if (tagHit) {
+          const t = tagHit.inst;
+          if (!e.shiftKey) this._selectAll(false);
+          t.selected = true;
+          this.selected = t;
+          this.selectedWire = null;
+          this.mode = 'dragging';
+          this.dragging = {
+            inst: t,
+            offsetX: world.x - t.x,
+            offsetY: world.y - t.y,
+            startX: t.x,
+            startY: t.y,
+            moved: false,
+          };
+          return;
+        }
+      }
+
       // Check pin click first (start wiring)
       const pinHit = this._hitTestPin(world.x, world.y);
       if (pinHit) {
@@ -2150,7 +2314,8 @@ class CircuitCanvas {
     }
 
     // Hover cursor + pin tooltip
-    const pin = this._hitTestPin(world.x, world.y);
+    const tagHover = this._hitTestTag(world.x, world.y);
+    const pin = tagHover ? null : this._hitTestPin(world.x, world.y);
     const comp = this._hitTestComp(world.x, world.y);
     const wireDetail = this._hitTestWireDetails(world.x, world.y);
     const irRemoteHover = this._hitTestIrRemoteHover(world.x, world.y);
@@ -2171,7 +2336,10 @@ class CircuitCanvas {
       }
     }
 
-    if (pin) {
+    if (tagHover) {
+      this.canvas.style.cursor = 'pointer';
+      this._hidePinTooltip();
+    } else if (pin) {
       this.canvas.style.cursor = 'crosshair';
       this._showPinTooltip(pin, e);
     } else if (irRemoteHover) {
@@ -2191,9 +2359,16 @@ class CircuitCanvas {
 
   _onMouseUp(e) {
     if (this.mode === 'dragging' && this.dragging) {
+      const dragged = this.dragging.inst;
       if (this.dragging.moved) {
+        if (dragged && (dragged.type === 'logic_level_in' || dragged.type === 'logic_level_out')) {
+          this._tryAttachTag(dragged);
+        }
         this._pushHistory();
         this._onChanged();
+      } else if (dragged && dragged.type === 'logic_level_in') {
+        // Click without moving — toggle the input tag's level
+        this._toggleLogicTag(dragged);
       }
       this.mode = 'idle';
       this.dragging = null;
@@ -2251,6 +2426,9 @@ class CircuitCanvas {
   _onContextMenu(e) {
     e.preventDefault();
     const world = this._toWorld(e.offsetX, e.offsetY);
+    // Right-click on a forced input tag releases its force (no menu)
+    const tagHit = this._hitTestTag(world.x, world.y);
+    if (tagHit && this._releaseLogicTag(tagHit.inst)) return;
     const comp = this._hitTestComp(world.x, world.y);
     const wire = this._hitTestWire(world.x, world.y);
     if (comp) {
@@ -2613,6 +2791,7 @@ class CircuitCanvas {
   _placeComponent(world) {
     if (!this.placingType) return;
     const inst = this.addComponent(this.placingType, world.x, world.y);
+    if (inst) this._tryAttachTag(inst);
     // Don't cancel placing — allow multiple placement
     // Press ESC to stop
     return inst;
@@ -2634,7 +2813,7 @@ class CircuitCanvas {
     if (compEl) compEl.textContent = `${this.components.length} component${this.components.length !== 1 ? 's' : ''}`;
     if (wireEl) wireEl.textContent = `${this.wires.length} wire${this.wires.length !== 1 ? 's' : ''}`;
     // Detect standalone power sources so DMM/function-gen update without running Arduino sketch
-    const standaloneTypes = new Set(['power_5v', 'power_gnd', 'battery', 'mb102_power', 'bench_power_supply', 'func_gen', 'v_to_i_420ma', 'i_to_v_420ma']);
+    const standaloneTypes = new Set(['power_5v', 'power_gnd', 'battery', 'mb102_power', 'bench_power_supply', 'func_gen', 'v_to_i_420ma', 'i_to_v_420ma', 'logic_level_in']);
     this._hasStandalonePower = this.components.some(c => standaloneTypes.has(c.type));
     // Rebuild electrical graph
     this.engine.buildGraph(this.components, this.wires);
@@ -2881,6 +3060,8 @@ class CircuitCanvas {
 
       // Draw wires
       this._drawWires(tc);
+
+      try { this._drawLvlTags(tc); } catch (_e) { /* guard */ }
 
       // Draw components
       this._drawComponents(tc);
@@ -5365,6 +5546,9 @@ class CircuitCanvas {
     if (other.type === 'power_5v') return 1;
     if (other.type === 'power_gnd') return 0;
 
+    // 1a. Logic input tag acting as a wired constant source
+    if (other.type === 'logic_level_in') return (other.props && other.props.level) ? 1 : 0;
+
     // 1b. Breadboard: every hole on the same internal node reads as one signal
     if (other.type === 'breadboard' || other.type === 'breadboard_small') {
       const bg = window._breadboardGetGroup;
@@ -5441,6 +5625,7 @@ class CircuitCanvas {
     const other = wireTarget.inst;
     const targetPin = wireTarget.pinId;
     if (other.type === 'power_5v' || other.type === 'power_gnd') return true;
+    if (other.type === 'logic_level_in') return true;
     if (other.type === 'breadboard' || other.type === 'breadboard_small') {
       const bg = window._breadboardGetGroup;
       const grp = bg && bg(targetPin);

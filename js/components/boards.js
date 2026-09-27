@@ -1,7 +1,8 @@
 /* components/boards.js — Arduino & ESP32 board definitions */
 'use strict';
 
-/* ──────────────────── Arduino BOARDS ──────────────────── */
+/* ──────────────────── Arduino UNO R3 BOARDS ──────────────────── */
+
 defComp({
   id: 'arduino_uno',
   name: 'Arduino Uno R3',
@@ -315,6 +316,7 @@ defComp({
     ctx.restore();
   }
 });
+
 /* ──────────────────── Arduino BOARDS blue ──────────────────── */
 // defComp({
 //   id: 'arduino_uno',
@@ -1395,8 +1397,6 @@ function drawLED_on_board(ctx, cx, cy, color, radius) {
   ctx.stroke();
 }
 
-
-
 /* ──────────────────── STM32F746G-DISCO BOARD (ENHANCED) ──────────────────── */
 defComp({
   id: 'stm32f746_disco',
@@ -2022,9 +2022,6 @@ defComp({
     ctx.restore();
   }
 });
-
-
-
 
 /* ──────────────────── Intel 8085 Board ──────────────────── */
 defComp({

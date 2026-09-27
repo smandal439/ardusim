@@ -1,0 +1,110 @@
+{
+  "id": "nano_pwm",
+  "name": "nano pwm",
+  "icon": "🔧",
+  "desc": "A custom nano pwm circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790519707631_e981f",
+        "type": "arduino_nano",
+        "x": 45,
+        "y": 70,
+        "rotation": 0,
+        "props": {
+          "label": "NANO"
+        }
+      },
+      {
+        "id": "comp_1790519771673_lsnxy",
+        "type": "led",
+        "x": 285,
+        "y": 80,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "comp_1790519797154_73xhv",
+        "type": "resistor",
+        "x": 210,
+        "y": 135,
+        "rotation": 1,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1790519788385_sysjv",
+        "from": {
+          "instId": "comp_1790519707631_e981f",
+          "pinId": "D6"
+        },
+        "to": {
+          "instId": "comp_1790519771673_lsnxy",
+          "pinId": "anode"
+        },
+        "color": "#9C27B0",
+        "waypoints": [
+          {
+            "x": 172,
+            "y": 55
+          },
+          {
+            "x": 300,
+            "y": 55
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790519802142_b7vnx",
+        "from": {
+          "instId": "comp_1790519797154_73xhv",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1790519771673_lsnxy",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790519811556_f4prl",
+        "from": {
+          "instId": "comp_1790519707631_e981f",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1790519797154_73xhv",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 102,
+            "y": 165
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "void setup() {\n  Serial.begin(115200);\n}\n\nvoid loop() {\nfor (int i = 0; i < 255; i++) {\n  analogWrite(6, i);\n  delay(10);\n}\nfor (int i = 255; i >=0; i--) {\n  analogWrite(6, i);\n  delay(10);\n}\n}"
+  }
+}

@@ -1,5 +1,5 @@
 /**
- * test/ic_logic_tags.test.js — Properties-panel logic-level tags for digital ICs:
+ * test/ic_logic_tags.test.js — Logic-level forcing machinery for digital ICs:
  *   - classifyICTags() splits an IC's digital pins into input / output tags
  *   - props.forcedInputs drives IC logic (class _readDigitalInput, canvas
  *     _readDigitalInput/_hasDigitalInputSource, getPinVoltage origin + wire end)
@@ -226,15 +226,13 @@ describe('persistence + source wiring', () => {
     expect(src.split('const forced = this.getForcedLevel(pinId);').length - 1).toBe(18);
   });
 
-  it('source hooks: canvas force lookup, app tags, base helper, css class', () => {
+  it('source hooks: canvas force lookup, base helper, hidden modal prop row', () => {
     expect(readSrc('js/canvas.js').includes('_getForcedLevel(instId, pinId)')).toBe(true);
     expect(readSrc('js/canvas.js').includes('function classifyICTags(type, pins)')).toBe(true);
     expect(readSrc('js/components/base.js').includes('getForcedLevel(pinId)')).toBe(true);
     const app = readSrc('js/app.js');
-    expect(app.includes('data-lvl-pin')).toBe(true);
-    expect(app.includes("_refreshIcLvlTags")).toBe(true);
     expect(app.includes("if (key === 'forcedInputs') return;")).toBe(true);
-    expect(readSrc('css/style.css').includes('.lvl-tag')).toBe(true);
+    expect(app.includes('_refreshIcLvlTags')).toBe(false); // panel tags moved to canvas
   });
 
   it('simulator getPinVoltage checks forced levels at both ends', () => {

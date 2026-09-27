@@ -1,0 +1,137 @@
+{
+  "id": "nano_pushbutton_led",
+  "name": "NANO PUSHBUTTON LED",
+  "icon": "🔧",
+  "desc": "Arduino Nano — turn on an LED when a pushbutton is pressed using direct register manipulation (no Arduino libraries)",
+  "tags": [
+    "custom",
+    "circuit","NANO","pushbutton","led","registers"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790519707631_e981f",
+        "type": "arduino_nano",
+        "x": 45,
+        "y": 70,
+        "rotation": 0,
+        "props": {
+          "label": "NANO"
+        }
+      },
+      {
+        "id": "comp_1790519771673_lsnxy",
+        "type": "led",
+        "x": 300,
+        "y": 130,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "comp_1790519797154_73xhv",
+        "type": "resistor",
+        "x": 210,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "comp_1790520271612_binra",
+        "type": "push_button",
+        "x": 135,
+        "y": 185,
+        "rotation": 0,
+        "props": {
+          "pressed": false,
+          "label": "BTN"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1790519788385_sysjv",
+        "from": {
+          "instId": "comp_1790519707631_e981f",
+          "pinId": "D6"
+        },
+        "to": {
+          "instId": "comp_1790519771673_lsnxy",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790519802142_b7vnx",
+        "from": {
+          "instId": "comp_1790519797154_73xhv",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1790519771673_lsnxy",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790519811556_f4prl",
+        "from": {
+          "instId": "comp_1790519707631_e981f",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1790519797154_73xhv",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790520277418_9y9fk",
+        "from": {
+          "instId": "comp_1790520271612_binra",
+          "pinId": "p3"
+        },
+        "to": {
+          "instId": "comp_1790519707631_e981f",
+          "pinId": "GND2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790520282026_r8xx8",
+        "from": {
+          "instId": "comp_1790519707631_e981f",
+          "pinId": "D4"
+        },
+        "to": {
+          "instId": "comp_1790520271612_binra",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "void setup() {\n  // 1. Set D6 (Bit 6) as OUTPUT\n  DDRD |= (1 << DDD6);\n  \n  // 2. Set D4 (Bit 4) as INPUT\n  DDRD &= ~(1 << DDD4);\n  \n  // 3. Enable internal pull-up resistor on D4 (keeps pin HIGH until button connects it to GND)\n  PORTD |= (1 << PORTD4);\n}\n\nvoid loop() {\n  // Read PIND register bit 4. If it's LOW (button pressed):\n  if (!(PIND & (1 << PIND4))) {\n    PORTD |= (1 << PORTD6);   // Set D6 HIGH (Turn LED ON)\n  } else {\n    PORTD &= ~(1 << PORTD6);  // Set D6 LOW (Turn LED OFF)\n  }\n}\n"
+  }
+}
