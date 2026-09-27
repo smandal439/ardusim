@@ -2118,7 +2118,9 @@ class ArduinoSimulator {
   /* Start execution of already-compiled code (non-blocking, for dual-board parallel run) */
   _startExecution() {
     if (!this._compiledCtx && !this._assemblyMode) return;
-    this.sessionId = Math.random().toString(36).slice(2, 18);
+    const _sidBytes = new Uint8Array(12);
+    globalThis.crypto.getRandomValues(_sidBytes);
+    this.sessionId = Array.from(_sidBytes, b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
     this.isRunning = true;
     this.isPaused = false;
     this._resumeAudio();
