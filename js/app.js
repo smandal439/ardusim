@@ -287,6 +287,7 @@ class App {
       if (searchBox) { searchBox.value = ''; this._filterComponents(''); }
       document.getElementById('search-clear')?.classList.remove('visible');
     });
+    document.getElementById('groups-collapse-all')?.addEventListener('click', () => this._collapseAllComponentGroups());
     speedSel?.addEventListener('change', (e) => this.sim.setSpeed(e.target.value));
     const boardSel = get('board-select');
     boardSel?.addEventListener('change', (e) => this._setBoard(e.target.value));
@@ -1853,6 +1854,7 @@ _newProject() {
     for (const group of window.ArduinoComponents.COMPONENT_CATALOG) {
       const section = document.createElement('div');
       section.className = 'comp-group';
+      section.dataset.category = group.category;
       const title = document.createElement('div');
       title.className = 'comp-group-title';
       title.textContent = group.category;
@@ -1984,13 +1986,30 @@ _newProject() {
       if (isSearching) {
         group.classList.remove('collapsed');
       } else {
-        const cat = group.querySelector('.comp-group-title')?.textContent?.trim();
+        const cat = group.dataset.category;
         if (cat) {
           const cs = JSON.parse(localStorage.getItem('ardusim_comp_collapsed') || '{}');
           if (cs[cat]) group.classList.add('collapsed');
         }
       }
     });
+  }
+
+  _collapseAllComponentGroups() {
+    const cs = {};
+    document.querySelectorAll('#components-container .comp-group').forEach(group => {
+      group.classList.add('collapsed');
+      const cat = group.dataset.category;
+      if (cat) cs[cat] = true;
+    });
+    localStorage.setItem('ardusim_comp_collapsed', JSON.stringify(cs));
+    // Collapse is only visible when not actively filtering — clear the search too
+    const sb = document.getElementById('component-search');
+    if (sb && sb.value) {
+      sb.value = '';
+      this._filterComponents('');
+      document.getElementById('search-clear')?.classList.remove('visible');
+    }
   }
 
   /* ---------------------- CANVAS SUMMARY ---------------------- */

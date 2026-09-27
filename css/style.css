@@ -1197,6 +1197,26 @@ body.file-explorer-collapsed .file-explorer-expand {
 }
 #component-search::placeholder { color: var(--text-muted); }
 
+.search-collapse-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.search-collapse-all:hover {
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+  background: var(--bg-hover);
+}
+
 .components-container {
   flex: 1;
   overflow-y: auto;
