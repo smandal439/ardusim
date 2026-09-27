@@ -2594,7 +2594,7 @@ class CircuitCanvas {
     if (compEl) compEl.textContent = `${this.components.length} component${this.components.length !== 1 ? 's' : ''}`;
     if (wireEl) wireEl.textContent = `${this.wires.length} wire${this.wires.length !== 1 ? 's' : ''}`;
     // Detect standalone power sources so DMM/function-gen update without running Arduino sketch
-    const standaloneTypes = new Set(['power_5v', 'power_gnd', 'battery', 'mb102_power', 'bench_power_supply', 'func_gen']);
+    const standaloneTypes = new Set(['power_5v', 'power_gnd', 'battery', 'mb102_power', 'bench_power_supply', 'func_gen', 'v_to_i_420ma', 'i_to_v_420ma']);
     this._hasStandalonePower = this.components.some(c => standaloneTypes.has(c.type));
     // Rebuild electrical graph
     this.engine.buildGraph(this.components, this.wires);

@@ -5757,3 +5757,445 @@ class IRRemoteComponent extends Component {
   update() {}
 }
 registerComponent('ir_remote', IRRemoteComponent);
+
+/* ═══════════════════════ 0-5V → 4-20mA Current Transmitter ═══════════════════════ */
+
+defComp({
+  id: 'v_to_i_420ma',
+  name: '0-5V to 4-20mA Transmitter',
+  category: 'Sensors',
+  icon: '📤',
+  desc: 'Voltage-to-current module: converts a 0-5V analog input into a 4-20mA industrial current loop (I = 4 + Vin/5 × 16 mA).',
+  search: 'voltage to current module v to i transmitter 0-5v 4-20ma current loop industrial signal conditioner analog input',
+  width: 120,
+  height: 76,
+  defaultProps: { vin: 0 },
+  interactive: [
+    { field: 'vin', label: 'Input Voltage', min: 0, max: 5, step: 0.1, unit: ' V' },
+  ],
+  pins: [
+    { id: 'VIN', label: 'VIN', type: PIN_TYPE.ANALOG, x: 0, y: 40, side: 'left' },
+    { id: 'OUT+', label: 'OUT+', type: PIN_TYPE.SIGNAL, x: 120, y: 32, side: 'right' },
+    { id: 'OUT-', label: 'OUT-', type: PIN_TYPE.SIGNAL, x: 120, y: 52, side: 'right' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 44, y: 76, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 68, y: 76, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const vin = Math.max(0, Math.min(5, Number(inst.runtimeState?.vin ?? inst.props?.vin ?? 0)));
+    const mA = 4 + (vin / 5) * 16;
+    const isRunning = !!(sim && sim.isRunning);
+    const eng = window.CircuitCanvas && window.CircuitCanvas.engine;
+    const vccV = (eng && typeof eng.getVoltageAtPin === 'function') ? (eng.getVoltageAtPin(inst.id, 'VCC') || 0) : 0;
+    const powered = vccV > 0.5;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const drawRR = (rx, ry, rw, rh, rad) => {
+      ctx.beginPath();
+      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+    const screwAt = (sx, sy) => {
+      ctx.fillStyle = '#b0bec5';
+      ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#78909c'; ctx.lineWidth = 0.8; ctx.stroke();
+      ctx.fillStyle = '#eceff1';
+      ctx.beginPath(); ctx.arc(sx, sy, 2.6, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#607d8b'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sx - 2, sy - 1.2); ctx.lineTo(sx + 2, sy + 1.2); ctx.stroke();
+    };
+    const trimmer = (tx, ty, label) => {
+      ctx.fillStyle = '#1565c0';
+      ctx.beginPath(); ctx.arc(tx, ty, 5.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#cfd8dc';
+      ctx.beginPath(); ctx.arc(tx, ty, 3.6, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#607d8b'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(tx - 2.6, ty); ctx.lineTo(tx + 2.6, ty); ctx.stroke();
+      ctx.fillStyle = '#9fb6cc'; ctx.font = '3px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+      ctx.fillText(label, tx, ty + 10);
+    };
+
+    // 1. Blue PCB
+    const pcbGrad = ctx.createLinearGradient(0, 0, 120, 76);
+    pcbGrad.addColorStop(0, '#0c2340');
+    pcbGrad.addColorStop(0.5, '#133863');
+    pcbGrad.addColorStop(1, '#0b1d36');
+    ctx.fillStyle = pcbGrad;
+    drawRR(0, 0, 120, 76, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#2d588c'; ctx.lineWidth = 0.8; ctx.stroke();
+
+    // Corner mounting holes
+    [[6, 6], [114, 6], [6, 70], [114, 70]].forEach(([hx, hy]) => {
+      ctx.fillStyle = '#060f1c'; ctx.beginPath(); ctx.arc(hx, hy, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#c5a059'; ctx.lineWidth = 0.6; ctx.stroke();
+    });
+
+    // 2. Silkscreen
+    ctx.fillStyle = '#e8f1ff'; ctx.font = 'bold 5px "JetBrains Mono", monospace'; ctx.textAlign = 'left';
+    ctx.fillText('V→I TRANSMITTER', 24, 11);
+    ctx.fillStyle = '#7fb2ff'; ctx.font = '4px "JetBrains Mono", monospace'; ctx.textAlign = 'right';
+    ctx.fillText('4-20mA', 96, 11);
+
+    // 3. V→I converter IC
+    ctx.fillStyle = '#1a1a1a';
+    drawRR(36, 14, 30, 17, 1.5);
+    ctx.fill();
+    ctx.fillStyle = '#aaa';
+    for (let i = 0; i < 4; i++) {
+      ctx.fillRect(33, 17 + i * 3.5, 3, 1.6);
+      ctx.fillRect(66, 17 + i * 3.5, 3, 1.6);
+    }
+    ctx.fillStyle = '#ccc'; ctx.font = 'bold 5px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+    ctx.fillText('V→I', 51, 23);
+    ctx.fillStyle = '#78909c'; ctx.font = '3px "JetBrains Mono", monospace';
+    ctx.fillText('4-20mA', 51, 29);
+
+    // 4. ZERO / SPAN trimmers
+    trimmer(74, 22, 'ZERO');
+    trimmer(87, 22, 'SPAN');
+
+    // 5. Input screw terminal (VIN)
+    ctx.fillStyle = '#1f7a3d';
+    drawRR(0, 28, 20, 28, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#0d4a22'; ctx.lineWidth = 0.8; ctx.stroke();
+    screwAt(10, 40);
+    ctx.fillStyle = '#dfe8f0'; ctx.font = 'bold 4px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+    ctx.fillText('VIN', 10, 33);
+
+    // 6. Loop screw terminals (OUT+ / OUT-)
+    ctx.fillStyle = '#1f7a3d';
+    drawRR(100, 14, 20, 48, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#0d4a22'; ctx.lineWidth = 0.8; ctx.stroke();
+    screwAt(110, 32);
+    screwAt(110, 52);
+    ctx.fillStyle = '#dfe8f0'; ctx.font = 'bold 4px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+    ctx.fillText('OUT+', 110, 24);
+    ctx.fillText('OUT-', 110, 44);
+
+    // 7. Live readout
+    ctx.fillStyle = '#050e1a';
+    drawRR(26, 34, 68, 17, 2);
+    ctx.fill();
+    ctx.strokeStyle = isRunning ? 'rgba(0,200,255,0.35)' : 'rgba(40,60,90,0.5)';
+    ctx.lineWidth = 0.5; ctx.stroke();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = isRunning ? '#ffab40' : '#546e7a';
+    ctx.font = 'bold 6px "JetBrains Mono", monospace';
+    ctx.fillText(`${vin.toFixed(2)}V`, 30, 46);
+    ctx.fillStyle = isRunning ? '#607d8b' : '#3d5060';
+    ctx.font = 'bold 5px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('→', 57, 46);
+    ctx.fillStyle = isRunning ? '#00e5ff' : '#546e7a';
+    ctx.font = 'bold 7px "JetBrains Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(`${mA.toFixed(1)}mA`, 91, 46);
+
+    // 8. Power LED
+    ctx.fillStyle = powered ? '#00ff44' : '#1e3320';
+    ctx.beginPath(); ctx.arc(8, 62, 2.4, 0, Math.PI * 2); ctx.fill();
+    if (powered) {
+      ctx.shadowColor = '#00ff44'; ctx.shadowBlur = 5; ctx.fill(); ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.beginPath(); ctx.arc(7.2, 61.2, 0.9, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = powered ? '#8be9a8' : '#5c7a66';
+    ctx.font = '3px "JetBrains Mono", monospace'; ctx.textAlign = 'left';
+    ctx.fillText('PWR', 14, 63);
+
+    // 9. Bottom power header (VCC / GND)
+    ctx.fillStyle = '#141416';
+    drawRR(36, 58, 40, 5, 1.5);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 0.7; ctx.stroke();
+    ctx.fillStyle = '#9fb6cc'; ctx.font = 'bold 4px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+    ctx.fillText('VCC', 44, 56);
+    ctx.fillText('GND', 68, 56);
+    [44, 68].forEach(px => {
+      ctx.fillStyle = '#d4af37'; ctx.fillRect(px - 1.8, 60, 3.6, 3);
+      const g = ctx.createLinearGradient(px - 0.9, 63, px + 0.9, 63);
+      g.addColorStop(0, '#aaa'); g.addColorStop(0.5, '#fff'); g.addColorStop(1, '#666');
+      ctx.fillStyle = g; ctx.fillRect(px - 0.9, 63, 1.8, 13);
+    });
+
+    if (inst.selected) drawSelectionRect(ctx, -4, -4, 128, 84);
+    ctx.restore();
+  }
+});
+
+class VtoI420maComponent extends Component {
+  getPins() {
+    return [
+      { id: 'VIN', label: 'VIN', type: PIN_TYPE.ANALOG, x: 0, y: 40, side: 'left' },
+      { id: 'OUT+', label: 'OUT+', type: PIN_TYPE.SIGNAL, x: 120, y: 32, side: 'right' },
+      { id: 'OUT-', label: 'OUT-', type: PIN_TYPE.SIGNAL, x: 120, y: 52, side: 'right' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 44, y: 76, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 68, y: 76, side: 'bottom' },
+    ];
+  }
+
+  update(canvas) {
+    const rs = this.runtimeState;
+    const net = this.getNet('VIN');
+    const wired = !!(net && net.pins && net.pins.size > 1);
+    let vin;
+
+    if (wired && canvas && typeof canvas._readAnalogInput === 'function') {
+      // Input comes from the circuit — mirror it onto the slider as a live gauge.
+      vin = (Number(canvas._readAnalogInput(this.id, 'VIN')) || 0) / 1023 * 5;
+      vin = Math.max(0, Math.min(5, vin));
+      rs.vin = vin;
+    } else {
+      // Unconnected input — the "Input Voltage" slider is the signal source.
+      vin = Math.max(0, Math.min(5, Number(rs.vin !== undefined ? rs.vin : (this.props.vin ?? 0))));
+    }
+
+    rs.inputV = vin;
+    rs.current = 4 + (vin / 5) * 16;
+  }
+}
+registerComponent('v_to_i_420ma', VtoI420maComponent);
+
+/* ═══════════════════════ 4-20mA to 5V Converter ═══════════════════════ */
+
+defComp({
+  id: 'i_to_v_420ma',
+  name: '4-20mA to 5V Converter',
+  category: 'Sensors',
+  icon: '📥',
+  desc: 'Industrial 4-20mA receiver board for Arduino: converts a current loop into a 0-5V analog output (1-5V across an internal 250Ω shunt).',
+  search: '4-20ma to 5v converter current to voltage receiver industrial sensor interface board loop analog output arduino',
+  width: 120,
+  height: 76,
+  defaultProps: { loopCurrent: 12 },
+  interactive: [
+    { field: 'loopCurrent', label: 'Loop Current', min: 4, max: 20, step: 0.5, unit: ' mA' },
+  ],
+  pins: [
+    { id: 'IIN+', label: 'IN+', type: PIN_TYPE.SIGNAL, x: 0, y: 32, side: 'left' },
+    { id: 'IIN-', label: 'IN-', type: PIN_TYPE.SIGNAL, x: 0, y: 52, side: 'left' },
+    { id: 'VOUT', label: 'VOUT', type: PIN_TYPE.ANALOG, x: 120, y: 42, side: 'right' },
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 44, y: 76, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 68, y: 76, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const rs = inst.runtimeState || {};
+    const mA = Math.max(0, Math.min(30, Number(rs.loopMa ?? rs.loopCurrent ?? inst.props?.loopCurrent ?? 12)));
+    const vOut = Math.max(0, Math.min(5, (mA - 4) * 5 / 16));
+    const isRunning = !!(sim && sim.isRunning);
+    const eng = window.CircuitCanvas && window.CircuitCanvas.engine;
+    const vccV = (eng && typeof eng.getVoltageAtPin === 'function') ? (eng.getVoltageAtPin(inst.id, 'VCC') || 0) : 0;
+    const powered = vccV > 0.5;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const drawRR = (rx, ry, rw, rh, rad) => {
+      ctx.beginPath();
+      if (typeof roundRect === 'function') roundRect(ctx, rx, ry, rw, rh, rad);
+      else if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+      else ctx.rect(rx, ry, rw, rh);
+    };
+    const screwAt = (sx, sy) => {
+      ctx.fillStyle = '#b0bec5';
+      ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#78909c'; ctx.lineWidth = 0.8; ctx.stroke();
+      ctx.fillStyle = '#eceff1';
+      ctx.beginPath(); ctx.arc(sx, sy, 2.6, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#607d8b'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sx - 2, sy - 1.2); ctx.lineTo(sx + 2, sy + 1.2); ctx.stroke();
+    };
+    const trimmer = (tx, ty, label) => {
+      ctx.fillStyle = '#6a1b9a';
+      ctx.beginPath(); ctx.arc(tx, ty, 5.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#cfd8dc';
+      ctx.beginPath(); ctx.arc(tx, ty, 3.6, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#607d8b'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(tx - 2.6, ty); ctx.lineTo(tx + 2.6, ty); ctx.stroke();
+      ctx.fillStyle = '#a5d6a7'; ctx.font = '3px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+      ctx.fillText(label, tx, ty + 10);
+    };
+
+    // 1. Green PCB
+    const pcbGrad = ctx.createLinearGradient(0, 0, 120, 76);
+    pcbGrad.addColorStop(0, '#0a3d1b');
+    pcbGrad.addColorStop(0.5, '#0f5226');
+    pcbGrad.addColorStop(1, '#083015');
+    ctx.fillStyle = pcbGrad;
+    drawRR(0, 0, 120, 76, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#1e7a3c'; ctx.lineWidth = 0.8; ctx.stroke();
+
+    // Corner mounting holes
+    [[6, 6], [114, 6], [6, 70], [114, 70]].forEach(([hx, hy]) => {
+      ctx.fillStyle = '#04160a'; ctx.beginPath(); ctx.arc(hx, hy, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#c5a059'; ctx.lineWidth = 0.6; ctx.stroke();
+    });
+
+    // 2. Silkscreen
+    ctx.fillStyle = '#e8ffe8'; ctx.font = 'bold 5px "JetBrains Mono", monospace'; ctx.textAlign = 'left';
+    ctx.fillText('I→V RECEIVER', 24, 11);
+    ctx.fillStyle = '#8ce8a8'; ctx.font = '4px "JetBrains Mono", monospace'; ctx.textAlign = 'right';
+    ctx.fillText('0-5V', 96, 11);
+
+    // 3. I→V converter IC
+    ctx.fillStyle = '#1a1a1a';
+    drawRR(36, 14, 30, 17, 1.5);
+    ctx.fill();
+    ctx.fillStyle = '#aaa';
+    for (let i = 0; i < 4; i++) {
+      ctx.fillRect(33, 17 + i * 3.5, 3, 1.6);
+      ctx.fillRect(66, 17 + i * 3.5, 3, 1.6);
+    }
+    ctx.fillStyle = '#ccc'; ctx.font = 'bold 5px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+    ctx.fillText('I→V', 51, 23);
+    ctx.fillStyle = '#78909c'; ctx.font = '3px "JetBrains Mono", monospace';
+    ctx.fillText('250Ω', 51, 29);
+
+    // 4. ZERO / SPAN trimmers
+    trimmer(74, 22, 'ZERO');
+    trimmer(87, 22, 'SPAN');
+
+    // 5. Loop input screw terminals (IN+ / IN-)
+    ctx.fillStyle = '#1f7a3d';
+    drawRR(0, 14, 20, 48, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#0d4a22'; ctx.lineWidth = 0.8; ctx.stroke();
+    screwAt(10, 32);
+    screwAt(10, 52);
+    ctx.fillStyle = '#dfe8f0'; ctx.font = 'bold 4px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+    ctx.fillText('IN+', 10, 24);
+    ctx.fillText('IN-', 10, 44);
+
+    // 6. Analog output screw terminal (VOUT)
+    ctx.fillStyle = '#1f7a3d';
+    drawRR(100, 28, 20, 28, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#0d4a22'; ctx.lineWidth = 0.8; ctx.stroke();
+    screwAt(110, 42);
+    ctx.fillStyle = '#dfe8f0'; ctx.font = 'bold 4px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+    ctx.fillText('VOUT', 110, 35);
+
+    // 7. Live readout
+    ctx.fillStyle = '#050e1a';
+    drawRR(26, 34, 68, 17, 2);
+    ctx.fill();
+    ctx.strokeStyle = isRunning ? 'rgba(0,255,140,0.3)' : 'rgba(40,80,50,0.5)';
+    ctx.lineWidth = 0.5; ctx.stroke();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = isRunning ? '#ffab40' : '#546e7a';
+    ctx.font = 'bold 6px "JetBrains Mono", monospace';
+    ctx.fillText(`${mA.toFixed(1)}mA`, 30, 46);
+    ctx.fillStyle = isRunning ? '#607d8b' : '#3d5060';
+    ctx.font = 'bold 5px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('→', 62, 46);
+    ctx.fillStyle = isRunning ? '#69f0ae' : '#546e7a';
+    ctx.font = 'bold 7px "JetBrains Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(`${vOut.toFixed(2)}V`, 91, 46);
+
+    // 8. Power LED
+    ctx.fillStyle = powered ? '#00ff44' : '#1e3320';
+    ctx.beginPath(); ctx.arc(8, 62, 2.4, 0, Math.PI * 2); ctx.fill();
+    if (powered) {
+      ctx.shadowColor = '#00ff44'; ctx.shadowBlur = 5; ctx.fill(); ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.beginPath(); ctx.arc(7.2, 61.2, 0.9, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = powered ? '#8be9a8' : '#5c7a66';
+    ctx.font = '3px "JetBrains Mono", monospace'; ctx.textAlign = 'left';
+    ctx.fillText('PWR', 14, 63);
+
+    // 9. Bottom power header (VCC / GND)
+    ctx.fillStyle = '#141416';
+    drawRR(36, 58, 40, 5, 1.5);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 0.7; ctx.stroke();
+    ctx.fillStyle = '#a5d6a7'; ctx.font = 'bold 4px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+    ctx.fillText('VCC', 44, 56);
+    ctx.fillText('GND', 68, 56);
+    [44, 68].forEach(px => {
+      ctx.fillStyle = '#d4af37'; ctx.fillRect(px - 1.8, 60, 3.6, 3);
+      const g = ctx.createLinearGradient(px - 0.9, 63, px + 0.9, 63);
+      g.addColorStop(0, '#aaa'); g.addColorStop(0.5, '#fff'); g.addColorStop(1, '#666');
+      ctx.fillStyle = g; ctx.fillRect(px - 0.9, 63, 1.8, 13);
+    });
+
+    if (inst.selected) drawSelectionRect(ctx, -4, -4, 128, 84);
+    ctx.restore();
+  }
+});
+
+class ItoV420maComponent extends Component {
+  getPins() {
+    return [
+      { id: 'IIN+', label: 'IN+', type: PIN_TYPE.SIGNAL, x: 0, y: 32, side: 'left' },
+      { id: 'IIN-', label: 'IN-', type: PIN_TYPE.SIGNAL, x: 0, y: 52, side: 'left' },
+      { id: 'VOUT', label: 'VOUT', type: PIN_TYPE.ANALOG, x: 120, y: 42, side: 'right' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 44, y: 76, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 68, y: 76, side: 'bottom' },
+    ];
+  }
+
+  update(canvas) {
+    const rs = this.runtimeState;
+    let mA = null;
+
+    // 1. A transmitter wired onto the loop pins drives the current directly
+    const tx = this._findTransmitter(canvas);
+    if (tx) {
+      mA = Number(tx.runtimeState && tx.runtimeState.current !== undefined ? tx.runtimeState.current : 12);
+    }
+
+    // 2. Loop voltage across the internal 250Ω shunt: 1V = 4mA … 5V = 20mA
+    if (mA === null && this.engine && typeof this.engine.getVoltageAtPin === 'function') {
+      const vIn = Number(this.engine.getVoltageAtPin(this.id, 'IIN+')) || 0;
+      const vRet = Number(this.engine.getVoltageAtPin(this.id, 'IIN-')) || 0;
+      const vLoop = vIn - vRet;
+      if (vLoop > 0.05) mA = vLoop * 4;
+    }
+
+    // 3. Nothing drives the loop — the "Loop Current" slider is the source
+    if (mA === null) {
+      mA = Number(rs.loopCurrent !== undefined ? rs.loopCurrent : (this.props.loopCurrent ?? 12));
+    } else {
+      // Mirror the measured loop current onto the slider as a live gauge
+      rs.loopCurrent = mA;
+    }
+
+    mA = Math.max(0, Math.min(30, mA));
+    rs.loopMa = mA;
+    rs.vOut = Math.max(0, Math.min(5, (mA - 4) * 5 / 16));
+  }
+
+  _findTransmitter(canvas) {
+    const eng = this.engine;
+    const comps = (canvas && canvas.components)
+      || (window.CircuitCanvas && window.CircuitCanvas.components)
+      || [];
+    if (eng && typeof eng.getNetForPin === 'function') {
+      const inNet = eng.getNetForPin(this.id, 'IIN+');
+      if (inNet) {
+        for (const c of comps) {
+          if (c.type !== 'v_to_i_420ma') continue;
+          const outNet = eng.getNetForPin(c.id, 'OUT+');
+          if (outNet && outNet.id === inNet.id) return c;
+        }
+      }
+    }
+    for (const pinId of ['IIN+', 'IIN-']) {
+      const hits = this.findConnected(pinId, 'v_to_i_420ma');
+      if (hits.length) return hits[0];
+    }
+    return null;
+  }
+}
+registerComponent('i_to_v_420ma', ItoV420maComponent);

@@ -2242,6 +2242,44 @@ void loop() {
     exampleId: 'ina219_solar_tracker',
   },
 
+  v_to_i_420ma: {
+    id: 'v_to_i_420ma',
+    name: '0-5V to 4-20mA Transmitter',
+    icon: '📤',
+    category: 'Sensors',
+    longDesc: 'Voltage-to-current transmitter module (V-to-I signal conditioner). Takes a 0-5V analog input and drives an industry-standard 4-20mA current loop using I = 4 + (Vin / 5) × 16 mA, so 0V gives 4mA (live-zero), 2.5V gives 12mA and 5V gives 20mA. The OUT+ pin presents the voltage that loop current develops across a 250Ω shunt (1-5V), which is what a 4-20mA receiver measures.',
+    use: 'Sending analog sensor signals over long distances in industrial plants: PLC / DCS analog inputs, remote temperature, pressure and level transmitters, noise-immune 4-20mA current loops.',
+    pins: {
+      VIN: { label: 'VIN', type: 'analog', desc: '0-5V analog input signal. Wire to a sensor output, potentiometer wiper, PWM/DAC pin — or leave it unconnected and drive the Input Voltage slider.' },
+      'OUT+': { label: 'OUT+', type: 'signal', desc: 'Current loop output (+). Wire to IN+ of a 4-20mA receiver. Reads 1-5V across a 250Ω shunt.' },
+      'OUT-': { label: 'OUT-', type: 'signal', desc: 'Current loop output (−). Wire to IN− of the receiver to close the loop.' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Module supply (12-36V, typically 24V). Powers the module only — it is not part of the loop.' },
+      GND: { label: 'GND', type: 'gnd', desc: 'Supply ground / common reference.' },
+    },
+    props: { vin: 'Input voltage 0-5V. Used as the signal source while the VIN terminal is unconnected; while VIN is wired it mirrors the measured input.' },
+    wiring: 'VIN→sensor/PWM output, VCC→supply +, GND→GND, OUT+→receiver IN+, OUT-→receiver IN-.',
+    code: '/* Analog source for VIN (PWM filtered, or use a DAC on ESP32):\n   0..5V maps to 4..20mA on the loop.\n   Read the result back with the 4-20mA to 5V converter on an analog pin. */\nint sensorPin = A0;   // potentiometer wiper -> VIN\nint pwmPin    = 9;    // optional PWM -> VIN through an RC filter\nvoid setup() {\n  pinMode(sensorPin, INPUT);\n  Serial.begin(9600);\n}\nvoid loop() {\n  int raw = analogRead(sensorPin);        // 0..1023  ==  0..5V\n  float vin = raw * (5.0 / 1023.0);\n  float loopMa = 4.0 + (vin / 5.0) * 16.0; // transmitter transfer function\n  Serial.print("Vin: "); Serial.print(vin, 2);\n  Serial.print(" V   Loop: "); Serial.print(loopMa, 1);\n  Serial.println(" mA");\n  delay(500);\n}',
+  },
+
+  i_to_v_420ma: {
+    id: 'i_to_v_420ma',
+    name: '4-20mA to 5V Converter',
+    icon: '📥',
+    category: 'Sensors',
+    longDesc: 'Industrial 4-20mA receiver board (I-to-V signal conditioner) for Arduino. It terminates the current loop with an internal 250Ω precision shunt, so the loop current becomes 1-5V, then scales that to a 0-5V analog output: Vout = (I − 4mA) / 16mA × 5V. 4mA gives 0V, 12mA gives 2.5V and 20mA gives 5V — a full-range round trip when paired with the 0-5V to 4-20mA transmitter.',
+    use: 'Reading industrial 4-20mA sensors and transmitters with an Arduino/PLC analog input: pressure, temperature, flow and level sensors, long-cable noise-immune signalling.',
+    pins: {
+      'IIN+': { label: 'IN+', type: 'signal', desc: 'Current loop input (+). Wire to OUT+ of a 4-20mA transmitter (or the + side of the loop supply).' },
+      'IIN-': { label: 'IN-', type: 'signal', desc: 'Current loop input (−). Wire to OUT- of the transmitter to close the loop.' },
+      VOUT: { label: 'VOUT', type: 'analog', desc: '0-5V analog output. Wire straight to an Arduino analog pin (A0…) and read with analogRead().' },
+      VCC: { label: 'VCC', type: 'power', desc: 'Board supply (12-36V, typically 24V). Powers the board only — it is not part of the loop.' },
+      GND: { label: 'GND', type: 'gnd', desc: 'Supply ground and output reference — connect to Arduino GND.' },
+    },
+    props: { loopCurrent: 'Loop current 4-20mA. Used as the source while no transmitter is wired to the loop pins; while the loop is connected it mirrors the measured current.' },
+    wiring: 'IN+←transmitter OUT+, IN-←transmitter OUT-, VOUT→A0, VCC→supply +, GND→Arduino GND.',
+    code: '/* 4-20mA industrial sensor -> 4-20mA to 5V converter -> A0 */\nconst int loopPin = A0;\nvoid setup() {\n  pinMode(loopPin, INPUT);\n  Serial.begin(9600);\n}\nvoid loop() {\n  int adc = analogRead(loopPin);          // 0..1023 == 0..5V\n  float vout = adc * (5.0 / 1023.0);\n  float loopMa = 4.0 + (vout / 5.0) * 16.0; // 0V->4mA ... 5V->20mA\n  float engineering = map(adc, 0, 1023, 0, 100); // scale to your process unit\n  Serial.print("Loop: "); Serial.print(loopMa, 1);\n  Serial.print(" mA   Value: "); Serial.print(engineering);\n  Serial.println(" %");\n  delay(500);\n}',
+  },
+
   max6675: {
     id: 'max6675',
     name: 'MAX6675 Thermocouple',

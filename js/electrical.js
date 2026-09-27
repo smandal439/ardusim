@@ -574,6 +574,23 @@ class ElectricalEngine {
         }
         break;
       }
+      case 'v_to_i_420ma': {
+        // 4-20mA loop driver: the OUT+ pin carries the voltage the loop current
+        // develops across a 250Ω shunt (4mA→1.0V … 20mA→5.0V, V = I × 250Ω).
+        const mA = inst.runtimeState?.current ?? 12;
+        const raw = Math.max(0, Math.min(255, Math.round((mA / 20) * 255)));
+        addSource('OUT+', 'current_loop', mA / 4, raw);
+        addGround('GND', 'gnd');
+        break;
+      }
+      case 'i_to_v_420ma': {
+        // Receiver output: 0-5V analog signal for an Arduino input pin.
+        const vOut = Math.max(0, inst.runtimeState?.vOut ?? 0);
+        const raw = Math.max(0, Math.min(255, Math.round((vOut / 5) * 255)));
+        addSource('VOUT', 'analog_out', vOut, raw);
+        addGround('GND', 'gnd');
+        break;
+      }
     }
   }
 
