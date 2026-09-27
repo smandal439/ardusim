@@ -2,10 +2,11 @@
   "id": "tb6600_stepper_motor",
   "name": "TB6600 Stepper Motor",
   "icon": "🔧",
-  "desc": "A custom TB6600 Stepper Motor circuit example.",
+  "desc": "This example demonstrates how to control a NEMA 17 stepper motor using a TB6600 driver with an Arduino Uno. The TB6600 is a high-performance stepper motor driver that supports microstepping and can handle higher current loads, making it suitable for precise motion control applications.\n\nThe circuit connects the Arduino to the TB6600 driver, which in turn drives the NEMA 17 stepper motor. The Arduino sends pulse and direction signals to the TB6600, allowing for controlled rotation of the motor. The example code includes various speed settings and demonstrates clockwise and counter-clockwise rotation, as well as enabling and disabling the motor.\n\nKey features of this example include:\n- Microstepping support (1/16 microstep)\n- Adjustable speed control\n- Direction control\n- Motor enable/disable functionality\n- Serial output for monitoring motor actions",
   "tags": [
-    "custom",
-    "circuit"
+    "motor",
+    "stepper_motor",
+    "tb6600"
   ],
   "circuit": {
     "components": [
