@@ -1833,6 +1833,12 @@ class ArduinoSimulator {
       const body = `{\n${js}\n\nif(typeof setup === "undefined") throw new Error("Missing setup() function. Every Arduino sketch needs a setup() function."); if(typeof loop === "undefined") throw new Error("Missing loop() function. Every Arduino sketch needs a loop() function."); return { setup, loop };\n}`;
 
       // Try to build the function // will throw on syntax errors
+      // codeql[js/code-injection] Intended behaviour: the Arduino sketch the user
+      // authored (or loaded from a project/example) is transpiled to JS and run
+      // in that same user's browser — this is a client-side simulator/playground
+      // with no server-side execution and no cross-user data flow. Parameter
+      // names (keys) are allow-listed identifier-checked above; the only
+      // executed value is the sketch itself, which is the product's core feature.
       const fn = new Function(...keys, body);
       this._compiledFn = fn;
       this._compiledCtx = { keys, vals, fn };

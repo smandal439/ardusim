@@ -4239,7 +4239,9 @@ class CircuitCanvas {
 
         /* â”€â”€ Digital Multimeter — measures voltage / resistance / continuity â”€â”€ */
         case 'multimeter': {
-          const mode = inst.runtimeState.mode || inst.props.mode || 'V_DC';
+          // props.mode is the source of truth — runtimeState.mode is only a
+          // mirror, otherwise a mode switch after the first tick is ignored.
+          const mode = inst.props?.mode || inst.runtimeState?.mode || 'V_DC';
 
           // Use ElectricalEngine's solved voltages for accurate readings
           // (accounts for voltage division through resistors)
@@ -4282,78 +4284,20 @@ class CircuitCanvas {
               break;
             }
             case 'A_DC': {
-              // In current mode, probe_red and probe_com are shorted (same net).
-              // Measure current flowing OUT of the COM side through resistors.
-              // COM side wire group = all pins connected to probe_com via wires only.
-              const probeNet = this.engine.getNetForPin(inst.id, 'probe_red');
-              if (!probeNet || probeNet.voltage === 0) {
-                displayText = '0.000';
-                displayUnit = 'mA';
-                break;
-              }
-              const vNet = probeNet.voltage;
-
-              // BFS from probe_com through wires only (not through meter's internal short)
-              const comGroup = new Set();
-              const wireQueue = [`${inst.id}:probe_com`];
-              const wireVisited = new Set();
-              while (wireQueue.length > 0) {
-                const key = wireQueue.shift();
-                if (wireVisited.has(key)) continue;
-                wireVisited.add(key);
-                comGroup.add(key);
-                const [cInstId, cPinId] = key.split(':');
-                for (const w of this.wires) {
-                  let ni, np;
-                  if (w.from.instId === cInstId && w.from.pinId === cPinId) { ni = w.to.instId; np = w.to.pinId; }
-                  else if (w.to.instId === cInstId && w.to.pinId === cPinId) { ni = w.from.instId; np = w.from.pinId; }
-                  else continue;
-                  wireQueue.push(`${ni}:${np}`);
-                }
-              }
-
-              // Sum currents through resistors with one pin in comGroup and one outside
-              let totalCurrent = 0;
-              for (const comp of this.components) {
-                const net1 = this.engine.getNetForPin(comp.id, 'p1');
-                const net2 = this.engine.getNetForPin(comp.id, 'p2');
-                if (!net1 || !net2) continue;
-                const inCom1 = comGroup.has(`${comp.id}:p1`);
-                const inCom2 = comGroup.has(`${comp.id}:p2`);
-                if (inCom1 === inCom2) continue; // both in or both out
-
-                let r = 0;
-                switch (comp.type) {
-                  case 'resistor':
-                    r = (Number(comp.props?.value) || 220)
-                      * (comp.props?.unit === 'kΩ' ? 1e3 : comp.props?.unit === 'MΩ' ? 1e6 : 1);
-                    break;
-                  case 'bulb_12v': r = 12; break;
-                  case 'led': case 'led_green': case 'led_blue':
-                  case 'led_yellow': case 'led_orange': case 'led_white': r = 20; break;
-                  case 'diode_1n4007': r = 10; break;
-                  default: continue;
-                }
-                if (r <= 0) continue;
-
-                // Current from outside into comGroup = (V_outside - V_net) / R
-                // Current from comGroup to outside = (V_net - V_outside) / R
-                const outsideNet = inCom1 ? net2 : net1;
-                totalCurrent += (vNet - outsideNet.voltage) / r;
-              }
-
-              {
-                const absA = Math.abs(totalCurrent);
-                const sign = totalCurrent < 0 ? '-' : '';
-                let disp, pfx;
-                if (absA >= 1) { disp = absA; pfx = 'A'; }
-                else if (absA >= 0.001) { disp = absA * 1000; pfx = 'mA'; }
-                else { disp = absA * 1e6; pfx = 'µA'; }
-                const decimals = disp >= 100 ? 1 : 3;
-                displayText = sign + disp.toFixed(decimals);
-                displayUnit = pfx;
-              }
+              // The three jacks are shorted inside the meter, so branch currents
+              // are recovered with KCL over the wire group attached to each jack.
+              // The largest group sum is the shunt current — this works for any
+              // wiring style (V/Ω+COM, 10A+COM, either polarity).
+              const absA = Math.abs(this._mmMeasureCurrent(inst));
+              let disp, pfx;
+              if (absA >= 1) { disp = absA; pfx = 'A'; }
+              else if (absA >= 0.001) { disp = absA * 1000; pfx = 'mA'; }
+              else { disp = absA * 1e6; pfx = 'µA'; }
+              const decimals = disp >= 100 ? 1 : 3;
+              displayText = disp.toFixed(decimals);
+              displayUnit = pfx;
               displayMode = 'DC';
+              inst.runtimeState.amps = absA;
               break;
             }
             case 'RES': {
@@ -4420,16 +4364,16 @@ class CircuitCanvas {
               break;
             }
             case 'A_AC': {
-              const vAmp = this.engine.getVoltageAtPin(inst.id, 'probe_amp');
-              const amps = Math.abs(vAmp - vCom) / 0.01;
+              const absA = Math.abs(this._mmMeasureCurrent(inst));
               let disp, pfx;
-              if (amps >= 1) { disp = amps; pfx = 'A'; }
-              else if (amps >= 0.001) { disp = amps * 1000; pfx = 'mA'; }
-              else { disp = amps * 1e6; pfx = 'µA'; }
+              if (absA >= 1) { disp = absA; pfx = 'A'; }
+              else if (absA >= 0.001) { disp = absA * 1000; pfx = 'mA'; }
+              else { disp = absA * 1e6; pfx = 'µA'; }
               const decimals = disp >= 100 ? 1 : 3;
               displayText = disp.toFixed(decimals);
               displayUnit = pfx;
               displayMode = 'AC';
+              inst.runtimeState.amps = absA;
               break;
             }
           }
@@ -4550,6 +4494,87 @@ class CircuitCanvas {
   }
 
   // Electrical graph network tracer: traverses wires and series components to discover sources & ground nodes
+  /**
+   * Current through the DMM shunt (amps), for A_DC / A_AC modes.
+   * In current mode the meter internally commons all three jacks, so the
+   * branch currents are recovered with KCL over the wire group attached to
+   * each jack (wires only — never through the meter's internal short).
+   * Returns the largest group sum, which makes the reading independent of
+   * which jacks the circuit uses (V/Ω + COM, 10A + COM) and of polarity.
+   */
+  _mmMeasureCurrent(inst) {
+    const engine = this.engine;
+    const meterNet = engine.getNetForPin(inst.id, 'probe_red')
+      || engine.getNetForPin(inst.id, 'probe_com');
+    if (!meterNet) return 0;
+    const vNet = meterNet.voltage;
+
+    const branchResistance = (comp) => {
+      switch (comp.type) {
+        case 'resistor':
+          return (Number(comp.props?.value) || 220)
+            * (comp.props?.unit === 'kΩ' ? 1e3 : comp.props?.unit === 'MΩ' ? 1e6 : 1);
+        case 'bulb_12v': return 12;
+        case 'led': case 'led_green': case 'led_blue':
+        case 'led_yellow': case 'led_orange': case 'led_white': return 20;
+        case 'diode_1n4007': return 10;
+        default: return null;
+      }
+    };
+
+    // All pins reachable from a jack through wires only
+    const wireGroup = (pinId) => {
+      const group = new Set();
+      const queue = [`${inst.id}:${pinId}`];
+      while (queue.length > 0) {
+        const key = queue.shift();
+        if (group.has(key)) continue;
+        group.add(key);
+        const sep = key.indexOf(':');
+        const cInstId = key.slice(0, sep);
+        const cPinId = key.slice(sep + 1);
+        for (const w of this.wires) {
+          let ni, np;
+          if (w.from.instId === cInstId && w.from.pinId === cPinId) { ni = w.to.instId; np = w.to.pinId; }
+          else if (w.to.instId === cInstId && w.to.pinId === cPinId) { ni = w.from.instId; np = w.from.pinId; }
+          else continue;
+          queue.push(`${ni}:${np}`);
+        }
+      }
+      return group;
+    };
+
+    // Sum of (V_meter − V_outside)/R over 2-terminal passives straddling the group
+    const groupAmps = (group) => {
+      const defs = window.ArduinoComponents?.COMPONENT_DEFS || {};
+      let sum = 0;
+      for (const comp of this.components) {
+        const r = branchResistance(comp);
+        if (r == null || r <= 0) continue;
+        const pins = defs[comp.type]?.pins;
+        if (!pins || pins.length !== 2) continue;
+        const key1 = `${comp.id}:${pins[0].id}`;
+        const key2 = `${comp.id}:${pins[1].id}`;
+        const in1 = group.has(key1);
+        const in2 = group.has(key2);
+        if (in1 === in2) continue; // both sides inside or outside
+        const net1 = engine.getNetForPin(comp.id, pins[0].id);
+        const net2 = engine.getNetForPin(comp.id, pins[1].id);
+        if (!net1 || !net2) continue;
+        const outsideNet = in1 ? net2 : net1;
+        sum += (vNet - outsideNet.voltage) / r;
+      }
+      return sum;
+    };
+
+    let best = 0;
+    for (const pinId of ['probe_com', 'probe_red', 'probe_amp']) {
+      const amps = Math.abs(groupAmps(wireGroup(pinId)));
+      if (amps > best) best = amps;
+    }
+    return best;
+  }
+
   _tracePinNet(startInstId, startPinId, skipInternalTypes) {
     const queue = [{ instId: startInstId, pinId: startPinId, resistance: 0 }];
     const visited = new Set();
@@ -4838,12 +4863,16 @@ class CircuitCanvas {
         }
       }
 
-      // 4b0. Multimeter pass-through in current mode (probe_red ↔ probe_com, 0Ω)
+      // 4b0. Multimeter pass-through in current mode (jacks commoned, 0Ω)
       if (inst.type === 'multimeter') {
-        const mmMode = inst.runtimeState?.mode || inst.props?.mode || 'V_DC';
+        const mmMode = inst.props?.mode || inst.runtimeState?.mode || 'V_DC';
         if (mmMode === 'A_DC' || mmMode === 'A_AC') {
-          const otherPin = current.pinId === 'probe_red' ? 'probe_com' : 'probe_red';
-          queue.push({ instId: inst.id, pinId: otherPin, resistance: current.resistance });
+          if (current.pinId === 'probe_red' || current.pinId === 'probe_amp') {
+            queue.push({ instId: inst.id, pinId: 'probe_com', resistance: current.resistance });
+          } else if (current.pinId === 'probe_com') {
+            queue.push({ instId: inst.id, pinId: 'probe_red', resistance: current.resistance });
+            queue.push({ instId: inst.id, pinId: 'probe_amp', resistance: current.resistance });
+          }
         }
       }
 

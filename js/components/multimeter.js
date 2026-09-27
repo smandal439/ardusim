@@ -59,7 +59,7 @@ defComp({
 
     // Probe Potentials — use _tracePinNet for accurate electrical path tracing
     const CC = window.CircuitCanvas;
-    let vRed = 0, vCom = 0, vAmp = 0;
+    let vRed = 0, vCom = 0;
     if (CC && typeof CC._tracePinNet === 'function') {
       const _getNetV = (net) => {
         if (!net || !net.sources || net.sources.length === 0) return 0;
@@ -68,14 +68,11 @@ defComp({
       };
       const redNet = CC._tracePinNet(inst.id, 'probe_red');
       const comNet = CC._tracePinNet(inst.id, 'probe_com');
-      const ampNet = CC._tracePinNet(inst.id, 'probe_amp');
       vRed = _getNetV(redNet);
       vCom = _getNetV(comNet);
-      vAmp = _getNetV(ampNet);
     } else if (sim && typeof sim.getPinVoltage === 'function') {
       vRed = sim.getPinVoltage(inst, 'probe_red') || 0;
       vCom = sim.getPinVoltage(inst, 'probe_com') || 0;
-      vAmp = sim.getPinVoltage(inst, 'probe_amp') || 0;
     }
     const vDiff = vRed - vCom;
 
@@ -84,7 +81,11 @@ defComp({
       rs.buffer = new Float32Array(128);
       rs.bufIdx = 0;
     }
-    rs.buffer[rs.bufIdx] = (mode === 'A_AC' || mode === 'A_DC') ? (vAmp - vCom) : vDiff;
+    // amps is computed by updateSimState() in canvas.js (_mmMeasureCurrent);
+    // both current jacks are shorted internally so probe differentials are 0.
+    rs.buffer[rs.bufIdx] = (mode === 'A_AC' || mode === 'A_DC')
+      ? (typeof rs.amps === 'number' ? rs.amps : 0)
+      : vDiff;
     rs.bufIdx = (rs.bufIdx + 1) & 127;
 
     // Hold latch
@@ -115,7 +116,7 @@ defComp({
         break;
       }
       case 'A_DC':
-        bargraph = Math.min(Math.abs((vAmp - vCom) / 0.01) / 10.0, 1.0);
+        bargraph = Math.min(Math.abs(rs.amps || 0) / 10.0, 1.0);
         break;
       case 'DIODE':
         bargraph = Math.min(Math.max(0, vDiff) / 2.0, 1.0);
@@ -337,7 +338,24 @@ defComp({
     ctx.font = 'bold 7px system-ui, monospace';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
-    ctx.fillText('V\u23C1', dialX - 25, dialY - 14);
+    // DC voltage position: "V" + solid-over-dashed bar. Drawn as vector lines
+    // because U+2393/U+23C1 glyphs are missing from common canvas fonts and
+    // render as a "tofu" box (unsupported character).
+    ctx.textAlign = 'right';
+    ctx.fillText('V', dialX - 23, dialY - 14);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(dialX - 21.5, dialY - 18);
+    ctx.lineTo(dialX - 16.5, dialY - 18);
+    ctx.stroke();
+    ctx.setLineDash([2.5, 2]);
+    ctx.beginPath();
+    ctx.moveTo(dialX - 21.5, dialY - 15.5);
+    ctx.lineTo(dialX - 16.5, dialY - 15.5);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.textAlign = 'center';
     ctx.fillText('V~', dialX - 16, dialY - 25);
     ctx.fillText('\u03A9', dialX + 16, dialY - 25);
     ctx.fillText('\uD83D\uDD0A', dialX + 27, dialY - 14);
@@ -365,7 +383,7 @@ defComp({
 
     _drawTerminal(72, '#eccc68', '10A');
     _drawTerminal(110, '#484f63', 'COM');
-    _drawTerminal(148, '#ff3838', 'V\u03A9\mA');
+    _drawTerminal(148, '#ff3838', 'VΩ/mA');
 
     // Selection Highlight
     if (inst.selected && typeof drawSelectionRect === 'function') {

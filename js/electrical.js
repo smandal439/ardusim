@@ -183,10 +183,14 @@ class ElectricalEngine {
         break;
       }
       case 'multimeter': {
-        // In current mode, the multimeter is a short circuit (0Ω) — probes are connected
-        const mode = inst.runtimeState?.mode || inst.props?.mode || 'V_DC';
+        // In current mode, the multimeter is a short circuit (0Ω) — probes are
+        // connected. props is the source of truth (runtimeState.mode mirrors it
+        // and can lag behind a mode switch made in the property panel).
+        // All three jacks are commoned so wiring through the 10A terminal works.
+        const mode = inst.props?.mode || inst.runtimeState?.mode || 'V_DC';
         if (mode === 'A_DC' || mode === 'A_AC') {
           conns.push([key('probe_red'), key('probe_com')]);
+          conns.push([key('probe_amp'), key('probe_com')]);
         }
         break;
       }
