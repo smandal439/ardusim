@@ -406,111 +406,7 @@ registerComponent('led_orange', LEDComponent);
 registerComponent('led_white', LEDComponent);
 
 /* ---------------------------------- Multi-Color LED Array------------------------------ */
-// defComp({
-//   id: 'multi_led_array',
-//   name: 'Multi-Color LED Array',
-//   category: 'Output',
-//   icon: '🌈',
-//   desc: 'Module with 4 individually controlled LEDs (Red, Yellow, Green, Blue) sharing a common ground',
-//   width: 90,
-//   height: 60,
-//   defaultProps: {},
-//   pins: [
-//     { id: 'led_r', label: 'R', type: PIN_TYPE.DIGITAL, x: 15, y: 60, side: 'bottom' },
-//     { id: 'led_y', label: 'Y', type: PIN_TYPE.DIGITAL, x: 30, y: 60, side: 'bottom' },
-//     { id: 'led_g', label: 'G', type: PIN_TYPE.DIGITAL, x: 45, y: 60, side: 'bottom' },
-//     { id: 'led_b', label: 'B', type: PIN_TYPE.DIGITAL, x: 60, y: 60, side: 'bottom' },
-//     { id: 'gnd', label: '−', type: PIN_TYPE.GND, x: 75, y: 60, side: 'bottom' },
-//   ],
-//   draw(ctx, inst, sim) {
-//     const { x, y } = inst;
 
-//     // Configuration for each LED in the module
-//     const leds = [
-//       { id: 'led_r', color: '#ff3333', label: 'R', x: 15 },
-//       { id: 'led_y', color: '#ffcc00', label: 'Y', x: 30 },
-//       { id: 'led_g', color: '#33cc33', label: 'G', x: 45 },
-//       { id: 'led_b', color: '#3388ff', label: 'B', x: 60 },
-//     ];
-
-//     ctx.save();
-//     ctx.translate(x, y);
-
-//     // Module Housing Base
-//     ctx.fillStyle = '#1e1e24';
-//     roundRect(ctx, 4, 10, 82, 30, 4);
-//     ctx.fill();
-//     ctx.strokeStyle = '#3a3a42';
-//     ctx.lineWidth = 1;
-//     ctx.stroke();
-
-//     // Bottom Lead Pins
-//     const pinXs = [15, 30, 45, 60, 75];
-//     ctx.strokeStyle = '#888888';
-//     ctx.lineWidth = 1.5;
-//     pinXs.forEach(px => {
-//       ctx.beginPath();
-//       ctx.moveTo(px, 40);
-//       ctx.lineTo(px, 60);
-//       ctx.stroke();
-//     });
-
-//     // Common Cathode (GND) Mark
-//     ctx.fillStyle = '#aaaaaa';
-//     ctx.font = 'bold 8px sans-serif';
-//     ctx.textAlign = 'center';
-//     ctx.fillText('−', 75, 53);
-
-//     // Render Individual LEDs
-//     leds.forEach(led => {
-//       const val = getInstPinState(inst, led.id, sim) || 0;
-//       const brightness = val > 1 ? Math.min(val / 255, 1) : Math.max(val, 0);
-//       const isOn = brightness > 0.02;
-//       const col = led.color;
-//       const lx = led.x;
-//       const ly = 25;
-
-//       // Pin Text Labels
-//       ctx.fillStyle = '#aaaaaa';
-//       ctx.font = 'bold 7px sans-serif';
-//       ctx.fillText(led.label, lx, 53);
-
-//       // 1. Ambient Volumetric Glow Halo (When Lit)
-//       if (isOn) {
-//         const glowRadius = 18 * brightness;
-//         const halo = ctx.createRadialGradient(lx, ly, 0, lx, ly, glowRadius);
-//         halo.addColorStop(0, hexToRgba(col, 0.65 * brightness));
-//         halo.addColorStop(0.5, hexToRgba(col, 0.25 * brightness));
-//         halo.addColorStop(1, hexToRgba(col, 0));
-//         ctx.fillStyle = halo;
-//         ctx.beginPath();
-//         ctx.arc(lx, ly, glowRadius, 0, Math.PI * 2);
-//         ctx.fill();
-//       }
-
-//       // 2. LED Bulb Lens Body
-//       ctx.fillStyle = isOn ? hexToRgba(col, 0.9) : hexToRgba(col, 0.3);
-//       ctx.beginPath();
-//       ctx.arc(lx, ly, 6, 0, Math.PI * 2);
-//       ctx.fill();
-
-//       ctx.strokeStyle = isOn ? '#ffffff' : hexToRgba(col, 0.6);
-//       ctx.lineWidth = 1;
-//       ctx.stroke();
-
-//       // 3. Bright Specular Highlight Core
-//       if (isOn) {
-//         ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-//         ctx.beginPath();
-//         ctx.arc(lx - 2, ly - 2, 1.8, 0, Math.PI * 2);
-//         ctx.fill();
-//       }
-//     });
-
-//     if (inst.selected) drawSelectionRect(ctx, -2, 5, 94, 60);
-//     ctx.restore();
-//   }
-// });
 
 defComp({
   id: 'multi_led_array',
@@ -952,8 +848,8 @@ defComp({
   category: 'Output',
   icon: '🔢',
   desc: 'Single-digit 7-segment LED display with decimal point',
-  width: 50,
-  height: 80,
+  width: 60,
+  height: 90,
   defaultProps: { commonAnode: false, color: '#ff3333', colorName: 'Red', brightness: 100 },
   interactive: [
     { field: 'color', label: 'LED Color', type: 'select', options: [
@@ -973,21 +869,22 @@ defComp({
     ] },
   ],
   pins: [
-    { id: 'segA', label: 'A', type: PIN_TYPE.DIGITAL, x: 8, y: 0, side: 'top' },
-    { id: 'segB', label: 'B', type: PIN_TYPE.DIGITAL, x: 16, y: 0, side: 'top' },
-    { id: 'segC', label: 'C', type: PIN_TYPE.DIGITAL, x: 24, y: 0, side: 'top' },
-    { id: 'segD', label: 'D', type: PIN_TYPE.DIGITAL, x: 32, y: 0, side: 'top' },
-    { id: 'segE', label: 'E', type: PIN_TYPE.DIGITAL, x: 40, y: 0, side: 'top' },
-    { id: 'segF', label: 'F', type: PIN_TYPE.DIGITAL, x: 48, y: 0, side: 'top' },
-    { id: 'segG', label: 'G', type: PIN_TYPE.DIGITAL, x: 8, y: 80, side: 'bottom' },
-    { id: 'dp', label: 'DP', type: PIN_TYPE.DIGITAL, x: 28, y: 80, side: 'bottom' },
-    { id: 'com', label: 'COM', type: PIN_TYPE.POWER, x: 48, y: 80, side: 'bottom' },
+    // Bottom row (Pins 1 to 5: E, D, COM, C, DP)
+    { id: 'segE', label: 'E', type: PIN_TYPE.DIGITAL, x: 10, y: 90, side: 'bottom' },
+    { id: 'segD', label: 'D', type: PIN_TYPE.DIGITAL, x: 20, y: 90, side: 'bottom' },
+    { id: 'com',  label: 'COM', type: PIN_TYPE.POWER,  x: 30, y: 90, side: 'bottom' },
+    { id: 'segC', label: 'C', type: PIN_TYPE.DIGITAL, x: 40, y: 90, side: 'bottom' },
+    { id: 'dp',   label: 'DP', type: PIN_TYPE.DIGITAL, x: 50, y: 90, side: 'bottom' },
+    // Top row (Pins 6 to 10: G, F, COM, A, B)
+    { id: 'segG', label: 'G', type: PIN_TYPE.DIGITAL, x: 10, y: 0, side: 'top' },
+    { id: 'segF', label: 'F', type: PIN_TYPE.DIGITAL, x: 20, y: 0, side: 'top' },
+    { id: 'com2', label: 'COM', type: PIN_TYPE.POWER,  x: 30, y: 0, side: 'top' },
+    { id: 'segA', label: 'A', type: PIN_TYPE.DIGITAL, x: 40, y: 0, side: 'top' },
+    { id: 'segB', label: 'B', type: PIN_TYPE.DIGITAL, x: 50, y: 0, side: 'top' },
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
     const segs = inst.runtimeState && inst.runtimeState.segments ? inst.runtimeState.segments : {};
-    // runtimeState.segments holds brightness 0..1 (PWM-aware); booleans from
-    // older state paths are treated as full-on.
     const bri = (k) => {
       const v = segs[k];
       if (!v) return 0;
@@ -995,7 +892,6 @@ defComp({
       return b > 0.01 ? Math.min(b, 1) : 0;
     };
     const lit0 = { A: bri('A'), B: bri('B'), C: bri('C'), D: bri('D'), E: bri('E'), F: bri('F'), G: bri('G'), DP: bri('DP') };
-    // Properties menu: LED colour + brightness (0-100 %)
     const p = inst.props || {};
     const hex = (typeof p.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(p.color)) ? p.color : '#ff3333';
     const base = [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
@@ -1007,121 +903,271 @@ defComp({
     const lit = {};
     for (const k of Object.keys(lit0)) lit[k] = lit0[k] * inten;
     const anyLit = lit.A + lit.B + lit.C + lit.D + lit.E + lit.F + lit.G + lit.DP > 0;
-    const pulse = anyLit ? 1 + Math.sin(Date.now() / 300) * 0.04 : 1; // subtle LED breathing
+    const pulse = anyLit ? 1 + Math.sin(Date.now() / 300) * 0.03 : 1;
 
     ctx.save();
     ctx.translate(x, y);
 
-    // ── Leads from the pins into the package ──
+    // ── Leads from the pins into the package (Top & Bottom) ──
     ctx.strokeStyle = '#8f8f8f';
     ctx.lineWidth = 1.5;
-    for (const lx of [8, 16, 24, 32, 40, 48]) {
-      ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, 9); ctx.stroke();
-    }
-    for (const lx of [8, 28, 48]) {
-      ctx.beginPath(); ctx.moveTo(lx, 80); ctx.lineTo(lx, 72); ctx.stroke();
+    for (const lx of [10, 20, 30, 40, 50]) {
+      ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, 10); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(lx, 90); ctx.lineTo(lx, 80); ctx.stroke();
     }
 
-    // ── Epoxy package: glossy dark body with edge highlight + sheen ──
-    const bodyGrad = ctx.createLinearGradient(0, 7, 0, 74);
-    bodyGrad.addColorStop(0, '#2a1d19');
-    bodyGrad.addColorStop(0.1, '#171110');
-    bodyGrad.addColorStop(1, '#080505');
+    // ── Epoxy package: clean matte dark plastic body ──
+    const bodyGrad = ctx.createLinearGradient(0, 10, 0, 80);
+    bodyGrad.addColorStop(0, '#1c1c1c');
+    bodyGrad.addColorStop(1, '#111111');
     ctx.fillStyle = bodyGrad;
-    roundRect(ctx, 2, 8, 46, 65, 5);
+    roundRect(ctx, 4, 10, 52, 70, 5);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
     ctx.lineWidth = 1;
-    roundRect(ctx, 2.5, 8.5, 45, 64, 5);
+    roundRect(ctx, 4.5, 10.5, 51, 69, 5);
     ctx.stroke();
-    const sheen = ctx.createLinearGradient(2, 8, 48, 73);
-    sheen.addColorStop(0, 'rgba(255,255,255,0.07)');
-    sheen.addColorStop(0.35, 'rgba(255,255,255,0.02)');
-    sheen.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = sheen;
-    roundRect(ctx, 2, 8, 46, 65, 5);
-    ctx.fill();
 
     // ── Segment geometry (classic 8-layout with corner gaps) ──
-    const hPath = (cy) => { // horizontal a/g/d — tips at x14 and x38
-      ctx.moveTo(14, cy); ctx.lineTo(17, cy - 3); ctx.lineTo(35, cy - 3);
-      ctx.lineTo(38, cy); ctx.lineTo(35, cy + 3); ctx.lineTo(17, cy + 3);
+    const hPath = (cy) => {
+      ctx.moveTo(19, cy); ctx.lineTo(22, cy - 3); ctx.lineTo(40, cy - 3);
+      ctx.lineTo(43, cy); ctx.lineTo(40, cy + 3); ctx.lineTo(22, cy + 3);
       ctx.closePath();
     };
-    const vPath = (sx, sy) => { // vertical f/e/b/c — tips at sy and sy+16
+    const vPath = (sx, sy) => {
       ctx.moveTo(sx, sy); ctx.lineTo(sx + 3, sy + 3); ctx.lineTo(sx + 3, sy + 13);
       ctx.lineTo(sx, sy + 16); ctx.lineTo(sx - 3, sy + 13); ctx.lineTo(sx - 3, sy + 3);
       ctx.closePath();
     };
-    // [path, centroid x, centroid y, across-axis ('h' = gradient runs vertically)
     const SHAPES = [
-      [() => hPath(16), 26, 16, 'h', lit.A],   // a — top
-      [() => vPath(38, 19), 38, 27, 'v', lit.B], // b — top right
-      [() => vPath(38, 39), 38, 47, 'v', lit.C], // c — bottom right
-      [() => hPath(56), 26, 56, 'h', lit.D],   // d — bottom
-      [() => vPath(14, 39), 14, 47, 'v', lit.E], // e — bottom left
-      [() => vPath(14, 19), 14, 27, 'v', lit.F], // f — top left
-      [() => hPath(36), 26, 36, 'h', lit.G],   // g — middle
+      [() => hPath(18), 31, 18, 'h', lit.A],   // a — top
+      [() => vPath(43, 21), 43, 29, 'v', lit.B], // b — top right
+      [() => vPath(43, 41), 43, 49, 'v', lit.C], // c — bottom right
+      [() => hPath(58), 31, 58, 'h', lit.D],   // d — bottom
+      [() => vPath(19, 41), 19, 49, 'v', lit.E], // e — bottom left
+      [() => vPath(19, 21), 19, 29, 'v', lit.F], // f — top left
+      [() => hPath(38), 31, 38, 'h', lit.G],   // g — middle
     ];
-    const GHOST = `rgba(${rgbs(mixc(base, BLACK, 0.78))},1)`; // unlit segment — dark tint of the LED colour
+    const GHOST = `rgba(${rgbs(mixc(base, BLACK, 0.82))},1)`; // unlit segment — dark tint
 
     // Pass 1: ghost (unlit) segments
     ctx.fillStyle = GHOST;
     for (const [path] of SHAPES) { ctx.beginPath(); path(); ctx.fill(); }
-    ctx.beginPath(); ctx.arc(44, 59, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(49, 61, 3, 0, Math.PI * 2); ctx.fill();
 
-    // Pass 2: light spill (halo) from each lit segment onto the face
-    for (const [, hx, hy, , b] of SHAPES) {
-      if (b <= 0.01) continue;
-      const hr = (12 + 8 * b) * pulse;
-      const halo = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr);
-      halo.addColorStop(0, `rgba(${rgbs(base)},${(0.38 * b).toFixed(3)})`);
-      halo.addColorStop(0.45, `rgba(${rgbs(base)},${(0.13 * b).toFixed(3)})`);
-      halo.addColorStop(1, `rgba(${rgbs(base)},0)`);
-      ctx.fillStyle = halo;
-      ctx.beginPath(); ctx.arc(hx, hy, hr, 0, Math.PI * 2); ctx.fill();
-    }
-    if (lit.DP > 0.01) {
-      const hr = (9 + 6 * lit.DP) * pulse;
-      const halo = ctx.createRadialGradient(44, 59, 0, 44, 59, hr);
-      halo.addColorStop(0, `rgba(${rgbs(base)},${(0.38 * lit.DP).toFixed(3)})`);
-      halo.addColorStop(1, `rgba(${rgbs(base)},0)`);
-      ctx.fillStyle = halo;
-      ctx.beginPath(); ctx.arc(44, 59, hr, 0, Math.PI * 2); ctx.fill();
-    }
-
-    // Pass 3: lit segments — edge-to-core gradient (hot centre), glow shadow
+    // Pass 2: lit segments — balanced, even LED glow using linear gradients only
     for (const [path, hx, hy, axis, b] of SHAPES) {
       if (b <= 0.01) continue;
       let grad;
       if (axis === 'h') grad = ctx.createLinearGradient(0, hy - 3.5, 0, hy + 3.5);
       else grad = ctx.createLinearGradient(hx - 3.5, 0, hx + 3.5, 0);
-      grad.addColorStop(0, `rgba(${rgbs(mixc(base, BLACK, 0.25))},${(0.35 + 0.65 * b).toFixed(3)})`);
-      grad.addColorStop(0.5, `rgba(${rgbs(mixc(base, WHITE, 0.45 + 0.5 * b))},${(0.5 + 0.5 * b).toFixed(3)})`);
-      grad.addColorStop(1, `rgba(${rgbs(mixc(base, BLACK, 0.25))},${(0.35 + 0.65 * b).toFixed(3)})`);
-      ctx.shadowColor = `rgba(${rgbs(base)},${(0.55 * b).toFixed(3)})`;
-      ctx.shadowBlur = (5 + 9 * b) * pulse;
+      
+      grad.addColorStop(0, `rgba(${rgbs(mixc(base, WHITE, 0.2))},${(0.8 + 0.2 * b).toFixed(3)})`);
+      grad.addColorStop(0.5, `rgba(${rgbs(mixc(base, WHITE, 0.35))},${(0.95 * b).toFixed(3)})`);
+      grad.addColorStop(1, `rgba(${rgbs(base)},${(0.8 + 0.2 * b).toFixed(3)})`);
+      
+      ctx.shadowColor = `rgba(${rgbs(base)},${(0.35 * b).toFixed(3)})`;
+      ctx.shadowBlur = (2 + 4 * b) * pulse;
       ctx.fillStyle = grad;
       ctx.beginPath(); path(); ctx.fill();
     }
+
     // Decimal point
     if (lit.DP > 0.01) {
       const b = lit.DP;
-      const rg = ctx.createRadialGradient(44, 59, 0, 44, 59, 3.2);
-      rg.addColorStop(0, `rgba(${rgbs(mixc(base, WHITE, 0.5 + 0.5 * b))},${(0.55 + 0.45 * b).toFixed(3)})`);
-      rg.addColorStop(0.55, `rgba(${rgbs(base)},${(0.5 + 0.5 * b).toFixed(3)})`);
-      rg.addColorStop(1, `rgba(${rgbs(mixc(base, BLACK, 0.3))},${(0.35 + 0.65 * b).toFixed(3)})`);
-      ctx.shadowColor = `rgba(${rgbs(base)},${(0.55 * b).toFixed(3)})`;
-      ctx.shadowBlur = (5 + 8 * b) * pulse;
-      ctx.fillStyle = rg;
-      ctx.beginPath(); ctx.arc(44, 59, 3, 0, Math.PI * 2); ctx.fill();
+      let dpGrad = ctx.createLinearGradient(46, 58, 52, 64);
+      dpGrad.addColorStop(0, `rgba(${rgbs(mixc(base, WHITE, 0.2))},${(0.8 + 0.2 * b).toFixed(3)})`);
+      dpGrad.addColorStop(0.5, `rgba(${rgbs(mixc(base, WHITE, 0.35))},${(0.95 * b).toFixed(3)})`);
+      dpGrad.addColorStop(1, `rgba(${rgbs(base)},${(0.8 + 0.2 * b).toFixed(3)})`);
+      
+      ctx.shadowColor = `rgba(${rgbs(base)},${(0.35 * b).toFixed(3)})`;
+      ctx.shadowBlur = (2 + 4 * b) * pulse;
+      ctx.fillStyle = dpGrad;
+      ctx.beginPath(); ctx.arc(49, 61, 3, 0, Math.PI * 2); ctx.fill();
     }
     ctx.shadowBlur = 0;
 
-    if (inst.selected) drawSelectionRect(ctx, -1, 5, 52, 78);
+    if (inst.selected) drawSelectionRect(ctx, 2, 8, 56, 74);
     ctx.restore();
   }
 });
+
+// defComp({
+//   id: 'seg7',
+//   name: '7-Segment Display',
+//   category: 'Output',
+//   icon: '🔢',
+//   desc: 'Single-digit 7-segment LED display with decimal point',
+//   width: 50,
+//   height: 80,
+//   defaultProps: { commonAnode: false, color: '#ff3333', colorName: 'Red', brightness: 100 },
+//   interactive: [
+//     { field: 'color', label: 'LED Color', type: 'select', options: [
+//       { value: '#ff3333', label: 'Red' },
+//       { value: '#33ff66', label: 'Green' },
+//       { value: '#3399ff', label: 'Blue' },
+//       { value: '#ffee33', label: 'Yellow' },
+//       { value: '#ff8833', label: 'Orange' },
+//       { value: '#ffffff', label: 'White' },
+//     ] },
+//     { field: 'brightness', label: 'Brightness', type: 'select', options: [
+//       { value: 100, label: '100 %' },
+//       { value: 75, label: '75 %' },
+//       { value: 50, label: '50 %' },
+//       { value: 25, label: '25 %' },
+//       { value: 10, label: '10 %' },
+//     ] },
+//   ],
+//   pins: [
+//     { id: 'segA', label: 'A', type: PIN_TYPE.DIGITAL, x: 8, y: 0, side: 'top' },
+//     { id: 'segB', label: 'B', type: PIN_TYPE.DIGITAL, x: 16, y: 0, side: 'top' },
+//     { id: 'segC', label: 'C', type: PIN_TYPE.DIGITAL, x: 24, y: 0, side: 'top' },
+//     { id: 'segD', label: 'D', type: PIN_TYPE.DIGITAL, x: 32, y: 0, side: 'top' },
+//     { id: 'segE', label: 'E', type: PIN_TYPE.DIGITAL, x: 40, y: 0, side: 'top' },
+//     { id: 'segF', label: 'F', type: PIN_TYPE.DIGITAL, x: 48, y: 0, side: 'top' },
+//     { id: 'segG', label: 'G', type: PIN_TYPE.DIGITAL, x: 8, y: 80, side: 'bottom' },
+//     { id: 'dp', label: 'DP', type: PIN_TYPE.DIGITAL, x: 28, y: 80, side: 'bottom' },
+//     { id: 'com', label: 'COM', type: PIN_TYPE.POWER, x: 48, y: 80, side: 'bottom' },
+//   ],
+//   draw(ctx, inst, sim) {
+//     const { x, y } = inst;
+//     const segs = inst.runtimeState && inst.runtimeState.segments ? inst.runtimeState.segments : {};
+//     // runtimeState.segments holds brightness 0..1 (PWM-aware); booleans from
+//     // older state paths are treated as full-on.
+//     const bri = (k) => {
+//       const v = segs[k];
+//       if (!v) return 0;
+//       const b = v === true ? 1 : Number(v);
+//       return b > 0.01 ? Math.min(b, 1) : 0;
+//     };
+//     const lit0 = { A: bri('A'), B: bri('B'), C: bri('C'), D: bri('D'), E: bri('E'), F: bri('F'), G: bri('G'), DP: bri('DP') };
+//     // Properties menu: LED colour + brightness (0-100 %)
+//     const p = inst.props || {};
+//     const hex = (typeof p.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(p.color)) ? p.color : '#ff3333';
+//     const base = [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+//     const bNum = Number(p.brightness);
+//     const inten = Number.isFinite(bNum) ? Math.min(Math.max(bNum, 0), 100) / 100 : 1;
+//     const mixc = (a, b2, t) => [0, 1, 2].map(i => Math.round(a[i] + (b2[i] - a[i]) * t));
+//     const rgbs = (c) => `${c[0]},${c[1]},${c[2]}`;
+//     const WHITE = [255, 255, 255], BLACK = [0, 0, 0];
+//     const lit = {};
+//     for (const k of Object.keys(lit0)) lit[k] = lit0[k] * inten;
+//     const anyLit = lit.A + lit.B + lit.C + lit.D + lit.E + lit.F + lit.G + lit.DP > 0;
+//     const pulse = anyLit ? 1 + Math.sin(Date.now() / 300) * 0.04 : 1; // subtle LED breathing
+
+//     ctx.save();
+//     ctx.translate(x, y);
+
+//     // ── Leads from the pins into the package ──
+//     ctx.strokeStyle = '#8f8f8f';
+//     ctx.lineWidth = 1.5;
+//     for (const lx of [8, 16, 24, 32, 40, 48]) {
+//       ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, 9); ctx.stroke();
+//     }
+//     for (const lx of [8, 28, 48]) {
+//       ctx.beginPath(); ctx.moveTo(lx, 80); ctx.lineTo(lx, 72); ctx.stroke();
+//     }
+
+//     // ── Epoxy package: glossy dark body with edge highlight + sheen ──
+//     const bodyGrad = ctx.createLinearGradient(0, 7, 0, 74);
+//     bodyGrad.addColorStop(0, '#2a1d19');
+//     bodyGrad.addColorStop(0.1, '#171110');
+//     bodyGrad.addColorStop(1, '#080505');
+//     ctx.fillStyle = bodyGrad;
+//     roundRect(ctx, 2, 8, 46, 65, 5);
+//     ctx.fill();
+//     ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+//     ctx.lineWidth = 1;
+//     roundRect(ctx, 2.5, 8.5, 45, 64, 5);
+//     ctx.stroke();
+//     const sheen = ctx.createLinearGradient(2, 8, 48, 73);
+//     sheen.addColorStop(0, 'rgba(255,255,255,0.07)');
+//     sheen.addColorStop(0.35, 'rgba(255,255,255,0.02)');
+//     sheen.addColorStop(1, 'rgba(255,255,255,0)');
+//     ctx.fillStyle = sheen;
+//     roundRect(ctx, 2, 8, 46, 65, 5);
+//     ctx.fill();
+
+//     // ── Segment geometry (classic 8-layout with corner gaps) ──
+//     const hPath = (cy) => { // horizontal a/g/d — tips at x14 and x38
+//       ctx.moveTo(14, cy); ctx.lineTo(17, cy - 3); ctx.lineTo(35, cy - 3);
+//       ctx.lineTo(38, cy); ctx.lineTo(35, cy + 3); ctx.lineTo(17, cy + 3);
+//       ctx.closePath();
+//     };
+//     const vPath = (sx, sy) => { // vertical f/e/b/c — tips at sy and sy+16
+//       ctx.moveTo(sx, sy); ctx.lineTo(sx + 3, sy + 3); ctx.lineTo(sx + 3, sy + 13);
+//       ctx.lineTo(sx, sy + 16); ctx.lineTo(sx - 3, sy + 13); ctx.lineTo(sx - 3, sy + 3);
+//       ctx.closePath();
+//     };
+//     // [path, centroid x, centroid y, across-axis ('h' = gradient runs vertically)
+//     const SHAPES = [
+//       [() => hPath(16), 26, 16, 'h', lit.A],   // a — top
+//       [() => vPath(38, 19), 38, 27, 'v', lit.B], // b — top right
+//       [() => vPath(38, 39), 38, 47, 'v', lit.C], // c — bottom right
+//       [() => hPath(56), 26, 56, 'h', lit.D],   // d — bottom
+//       [() => vPath(14, 39), 14, 47, 'v', lit.E], // e — bottom left
+//       [() => vPath(14, 19), 14, 27, 'v', lit.F], // f — top left
+//       [() => hPath(36), 26, 36, 'h', lit.G],   // g — middle
+//     ];
+//     const GHOST = `rgba(${rgbs(mixc(base, BLACK, 0.78))},1)`; // unlit segment — dark tint of the LED colour
+
+//     // Pass 1: ghost (unlit) segments
+//     ctx.fillStyle = GHOST;
+//     for (const [path] of SHAPES) { ctx.beginPath(); path(); ctx.fill(); }
+//     ctx.beginPath(); ctx.arc(44, 59, 3, 0, Math.PI * 2); ctx.fill();
+
+//     // Pass 2: light spill (halo) from each lit segment onto the face
+//     for (const [, hx, hy, , b] of SHAPES) {
+//       if (b <= 0.01) continue;
+//       const hr = (12 + 8 * b) * pulse;
+//       const halo = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr);
+//       halo.addColorStop(0, `rgba(${rgbs(base)},${(0.38 * b).toFixed(3)})`);
+//       halo.addColorStop(0.45, `rgba(${rgbs(base)},${(0.13 * b).toFixed(3)})`);
+//       halo.addColorStop(1, `rgba(${rgbs(base)},0)`);
+//       ctx.fillStyle = halo;
+//       ctx.beginPath(); ctx.arc(hx, hy, hr, 0, Math.PI * 2); ctx.fill();
+//     }
+//     if (lit.DP > 0.01) {
+//       const hr = (9 + 6 * lit.DP) * pulse;
+//       const halo = ctx.createRadialGradient(44, 59, 0, 44, 59, hr);
+//       halo.addColorStop(0, `rgba(${rgbs(base)},${(0.38 * lit.DP).toFixed(3)})`);
+//       halo.addColorStop(1, `rgba(${rgbs(base)},0)`);
+//       ctx.fillStyle = halo;
+//       ctx.beginPath(); ctx.arc(44, 59, hr, 0, Math.PI * 2); ctx.fill();
+//     }
+
+//     // Pass 3: lit segments — edge-to-core gradient (hot centre), glow shadow
+//     for (const [path, hx, hy, axis, b] of SHAPES) {
+//       if (b <= 0.01) continue;
+//       let grad;
+//       if (axis === 'h') grad = ctx.createLinearGradient(0, hy - 3.5, 0, hy + 3.5);
+//       else grad = ctx.createLinearGradient(hx - 3.5, 0, hx + 3.5, 0);
+//       grad.addColorStop(0, `rgba(${rgbs(mixc(base, BLACK, 0.25))},${(0.35 + 0.65 * b).toFixed(3)})`);
+//       grad.addColorStop(0.5, `rgba(${rgbs(mixc(base, WHITE, 0.45 + 0.5 * b))},${(0.5 + 0.5 * b).toFixed(3)})`);
+//       grad.addColorStop(1, `rgba(${rgbs(mixc(base, BLACK, 0.25))},${(0.35 + 0.65 * b).toFixed(3)})`);
+//       ctx.shadowColor = `rgba(${rgbs(base)},${(0.55 * b).toFixed(3)})`;
+//       ctx.shadowBlur = (5 + 9 * b) * pulse;
+//       ctx.fillStyle = grad;
+//       ctx.beginPath(); path(); ctx.fill();
+//     }
+//     // Decimal point
+//     if (lit.DP > 0.01) {
+//       const b = lit.DP;
+//       const rg = ctx.createRadialGradient(44, 59, 0, 44, 59, 3.2);
+//       rg.addColorStop(0, `rgba(${rgbs(mixc(base, WHITE, 0.5 + 0.5 * b))},${(0.55 + 0.45 * b).toFixed(3)})`);
+//       rg.addColorStop(0.55, `rgba(${rgbs(base)},${(0.5 + 0.5 * b).toFixed(3)})`);
+//       rg.addColorStop(1, `rgba(${rgbs(mixc(base, BLACK, 0.3))},${(0.35 + 0.65 * b).toFixed(3)})`);
+//       ctx.shadowColor = `rgba(${rgbs(base)},${(0.55 * b).toFixed(3)})`;
+//       ctx.shadowBlur = (5 + 8 * b) * pulse;
+//       ctx.fillStyle = rg;
+//       ctx.beginPath(); ctx.arc(44, 59, 3, 0, Math.PI * 2); ctx.fill();
+//     }
+//     ctx.shadowBlur = 0;
+
+//     if (inst.selected) drawSelectionRect(ctx, -1, 5, 52, 78);
+//     ctx.restore();
+//   }
+// });
 
 /* TM1637 4-DIGIT DISPLAY MODULE (clock board with colon) */
 defComp({
@@ -1167,11 +1213,9 @@ defComp({
     const CELLS = [24, 46, 78, 100]; // digit centres
     const CY = 28;
     const GHOST = `rgba(${rgbs(mixc(base, BLACK, 0.78))},1)`;
-    const anyLit = inten > 0 && (colon || digits.some(d => d & 0xFF));
-    const pulse = anyLit ? 1 + Math.sin(Date.now() / 300) * 0.04 : 1;
     const b = inten; // effective 0..1 brightness
 
-    // Segment geometry (b = bit index in the digit byte)
+    // Segment geometry
     const hPath = (cx, cyRow) => {
       ctx.moveTo(cx - 7, cyRow); ctx.lineTo(cx - 5, cyRow - 2); ctx.lineTo(cx + 5, cyRow - 2);
       ctx.lineTo(cx + 7, cyRow); ctx.lineTo(cx + 5, cyRow + 2); ctx.lineTo(cx - 5, cyRow + 2);
@@ -1182,7 +1226,6 @@ defComp({
       ctx.lineTo(sx, top + 9); ctx.lineTo(sx - 1.5, top + 7.5); ctx.lineTo(sx - 1.5, top + 1.5);
       ctx.closePath();
     };
-    // [buildFn(cx), centroid cx, centroid cy, axis]
     const segShapes = (cx) => ([
       [() => hPath(cx, CY - 12), cx, CY - 12, 'h', 0], // A
       [() => vPath(cx + 7, CY - 10), cx + 7, CY - 5, 'v', 1], // B
@@ -1242,27 +1285,7 @@ defComp({
     ctx.beginPath(); ctx.arc(62, 32, 2, 0, Math.PI * 2); ctx.fill();
 
     if (inten > 0) {
-      // ── Pass 2: light spill from lit digits ──
-      CELLS.forEach((cx, i) => {
-        if (!(digits[i] & 0x7F)) return;
-        const hr = (15 + 7 * b) * pulse;
-        const halo = ctx.createRadialGradient(cx, CY, 0, cx, CY, hr);
-        halo.addColorStop(0, `rgba(${rgbs(base)},${(0.34 * b).toFixed(3)})`);
-        halo.addColorStop(0.45, `rgba(${rgbs(base)},${(0.12 * b).toFixed(3)})`);
-        halo.addColorStop(1, `rgba(${rgbs(base)},0)`);
-        ctx.fillStyle = halo;
-        ctx.beginPath(); ctx.arc(cx, CY, hr, 0, Math.PI * 2); ctx.fill();
-      });
-      if (colon) {
-        const hr = (11 + 5 * b) * pulse;
-        const halo = ctx.createRadialGradient(62, 28, 0, 62, 28, hr);
-        halo.addColorStop(0, `rgba(${rgbs(base)},${(0.34 * b).toFixed(3)})`);
-        halo.addColorStop(1, `rgba(${rgbs(base)},0)`);
-        ctx.fillStyle = halo;
-        ctx.beginPath(); ctx.arc(62, 28, hr, 0, Math.PI * 2); ctx.fill();
-      }
-
-      // ── Pass 3: lit segments — edge-to-core gradient + glow ──
+      // ── Pass 2: lit segments — clean, crisp rendering with minimal eye-friendly glow ──
       for (let i = 0; i < 4; i++) {
         const byte = digits[i] & 0xFF;
         if (!byte) continue;
@@ -1271,20 +1294,22 @@ defComp({
           let grad;
           if (axis === 'h') grad = ctx.createLinearGradient(0, sy - 2.5, 0, sy + 2.5);
           else grad = ctx.createLinearGradient(sx - 2.5, 0, sx + 2.5, 0);
-          grad.addColorStop(0, `rgba(${rgbs(mixc(base, BLACK, 0.25))},${(0.35 + 0.65 * b).toFixed(3)})`);
-          grad.addColorStop(0.5, `rgba(${rgbs(mixc(base, WHITE, 0.45 + 0.5 * b))},${(0.5 + 0.5 * b).toFixed(3)})`);
-          grad.addColorStop(1, `rgba(${rgbs(mixc(base, BLACK, 0.25))},${(0.35 + 0.65 * b).toFixed(3)})`);
-          ctx.shadowColor = `rgba(${rgbs(base)},${(0.55 * b).toFixed(3)})`;
-          ctx.shadowBlur = (3 + 6 * b) * pulse;
+          grad.addColorStop(0, `rgba(${rgbs(mixc(base, BLACK, 0.2))},${(0.4 + 0.6 * b).toFixed(3)})`);
+          grad.addColorStop(0.5, `rgba(${rgbs(mixc(base, WHITE, 0.3 + 0.4 * b))},${(0.7 + 0.3 * b).toFixed(3)})`);
+          grad.addColorStop(1, `rgba(${rgbs(mixc(base, BLACK, 0.2))},${(0.4 + 0.6 * b).toFixed(3)})`);
+          
+          // Subtle, soft shadow blur instead of aggressive blinding radial glow
+          ctx.shadowColor = `rgba(${rgbs(base)},${(0.3 * b).toFixed(3)})`;
+          ctx.shadowBlur = 1.5 + 2 * b;
           ctx.fillStyle = grad;
           ctx.beginPath(); path(); ctx.fill();
         }
         if (byte & 0x80) { // decimal point
           const dg = ctx.createRadialGradient(CELLS[i] + 8.5, CY + 10, 0, CELLS[i] + 8.5, CY + 10, 2);
-          dg.addColorStop(0, `rgba(${rgbs(mixc(base, WHITE, 0.5 + 0.5 * b))},${(0.6 + 0.4 * b).toFixed(3)})`);
-          dg.addColorStop(1, `rgba(${rgbs(base)},${(0.5 + 0.5 * b).toFixed(3)})`);
-          ctx.shadowColor = `rgba(${rgbs(base)},${(0.55 * b).toFixed(3)})`;
-          ctx.shadowBlur = (3 + 5 * b) * pulse;
+          dg.addColorStop(0, `rgba(${rgbs(mixc(base, WHITE, 0.4 + 0.4 * b))},${(0.7 + 0.3 * b).toFixed(3)})`);
+          dg.addColorStop(1, `rgba(${rgbs(base)},${(0.6 + 0.4 * b).toFixed(3)})`);
+          ctx.shadowColor = `rgba(${rgbs(base)},${(0.3 * b).toFixed(3)})`;
+          ctx.shadowBlur = 1.5 + 2 * b;
           ctx.fillStyle = dg;
           ctx.beginPath(); ctx.arc(CELLS[i] + 8.5, CY + 10, 1.5, 0, Math.PI * 2); ctx.fill();
         }
@@ -1293,10 +1318,10 @@ defComp({
       if (colon) {
         for (const dy of [24, 32]) {
           const cg = ctx.createRadialGradient(62, dy, 0, 62, dy, 2.5);
-          cg.addColorStop(0, `rgba(${rgbs(mixc(base, WHITE, 0.5 + 0.5 * b))},${(0.6 + 0.4 * b).toFixed(3)})`);
-          cg.addColorStop(1, `rgba(${rgbs(base)},${(0.5 + 0.5 * b).toFixed(3)})`);
-          ctx.shadowColor = `rgba(${rgbs(base)},${(0.55 * b).toFixed(3)})`;
-          ctx.shadowBlur = (3 + 5 * b) * pulse;
+          cg.addColorStop(0, `rgba(${rgbs(mixc(base, WHITE, 0.4 + 0.4 * b))},${(0.7 + 0.3 * b).toFixed(3)})`);
+          cg.addColorStop(1, `rgba(${rgbs(base)},${(0.6 + 0.4 * b).toFixed(3)})`);
+          ctx.shadowColor = `rgba(${rgbs(base)},${(0.3 * b).toFixed(3)})`;
+          ctx.shadowBlur = 1.5 + 2 * b;
           ctx.fillStyle = cg;
           ctx.beginPath(); ctx.arc(62, dy, 2, 0, Math.PI * 2); ctx.fill();
         }
@@ -1308,6 +1333,8 @@ defComp({
     ctx.restore();
   }
 });
+
+
 
 /* -------------- LCD 16x2 (Parallel HD44780 - Large Realistic Design) ------------------ */
 

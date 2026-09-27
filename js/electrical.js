@@ -224,17 +224,16 @@ class ElectricalEngine {
   }
 
   _breadboardGroup(pinId) {
-    // Simplified breadboard grouping
-    // Power rails: VCC, GND
-    // Component area: columns 1-30, rows a-e (top), f-j (bottom)
+    // Must mirror js/components/passive.js pin ids: ut/ub = upper half
+    // (rows a–e share a node), lt/lb = lower half (rows f–j), rails are
+    // four continuous nodes (rp/rn top, bp/bn bottom).
     if (!pinId) return null;
-    if (pinId === 'VCC' || pinId === 'vcc' || pinId === 'vcc_t' || pinId === 'vcc_b') return 'vcc';
-    if (pinId === 'GND' || pinId === 'gnd' || pinId === 'gnd_t' || pinId === 'gnd_b') return 'gnd';
-    // Rows a-e in same column share a connection
-    const match = pinId.match(/^(\d+)([a-e])$/);
-    if (match) return `top_${match[1]}`;
-    const match2 = pinId.match(/^(\d+)([f-j])$/);
-    if (match2) return `bot_${match2[1]}`;
+    if (pinId === 'rp') return 'rail_tp';
+    if (pinId === 'rn') return 'rail_tn';
+    if (pinId === 'bp') return 'rail_bp';
+    if (pinId === 'bn') return 'rail_bn';
+    const m = /^([ul])([tb])(\d+)$/.exec(pinId);
+    if (m) return m[1] + m[3];
     return null;
   }
 
@@ -566,6 +565,12 @@ class ElectricalEngine {
       case 'ic_74hc193':
       case 'ic_74hc47':
       case 'ic_74hc148':
+      case 'ic_74hc02':
+      case 'ic_74hc86':
+      case 'ic_74hc139':
+      case 'ic_74hc153':
+      case 'ic_74hc164':
+      case 'ic_74hc4017':
       case 'lm741':
         this._classifyIC(inst);
         break;

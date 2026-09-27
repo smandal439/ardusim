@@ -19,6 +19,18 @@ const IC_OUTPUT_MAP = {
   ic_74hc193: { pins: ['QA', 'QB', 'QC', 'QD', 'CO', 'BO'], activeLow: ['CO', 'BO'] },
   ic_74hc47: { pins: ['a', 'b', 'c', 'd', 'e', 'f', 'g'], activeLow: ['a', 'b', 'c', 'd', 'e', 'f', 'g'] },
   ic_74hc148: { pins: ['A0', 'A1', 'A2', 'GS', 'EO'], activeLow: ['A0', 'A1', 'A2', 'GS', 'EO'] },
+  ic_74hc02: { pins: ['Y1', 'Y2', 'Y3', 'Y4'], activeLow: [] },
+  ic_74hc86: { pins: ['Y1', 'Y2', 'Y3', 'Y4'], activeLow: [] },
+  ic_74hc139: {
+    pins: ['Y0_1', 'Y1_1', 'Y2_1', 'Y3_1', 'Y0_2', 'Y1_2', 'Y2_2', 'Y3_2'],
+    activeLow: ['Y0_1', 'Y1_1', 'Y2_1', 'Y3_1', 'Y0_2', 'Y1_2', 'Y2_2', 'Y3_2'],
+  },
+  ic_74hc153: { pins: ['Y1', 'Y2'], activeLow: [] },
+  ic_74hc164: { pins: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7'], activeLow: [] },
+  ic_74hc4017: {
+    pins: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q59'],
+    activeLow: [],
+  },
   lm741: { pins: ['OUT'], activeLow: [] },
 };
 const IC_OUTPUT_PIN_LIST = {
@@ -5319,6 +5331,20 @@ class CircuitCanvas {
     if (other.type === 'power_5v') return 1;
     if (other.type === 'power_gnd') return 0;
 
+    // 1b. Breadboard: every hole on the same internal node reads as one signal
+    if (other.type === 'breadboard' || other.type === 'breadboard_small') {
+      const bg = window._breadboardGetGroup;
+      const grp = bg && bg(targetPin);
+      if (grp) {
+        const def = (window.ArduinoComponents?.COMPONENT_DEFS || {})[other.type];
+        for (const p of (def?.pins || [])) {
+          if (bg(p.id) !== grp) continue;
+          if (this._readDigitalInput(other.id, p.id, visited) === 1) return 1;
+        }
+      }
+      return 0;
+    }
+
     // 2. Pass-through components (Resistors)
     if (other.type === 'resistor') {
       const otherPin = targetPin === 'p1' ? 'p2' : 'p1';
@@ -5380,6 +5406,18 @@ class CircuitCanvas {
     const other = wireTarget.inst;
     const targetPin = wireTarget.pinId;
     if (other.type === 'power_5v' || other.type === 'power_gnd') return true;
+    if (other.type === 'breadboard' || other.type === 'breadboard_small') {
+      const bg = window._breadboardGetGroup;
+      const grp = bg && bg(targetPin);
+      if (grp) {
+        const def = (window.ArduinoComponents?.COMPONENT_DEFS || {})[other.type];
+        for (const p of (def?.pins || [])) {
+          if (bg(p.id) !== grp) continue;
+          if (this._hasDigitalInputSource(other.id, p.id, visited)) return true;
+        }
+      }
+      return false;
+    }
     if (other.type === 'resistor') {
       const otherPin = targetPin === 'p1' ? 'p2' : 'p1';
       return this._hasDigitalInputSource(other.id, otherPin, visited);

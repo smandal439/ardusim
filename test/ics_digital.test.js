@@ -483,8 +483,9 @@ describe('LA probe reads new IC outputs (getPinVoltage)', () => {
   function stubWireTo(type, pin, runtimeState) {
     const target = { id: 't_ic', type, runtimeState };
     window.CircuitCanvas = {
+      components: [target],
+      wires: [{ id: 'w1', from: { instId: probe.id, pinId: 'tip' }, to: { instId: target.id, pinId: pin } }],
       _getConnectedPinNum: () => null,
-      _getWireTarget: () => ({ inst: target, pinId: pin }),
     };
     return target;
   }

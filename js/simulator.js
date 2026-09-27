@@ -2715,68 +2715,137 @@ class ArduinoSimulator {
     const directVal = this.pinStates[`${inst.id}_${pinId}`];
     if (directVal !== undefined) return directVal;
 
-    // 3. Follow wire to the connected component and read its output voltage
-    if (typeof window.CircuitCanvas._getWireTarget === 'function') {
-      const target = window.CircuitCanvas._getWireTarget(inst.id, pinId);
-      if (target) {
-        const other = target.inst;
+    // 3. Walk the wire graph — through breadboard internal nodes — to a source
+    const IC_OUT = {
+      ic_555: ['OUT'],
+      ic_74hc00: ['Y1', 'Y2', 'Y3', 'Y4'],
+      ic_74hc04: ['Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6'],
+      ic_74hc08: ['Y1', 'Y2', 'Y3', 'Y4'],
+      ic_74hc32: ['Y1', 'Y2', 'Y3', 'Y4'],
+      ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'],
+      ic_74hc138: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'],
+      ic_74hc245: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
+      ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
+      ic_74hc165: ['Q7', 'Q7n'],
+      ic_74hc193: ['QA', 'QB', 'QC', 'QD', 'CO', 'BO', 'TC_U', 'TC_D'],
+      ic_74hc47: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+      ic_74hc148: ['A0', 'A1', 'A2', 'GS', 'EO'],
+      ic_74hc02: ['Y1', 'Y2', 'Y3', 'Y4'],
+      ic_74hc86: ['Y1', 'Y2', 'Y3', 'Y4'],
+      ic_74hc139: ['Y0_1', 'Y1_1', 'Y2_1', 'Y3_1', 'Y0_2', 'Y1_2', 'Y2_2', 'Y3_2'],
+      ic_74hc153: ['Y1', 'Y2'],
+      ic_74hc164: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7'],
+      ic_74hc4017: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q59'],
+      lm741: ['OUT'],
+    };
+    const bbGroupOf = (pid) => {
+      if (typeof window._breadboardGetGroup === 'function') {
+        const g = window._breadboardGetGroup(pid);
+        if (g) return g;
+      }
+      if (pid === 'rp') return 'rail_tp';
+      if (pid === 'rn') return 'rail_tn';
+      if (pid === 'bp') return 'rail_bp';
+      if (pid === 'bn') return 'rail_bn';
+      const m = /^([ul])([tb])(\d+)$/.exec(pid || '');
+      return m ? m[1] + m[3] : null;
+    };
+    const canvas = window.CircuitCanvas;
+    const visited = new Set();
+    const resolve = (id, pid) => {
+      const key = `${id}:${pid}`;
+      if (visited.has(key)) return null;
+      visited.add(key);
+      const wires = (canvas.wires || []).filter(w =>
+        (w.from.instId === id && w.from.pinId === pid) ||
+        (w.to.instId === id && w.to.pinId === pid));
+      for (const w of wires) {
+        const far = (w.from.instId === id && w.from.pinId === pid) ? w.to : w.from;
+        const other = (canvas.components || []).find(c => c.id === far.instId);
+        if (!other) continue;
+
+        // Breadboard: hop to every hole on the same internal node
+        if (other.type === 'breadboard' || other.type === 'breadboard_small') {
+          const g = bbGroupOf(far.pinId);
+          if (g) {
+            const def = (window.ArduinoComponents?.COMPONENT_DEFS || {})[other.type];
+            for (const p of (def?.pins || [])) {
+              if (bbGroupOf(p.id) !== g) continue;
+              const v = resolve(other.id, p.id);
+              if (v !== null) return v;
+            }
+          }
+          continue;
+        }
+
         // Function Generator output
         if (other.type === 'func_gen') {
           const rs = other.runtimeState || {};
-          if (target.pinId === 'ch1_out') return rs.ch1_voltage || 0;
-          if (target.pinId === 'ch2_out') return rs.ch2_voltage || 0;
+          if (far.pinId === 'ch1_out') return rs.ch1_voltage || 0;
+          if (far.pinId === 'ch2_out') return rs.ch2_voltage || 0;
+        }
+        // Power rails / battery
+        if (other.type === 'power_5v') return 5;
+        if (other.type === 'power_gnd') return 0;
+        if (other.type === 'battery') {
+          if (far.pinId === 'neg') return 0;
+          return Number(other.runtimeState?.voltage ?? other.props?.voltage ?? 3.7);
+        }
+        // Resistors pass the far-side voltage through
+        if (other.type === 'resistor') {
+          const v = resolve(other.id, far.pinId === 'p1' ? 'p2' : 'p1');
+          if (v !== null) return v;
+          continue;
+        }
+        // Push button: follow the closed contact pair
+        if (other.type === 'push_button') {
+          const pressed = !!(other.runtimeState && other.runtimeState.pressed);
+          const pairMap = { p1: 'p2', p2: 'p1', p3: 'p4', p4: 'p3' };
+          const next = pressed
+            ? ((far.pinId === 'p1' || far.pinId === 'p2') ? 'p3' : 'p1')
+            : pairMap[far.pinId];
+          if (next) {
+            const v = resolve(other.id, next);
+            if (v !== null) return v;
+          }
+          continue;
         }
         // IC output pins
-        const IC_OUT = {
-          ic_555: ['OUT'],
-          ic_74hc00: ['Y1', 'Y2', 'Y3', 'Y4'],
-          ic_74hc04: ['Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6'],
-          ic_74hc08: ['Y1', 'Y2', 'Y3', 'Y4'],
-          ic_74hc32: ['Y1', 'Y2', 'Y3', 'Y4'],
-          ic_74hc595: ['QA', 'QB', 'QC', 'QD', 'QE', 'QF', 'QG', 'QH', 'QHn'],
-          ic_74hc138: ['Y0', 'Y1', 'Y2', 'Y3', 'Y4', 'Y5', 'Y6', 'Y7'],
-          ic_74hc245: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
-          ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
-          ic_74hc165: ['Q7', 'Q7n'],
-          ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],
-          ic_74hc47: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
-          ic_74hc148: ['A0', 'A1', 'A2', 'GS', 'EO'],
-          ic_74hc02: ['Y1', 'Y2', 'Y3', 'Y4'],
-          ic_74hc86: ['Y1', 'Y2', 'Y3', 'Y4'],
-          ic_74hc139: ['Y0_1', 'Y1_1', 'Y2_1', 'Y3_1', 'Y0_2', 'Y1_2', 'Y2_2', 'Y3_2'],
-          ic_74hc153: ['Y1', 'Y2'],
-          ic_74hc164: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7'],
-          ic_74hc4017: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q59'],
-          lm741: ['OUT'],
-        };
-        if (IC_OUT[other.type] && IC_OUT[other.type].includes(target.pinId)) {
+        if (IC_OUT[other.type] && IC_OUT[other.type].includes(far.pinId)) {
           if (other.type === 'lm741') {
             return other.runtimeState ? (other.runtimeState.vOut || 0) : 0;
           }
-          const raw = other.runtimeState && other.runtimeState[target.pinId] != null
-            ? other.runtimeState[target.pinId] : 0;
+          const raw = other.runtimeState && other.runtimeState[far.pinId] != null
+            ? other.runtimeState[far.pinId] : 0;
           return raw > 1 ? (raw / 255) * 5.0 : raw > 0 ? 5.0 : 0;
         }
         // Potentiometer wiper
-        if (other.type === 'potentiometer' && target.pinId === 'wiper') {
+        if (other.type === 'potentiometer' && far.pinId === 'wiper') {
           return (other.runtimeState && other.runtimeState.wiper != null) ? (other.runtimeState.wiper / 1023) * 5.0 : 0;
         }
         // Op-amp output
-        if (other.type === 'lm741' && target.pinId === 'OUT') {
+        if (other.type === 'lm741' && far.pinId === 'OUT') {
           return other.runtimeState ? (other.runtimeState.vOut || 0) : 0;
         }
-        // Probe pass-through // return voltage sampled at probe tip
-        if (other.type === 'probe' || other.type.startsWith('osc_probe_') || other.type.startsWith('dso_probe_')) {
-          return other.runtimeState ? (other.runtimeState.voltage || 0) : 0;
+        // Probe pass-through — return voltage sampled at probe tip
+        if (other.type === 'probe' || other.type.startsWith('osc_probe_') ||
+            other.type.startsWith('dso_probe_') || other.type.startsWith('la_probe_')) {
+          // never read back the origin probe's own (stale) sample
+          if (other.id !== inst.id) return other.runtimeState ? (other.runtimeState.voltage || 0) : 0;
+          continue;
         }
-        // Another DSO reading from a source // recurse
-        if (other.type === 'dso_4ch') {
-          return 0;
+        // Another DSO reading from a source
+        if (other.type === 'dso_4ch') return 0;
+        // Board pin: output latched by the sketch / input state in pinStates
+        if (typeof canvas._getConnectedPinNum === 'function') {
+          const num = canvas._getConnectedPinNum(far.instId, far.pinId);
+          if (num !== null) return this.pinStates[`pin_${num}`] || 0;
         }
       }
-    }
-
-    return 0;
+      return null;
+    };
+    const found = resolve(inst.id, pinId);
+    return found !== null ? found : 0;
   }
 
 
