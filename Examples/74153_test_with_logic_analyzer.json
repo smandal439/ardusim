@@ -1,0 +1,247 @@
+{
+  "id": "74153_test_with_logic_analyzer",
+  "name": "74153 test with logic analyzer",
+  "icon": "🔀",
+  "desc": "Test of the 74HC153 dual 4-input multiplexer. Mux-1 inputs are tied HIGH/LOW/ HIGH/LOW, select lines S0/S1 come from the function generator, and the logic analyzer shows the select code and the multiplexed output 1Y.",
+  "tags": [
+    "custom",
+    "circuit",
+    "74153",
+    "multiplexer",
+    "logic analyzer",
+    "function generator"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_pwr",
+        "type": "power_5v",
+        "x": 295,
+        "y": -165,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_gnd",
+        "type": "power_gnd",
+        "x": 400,
+        "y": 95,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_fn",
+        "type": "func_gen",
+        "x": -150,
+        "y": -170,
+        "rotation": 0,
+        "props": {
+          "powered": 1,
+          "ch1_wave": "square",
+          "ch1_freq": 2,
+          "ch1_amp": 5,
+          "ch1_offset": 0,
+          "ch1_phase": 0,
+          "ch1_duty": 50,
+          "ch2_wave": "square",
+          "ch2_freq": 4,
+          "ch2_amp": 5,
+          "ch2_offset": 0,
+          "ch2_phase": 2,
+          "ch2_duty": 50
+        }
+      },
+      {
+        "id": "comp_ic",
+        "type": "ic_74hc153",
+        "x": 260,
+        "y": -70,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_la1",
+        "type": "la_probe_ch1",
+        "x": -80,
+        "y": 85,
+        "rotation": 2,
+        "props": {}
+      },
+      {
+        "id": "comp_la2",
+        "type": "la_probe_ch2",
+        "x": 15,
+        "y": 80,
+        "rotation": 2,
+        "props": {}
+      },
+      {
+        "id": "comp_la3",
+        "type": "la_probe_ch3",
+        "x": 285,
+        "y": 90,
+        "rotation": 2,
+        "props": {}
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_dgi_001",
+        "from": {
+          "instId": "comp_fn",
+          "pinId": "ch1_gnd"
+        },
+        "to": {
+          "instId": "comp_gnd",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_002",
+        "from": {
+          "instId": "comp_ic",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "comp_gnd",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_003",
+        "from": {
+          "instId": "comp_ic",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "comp_pwr",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_004",
+        "from": {
+          "instId": "comp_fn",
+          "pinId": "ch1_out"
+        },
+        "to": {
+          "instId": "comp_ic",
+          "pinId": "S0"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_005",
+        "from": {
+          "instId": "comp_fn",
+          "pinId": "ch2_out"
+        },
+        "to": {
+          "instId": "comp_ic",
+          "pinId": "S1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_006",
+        "from": {
+          "instId": "comp_pwr",
+          "pinId": "vcc"
+        },
+        "to": {
+          "instId": "comp_ic",
+          "pinId": "I0_1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_007",
+        "from": {
+          "instId": "comp_gnd",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "comp_ic",
+          "pinId": "I1_1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_008",
+        "from": {
+          "instId": "comp_pwr",
+          "pinId": "vcc"
+        },
+        "to": {
+          "instId": "comp_ic",
+          "pinId": "I2_1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_009",
+        "from": {
+          "instId": "comp_gnd",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "comp_ic",
+          "pinId": "I3_1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_010",
+        "from": {
+          "instId": "comp_fn",
+          "pinId": "ch1_out"
+        },
+        "to": {
+          "instId": "comp_la1",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_011",
+        "from": {
+          "instId": "comp_fn",
+          "pinId": "ch2_out"
+        },
+        "to": {
+          "instId": "comp_la2",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_012",
+        "from": {
+          "instId": "comp_ic",
+          "pinId": "Y1"
+        },
+        "to": {
+          "instId": "comp_la3",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "void setup() {\n   // Put your setup code here, to run once when the board starts:\n}\nvoid loop() {\n  // Put your main code here, to run repeatedly indefinitely:\n}"
+}

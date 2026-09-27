@@ -393,27 +393,10 @@ const COMPONENT_CATALOG = [
   { category: 'Passive', ids: ['resistor', 'capacitor', 'breadboard', 'breadboard_small', 'diode_1n4007'] },
   { category: 'Power', ids: ['power_5v', 'power_gnd', 'battery', 'mb102_power', 'bench_power_supply'] },
   {
-    category: 'Digital ICs', ids: [],
-    dropdown: {
-      id: 'digital_ic', label: 'Digital ICs', icon: '⮗', desc: 'Logic Gates & Timers',
-      variants: [
-        { id: 'ic_555', name: '555 Timer', icon: '⏱️' },
-        { id: 'ic_74hc00', name: '74HC00 NAND', icon: '⮗' },
-        { id: 'ic_74hc04', name: '74HC04 NOT', icon: '⮗' },
-        { id: 'ic_74hc08', name: '74HC08 AND', icon: '⮗' },
-        { id: 'ic_74hc32', name: '74HC32 OR', icon: '⮗' },
-        { id: 'ic_74hc74', name: '74HC74 Dual DFF', icon: '⮗' },
-        { id: 'ic_74hc47', name: '74HC47 BCD→7Seg', icon: '⮗' },
-        { id: 'ic_74hc148', name: '74HC148 Encoder', icon: '⮗' },
-        { id: 'ic_8255', name: 'Intel 8255 PPI', icon: '🔲' },
-        { id: 'ic_74hc595', name: '74HC595 Shift Reg', icon: '⮗' },
-        { id: 'ic_74hc138', name: '74HC138 Decoder', icon: '⮗' },
-        { id: 'ic_74hc165', name: '74HC165 PISO', icon: '⮗' },
-        { id: 'ic_74hc193', name: '74HC193 Counter', icon: '⮗' },
-        { id: 'ic_74hc245', name: '74HC245 Buffer', icon: '⮗' },
-        { id: 'lm741', name: 'LM741 Op-Amp', icon: '📐' },
-      ]
-    }
+    category: 'Digital ICs',
+    ids: ['ic_555', 'ic_74hc00', 'ic_74hc02', 'ic_74hc04', 'ic_74hc08', 'ic_74hc32', 'ic_74hc86',
+      'ic_74hc74', 'ic_74hc47', 'ic_74hc138', 'ic_74hc139', 'ic_74hc148', 'ic_74hc153', 'ic_74hc164',
+      'ic_74hc165', 'ic_74hc193', 'ic_74hc245', 'ic_74hc595', 'ic_74hc4017', 'ic_8255', 'lm741']
   },
   { category: 'Communication', ids: ['wifi_module', 'lora_module', 'sd_card', 'hc05', 'gps_neo6m', 'rc522'] },
   {

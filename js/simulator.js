@@ -2809,7 +2809,8 @@ window.loadExamplesFromFiles = async function () {
 
   // 3. Fallback: fetch individual JSON files (no cache-busting so browsers can cache)
   const files = [
-    '7408_test_with_logic_analyzer', '8051_addition', '8051_all_led_on', '8051_array_maximum', '8051_copy_block', '8051_port_control',
+    '4017_test_with_logic_analyzer', '7402_test_with_logic_analyzer', '7408_test_with_logic_analyzer', '74139_test_with_logic_analyzer',
+    '74153_test_with_logic_analyzer', '74164_test_with_logic_analyzer', '7486_test_with_logic_analyzer', '8051_addition', '8051_all_led_on', '8051_array_maximum', '8051_copy_block', '8051_port_control',
     '8085_16bit_multiplication', '8085_2s_complement', '8085_8bit_addition', '8085_all_led_on', '8085_bitwise_and', '8085_block_data_transfer',
     '8085_data_exchange', '8085_exchange_memory', '8085_fibonacci', '8085_load_add', '8085_load_copy', '8085_sorting_ascending',
     '8085_sorting_descending', 'add_2_number', 'and_gate', 'astable_555', 'battery_in_series', 'battery_led',

@@ -1,0 +1,541 @@
+{
+  "id": "555_timer_astable_led_blinker",
+  "name": "555 Timer Astable LED Blinker",
+  "icon": "🔧",
+  "desc": "A custom 555 Timer Astable LED Blinker circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "ic1",
+        "type": "ic_555",
+        "x": 300,
+        "y": 280,
+        "rotation": 0,
+        "props": {
+          "mode": "astable",
+          "frequency": 1000,
+          "dutyCycle": 50
+        }
+      },
+      {
+        "id": "vcc1",
+        "type": "power_5v",
+        "x": 245,
+        "y": 200,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "gnd1",
+        "type": "power_gnd",
+        "x": 220,
+        "y": 475,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 400,
+        "y": 205,
+        "rotation": 1,
+        "props": {
+          "value": 10,
+          "unit": "kΩ"
+        }
+      },
+      {
+        "id": "r2",
+        "type": "resistor",
+        "x": 475,
+        "y": 235,
+        "rotation": 3,
+        "props": {
+          "value": 10,
+          "unit": "kΩ"
+        }
+      },
+      {
+        "id": "c1",
+        "type": "capacitor",
+        "x": 450,
+        "y": 360,
+        "rotation": 0,
+        "props": {
+          "value": 100,
+          "unit": "µF"
+        }
+      },
+      {
+        "id": "cv_cap",
+        "type": "capacitor",
+        "x": 350,
+        "y": 410,
+        "rotation": 0,
+        "props": {
+          "value": 0.1,
+          "unit": "µF"
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 130,
+        "y": 270,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "rled",
+        "type": "resistor",
+        "x": 125,
+        "y": 375,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "vcc1",
+          "pinId": "vcc"
+        },
+        "to": {
+          "instId": "r1",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 410,
+            "y": 200
+          }
+        ],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 260,
+            "y": 246.61168720299747
+          },
+          "c2": {
+            "x": 410,
+            "y": 158.38831279700253
+          }
+        }
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "ic1",
+          "pinId": "DIS"
+        },
+        "color": "#E0E0E0",
+        "waypoints": [
+          {
+            "x": 410,
+            "y": 304
+          },
+          {
+            "x": 287,
+            "y": 304
+          },
+          {
+            "x": 287,
+            "y": 256
+          },
+          {
+            "x": 317,
+            "y": 256
+          }
+        ],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 425,
+            "y": 318.2462715155885
+          },
+          "c2": {
+            "x": 317,
+            "y": 236.7537284844115
+          }
+        }
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "r2",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "ic1",
+          "pinId": "DIS"
+        },
+        "color": "#FF9800",
+        "waypoints": [],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 410,
+            "y": 303.4399312715284
+          },
+          "c2": {
+            "x": 317,
+            "y": 233.4399312715284
+          }
+        }
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "r2",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "ic1",
+          "pinId": "THR"
+        },
+        "color": "#FFC107",
+        "waypoints": [],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 415,
+            "y": 370
+          },
+          "c2": {
+            "x": 395,
+            "y": 195
+          }
+        }
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "ic1",
+          "pinId": "THR"
+        },
+        "to": {
+          "instId": "c1",
+          "pinId": "pos"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 334,
+            "y": 220.54110663660146
+          },
+          "c2": {
+            "x": 430,
+            "y": 285
+          }
+        }
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "ic1",
+          "pinId": "TRIG"
+        },
+        "to": {
+          "instId": "c1",
+          "pinId": "pos"
+        },
+        "color": "#4CAF50",
+        "waypoints": [
+          {
+            "x": 280,
+            "y": 340
+          },
+          {
+            "x": 280,
+            "y": 350
+          },
+          {
+            "x": 450,
+            "y": 350
+          }
+        ],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 317,
+            "y": 391.3305796483288
+          },
+          "c2": {
+            "x": 470,
+            "y": 278.6694203516712
+          }
+        }
+      },
+      {
+        "id": "w7",
+        "from": {
+          "instId": "c1",
+          "pinId": "neg"
+        },
+        "to": {
+          "instId": "gnd1",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 465,
+            "y": 500
+          },
+          "c2": {
+            "x": 380,
+            "y": 530
+          }
+        }
+      },
+      {
+        "id": "w8",
+        "from": {
+          "instId": "ic1",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "gnd1",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 300,
+            "y": 395.6048778674269
+          },
+          "c2": {
+            "x": 200,
+            "y": 394.3951221325731
+          }
+        }
+      },
+      {
+        "id": "w9",
+        "from": {
+          "instId": "ic1",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "vcc1",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 280,
+            "y": 200
+          }
+        ],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 248.88760717129588,
+            "y": 265.290995837907
+          },
+          "c2": {
+            "x": 303.8876071712959,
+            "y": 265.290995837907
+          }
+        }
+      },
+      {
+        "id": "w10",
+        "from": {
+          "instId": "ic1",
+          "pinId": "RST"
+        },
+        "to": {
+          "instId": "vcc1",
+          "pinId": "vcc"
+        },
+        "color": "#F44336",
+        "waypoints": [
+          {
+            "x": 270,
+            "y": 210
+          }
+        ],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 269.27310332785464,
+            "y": 449.15911692947583
+          },
+          "c2": {
+            "x": 273.27310332785464,
+            "y": 319.15911692947583
+          }
+        }
+      },
+      {
+        "id": "w11",
+        "from": {
+          "instId": "ic1",
+          "pinId": "CV"
+        },
+        "to": {
+          "instId": "cv_cap",
+          "pinId": "pos"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 351,
+            "y": 227.87553357587245
+          },
+          "c2": {
+            "x": 395,
+            "y": 355
+          }
+        }
+      },
+      {
+        "id": "w12",
+        "from": {
+          "instId": "cv_cap",
+          "pinId": "neg"
+        },
+        "to": {
+          "instId": "gnd1",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 360,
+            "y": 440
+          },
+          {
+            "x": 215,
+            "y": 440
+          }
+        ],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 360,
+            "y": 534.1248781675256
+          },
+          "c2": {
+            "x": 200,
+            "y": 395.8751218324744
+          }
+        }
+      },
+      {
+        "id": "w13",
+        "from": {
+          "instId": "ic1",
+          "pinId": "OUT"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 145,
+            "y": 280
+          }
+        ],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 341.9838734342168,
+            "y": 495.3394419307411
+          },
+          "c2": {
+            "x": 228.86028273537343,
+            "y": 237.9932599195172
+          }
+        }
+      },
+      {
+        "id": "w14",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "rled",
+          "pinId": "p1"
+        },
+        "color": "#00BCD4",
+        "waypoints": [],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 145,
+            "y": 370
+          },
+          "c2": {
+            "x": 135,
+            "y": 345
+          }
+        }
+      },
+      {
+        "id": "w15",
+        "from": {
+          "instId": "rled",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "gnd1",
+          "pinId": "gnd"
+        },
+        "color": "#424242",
+        "waypoints": [
+          {
+            "x": 140,
+            "y": 440
+          },
+          {
+            "x": 215,
+            "y": 440
+          }
+        ],
+        "routeStyle": "bezier",
+        "bezierCtrl": {
+          "c1": {
+            "x": 150,
+            "y": 495
+          },
+          "c2": {
+            "x": 165,
+            "y": 415
+          }
+        }
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "void setup() {\n  // 555 timer runs autonomously — no code needed!\n}\nvoid loop() {\n  // The 555 OUT pin drives the LED directly.\n  // Frequency is determined by R1, R2, and C:\n  //   f = 1.44 / ((R1 + 2*R2) * C)\n}"
+  }
+}

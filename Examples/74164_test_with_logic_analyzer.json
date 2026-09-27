@@ -1,0 +1,284 @@
+{
+  "id": "74164_test_with_logic_analyzer",
+  "name": "74164 test with logic analyzer",
+  "icon": "➡️",
+  "desc": "Test of the 74HC164 8-bit shift register. Channel 1 is the shift clock, channel 2 is the serial data (DSB is tied HIGH so DSA passes through), /MR is released to VCC, and the logic analyzer watches the clock, data and outputs Q0–Q3 shifting one bit per clock.",
+  "tags": [
+    "custom",
+    "circuit",
+    "74164",
+    "shift register",
+    "logic analyzer",
+    "function generator"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_pwr",
+        "type": "power_5v",
+        "x": 295,
+        "y": -165,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_gnd",
+        "type": "power_gnd",
+        "x": 400,
+        "y": 95,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_fn",
+        "type": "func_gen",
+        "x": -150,
+        "y": -170,
+        "rotation": 0,
+        "props": {
+          "powered": 1,
+          "ch1_wave": "square",
+          "ch1_freq": 2,
+          "ch1_amp": 5,
+          "ch1_offset": 0,
+          "ch1_phase": 0,
+          "ch1_duty": 50,
+          "ch2_wave": "square",
+          "ch2_freq": 4,
+          "ch2_amp": 5,
+          "ch2_offset": 0,
+          "ch2_phase": 2,
+          "ch2_duty": 50
+        }
+      },
+      {
+        "id": "comp_ic",
+        "type": "ic_74hc164",
+        "x": 260,
+        "y": -70,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_la1",
+        "type": "la_probe_ch1",
+        "x": -80,
+        "y": 85,
+        "rotation": 2,
+        "props": {}
+      },
+      {
+        "id": "comp_la2",
+        "type": "la_probe_ch2",
+        "x": 15,
+        "y": 80,
+        "rotation": 2,
+        "props": {}
+      },
+      {
+        "id": "comp_la3",
+        "type": "la_probe_ch3",
+        "x": 110,
+        "y": 80,
+        "rotation": 2,
+        "props": {}
+      },
+      {
+        "id": "comp_la4",
+        "type": "la_probe_ch4",
+        "x": 205,
+        "y": 85,
+        "rotation": 2,
+        "props": {}
+      },
+      {
+        "id": "comp_la5",
+        "type": "la_probe_ch5",
+        "x": 300,
+        "y": 85,
+        "rotation": 2,
+        "props": {}
+      },
+      {
+        "id": "comp_la6",
+        "type": "la_probe_ch6",
+        "x": 395,
+        "y": 90,
+        "rotation": 2,
+        "props": {}
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_dgi_001",
+        "from": {
+          "instId": "comp_fn",
+          "pinId": "ch1_gnd"
+        },
+        "to": {
+          "instId": "comp_gnd",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_002",
+        "from": {
+          "instId": "comp_ic",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "comp_gnd",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_003",
+        "from": {
+          "instId": "comp_ic",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "comp_pwr",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_004",
+        "from": {
+          "instId": "comp_pwr",
+          "pinId": "vcc"
+        },
+        "to": {
+          "instId": "comp_ic",
+          "pinId": "MR"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_005",
+        "from": {
+          "instId": "comp_pwr",
+          "pinId": "vcc"
+        },
+        "to": {
+          "instId": "comp_ic",
+          "pinId": "DSB"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_006",
+        "from": {
+          "instId": "comp_fn",
+          "pinId": "ch1_out"
+        },
+        "to": {
+          "instId": "comp_ic",
+          "pinId": "CP"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_007",
+        "from": {
+          "instId": "comp_fn",
+          "pinId": "ch2_out"
+        },
+        "to": {
+          "instId": "comp_ic",
+          "pinId": "DSA"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_008",
+        "from": {
+          "instId": "comp_fn",
+          "pinId": "ch1_out"
+        },
+        "to": {
+          "instId": "comp_la1",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_009",
+        "from": {
+          "instId": "comp_fn",
+          "pinId": "ch2_out"
+        },
+        "to": {
+          "instId": "comp_la2",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_010",
+        "from": {
+          "instId": "comp_ic",
+          "pinId": "Q0"
+        },
+        "to": {
+          "instId": "comp_la3",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_011",
+        "from": {
+          "instId": "comp_ic",
+          "pinId": "Q1"
+        },
+        "to": {
+          "instId": "comp_la4",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_012",
+        "from": {
+          "instId": "comp_ic",
+          "pinId": "Q2"
+        },
+        "to": {
+          "instId": "comp_la5",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "wire_dgi_013",
+        "from": {
+          "instId": "comp_ic",
+          "pinId": "Q3"
+        },
+        "to": {
+          "instId": "comp_la6",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "void setup() {\n   // Put your setup code here, to run once when the board starts:\n}\nvoid loop() {\n  // Put your main code here, to run repeatedly indefinitely:\n}"
+}

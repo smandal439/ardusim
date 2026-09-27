@@ -8,7 +8,7 @@
 defComp({
   id: 'ic_8255',
   name: 'Intel 8255 PPI',
-  category: 'ICs',
+  category: 'Digital ICs',
   icon: '🔲',
   desc: 'Intel 8255 Programmable Peripheral Interface — 3 ports (PA, PB, PC), Modes 0/1/2, bit set/reset',
   width: 260,

@@ -1240,6 +1240,508 @@ defComp({
   }
 });
 
+/* ══════════════════════════════════════════════════════════
+   74HC02 — Quad 2-Input NOR Gate (14-pin DIP)
+
+   Real pinout (output-first layout, unlike other 74xx):
+   Pin 1: 1Y    Pin 8:  3A
+   Pin 2: 1A    Pin 9:  3B
+   Pin 3: 1B    Pin 10: 3Y
+   Pin 4: 2Y    Pin 11: 4A
+   Pin 5: 2A    Pin 12: 4B
+   Pin 6: 2B    Pin 13: 4Y
+   Pin 7: GND   Pin 14: VCC
+   ══════════════════════════════════════════════════════════ */
+defComp({
+  id: 'ic_74hc02',
+  name: '74HC02 Quad NOR',
+  category: 'Digital ICs',
+  icon: '⮗',
+  desc: 'Quad 2-input NOR gate — outputs HIGH only when both inputs are LOW',
+  width: 119,
+  height: 50,
+  defaultProps: {},
+  pins: [
+    /* Bottom row (pins 1-7, left to right) */
+    { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+    /* Top row (pins 14-8, left to right) */
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.strokeStyle = '#888'; ctx.lineWidth = 1.5;
+    for (let i = 0; i <= 6; i++) {
+      const px = i * 17;
+      ctx.beginPath(); ctx.moveTo(px, 40); ctx.lineTo(px, 50); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px, 10); ctx.lineTo(px, 0); ctx.stroke();
+    }
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(ctx, -6, 10, 114, 30, 3); ctx.fill();
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(-6, 25, 4, -Math.PI / 2, Math.PI / 2);
+    ctx.strokeStyle = '#666'; ctx.stroke();
+    ctx.fillStyle = '#888';
+    ctx.beginPath(); ctx.arc(0, 32, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ccc';
+    ctx.font = 'bold 8px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('74HC02', 51, 23);
+    ctx.font = '5px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('Quad NOR', 51, 32);
+    const drawNorGate = (cx, cy) => {
+      ctx.strokeStyle = '#00979c'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx - 5, cy - 3);
+      ctx.quadraticCurveTo(cx - 1, cy, cx - 5, cy + 3);
+      ctx.quadraticCurveTo(cx + 1, cy + 4, cx + 5, cy);
+      ctx.quadraticCurveTo(cx + 1, cy - 4, cx - 5, cy - 3);
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx + 7, cy, 1.3, 0, Math.PI * 2); ctx.stroke();
+    };
+    drawNorGate(17, 25); drawNorGate(37, 25);
+    drawNorGate(65, 25); drawNorGate(85, 25);
+    if (inst.selected) drawSelectionRect(ctx, -10, -4, 123, 58);
+    ctx.restore();
+  }
+});
+
+/* ══════════════════════════════════════════════════════════
+   74HC86 — Quad 2-Input XOR Gate (14-pin DIP)
+
+   Real pinout:
+   Pin 1: 1A    Pin 8:  3Y
+   Pin 2: 1B    Pin 9:  3A
+   Pin 3: 1Y    Pin 10: 3B
+   Pin 4: 2A    Pin 11: 4Y
+   Pin 5: 2B    Pin 12: 4A
+   Pin 6: 2Y    Pin 13: 4B
+   Pin 7: GND   Pin 14: VCC
+   ══════════════════════════════════════════════════════════ */
+defComp({
+  id: 'ic_74hc86',
+  name: '74HC86 Quad XOR',
+  category: 'Digital ICs',
+  icon: '⮗',
+  desc: 'Quad 2-input XOR gate — outputs HIGH when inputs differ',
+  width: 119,
+  height: 50,
+  defaultProps: {},
+  pins: [
+    /* Bottom row (pins 1-7, left to right) */
+    { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+    /* Top row (pins 14-8, left to right) */
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.strokeStyle = '#888'; ctx.lineWidth = 1.5;
+    for (let i = 0; i <= 6; i++) {
+      const px = i * 17;
+      ctx.beginPath(); ctx.moveTo(px, 40); ctx.lineTo(px, 50); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px, 10); ctx.lineTo(px, 0); ctx.stroke();
+    }
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(ctx, -6, 10, 114, 30, 3); ctx.fill();
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(-6, 25, 4, -Math.PI / 2, Math.PI / 2);
+    ctx.strokeStyle = '#666'; ctx.stroke();
+    ctx.fillStyle = '#888';
+    ctx.beginPath(); ctx.arc(0, 32, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ccc';
+    ctx.font = 'bold 8px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('74HC86', 51, 23);
+    ctx.font = '5px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('Quad XOR', 51, 32);
+    const drawXorGate = (cx, cy) => {
+      ctx.strokeStyle = '#00979c'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx - 5, cy - 3);
+      ctx.quadraticCurveTo(cx - 1, cy, cx - 5, cy + 3);
+      ctx.quadraticCurveTo(cx + 1, cy + 4, cx + 5, cy);
+      ctx.quadraticCurveTo(cx + 1, cy - 4, cx - 5, cy - 3);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx - 7, cy - 3);
+      ctx.quadraticCurveTo(cx - 3, cy, cx - 7, cy + 3);
+      ctx.stroke();
+    };
+    drawXorGate(20, 25); drawXorGate(38, 25);
+    drawXorGate(66, 25); drawXorGate(84, 25);
+    if (inst.selected) drawSelectionRect(ctx, -10, -4, 123, 58);
+    ctx.restore();
+  }
+});
+
+/* ══════════════════════════════════════════════════════════
+   74HC139 — Dual 2-to-4 Line Decoder/Demultiplexer (16-pin DIP)
+
+   Real pinout:
+   Pin 1: 1E'    Pin 9:  2Y3
+   Pin 2: 1A0    Pin 10: 2Y2
+   Pin 3: 1A1    Pin 11: 2Y1
+   Pin 4: 1Y0    Pin 12: 2Y0
+   Pin 5: 1Y1    Pin 13: 2A1
+   Pin 6: 1Y2    Pin 14: 2A0
+   Pin 7: 1Y3    Pin 15: 2E'
+   Pin 8: GND    Pin 16: VCC
+   ══════════════════════════════════════════════════════════ */
+defComp({
+  id: 'ic_74hc139',
+  name: '74HC139 Decoder',
+  category: 'Digital ICs',
+  icon: '⮗',
+  desc: 'Dual 2-to-4 decoder/demultiplexer — active-LOW outputs with active-LOW enables',
+  width: 136,
+  height: 50,
+  defaultProps: {},
+  pins: [
+    /* Bottom row (pins 1-8, left to right) */
+    { id: 'E1', label: "1E'", type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'A0_1', label: '1A0', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'A1_1', label: '1A1', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'Y0_1', label: '1Y0', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'Y1_1', label: '1Y1', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Y2_1', label: '1Y2', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'Y3_1', label: '1Y3', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+    /* Top row (pins 16-9, left to right) */
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'E2', label: "2E'", type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'A0_2', label: '2A0', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'A1_2', label: '2A1', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'Y0_2', label: '2Y0', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'Y1_2', label: '2Y1', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Y2_2', label: '2Y2', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'Y3_2', label: '2Y3', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const state = inst.runtimeState || {};
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.strokeStyle = '#888'; ctx.lineWidth = 1.5;
+    for (let i = 0; i <= 7; i++) {
+      const px = i * 17;
+      ctx.beginPath(); ctx.moveTo(px, 40); ctx.lineTo(px, 50); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px, 10); ctx.lineTo(px, 0); ctx.stroke();
+    }
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(ctx, -6, 10, 131, 30, 3); ctx.fill();
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(-6, 25, 4, -Math.PI / 2, Math.PI / 2);
+    ctx.strokeStyle = '#666'; ctx.stroke();
+    ctx.fillStyle = '#888';
+    ctx.beginPath(); ctx.arc(0, 32, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ccc';
+    ctx.font = 'bold 7px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('74HC139', 59, 21);
+    ctx.font = '5px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('Dual 2-4 Decoder', 59, 28);
+    // Output dots (active LOW — lit means selected)
+    const ys = ['Y0_1', 'Y1_1', 'Y2_1', 'Y3_1', 'Y0_2', 'Y1_2', 'Y2_2', 'Y3_2'];
+    ys.forEach((id, i) => {
+      const lit = state[id] === 0;
+      const lx = 9 + i * 15;
+      ctx.fillStyle = lit ? '#33ff66' : '#334433';
+      ctx.beginPath(); ctx.arc(lx, 34, 2, 0, Math.PI * 2); ctx.fill();
+      if (lit) {
+        ctx.shadowColor = '#33ff66'; ctx.shadowBlur = 3;
+        ctx.beginPath(); ctx.arc(lx, 34, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    });
+    if (inst.selected) drawSelectionRect(ctx, -10, -4, 140, 58);
+    ctx.restore();
+  }
+});
+
+/* ══════════════════════════════════════════════════════════
+   74HC153 — Dual 4-Input Multiplexer (16-pin DIP)
+
+   Real pinout:
+   Pin 1: 1E'    Pin 9:  2Y
+   Pin 2: S1     Pin 10: 2I0
+   Pin 3: 1I3    Pin 11: 2I1
+   Pin 4: 1I2    Pin 12: 2I2
+   Pin 5: 1I1    Pin 13: 2I3
+   Pin 6: 1I0    Pin 14: S0
+   Pin 7: 1Y     Pin 15: 2E'
+   Pin 8: GND    Pin 16: VCC
+   ══════════════════════════════════════════════════════════ */
+defComp({
+  id: 'ic_74hc153',
+  name: '74HC153 MUX',
+  category: 'Digital ICs',
+  icon: '⮗',
+  desc: 'Dual 4-input multiplexer — shared select lines, independent active-LOW enables',
+  width: 136,
+  height: 50,
+  defaultProps: {},
+  pins: [
+    /* Bottom row (pins 1-8, left to right) */
+    { id: 'E1', label: "1E'", type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'S1', label: 'S1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'I3_1', label: '1I3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'I2_1', label: '1I2', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'I1_1', label: '1I1', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'I0_1', label: '1I0', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+    /* Top row (pins 16-9, left to right) */
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'E2', label: "2E'", type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'S0', label: 'S0', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'I3_2', label: '2I3', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'I2_2', label: '2I2', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'I1_2', label: '2I1', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'I0_2', label: '2I0', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const state = inst.runtimeState || {};
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.strokeStyle = '#888'; ctx.lineWidth = 1.5;
+    for (let i = 0; i <= 7; i++) {
+      const px = i * 17;
+      ctx.beginPath(); ctx.moveTo(px, 40); ctx.lineTo(px, 50); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px, 10); ctx.lineTo(px, 0); ctx.stroke();
+    }
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(ctx, -6, 10, 131, 30, 3); ctx.fill();
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(-6, 25, 4, -Math.PI / 2, Math.PI / 2);
+    ctx.strokeStyle = '#666'; ctx.stroke();
+    ctx.fillStyle = '#888';
+    ctx.beginPath(); ctx.arc(0, 32, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ccc';
+    ctx.font = 'bold 7px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('74HC153', 59, 21);
+    ctx.font = '5px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('Dual 4-Input MUX', 59, 28);
+    // Indicators: S1, S0, 1Y, 2Y
+    const dots = [
+      { id: 'S1', lit: !!state.S1 },
+      { id: 'S0', lit: !!state.S0 },
+      { id: 'Y1', lit: !!state.Y1 },
+      { id: 'Y2', lit: !!state.Y2 },
+    ];
+    dots.forEach((d, i) => {
+      const lx = 50 + i * 16;
+      ctx.fillStyle = d.lit ? '#33ff66' : '#334433';
+      ctx.beginPath(); ctx.arc(lx, 34, 2, 0, Math.PI * 2); ctx.fill();
+      if (d.lit) {
+        ctx.shadowColor = '#33ff66'; ctx.shadowBlur = 3;
+        ctx.beginPath(); ctx.arc(lx, 34, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    });
+    if (inst.selected) drawSelectionRect(ctx, -10, -4, 140, 58);
+    ctx.restore();
+  }
+});
+
+/* ══════════════════════════════════════════════════════════
+   74HC164 — 8-Bit Serial-In Parallel-Out Shift Register (14-pin DIP)
+
+   Real pinout:
+   Pin 1: DSA    Pin 8:  CP
+   Pin 2: DSB    Pin 9:  MR' (Master Reset, active LOW)
+   Pin 3: Q0     Pin 10: Q4
+   Pin 4: Q1     Pin 11: Q5
+   Pin 5: Q2     Pin 12: Q6
+   Pin 6: Q3     Pin 13: Q7
+   Pin 7: GND    Pin 14: VCC
+   ══════════════════════════════════════════════════════════ */
+defComp({
+  id: 'ic_74hc164',
+  name: '74HC164 SIPO',
+  category: 'Digital ICs',
+  icon: '⮗',
+  desc: '8-bit serial-in parallel-out shift register — no output latch, ANDed data inputs',
+  width: 119,
+  height: 50,
+  defaultProps: {},
+  pins: [
+    /* Bottom row (pins 1-7, left to right) */
+    { id: 'DSA', label: 'DSA', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'DSB', label: 'DSB', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'Q0', label: 'Q0', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'Q1', label: 'Q1', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'Q2', label: 'Q2', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Q3', label: 'Q3', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+    /* Top row (pins 14-8, left to right) */
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'Q7', label: 'Q7', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'Q6', label: 'Q6', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'Q5', label: 'Q5', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'Q4', label: 'Q4', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'MR', label: "/MR", type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'CP', label: 'CP', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const state = inst.runtimeState || {};
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.strokeStyle = '#888'; ctx.lineWidth = 1.5;
+    for (let i = 0; i <= 6; i++) {
+      const px = i * 17;
+      ctx.beginPath(); ctx.moveTo(px, 40); ctx.lineTo(px, 50); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px, 10); ctx.lineTo(px, 0); ctx.stroke();
+    }
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(ctx, -6, 10, 114, 30, 3); ctx.fill();
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(-6, 25, 4, -Math.PI / 2, Math.PI / 2);
+    ctx.strokeStyle = '#666'; ctx.stroke();
+    ctx.fillStyle = '#888';
+    ctx.beginPath(); ctx.arc(0, 32, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ccc';
+    ctx.font = 'bold 7px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('74HC164', 51, 21);
+    ctx.font = '5px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('8-Bit SIPO Shift Reg', 51, 28);
+    // Q0..Q7 bit dots (left to right)
+    for (let i = 0; i < 8; i++) {
+      const bitOn = !!state[`Q${i}`];
+      const lx = 8 + i * 14;
+      ctx.fillStyle = bitOn ? '#33ff66' : '#334433';
+      ctx.beginPath(); ctx.arc(lx, 34, 2, 0, Math.PI * 2); ctx.fill();
+      if (bitOn) {
+        ctx.shadowColor = '#33ff66'; ctx.shadowBlur = 3;
+        ctx.beginPath(); ctx.arc(lx, 34, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+    if (inst.selected) drawSelectionRect(ctx, -10, -4, 123, 58);
+    ctx.restore();
+  }
+});
+
+/* ══════════════════════════════════════════════════════════
+   74HC4017 — Johnson Decade Counter (16-pin DIP)
+
+   Real pinout:
+   Pin 1: Q5     Pin 9:  Q8
+   Pin 2: Q1     Pin 10: Q4
+   Pin 3: Q0     Pin 11: Q9
+   Pin 4: Q2     Pin 12: Q5-9 (carry, active LOW)
+   Pin 5: Q6     Pin 13: CP1 (falling-edge clock)
+   Pin 6: Q7     Pin 14: CP0 (rising-edge clock)
+   Pin 7: Q3     Pin 15: MR (Master Reset, active HIGH)
+   Pin 8: GND    Pin 16: VCC
+   ══════════════════════════════════════════════════════════ */
+defComp({
+  id: 'ic_74hc4017',
+  name: '74HC4017 Decade Ctr',
+  category: 'Digital ICs',
+  icon: '⮗',
+  desc: 'Johnson decade counter — 10 decoded one-hot outputs with clock inhibit and carry',
+  width: 136,
+  height: 50,
+  defaultProps: {},
+  pins: [
+    /* Bottom row (pins 1-8, left to right) */
+    { id: 'Q5', label: 'Q5', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+    { id: 'Q1', label: 'Q1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+    { id: 'Q0', label: 'Q0', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+    { id: 'Q2', label: 'Q2', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+    { id: 'Q6', label: 'Q6', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+    { id: 'Q7', label: 'Q7', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+    { id: 'Q3', label: 'Q3', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+    { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+    /* Top row (pins 16-9, left to right) */
+    { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+    { id: 'MR', label: 'MR', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+    { id: 'CP0', label: 'CP0', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+    { id: 'CP1', label: 'CP1', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+    { id: 'Q59', label: 'Q5-9', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+    { id: 'Q9', label: 'Q9', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+    { id: 'Q4', label: 'Q4', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    { id: 'Q8', label: 'Q8', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const state = inst.runtimeState || {};
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.strokeStyle = '#888'; ctx.lineWidth = 1.5;
+    for (let i = 0; i <= 7; i++) {
+      const px = i * 17;
+      ctx.beginPath(); ctx.moveTo(px, 40); ctx.lineTo(px, 50); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px, 10); ctx.lineTo(px, 0); ctx.stroke();
+    }
+    ctx.fillStyle = '#1a1a1a';
+    roundRect(ctx, -6, 10, 131, 30, 3); ctx.fill();
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(-6, 25, 4, -Math.PI / 2, Math.PI / 2);
+    ctx.strokeStyle = '#666'; ctx.stroke();
+    ctx.fillStyle = '#888';
+    ctx.beginPath(); ctx.arc(0, 32, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ccc';
+    ctx.font = 'bold 7px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('74HC4017', 59, 21);
+    ctx.font = '5px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('Decade Counter', 59, 28);
+    // One-hot dots Q0..Q9 (left to right)
+    for (let i = 0; i < 10; i++) {
+      const bitOn = !!state[`Q${i}`];
+      const lx = 9 + i * 13;
+      ctx.fillStyle = bitOn ? '#33ff66' : '#334433';
+      ctx.beginPath(); ctx.arc(lx, 34, 2, 0, Math.PI * 2); ctx.fill();
+      if (bitOn) {
+        ctx.shadowColor = '#33ff66'; ctx.shadowBlur = 3;
+        ctx.beginPath(); ctx.arc(lx, 34, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+    if (inst.selected) drawSelectionRect(ctx, -10, -4, 140, 58);
+    ctx.restore();
+  }
+});
+
 /* ══════════════ CLASS-BASED IC COMPONENTS ══════════════ */
 
 class IC74HC00Component extends Component {
@@ -1991,6 +2493,344 @@ class IC74HC148Component extends Component {
   }
 }
 
+class IC74HC02Component extends Component {
+  getPins() {
+    return [
+      { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const gates = [['Y1', 'A1', 'B1'], ['Y2', 'A2', 'B2'], ['Y3', 'A3', 'B3'], ['Y4', 'A4', 'B4']];
+    for (const [y, a, b] of gates) {
+      const outVal = (read(a) | read(b)) ? 0 : 1;
+      this.runtimeState[y] = outVal ? 255 : 0;
+      const pn = this.getConnectedPinNum(y);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = outVal ? 255 : 0;
+    }
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
+class IC74HC86Component extends Component {
+  getPins() {
+    return [
+      { id: 'A1', label: '1A', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'B1', label: '1B', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'A2', label: '2A', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'B2', label: '2B', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'B4', label: '4B', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'A4', label: '4A', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'Y4', label: '4Y', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'B3', label: '3B', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'A3', label: '3A', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'Y3', label: '3Y', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const gates = [['A1', 'B1', 'Y1'], ['A2', 'B2', 'Y2'], ['A3', 'B3', 'Y3'], ['A4', 'B4', 'Y4']];
+    for (const [a, b, y] of gates) {
+      const outVal = read(a) ^ read(b);
+      this.runtimeState[y] = outVal ? 255 : 0;
+      const pn = this.getConnectedPinNum(y);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = outVal ? 255 : 0;
+    }
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
+class IC74HC139Component extends Component {
+  getPins() {
+    return [
+      { id: 'E1', label: "1E'", type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'A0_1', label: '1A0', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'A1_1', label: '1A1', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'Y0_1', label: '1Y0', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'Y1_1', label: '1Y1', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'Y2_1', label: '1Y2', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'Y3_1', label: '1Y3', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'E2', label: "2E'", type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'A0_2', label: '2A0', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'A1_2', label: '2A1', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'Y0_2', label: '2Y0', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'Y1_2', label: '2Y1', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'Y2_2', label: '2Y2', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'Y3_2', label: '2Y3', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const write = (id, val) => {
+      const pn = this.getConnectedPinNum(id);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = val ? 255 : 0;
+    };
+    const units = [
+      { en: 'E1', a0: 'A0_1', a1: 'A1_1', ys: ['Y0_1', 'Y1_1', 'Y2_1', 'Y3_1'] },
+      { en: 'E2', a0: 'A0_2', a1: 'A1_2', ys: ['Y0_2', 'Y1_2', 'Y2_2', 'Y3_2'] },
+    ];
+    for (const u of units) {
+      const enabled = read(u.en) === 0;
+      const sel = (read(u.a1) << 1) | read(u.a0);
+      u.ys.forEach((y, i) => {
+        const val = enabled && i === sel ? 0 : 1; // active-LOW outputs
+        this.runtimeState[y] = val ? 255 : 0;
+        write(y, val);
+      });
+    }
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
+class IC74HC153Component extends Component {
+  getPins() {
+    return [
+      { id: 'E1', label: "1E'", type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'S1', label: 'S1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'I3_1', label: '1I3', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'I2_1', label: '1I2', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'I1_1', label: '1I1', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'I0_1', label: '1I0', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'Y1', label: '1Y', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'E2', label: "2E'", type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'S0', label: 'S0', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'I3_2', label: '2I3', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'I2_2', label: '2I2', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'I1_2', label: '2I1', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'I0_2', label: '2I0', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'Y2', label: '2Y', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const write = (id, val) => {
+      const pn = this.getConnectedPinNum(id);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = val ? 255 : 0;
+    };
+    const s0 = read('S0');
+    const s1 = read('S1');
+    const sel = (s1 << 1) | s0;
+    this.runtimeState.S0 = s0 ? 255 : 0;
+    this.runtimeState.S1 = s1 ? 255 : 0;
+    const units = [
+      { en: 'E1', ins: ['I0_1', 'I1_1', 'I2_1', 'I3_1'], y: 'Y1' },
+      { en: 'E2', ins: ['I0_2', 'I1_2', 'I2_2', 'I3_2'], y: 'Y2' },
+    ];
+    for (const u of units) {
+      const val = read(u.en) === 0 ? read(u.ins[sel]) : 0;
+      this.runtimeState[u.y] = val ? 255 : 0;
+      write(u.y, val);
+    }
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
+class IC74HC164Component extends Component {
+  getPins() {
+    return [
+      { id: 'DSA', label: 'DSA', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'DSB', label: 'DSB', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'Q0', label: 'Q0', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'Q1', label: 'Q1', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'Q2', label: 'Q2', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'Q3', label: 'Q3', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 102, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'Q7', label: 'Q7', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'Q6', label: 'Q6', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'Q5', label: 'Q5', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'Q4', label: 'Q4', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'MR', label: '/MR', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'CP', label: 'CP', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const write = (id, val) => {
+      const pn = this.getConnectedPinNum(id);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = val ? 255 : 0;
+    };
+    if (this.runtimeState._reg === undefined) { this.runtimeState._reg = 0; this.runtimeState._lastCP = 0; }
+    const cp = read('CP');
+    const mr = read('MR');
+    if (mr === 0) {
+      this.runtimeState._reg = 0; // async master reset (active LOW)
+    } else if (cp === 1 && this.runtimeState._lastCP === 0) {
+      const d = read('DSA') & read('DSB'); // serial inputs are ANDed
+      this.runtimeState._reg = ((this.runtimeState._reg << 1) | d) & 0xFF;
+    }
+    this.runtimeState._lastCP = cp;
+    const reg = this.runtimeState._reg;
+    this.runtimeState.bits = reg;
+    for (let i = 0; i < 8; i++) {
+      const b = (reg >> i) & 1;
+      this.runtimeState[`Q${i}`] = b ? 255 : 0;
+      write(`Q${i}`, b);
+    }
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
+class IC74HC4017Component extends Component {
+  getPins() {
+    return [
+      { id: 'Q5', label: 'Q5', type: PIN_TYPE.DIGITAL, x: 0, y: 50, side: 'bottom' },
+      { id: 'Q1', label: 'Q1', type: PIN_TYPE.DIGITAL, x: 17, y: 50, side: 'bottom' },
+      { id: 'Q0', label: 'Q0', type: PIN_TYPE.DIGITAL, x: 34, y: 50, side: 'bottom' },
+      { id: 'Q2', label: 'Q2', type: PIN_TYPE.DIGITAL, x: 51, y: 50, side: 'bottom' },
+      { id: 'Q6', label: 'Q6', type: PIN_TYPE.DIGITAL, x: 68, y: 50, side: 'bottom' },
+      { id: 'Q7', label: 'Q7', type: PIN_TYPE.DIGITAL, x: 85, y: 50, side: 'bottom' },
+      { id: 'Q3', label: 'Q3', type: PIN_TYPE.DIGITAL, x: 102, y: 50, side: 'bottom' },
+      { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 119, y: 50, side: 'bottom' },
+      { id: 'VCC', label: 'VCC', type: PIN_TYPE.POWER, x: 0, y: 0, side: 'top' },
+      { id: 'MR', label: 'MR', type: PIN_TYPE.DIGITAL, x: 17, y: 0, side: 'top' },
+      { id: 'CP0', label: 'CP0', type: PIN_TYPE.DIGITAL, x: 34, y: 0, side: 'top' },
+      { id: 'CP1', label: 'CP1', type: PIN_TYPE.DIGITAL, x: 51, y: 0, side: 'top' },
+      { id: 'Q59', label: 'Q5-9', type: PIN_TYPE.DIGITAL, x: 68, y: 0, side: 'top' },
+      { id: 'Q9', label: 'Q9', type: PIN_TYPE.DIGITAL, x: 85, y: 0, side: 'top' },
+      { id: 'Q4', label: 'Q4', type: PIN_TYPE.DIGITAL, x: 102, y: 0, side: 'top' },
+      { id: 'Q8', label: 'Q8', type: PIN_TYPE.DIGITAL, x: 119, y: 0, side: 'top' },
+    ];
+  }
+  update(canvas) {
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.pinStates) return;
+    const read = (id) => this._readDigitalInput(id);
+    const write = (id, val) => {
+      const pn = this.getConnectedPinNum(id);
+      if (pn !== null) sim.pinStates[`pin_${pn}`] = val ? 255 : 0;
+    };
+    if (this.runtimeState._count === undefined) {
+      this.runtimeState._count = 0;
+      this.runtimeState._lastCP0 = 0;
+      this.runtimeState._lastCP1 = 0;
+    }
+    const mr = read('MR');
+    const cp0 = read('CP0');
+    const cp1 = read('CP1');
+    if (mr === 1) {
+      this.runtimeState._count = 0; // async master reset (active HIGH)
+    } else if (cp0 === 1 && this.runtimeState._lastCP0 === 0 && cp1 === 0) {
+      // LOW-to-HIGH transition at CP0 while CP1 is LOW
+      this.runtimeState._count = (this.runtimeState._count + 1) % 10;
+    } else if (cp1 === 0 && this.runtimeState._lastCP1 === 1 && cp0 === 1) {
+      // HIGH-to-LOW transition at CP1 while CP0 is HIGH
+      this.runtimeState._count = (this.runtimeState._count + 1) % 10;
+    }
+    this.runtimeState._lastCP0 = cp0;
+    this.runtimeState._lastCP1 = cp1;
+    const count = this.runtimeState._count;
+    this.runtimeState.count = count;
+    for (let i = 0; i < 10; i++) {
+      const on = count === i ? 1 : 0;
+      this.runtimeState[`Q${i}`] = on ? 255 : 0;
+      write(`Q${i}`, on);
+    }
+    // Q5-9 carry output: LOW while counter is in states 5-9
+    const carry = count < 5 ? 1 : 0;
+    this.runtimeState.Q59 = carry ? 255 : 0;
+    write('Q59', carry);
+  }
+  _readDigitalInput(pinId) {
+    const pn = this.getConnectedPinNum(pinId);
+    if (pn !== null) {
+      const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
+      return val > 128 ? 1 : 0;
+    }
+    const sim = window.ArduinoSim;
+    if (sim && typeof sim.getPinVoltage === 'function') {
+      return sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+    }
+    return 0;
+  }
+}
+
 registerComponent('ic_74hc00', IC74HC00Component);
 registerComponent('ic_74hc04', IC74HC04Component);
 registerComponent('ic_74hc08', IC74HC08Component);
@@ -2003,3 +2843,9 @@ registerComponent('ic_74hc165', IC74HC165Component);
 registerComponent('ic_74hc193', IC74HC193Component);
 registerComponent('ic_74hc47', IC74HC47Component);
 registerComponent('ic_74hc148', IC74HC148Component);
+registerComponent('ic_74hc02', IC74HC02Component);
+registerComponent('ic_74hc86', IC74HC86Component);
+registerComponent('ic_74hc139', IC74HC139Component);
+registerComponent('ic_74hc153', IC74HC153Component);
+registerComponent('ic_74hc164', IC74HC164Component);
+registerComponent('ic_74hc4017', IC74HC4017Component);
