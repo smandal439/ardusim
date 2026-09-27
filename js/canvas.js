@@ -4,7 +4,7 @@
 
 'use strict'; 
 
-/* â”€â”€ Hoisted IC output-pin tables (used by _readDigitalInput / _readAnalogInput) â”€â”€ */
+/* ---- Hoisted IC output-pin tables (used by _readDigitalInput / _readAnalogInput) ---- */
 const IC_OUTPUT_MAP = {
   ic_555: { pins: ['OUT'], activeLow: [] },
   ic_74hc00: { pins: ['Y1', 'Y2', 'Y3', 'Y4'], activeLow: [] },
