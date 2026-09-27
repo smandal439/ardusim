@@ -1,0 +1,255 @@
+{
+  "id": "4_20ma_transmitter_and_receiver",
+  "name": "4 20mA Transmitter and Receiver",
+  "icon": "🔧",
+  "desc": "A custom 4 20mA Transmitter and Receiver circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790502052906_z3k20",
+        "type": "v_to_i_420ma",
+        "x": 145,
+        "y": -50,
+        "rotation": 0,
+        "props": {
+          "vin": 0
+        }
+      },
+      {
+        "id": "comp_1790502057706_jppfc",
+        "type": "multimeter",
+        "x": 425,
+        "y": -140,
+        "rotation": 0,
+        "props": {
+          "mode": "A_DC",
+          "hold": false,
+          "rel": false,
+          "range_auto": true
+        }
+      },
+      {
+        "id": "comp_1790502076455_g5oth",
+        "type": "resistor",
+        "x": 370,
+        "y": -50,
+        "rotation": 1,
+        "props": {
+          "value": 330,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "comp_1790502275384_asl9k",
+        "type": "arduino_uno",
+        "x": -135,
+        "y": 25,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "comp_1790504856863_56y7i",
+        "type": "i_to_v_420ma",
+        "x": 165,
+        "y": 150,
+        "rotation": 0,
+        "props": {
+          "loopCurrent": 12
+        }
+      },
+      {
+        "id": "multimeter_1790504867638_0ss4z",
+        "type": "multimeter",
+        "x": 380,
+        "y": 110,
+        "rotation": 0,
+        "props": {
+          "mode": "V_DC",
+          "hold": false,
+          "rel": false,
+          "range_auto": true
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1790502283368_qaoii",
+        "from": {
+          "instId": "comp_1790502275384_asl9k",
+          "pinId": "D11"
+        },
+        "to": {
+          "instId": "comp_1790502052906_z3k20",
+          "pinId": "VIN"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790502287802_6v0bu",
+        "from": {
+          "instId": "comp_1790502275384_asl9k",
+          "pinId": "GND2"
+        },
+        "to": {
+          "instId": "comp_1790502052906_z3k20",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790504708042_dncsl",
+        "from": {
+          "instId": "comp_1790502076455_g5oth",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1790502057706_jppfc",
+          "pinId": "probe_red"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790504874345_s3340",
+        "from": {
+          "instId": "comp_1790504856863_56y7i",
+          "pinId": "VOUT"
+        },
+        "to": {
+          "instId": "multimeter_1790504867638_0ss4z",
+          "pinId": "probe_red"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790504876556_lhaat",
+        "from": {
+          "instId": "comp_1790504856863_56y7i",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "multimeter_1790504867638_0ss4z",
+          "pinId": "probe_com"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790504879905_8q6ub",
+        "from": {
+          "instId": "comp_1790502052906_z3k20",
+          "pinId": "OUT+"
+        },
+        "to": {
+          "instId": "comp_1790504856863_56y7i",
+          "pinId": "IIN+"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 315,
+            "y": -18
+          },
+          {
+            "x": 315,
+            "y": 242
+          },
+          {
+            "x": 141,
+            "y": 242
+          },
+          {
+            "x": 141,
+            "y": 182
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790504882785_7x8mz",
+        "from": {
+          "instId": "comp_1790502052906_z3k20",
+          "pinId": "OUT-"
+        },
+        "to": {
+          "instId": "comp_1790504856863_56y7i",
+          "pinId": "IIN-"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 280,
+            "y": 2
+          },
+          {
+            "x": 280,
+            "y": 262
+          },
+          {
+            "x": 141,
+            "y": 262
+          },
+          {
+            "x": 141,
+            "y": 202
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790505167233_recjs",
+        "from": {
+          "instId": "comp_1790502052906_z3k20",
+          "pinId": "OUT+"
+        },
+        "to": {
+          "instId": "comp_1790502076455_g5oth",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790505199778_ffa7y",
+        "from": {
+          "instId": "comp_1790502057706_jppfc",
+          "pinId": "probe_com"
+        },
+        "to": {
+          "instId": "comp_1790502052906_z3k20",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "void setup() {\n\n}\n\nvoid loop() {\n  for (int i = 0; i < 255; i++) {\n    analogWrite(11, i);\n    delay(50);\n  }\nfor (int i = 255; i>=0; i--) {\n    analogWrite(11, i);\n    delay(50);\n  }\n}"
+  }
+}
