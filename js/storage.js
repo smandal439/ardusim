@@ -491,7 +491,31 @@ const StorageManager = {
     try {
       const raw = decodeURIComponent(escape(atob(encoded)));
       const project = JSON.parse(raw);
-      return this._migrateProject(project);
+      const migrated = this._migrateProject(project);
+      if (!migrated || typeof migrated !== 'object') return null;
+
+      const files = migrated.files;
+      const hasFiles = files && typeof files === 'object';
+      const hasBoard2Code = typeof migrated.board2Code === 'string' && migrated.board2Code.trim().length > 0;
+      const hasExecutableCode = hasFiles || hasBoard2Code;
+
+      // Shared URL content is untrusted by default. Only allow executable code
+      // when the URL explicitly marks the payload as trusted.
+      const trusted = params.get('trusted') === '1';
+      if (hasExecutableCode && !trusted) return null;
+
+      // Basic size/type guards for loaded code payloads
+      if (hasFiles) {
+        const names = Object.keys(files);
+        if (names.length > 200) return null;
+        for (const name of names) {
+          if (typeof files[name] !== 'string') return null;
+          if (files[name].length > 100_000) return null;
+        }
+      }
+      if (migrated.board2Code && migrated.board2Code.length > 100_000) return null;
+
+      return migrated;
     } catch (e) { return null; }
   },
 
