@@ -4386,7 +4386,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* â”€â”€ Dual Channel Function Generator — outputs voltage waveforms â”€â”€ */
+        /* ------ Dual Channel Function Generator — outputs voltage waveforms ------ */
         case 'func_gen': {
           const props = inst.props || {};
           const sim = window.ArduinoSim;
@@ -4438,7 +4438,7 @@ class CircuitCanvas {
           break;
         }
 
-        /* â”€â”€ MAX7219 — SPI bit-bang decoder â”€â”€ */
+        /* ------ MAX7219 — SPI bit-bang decoder ------ */
         case 'max7219': {
           const sim = window.ArduinoSim;
           if (!sim || !sim.pinStates) break;
