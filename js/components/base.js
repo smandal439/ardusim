@@ -151,6 +151,13 @@ class Component {
     return { sources: [], grounds: [] };
   }
 
+  /** Forced logic level (0/1) from the properties-panel input tag, or null when not forced. */
+  getForcedLevel(pinId) {
+    const fi = this.props && this.props.forcedInputs;
+    if (!fi || fi[pinId] === undefined) return null;
+    return fi[pinId] ? 1 : 0;
+  }
+
   /** Read pin state from the simulator. */
   readPin(pinId) {
     const pinNum = this.getConnectedPinNum(pinId);

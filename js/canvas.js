@@ -57,6 +57,28 @@ const IC_OUTPUT_PIN_LIST = {
   lm741: ['OUT'],
 };
 
+/* Classify an IC's pins into logic-level tag groups for the properties panel.
+   Returns { inputs, outputs } (digital pins only) or null when the type has no
+   IC output table / nothing taggable. Inputs are only forceable when the IC has
+   a class-based update() that honours props.forcedInputs. */
+function classifyICTags(type, pins) {
+  const spec = typeof IC_OUTPUT_MAP !== 'undefined' ? IC_OUTPUT_MAP[type] : null;
+  if (!spec) return null;
+  const ac = window.ArduinoComponents;
+  const hasClass = !!(ac && typeof ac.getComponentClass === 'function' && ac.getComponentClass(type));
+  const outSet = new Set(spec.pins);
+  const inputs = [];
+  const outputs = [];
+  for (const p of (pins || [])) {
+    if (p.type !== 'digital') continue;
+    if (outSet.has(p.id)) outputs.push(p.id);
+    else if (hasClass) inputs.push(p.id);
+  }
+  if (!inputs.length && !outputs.length) return null;
+  return { inputs, outputs };
+}
+window.classifyICTags = classifyICTags;
+
 class CircuitCanvas {
   constructor(canvasEl, wrapperEl) {
     this.canvas = canvasEl;
@@ -5315,11 +5337,23 @@ class CircuitCanvas {
   //   }
   //   return 0;
   // }
+  /* Forced logic level set by the properties-panel input tag (props.forcedInputs). */
+  _getForcedLevel(instId, pinId) {
+    const c = this.components.find(x => x.id === instId);
+    const fi = c && c.props && c.props.forcedInputs;
+    if (!fi || fi[pinId] === undefined) return null;
+    return fi[pinId] ? 1 : 0;
+  }
+
   _readDigitalInput(fromInstId, pinId, visited = new Set()) {
     // Prevent infinite recursion loops across connected components
     const visitKey = `${fromInstId}:${pinId}`;
     if (visited.has(visitKey)) return 0;
     visited.add(visitKey);
+
+    // Panel input tag force overrides any wiring
+    const forced = this._getForcedLevel(fromInstId, pinId);
+    if (forced !== null) return forced;
 
     const wireTarget = this._getWireTarget(fromInstId, pinId);
     if (!wireTarget) return 0;
@@ -5401,6 +5435,7 @@ class CircuitCanvas {
     const visitKey = `${fromInstId}:${pinId}`;
     if (visited.has(visitKey)) return false;
     visited.add(visitKey);
+    if (this._getForcedLevel(fromInstId, pinId) !== null) return true;
     const wireTarget = this._getWireTarget(fromInstId, pinId);
     if (!wireTarget) return false;
     const other = wireTarget.inst;

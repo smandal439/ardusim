@@ -1776,6 +1776,8 @@ class IC74HC00Component extends Component {
     }
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -1821,6 +1823,8 @@ class IC74HC04Component extends Component {
     }
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -1866,6 +1870,8 @@ class IC74HC08Component extends Component {
     }
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -1911,6 +1917,8 @@ class IC74HC32Component extends Component {
     }
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -1997,6 +2005,8 @@ class IC74HC595Component extends Component {
     write('QHn', q7nVal);
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2051,6 +2061,8 @@ class IC74HC138Component extends Component {
     this.runtimeState.activeOutput = enabled ? addr : -1;
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2126,6 +2138,8 @@ class IC74HC245Component extends Component {
     }
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2182,7 +2196,8 @@ class IC74HC74Component extends Component {
     }
     this.runtimeState._lastCLK1 = clk1;
     write('Q1', this.runtimeState.Q1);
-    write('Q1n', this.runtimeState.Q1 ? 0 : 1);
+    this.runtimeState.Q1n = this.runtimeState.Q1 ? 0 : 1;
+    write('Q1n', this.runtimeState.Q1n);
 
     const clr2 = read('CLR2'), pre2 = read('PRE2');
     const clk2 = read('CLK2'), d2 = read('D2');
@@ -2195,9 +2210,12 @@ class IC74HC74Component extends Component {
     }
     this.runtimeState._lastCLK2 = clk2;
     write('Q2', this.runtimeState.Q2);
-    write('Q2n', this.runtimeState.Q2 ? 0 : 1);
+    this.runtimeState.Q2n = this.runtimeState.Q2 ? 0 : 1;
+    write('Q2n', this.runtimeState.Q2n);
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2259,10 +2277,15 @@ class IC74HC165Component extends Component {
       this.runtimeState.bits = ((this.runtimeState.bits << 1) | ser) & 0xFF;
     }
     this.runtimeState._lastCLK165 = clk;
-    write('Q7', (this.runtimeState.bits >> 7) & 1);
-    write('Q7n', (this.runtimeState.bits >> 7) & 1 ? 0 : 1);
+    const q7 = (this.runtimeState.bits >> 7) & 1;
+    this.runtimeState.Q7 = q7;
+    this.runtimeState.Q7n = q7 ? 0 : 1;
+    write('Q7', this.runtimeState.Q7);
+    write('Q7n', this.runtimeState.Q7n);
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2334,14 +2357,24 @@ class IC74HC193Component extends Component {
     this.runtimeState._lastCPU = cpu;
     this.runtimeState._lastCPD = cpd;
     const c = this.runtimeState.count;
-    write('QA', c & 1);
-    write('QB', (c >> 1) & 1);
-    write('CO', (c === 0xF) ? 0 : 1);
-    write('BO', (c === 0x0) ? 0 : 1);
+    this.runtimeState.QA = c & 1;
+    this.runtimeState.QB = (c >> 1) & 1;
+    this.runtimeState.QC = (c >> 2) & 1;
+    this.runtimeState.QD = (c >> 3) & 1;
+    this.runtimeState.CO = (c === 0xF) ? 0 : 1;
+    this.runtimeState.BO = (c === 0x0) ? 0 : 1;
+    write('QA', this.runtimeState.QA);
+    write('QB', this.runtimeState.QB);
+    write('QC', this.runtimeState.QC);
+    write('QD', this.runtimeState.QD);
+    write('CO', this.runtimeState.CO);
+    write('BO', this.runtimeState.BO);
     write('TC_U', c === 0xF ? 1 : 0);
     write('TC_D', c === 0x0 ? 1 : 0);
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2402,15 +2435,24 @@ class IC74HC47Component extends Component {
       segments = segTable[bcd] || 0x7F;
     }
     this.runtimeState.segments = segments;
-    write('a', (segments & 0x01) ? 0 : 1);
-    write('b', (segments & 0x02) ? 0 : 1);
-    write('c', (segments & 0x04) ? 0 : 1);
-    write('d', (segments & 0x08) ? 0 : 1);
-    write('e', (segments & 0x10) ? 0 : 1);
-    write('f', (segments & 0x20) ? 0 : 1);
-    write('g', (segments & 0x40) ? 0 : 1);
+    this.runtimeState.a = (segments & 0x01) ? 0 : 1;
+    this.runtimeState.b = (segments & 0x02) ? 0 : 1;
+    this.runtimeState.c = (segments & 0x04) ? 0 : 1;
+    this.runtimeState.d = (segments & 0x08) ? 0 : 1;
+    this.runtimeState.e = (segments & 0x10) ? 0 : 1;
+    this.runtimeState.f = (segments & 0x20) ? 0 : 1;
+    this.runtimeState.g = (segments & 0x40) ? 0 : 1;
+    write('a', this.runtimeState.a);
+    write('b', this.runtimeState.b);
+    write('c', this.runtimeState.c);
+    write('d', this.runtimeState.d);
+    write('e', this.runtimeState.e);
+    write('f', this.runtimeState.f);
+    write('g', this.runtimeState.g);
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2461,25 +2503,34 @@ class IC74HC148Component extends Component {
     }
     const anyActive = activeIdx >= 0;
     if (ei === 1) {
-      write('A0', 0); write('A1', 0); write('A2', 0);
-      write('GS', 0); write('EO', 0);
+      this.runtimeState.A0 = 0; this.runtimeState.A1 = 0; this.runtimeState.A2 = 0;
+      this.runtimeState.GS = 0; this.runtimeState.EO = 0;
+      write('A0', this.runtimeState.A0); write('A1', this.runtimeState.A1); write('A2', this.runtimeState.A2);
+      write('GS', this.runtimeState.GS); write('EO', this.runtimeState.EO);
       this.runtimeState.code = null;
     } else {
       if (anyActive) {
-        write('A0', activeIdx & 1);
-        write('A1', (activeIdx >> 1) & 1);
-        write('A2', (activeIdx >> 2) & 1);
-        write('GS', 1);
-        write('EO', 0);
+        this.runtimeState.A0 = activeIdx & 1;
+        this.runtimeState.A1 = (activeIdx >> 1) & 1;
+        this.runtimeState.A2 = (activeIdx >> 2) & 1;
+        this.runtimeState.GS = 1;
+        this.runtimeState.EO = 0;
       } else {
-        write('A0', 1); write('A1', 1); write('A2', 1);
-        write('GS', 0);
-        write('EO', 1);
+        this.runtimeState.A0 = 1; this.runtimeState.A1 = 1; this.runtimeState.A2 = 1;
+        this.runtimeState.GS = 0;
+        this.runtimeState.EO = 1;
       }
+      write('A0', this.runtimeState.A0);
+      write('A1', this.runtimeState.A1);
+      write('A2', this.runtimeState.A2);
+      write('GS', this.runtimeState.GS);
+      write('EO', this.runtimeState.EO);
       this.runtimeState.code = anyActive ? activeIdx : null;
     }
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2525,6 +2576,8 @@ class IC74HC02Component extends Component {
     }
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2570,6 +2623,8 @@ class IC74HC86Component extends Component {
     }
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2627,6 +2682,8 @@ class IC74HC139Component extends Component {
     }
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2685,6 +2742,8 @@ class IC74HC153Component extends Component {
     }
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2744,6 +2803,8 @@ class IC74HC164Component extends Component {
     }
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;
@@ -2818,6 +2879,8 @@ class IC74HC4017Component extends Component {
     write('Q59', carry);
   }
   _readDigitalInput(pinId) {
+    const forced = this.getForcedLevel(pinId);
+    if (forced !== null) return forced;
     const pn = this.getConnectedPinNum(pinId);
     if (pn !== null) {
       const val = window.ArduinoSim?.pinStates?.[`pin_${pn}`] || 0;

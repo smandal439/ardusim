@@ -257,6 +257,7 @@ describe('canvas _readDigitalInput / _hasDigitalInputSource through breadboard',
     const stub = makeCanvas(components, wires);
     stub._readDigitalInput = proto._readDigitalInput.bind(stub);
     stub._hasDigitalInputSource = proto._hasDigitalInputSource.bind(stub);
+    stub._getForcedLevel = proto._getForcedLevel.bind(stub);
     return stub;
   }
 

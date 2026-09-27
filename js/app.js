@@ -3452,12 +3452,20 @@ _newProject() {
     // Description header block
     const infoBlock = document.createElement('div');
     infoBlock.className = 'props-info';
+    const icTags = window.classifyICTags ? window.classifyICTags(comp.type, (def && def.pins) || []) : null;
     const pinsPreview = (def && def.pins && def.pins.length)
       ? def.pins.map(p => {
           const pinInfo = pinDescs[p.id] || {};
           const label = pinInfo.label || p.label || p.id;
           const tip = pinInfo.desc || '';
           const typeMap = { digital: 'Digital', analog: 'Analog', power: 'Power', gnd: 'GND', pwm: 'PWM', signal: 'Signal' };
+          if (icTags && p.type === 'digital') {
+            const isOut = icTags.outputs.includes(p.id);
+            const lvl = isOut ? this._icLvlOut(comp, p.id) : this._icLvlIn(comp, p.id);
+            const forced = !isOut && !!(comp.props.forcedInputs && comp.props.forcedInputs[p.id] !== undefined);
+            const hint = isOut ? ' — output level' : ' — click to force 0/1, right-click to release';
+            return `<span class="props-pin props-pin-lvl" title="${esc(tip + hint)}"><code>${esc(label)}</code><b class="lvl-tag lvl-${isOut ? 'out' : 'in'}${lvl ? ' lvl-hi' : ' lvl-lo'}${forced ? ' lvl-forced' : ''}" data-lvl-pin="${esc(p.id)}" data-lvl-kind="${isOut ? 'out' : 'in'}">${lvl}</b></span>`;
+          }
           return `<span class="props-pin" title="${esc(tip)}"><code>${esc(label)}</code><i>${esc(typeMap[p.type] || p.type)}</i></span>`;
         }).join('')
       : '';
@@ -3495,6 +3503,7 @@ _newProject() {
 
     Object.entries(comp.props || {}).forEach(([key, value]) => {
       if (key === 'colorName') return; // derived from the colour select — never editable
+      if (key === 'forcedInputs') return; // logic-level input tag state, not an editable field
 
       // Handle interactive select controls
       const iDef = interactiveDefs[key];
@@ -3574,9 +3583,75 @@ _newProject() {
       window.GuideManager?.open('components');
     });
 
+    // Logic-level tags: click an input tag to force 0/1, right-click to release
+    infoBlock.addEventListener('click', (e) => {
+      const chip = e.target && e.target.closest ? e.target.closest('.props-pin-lvl') : null;
+      const tag = chip && chip.querySelector('.lvl-tag');
+      if (!tag || tag.getAttribute('data-lvl-kind') !== 'in') return;
+      const pinId = tag.getAttribute('data-lvl-pin');
+      if (!pinId) return;
+      if (!comp.props) comp.props = {};
+      if (!comp.props.forcedInputs) comp.props.forcedInputs = {};
+      comp.props.forcedInputs[pinId] = this._icLvlIn(comp, pinId) ? 0 : 1;
+      this._refreshIcLvlTags();
+      this.canvas?._onChanged?.();
+    });
+    infoBlock.addEventListener('contextmenu', (e) => {
+      const chip = e.target && e.target.closest ? e.target.closest('.props-pin-lvl') : null;
+      const tag = chip && chip.querySelector('.lvl-tag');
+      if (!tag || tag.getAttribute('data-lvl-kind') !== 'in') return;
+      e.preventDefault();
+      const pinId = tag.getAttribute('data-lvl-pin');
+      if (pinId && comp.props && comp.props.forcedInputs && comp.props.forcedInputs[pinId] !== undefined) {
+        delete comp.props.forcedInputs[pinId];
+        this._refreshIcLvlTags();
+        this.canvas?._onChanged?.();
+      }
+    });
+
+    // Keep output tags live while the panel stays open
+    if (this._icLvlTimer) clearInterval(this._icLvlTimer);
+    if (body.querySelector('.lvl-tag')) {
+      this._icLvlTimer = setInterval(() => this._refreshIcLvlTags(), 150);
+    }
+
     document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
     overlay.classList.remove('hidden');
     modal.classList.add('active');
+  }
+
+  /* ---------------- IC LOGIC-LEVEL TAGS (properties panel) ---------------- */
+  _icLvlIn(comp, pinId) {
+    if (this.canvas && typeof this.canvas._readDigitalInput === 'function') {
+      return this.canvas._readDigitalInput(comp.id, pinId) ? 1 : 0;
+    }
+    const fi = comp.props && comp.props.forcedInputs;
+    return fi && fi[pinId] !== undefined ? (fi[pinId] ? 1 : 0) : 0;
+  }
+
+  _icLvlOut(comp, pinId) {
+    const v = comp.runtimeState ? comp.runtimeState[pinId] : undefined;
+    return Number(v) > 0 ? 1 : 0;
+  }
+
+  _refreshIcLvlTags() {
+    const modal = document.getElementById('modal-props');
+    if (!modal || !modal.classList.contains('active') || !this._propsComp) {
+      if (this._icLvlTimer) { clearInterval(this._icLvlTimer); this._icLvlTimer = null; }
+      return;
+    }
+    const comp = this._propsComp;
+    modal.querySelectorAll('.lvl-tag').forEach(tag => {
+      const kind = tag.getAttribute('data-lvl-kind');
+      const pinId = tag.getAttribute('data-lvl-pin');
+      if (!pinId) return;
+      const lvl = kind === 'out' ? this._icLvlOut(comp, pinId) : this._icLvlIn(comp, pinId);
+      tag.textContent = lvl ? '1' : '0';
+      tag.classList.toggle('lvl-hi', !!lvl);
+      tag.classList.toggle('lvl-lo', !lvl);
+      tag.classList.toggle('lvl-forced',
+        kind === 'in' && !!(comp.props.forcedInputs && comp.props.forcedInputs[pinId] !== undefined));
+    });
   }
 
   _applyPropsModal() {
@@ -3613,6 +3688,7 @@ _newProject() {
   }
 
   _closePropsModal() {
+    if (this._icLvlTimer) { clearInterval(this._icLvlTimer); this._icLvlTimer = null; }
     const modal = document.getElementById('modal-props');
     if (modal) modal.classList.remove('active');
     this._propsComp = null;

@@ -2705,6 +2705,10 @@ class ArduinoSimulator {
   getPinVoltage(inst, pinId) {
     if (!window.CircuitCanvas) return 0;
 
+    // Forced logic level from the properties-panel input tag
+    const forcedSelf = inst.props && inst.props.forcedInputs;
+    if (forcedSelf && forcedSelf[pinId] !== undefined) return forcedSelf[pinId] ? 5 : 0;
+
     // 1. Try Arduino/ESP32 board pin lookup
     if (typeof window.CircuitCanvas._getConnectedPinNum === 'function') {
       const pinNum = window.CircuitCanvas._getConnectedPinNum(inst.id, pinId);
@@ -2763,6 +2767,10 @@ class ArduinoSimulator {
         const far = (w.from.instId === id && w.from.pinId === pid) ? w.to : w.from;
         const other = (canvas.components || []).find(c => c.id === far.instId);
         if (!other) continue;
+
+        // Forced logic level on the far component's pin (panel input tag)
+        const forcedFar = other.props && other.props.forcedInputs;
+        if (forcedFar && forcedFar[far.pinId] !== undefined) return forcedFar[far.pinId] ? 5 : 0;
 
         // Breadboard: hop to every hole on the same internal node
         if (other.type === 'breadboard' || other.type === 'breadboard_small') {
