@@ -2833,9 +2833,19 @@ class Bulb12VComponent extends Component {
     ];
   }
   update(canvas) {
-    const source = this.getSource('anode');
-    const hasGnd = this.hasGround('cathode');
-    if (!hasGnd || !source || source.voltage <= 0) {
+    // Incandescent filament is non-polar: a source on either pin with a
+    // ground on the opposite pin lights it (both wiring orientations).
+    const fwdSource = this.getSource('anode');
+    const fwdGnd = this.hasGround('cathode');
+    const revSource = this.getSource('cathode');
+    const revGnd = this.hasGround('anode');
+    let source = null;
+    if (fwdSource && fwdSource.voltage > 0 && fwdGnd) {
+      source = fwdSource;
+    } else if (revSource && revSource.voltage > 0 && revGnd) {
+      source = revSource;
+    }
+    if (!source) {
       this.runtimeState.brightness = 0;
       this.runtimeState.blown = false;
       this.runtimeState._warnedBlown = false;

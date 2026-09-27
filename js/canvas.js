@@ -3065,15 +3065,29 @@ class CircuitCanvas {
           const anodeNet = this._tracePinNet(inst.id, 'anode', ['bulb_12v']);
           const cathodeNet = this._tracePinNet(inst.id, 'cathode', ['bulb_12v']);
 
-          const hasGround = cathodeNet.grounds.length > 0;
-          const bestSource = anodeNet.sources.sort((a, b) => b.voltage - a.voltage)[0] || null;
+          // Incandescent filament is non-polar: it lights when a source sits on
+          // either pin AND a ground on the opposite pin (both orientations).
+          const driveFrom = (srcNet, gndNet) => {
+            if (srcNet.sources.length === 0 || gndNet.grounds.length === 0) return null;
+            return {
+              source: srcNet.sources.slice().sort((a, b) => b.voltage - a.voltage)[0],
+              ground: gndNet.grounds.slice().sort((a, b) => a.resistance - b.resistance)[0],
+            };
+          };
+          let drive = driveFrom(anodeNet, cathodeNet);
+          const reverseDrive = driveFrom(cathodeNet, anodeNet);
+          if (reverseDrive && (!drive || reverseDrive.source.voltage > drive.source.voltage)) {
+            drive = reverseDrive;
+          }
+          const bestSource = drive ? drive.source : null;
+          const bestGround = drive ? drive.ground : null;
+          const hasGround = !!bestGround;
 
           if (!hasGround || !bestSource || bestSource.voltage <= 0) {
             inst.runtimeState.brightness = 0;
             inst.runtimeState.blown = false;
             inst.runtimeState._warnedBlown = false;
           } else {
-            const bestGround = cathodeNet.grounds.sort((a, b) => a.resistance - b.resistance)[0];
             const rTotal = Math.max(1, (bestSource.resistance || 0) + (bestGround.resistance || 0));
             const vSource = bestSource.voltage;
 
@@ -4774,14 +4788,20 @@ class CircuitCanvas {
         });
       }
 
-      // 3b. 12V Bulb internal pass-through (anode -> cathode only, ~12Ω nominal)
-      // Directional: only allows trace in forward current direction (anode←cathode)
-      // to prevent cross-circuit leakage through shared rails
+      // 3b. 12V Bulb internal pass-through (anode ↔ cathode, ~12Ω nominal)
+      // Non-polar filament: trace through it in either direction
+      // (reverse-orientation bulbs must not hide the circuit behind them)
       if (inst.type === 'bulb_12v' && !skipInternalTypes.includes('bulb_12v')) {
         if (current.pinId === 'anode') {
           queue.push({
             instId: inst.id,
             pinId: 'cathode',
+            resistance: current.resistance + 12,
+          });
+        } else if (current.pinId === 'cathode') {
+          queue.push({
+            instId: inst.id,
+            pinId: 'anode',
             resistance: current.resistance + 12,
           });
         }
