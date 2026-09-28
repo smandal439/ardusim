@@ -3112,9 +3112,9 @@ class CircuitCanvas {
   _updateSimStateInner(pinStates) {
     const { getComponentClass } = window.ArduinoComponents;
 
-    // Pre-update relay state so buildGraph uses latest active flag
+    // Pre-update relay / SSR state so buildGraph uses latest active flag
     for (const inst of this.components) {
-      if (inst.type === 'relay') {
+      if (inst.type === 'relay' || inst.type === 'ssr_8ch') {
         const CompClass = getComponentClass(inst.type);
         if (CompClass) {
           if (!inst._componentInstance || inst._componentInstance.type !== inst.type) {
@@ -5084,6 +5084,22 @@ class CircuitCanvas {
         }
       }
 
+      // 4b2. SSR channel pass-through (outNa ↔ outNb when channel N is on)
+      if (inst.type === 'ssr_8ch') {
+        const m = /^out(\d)([ab])$/.exec(current.pinId);
+        if (m) {
+          const chList = (inst.runtimeState && inst.runtimeState.channels) || [];
+          const chOn = !!chList[Number(m[1]) - 1];
+          if (chOn) {
+            queue.push({
+              instId: inst.id,
+              pinId: `out${m[1]}${m[2] === 'a' ? 'b' : 'a'}`,
+              resistance: current.resistance,
+            });
+          }
+        }
+      }
+
       // 4b0. Multimeter pass-through in current mode (jacks commoned, 0Ω)
       if (inst.type === 'multimeter') {
         const mmMode = inst.props?.mode || inst.runtimeState?.mode || 'V_DC';
@@ -5357,6 +5373,11 @@ class CircuitCanvas {
       } else if (inst.type === 'relay') {
         const on = inst.runtimeState && inst.runtimeState.active;
         addEdge(key('com'), key(on ? 'no' : 'nc'), 0);
+      } else if (inst.type === 'ssr_8ch') {
+        const channels = (inst.runtimeState && inst.runtimeState.channels) || [];
+        for (let i = 1; i <= 8; i++) {
+          if (channels[i - 1]) addEdge(key(`out${i}a`), key(`out${i}b`), 0);
+        }
       } else if (inst.type === 'breadboard' || inst.type === 'breadboard_small') {
         const defs = window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS;
         const def = defs && defs[inst.type];

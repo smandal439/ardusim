@@ -765,6 +765,62 @@ void loop(){
     exampleId: 'relay_control',
   },
 
+  ssr_8ch: {
+    id: 'ssr_8ch',
+    name: '5V 8-Channel SSR Module',
+    icon: '🔀',
+    category: 'Actuators',
+    longDesc: 'An opto-isolated solid state relay module with 8 independent channels. Each input (IN1–IN8) drives one isolated two-terminal output pair (A/B) — there are no moving contacts, so switching is silent, bounce-free and essentially unlimited in cycle life. A HIGH on an input (or a LOW, when Trigger is set to low-level) closes that channel’s output pair.',
+    use: 'Switching LEDs, heaters and small DC/AC loads from Arduino pins with full electrical isolation between the control side and each load loop.',
+    pins: {
+      vcc: { label: 'VCC', type: 'power', desc: 'Module power — 5 V.' },
+      gnd: { label: 'GND', type: 'gnd', desc: 'Ground.' },
+      in1: { label: 'IN1', type: 'digital', desc: 'Channel 1 input — switches output pair 1A/1B.' },
+      in2: { label: 'IN2', type: 'digital', desc: 'Channel 2 input — switches output pair 2A/2B.' },
+      in3: { label: 'IN3', type: 'digital', desc: 'Channel 3 input — switches output pair 3A/3B.' },
+      in4: { label: 'IN4', type: 'digital', desc: 'Channel 4 input — switches output pair 4A/4B.' },
+      in5: { label: 'IN5', type: 'digital', desc: 'Channel 5 input — switches output pair 5A/5B.' },
+      in6: { label: 'IN6', type: 'digital', desc: 'Channel 6 input — switches output pair 6A/6B.' },
+      in7: { label: 'IN7', type: 'digital', desc: 'Channel 7 input — switches output pair 7A/7B.' },
+      in8: { label: 'IN8', type: 'digital', desc: 'Channel 8 input — switches output pair 8A/8B.' },
+      out1a: { label: '1A', type: 'signal', desc: 'Channel 1 output — one side of the isolated switch (screw terminal 1).' },
+      out1b: { label: '1B', type: 'signal', desc: 'Channel 1 output — other side of the isolated switch (screw terminal 1).' },
+      out2a: { label: '2A', type: 'signal', desc: 'Channel 2 output — one side of the isolated switch (screw terminal 2).' },
+      out2b: { label: '2B', type: 'signal', desc: 'Channel 2 output — other side of the isolated switch (screw terminal 2).' },
+      out3a: { label: '3A', type: 'signal', desc: 'Channel 3 output — one side of the isolated switch (screw terminal 3).' },
+      out3b: { label: '3B', type: 'signal', desc: 'Channel 3 output — other side of the isolated switch (screw terminal 3).' },
+      out4a: { label: '4A', type: 'signal', desc: 'Channel 4 output — one side of the isolated switch (screw terminal 4).' },
+      out4b: { label: '4B', type: 'signal', desc: 'Channel 4 output — other side of the isolated switch (screw terminal 4).' },
+      out5a: { label: '5A', type: 'signal', desc: 'Channel 5 output — one side of the isolated switch (screw terminal 5).' },
+      out5b: { label: '5B', type: 'signal', desc: 'Channel 5 output — other side of the isolated switch (screw terminal 5).' },
+      out6a: { label: '6A', type: 'signal', desc: 'Channel 6 output — one side of the isolated switch (screw terminal 6).' },
+      out6b: { label: '6B', type: 'signal', desc: 'Channel 6 output — other side of the isolated switch (screw terminal 6).' },
+      out7a: { label: '7A', type: 'signal', desc: 'Channel 7 output — one side of the isolated switch (screw terminal 7).' },
+      out7b: { label: '7B', type: 'signal', desc: 'Channel 7 output — other side of the isolated switch (screw terminal 7).' },
+      out8a: { label: '8A', type: 'signal', desc: 'Channel 8 output — one side of the isolated switch (screw terminal 8).' },
+      out8b: { label: '8B', type: 'signal', desc: 'Channel 8 output — other side of the isolated switch (screw terminal 8).' },
+    },
+    props: {
+      label: 'Module label shown on the canvas.',
+      trigger: 'Trigger level — high-level closes a channel when its input is HIGH, low-level closes it when the input is LOW.',
+    },
+    wiring: 'VCC→5V, GND→GND, IN1..IN8→D2..D9. Each load loop: 5V→220 Ω→LED→outNa, outNb→5V− (the SSR closes that loop when channel N is on).',
+    code: `const int ssrPins[8] = {2, 3, 4, 5, 6, 7, 8, 9};
+
+void setup() {
+  for (int i = 0; i < 8; i++) pinMode(ssrPins[i], OUTPUT);
+}
+
+void loop() {
+  for (int i = 0; i < 8; i++) {
+    digitalWrite(ssrPins[i], HIGH);  // channel on — load loop closed
+    delay(150);
+    digitalWrite(ssrPins[i], LOW);   // channel off
+  }
+}`,
+    exampleId: 'ssr_8ch_chaser',
+  },
+
   /* --- SENSORS --- */
   dht11: {
     id: 'dht11',

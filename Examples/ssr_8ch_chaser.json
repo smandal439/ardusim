@@ -17,24 +17,20 @@
       {
         "id": "b1",
         "type": "arduino_uno",
-        "x": 60,
-        "y": 540,
-        "width": 384.16,
-        "height": 299.04,
+        "x": 50,
+        "y": 420,
+        "rotation": 0,
         "props": {
           "label": "UNO"
         },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "runtimeState": {}
       },
       {
         "id": "ssr1",
         "type": "ssr_8ch",
-        "x": 480,
-        "y": 340,
-        "width": 200,
-        "height": 96,
+        "x": 430,
+        "y": 300,
+        "rotation": 0,
         "props": {
           "label": "SSR-8CH",
           "trigger": "high"
@@ -50,46 +46,37 @@
             false,
             false
           ]
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "batt1",
         "type": "battery",
         "x": 60,
         "y": 60,
-        "width": 271.6,
-        "height": 147.84,
+        "rotation": 0,
         "props": {
-          "voltage": 5
+          "voltage": 3.7
         },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "runtimeState": {}
       },
       {
         "id": "r1",
         "type": "resistor",
-        "x": 442.36,
-        "y": 133.92,
-        "width": 35.28,
-        "height": 112,
+        "x": 436,
+        "y": 40,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Ω"
         },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "runtimeState": {}
       },
       {
         "id": "led1",
         "type": "led",
-        "x": 446,
-        "y": 260,
-        "width": 28,
-        "height": 67.2,
+        "x": 431,
+        "y": 112,
+        "rotation": 0,
         "props": {
           "color": "#ff3333",
           "colorName": "Red"
@@ -98,36 +85,30 @@
           "val": 255,
           "lit": true,
           "brightness": 1,
-          "current_mA": 12.198581560283689,
+          "current_mA": 7.72,
           "overload": false,
           "blown": false,
           "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "r2",
         "type": "resistor",
-        "x": 492.36,
-        "y": 133.92,
-        "width": 35.28,
-        "height": 112,
+        "x": 460,
+        "y": 40,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Ω"
         },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "runtimeState": {}
       },
       {
         "id": "led2",
         "type": "led",
-        "x": 496,
-        "y": 260,
-        "width": 28,
-        "height": 67.2,
+        "x": 455,
+        "y": 112,
+        "rotation": 0,
         "props": {
           "color": "#ff3333",
           "colorName": "Red"
@@ -140,32 +121,26 @@
           "overload": false,
           "blown": false,
           "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "r3",
         "type": "resistor",
-        "x": 542.36,
-        "y": 133.92,
-        "width": 35.28,
-        "height": 112,
+        "x": 484,
+        "y": 40,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Ω"
         },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "runtimeState": {}
       },
       {
         "id": "led3",
         "type": "led",
-        "x": 546,
-        "y": 260,
-        "width": 28,
-        "height": 67.2,
+        "x": 479,
+        "y": 112,
+        "rotation": 0,
         "props": {
           "color": "#ff3333",
           "colorName": "Red"
@@ -178,32 +153,26 @@
           "overload": false,
           "blown": false,
           "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "r4",
         "type": "resistor",
-        "x": 592.36,
-        "y": 133.92,
-        "width": 35.28,
-        "height": 112,
+        "x": 508,
+        "y": 40,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Ω"
         },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "runtimeState": {}
       },
       {
         "id": "led4",
         "type": "led",
-        "x": 596,
-        "y": 260,
-        "width": 28,
-        "height": 67.2,
+        "x": 503,
+        "y": 112,
+        "rotation": 0,
         "props": {
           "color": "#ff3333",
           "colorName": "Red"
@@ -216,32 +185,26 @@
           "overload": false,
           "blown": false,
           "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "r5",
         "type": "resistor",
-        "x": 642.36,
-        "y": 133.92,
-        "width": 35.28,
-        "height": 112,
+        "x": 532,
+        "y": 40,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Ω"
         },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "runtimeState": {}
       },
       {
         "id": "led5",
         "type": "led",
-        "x": 646,
-        "y": 260,
-        "width": 28,
-        "height": 67.2,
+        "x": 527,
+        "y": 112,
+        "rotation": 0,
         "props": {
           "color": "#ff3333",
           "colorName": "Red"
@@ -254,32 +217,26 @@
           "overload": false,
           "blown": false,
           "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "r6",
         "type": "resistor",
-        "x": 692.36,
-        "y": 133.92,
-        "width": 35.28,
-        "height": 112,
+        "x": 556,
+        "y": 40,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Ω"
         },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "runtimeState": {}
       },
       {
         "id": "led6",
         "type": "led",
-        "x": 696,
-        "y": 260,
-        "width": 28,
-        "height": 67.2,
+        "x": 551,
+        "y": 112,
+        "rotation": 0,
         "props": {
           "color": "#ff3333",
           "colorName": "Red"
@@ -292,32 +249,26 @@
           "overload": false,
           "blown": false,
           "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "r7",
         "type": "resistor",
-        "x": 742.36,
-        "y": 133.92,
-        "width": 35.28,
-        "height": 112,
+        "x": 580,
+        "y": 40,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Ω"
         },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "runtimeState": {}
       },
       {
         "id": "led7",
         "type": "led",
-        "x": 746,
-        "y": 260,
-        "width": 28,
-        "height": 67.2,
+        "x": 575,
+        "y": 112,
+        "rotation": 0,
         "props": {
           "color": "#ff3333",
           "colorName": "Red"
@@ -330,32 +281,26 @@
           "overload": false,
           "blown": false,
           "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       },
       {
         "id": "r8",
         "type": "resistor",
-        "x": 792.36,
-        "y": 133.92,
-        "width": 35.28,
-        "height": 112,
+        "x": 604,
+        "y": 40,
+        "rotation": 0,
         "props": {
           "value": 220,
           "unit": "Ω"
         },
-        "runtimeState": {},
-        "selected": false,
-        "rotation": 0
+        "runtimeState": {}
       },
       {
         "id": "led8",
         "type": "led",
-        "x": 796,
-        "y": 260,
-        "width": 28,
-        "height": 67.2,
+        "x": 599,
+        "y": 112,
+        "rotation": 0,
         "props": {
           "color": "#ff3333",
           "colorName": "Red"
@@ -368,9 +313,7 @@
           "overload": false,
           "blown": false,
           "_warnedBlown": false
-        },
-        "selected": false,
-        "rotation": 0
+        }
       }
     ],
     "wires": [
@@ -491,24 +434,12 @@
         "color": null,
         "waypoints": [
           {
-            "x": 303.86,
-            "y": 807.14
+            "x": 196,
+            "y": 574
           },
           {
-            "x": 303.86,
-            "y": 870
-          },
-          {
-            "x": 760,
-            "y": 870
-          },
-          {
-            "x": 760,
-            "y": 470
-          },
-          {
-            "x": 504,
-            "y": 436
+            "x": 454,
+            "y": 574
           }
         ]
       },
@@ -525,381 +456,17 @@
         "color": null,
         "waypoints": [
           {
-            "x": 257.09000000000003,
-            "y": 807.14
+            "x": 168,
+            "y": 592
           },
           {
-            "x": 257.09000000000003,
-            "y": 895
-          },
-          {
-            "x": 790,
-            "y": 895
-          },
-          {
-            "x": 790,
-            "y": 500
-          },
-          {
-            "x": 520,
-            "y": 436
+            "x": 470,
+            "y": 592
           }
         ]
       },
       {
         "id": "w11",
-        "from": {
-          "instId": "r1",
-          "pinId": "p2"
-        },
-        "to": {
-          "instId": "led1",
-          "pinId": "anode"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 460,
-            "y": 245.92
-          },
-          {
-            "x": 460,
-            "y": 260
-          }
-        ]
-      },
-      {
-        "id": "w12",
-        "from": {
-          "instId": "led1",
-          "pinId": "cathode"
-        },
-        "to": {
-          "instId": "ssr1",
-          "pinId": "out1a"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 460,
-            "y": 327.2
-          },
-          {
-            "x": 496,
-            "y": 340
-          }
-        ]
-      },
-      {
-        "id": "w13",
-        "from": {
-          "instId": "r2",
-          "pinId": "p2"
-        },
-        "to": {
-          "instId": "led2",
-          "pinId": "anode"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 510,
-            "y": 245.92
-          },
-          {
-            "x": 510,
-            "y": 260
-          }
-        ]
-      },
-      {
-        "id": "w14",
-        "from": {
-          "instId": "led2",
-          "pinId": "cathode"
-        },
-        "to": {
-          "instId": "ssr1",
-          "pinId": "out2a"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 510,
-            "y": 327.2
-          },
-          {
-            "x": 520,
-            "y": 340
-          }
-        ]
-      },
-      {
-        "id": "w15",
-        "from": {
-          "instId": "r3",
-          "pinId": "p2"
-        },
-        "to": {
-          "instId": "led3",
-          "pinId": "anode"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 560,
-            "y": 245.92
-          },
-          {
-            "x": 560,
-            "y": 260
-          }
-        ]
-      },
-      {
-        "id": "w16",
-        "from": {
-          "instId": "led3",
-          "pinId": "cathode"
-        },
-        "to": {
-          "instId": "ssr1",
-          "pinId": "out3a"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 560,
-            "y": 327.2
-          },
-          {
-            "x": 544,
-            "y": 340
-          }
-        ]
-      },
-      {
-        "id": "w17",
-        "from": {
-          "instId": "r4",
-          "pinId": "p2"
-        },
-        "to": {
-          "instId": "led4",
-          "pinId": "anode"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 610,
-            "y": 245.92
-          },
-          {
-            "x": 610,
-            "y": 260
-          }
-        ]
-      },
-      {
-        "id": "w18",
-        "from": {
-          "instId": "led4",
-          "pinId": "cathode"
-        },
-        "to": {
-          "instId": "ssr1",
-          "pinId": "out4a"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 610,
-            "y": 327.2
-          },
-          {
-            "x": 568,
-            "y": 340
-          }
-        ]
-      },
-      {
-        "id": "w19",
-        "from": {
-          "instId": "r5",
-          "pinId": "p2"
-        },
-        "to": {
-          "instId": "led5",
-          "pinId": "anode"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 660,
-            "y": 245.92
-          },
-          {
-            "x": 660,
-            "y": 260
-          }
-        ]
-      },
-      {
-        "id": "w20",
-        "from": {
-          "instId": "led5",
-          "pinId": "cathode"
-        },
-        "to": {
-          "instId": "ssr1",
-          "pinId": "out5a"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 660,
-            "y": 327.2
-          },
-          {
-            "x": 592,
-            "y": 340
-          }
-        ]
-      },
-      {
-        "id": "w21",
-        "from": {
-          "instId": "r6",
-          "pinId": "p2"
-        },
-        "to": {
-          "instId": "led6",
-          "pinId": "anode"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 710,
-            "y": 245.92
-          },
-          {
-            "x": 710,
-            "y": 260
-          }
-        ]
-      },
-      {
-        "id": "w22",
-        "from": {
-          "instId": "led6",
-          "pinId": "cathode"
-        },
-        "to": {
-          "instId": "ssr1",
-          "pinId": "out6a"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 710,
-            "y": 327.2
-          },
-          {
-            "x": 616,
-            "y": 340
-          }
-        ]
-      },
-      {
-        "id": "w23",
-        "from": {
-          "instId": "r7",
-          "pinId": "p2"
-        },
-        "to": {
-          "instId": "led7",
-          "pinId": "anode"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 760,
-            "y": 245.92
-          },
-          {
-            "x": 760,
-            "y": 260
-          }
-        ]
-      },
-      {
-        "id": "w24",
-        "from": {
-          "instId": "led7",
-          "pinId": "cathode"
-        },
-        "to": {
-          "instId": "ssr1",
-          "pinId": "out7a"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 760,
-            "y": 327.2
-          },
-          {
-            "x": 640,
-            "y": 340
-          }
-        ]
-      },
-      {
-        "id": "w25",
-        "from": {
-          "instId": "r8",
-          "pinId": "p2"
-        },
-        "to": {
-          "instId": "led8",
-          "pinId": "anode"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 810,
-            "y": 245.92
-          },
-          {
-            "x": 810,
-            "y": 260
-          }
-        ]
-      },
-      {
-        "id": "w26",
-        "from": {
-          "instId": "led8",
-          "pinId": "cathode"
-        },
-        "to": {
-          "instId": "ssr1",
-          "pinId": "out8a"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 810,
-            "y": 327.2
-          },
-          {
-            "x": 664,
-            "y": 340
-          }
-        ]
-      },
-      {
-        "id": "w27",
         "from": {
           "instId": "batt1",
           "pinId": "pos"
@@ -909,10 +476,19 @@
           "pinId": "p1"
         },
         "color": null,
-        "waypoints": []
+        "waypoints": [
+          {
+            "x": 215,
+            "y": 99
+          },
+          {
+            "x": 215,
+            "y": 40
+          }
+        ]
       },
       {
-        "id": "w28",
+        "id": "w12",
         "from": {
           "instId": "r1",
           "pinId": "p1"
@@ -925,7 +501,7 @@
         "waypoints": []
       },
       {
-        "id": "w29",
+        "id": "w13",
         "from": {
           "instId": "r2",
           "pinId": "p1"
@@ -938,7 +514,7 @@
         "waypoints": []
       },
       {
-        "id": "w30",
+        "id": "w14",
         "from": {
           "instId": "r3",
           "pinId": "p1"
@@ -951,7 +527,7 @@
         "waypoints": []
       },
       {
-        "id": "w31",
+        "id": "w15",
         "from": {
           "instId": "r4",
           "pinId": "p1"
@@ -964,7 +540,7 @@
         "waypoints": []
       },
       {
-        "id": "w32",
+        "id": "w16",
         "from": {
           "instId": "r5",
           "pinId": "p1"
@@ -977,7 +553,7 @@
         "waypoints": []
       },
       {
-        "id": "w33",
+        "id": "w17",
         "from": {
           "instId": "r6",
           "pinId": "p1"
@@ -990,7 +566,7 @@
         "waypoints": []
       },
       {
-        "id": "w34",
+        "id": "w18",
         "from": {
           "instId": "r7",
           "pinId": "p1"
@@ -998,6 +574,214 @@
         "to": {
           "instId": "r8",
           "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w19",
+        "from": {
+          "instId": "r1",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "led1",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w20",
+        "from": {
+          "instId": "led1",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "ssr1",
+          "pinId": "out1a"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w21",
+        "from": {
+          "instId": "r2",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "led2",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w22",
+        "from": {
+          "instId": "led2",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "ssr1",
+          "pinId": "out2a"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w23",
+        "from": {
+          "instId": "r3",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "led3",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w24",
+        "from": {
+          "instId": "led3",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "ssr1",
+          "pinId": "out3a"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w25",
+        "from": {
+          "instId": "r4",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "led4",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w26",
+        "from": {
+          "instId": "led4",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "ssr1",
+          "pinId": "out4a"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w27",
+        "from": {
+          "instId": "r5",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "led5",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w28",
+        "from": {
+          "instId": "led5",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "ssr1",
+          "pinId": "out5a"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w29",
+        "from": {
+          "instId": "r6",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "led6",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w30",
+        "from": {
+          "instId": "led6",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "ssr1",
+          "pinId": "out6a"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w31",
+        "from": {
+          "instId": "r7",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "led7",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w32",
+        "from": {
+          "instId": "led7",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "ssr1",
+          "pinId": "out7a"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w33",
+        "from": {
+          "instId": "r8",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "led8",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "w34",
+        "from": {
+          "instId": "led8",
+          "pinId": "cathode"
+        },
+        "to": {
+          "instId": "ssr1",
+          "pinId": "out8a"
         },
         "color": null,
         "waypoints": []
@@ -1009,65 +793,23 @@
           "pinId": "out1b"
         },
         "to": {
-          "instId": "batt1",
-          "pinId": "neg"
-        },
-        "color": null,
-        "waypoints": [
-          {
-            "x": 507,
-            "y": 340
-          },
-          {
-            "x": 507,
-            "y": 326
-          },
-          {
-            "x": 430,
-            "y": 326
-          },
-          {
-            "x": 430,
-            "y": 230
-          },
-          {
-            "x": 40,
-            "y": 230
-          },
-          {
-            "x": 40,
-            "y": 133.92000000000002
-          },
-          {
-            "x": 63.77,
-            "y": 133.92000000000002
-          }
-        ]
-      },
-      {
-        "id": "w36",
-        "from": {
-          "instId": "ssr1",
-          "pinId": "out1b"
-        },
-        "to": {
           "instId": "ssr1",
           "pinId": "out2b"
         },
         "color": null,
         "waypoints": [
           {
-            "x": 507,
-            "y": 326
+            "x": 457,
+            "y": 260
           },
           {
-            "x": 531,
-            "y": 326
+            "x": 481,
+            "y": 260
           }
         ]
       },
       {
-        "id": "w37",
+        "id": "w36",
         "from": {
           "instId": "ssr1",
           "pinId": "out2b"
@@ -1079,17 +821,17 @@
         "color": null,
         "waypoints": [
           {
-            "x": 531,
-            "y": 326
+            "x": 481,
+            "y": 260
           },
           {
-            "x": 555,
-            "y": 326
+            "x": 505,
+            "y": 260
           }
         ]
       },
       {
-        "id": "w38",
+        "id": "w37",
         "from": {
           "instId": "ssr1",
           "pinId": "out3b"
@@ -1101,17 +843,17 @@
         "color": null,
         "waypoints": [
           {
-            "x": 555,
-            "y": 326
+            "x": 505,
+            "y": 260
           },
           {
-            "x": 579,
-            "y": 326
+            "x": 529,
+            "y": 260
           }
         ]
       },
       {
-        "id": "w39",
+        "id": "w38",
         "from": {
           "instId": "ssr1",
           "pinId": "out4b"
@@ -1123,17 +865,17 @@
         "color": null,
         "waypoints": [
           {
-            "x": 579,
-            "y": 326
+            "x": 529,
+            "y": 260
           },
           {
-            "x": 603,
-            "y": 326
+            "x": 553,
+            "y": 260
           }
         ]
       },
       {
-        "id": "w40",
+        "id": "w39",
         "from": {
           "instId": "ssr1",
           "pinId": "out5b"
@@ -1145,17 +887,17 @@
         "color": null,
         "waypoints": [
           {
-            "x": 603,
-            "y": 326
+            "x": 553,
+            "y": 260
           },
           {
-            "x": 627,
-            "y": 326
+            "x": 577,
+            "y": 260
           }
         ]
       },
       {
-        "id": "w41",
+        "id": "w40",
         "from": {
           "instId": "ssr1",
           "pinId": "out6b"
@@ -1167,17 +909,17 @@
         "color": null,
         "waypoints": [
           {
-            "x": 627,
-            "y": 326
+            "x": 577,
+            "y": 260
           },
           {
-            "x": 651,
-            "y": 326
+            "x": 601,
+            "y": 260
           }
         ]
       },
       {
-        "id": "w42",
+        "id": "w41",
         "from": {
           "instId": "ssr1",
           "pinId": "out7b"
@@ -1189,12 +931,38 @@
         "color": null,
         "waypoints": [
           {
-            "x": 651,
-            "y": 326
+            "x": 601,
+            "y": 260
           },
           {
-            "x": 675,
-            "y": 326
+            "x": 625,
+            "y": 260
+          }
+        ]
+      },
+      {
+        "id": "w42",
+        "from": {
+          "instId": "ssr1",
+          "pinId": "out1b"
+        },
+        "to": {
+          "instId": "batt1",
+          "pinId": "neg"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 457,
+            "y": 260
+          },
+          {
+            "x": 40,
+            "y": 260
+          },
+          {
+            "x": 40,
+            "y": 99
           }
         ]
       }

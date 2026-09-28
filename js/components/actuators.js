@@ -355,6 +355,205 @@ defComp({
   }
 });
 
+/* ─── 5V 8-Channel Solid State Relay Module ─── */
+
+function ssr8chPins() {
+  const pins = [
+    { id: 'vcc', label: 'VCC', type: PIN_TYPE.POWER, x: 24, y: 96, side: 'bottom' },
+    { id: 'gnd', label: 'GND', type: PIN_TYPE.GND, x: 40, y: 96, side: 'bottom' },
+  ];
+  for (let i = 1; i <= 8; i++) {
+    pins.push({ id: `in${i}`, label: `IN${i}`, type: PIN_TYPE.DIGITAL, x: 40 + i * 16, y: 96, side: 'bottom' });
+  }
+  for (let i = 1; i <= 8; i++) {
+    pins.push({ id: `out${i}a`, label: `${i}A`, type: PIN_TYPE.SIGNAL, x: 16 + (i - 1) * 24, y: 0, side: 'top' });
+    pins.push({ id: `out${i}b`, label: `${i}B`, type: PIN_TYPE.SIGNAL, x: 27 + (i - 1) * 24, y: 0, side: 'top' });
+  }
+  return pins;
+}
+
+defComp({
+  id: 'ssr_8ch',
+  name: '5V 8-Channel SSR Module',
+  category: 'Actuators',
+  icon: '🔀',
+  desc: 'Opto-isolated solid state relay module — 8 independent channels switch 8 isolated output pairs, no moving parts',
+  width: 200,
+  height: 96,
+  defaultProps: { label: 'SSR-8CH', trigger: 'high' },
+  interactive: [
+    {
+      field: 'trigger', label: 'Trigger', type: 'select', options: [
+        { value: 'high', label: 'High-level trigger' },
+        { value: 'low', label: 'Low-level trigger' },
+      ]
+    },
+  ],
+  pins: ssr8chPins(),
+  draw(ctx, inst, sim) {
+    const { x, y } = inst;
+    const channels = (inst.runtimeState && inst.runtimeState.channels) || [];
+    const triggerLow = !!(inst.props && inst.props.trigger === 'low');
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // 1. Blue PCB
+    const pcb = ctx.createLinearGradient(0, 0, 200, 96);
+    pcb.addColorStop(0, '#134a7a');
+    pcb.addColorStop(0.5, '#1a5f96');
+    pcb.addColorStop(1, '#0d3a61');
+    ctx.fillStyle = pcb;
+    roundRect(ctx, 0, 0, 200, 96, 5);
+    ctx.fill();
+    ctx.strokeStyle = '#2d7fc2';
+    ctx.lineWidth = 1.2;
+    roundRect(ctx, 0.6, 0.6, 198.8, 94.8, 4.5);
+    ctx.stroke();
+
+    // Silkscreen frame
+    ctx.strokeStyle = 'rgba(255,255,255,0.13)';
+    ctx.lineWidth = 0.8;
+    roundRect(ctx, 4, 4, 192, 88, 3);
+    ctx.stroke();
+
+    // Corner mounting holes with copper rings
+    [[7, 7], [193, 7], [7, 89], [193, 89]].forEach(([hx, hy]) => {
+      ctx.fillStyle = '#061a2c';
+      ctx.beginPath(); ctx.arc(hx, hy, 2.2, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#d4af37';
+      ctx.lineWidth = 0.7;
+      ctx.stroke();
+    });
+
+    // 2. Green screw-terminal blocks along the top edge (8 × 2-position)
+    for (let i = 1; i <= 8; i++) {
+      const bx = 10 + (i - 1) * 24;
+      const term = ctx.createLinearGradient(0, 2, 0, 19);
+      term.addColorStop(0, '#3fae52');
+      term.addColorStop(1, '#247c35');
+      ctx.fillStyle = term;
+      roundRect(ctx, bx, 2, 22, 17, 2);
+      ctx.fill();
+      ctx.strokeStyle = '#14511f';
+      ctx.lineWidth = 0.8;
+      roundRect(ctx, bx, 2, 22, 17, 2);
+      ctx.stroke();
+
+      // Screw heads sitting over the two output pins
+      [16 + (i - 1) * 24, 27 + (i - 1) * 24].forEach((sx) => {
+        ctx.fillStyle = '#c8ccd0';
+        ctx.beginPath(); ctx.arc(sx, 10.5, 3.1, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#6f7478';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(sx - 2.2, 10.5); ctx.lineTo(sx + 2.2, 10.5); ctx.stroke();
+      });
+
+      // Channel number between the screws
+      ctx.fillStyle = '#eaf6ff';
+      ctx.font = 'bold 5px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(String(i), bx + 11.5, 12.5);
+
+      // Channel status LED
+      const on = !!channels[i - 1];
+      if (on) { ctx.shadowColor = '#3dff70'; ctx.shadowBlur = 5; }
+      ctx.fillStyle = on ? '#48ff7c' : '#0f2e1c';
+      ctx.beginPath(); ctx.arc(bx + 11, 26, 2.6, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+      ctx.lineWidth = 0.6;
+      ctx.stroke();
+    }
+
+    // 3. SSR output-stage chips (SOP-4, one per channel)
+    for (let i = 1; i <= 8; i++) {
+      const cx0 = 14 + ((i - 1) % 4) * 46;
+      const cy0 = 37 + Math.floor((i - 1) / 4) * 16;
+
+      // Legs
+      ctx.strokeStyle = '#b9bec2';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx0 - 3, cy0 + 3); ctx.lineTo(cx0, cy0 + 3);
+      ctx.moveTo(cx0 - 3, cy0 + 8); ctx.lineTo(cx0, cy0 + 8);
+      ctx.moveTo(cx0 + 20, cy0 + 3); ctx.lineTo(cx0 + 23, cy0 + 3);
+      ctx.moveTo(cx0 + 20, cy0 + 8); ctx.lineTo(cx0 + 23, cy0 + 8);
+      ctx.stroke();
+
+      // Body
+      ctx.fillStyle = '#17181c';
+      roundRect(ctx, cx0, cy0, 20, 11, 1.5);
+      ctx.fill();
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 0.6;
+      ctx.stroke();
+
+      // Pin-1 dot + channel silk
+      ctx.fillStyle = '#3a3d42';
+      ctx.beginPath(); ctx.arc(cx0 + 4, cy0 + 3.5, 1.2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#9aa0a6';
+      ctx.font = '5px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(String(i), cx0 + 13, cy0 + 7.6);
+    }
+
+    // 4. Silk labels
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#dfeeff';
+    ctx.font = 'bold 7px monospace';
+    ctx.fillText('5V 8CH SSR MODULE', 10, 73);
+    ctx.font = '6px monospace';
+    ctx.fillStyle = triggerLow ? '#ffd166' : '#8fd3ff';
+    ctx.fillText(triggerLow ? 'LOW TRIGGER' : 'HIGH TRIGGER', 90, 73);
+
+    // PWR LED (lights when VCC has a source)
+    let powered = false;
+    try {
+      const eng = window.CircuitCanvas && window.CircuitCanvas.engine;
+      powered = !!(eng && typeof eng.getSourceAtPin === 'function'
+        && eng.getSourceAtPin(inst.id, 'vcc'));
+    } catch (e) { powered = false; }
+    if (powered) { ctx.shadowColor = '#ff6a55'; ctx.shadowBlur = 5; }
+    ctx.fillStyle = powered ? '#ff6a55' : '#3a1a16';
+    ctx.beginPath(); ctx.arc(181, 70, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#b9c4cf';
+    ctx.font = '5px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('PWR', 186, 72);
+
+    // 5. Input header strip (VCC, GND, IN1..IN8) with leads to the bottom pins
+    ctx.fillStyle = '#101216';
+    roundRect(ctx, 16, 76, 160, 14, 2);
+    ctx.fill();
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+
+    const headerXs = [24, 40];
+    for (let i = 1; i <= 8; i++) headerXs.push(40 + i * 16);
+    headerXs.forEach((hx) => {
+      // Gold contact ring
+      ctx.fillStyle = '#d4af37';
+      ctx.beginPath(); ctx.arc(hx, 83, 2.6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#0a0b0d';
+      ctx.beginPath(); ctx.arc(hx, 83, 1.2, 0, Math.PI * 2); ctx.fill();
+      // Lead through the housing down to the bottom pin
+      ctx.strokeStyle = '#9aa0a6';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(hx, 83); ctx.lineTo(hx, 96); ctx.stroke();
+    });
+
+    // Selection halo
+    if (inst.selected && typeof drawSelectionRect === 'function') {
+      drawSelectionRect(ctx, -2, -2, 204, 100);
+    }
+
+    ctx.restore();
+  }
+});
+
 /* ─── DC MOTOR ─── */
 // defComp({
 //   id: 'dc_motor',
@@ -2023,6 +2222,31 @@ class RelayComponent extends Component {
   }
 }
 
+class SSR8ChComponent extends Component {
+  getPins() {
+    return ssr8chPins();
+  }
+  update() {
+    const sim = window.ArduinoSim;
+    const lowTrigger = !!(this.props && this.props.trigger === 'low');
+    const channels = [];
+    for (let i = 1; i <= 8; i++) {
+      const pinId = `in${i}`;
+      let level = 0;
+      const forced = this.getForcedLevel(pinId);
+      if (forced !== null) {
+        level = forced;
+      } else if (sim && typeof sim.getPinVoltage === 'function') {
+        level = sim.getPinVoltage(this, pinId) > 0 ? 1 : 0;
+      } else {
+        level = this.readPin(pinId) > 0 ? 1 : 0;
+      }
+      channels.push((level === 1) !== lowTrigger);
+    }
+    this.runtimeState.channels = channels;
+  }
+}
+
 class DCMotorComponent extends Component {
   getPins() {
     return [
@@ -2876,7 +3100,8 @@ class Nema17Component extends Component {
 
 registerComponent('servo', ServoComponent);
 registerComponent('servo_continuous', ServoContinuousComponent);
-registerComponent('relay', RelayComponent);
+  registerComponent('relay', RelayComponent);
+  registerComponent('ssr_8ch', SSR8ChComponent);
 registerComponent('dc_motor', DCMotorComponent);
 registerComponent('l298n', L298NComponent);
 registerComponent('stepper_28byj', Stepper28BYJComponent);

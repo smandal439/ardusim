@@ -3611,7 +3611,7 @@ window.EXAMPLE_SKETCHES = [
       ]
     },
     "files": {
-      "sketch.ino": "const int adcPin = 34; // GPIO34 = ADC1, input-only battery sense pin\nconst float maxVoltage = 4.2; // Full battery\nconst float minVoltage = 2.5; // Empty battery\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(adcPin, INPUT);\n}\n\nvoid loop() {\n  // Read calibrated millivolts if available, or raw analog read\n  int rawValue = analogRead(adcPin);\n  \n  // Convert raw reading to voltage at the pin (ESP32 ADC is 12-bit: 4095 = 3.3V roughly, \n  // but analogReadMillivolts() is more accurate)\n  float pinVoltage = analogReadMilliVolts(adcPin) / 1000.0;\n  \n  // Reconstruct actual battery voltage based on your voltage divider ratio (e.g., multiplier of 2 for equal resistors)\n  float batteryVoltage = pinVoltage * 2.0; \n  \n  // Calculate percentage (Linear approximation)\n  int batteryPercentage = (int)((batteryVoltage - minVoltage) / (maxVoltage - minVoltage) * 100.0);\n  batteryPercentage = constrain(batteryPercentage, 0, 100);\n\n  Serial.print(\"Voltage: \");\n  Serial.print(batteryVoltage);\n  Serial.print(\" V  |  \");\n  Serial.print(batteryPercentage);\n  Serial.println(\" %\");\n  \n  delay(2000);\n}\n"
+      "sketch.ino": "const int adcPin = 34; // GPIO34 = ADC1, input-only battery sense pin\nconst float maxVoltage = 4.2; // Full battery\nconst float minVoltage = 2.5; // Empty battery\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(adcPin, INPUT);\n}\n\nvoid loop() {\n  // Read calibrated millivolts if available, or raw analog read\n  int rawValue = analogRead(adcPin);\n  \n  // Convert raw reading to voltage at the pin (ESP32 ADC is 12-bit: 4095 = 3.3V roughly, \n  // but analogReadMillivolts() is more accurate)\n  float pinVoltage = analogReadMilliVolts(adcPin) / 1000.0;\n  \n  // Reconstruct actual battery voltage based on your voltage divider ratio (e.g., multiplier of 2 for equal resistors)\n  float batteryVoltage = pinVoltage * 2.0; \n  \n  // Calculate percentage (Linear approximation)\nfloat batteryPercentage = (batteryVoltage - minVoltage) / (maxVoltage - minVoltage) * 100.0;\n  batteryPercentage = constrain(batteryPercentage, 0.0, 100.0);\n  batteryPercentage = round(batteryPercentage * 100.0) / 100.0; // keep 2 decimal places\n\n  Serial.print(\"Voltage: \");\n  Serial.print(batteryVoltage);\n  Serial.print(\" V  |  \");\n  Serial.print(batteryPercentage);\n  Serial.println(\" %\");\n  \n  delay(2000);\n}\n"
     }
   },
   {
@@ -16881,408 +16881,6 @@ window.EXAMPLE_SKETCHES = [
     "board2Code": "/*\n * LoRa Receiver — Board 2\n * Receives packets from the Sender board\n * Displays message content and RSSI/SNR on Serial Monitor\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n\n#define SS_PIN   10\n#define RST_PIN  9\n#define DIO0_PIN 2\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"LoRa Receiver Starting...\");\n\n  LoRa.setPins(SS_PIN, RST_PIN, DIO0_PIN);\n\n  if (!LoRa.begin(868E6)) {\n    Serial.println(\"LoRa init failed!\");\n    while (1);\n  }\n\n  LoRa.setSpreadingFactor(7);\n  LoRa.setSignalBandwidth(125000);\n  LoRa.setCodingRate4(5);\n  LoRa.setSyncWord(0x12);\n  LoRa.enableCrc();\n\n  Serial.println(\"LoRa Receiver ready — waiting for packets...\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  int packetSize = LoRa.parsePacket();\n\n  if (packetSize) {\n    Serial.print(\"Received packet: \");\n\n    String message = \"\";\n    while (LoRa.available()) {\n      message += (char)LoRa.read();\n    }\n    Serial.println(message);\n\n    int rssi = LoRa.packetRssi();\n    float snr = LoRa.packetSnr();\n\n    Serial.print(\"RSSI: \");\n    Serial.print(rssi);\n    Serial.println(\" dBm\");\n\n    Serial.print(\"SNR: \");\n    Serial.print(snr);\n    Serial.println(\" dB\");\n\n    Serial.println(\"---\");\n  }\n}"
   },
   {
-    "id": "lora_weather_station",
-    "name": "LoRa Weather Station (Sensor TX + Receiver Display)",
-    "icon": "📡",
-    "desc": "A practical LoRa long-range weather monitoring system. The Transmitter (ESP32) reads DHT22 temperature/humidity sensor and battery voltage via ADC, then sends a JSON payload every 30 seconds over LoRa. The Receiver (ESP32) decodes the packet, displays live readings on an SSD1306 OLED, and logs to Serial. Demonstrates real-world IoT: low-power TX, JSON payloads, OLED display, and signal quality monitoring (RSSI/SNR).",
-    "tags": [
-      "lora",
-      "weather",
-      "iot",
-      "sensor",
-      "dht11",
-      "oled",
-      "esp32",
-      "long-range",
-      "sx1276",
-      "rfm95",
-      "intermediate"
-    ],
-    "circuit": {
-      "components": [
-        {
-          "id": "tx_board",
-          "type": "esp32_devkit_v1",
-          "x": 150,
-          "y": 200,
-          "props": {
-            "label": "LoRa TX - Weather Station"
-          },
-          "rotation": 0
-        },
-        {
-          "id": "lora_tx",
-          "type": "lora_module",
-          "x": 50,
-          "y": 80,
-          "props": {
-            "frequency": 868000000,
-            "spreadingFactor": 10,
-            "bandwidth": 125000,
-            "codingRate": 5,
-            "txPower": 17,
-            "syncWord": 18,
-            "crcEnabled": true,
-            "preambleLen": 8,
-            "payloadLen": 64
-          },
-          "rotation": 0
-        },
-        {
-          "id": "dht22",
-          "type": "dht11",
-          "x": 50,
-          "y": 350,
-          "props": {
-            "label": "DHT Sensor"
-          },
-          "rotation": 0
-        },
-        {
-          "id": "rx_board",
-          "type": "esp32_devkit_v1",
-          "x": 700,
-          "y": 200,
-          "props": {
-            "label": "LoRa RX - Display Station"
-          },
-          "rotation": 0
-        },
-        {
-          "id": "lora_rx",
-          "type": "lora_module",
-          "x": 850,
-          "y": 80,
-          "props": {
-            "frequency": 868000000,
-            "spreadingFactor": 10,
-            "bandwidth": 125000,
-            "codingRate": 5,
-            "txPower": 17,
-            "syncWord": 18,
-            "crcEnabled": true,
-            "preambleLen": 8,
-            "payloadLen": 64
-          },
-          "rotation": 0
-        },
-        {
-          "id": "oled",
-          "type": "oled_ssd1306",
-          "x": 870,
-          "y": 350,
-          "props": {
-            "address": "0x3C"
-          },
-          "rotation": 0
-        }
-      ],
-      "wires": [
-        {
-          "id": "w_sck_tx",
-          "from": {
-            "instId": "lora_tx",
-            "pinId": "SCK"
-          },
-          "to": {
-            "instId": "tx_board",
-            "pinId": "D18"
-          },
-          "color": "#00bcd4",
-          "waypoints": []
-        },
-        {
-          "id": "w_miso_tx",
-          "from": {
-            "instId": "lora_tx",
-            "pinId": "MISO"
-          },
-          "to": {
-            "instId": "tx_board",
-            "pinId": "D19"
-          },
-          "color": "#4caf50",
-          "waypoints": []
-        },
-        {
-          "id": "w_mosi_tx",
-          "from": {
-            "instId": "lora_tx",
-            "pinId": "MOSI"
-          },
-          "to": {
-            "instId": "tx_board",
-            "pinId": "D23"
-          },
-          "color": "#ff9800",
-          "waypoints": []
-        },
-        {
-          "id": "w_nss_tx",
-          "from": {
-            "instId": "lora_tx",
-            "pinId": "NSS"
-          },
-          "to": {
-            "instId": "tx_board",
-            "pinId": "D5"
-          },
-          "color": "#e91e63",
-          "waypoints": []
-        },
-        {
-          "id": "w_dio_tx",
-          "from": {
-            "instId": "lora_tx",
-            "pinId": "DIO0"
-          },
-          "to": {
-            "instId": "tx_board",
-            "pinId": "D26"
-          },
-          "color": "#9c27b0",
-          "waypoints": []
-        },
-        {
-          "id": "w_rst_tx",
-          "from": {
-            "instId": "lora_tx",
-            "pinId": "RST"
-          },
-          "to": {
-            "instId": "tx_board",
-            "pinId": "D14"
-          },
-          "color": "#f44336",
-          "waypoints": []
-        },
-        {
-          "id": "w_3v3_tx",
-          "from": {
-            "instId": "lora_tx",
-            "pinId": "3V3"
-          },
-          "to": {
-            "instId": "tx_board",
-            "pinId": "3V3"
-          },
-          "color": "#f44336",
-          "waypoints": []
-        },
-        {
-          "id": "w_gnd_tx",
-          "from": {
-            "instId": "lora_tx",
-            "pinId": "GND"
-          },
-          "to": {
-            "instId": "tx_board",
-            "pinId": "GND1"
-          },
-          "color": "#333333",
-          "waypoints": []
-        },
-        {
-          "id": "w_dht_data",
-          "from": {
-            "instId": "dht22",
-            "pinId": "data"
-          },
-          "to": {
-            "instId": "tx_board",
-            "pinId": "D4"
-          },
-          "color": "#2196f3",
-          "waypoints": []
-        },
-        {
-          "id": "w_dht_vcc",
-          "from": {
-            "instId": "dht22",
-            "pinId": "vcc"
-          },
-          "to": {
-            "instId": "tx_board",
-            "pinId": "3V3"
-          },
-          "color": "#f44336",
-          "waypoints": []
-        },
-        {
-          "id": "w_dht_gnd",
-          "from": {
-            "instId": "dht22",
-            "pinId": "gnd"
-          },
-          "to": {
-            "instId": "tx_board",
-            "pinId": "GND2"
-          },
-          "color": "#333333",
-          "waypoints": []
-        },
-        {
-          "id": "w_sck_rx",
-          "from": {
-            "instId": "lora_rx",
-            "pinId": "SCK"
-          },
-          "to": {
-            "instId": "rx_board",
-            "pinId": "D18"
-          },
-          "color": "#00bcd4",
-          "waypoints": []
-        },
-        {
-          "id": "w_miso_rx",
-          "from": {
-            "instId": "lora_rx",
-            "pinId": "MISO"
-          },
-          "to": {
-            "instId": "rx_board",
-            "pinId": "D19"
-          },
-          "color": "#4caf50",
-          "waypoints": []
-        },
-        {
-          "id": "w_mosi_rx",
-          "from": {
-            "instId": "lora_rx",
-            "pinId": "MOSI"
-          },
-          "to": {
-            "instId": "rx_board",
-            "pinId": "D23"
-          },
-          "color": "#ff9800",
-          "waypoints": []
-        },
-        {
-          "id": "w_nss_rx",
-          "from": {
-            "instId": "lora_rx",
-            "pinId": "NSS"
-          },
-          "to": {
-            "instId": "rx_board",
-            "pinId": "D5"
-          },
-          "color": "#e91e63",
-          "waypoints": []
-        },
-        {
-          "id": "w_dio_rx",
-          "from": {
-            "instId": "lora_rx",
-            "pinId": "DIO0"
-          },
-          "to": {
-            "instId": "rx_board",
-            "pinId": "D26"
-          },
-          "color": "#9c27b0",
-          "waypoints": []
-        },
-        {
-          "id": "w_rst_rx",
-          "from": {
-            "instId": "lora_rx",
-            "pinId": "RST"
-          },
-          "to": {
-            "instId": "rx_board",
-            "pinId": "D14"
-          },
-          "color": "#f44336",
-          "waypoints": []
-        },
-        {
-          "id": "w_3v3_rx",
-          "from": {
-            "instId": "lora_rx",
-            "pinId": "3V3"
-          },
-          "to": {
-            "instId": "rx_board",
-            "pinId": "3V3"
-          },
-          "color": "#f44336",
-          "waypoints": []
-        },
-        {
-          "id": "w_gnd_rx",
-          "from": {
-            "instId": "lora_rx",
-            "pinId": "GND"
-          },
-          "to": {
-            "instId": "rx_board",
-            "pinId": "GND1"
-          },
-          "color": "#333333",
-          "waypoints": []
-        },
-        {
-          "id": "w_oled_sda",
-          "from": {
-            "instId": "oled",
-            "pinId": "sda"
-          },
-          "to": {
-            "instId": "rx_board",
-            "pinId": "D21"
-          },
-          "color": "#4caf50",
-          "waypoints": []
-        },
-        {
-          "id": "w_oled_scl",
-          "from": {
-            "instId": "oled",
-            "pinId": "scl"
-          },
-          "to": {
-            "instId": "rx_board",
-            "pinId": "D22"
-          },
-          "color": "#2196f3",
-          "waypoints": []
-        },
-        {
-          "id": "w_oled_vcc",
-          "from": {
-            "instId": "oled",
-            "pinId": "vcc"
-          },
-          "to": {
-            "instId": "rx_board",
-            "pinId": "3V3"
-          },
-          "color": "#f44336",
-          "waypoints": []
-        },
-        {
-          "id": "w_oled_gnd",
-          "from": {
-            "instId": "oled",
-            "pinId": "gnd"
-          },
-          "to": {
-            "instId": "rx_board",
-            "pinId": "GND2"
-          },
-          "color": "#333333",
-          "waypoints": []
-        }
-      ]
-    },
-    "code": "/*\n * LoRa Weather Station - TRANSMITTER (Board 1)\n * ESP32 + SX1276/RFM95W + DHT22\n *\n * Reads temperature, humidity, and battery voltage.\n * Sends a JSON payload over LoRa every 30 seconds.\n * Designed for remote / battery-powered deployment.\n *\n * Libraries needed:\n *   - LoRa by Sandeep Mistry\n *   - DHT sensor library by Adafruit\n *   - ArduinoJson (for JSON serialization)\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n#include <DHT.h>\n#include <ArduinoJson.h>\n\n// --- Pin Definitions (ESP32 + LoRa SX1276) ---\n#define LORA_SS     5\n#define LORA_RST    14\n#define LORA_DIO0   26\n#define DHT_PIN     4\n#define BATT_ADC    34    // Battery voltage divider -> ADC pin\n\n// --- LoRa Parameters ---\n#define LORA_FREQ      868E6   // 868 MHz (EU) - change to 915E6 for US\n#define SF             10      // Spreading Factor (7-12). Higher = longer range, slower.\n#define BW             125000  // Bandwidth in Hz\n#define CR             5       // Coding Rate 4/5\n#define TX_POWER       17      // dBm (max 20 for SX1276)\n#define SYNC_WORD      0x12    // Sync word to filter own packets\n#define TX_INTERVAL_MS 30000   // Send every 30 seconds\n\n// --- DHT22 ---\n#define DHT_TYPE DHT22\nDHT dht(DHT_PIN, DHT_TYPE);\n\n// --- Battery voltage divider ratio ---\n// If using a 2:1 divider (R1=100k, R2=100k):\nconst float BATT_DIVIDER = 2.0;\nconst float ADC_VREF = 3.3;\nconst int ADC_RESOLUTION = 4095;\n\n// --- Packet counter ---\nunsigned long packetCount = 0;\n\n// --- Deep-sleep duration (set to 0 to disable) ---\n#define SLEEP_SECONDS 0   // Set >0 for deep-sleep between transmissions\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println();\n  Serial.println(\"========================================\");\n  Serial.println(\"  LoRa Weather Station - Transmitter\");\n  Serial.println(\"========================================\");\n\n  // DHT22\n  dht.begin();\n  Serial.println(\"[INIT] DHT22 sensor ready.\");\n\n  // LoRa\n  SPI.begin(18, 19, 23, LORA_SS);  // SCK, MISO, MOSI, SS\n  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);\n\n  if (!LoRa.begin(LORA_FREQ)) {\n    Serial.println(\"[ERROR] LoRa init failed!\");\n    while (1) { delay(1000); }\n  }\n\n  // LoRa configuration\n  LoRa.setSpreadingFactor(SF);\n  LoRa.setSignalBandwidth(BW);\n  LoRa.setCodingRate4(CR);\n  LoRa.setTxPower(TX_POWER);\n  LoRa.setSyncWord(SYNC_WORD);\n  LoRa.enableCrc();\n  LoRa.setPreambleLength(8);\n\n  Serial.println(\"[INIT] LoRa radio configured.\");\n  Serial.print(\"  Frequency : \"); Serial.print(LORA_FREQ / 1E6); Serial.println(\" MHz\");\n  Serial.print(\"  SF        : \"); Serial.println(SF);\n  Serial.print(\"  Bandwidth : \"); Serial.print(BW / 1000); Serial.println(\" kHz\");\n  Serial.print(\"  TX Power  : \"); Serial.print(TX_POWER); Serial.println(\" dBm\");\n  Serial.println(\"---\");\n}\n\nfloat readBatteryVoltage() {\n  int raw = analogRead(BATT_ADC);\n  float voltage = (raw / (float)ADC_RESOLUTION) * ADC_VREF * BATT_DIVIDER;\n  return voltage;\n}\n\nvoid loop() {\n  packetCount++;\n\n  // Read sensors\n  float temperature = dht.readTemperature();   // Celsius\n  float humidity    = dht.readHumidity();\n  float batteryV    = readBatteryVoltage();\n\n  // Check DHT read errors\n  bool dhtError = isnan(temperature) || isnan(humidity);\n\n  // Build JSON payload\n  StaticJsonDocument<128> doc;\n  doc[\"id\"]    = \"ws-01\";          // Station ID\n  doc[\"pkt\"]   = packetCount;\n  doc[\"temp\"]  = dhtError ? -999.0 : round(temperature * 10.0) / 10.0;\n  doc[\"hum\"]   = dhtError ? -1.0   : round(humidity * 10.0) / 10.0;\n  doc[\"bat\"]   = round(batteryV * 100.0) / 100.0;\n\n  char payload[128];\n  serializeJson(doc, payload, sizeof(payload));\n\n  // Print to local serial\n  Serial.print(\"[TX #\"); Serial.print(packetCount); Serial.print(\"] \");\n  Serial.println(payload);\n\n  // Send over LoRa\n  LoRa.beginPacket();\n  LoRa.print(payload);\n  LoRa.endPacket();\n\n  Serial.println(\"  -> Packet sent!\");\n  Serial.println(\"---\");\n\n  // Deep-sleep mode (optional, uncomment below to enable)\n  // #if SLEEP_SECONDS > 0\n  //   LoRa.sleep();\n  //   esp_sleep_enable_timer_wakeup(SLEEP_SECONDS * 1000000ULL);\n  //   esp_deep_sleep_start();\n  // #endif\n\n  delay(TX_INTERVAL_MS);\n}",
-    "board2Code": "/*\n * LoRa Weather Station - RECEIVER (Board 2)\n * ESP32 + SX1276/RFM95W + SSD1306 OLED\n *\n * Receives JSON weather packets from the Transmitter.\n * Displays temperature, humidity, battery, and signal\n * quality (RSSI/SNR) on a 128x64 OLED display.\n * Also logs all data to Serial Monitor.\n *\n * Libraries needed:\n *   - LoRa by Sandeep Mistry\n *   - Adafruit SSD1306\n *   - Adafruit GFX Library\n *   - ArduinoJson (for JSON deserialization)\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>\n#include <ArduinoJson.h>\n\n// --- Pin Definitions (ESP32 + LoRa SX1276) ---\n#define LORA_SS     5\n#define LORA_RST    14\n#define LORA_DIO0   26\n\n// --- OLED ---\n#define SCREEN_WIDTH  128\n#define SCREEN_HEIGHT 64\n#define OLED_SDA      21\n#define OLED_SCL      22\n#define OLED_RST      -1   // -1 if not connected\n\n// --- LoRa Parameters (must match Transmitter) ---\n#define LORA_FREQ   868E6\n#define SF          10\n#define BW          125000\n#define CR          5\n#define SYNC_WORD   0x12\n\n// --- Display ---\nAdafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);\n\n// --- Packet tracking ---\nunsigned long rxCount = 0;\nunsigned long lastPacketTime = 0;\nconst long TIMEOUT_MS = 90000;  // 90s without a packet = stale\n\n// --- Last known values ---\nfloat lastTemp     = -999;\nfloat lastHum      = -1;\nfloat lastBat      = 0;\nfloat lastRSSI     = 0;\nfloat lastSNR      = 0;\nString lastStationId = \"--\";\n\nvoid drawHeader() {\n  display.setTextSize(1);\n  display.setTextColor(SSD1306_WHITE);\n  display.setCursor(0, 0);\n  display.print(\"LoRa Weather Station\");\n  display.drawLine(0, 10, 127, 10, SSD1306_WHITE);\n}\n\nvoid updateDisplay() {\n  display.clearDisplay();\n  drawHeader();\n\n  display.setTextSize(1);\n\n  // Station ID + packet count\n  display.setCursor(0, 14);\n  display.print(\"Station: \");\n  display.print(lastStationId);\n  display.print(\"  #\");\n  display.print(rxCount);\n\n  // Temperature\n  display.setCursor(0, 26);\n  display.print(\"Temp : \");\n  if (lastTemp > -900) {\n    display.print(lastTemp, 1);\n    display.print(\" C\");\n  } else {\n    display.print(\"ERR\");\n  }\n\n  // Humidity\n  display.setCursor(0, 36);\n  display.print(\"Hum  : \");\n  if (lastHum >= 0) {\n    display.print(lastHum, 1);\n    display.print(\" %\");\n  } else {\n    display.print(\"ERR\");\n  }\n\n  // Battery\n  display.setCursor(0, 46);\n  display.print(\"Batt : \");\n  display.print(lastBat, 2);\n  display.print(\" V\");\n\n  // Signal quality\n  display.setCursor(0, 56);\n  display.print(\"RSSI:\");\n  display.print((int)lastRSSI);\n  display.print(\"  SNR:\");\n  display.print(lastSNR, 1);\n\n  // Stale indicator\n  if (millis() - lastPacketTime > TIMEOUT_MS && lastPacketTime > 0) {\n    display.setTextSize(1);\n    display.setCursor(100, 14);\n    display.print(\"STALE\");\n  }\n\n  display.display();\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println();\n  Serial.println(\"========================================\");\n  Serial.println(\"  LoRa Weather Station - Receiver\");\n  Serial.println(\"========================================\");\n\n  // OLED reset\n  if (OLED_RST > 0) {\n    pinMode(OLED_RST, OUTPUT);\n    digitalWrite(OLED_RST, LOW);\n    delay(20);\n    digitalWrite(OLED_RST, HIGH);\n  }\n\n  Wire.begin(OLED_SDA, OLED_SCL);\n  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {\n    Serial.println(\"[ERROR] OLED init failed!\");\n    while (1) { delay(1000); }\n  }\n  display.clearDisplay();\n  display.setTextSize(1);\n  display.setTextColor(SSD1306_WHITE);\n  display.setCursor(0, 0);\n  display.println(\"Waiting for LoRa...\");\n  display.display();\n  Serial.println(\"[INIT] OLED display ready.\");\n\n  // LoRa\n  SPI.begin(18, 19, 23, LORA_SS);\n  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);\n\n  if (!LoRa.begin(LORA_FREQ)) {\n    Serial.println(\"[ERROR] LoRa init failed!\");\n    while (1) { delay(1000); }\n  }\n\n  LoRa.setSpreadingFactor(SF);\n  LoRa.setSignalBandwidth(BW);\n  LoRa.setCodingRate4(CR);\n  LoRa.setSyncWord(SYNC_WORD);\n  LoRa.enableCrc();\n\n  Serial.println(\"[INIT] LoRa radio configured.\");\n  Serial.print(\"  Listening on \"); Serial.print(LORA_FREQ / 1E6); Serial.println(\" MHz\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  int packetSize = LoRa.parsePacket();\n\n  if (packetSize) {\n    rxCount++;\n    lastPacketTime = millis();\n\n    // Read the raw payload\n    char buffer[128];\n    int idx = 0;\n    while (LoRa.available() && idx < (int)sizeof(buffer) - 1) {\n      buffer[idx++] = (char)LoRa.read();\n    }\n    buffer[idx] = 0;\n\n    // Signal quality\n    lastRSSI = LoRa.packetRssi();\n    lastSNR  = LoRa.packetSnr();\n\n    // Parse JSON\n    StaticJsonDocument<128> doc;\n    DeserializationError err = deserializeJson(doc, buffer);\n\n    if (!err) {\n      lastStationId = doc[\"id\"].as<String>();\n      lastTemp      = doc[\"temp\"].as<float>();\n      lastHum       = doc[\"hum\"].as<float>();\n      lastBat       = doc[\"bat\"].as<float>();\n\n      // Serial log\n      Serial.print(\"[RX #\"); Serial.print(rxCount); Serial.print(\"] \");\n      Serial.print(\"Station:\"); Serial.print(lastStationId);\n      Serial.print(\" Temp:\"); Serial.print(lastTemp, 1);\n      Serial.print(\"C  Hum:\"); Serial.print(lastHum, 1);\n      Serial.print(\"%  Bat:\"); Serial.print(lastBat, 2);\n      Serial.print(\"V  RSSI:\"); Serial.print((int)lastRSSI);\n      Serial.print(\"dBm  SNR:\"); Serial.print(lastSNR, 1);\n      Serial.println(\"dB\");\n    } else {\n      Serial.print(\"[RX] JSON parse error: \");\n      Serial.println(err.c_str());\n      Serial.print(\"  Raw: \");\n      Serial.println(buffer);\n    }\n\n    Serial.println(\"---\");\n    updateDisplay();\n  }\n}"
-  },
-  {
     "id": "lora_weather_station_sensor_tx_receiver_display",
     "name": "LoRa Weather Station (Sensor TX + Receiver Display)",
     "icon": "🔧",
@@ -17364,7 +16962,7 @@ window.EXAMPLE_SKETCHES = [
         {
           "id": "oled",
           "type": "oled_ssd1306",
-          "x": 870,
+          "x": 910,
           "y": 350,
           "rotation": 0,
           "props": {
@@ -17401,7 +16999,7 @@ window.EXAMPLE_SKETCHES = [
           "rotation": 3,
           "props": {
             "voltage": 3.7,
-            "capacity_mah": 100,
+            "capacity_mah": 50,
             "r_int": 0.15
           }
         },
@@ -17415,6 +17013,17 @@ window.EXAMPLE_SKETCHES = [
             "voltage": 3.7,
             "capacity_mah": 5,
             "r_int": 0.15
+          }
+        },
+        {
+          "id": "comp_1790619704635_fqxoc",
+          "type": "resistor",
+          "x": 615,
+          "y": 280,
+          "rotation": 0,
+          "props": {
+            "value": 100,
+            "unit": "Ω"
           }
         }
       ],
@@ -17883,13 +17492,43 @@ window.EXAMPLE_SKETCHES = [
           "waypoints": [],
           "routeStyle": "orthogonal",
           "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790619708124_03yv5",
+          "from": {
+            "instId": "comp_1790268474184_0tc2p",
+            "pinId": "pos"
+          },
+          "to": {
+            "instId": "comp_1790619704635_fqxoc",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1790619710341_eivrw",
+          "from": {
+            "instId": "comp_1790268474184_0tc2p",
+            "pinId": "neg"
+          },
+          "to": {
+            "instId": "comp_1790619704635_fqxoc",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         }
       ]
     },
     "files": {
-      "sketch.ino": "/*\n * LoRa Weather Station - TRANSMITTER (Board 1)\n * ESP32 + SX1276/RFM95W + DHT22\n *\n * Reads temperature, humidity, and battery voltage.\n * Sends a JSON payload over LoRa every 30 seconds.\n * Designed for remote / battery-powered deployment.\n *\n * Libraries needed:\n *   - LoRa by Sandeep Mistry\n *   - DHT sensor library by Adafruit\n *   - ArduinoJson (for JSON serialization)\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n#include <DHT.h>\n#include <ArduinoJson.h>\n\n// --- Pin Definitions (ESP32 + LoRa SX1276) ---\n#define LORA_SS     5\n#define LORA_RST    14\n#define LORA_DIO0   26\n#define DHT_PIN     4\n#define BATT_ADC    34    // Battery voltage divider -> ADC pin\n\n// --- LoRa Parameters ---\n#define LORA_FREQ      868E6   // 868 MHz (EU) - change to 915E6 for US\n#define SF             10      // Spreading Factor (7-12). Higher = longer range, slower.\n#define BW             125000  // Bandwidth in Hz\n#define CR             5       // Coding Rate 4/5\n#define TX_POWER       17      // dBm (max 20 for SX1276)\n#define SYNC_WORD      0x12    // Sync word to filter own packets\n#define TX_INTERVAL_MS 30000   // Send every 30 seconds\n\n// --- DHT22 ---\n#define DHT_TYPE DHT22\nDHT dht(DHT_PIN, DHT_TYPE);\n\n// --- Battery voltage divider ratio ---\n// If using a 2:1 divider (R1=100k, R2=100k):\nconst float BATT_DIVIDER = 2.0;\nconst float ADC_VREF = 3.3;\nconst int ADC_RESOLUTION = 4095;\n\n// --- Packet counter ---\nunsigned long packetCount = 0;\n\n// --- Deep-sleep duration (set to 0 to disable) ---\n#define SLEEP_SECONDS 0   // Set >0 for deep-sleep between transmissions\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println();\n  Serial.println(\"========================================\");\n  Serial.println(\"  LoRa Weather Station - Transmitter\");\n  Serial.println(\"========================================\");\n\n  // Battery voltage divider -> ADC pin (input-only GPIO34)\n  pinMode(BATT_ADC, INPUT);\n\n  // DHT22\n  dht.begin();\n  Serial.println(\"[INIT] DHT22 sensor ready.\");\n\n  // LoRa\n  SPI.begin(18, 19, 23, LORA_SS);  // SCK, MISO, MOSI, SS\n  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);\n\n  if (!LoRa.begin(LORA_FREQ)) {\n    Serial.println(\"[ERROR] LoRa init failed!\");\n    while (1) { delay(1000); }\n  }\n\n  // LoRa configuration\n  LoRa.setSpreadingFactor(SF);\n  LoRa.setSignalBandwidth(BW);\n  LoRa.setCodingRate4(CR);\n  LoRa.setTxPower(TX_POWER);\n  LoRa.setSyncWord(SYNC_WORD);\n  LoRa.enableCrc();\n  LoRa.setPreambleLength(8);\n\n  Serial.println(\"[INIT] LoRa radio configured.\");\n  Serial.print(\"  Frequency : \"); Serial.print(LORA_FREQ / 1E6); Serial.println(\" MHz\");\n  Serial.print(\"  SF        : \"); Serial.println(SF);\n  Serial.print(\"  Bandwidth : \"); Serial.print(BW / 1000); Serial.println(\" kHz\");\n  Serial.print(\"  TX Power  : \"); Serial.print(TX_POWER); Serial.println(\" dBm\");\n  Serial.println(\"---\");\n}\n\nfloat readBatteryVoltage() {\n  int raw = analogRead(BATT_ADC);\n  float voltage = (raw / (float)ADC_RESOLUTION) * ADC_VREF * BATT_DIVIDER;\n  return voltage;\n}\n\nvoid loop() {\n  packetCount++;\n\n  // Read sensors\n  float temperature = dht.readTemperature();   // Celsius\n  float humidity    = dht.readHumidity();\n  float batteryV    = readBatteryVoltage();\n\n  // Check DHT read errors\n  bool dhtError = isnan(temperature) || isnan(humidity);\n\n  // Build JSON payload\n  StaticJsonDocument<128> doc;\n  doc[\"id\"]    = \"ws-01\";          // Station ID\n  doc[\"pkt\"]   = packetCount;\n  doc[\"temp\"]  = dhtError ? -999.0 : round(temperature * 10.0) / 10.0;\n  doc[\"hum\"]   = dhtError ? -1.0   : round(humidity * 10.0) / 10.0;\n  doc[\"bat\"]   = round(batteryV * 100.0) / 100.0;\n\n  char payload[128];\n  serializeJson(doc, payload, sizeof(payload));\n\n  // Print to local serial\n  Serial.print(\"[TX #\"); Serial.print(packetCount); Serial.print(\"] \");\n  Serial.println(payload);\n\n  // Send over LoRa\n  LoRa.beginPacket();\n  LoRa.print(payload);\n  LoRa.endPacket();\n\n  Serial.println(\"  -> Packet sent!\");\n  Serial.println(\"---\");\n\n  // Deep-sleep mode (optional, uncomment below to enable)\n  // #if SLEEP_SECONDS > 0\n  //   LoRa.sleep();\n  //   esp_sleep_enable_timer_wakeup(SLEEP_SECONDS * 1000000ULL);\n  //   esp_deep_sleep_start();\n  // #endif\n\n  delay(TX_INTERVAL_MS);\n}"
+      "sketch.ino": "/*\n* LoRa Weather Station - TRANSMITTER (Board 1)\n* ESP32 + SX1276/RFM95W + DHT22\n*\n* Reads temperature, humidity, and battery voltage.\n* Sends a JSON payload over LoRa every 30 seconds.\n* Designed for remote / battery-powered deployment.\n*\n* Libraries needed:\n*   - LoRa by Sandeep Mistry\n*   - DHT sensor library by Adafruit\n*   - ArduinoJson (for JSON serialization)\n*/\n\n#include <SPI.h>\n#include <LoRa.h>\n#include <DHT.h>\n#include <ArduinoJson.h>\n\n// --- Pin Definitions (ESP32 + LoRa SX1276) ---\n#define LORA_SS     5\n#define LORA_RST    14\n#define LORA_DIO0   26\n#define DHT_PIN     4\n\n\n// --- LoRa Parameters ---\n#define LORA_FREQ      868E6   // 868 MHz (EU) - change to 915E6 for US\n#define SF             10      // Spreading Factor (7-12). Higher = longer range, slower.\n#define BW             125000  // Bandwidth in Hz\n#define CR             5       // Coding Rate 4/5\n#define TX_POWER       17      // dBm (max 20 for SX1276)\n#define SYNC_WORD      0x12    // Sync word to filter own packets\n#define TX_INTERVAL_MS 5000   // Send every 5 seconds\n\n// --- DHT22 ---\n#define DHT_TYPE DHT22\nDHT dht(DHT_PIN, DHT_TYPE);\n\n// --- Battery voltage divider ratio ---\n// If using a 2:1 divider (R1=100k, R2=100k):\nconst float BATT_DIVIDER = 2.0;\nconst int adcPin = 34; // GPIO34 = ADC1, input-only battery sense pin\nconst float maxVoltage = 4.2; // Full battery\nconst float minVoltage = 2.5; // Empty battery\n\n// --- Packet counter ---\nunsigned long packetCount = 0;\n\n// --- Deep-sleep duration (set to 0 to disable) ---\n#define SLEEP_SECONDS 0   // Set >0 for deep-sleep between transmissions\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println();\n  Serial.println(\"========================================\");\n  Serial.println(\"  LoRa Weather Station - Transmitter\");\n  Serial.println(\"========================================\");\n\n// Battery voltage divider -> ADC pin (input-only GPIO34)\n  pinMode(adcPin, INPUT);\n\n// DHT22\n  dht.begin();\n  Serial.println(\"[INIT] DHT22 sensor ready.\");\n\n// LoRa\n  SPI.begin(18, 19, 23, LORA_SS);  // SCK, MISO, MOSI, SS\n  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);\n\n  if (!LoRa.begin(LORA_FREQ)) {\n    Serial.println(\"[ERROR] LoRa init failed!\");\n    while (1) { delay(1000); }\n  }\n\n// LoRa configuration\n  LoRa.setSpreadingFactor(SF);\n  LoRa.setSignalBandwidth(BW);\n  LoRa.setCodingRate4(CR);\n  LoRa.setTxPower(TX_POWER);\n  LoRa.setSyncWord(SYNC_WORD);\n  LoRa.enableCrc();\n  LoRa.setPreambleLength(8);\n\n  Serial.println(\"[INIT] LoRa radio configured.\");\n  Serial.print(\"  Frequency : \"); Serial.print(LORA_FREQ / 1E6); Serial.println(\" MHz\");\n  Serial.print(\"  SF        : \"); Serial.println(SF);\n  Serial.print(\"  Bandwidth : \"); Serial.print(BW / 1000); Serial.println(\" kHz\");\n  Serial.print(\"  TX Power  : \"); Serial.print(TX_POWER); Serial.println(\" dBm\");\n  Serial.println(\"---\");\n}\n\nfloat readBatteryVoltage() {\n  int raw = analogRead(BATT_ADC);\n  float voltage = (raw / (float)ADC_RESOLUTION) * ADC_VREF * BATT_DIVIDER;\n  return voltage;\n}\n\nvoid loop() {\n  packetCount++;\n\n// Read sensors\n  float temperature = dht.readTemperature();   // Celsius\n  float humidity    = dht.readHumidity();  \n\n  // Read calibrated millivolts if available, or raw analog read\n  int rawValue = analogRead(adcPin);\n  \n  // Convert raw reading to voltage at the pin (ESP32 ADC is 12-bit: 4095 = 3.3V roughly, \n  // but analogReadMillivolts() is more accurate)\n  float pinVoltage = analogReadMilliVolts(adcPin) / 1000.0;\n  \n  // Reconstruct actual battery voltage based on your voltage divider ratio (e.g., multiplier of 2 for equal resistors)\n  float batteryVoltage = pinVoltage * BATT_DIVIDER; \n  \n  // Calculate percentage (Linear approximation)\nfloat batteryPercentage = (batteryVoltage - minVoltage) / (maxVoltage - minVoltage) * 100.0;\n  batteryPercentage = constrain(batteryPercentage, 0.0, 100.0);\n  batteryPercentage = round(batteryPercentage * 100.0) / 100.0; // keep 2 decimal places\n\n// Check DHT read errors\n  bool dhtError = isnan(temperature) || isnan(humidity);\n\n// Build JSON payload\n  StaticJsonDocument<128> doc;\n  doc[\"id\"]    = \"ws-01\";          // Station ID\n  doc[\"pkt\"]   = packetCount;\n  doc[\"temp\"]  = dhtError ? -999.0 : round(temperature * 10.0) / 10.0;\n  doc[\"hum\"]   = dhtError ? -1.0   : round(humidity * 10.0) / 10.0;\n  doc[\"bat\"]   = batteryPercentage;\n\n  char payload[128];\n  serializeJson(doc, payload, sizeof(payload));\n\n// Print to local serial\n  Serial.print(\"[TX #\"); Serial.print(packetCount); Serial.print(\"] \");\n  Serial.println(payload);\n\n// Send over LoRa\n  LoRa.beginPacket();\n  LoRa.print(payload);\n  LoRa.endPacket();\n\n  Serial.println(\"  -> Packet sent!\");\n  Serial.println(\"---\");\n\n// Deep-sleep mode (optional, uncomment below to enable)\n// #if SLEEP_SECONDS > 0\n//   LoRa.sleep();\n//   esp_sleep_enable_timer_wakeup(SLEEP_SECONDS * 1000000ULL);\n//   esp_deep_sleep_start();\n// #endif\n\n  delay(TX_INTERVAL_MS);\n}"
     },
-    "board2Code": "/*\n * LoRa Weather Station - RECEIVER (Board 2)\n * ESP32 + SX1276/RFM95W + SSD1306 OLED\n *\n * Receives JSON weather packets from the Transmitter.\n * Displays temperature, humidity, battery, and signal\n * quality (RSSI/SNR) on a 128x64 OLED display.\n * Also logs all data to Serial Monitor.\n *\n * Libraries needed:\n *   - LoRa by Sandeep Mistry\n *   - Adafruit SSD1306\n *   - Adafruit GFX Library\n *   - ArduinoJson (for JSON deserialization)\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>\n#include <ArduinoJson.h>\n\n// --- Pin Definitions (ESP32 + LoRa SX1276) ---\n#define LORA_SS     5\n#define LORA_RST    14\n#define LORA_DIO0   26\n\n// --- OLED ---\n#define SCREEN_WIDTH  128\n#define SCREEN_HEIGHT 64\n#define OLED_SDA      21\n#define OLED_SCL      22\n#define OLED_RST      -1   // -1 if not connected\n\n// --- LoRa Parameters (must match Transmitter) ---\n#define LORA_FREQ   868E6\n#define SF          10\n#define BW          125000\n#define CR          5\n#define SYNC_WORD   0x12\n\n// --- Display ---\nAdafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);\n\n// --- Packet tracking ---\nunsigned long rxCount = 0;\nunsigned long lastPacketTime = 0;\nconst long TIMEOUT_MS = 90000;  // 90s without a packet = stale\n\n// --- Last known values ---\nfloat lastTemp     = -999;\nfloat lastHum      = -1;\nfloat lastBat      = 0;\nfloat lastRSSI     = 0;\nfloat lastSNR      = 0;\nString lastStationId = \"--\";\n\nvoid drawHeader() {\n  display.setTextSize(1);\n  display.setTextColor(SSD1306_WHITE);\n  display.setCursor(0, 0);\n  display.print(\"LoRa Weather Station\");\n  display.drawLine(0, 10, 127, 10, SSD1306_WHITE);\n}\n\nvoid updateDisplay() {\n  display.clearDisplay();\n  drawHeader();\n\n  display.setTextSize(1);\n\n  // Station ID + packet count\n  display.setCursor(0, 14);\n  display.print(\"Station: \");\n  display.print(lastStationId);\n  display.print(\"  #\");\n  display.print(rxCount);\n\n  // Temperature\n  display.setCursor(0, 26);\n  display.print(\"Temp : \");\n  if (lastTemp > -900) {\n    display.print(lastTemp, 1);\n    display.print(\" C\");\n  } else {\n    display.print(\"ERR\");\n  }\n\n  // Humidity\n  display.setCursor(0, 36);\n  display.print(\"Hum  : \");\n  if (lastHum >= 0) {\n    display.print(lastHum, 1);\n    display.print(\" %\");\n  } else {\n    display.print(\"ERR\");\n  }\n\n  // Battery\n  display.setCursor(0, 46);\n  display.print(\"Batt : \");\n  display.print(lastBat, 2);\n  display.print(\" V\");\n\n  // Signal quality\n  display.setCursor(0, 56);\n  display.print(\"RSSI:\");\n  display.print((int)lastRSSI);\n  display.print(\"  SNR:\");\n  display.print(lastSNR, 1);\n\n  // Stale indicator\n  if (millis() - lastPacketTime > TIMEOUT_MS && lastPacketTime > 0) {\n    display.setTextSize(1);\n    display.setCursor(100, 14);\n    display.print(\"STALE\");\n  }\n\n  display.display();\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println();\n  Serial.println(\"========================================\");\n  Serial.println(\"  LoRa Weather Station - Receiver\");\n  Serial.println(\"========================================\");\n\n  // OLED reset\n  if (OLED_RST > 0) {\n    pinMode(OLED_RST, OUTPUT);\n    digitalWrite(OLED_RST, LOW);\n    delay(20);\n    digitalWrite(OLED_RST, HIGH);\n  }\n\n  Wire.begin(OLED_SDA, OLED_SCL);\n  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {\n    Serial.println(\"[ERROR] OLED init failed!\");\n    while (1) { delay(1000); }\n  }\n  display.clearDisplay();\n  display.setTextSize(1);\n  display.setTextColor(SSD1306_WHITE);\n  display.setCursor(0, 0);\n  display.println(\"Waiting for LoRa...\");\n  display.display();\n  Serial.println(\"[INIT] OLED display ready.\");\n\n  // LoRa\n  SPI.begin(18, 19, 23, LORA_SS);\n  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);\n\n  if (!LoRa.begin(LORA_FREQ)) {\n    Serial.println(\"[ERROR] LoRa init failed!\");\n    while (1) { delay(1000); }\n  }\n\n  LoRa.setSpreadingFactor(SF);\n  LoRa.setSignalBandwidth(BW);\n  LoRa.setCodingRate4(CR);\n  LoRa.setSyncWord(SYNC_WORD);\n  LoRa.enableCrc();\n\n  Serial.println(\"[INIT] LoRa radio configured.\");\n  Serial.print(\"  Listening on \"); Serial.print(LORA_FREQ / 1E6); Serial.println(\" MHz\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  int packetSize = LoRa.parsePacket();\n\n  if (packetSize) {\n    rxCount++;\n    lastPacketTime = millis();\n\n    // Read the raw payload\n    char buffer[128];\n    int idx = 0;\n    while (LoRa.available() && idx < (int)sizeof(buffer) - 1) {\n      buffer[idx++] = (char)LoRa.read();\n    }\n    buffer[idx] = 0;\n\n    // Signal quality\n    lastRSSI = LoRa.packetRssi();\n    lastSNR  = LoRa.packetSnr();\n\n    // Parse JSON\n    StaticJsonDocument<128> doc;\n    DeserializationError err = deserializeJson(doc, buffer);\n\n    if (!err) {\n      lastStationId = doc[\"id\"].as<String>();\n      lastTemp      = doc[\"temp\"].as<float>();\n      lastHum       = doc[\"hum\"].as<float>();\n      lastBat       = doc[\"bat\"].as<float>();\n\n      // Serial log\n      Serial.print(\"[RX #\"); Serial.print(rxCount); Serial.print(\"] \");\n      Serial.print(\"Station:\"); Serial.print(lastStationId);\n      Serial.print(\" Temp:\"); Serial.print(lastTemp, 1);\n      Serial.print(\"C  Hum:\"); Serial.print(lastHum, 1);\n      Serial.print(\"%  Bat:\"); Serial.print(lastBat, 2);\n      Serial.print(\"V  RSSI:\"); Serial.print((int)lastRSSI);\n      Serial.print(\"dBm  SNR:\"); Serial.print(lastSNR, 1);\n      Serial.println(\"dB\");\n    } else {\n      Serial.print(\"[RX] JSON parse error: \");\n      Serial.println(err.c_str());\n      Serial.print(\"  Raw: \");\n      Serial.println(buffer);\n    }\n\n    Serial.println(\"---\");\n    updateDisplay();\n  }\n}"
+    "board2Code": "/*\n * LoRa Weather Station - RECEIVER (Board 2)\n * ESP32 + SX1276/RFM95W + SSD1306 OLED\n *\n * Receives JSON weather packets from the Transmitter.\n * Displays temperature, humidity, battery, and signal\n * quality (RSSI/SNR) on a 128x64 OLED display.\n * Also logs all data to Serial Monitor.\n *\n * Libraries needed:\n *   - LoRa by Sandeep Mistry\n *   - Adafruit SSD1306\n *   - Adafruit GFX Library\n *   - ArduinoJson (for JSON deserialization)\n */\n\n#include <SPI.h>\n#include <LoRa.h>\n#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>\n#include <ArduinoJson.h>\n\n// --- Pin Definitions (ESP32 + LoRa SX1276) ---\n#define LORA_SS     5\n#define LORA_RST    14\n#define LORA_DIO0   26\n\n// --- OLED ---\n#define SCREEN_WIDTH  128\n#define SCREEN_HEIGHT 64\n#define OLED_SDA      21\n#define OLED_SCL      22\n#define OLED_RST      -1   // -1 if not connected\n\n// --- LoRa Parameters (must match Transmitter) ---\n#define LORA_FREQ   868E6\n#define SF          10\n#define BW          125000\n#define CR          5\n#define SYNC_WORD   0x12\n\n// --- Display ---\nAdafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);\n\n// --- Packet tracking ---\nunsigned long rxCount = 0;\nunsigned long lastPacketTime = 0;\nconst long TIMEOUT_MS = 90000;  // 90s without a packet = stale\n\n// --- Last known values ---\nfloat lastTemp     = -999;\nfloat lastHum      = -1;\nfloat lastBat      = 0;\nfloat lastRSSI     = 0;\nfloat lastSNR      = 0;\nString lastStationId = \"--\";\n\nvoid drawHeader() {\n  display.setTextSize(1);\n  display.setTextColor(SSD1306_WHITE);\n  display.setCursor(0, 0);\n  display.print(\"LoRa Weather Station\");\n  display.drawLine(0, 10, 127, 10, SSD1306_WHITE);\n}\n\nvoid updateDisplay() {\n  display.clearDisplay();\n  drawHeader();\n\n  display.setTextSize(1);\n\n  // Station ID + packet count\n  display.setCursor(0, 14);\n  display.print(\"Station: \");\n  display.print(lastStationId);\n  display.print(\"  #\");\n  display.print(rxCount);\n\n  // Temperature\n  display.setCursor(0, 26);\n  display.print(\"Temp : \");\n  if (lastTemp > -900) {\n    display.print(lastTemp, 1);\n    display.print(\" C\");\n  } else {\n    display.print(\"ERR\");\n  }\n\n  // Humidity\n  display.setCursor(0, 36);\n  display.print(\"Hum  : \");\n  if (lastHum >= 0) {\n    display.print(lastHum, 1);\n    display.print(\" %\");\n  } else {\n    display.print(\"ERR\");\n  }\n\n  // Battery\n  display.setCursor(0, 46);\n  display.print(\"Batt : \");\n  display.print(lastBat, 2);\n  display.print(\" %\");\n\n  // Signal quality\n  display.setCursor(0, 56);\n  display.print(\"RSSI:\");\n  display.print((int)lastRSSI);\n  display.print(\"  SNR:\");\n  display.print(lastSNR, 1);\n\n  // Stale indicator\n  if (millis() - lastPacketTime > TIMEOUT_MS && lastPacketTime > 0) {\n    display.setTextSize(1);\n    display.setCursor(100, 14);\n    display.print(\"STALE\");\n  }\n\n  display.display();\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  delay(1000);\n  Serial.println();\n  Serial.println(\"========================================\");\n  Serial.println(\"  LoRa Weather Station - Receiver\");\n  Serial.println(\"========================================\");\n\n  // OLED reset\n  if (OLED_RST > 0) {\n    pinMode(OLED_RST, OUTPUT);\n    digitalWrite(OLED_RST, LOW);\n    delay(20);\n    digitalWrite(OLED_RST, HIGH);\n  }\n\n  Wire.begin(OLED_SDA, OLED_SCL);\n  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {\n    Serial.println(\"[ERROR] OLED init failed!\");\n    while (1) { delay(1000); }\n  }\n  display.clearDisplay();\n  display.setTextSize(1);\n  display.setTextColor(SSD1306_WHITE);\n  display.setCursor(0, 0);\n  display.println(\"Waiting for LoRa...\");\n  display.display();\n  Serial.println(\"[INIT] OLED display ready.\");\n\n  // LoRa\n  SPI.begin(18, 19, 23, LORA_SS);\n  LoRa.setPins(LORA_SS, LORA_RST, LORA_DIO0);\n\n  if (!LoRa.begin(LORA_FREQ)) {\n    Serial.println(\"[ERROR] LoRa init failed!\");\n    while (1) { delay(1000); }\n  }\n\n  LoRa.setSpreadingFactor(SF);\n  LoRa.setSignalBandwidth(BW);\n  LoRa.setCodingRate4(CR);\n  LoRa.setSyncWord(SYNC_WORD);\n  LoRa.enableCrc();\n\n  Serial.println(\"[INIT] LoRa radio configured.\");\n  Serial.print(\"  Listening on \"); Serial.print(LORA_FREQ / 1E6); Serial.println(\" MHz\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  int packetSize = LoRa.parsePacket();\n\n  if (packetSize) {\n    rxCount++;\n    lastPacketTime = millis();\n\n    // Read the raw payload\n    char buffer[128];\n    int idx = 0;\n    while (LoRa.available() && idx < (int)sizeof(buffer) - 1) {\n      buffer[idx++] = (char)LoRa.read();\n    }\n    buffer[idx] = 0;\n\n    // Signal quality\n    lastRSSI = LoRa.packetRssi();\n    lastSNR  = LoRa.packetSnr();\n\n    // Parse JSON\n    StaticJsonDocument<128> doc;\n    DeserializationError err = deserializeJson(doc, buffer);\n\n    if (!err) {\n      lastStationId = doc[\"id\"].as<String>();\n      lastTemp      = doc[\"temp\"].as<float>();\n      lastHum       = doc[\"hum\"].as<float>();\n      lastBat       = doc[\"bat\"].as<float>();\n\n      // Serial log\n      Serial.print(\"[RX #\"); Serial.print(rxCount); Serial.print(\"] \");\n      Serial.print(\"Station:\"); Serial.print(lastStationId);\n      Serial.print(\" Temp:\"); Serial.print(lastTemp, 1);\n      Serial.print(\"C  Hum:\"); Serial.print(lastHum, 1);\n      Serial.print(\"%  Bat:\"); Serial.print(lastBat, 2);\n      Serial.print(\"V  RSSI:\"); Serial.print((int)lastRSSI);\n      Serial.print(\"dBm  SNR:\"); Serial.print(lastSNR, 1);\n      Serial.println(\"dB\");\n    } else {\n      Serial.print(\"[RX] JSON parse error: \");\n      Serial.println(err.c_str());\n      Serial.print(\"  Raw: \");\n      Serial.println(buffer);\n    }\n\n    Serial.println(\"---\");\n    updateDisplay();\n  }\n}"
   },
   {
     "id": "lpc2148_all_leds",
@@ -26399,24 +26038,20 @@ window.EXAMPLE_SKETCHES = [
         {
           "id": "b1",
           "type": "arduino_uno",
-          "x": 60,
-          "y": 540,
-          "width": 384.16,
-          "height": 299.04,
+          "x": 50,
+          "y": 420,
+          "rotation": 0,
           "props": {
             "label": "UNO"
           },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          "runtimeState": {}
         },
         {
           "id": "ssr1",
           "type": "ssr_8ch",
-          "x": 480,
-          "y": 340,
-          "width": 200,
-          "height": 96,
+          "x": 430,
+          "y": 300,
+          "rotation": 0,
           "props": {
             "label": "SSR-8CH",
             "trigger": "high"
@@ -26432,46 +26067,37 @@ window.EXAMPLE_SKETCHES = [
               false,
               false
             ]
-          },
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "batt1",
           "type": "battery",
           "x": 60,
           "y": 60,
-          "width": 271.6,
-          "height": 147.84,
+          "rotation": 0,
           "props": {
-            "voltage": 5
+            "voltage": 3.7
           },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          "runtimeState": {}
         },
         {
           "id": "r1",
           "type": "resistor",
-          "x": 442.36,
-          "y": 133.92,
-          "width": 35.28,
-          "height": 112,
+          "x": 436,
+          "y": 40,
+          "rotation": 0,
           "props": {
             "value": 220,
             "unit": "Ω"
           },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          "runtimeState": {}
         },
         {
           "id": "led1",
           "type": "led",
-          "x": 446,
-          "y": 260,
-          "width": 28,
-          "height": 67.2,
+          "x": 431,
+          "y": 112,
+          "rotation": 0,
           "props": {
             "color": "#ff3333",
             "colorName": "Red"
@@ -26480,36 +26106,30 @@ window.EXAMPLE_SKETCHES = [
             "val": 255,
             "lit": true,
             "brightness": 1,
-            "current_mA": 12.198581560283689,
+            "current_mA": 7.72,
             "overload": false,
             "blown": false,
             "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "r2",
           "type": "resistor",
-          "x": 492.36,
-          "y": 133.92,
-          "width": 35.28,
-          "height": 112,
+          "x": 460,
+          "y": 40,
+          "rotation": 0,
           "props": {
             "value": 220,
             "unit": "Ω"
           },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          "runtimeState": {}
         },
         {
           "id": "led2",
           "type": "led",
-          "x": 496,
-          "y": 260,
-          "width": 28,
-          "height": 67.2,
+          "x": 455,
+          "y": 112,
+          "rotation": 0,
           "props": {
             "color": "#ff3333",
             "colorName": "Red"
@@ -26522,32 +26142,26 @@ window.EXAMPLE_SKETCHES = [
             "overload": false,
             "blown": false,
             "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "r3",
           "type": "resistor",
-          "x": 542.36,
-          "y": 133.92,
-          "width": 35.28,
-          "height": 112,
+          "x": 484,
+          "y": 40,
+          "rotation": 0,
           "props": {
             "value": 220,
             "unit": "Ω"
           },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          "runtimeState": {}
         },
         {
           "id": "led3",
           "type": "led",
-          "x": 546,
-          "y": 260,
-          "width": 28,
-          "height": 67.2,
+          "x": 479,
+          "y": 112,
+          "rotation": 0,
           "props": {
             "color": "#ff3333",
             "colorName": "Red"
@@ -26560,32 +26174,26 @@ window.EXAMPLE_SKETCHES = [
             "overload": false,
             "blown": false,
             "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "r4",
           "type": "resistor",
-          "x": 592.36,
-          "y": 133.92,
-          "width": 35.28,
-          "height": 112,
+          "x": 508,
+          "y": 40,
+          "rotation": 0,
           "props": {
             "value": 220,
             "unit": "Ω"
           },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          "runtimeState": {}
         },
         {
           "id": "led4",
           "type": "led",
-          "x": 596,
-          "y": 260,
-          "width": 28,
-          "height": 67.2,
+          "x": 503,
+          "y": 112,
+          "rotation": 0,
           "props": {
             "color": "#ff3333",
             "colorName": "Red"
@@ -26598,32 +26206,26 @@ window.EXAMPLE_SKETCHES = [
             "overload": false,
             "blown": false,
             "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "r5",
           "type": "resistor",
-          "x": 642.36,
-          "y": 133.92,
-          "width": 35.28,
-          "height": 112,
+          "x": 532,
+          "y": 40,
+          "rotation": 0,
           "props": {
             "value": 220,
             "unit": "Ω"
           },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          "runtimeState": {}
         },
         {
           "id": "led5",
           "type": "led",
-          "x": 646,
-          "y": 260,
-          "width": 28,
-          "height": 67.2,
+          "x": 527,
+          "y": 112,
+          "rotation": 0,
           "props": {
             "color": "#ff3333",
             "colorName": "Red"
@@ -26636,32 +26238,26 @@ window.EXAMPLE_SKETCHES = [
             "overload": false,
             "blown": false,
             "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "r6",
           "type": "resistor",
-          "x": 692.36,
-          "y": 133.92,
-          "width": 35.28,
-          "height": 112,
+          "x": 556,
+          "y": 40,
+          "rotation": 0,
           "props": {
             "value": 220,
             "unit": "Ω"
           },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          "runtimeState": {}
         },
         {
           "id": "led6",
           "type": "led",
-          "x": 696,
-          "y": 260,
-          "width": 28,
-          "height": 67.2,
+          "x": 551,
+          "y": 112,
+          "rotation": 0,
           "props": {
             "color": "#ff3333",
             "colorName": "Red"
@@ -26674,32 +26270,26 @@ window.EXAMPLE_SKETCHES = [
             "overload": false,
             "blown": false,
             "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "r7",
           "type": "resistor",
-          "x": 742.36,
-          "y": 133.92,
-          "width": 35.28,
-          "height": 112,
+          "x": 580,
+          "y": 40,
+          "rotation": 0,
           "props": {
             "value": 220,
             "unit": "Ω"
           },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          "runtimeState": {}
         },
         {
           "id": "led7",
           "type": "led",
-          "x": 746,
-          "y": 260,
-          "width": 28,
-          "height": 67.2,
+          "x": 575,
+          "y": 112,
+          "rotation": 0,
           "props": {
             "color": "#ff3333",
             "colorName": "Red"
@@ -26712,32 +26302,26 @@ window.EXAMPLE_SKETCHES = [
             "overload": false,
             "blown": false,
             "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "r8",
           "type": "resistor",
-          "x": 792.36,
-          "y": 133.92,
-          "width": 35.28,
-          "height": 112,
+          "x": 604,
+          "y": 40,
+          "rotation": 0,
           "props": {
             "value": 220,
             "unit": "Ω"
           },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          "runtimeState": {}
         },
         {
           "id": "led8",
           "type": "led",
-          "x": 796,
-          "y": 260,
-          "width": 28,
-          "height": 67.2,
+          "x": 599,
+          "y": 112,
+          "rotation": 0,
           "props": {
             "color": "#ff3333",
             "colorName": "Red"
@@ -26750,9 +26334,7 @@ window.EXAMPLE_SKETCHES = [
             "overload": false,
             "blown": false,
             "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+          }
         }
       ],
       "wires": [
@@ -26873,24 +26455,12 @@ window.EXAMPLE_SKETCHES = [
           "color": null,
           "waypoints": [
             {
-              "x": 303.86,
-              "y": 807.14
+              "x": 196,
+              "y": 574
             },
             {
-              "x": 303.86,
-              "y": 870
-            },
-            {
-              "x": 760,
-              "y": 870
-            },
-            {
-              "x": 760,
-              "y": 470
-            },
-            {
-              "x": 504,
-              "y": 436
+              "x": 454,
+              "y": 574
             }
           ]
         },
@@ -26907,381 +26477,17 @@ window.EXAMPLE_SKETCHES = [
           "color": null,
           "waypoints": [
             {
-              "x": 257.09000000000003,
-              "y": 807.14
+              "x": 168,
+              "y": 592
             },
             {
-              "x": 257.09000000000003,
-              "y": 895
-            },
-            {
-              "x": 790,
-              "y": 895
-            },
-            {
-              "x": 790,
-              "y": 500
-            },
-            {
-              "x": 520,
-              "y": 436
+              "x": 470,
+              "y": 592
             }
           ]
         },
         {
           "id": "w11",
-          "from": {
-            "instId": "r1",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "led1",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 460,
-              "y": 245.92
-            },
-            {
-              "x": 460,
-              "y": 260
-            }
-          ]
-        },
-        {
-          "id": "w12",
-          "from": {
-            "instId": "led1",
-            "pinId": "cathode"
-          },
-          "to": {
-            "instId": "ssr1",
-            "pinId": "out1a"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 460,
-              "y": 327.2
-            },
-            {
-              "x": 496,
-              "y": 340
-            }
-          ]
-        },
-        {
-          "id": "w13",
-          "from": {
-            "instId": "r2",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "led2",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 510,
-              "y": 245.92
-            },
-            {
-              "x": 510,
-              "y": 260
-            }
-          ]
-        },
-        {
-          "id": "w14",
-          "from": {
-            "instId": "led2",
-            "pinId": "cathode"
-          },
-          "to": {
-            "instId": "ssr1",
-            "pinId": "out2a"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 510,
-              "y": 327.2
-            },
-            {
-              "x": 520,
-              "y": 340
-            }
-          ]
-        },
-        {
-          "id": "w15",
-          "from": {
-            "instId": "r3",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "led3",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 560,
-              "y": 245.92
-            },
-            {
-              "x": 560,
-              "y": 260
-            }
-          ]
-        },
-        {
-          "id": "w16",
-          "from": {
-            "instId": "led3",
-            "pinId": "cathode"
-          },
-          "to": {
-            "instId": "ssr1",
-            "pinId": "out3a"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 560,
-              "y": 327.2
-            },
-            {
-              "x": 544,
-              "y": 340
-            }
-          ]
-        },
-        {
-          "id": "w17",
-          "from": {
-            "instId": "r4",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "led4",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 610,
-              "y": 245.92
-            },
-            {
-              "x": 610,
-              "y": 260
-            }
-          ]
-        },
-        {
-          "id": "w18",
-          "from": {
-            "instId": "led4",
-            "pinId": "cathode"
-          },
-          "to": {
-            "instId": "ssr1",
-            "pinId": "out4a"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 610,
-              "y": 327.2
-            },
-            {
-              "x": 568,
-              "y": 340
-            }
-          ]
-        },
-        {
-          "id": "w19",
-          "from": {
-            "instId": "r5",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "led5",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 660,
-              "y": 245.92
-            },
-            {
-              "x": 660,
-              "y": 260
-            }
-          ]
-        },
-        {
-          "id": "w20",
-          "from": {
-            "instId": "led5",
-            "pinId": "cathode"
-          },
-          "to": {
-            "instId": "ssr1",
-            "pinId": "out5a"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 660,
-              "y": 327.2
-            },
-            {
-              "x": 592,
-              "y": 340
-            }
-          ]
-        },
-        {
-          "id": "w21",
-          "from": {
-            "instId": "r6",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "led6",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 710,
-              "y": 245.92
-            },
-            {
-              "x": 710,
-              "y": 260
-            }
-          ]
-        },
-        {
-          "id": "w22",
-          "from": {
-            "instId": "led6",
-            "pinId": "cathode"
-          },
-          "to": {
-            "instId": "ssr1",
-            "pinId": "out6a"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 710,
-              "y": 327.2
-            },
-            {
-              "x": 616,
-              "y": 340
-            }
-          ]
-        },
-        {
-          "id": "w23",
-          "from": {
-            "instId": "r7",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "led7",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 760,
-              "y": 245.92
-            },
-            {
-              "x": 760,
-              "y": 260
-            }
-          ]
-        },
-        {
-          "id": "w24",
-          "from": {
-            "instId": "led7",
-            "pinId": "cathode"
-          },
-          "to": {
-            "instId": "ssr1",
-            "pinId": "out7a"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 760,
-              "y": 327.2
-            },
-            {
-              "x": 640,
-              "y": 340
-            }
-          ]
-        },
-        {
-          "id": "w25",
-          "from": {
-            "instId": "r8",
-            "pinId": "p2"
-          },
-          "to": {
-            "instId": "led8",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 810,
-              "y": 245.92
-            },
-            {
-              "x": 810,
-              "y": 260
-            }
-          ]
-        },
-        {
-          "id": "w26",
-          "from": {
-            "instId": "led8",
-            "pinId": "cathode"
-          },
-          "to": {
-            "instId": "ssr1",
-            "pinId": "out8a"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 810,
-              "y": 327.2
-            },
-            {
-              "x": 664,
-              "y": 340
-            }
-          ]
-        },
-        {
-          "id": "w27",
           "from": {
             "instId": "batt1",
             "pinId": "pos"
@@ -27291,10 +26497,19 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "p1"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [
+            {
+              "x": 215,
+              "y": 99
+            },
+            {
+              "x": 215,
+              "y": 40
+            }
+          ]
         },
         {
-          "id": "w28",
+          "id": "w12",
           "from": {
             "instId": "r1",
             "pinId": "p1"
@@ -27307,7 +26522,7 @@ window.EXAMPLE_SKETCHES = [
           "waypoints": []
         },
         {
-          "id": "w29",
+          "id": "w13",
           "from": {
             "instId": "r2",
             "pinId": "p1"
@@ -27320,7 +26535,7 @@ window.EXAMPLE_SKETCHES = [
           "waypoints": []
         },
         {
-          "id": "w30",
+          "id": "w14",
           "from": {
             "instId": "r3",
             "pinId": "p1"
@@ -27333,7 +26548,7 @@ window.EXAMPLE_SKETCHES = [
           "waypoints": []
         },
         {
-          "id": "w31",
+          "id": "w15",
           "from": {
             "instId": "r4",
             "pinId": "p1"
@@ -27346,7 +26561,7 @@ window.EXAMPLE_SKETCHES = [
           "waypoints": []
         },
         {
-          "id": "w32",
+          "id": "w16",
           "from": {
             "instId": "r5",
             "pinId": "p1"
@@ -27359,7 +26574,7 @@ window.EXAMPLE_SKETCHES = [
           "waypoints": []
         },
         {
-          "id": "w33",
+          "id": "w17",
           "from": {
             "instId": "r6",
             "pinId": "p1"
@@ -27372,7 +26587,7 @@ window.EXAMPLE_SKETCHES = [
           "waypoints": []
         },
         {
-          "id": "w34",
+          "id": "w18",
           "from": {
             "instId": "r7",
             "pinId": "p1"
@@ -27380,6 +26595,214 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "r8",
             "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w19",
+          "from": {
+            "instId": "r1",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "led1",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w20",
+          "from": {
+            "instId": "led1",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "ssr1",
+            "pinId": "out1a"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w21",
+          "from": {
+            "instId": "r2",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "led2",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w22",
+          "from": {
+            "instId": "led2",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "ssr1",
+            "pinId": "out2a"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w23",
+          "from": {
+            "instId": "r3",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "led3",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w24",
+          "from": {
+            "instId": "led3",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "ssr1",
+            "pinId": "out3a"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w25",
+          "from": {
+            "instId": "r4",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "led4",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w26",
+          "from": {
+            "instId": "led4",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "ssr1",
+            "pinId": "out4a"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w27",
+          "from": {
+            "instId": "r5",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "led5",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w28",
+          "from": {
+            "instId": "led5",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "ssr1",
+            "pinId": "out5a"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w29",
+          "from": {
+            "instId": "r6",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "led6",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w30",
+          "from": {
+            "instId": "led6",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "ssr1",
+            "pinId": "out6a"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w31",
+          "from": {
+            "instId": "r7",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "led7",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w32",
+          "from": {
+            "instId": "led7",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "ssr1",
+            "pinId": "out7a"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w33",
+          "from": {
+            "instId": "r8",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "led8",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "w34",
+          "from": {
+            "instId": "led8",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "ssr1",
+            "pinId": "out8a"
           },
           "color": null,
           "waypoints": []
@@ -27391,65 +26814,23 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "out1b"
           },
           "to": {
-            "instId": "batt1",
-            "pinId": "neg"
-          },
-          "color": null,
-          "waypoints": [
-            {
-              "x": 507,
-              "y": 340
-            },
-            {
-              "x": 507,
-              "y": 326
-            },
-            {
-              "x": 430,
-              "y": 326
-            },
-            {
-              "x": 430,
-              "y": 230
-            },
-            {
-              "x": 40,
-              "y": 230
-            },
-            {
-              "x": 40,
-              "y": 133.92000000000002
-            },
-            {
-              "x": 63.77,
-              "y": 133.92000000000002
-            }
-          ]
-        },
-        {
-          "id": "w36",
-          "from": {
-            "instId": "ssr1",
-            "pinId": "out1b"
-          },
-          "to": {
             "instId": "ssr1",
             "pinId": "out2b"
           },
           "color": null,
           "waypoints": [
             {
-              "x": 507,
-              "y": 326
+              "x": 457,
+              "y": 260
             },
             {
-              "x": 531,
-              "y": 326
+              "x": 481,
+              "y": 260
             }
           ]
         },
         {
-          "id": "w37",
+          "id": "w36",
           "from": {
             "instId": "ssr1",
             "pinId": "out2b"
@@ -27461,17 +26842,17 @@ window.EXAMPLE_SKETCHES = [
           "color": null,
           "waypoints": [
             {
-              "x": 531,
-              "y": 326
+              "x": 481,
+              "y": 260
             },
             {
-              "x": 555,
-              "y": 326
+              "x": 505,
+              "y": 260
             }
           ]
         },
         {
-          "id": "w38",
+          "id": "w37",
           "from": {
             "instId": "ssr1",
             "pinId": "out3b"
@@ -27483,17 +26864,17 @@ window.EXAMPLE_SKETCHES = [
           "color": null,
           "waypoints": [
             {
-              "x": 555,
-              "y": 326
+              "x": 505,
+              "y": 260
             },
             {
-              "x": 579,
-              "y": 326
+              "x": 529,
+              "y": 260
             }
           ]
         },
         {
-          "id": "w39",
+          "id": "w38",
           "from": {
             "instId": "ssr1",
             "pinId": "out4b"
@@ -27505,17 +26886,17 @@ window.EXAMPLE_SKETCHES = [
           "color": null,
           "waypoints": [
             {
-              "x": 579,
-              "y": 326
+              "x": 529,
+              "y": 260
             },
             {
-              "x": 603,
-              "y": 326
+              "x": 553,
+              "y": 260
             }
           ]
         },
         {
-          "id": "w40",
+          "id": "w39",
           "from": {
             "instId": "ssr1",
             "pinId": "out5b"
@@ -27527,17 +26908,17 @@ window.EXAMPLE_SKETCHES = [
           "color": null,
           "waypoints": [
             {
-              "x": 603,
-              "y": 326
+              "x": 553,
+              "y": 260
             },
             {
-              "x": 627,
-              "y": 326
+              "x": 577,
+              "y": 260
             }
           ]
         },
         {
-          "id": "w41",
+          "id": "w40",
           "from": {
             "instId": "ssr1",
             "pinId": "out6b"
@@ -27549,17 +26930,17 @@ window.EXAMPLE_SKETCHES = [
           "color": null,
           "waypoints": [
             {
-              "x": 627,
-              "y": 326
+              "x": 577,
+              "y": 260
             },
             {
-              "x": 651,
-              "y": 326
+              "x": 601,
+              "y": 260
             }
           ]
         },
         {
-          "id": "w42",
+          "id": "w41",
           "from": {
             "instId": "ssr1",
             "pinId": "out7b"
@@ -27571,12 +26952,38 @@ window.EXAMPLE_SKETCHES = [
           "color": null,
           "waypoints": [
             {
-              "x": 651,
-              "y": 326
+              "x": 601,
+              "y": 260
             },
             {
-              "x": 675,
-              "y": 326
+              "x": 625,
+              "y": 260
+            }
+          ]
+        },
+        {
+          "id": "w42",
+          "from": {
+            "instId": "ssr1",
+            "pinId": "out1b"
+          },
+          "to": {
+            "instId": "batt1",
+            "pinId": "neg"
+          },
+          "color": null,
+          "waypoints": [
+            {
+              "x": 457,
+              "y": 260
+            },
+            {
+              "x": 40,
+              "y": 260
+            },
+            {
+              "x": 40,
+              "y": 99
             }
           ]
         }

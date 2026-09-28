@@ -182,6 +182,13 @@ class ElectricalEngine {
         }
         break;
       }
+      case 'ssr_8ch': {
+        const channels = inst.runtimeState?.channels || [];
+        for (let i = 1; i <= 8; i++) {
+          if (channels[i - 1]) conns.push([key(`out${i}a`), key(`out${i}b`)]);
+        }
+        break;
+      }
       case 'multimeter': {
         // In current mode, the multimeter is a short circuit (0Ω) — probes are
         // connected. props is the source of truth (runtimeState.mode mirrors it
@@ -791,6 +798,11 @@ class ElectricalEngine {
       } else if (inst.type === 'relay') {
         const on = inst.runtimeState?.active;
         addEdge(key('com'), key(on ? 'no' : 'nc'), 0);
+      } else if (inst.type === 'ssr_8ch') {
+        const channels = inst.runtimeState?.channels || [];
+        for (let i = 1; i <= 8; i++) {
+          if (channels[i - 1]) addEdge(key(`out${i}a`), key(`out${i}b`), 0);
+        }
       }
     }
 
