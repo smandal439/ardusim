@@ -1,0 +1,276 @@
+{
+  "id": "multiplexer_using_74153",
+  "name": "MULTIPLEXER USING 74153",
+  "icon": "🔧",
+  "desc": "A custom MULTIPLEXER USING 74153 circuit example.",
+  "tags": [
+    "custom",
+    "circuit"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1790407814870_n65zd",
+        "type": "ic_74hc153",
+        "x": 345,
+        "y": 310,
+        "rotation": 1,
+        "props": {}
+      },
+      {
+        "id": "comp_1790407845390_jvgbi",
+        "type": "logic_level_in",
+        "x": 290,
+        "y": 220,
+        "rotation": 0,
+        "props": {
+          "level": 0
+        }
+      },
+      {
+        "id": "comp_1790407846686_k2u8m",
+        "type": "logic_level_in",
+        "x": 290,
+        "y": 195,
+        "rotation": 0,
+        "props": {
+          "level": 0
+        }
+      },
+      {
+        "id": "comp_1790407847905_ek1x1",
+        "type": "logic_level_in",
+        "x": 505,
+        "y": 265,
+        "rotation": 0,
+        "props": {
+          "level": 1
+        }
+      },
+      {
+        "id": "comp_1790407849462_0nrem",
+        "type": "logic_level_in",
+        "x": 505,
+        "y": 240,
+        "rotation": 0,
+        "props": {
+          "level": 1
+        }
+      },
+      {
+        "id": "comp_1790407850825_i1elk",
+        "type": "logic_level_in",
+        "x": 505,
+        "y": 290,
+        "rotation": 0,
+        "props": {
+          "level": 0
+        }
+      },
+      {
+        "id": "comp_1790407991522_1avxv",
+        "type": "power_5v",
+        "x": 475,
+        "y": 190,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_1790407995113_zhobv",
+        "type": "power_gnd",
+        "x": 330,
+        "y": 410,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_1790408374841_u4nve",
+        "type": "logic_level_out",
+        "x": 510,
+        "y": 385,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "logic_level_in_1790581878845_jzol2",
+        "type": "logic_level_in",
+        "x": 505,
+        "y": 315,
+        "rotation": 0,
+        "props": {
+          "level": 0
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1790407998353_o27r6",
+        "from": {
+          "instId": "comp_1790407995113_zhobv",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "comp_1790407814870_n65zd",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790408000072_mkve2",
+        "from": {
+          "instId": "comp_1790407814870_n65zd",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "comp_1790407991522_1avxv",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790408051034_1mvma",
+        "from": {
+          "instId": "comp_1790407814870_n65zd",
+          "pinId": "S1"
+        },
+        "to": {
+          "instId": "comp_1790407845390_jvgbi",
+          "pinId": "out"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790408058503_5wcry",
+        "from": {
+          "instId": "comp_1790407814870_n65zd",
+          "pinId": "S0"
+        },
+        "to": {
+          "instId": "comp_1790407846686_k2u8m",
+          "pinId": "out"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790408353386_9j77h",
+        "from": {
+          "instId": "comp_1790407814870_n65zd",
+          "pinId": "I3_2"
+        },
+        "to": {
+          "instId": "comp_1790407849462_0nrem",
+          "pinId": "out"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790408355665_rwf9x",
+        "from": {
+          "instId": "comp_1790407814870_n65zd",
+          "pinId": "I2_2"
+        },
+        "to": {
+          "instId": "comp_1790407847905_ek1x1",
+          "pinId": "out"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790408357826_kn2mn",
+        "from": {
+          "instId": "comp_1790407814870_n65zd",
+          "pinId": "I1_2"
+        },
+        "to": {
+          "instId": "comp_1790407850825_i1elk",
+          "pinId": "out"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790408383960_fm13r",
+        "from": {
+          "instId": "comp_1790407814870_n65zd",
+          "pinId": "Y2"
+        },
+        "to": {
+          "instId": "comp_1790408374841_u4nve",
+          "pinId": "in"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790581802581_4cfgs",
+        "from": {
+          "instId": "comp_1790407995113_zhobv",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "comp_1790407814870_n65zd",
+          "pinId": "E1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790581805433_4fiwn",
+        "from": {
+          "instId": "comp_1790407995113_zhobv",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "comp_1790407814870_n65zd",
+          "pinId": "E2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1790581883242_8kmjy",
+        "from": {
+          "instId": "comp_1790407814870_n65zd",
+          "pinId": "I0_2"
+        },
+        "to": {
+          "instId": "logic_level_in_1790581878845_jzol2",
+          "pinId": "out"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "void setup() {\n\n}\n\nvoid loop() {\n\n}"
+  }
+}
