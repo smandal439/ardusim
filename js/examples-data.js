@@ -16884,10 +16884,10 @@ window.EXAMPLE_SKETCHES = [
     "id": "lora_weather_station_sensor_tx_receiver_display",
     "name": "LoRa Weather Station (Sensor TX + Receiver Display)",
     "icon": "🔧",
-    "desc": "A custom LoRa Weather Station (Sensor TX + Receiver Display) circuit example.",
+    "desc": "A custom LoRa weather station circuit example with a transmitter (sensor) and receiver (display).",
     "tags": [
-      "custom",
-      "circuit"
+      "lora",
+      "weather"
     ],
     "circuit": {
       "components": [
