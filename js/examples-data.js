@@ -3567,7 +3567,7 @@ window.EXAMPLE_SKETCHES = [
           "id": "wire_1790275028667_bqy2t",
           "from": {
             "instId": "comp_1790274702062_i4hby",
-            "pinId": "D13"
+            "pinId": "D34"
           },
           "to": {
             "instId": "comp_1790274749260_xwqsb",
@@ -3611,7 +3611,7 @@ window.EXAMPLE_SKETCHES = [
       ]
     },
     "files": {
-      "sketch.ino": "const int adcPin = 13; // Change to your GPIO pin\nconst float maxVoltage = 4.2; // Full battery\nconst float minVoltage = 2.5; // Empty battery\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(adcPin, INPUT);\n}\n\nvoid loop() {\n  // Read calibrated millivolts if available, or raw analog read\n  int rawValue = analogRead(adcPin);\n  \n  // Convert raw reading to voltage at the pin (ESP32 ADC is 12-bit: 4095 = 3.3V roughly, \n  // but analogReadMillivolts() is more accurate)\n  float pinVoltage = analogReadMilliVolts(adcPin) / 1000.0;\n  \n  // Reconstruct actual battery voltage based on your voltage divider ratio (e.g., multiplier of 2 for equal resistors)\n  float batteryVoltage = pinVoltage * 2.0; \n  \n  // Calculate percentage (Linear approximation)\n  int batteryPercentage = (int)((batteryVoltage - minVoltage) / (maxVoltage - minVoltage) * 100.0);\n  batteryPercentage = constrain(batteryPercentage, 0, 100);\n\n  Serial.print(\"Voltage: \");\n  Serial.print(batteryVoltage);\n  Serial.print(\" V  |  \");\n  Serial.print(batteryPercentage);\n  Serial.println(\" %\");\n  \n  delay(2000);\n}\n"
+      "sketch.ino": "const int adcPin = 34; // GPIO34 = ADC1, input-only battery sense pin\nconst float maxVoltage = 4.2; // Full battery\nconst float minVoltage = 2.5; // Empty battery\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(adcPin, INPUT);\n}\n\nvoid loop() {\n  // Read calibrated millivolts if available, or raw analog read\n  int rawValue = analogRead(adcPin);\n  \n  // Convert raw reading to voltage at the pin (ESP32 ADC is 12-bit: 4095 = 3.3V roughly, \n  // but analogReadMillivolts() is more accurate)\n  float pinVoltage = analogReadMilliVolts(adcPin) / 1000.0;\n  \n  // Reconstruct actual battery voltage based on your voltage divider ratio (e.g., multiplier of 2 for equal resistors)\n  float batteryVoltage = pinVoltage * 2.0; \n  \n  // Calculate percentage (Linear approximation)\n  int batteryPercentage = (int)((batteryVoltage - minVoltage) / (maxVoltage - minVoltage) * 100.0);\n  batteryPercentage = constrain(batteryPercentage, 0, 100);\n\n  Serial.print(\"Voltage: \");\n  Serial.print(batteryVoltage);\n  Serial.print(\" V  |  \");\n  Serial.print(batteryPercentage);\n  Serial.println(\" %\");\n  \n  delay(2000);\n}\n"
     }
   },
   {

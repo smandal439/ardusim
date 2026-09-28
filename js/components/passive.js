@@ -29,7 +29,10 @@ defComp({
   draw(ctx, inst, sim) {
     const { x, y } = inst;
     const val = inst.props.value || 220;
-    const bands = resistorBands(val);
+    // Bands encode ohms, so scale by the selected unit (Ω / kΩ / MΩ)
+    const ohms = val
+      * (inst.props.unit === 'kΩ' ? 1e3 : inst.props.unit === 'MΩ' ? 1e6 : 1);
+    const bands = resistorBands(ohms);
 
     ctx.save();
     ctx.translate(x, y);

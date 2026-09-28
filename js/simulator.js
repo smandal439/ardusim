@@ -970,19 +970,35 @@ class ArduinoSimulator {
                 label = picoMap[pinNum] || null;
               }
 
+              const toAdc = (measured) => {
+                // _readAnalogInput returns 0..1023 (normalized). The ESP32
+                // ADC is 12-bit on real hardware, so scale up to 0..4095.
+                const adcMax = board.type === 'esp32_devkit_v1' ? 4095 : 1023;
+                const scaled = adcMax === 1023 ? measured : (measured / 1023) * adcMax;
+                const adc = Math.max(0, Math.min(adcMax, Math.round(scaled)));
+                if (self.pinStates[key] !== adc) {
+                  self.pinStates[key] = adc;
+                  self._emitPinChange(key, adc);
+                }
+                return adc;
+              };
+
               if (label) {
                 const measured = Number(canvas._readAnalogInput(board.id, label));
-                if (Number.isFinite(measured)) {
-                  // _readAnalogInput returns 0..1023 (normalized). The ESP32
-                  // ADC is 12-bit on real hardware, so scale up to 0..4095.
-                  const adcMax = board.type === 'esp32_devkit_v1' ? 4095 : 1023;
-                  const scaled = adcMax === 1023 ? measured : (measured / 1023) * adcMax;
-                  const adc = Math.max(0, Math.min(adcMax, Math.round(scaled)));
-                  if (self.pinStates[key] !== adc) {
-                    self.pinStates[key] = adc;
-                    self._emitPinChange(key, adc);
-                  }
-                  return adc;
+                if (Number.isFinite(measured)) return toAdc(measured);
+              } else if (typeof canvas._getWireTarget === 'function') {
+                // Pins outside the ADC label map (e.g. GPIO13) still read the
+                // solved nodal voltage when something is wired to them —
+                // otherwise a voltage divider on a non-ADC pin falls back to
+                // the digital 0/1 feedback value and reports 0 volts.
+                const def = (window.ArduinoComponents || {}).COMPONENT_DEFS;
+                const pinDef = def && def[board.type] && def[board.type].pins
+                  ? def[board.type].pins.find(p => p.type !== 'power' && p.type !== 'gnd'
+                    && canvas._pinToNumber(p.id) === pinNum)
+                  : null;
+                if (pinDef && canvas._getWireTarget(board.id, pinDef.id)) {
+                  const measured = Number(canvas._readAnalogInput(board.id, pinDef.id));
+                  if (Number.isFinite(measured)) return toAdc(measured);
                 }
               }
             }
@@ -1232,12 +1248,15 @@ class ArduinoSimulator {
           self._emitPinChange(key, v);
         },
         analogReadMilliVolts(pin) {
-          const v = self.pinStates[`pin_${pin}`];
-          if (v === undefined || v === null) return 0;
+          // Resolve the reading through analogRead() so it comes from the
+          // solved nodal voltage. Reading pinStates directly picked up only
+          // the digital 0/1 feedback that updateSimState() leaves there
+          // between frames, which made battery-divider sketches report 0 mV.
+          const adc = Number(this.analogRead(pin)) || 0;
           // Simulation stores analog values in the board's ADC range
           // (0-1023 for 10-bit boards, 0-4095 for the 12-bit ESP32 ADC).
           const adcMax = self.board === 'esp32_devkit_v1' ? 4095 : 1023;
-          return Math.round((Number(v) || 0) * 3300 / adcMax);
+          return Math.round(adc * 3300 / adcMax);
         },
         analogReadMicroVolts(pin) { return this.analogReadMilliVolts(pin) * 1000; },
         touchRead(pin) { return 0; },
