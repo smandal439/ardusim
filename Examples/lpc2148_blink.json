@@ -10,5 +10,7 @@
     ],
     "wires": []
   },
-  "code": "/*\n * LPC2148 SmartX Board - Onboard LED1 Blink\n * P0.12 drives the red LED1 using register-level GPIO.\n * No external wiring required - just press Run!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    IO0DIR |= (1 << 12);      // P0.12 = output (LED1)\n    while (1) {\n        IO0SET = (1 << 12);   // Set P0.12 HIGH - LED ON\n        delay_ms(500);\n        IO0CLR = (1 << 12);   // Set P0.12 LOW - LED OFF\n        delay_ms(500);\n    }\n}"
+  "files": {
+    "main.c": "/*\n * LPC2148 SmartX Board - Onboard LED1 Blink\n * P0.12 drives the red LED1 using register-level GPIO.\n * No external wiring required - just press Run!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    IO0DIR |= (1 << 12);      // P0.12 = output (LED1)\n    while (1) {\n        IO0SET = (1 << 12);   // Set P0.12 HIGH - LED ON\n        delay_ms(500);\n        IO0CLR = (1 << 12);   // Set P0.12 LOW - LED OFF\n        delay_ms(500);\n    }\n}"
+  }
 }

@@ -24,6 +24,6 @@
     "wires": []
   },
   "files": {
-    "sketch.ino": "; LOAD 23H to register D and 5643H to register BC. \n; Copy the content of D register to A register.\n\n;CODE:\nMVI D,23H\nLXI B,5643H\nMOV A,D\nHLT\n\n;END OF CODE"
+    "sketch.asm": "; LOAD 23H to register D and 5643H to register BC. \n; Copy the content of D register to A register.\n\n;CODE:\nMVI D,23H\nLXI B,5643H\nMOV A,D\nHLT\n\n;END OF CODE"
   }
 }

@@ -24,6 +24,6 @@
     "wires": []
   },
   "files": {
-    "sketch.ino": ";  LOAD 44H to A register and 08H to B register. \n;  ADD the contents of register A and B. \n\n; CODE:\nMVI A,44H    \t\t\t\t\t\nMVI B,08H\t\t\t\t\t\nADD B\t\t\t\t\t\t\nHLT\n\n; END OF CODE"
+    "sketch.asm": ";  LOAD 44H to A register and 08H to B register. \n;  ADD the contents of register A and B. \n\n; CODE:\nMVI A,44H    \t\t\t\t\t\nMVI B,08H\t\t\t\t\t\nADD B\t\t\t\t\t\t\nHLT\n\n; END OF CODE"
   }
 }

@@ -112,6 +112,6 @@
     ]
   },
   "files": {
-    "sketch.ino": "/*\n * LPC2148 SmartX Board - 4-LED Binary Counter\n * Counts from 0 to 15 on onboard LEDs (P0.12-P0.15)\n * No external wiring required!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    // Set P0.12-P0.15 as outputs (LED1-LED4)\n    IO0DIR |= (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);\n    int count = 0;\n    while (1) {\n        IO0CLR = 0xF << 12;              // Clear all 4 LEDs\n        IO0SET = (count & 0xF) << 12;    // Set current count pattern\n        delay_ms(500);\n        count = (count + 1) & 0xF;       // Increment, wrap at 16\n    }\n}"
+    "sketch.c": "/*\n * LPC2148 SmartX Board - 4-LED Binary Counter\n * Counts from 0 to 15 on onboard LEDs (P0.12-P0.15)\n * No external wiring required!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    // Set P0.12-P0.15 as outputs (LED1-LED4)\n    IO0DIR |= (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);\n    int count = 0;\n    while (1) {\n        IO0CLR = 0xF << 12;              // Clear all 4 LEDs\n        IO0SET = (count & 0xF) << 12;    // Set current count pattern\n        delay_ms(500);\n        count = (count + 1) & 0xF;       // Increment, wrap at 16\n    }\n}"
   }
 }

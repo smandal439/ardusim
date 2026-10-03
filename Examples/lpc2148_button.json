@@ -22,5 +22,7 @@
       { "from": { "instId": "r1", "pinId": "p2" }, "to": { "instId": "b1", "pinId": "GND1" } }
     ]
   },
-  "code": "/*\n * LPC2148 SmartX Board - Button + LED\n * Read button on P0.16 (active low with pull-up resistor)\n * Control onboard LED1 on P0.12\n */\n\n#include <LPC214x.h>\n\nint main() {\n    IO0DIR |= (1 << 12);       // P0.12 = output (LED1)\n    IO0DIR &= ~(1 << 16);      // P0.16 = input (button)\n    while (1) {\n        if (!(IO0PIN & (1 << 16))) {   // Button pressed (active low)\n            IO0SET = (1 << 12);         // LED1 ON\n        } else {\n            IO0CLR = (1 << 12);         // LED1 OFF\n        }\n        delay_ms(50);\n    }\n}"
+  "files": {
+    "sketch.c": "/*\n * LPC2148 SmartX Board - Button + LED\n * Read button on P0.16 (active low with pull-up resistor)\n * Control onboard LED1 on P0.12\n */\n\n#include <LPC214x.h>\n\nint main() {\n    IO0DIR |= (1 << 12);       // P0.12 = output (LED1)\n    IO0DIR &= ~(1 << 16);      // P0.16 = input (button)\n    while (1) {\n        if (!(IO0PIN & (1 << 16))) {   // Button pressed (active low)\n            IO0SET = (1 << 12);         // LED1 ON\n        } else {\n            IO0CLR = (1 << 12);         // LED1 OFF\n        }\n        delay_ms(50);\n    }\n}"
+  }
 }

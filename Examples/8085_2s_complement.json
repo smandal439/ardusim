@@ -24,6 +24,6 @@
     "wires": []
   },
   "files": {
-    "sketch.ino": "; Store the number 42H in 9000H.Find 2’S compliment \n; of the number and store it back in 9008H.\n\nLXI H,9008H\nMVI M,42H ; // MOVE 42H INTO THE MEMORY LOCATION SPECIFIED BY HL REGISTER PAIR.\nLDA 9008H\nCMA\nADI 01H\nSTA 9008H\nHLT\n\n; END OF CODE"
+    "sketch.asm": "; Store the number 42H in 9000H.Find 2’S compliment \n; of the number and store it back in 9008H.\n\nLXI H,9008H\nMVI M,42H ; // MOVE 42H INTO THE MEMORY LOCATION SPECIFIED BY HL REGISTER PAIR.\nLDA 9008H\nCMA\nADI 01H\nSTA 9008H\nHLT\n\n; END OF CODE"
   }
 }

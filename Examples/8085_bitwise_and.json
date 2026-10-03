@@ -24,6 +24,6 @@
     "wires": []
   },
   "files": {
-    "sketch.ino": ";. Load 23H to A register and 09H toB register. \n;AND the contents of Register A and B.\n\n;CODE:\n\nMVI A,23H\nMVI B,09H\nANA B\n\nHLT\n\n; END OF CODE"
+    "sketch.asm": ";. Load 23H to A register and 09H toB register. \n;AND the contents of Register A and B.\n\n;CODE:\n\nMVI A,23H\nMVI B,09H\nANA B\n\nHLT\n\n; END OF CODE"
   }
 }

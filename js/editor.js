@@ -116,6 +116,7 @@ DL2:    DJNZ R3, DL2
 
     require(['vs/editor/editor.main'], () => {
       this._registerArduinoLanguage();
+      this._registerAsmLanguage();
       this._createEditor();
       this.monacoReady = true;
 
@@ -393,6 +394,7 @@ DL2:    DJNZ R3, DL2
         { token: 'number', foreground: 'f08d49' },
         { token: 'preprocessor', foreground: 'cc9966' },
         { token: 'arduino-api', foreground: '6fb3d2', fontStyle: 'bold' },
+        { token: 'variable', foreground: '79c0ff' },
         { token: 'identifier', foreground: 'e6edf3' },
       ],
       colors: {
@@ -417,6 +419,7 @@ DL2:    DJNZ R3, DL2
         { token: 'number', foreground: 'd35400' },
         { token: 'preprocessor', foreground: '8e44ad' },
         { token: 'arduino-api', foreground: '2980b9', fontStyle: 'bold' },
+        { token: 'variable', foreground: '1a6091' },
         { token: 'identifier', foreground: '2c3e50' },
       ],
       colors: {
@@ -519,6 +522,58 @@ DL2:    DJNZ R3, DL2
           text: formattedCode
         }];
       }
+    });
+  },
+
+  _registerAsmLanguage() {
+    monaco.languages.register({ id: 'asm' });
+
+    monaco.languages.setMonarchTokensProvider('asm', {
+      tokenizer: {
+        root: [
+          [/;.*$/, 'comment'],
+          [/\/\*/, 'comment', '@block_comment'],
+          [/\b(ORG|EQU|DB|DW|DD|DS|END|INCLUDE|PROC|ENDP|SEGMENT|ENDS|ASSUME|PUBLIC|EXTERN|TITLE|MACRO|ENDM|LOCAL|IF|ELSE|ENDIF|IFDEF|IFNDEF)\b/, 'preprocessor'],
+          [/\b(MOV|MOVC|MOVX|MOVB|MOVW|MVI|LDA|STA|LHLD|SHLD|LXI|LDAX|STAX|LD|LDI|LDIR|LDD|LDDR|XCHG|XCHD|EX|EXX|PUSH|POP|PUSHA|POPA|PUSHF|POPF)\b/, 'keyword'],
+          [/\b(ADD|ADDL|ADDW|ADI|ADC|ACI|SUB|SUBL|SUBB|SUI|SBB|SBI|MUL|MULB|IMUL|DIV|DIVB|IDIV|INC|INCW|INR|DEC|DECW|DCR|INX|DCX|DAD|NEG|DA)\b/, 'keyword'],
+          [/\b(AND|ANA|ANI|ANL|OR|ORA|ORI|ORL|XOR|XRA|XRI|XRL|NOT|CPL|CMP|CPI|CMPB|CMPS|CP|CPIR|CPD|CPDR|TEST|BTST|BIT|SET|RES)\b/, 'keyword'],
+          [/\b(SHL|SHR|SAL|SAR|ROL|ROR|RCL|RCR|RLC|RRC|RAL|RAR|RL|RR|SLA|SRL|SWAP|SHLD|SHRD)\b/, 'keyword'],
+          [/\b(JMP|JE|JNE|JZ|JNZ|JC|JNC|JO|JNO|JS|JNS|JP|JM|JB|JBE|JA|JAE|JG|JGE|JL|JLE|JPE|JPO|JCXZ|JECXZ|JR|LOOP|LOOPE|LOOPNE|LOOPZ|LOOPNZ|SJMP|LJMP|AJMP|CJNE|DJNZ)\b/, 'keyword'],
+          [/\b(CALL|RET|RETF|RETI|RETN|LCALL|ACALL|SCALL|CZ|CNZ|CC|CNC|CPE|CPO|RNZ|RZ|RC|RNC|RP|RM|RPE|RPO)\b/, 'keyword'],
+          [/\b(CLD|STD|CLC|STC|CMC|CLI|STI|CLTS|CLD|STD|REP|REPE|REPNE|REPNZ|REPZ|SCAS|SCASB|SCASW|STOS|STOSB|STOSW|LODS|LODSB|LODSW|MOVS|MOVSB|MOVSW|NOP|HLT|HALT|WAIT|ESC|LOCK|PAUSE|WFI|SEI|DI|EI)\b/, 'keyword'],
+          [/\b(OUT|IN|OUTB|INB|INT|INT3|INTO|IRET|IRETI|TRAP|SWI|SVC|SYSCALL|SYSENTER|IM)\b/, 'keyword'],
+          [/\b(XLAT|XLATB|LEA|LES|LDS|LEAW|BOUND|ENTER|LEAVE|SETB|CLR|JB|JBC|CHS)\b/, 'keyword'],
+          [/\b(HIGH|LOW|INPUT|OUTPUT|P1|P2|P3)\b/, 'constant'],
+          [/\b(PSW|ACC|DPTR|PC)\b/, 'variable'],
+          [/\b([ABC]CC?|[ABCDE]X|[ABCD]L?|[ABCD]H|[AB]H|[AB]L|AL|AH|BL|BH|CL|CH|DL|DH|SI|DI|BP|SP|IP|CS|DS|ES|SS|FS|GS|R[0-7]|XMM[0-9]+|YMM[0-9]+|ZMM[0-9]+|ST[0-7]|MM[0-7])\b/, 'variable'],
+          [/\b(P[0-3]|P[0-7])\b/, 'variable'],
+          [/\b(AX|BX|CX|DX|EAX|EBX|ECX|EDX|ESI|EDI|EBP|ESP|EIP|RAX|RBX|RCX|RDX|RSI|RDI|RBP|RSP|RIP|EFLAGS|RFLAGS)\b/, 'variable'],
+          [/\b0[xX][0-9a-fA-F]+\b/, 'number'],
+          [/\b0[0-7]+[qQoO]\b/, 'number'],
+          [/\b[0-9a-fA-F]+[hH]\b/, 'number'],
+          [/\b[0-9]+[bB]\b/, 'number'],
+          [/\b\d+\b/, 'number'],
+          [/"([^"\\]|\\.)*"/, 'string'],
+          [/'([^'\\]|\\.)*'/, 'string'],
+          [/^\s*[A-Za-z_]\w*\s*:/, 'identifier'],
+          [/[A-Za-z_]\w*/, 'identifier'],
+        ],
+        block_comment: [
+          [/[^/*]+/, 'comment'],
+          [/\*\//, 'comment', '@pop'],
+          [/[/*]/, 'comment'],
+        ],
+      }
+    });
+
+    monaco.languages.setLanguageConfiguration('asm', {
+      comments: { lineComment: ';' },
+      brackets: [['(', ')']],
+      autoClosingPairs: [
+        { open: '(', close: ')' },
+        { open: '[', close: ']' },
+        { open: '"', close: '"' },
+      ],
     });
   },
 
@@ -745,8 +800,8 @@ DL2:    DJNZ R3, DL2
     --------------------------------------------------------- */
 
   _getLanguageForFile(name) {
-    if (name.endsWith('.asm') || name.endsWith('.s')) return 'plaintext';
-    if (name.endsWith('.ino') || name.endsWith('.cpp') || name.endsWith('.c') || name.endsWith('.h')) {
+    if (name.endsWith('.asm') || name.endsWith('.s')) return 'asm';
+    if (name.endsWith('.c') || name.endsWith('.cpp') || name.endsWith('.h')) {
       if (window.Intel8051C && name === 'sketch.c') {
         const active = window.App?.canvas?.getBoardInst?.()?.type || window.App?.sim?.board;
         if (active === 'intel_8051') {
@@ -754,8 +809,9 @@ DL2:    DJNZ R3, DL2
           if (window.Intel8051C.sniff(content)) return 'arduino';
         }
       }
-      return 'arduino';
+      return 'cpp';
     }
+    if (name.endsWith('.ino')) return 'arduino';
     return 'plaintext';
   },
 

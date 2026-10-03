@@ -24,6 +24,6 @@
     "wires": []
   },
   "files": {
-    "sketch.ino": "; Load the data 8423H and 8596H in register pair DE and HL.\n; Exchange the numbers. \n\n; CODE:\n\nLXI D,8423H\nLXI H, 8596H\nXCHG\nHLT\n\n; END OF CODE"
+    "sketch.asm": "; Load the data 8423H and 8596H in register pair DE and HL.\n; Exchange the numbers. \n\n; CODE:\n\nLXI D,8423H\nLXI H, 8596H\nXCHG\nHLT\n\n; END OF CODE"
   }
 }
