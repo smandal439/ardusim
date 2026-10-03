@@ -2877,7 +2877,6 @@ class TB6600Component extends Component {
 //     ctx.restore();
 //   }
 // });
-
 // Helper for rounded rectangles with fallback
 function drawRoundedRect(ctx, x, y, width, height, radius) {
   ctx.beginPath();
@@ -2888,15 +2887,38 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
   }
 }
 
+const NEMA17_COIL_IDS = ['A+', 'A-', 'B+', 'B-'];
+
 defComp({
   id: 'nema17',
   name: 'NEMA 17 Stepper Motor',
   category: 'Actuators',
   icon: '⚙️',
-  desc: 'Bipolar 2-phase NEMA 17 stepper motor (1.8° step angle, 200 steps/rev). Connect to A+, A-, B+, B- coil terminals.',
+  desc: 'Bipolar 2-phase NEMA 17 stepper motor (1.8° step angle, 200 full steps/rev). Drive it from a TB6600, a Stepper.h sketch, or direct coil signals on A+, A-, B+, B-.',
   width: 80,
   height: 100,
-  defaultProps: { angle: 0 },
+  defaultProps: { label: 'NEMA 17', microstep: 16, stepAngle: 1.8, telemetry: 1 },
+  interactive: [
+    // The telemetry strip doubles as the on-canvas toggle (drawn by draw()).
+    { field: 'telemetry', label: 'Telemetry', type: 'toggle', min: 0, max: 1, inline: { x: 4, y: 76, w: 72, h: 12 } },
+    { field: 'microstep', label: 'Microstep', type: 'select', options: [
+      { value: '1', label: '1/1 (200 steps/rev)' },
+      { value: '2', label: '1/2 (400 steps/rev)' },
+      { value: '4', label: '1/4 (800 steps/rev)' },
+      { value: '8', label: '1/8 (1600 steps/rev)' },
+      { value: '16', label: '1/16 (3200 steps/rev)' },
+      { value: '32', label: '1/32 (6400 steps/rev)' },
+    ] },
+    { field: 'stepAngle', label: 'Step angle', type: 'select', options: [
+      { value: '1.8', label: '1.8° (200 full steps)' },
+      { value: '0.9', label: '0.9° (400 full steps)' },
+    ] },
+    // Listed last so the side panel renders telemetry as a dropdown.
+    { field: 'telemetry', label: 'Telemetry', type: 'select', options: [
+      { value: '1', label: 'Show' },
+      { value: '0', label: 'Hide' },
+    ] },
+  ],
   pins: [
     { id: 'A+', label: 'A+', type: PIN_TYPE.SIGNAL, x: 16, y: 100, side: 'bottom' },
     { id: 'A-', label: 'A-', type: PIN_TYPE.SIGNAL, x: 32, y: 100, side: 'bottom' },
@@ -2905,9 +2927,25 @@ defComp({
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
-    const angle = inst.runtimeState?.angle ?? inst.props.angle ?? 0;
+    const rs = inst.runtimeState || {};
+    const props = inst.props || {};
+
+    // Smooth the shaft toward the target angle: the driver advances the angle
+    // in ~30 Hz slices, which would otherwise render as a visible stutter.
+    const target = rs.angle ?? props.angle ?? 0;
+    if (rs.renderAngle === undefined || rs.renderAngle === null) rs.renderAngle = target;
+    const gap = target - rs.renderAngle;
+    rs.renderAngle = Math.abs(gap) < 0.01 ? target : rs.renderAngle + gap * 0.35;
+    const angle = rs.renderAngle;
+
     const rad = (angle * Math.PI) / 180;
     const isRunning = !!(sim && sim.isRunning);
+    const coilAOn = (rs.coilA ?? 0) !== 0;
+    const coilBOn = (rs.coilB ?? 0) !== 0;
+    const energized = coilAOn || coilBOn;
+    const moving = !!rs.moving;
+    const dirSign = (rs.dir ?? 1) >= 0 ? 1 : -1;
+    const showTelemetry = Number(rs.telemetry ?? props.telemetry ?? 1) > 0;
 
     ctx.save();
     ctx.translate(x, y);
@@ -2922,7 +2960,7 @@ defComp({
     ctx.fillStyle = bodyGrad;
     drawRoundedRect(ctx, 4, 4, 72, 72, 6);
     ctx.fill();
-    ctx.strokeStyle = '#454c54';
+    ctx.strokeStyle = energized ? '#3f5a46' : '#454c54';
     ctx.lineWidth = 1.2;
     ctx.stroke();
 
@@ -2979,6 +3017,36 @@ defComp({
     }
     ctx.restore();
 
+    // 3b. Rotation-direction arrow across the top of the faceplate
+    if (moving) {
+      const a1 = (-155 * Math.PI) / 180;
+      const a2 = (-25 * Math.PI) / 180;
+      const s = dirSign;
+      const from = s > 0 ? a1 : a2;
+      const to = s > 0 ? a2 : a1;
+      const col = s > 0 ? 'rgba(0,230,118,0.9)' : 'rgba(66,165,245,0.9)';
+      ctx.save();
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 27, from, to, s < 0);
+      ctx.stroke();
+
+      const tx = cx + 27 * Math.cos(to);
+      const ty = cy + 27 * Math.sin(to);
+      const ta = to + (s * Math.PI) / 2;
+      const L = 5.5;
+      const spread = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(tx, ty);
+      ctx.lineTo(tx + L * Math.cos(ta + Math.PI - spread), ty + L * Math.sin(ta + Math.PI - spread));
+      ctx.moveTo(tx, ty);
+      ctx.lineTo(tx + L * Math.cos(ta + Math.PI + spread), ty + L * Math.sin(ta + Math.PI + spread));
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // 4. Rotating D-Shaft Assembly
     ctx.save();
     ctx.translate(cx, cy);
@@ -3016,55 +3084,109 @@ defComp({
 
     ctx.restore();
 
-    // 5. Digital Angle Telemetry Display Box
-    ctx.fillStyle = '#0a0d12';
-    drawRoundedRect(ctx, 16, 78, 48, 10, 2);
+    // 4b. Motion trail — three fading marks behind the shaft pointer
+    if (moving) {
+      for (let k = 1; k <= 3; k++) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rad - dirSign * k * 0.16);
+        ctx.strokeStyle = `rgba(229,57,53,${(0.4 - k * 0.1).toFixed(2)})`;
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(12, 0);
+        ctx.lineTo(17, 0);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // 5. Telemetry strip — angle / step count on top, microstep / RPM below.
+    //    Doubles as the on-canvas toggle target defined in `interactive`.
+    ctx.fillStyle = '#070a0e';
+    drawRoundedRect(ctx, 4, 76, 72, 12, 2);
     ctx.fill();
-    ctx.strokeStyle = '#1e293b';
+    ctx.strokeStyle = energized ? 'rgba(0,230,118,0.55)' : '#1c2430';
     ctx.lineWidth = 0.8;
     ctx.stroke();
 
-    const normalizedAngle = Math.round(((angle % 360) + 360) % 360);
-    ctx.fillStyle = isRunning ? '#00e676' : '#64748b';
-    ctx.font = 'bold 5px "JetBrains Mono", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(`${normalizedAngle}°`, cx, 85);
+    if (showTelemetry) {
+      const norm = Math.round(((target % 360) + 360) % 360);
+      const steps = Math.round(rs.position ?? 0);
+      const rpm = Math.round(rs.rpm ?? 0);
+      const ms = Number(rs.microstep ?? props.microstep ?? 16) || 1;
+      ctx.textBaseline = 'alphabetic';
+
+      ctx.font = 'bold 5.5px "JetBrains Mono", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = energized ? '#00e676' : (isRunning ? '#b0bec5' : '#5c6b7a');
+      ctx.fillText(`${norm}°`, 8, 81.5);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#ffb300';
+      ctx.fillText(String(steps), 72, 81.5);
+
+      ctx.font = 'bold 4px "JetBrains Mono", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#78909c';
+      ctx.fillText(`1/${ms}`, 8, 86.5);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = rpm > 0 ? '#4dd0e1' : '#45505c';
+      ctx.fillText(`${rpm} rpm`, 72, 86.5);
+    } else {
+      ctx.font = 'bold 4px "JetBrains Mono", monospace';
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#4a5560';
+      ctx.fillText('telemetry ▸', 72, 83);
+    }
 
     // 6. JST-XH Connector Housing & Color-Coded Lead Wires
     const wireXs = [16, 32, 48, 64];
     const wireColors = ['#e53935', '#1e88e5', '#4caf50', '#212121']; // Standard A+ (Red), A- (Blue), B+ (Green), B- (Black)
     const wireLabels = ['A+', 'A-', 'B+', 'B-'];
+    const coilOn = [coilAOn, coilAOn, coilBOn, coilBOn];
 
     // JST White Connector Base
     ctx.fillStyle = '#f5f5f5';
-    drawRoundedRect(ctx, 10, 88, 60, 5, 1);
+    drawRoundedRect(ctx, 8, 89, 64, 6, 1.5);
     ctx.fill();
     ctx.strokeStyle = '#e0e0e0';
     ctx.lineWidth = 0.5;
     ctx.stroke();
 
     wireXs.forEach((wx, i) => {
-      // Pin notch inside JST housing
-      ctx.fillStyle = '#9e9e9e';
-      ctx.fillRect(wx - 1, 88.5, 2, 4);
+      // Pin label on the housing (drawn before the lead so it stays legible)
+      ctx.fillStyle = '#37474f';
+      ctx.font = 'bold 3px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(wireLabels[i], wx, 92);
+
+      // Pin hole
+      ctx.fillStyle = '#20262b';
+      ctx.beginPath();
+      ctx.arc(wx, 93.6, 1.4, 0, Math.PI * 2);
+      ctx.fill();
 
       // Wire insulation lead
       ctx.fillStyle = wireColors[i];
-      ctx.fillRect(wx - 1.5, 92, 3, 5);
+      ctx.fillRect(wx - 1.6, 95, 3.2, 3);
+
+      // Energized phase: bloom the insulation so the driven coil reads at a glance
+      if (coilOn[i]) {
+        ctx.save();
+        ctx.shadowColor = wireColors[i];
+        ctx.shadowBlur = 5;
+        ctx.fillStyle = wireColors[i];
+        ctx.fillRect(wx - 1.6, 95, 3.2, 3);
+        ctx.restore();
+      }
 
       // Gold terminal tip at bottom pin boundary
-      const goldGrad = ctx.createLinearGradient(wx - 1, 97, wx + 1, 97);
-      goldGrad.addColorStop(0, '#fbc02d');
-      goldGrad.addColorStop(0.5, '#fff59d');
-      goldGrad.addColorStop(1, '#f57f17');
+      const goldGrad = ctx.createLinearGradient(wx - 1.4, 98, wx + 1.4, 98);
+      goldGrad.addColorStop(0, coilOn[i] ? '#ffe57f' : '#fbc02d');
+      goldGrad.addColorStop(0.5, coilOn[i] ? '#fffde7' : '#fff59d');
+      goldGrad.addColorStop(1, coilOn[i] ? '#ffd54f' : '#f57f17');
       ctx.fillStyle = goldGrad;
-      ctx.fillRect(wx - 1, 97, 2, 3);
-
-      // Pin Labels
-      ctx.fillStyle = '#90a4ae';
-      ctx.font = 'bold 2.5px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(wireLabels[i], wx, 87);
+      ctx.fillRect(wx - 1.4, 98, 2.8, 2);
     });
 
     if (inst.selected && typeof drawSelectionRect === 'function') {
@@ -3075,16 +3197,76 @@ defComp({
 });
 class Nema17Component extends Component {
   getPins() {
-    return [
-      { id: 'A+', label: 'A+', type: PIN_TYPE.SIGNAL, x: 20, y: 100, side: 'bottom' },
-      { id: 'A-', label: 'A-', type: PIN_TYPE.SIGNAL, x: 40, y: 100, side: 'bottom' },
-      { id: 'B+', label: 'B+', type: PIN_TYPE.SIGNAL, x: 60, y: 100, side: 'bottom' },
-      { id: 'B-', label: 'B-', type: PIN_TYPE.SIGNAL, x: 80, y: 100, side: 'bottom' },
-    ];
+    const defs = window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS;
+    return (defs && defs.nema17 && defs.nema17.pins) || [];
   }
+
+  /* Resolve the coil pins as Arduino pin numbers, or null when they are wired
+     to something other than a board (e.g. straight into a TB6600). */
+  _coilPinNums(cv) {
+    if (!cv || typeof cv._getConnectedPinNum !== 'function') return null;
+    const pins = NEMA17_COIL_IDS.map(id => cv._getConnectedPinNum(this.id, id));
+    return pins.some(p => p === null || p === undefined) ? null : pins;
+  }
+
+  /* Find the instance of `type` this motor's coil wires run into. */
+  _findWiredInst(cv, type) {
+    if (!cv || !Array.isArray(cv.wires) || !Array.isArray(cv.components)) return null;
+    for (const w of cv.wires) {
+      const mine = w.from.instId === this.id ? w.from : (w.to.instId === this.id ? w.to : null);
+      if (!mine || !NEMA17_COIL_IDS.includes(mine.pinId)) continue;
+      const other = w.from.instId === this.id ? w.to : w.from;
+      const inst = cv.components.find(c => c.id === other.instId);
+      if (inst && inst.type === type) return inst;
+    }
+    return null;
+  }
+
+  /* TB6600 library record for the driver wired to this motor — matched through
+     that driver's own PUL pin so two motors on two drivers stay independent. */
+  _driverLibrary(sim, cv, driver) {
+    const all = sim._tb6600s ? Object.values(sim._tb6600s) : [];
+    if (all.length === 0) return null;
+    let pulPin = null;
+    if (driver && cv && typeof cv._getConnectedPinNum === 'function') {
+      pulPin = cv._getConnectedPinNum(driver.id, 'PUL');
+    } else if (!driver && !cv && all.length === 1) {
+      pulPin = all[0].pulPin; // no canvas context — only safe with a single driver
+    }
+    if (pulPin === null || pulPin === undefined) return null;
+    return all.find(t => Number(t.pulPin) === Number(pulPin)) || null;
+  }
+
+  /* Stepper.h record (sim._steppers) wired to these four coil pins. */
+  _findStepperLib(sim, cv) {
+    if (!sim._steppers) return null;
+    const pins = this._coilPinNums(cv);
+    if (!pins) return null;
+    const want = [...new Set(pins)].sort((a, b) => a - b).join(',');
+    for (const k in sim._steppers) {
+      const s = sim._steppers[k];
+      const have = [...new Set([s.pin1, s.pin2, s.pin3, s.pin4].filter(p => p != null))]
+        .sort((a, b) => a - b).join(',');
+      if (have === want) return s;
+    }
+    return null;
+  }
+
+  /* 4-bit A+/A-/B+/B- pattern driven straight from GPIO pins, or null when the
+     coil pins are not on a board at all. */
+  _readCoilPattern(sim, cv) {
+    const pins = this._coilPinNums(cv);
+    if (!pins) return null;
+    let pattern = 0;
+    pins.forEach((p, i) => {
+      if ((sim.pinStates[`pin_${p}`] || 0) > 0) pattern |= (1 << i);
+    });
+    return pattern;
+  }
+
   update(canvas) {
     const sim = window.ArduinoSim;
-    if (!sim) return;
+    if (!sim || !sim.pinStates) return;
 
     // Always write into the circuit instance's own runtimeState — that is the
     // object defComp's draw() reads. They are normally the same reference, but
@@ -3094,29 +3276,110 @@ class Nema17Component extends Component {
     if (this.inst) this.inst.runtimeState = rs;
     this.runtimeState = rs;
 
-    // 1st: Read directly from TB6600 library state (most reliable)
-    if (sim._tb6600s) {
-      for (const id in sim._tb6600s) {
-        const tb = sim._tb6600s[id];
-        rs.angle = tb.angle || 0;
-        rs.position = tb.position || 0;
-        return;
+    const cv = canvas || this.canvas || window.CircuitCanvas;
+    const props = (this.inst && this.inst.props) || this.props || {};
+
+    // The side panel writes props.telemetry while the on-canvas strip writes
+    // runtimeState.telemetry — drop the local override when the panel changes.
+    if (rs._telemetryProp !== props.telemetry) {
+      rs._telemetryProp = props.telemetry;
+      delete rs.telemetry;
+    }
+
+    const fullStep = Number(props.stepAngle) || 1.8;
+    let microstep = Number(props.microstep) || 16;
+    let position = rs.position ?? 0;
+    let enabled = rs.enabled !== false;
+    let source = null;
+    let stepsPerRev = null;
+
+    // 1st: TB6600 driver wired to this motor (library-backed counters are exact)
+    const driver = this._findWiredInst(cv, 'tb6600');
+    const lib = this._driverLibrary(sim, cv, driver);
+    if (lib) {
+      position = lib.position;
+      microstep = Number(lib.microstep) || microstep;
+      enabled = lib.enabled !== false;
+      source = 'tb6600';
+    } else if (driver && driver.runtimeState && typeof driver.runtimeState.position === 'number') {
+      // raw digitalWrite() sketches — trust the driver component's edge counter
+      position = driver.runtimeState.position;
+      enabled = driver.runtimeState.enabled !== false;
+      source = 'tb6600';
+    }
+
+    // 2nd: Stepper.h sketch wired straight into the coil pins
+    if (!source) {
+      const st = this._findStepperLib(sim, cv);
+      if (st) {
+        position = st.pos;
+        stepsPerRev = st.stepsPerRev || 200;
+        enabled = true;
+        source = 'stepper';
       }
     }
 
-    // 2nd: Read from TB6600 component runtimeState
-    const cw = window.CircuitCanvas;
-    if (cw && Array.isArray(cw.components)) {
-      for (const comp of cw.components) {
-        if (comp.type === 'tb6600' && comp.runtimeState) {
-          rs.angle = comp.runtimeState.angle ?? 0;
-          rs.position = comp.runtimeState.position ?? 0;
-          return;
-        }
+    // 3rd: bare coil drive — count full steps on any pattern change
+    if (!source) {
+      const pattern = this._readCoilPattern(sim, cv);
+      if (pattern !== null) {
+        const prev = rs._lastCoil ?? 0;
+        if (pattern !== 0 && pattern !== prev) position += microstep;
+        enabled = pattern !== 0;
+        rs._lastCoil = pattern;
+        source = 'coil';
       }
     }
+
+    rs.position = position;
+    rs.microstep = microstep;
+    rs.enabled = enabled;
+    rs.source = source;
+    // position is in micro-steps for TB6600/coil drive, but Stepper.h counts
+    // whole steps — normalise before deriving the shaft angle.
+    const fullSteps = stepsPerRev ? position : position / microstep;
+    rs.fullSteps = fullSteps;
+    rs.angle = stepsPerRev ? fullSteps * 360 / stepsPerRev : fullSteps * fullStep;
+
+    // Bipolar full-step sequence: which coil pair is energized, and with what
+    // polarity — drives the lead-wire glow in draw().
+    const seq = [[1, 1], [1, -1], [-1, -1], [-1, 1]];
+    const phase = ((Math.round(fullSteps) % 4) + 4) % 4;
+    rs.phase = phase;
+    if (enabled && source) {
+      rs.coilA = seq[phase][0];
+      rs.coilB = seq[phase][1];
+    } else {
+      rs.coilA = 0;
+      rs.coilB = 0;
+    }
+
+    // Motion flag with a short decay so a 30 Hz step train still reads as
+    // continuous rotation, plus rotation direction for the shaft arrow.
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const prevAngle = rs._prevAngle ?? rs.angle;
+    const delta = rs.angle - prevAngle;
+    if (Math.abs(delta) > 1e-9) {
+      rs.dir = delta > 0 ? 1 : -1;
+      rs._moveUntil = now + 150;
+    }
+    rs.moving = now < (rs._moveUntil || 0);
+    rs._prevAngle = rs.angle;
+
+    // Shaft speed in RPM, sampled a few times a second.
+    if (rs._rpmT === undefined) {
+      rs._rpmT = now;
+      rs._rpmAngle = rs.angle;
+      rs.rpm = rs.rpm || 0;
+    } else if (now - rs._rpmT >= 250) {
+      rs.rpm = Math.abs(rs.angle - rs._rpmAngle) / (now - rs._rpmT) * (60000 / 360);
+      rs._rpmT = now;
+      rs._rpmAngle = rs.angle;
+    }
+    rs.active = rs.moving || (enabled && !!source);
   }
 }
+
 
 registerComponent('servo', ServoComponent);
 registerComponent('servo_continuous', ServoContinuousComponent);
