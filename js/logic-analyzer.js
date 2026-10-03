@@ -39,6 +39,7 @@ class LogicAnalyzer {
     this.cursorB = null; // Cursor B (right click) — time value in ms
     this._cursorAx = null; // pixel position for rendering
     this._cursorBx = null;
+    this._cursorEpoch = null; // frozen window end while cursors are active (ms)
 
     /* Colors */
     this.BG_COLOR = '#0a0e14';
@@ -170,22 +171,33 @@ class LogicAnalyzer {
   }
 
   /* ── Cursor placement ── */
+  _dataNow() {
+    let now = 0;
+    for (const ch of this.channels) {
+      if (!ch.enabled) continue;
+      const d = this.data[ch.pin];
+      if (d.length > 0 && d[d.length - 1].t > now) now = d[d.length - 1].t;
+    }
+    return now;
+  }
+
+  /* Window end for display and pixel→time conversion. While any cursor is
+     active the window is frozen at the placement epoch — otherwise the
+     rolling window scrolls between the two clicks and ΔT picks up the scroll
+     delta instead of the visual distance (e.g. 562ms for a 1ms cycle). */
+  _cursorNow() {
+    if (this._cursorEpoch !== null) return this._cursorEpoch;
+    return this._dataNow();
+  }
+
   _pixelToTime(x) {
     const { canvas } = this;
     const W = canvas.width;
     const labelW = 60;
     const plotW = W - labelW;
     if (x < labelW || plotW <= 0) return null;
-    const activeChannels = this.channels.filter(ch => ch.enabled);
     const windowMs = this.timebase * this.gridDivs;
-    let now = 0;
-    for (const ch of activeChannels) {
-      const d = this.data[ch.pin];
-      if (d.length > 0) {
-        const last = d[d.length - 1].t;
-        if (last > now) now = last;
-      }
-    }
+    const now = this._cursorNow();
     const startT = now - windowMs;
     return startT + ((x - labelW) / plotW) * windowMs;
   }
@@ -203,7 +215,9 @@ class LogicAnalyzer {
       this.cursorB = null;
       this._cursorAx = null;
       this._cursorBx = null;
+      this._cursorEpoch = null;
     } else if (this.cursorA === null) {
+      if (this._cursorEpoch === null) this._cursorEpoch = this._dataNow(); // freeze the window
       this.cursorA = t;
       this._cursorAx = x;
     } else {
@@ -222,6 +236,7 @@ class LogicAnalyzer {
       this.cursorB = null;
       this._cursorAx = null;
       this._cursorBx = null;
+      this._cursorEpoch = null;
     } else if (this.cursorB === null && this.cursorA !== null) {
       this.cursorB = t;
       this._cursorBx = x;
@@ -255,7 +270,7 @@ class LogicAnalyzer {
     }
 
     // Filter edges within cursor range (with adaptive tolerance)
-    const margin = dt * 0.001; // 0.1% of cursor range
+    const margin = dt * 0.02; // 2% of cursor range — covers a few px of placement error
     const rangeEdges = edges.filter(e => e.t >= tA - margin && e.t <= tB + margin);
 
     // Count rising edges in range
@@ -411,15 +426,8 @@ class LogicAnalyzer {
     const channelH = Math.floor((H - bottomPad) / channelCount);
     const windowMs = this.timebase * this.gridDivs;
 
-    // Determine time window from data
-    let now = 0;
-    for (const ch of activeChannels) {
-      const d = this.data[ch.pin];
-      if (d.length > 0) {
-        const last = d[d.length - 1].t;
-        if (last > now) now = last;
-      }
-    }
+    // Determine time window from data (frozen while cursors are active)
+    const now = this._cursorNow();
     const startT = now - windowMs;
     const endT = now;
 
@@ -752,12 +760,16 @@ class LogicAnalyzer {
     const tb = this.timebase;
     const tbStr = tb < 1 ? (tb * 1000).toFixed(0) + 'µs' : tb < 1000 ? tb + 'ms' : (tb / 1000).toFixed(1) + 's';
     ctx.fillText(`${tbStr}/div · ${activeChannels.length} ch`, W - 8, 12);
+    if (this._cursorEpoch !== null) {
+      ctx.fillStyle = 'rgba(255,230,0,0.7)';
+      ctx.fillText('HOLD', W - 8, 24);
+    }
 
     // Measurement instructions
     if (this.cursorA === null && this.cursorB === null) {
       ctx.fillStyle = 'rgba(255,255,255,0.2)';
       ctx.textAlign = 'center';
-      ctx.fillText('Click: Cursor A · Right-click: Cursor B · Drag to move', W / 2, H - 4);
+      ctx.fillText('Click: Cursor A · Right-click: Cursor B · Drag to move · display holds while cursors set', W / 2, H - 4);
     }
 
     if (this.paused) {
@@ -831,6 +843,7 @@ class LogicAnalyzer {
     this.cursorB = null;
     this._cursorAx = null;
     this._cursorBx = null;
+    this._cursorEpoch = null;
   }
 
   togglePause() {
