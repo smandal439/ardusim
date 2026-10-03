@@ -261,6 +261,14 @@ window.Intel8051Assembler = (function () {
             break;
 
           case 'MOV':
+            if (r1 === 'C' || r1 === 'CY') {
+              idx++; emit(0xA2); emit(resolveBitAddr(raw2)); idx++;
+              break;
+            }
+            if (r2 === 'C' || r2 === 'CY') {
+              idx++; emit(0x92); emit(resolveBitAddr(raw1)); idx++;
+              break;
+            }
             if (isA(r1)) { idx++;
               if (isImm(r2)) { emit(0x74); emit(immVal(r2)); idx++; }
               else if (isReg(r2)) { emit(0xE8 + rNum(r2)); idx++; }

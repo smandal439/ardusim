@@ -1055,6 +1055,10 @@ void loop() {
 
     this.sim.onStart = () => {
       if (this._pendingRunEpoch !== this._runEpoch) return; // stop requested while starting
+      // Fresh acquisition per run: simTime restarts at 0, so old samples must
+      // not remain on a different time axis.
+      if (this.osc) this.osc.clear();
+      if (this.la) this.la.clear();
       this._setRunningState(true);
       this._updateCompileStatus(this.sim2 && this.sim2.isRunning ? 'Running (2 boards)' : 'Running');
       this._updateStatus('Simulation running');

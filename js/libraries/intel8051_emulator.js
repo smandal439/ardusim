@@ -10,7 +10,7 @@ this.halted=false;this.cycles=0;
 this._intPrioStack=[];this._prevInt0=0;this._prevInt1=0;this._prevT0=0;this._prevT1=0;
 this._portWriteCb=null;this._portReadCb=null;this._serialLogCb=null;}
 var CY=0x80,AC=0x40,F0=0x20,RS1=0x08,RS0=0x04,OV=0x02,PB=0x01;
-function par(x){x^=x>>4;x^=x>>2;x^=x>>1;return(~x)&1;}
+function par(x){x^=x>>4;x^=x>>2;x^=x>>1;return x&1;}
 Cpu.prototype={
 reset:function(){this.ACC=0;this.B=0;this.SP=0x07;this.PC=0;this.PSW=0;this.P0=0x00;this.P1=0x00;this.P2=0x00;this.P3=0x00;this.halted=false;this.cycles=0;this._intPrioStack.length=0;this._prevInt0=0;this._prevInt1=0;this._prevT0=0;this._prevT1=0;},
 load:function(code,addr){addr=addr||0;for(var i=0;i<code.length;i++)this.xram[(addr+i)&0xFFFF]=code[i];},
@@ -162,10 +162,10 @@ if(op===0x12){d=(this.xram[this.PC]<<8)|this.xram[(this.PC+1)&0xFFFF];this.PC=(t
 if(op===0x22){var rl=this._pop(),rh=this._pop();this.PC=((rh<<8)|rl)&0xFFFF;return 2;}
 if(op===0x32){var rl2=this._pop(),rh2=this._pop();this.PC=((rh2<<8)|rl2)&0xFFFF;this._intPrioStack.pop();return 2;}
 if(op===0x73){this.PC=((this.DPH<<8)|this.DPL)+this.ACC;return 2;}
-if(op===0x03){this.ACC=((this.ACC<<1)|(this.ACC>>7))&0xFF;this.PSW=(this.PSW&~PB)|(par(this.ACC)?PB:0);return 1;}
+if(op===0x03){this.ACC=((this.ACC>>1)|((this.ACC&1)<<7))&0xFF;this.PSW=(this.PSW&~PB)|(par(this.ACC)?PB:0);return 1;}
 if(op===0x13){var t=this.PSW&CY?1:0;this.PSW=(this.PSW&~CY)|(this.ACC&1?CY:0);this.ACC=((this.ACC>>1)|(t<<7))&0xFF;this.PSW=(this.PSW&~PB)|(par(this.ACC)?PB:0);return 1;}
 if(op===0x23){this.ACC=((this.ACC<<1)|(this.ACC>>7))&0xFF;this.PSW=(this.PSW&~PB)|(par(this.ACC)?PB:0);return 1;}
-if(op===0x33){var t2=this.PSW&CY?1:0;this.PSW=(this.PSW&~CY)|(this.ACC&0x80?CY:0);this.ACC=((this.ACC<<1)|(t2<<7))&0xFF;this.PSW=(this.PSW&~PB)|(par(this.ACC)?PB:0);return 1;}
+if(op===0x33){var t2=this.PSW&CY?1:0;this.PSW=(this.PSW&~CY)|((this.ACC>>7)&1?CY:0);this.ACC=((this.ACC<<1)|t2)&0xFF;this.PSW=(this.PSW&~PB)|(par(this.ACC)?PB:0);return 1;}
 if(op===0xC4){this.ACC=((this.ACC>>4)|(this.ACC<<4))&0xFF;return 1;}
 if(op===0xE4){this.ACC=0;this.PSW=(this.PSW&~PB)|(par(0)?PB:0);return 1;}
 if(op===0xF4){this.ACC=(~this.ACC)&0xFF;this.PSW=(this.PSW&~PB)|(par(this.ACC)?PB:0);return 1;}
@@ -203,6 +203,7 @@ if(op===0x76||op===0x77){this.ram[this._rR(op-0x76)&0x7F]=this.xram[this.PC];thi
 if(op===0xC0){a=this.xram[this.PC];this.PC=(this.PC+1)&0xFFFF;this._push(this._rs(a));return 2;}
 if(op===0xD0){a=this.xram[this.PC];this.PC=(this.PC+1)&0xFFFF;this._ws(a,this._pop());return 2;}
 if(op===0xC6||op===0xC7){var tmp=this.ACC;var ri=this._rR(op-0xC6)&0x7F;this.ACC=this.ram[ri];this.ram[ri]=tmp;this.PSW=(this.PSW&~PB)|(par(this.ACC)?PB:0);return 1;}
+if(op===0xC5){a=this.xram[this.PC];this.PC=(this.PC+1)&0xFFFF;var tmpd=this.ACC;this.ACC=this._rs(a);this._ws(a,tmpd);this.PSW=(this.PSW&~PB)|(par(this.ACC)?PB:0);return 2;}
 if(op===0xC8||op===0xC9||op===0xCA||op===0xCB||op===0xCC||op===0xCD||op===0xCE||op===0xCF){var tmp2=this.ACC;this.ACC=this._rR(op-0xC8);this._rW(op-0xC8,tmp2);this.PSW=(this.PSW&~PB)|(par(this.ACC)?PB:0);return 1;}
 if(op>=0x28&&op<=0x2F){this._add(this._rR(op-0x28));return 1;}
 if(op===0x25){a=this.xram[this.PC];this.PC=(this.PC+1)&0xFFFF;this._add(this._rs(a));return 2;}
@@ -256,6 +257,7 @@ if(op===0xA0){ba=this.xram[this.PC];this.PC=(this.PC+1)&0xFFFF;if(!this._rb(ba))
 if(op===0xA2){ba=this.xram[this.PC];this.PC=(this.PC+1)&0xFFFF;if(this._rb(ba))this.PSW|=CY;else this.PSW&=~CY;return 2;}
 if(op===0x92){ba=this.xram[this.PC];this.PC=(this.PC+1)&0xFFFF;this._wb(ba,this.PSW&CY?1:0);return 2;}
 if(op===0xB5){d=this.xram[this.PC];rel=this.xram[(this.PC+1)&0xFFFF];this.PC=(this.PC+2)&0xFFFF;if(this.ACC!==this._rs(d))this.PC=(this.PC+(rel>127?rel-256:rel))&0xFFFF;if(this.ACC<this._rs(d))this.PSW|=CY;else this.PSW&=~CY;return 2;}
+if(op===0xB6||op===0xB7){v=this.xram[this.PC];rel=this.xram[(this.PC+1)&0xFFFF];this.PC=(this.PC+2)&0xFFFF;var rb=this.ram[this._rR(op-0xB6)&0x7F];if(this.ACC!==rb)this.PC=(this.PC+(rel>127?rel-256:rel))&0xFFFF;if(this.ACC<rb)this.PSW|=CY;else this.PSW&=~CY;return 2;}
 if(op===0xB4){v=this.xram[this.PC];rel=this.xram[(this.PC+1)&0xFFFF];this.PC=(this.PC+2)&0xFFFF;if(this.ACC!==v)this.PC=(this.PC+(rel>127?rel-256:rel))&0xFFFF;if(this.ACC<v)this.PSW|=CY;else this.PSW&=~CY;return 2;}
 if(op>=0xB8&&op<=0xBF){i=op-0xB8;v=this.xram[this.PC];rel=this.xram[(this.PC+1)&0xFFFF];this.PC=(this.PC+2)&0xFFFF;if(this._rR(i)!==v)this.PC=(this.PC+(rel>127?rel-256:rel))&0xFFFF;if(this._rR(i)<v)this.PSW|=CY;else this.PSW&=~CY;return 2;}
 if(op>=0xD8&&op<=0xDF){i=op-0xD8;var rv=(this._rR(i)-1)&0xFF;this._rW(i,rv);rel=this.xram[this.PC];this.PC=(this.PC+1)&0xFFFF;if(rv!==0)this.PC=(this.PC+(rel>127?rel-256:rel))&0xFFFF;return 2;}

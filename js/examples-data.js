@@ -2203,6 +2203,58 @@ window.EXAMPLE_SKETCHES = [
     "code": "void setup() {\n   // Put your setup code here, to run once when the board starts:\n}\nvoid loop() {\n  // Put your main code here, to run repeatedly indefinitely:\n}"
   },
   {
+    "id": "8051_1khz_squarewave",
+    "name": "8051 1Khz SquareWave",
+    "icon": "🔧",
+    "desc": "A custom 8051 1Khz SquareWave circuit example.",
+    "tags": [
+      "8051",
+      "squarewave"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1791042559775_x65nv",
+          "type": "intel_8051",
+          "x": 265,
+          "y": 325,
+          "rotation": 0,
+          "props": {
+            "label": "8051"
+          }
+        },
+        {
+          "id": "comp_1791042618583_th5gv",
+          "type": "la_probe_ch1",
+          "x": 170,
+          "y": 395,
+          "rotation": 0,
+          "props": {}
+        }
+      ],
+      "wires": [
+        {
+          "id": "wire_1791042622727_ewr9z",
+          "from": {
+            "instId": "comp_1791042559775_x65nv",
+            "pinId": "P1.0"
+          },
+          "to": {
+            "instId": "comp_1791042618583_th5gv",
+            "pinId": "tip"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.c": "#include <reg51.h>\n\nsbit WAVE_OUT = P1^0; // Output pin P1.0\n\nvoid delay_500us(void) {\n    TMOD &= 0xF0;     // Clear Timer 0 mode bits\n    TMOD |= 0x01;     // Set Timer 0 in Mode 1 (16-bit timer)\n\n    // 12 MHz crystal: 1 machine cycle = 1 us.\n    // Preload = 65536 - 425 = 65111 (0xFE57). The while(TF0==0) polling\n    // loop detects the overflow on its 14-cycle iteration, so the half\n    // period comes out at ~494 us instead of 500 -> ~1.01 kHz (within 1%).\n    TH0 = 0xFE;\n    TL0 = 0x57;\n\n    TR0 = 1;          // Start Timer 0\n    while (TF0 == 0); // Wait until Timer 0 overflows\n    TR0 = 0;          // Stop Timer 0\n    TF0 = 0;          // Clear Timer 0 flag\n}\n\nvoid main(void) {\n    WAVE_OUT = 0;     // Initialize output\n    while (1) {\n        WAVE_OUT = ~WAVE_OUT; // Toggle P1.0 pin\n        delay_500us();        // Wait 500 microseconds\n    }\n}"
+    }
+  },
+  {
     "id": "8051_addition",
     "name": "8051 Addition Example",
     "icon": "🔧",
@@ -2261,7 +2313,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.c": "ORG 0000H         ; Origin, start of program\nMOV P0, #0FFH     ; Move 11111111b to Port 0 (sets all 8 pins high)\nMOV P1, #0FFH     ; Move 11111111b to Port 1 (sets all 8 pins high)\nMOV P2, #0FFH     ; Move 11111111b to Port 2 (sets all 8 pins high)\nMOV P3, #0FFH     ; Move 11111111b to Port 3 (sets all 8 pins high)\n\nHERE: SJMP HERE   ; Infinite loop to keep the program running\nEND               ; End of the program\n"
+      "sketch.asm": "ORG 0000H         ; Origin, start of program\nMOV P0, #0FFH     ; Move 11111111b to Port 0 (sets all 8 pins high)\nMOV P1, #0FFH     ; Move 11111111b to Port 1 (sets all 8 pins high)\nMOV P2, #0FFH     ; Move 11111111b to Port 2 (sets all 8 pins high)\nMOV P3, #0FFH     ; Move 11111111b to Port 3 (sets all 8 pins high)\n\nHERE: SJMP HERE   ; Infinite loop to keep the program running\nEND               ; End of the program\n"
     }
   },
   {
@@ -2386,7 +2438,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.ino": ";write an ALP to multiply two 8 bit number by shift and add method.\n\nORG 8000H\n8000: LHLD 9000H    ; Load 16-bit Multiplicand into HL pair (HL = 0008H)\n8003: XCHG          ; Copy Multiplicand to DE pair (DE = 0008H)\n8004: LDA 9002H     ; Load 8-bit Multiplier into Accumulator (A = AAH)\n8007: LXI H, 0000H  ; Clear HL pair to accumulate the partial product (HL = 0000H)\n800A: MVI C, 08H    ; Initialize loop counter for 8 bits (C = 08H)\n\nLOOP: \n800C: DAD H         ; Shift HL (partial product) left by 1 bit (Multiply by 2)\n800D: RAL           ; Rotate Accumulator (multiplier) left through Carry\n800E: JNC 8012H     ; If Carry = 0, skip the addition (Jump to NEXT)\n8011: DAD D         ; If Carry = 1, add Multiplicand (DE) to Partial Product (HL)\n\nNEXT: \n8012: DCR C         ; Decrement bit counter\n8013: JNZ 800CH     ; If C != 0, repeat loop for next bit\n8016: SHLD 9003H    ; Store final 16-bit product at memory 9003H-9004H\n8019: HLT           ; Halt execution\n\n; --- Data Section ---\nORG 9000H\n9000: DB 08H        ; Lower byte of Multiplicand\n9001: DB 00H        ; Higher byte of Multiplicand (Combined: 0008H)\n9002: DB AAH        ; 8-bit Multiplier\n"
+      "sketch.asm": ";write an ALP to multiply two 8 bit number by shift and add method.\n\nORG 8000H\n8000: LHLD 9000H    ; Load 16-bit Multiplicand into HL pair (HL = 0008H)\n8003: XCHG          ; Copy Multiplicand to DE pair (DE = 0008H)\n8004: LDA 9002H     ; Load 8-bit Multiplier into Accumulator (A = AAH)\n8007: LXI H, 0000H  ; Clear HL pair to accumulate the partial product (HL = 0000H)\n800A: MVI C, 08H    ; Initialize loop counter for 8 bits (C = 08H)\n\nLOOP: \n800C: DAD H         ; Shift HL (partial product) left by 1 bit (Multiply by 2)\n800D: RAL           ; Rotate Accumulator (multiplier) left through Carry\n800E: JNC 8012H     ; If Carry = 0, skip the addition (Jump to NEXT)\n8011: DAD D         ; If Carry = 1, add Multiplicand (DE) to Partial Product (HL)\n\nNEXT: \n8012: DCR C         ; Decrement bit counter\n8013: JNZ 800CH     ; If C != 0, repeat loop for next bit\n8016: SHLD 9003H    ; Store final 16-bit product at memory 9003H-9004H\n8019: HLT           ; Halt execution\n\n; --- Data Section ---\nORG 9000H\n9000: DB 08H        ; Lower byte of Multiplicand\n9001: DB 00H        ; Higher byte of Multiplicand (Combined: 0008H)\n9002: DB AAH        ; 8-bit Multiplier\n"
     }
   },
   {
@@ -2415,7 +2467,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.ino": "; Store the number 42H in 9000H.Find 2’S compliment \n; of the number and store it back in 9008H.\n\nLXI H,9008H\nMVI M,42H ; // MOVE 42H INTO THE MEMORY LOCATION SPECIFIED BY HL REGISTER PAIR.\nLDA 9008H\nCMA\nADI 01H\nSTA 9008H\nHLT\n\n; END OF CODE"
+      "sketch.asm": "; Store the number 42H in 9000H.Find 2’S compliment \n; of the number and store it back in 9008H.\n\nLXI H,9008H\nMVI M,42H ; // MOVE 42H INTO THE MEMORY LOCATION SPECIFIED BY HL REGISTER PAIR.\nLDA 9008H\nCMA\nADI 01H\nSTA 9008H\nHLT\n\n; END OF CODE"
     }
   },
   {
@@ -2445,7 +2497,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.ino": ";Load 9BH and A7H in registers D & E respectively.\r\n; Add the numbers. If some is grater than FFH\r\n; display 01H at output port 00,Otherwise,\r\n; display the sum add output port 01.\r\n\r\nORG 5000H           ; Program starting address\r\n\r\nMVI D, 9BH          ; Load 9BH directly into Register D\r\nMVI E, A7H          ; Load A7H directly into Register E\r\n\r\nMOV A, D            ; Move contents of D to Accumulator (A = 9BH)\r\nADD E               ; Add contents of E to Accumulator (A = A + E)\r\n\r\nJC DISPLAY          ; If Carry flag = 1 (Sum > FFH), jump to DISPLAY\r\nOUT 01H             ; Otherwise, display the valid sum at Port 01H\r\nHLT                 ; Terminate the program\r\n\r\nDISPLAY:\r\nMVI A, 01H          ; Load 01H into Accumulator\r\nOUT 00H             ; Display 01H at Port 00H\r\nHLT                 ; Terminate the program\r\n"
+      "sketch.asm": ";Load 9BH and A7H in registers D & E respectively.\r\n; Add the numbers. If some is grater than FFH\r\n; display 01H at output port 00,Otherwise,\r\n; display the sum add output port 01.\r\n\r\nORG 5000H           ; Program starting address\r\n\r\nMVI D, 9BH          ; Load 9BH directly into Register D\r\nMVI E, A7H          ; Load A7H directly into Register E\r\n\r\nMOV A, D            ; Move contents of D to Accumulator (A = 9BH)\r\nADD E               ; Add contents of E to Accumulator (A = A + E)\r\n\r\nJC DISPLAY          ; If Carry flag = 1 (Sum > FFH), jump to DISPLAY\r\nOUT 01H             ; Otherwise, display the valid sum at Port 01H\r\nHLT                 ; Terminate the program\r\n\r\nDISPLAY:\r\nMVI A, 01H          ; Load 01H into Accumulator\r\nOUT 00H             ; Display 01H at Port 00H\r\nHLT                 ; Terminate the program\r\n"
     }
   },
   {
@@ -2716,7 +2768,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.ino": ";. Load 23H to A register and 09H toB register. \n;AND the contents of Register A and B.\n\n;CODE:\n\nMVI A,23H\nMVI B,09H\nANA B\n\nHLT\n\n; END OF CODE"
+      "sketch.asm": ";. Load 23H to A register and 09H toB register. \n;AND the contents of Register A and B.\n\n;CODE:\n\nMVI A,23H\nMVI B,09H\nANA B\n\nHLT\n\n; END OF CODE"
     }
   },
   {
@@ -2745,7 +2797,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.ino": "; 16 8 bit  of data are stored in memory location\n;  4050H to 405FH.Transfer the entire block of data\n; to new memory location starting at 4870H.\n\n;CODE:\n       ORG 8000H\n       LXI H,4050H\n       LXI D,4870H\n       MVI B,10H\nLOOP:  MOV A,M\n       STAX D\n       INX H\n       INX D\n       DCR B\n       JNZ LOOP\n       HLT\n       ORG 4050H\n       DB 01H,01H,02H,03H,04H,05H,06H,07H,08H,09H,0AH,0BH,0CH,0DH,0EH,0FH\n       END"
+      "sketch.asm": "; 16 8 bit  of data are stored in memory location\n;  4050H to 405FH.Transfer the entire block of data\n; to new memory location starting at 4870H.\n\n;CODE:\n       ORG 8000H\n       LXI H,4050H\n       LXI D,4870H\n       MVI B,10H\nLOOP:  MOV A,M\n       STAX D\n       INX H\n       INX D\n       DCR B\n       JNZ LOOP\n       HLT\n       ORG 4050H\n       DB 01H,01H,02H,03H,04H,05H,06H,07H,08H,09H,0AH,0BH,0CH,0DH,0EH,0FH\n       END"
     }
   },
   {
@@ -2774,7 +2826,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.ino": "; Load the data 8423H and 8596H in register pair DE and HL.\n; Exchange the numbers. \n\n; CODE:\n\nLXI D,8423H\nLXI H, 8596H\nXCHG\nHLT\n\n; END OF CODE"
+      "sketch.asm": "; Load the data 8423H and 8596H in register pair DE and HL.\n; Exchange the numbers. \n\n; CODE:\n\nLXI D,8423H\nLXI H, 8596H\nXCHG\nHLT\n\n; END OF CODE"
     }
   },
   {
@@ -2804,7 +2856,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.ino": ";Write an ALP to exchange the contents of the memory\r\n; location 8000H to 8003H.\r\n\r\nORG 0000H       ; Program begins at code memory 0000H\r\n\r\nLDA 8000H       ; Load the contents of 8000H into Accumulator (A)\r\nMOV B, A        ; Save the contents of A into Register B\r\nLDA 8003H       ; Load the contents of 8003H into Accumulator (A)\r\nSTA 8000H       ; Store the contents of A into 8000H\r\nMOV A, B        ; Move the temporary value from B back to Accumulator (A)\r\nSTA 8003H       ; Store the contents of A into 8003H\r\n\r\nHLT             ; Halt the program Execution\r\n\r\n; --- Data Segment Definitions ---\r\nORG 8000H       ; Force assembler to jump to memory address 8000H\r\nDB 42H          ; Define byte at 8000H (Decimal 66 or Hex 42H)\r\n\r\nORG 8003H       ; Force assembler to jump to memory address 8003H\r\nDB 24H          ; Define byte at 8003H (Decimal 36 or Hex 24H)\r\n\r\n"
+      "sketch.asm": ";Write an ALP to exchange the contents of the memory\r\n; location 8000H to 8003H.\r\n\r\nORG 0000H       ; Program begins at code memory 0000H\r\n\r\nLDA 8000H       ; Load the contents of 8000H into Accumulator (A)\r\nMOV B, A        ; Save the contents of A into Register B\r\nLDA 8003H       ; Load the contents of 8003H into Accumulator (A)\r\nSTA 8000H       ; Store the contents of A into 8000H\r\nMOV A, B        ; Move the temporary value from B back to Accumulator (A)\r\nSTA 8003H       ; Store the contents of A into 8003H\r\n\r\nHLT             ; Halt the program Execution\r\n\r\n; --- Data Segment Definitions ---\r\nORG 8000H       ; Force assembler to jump to memory address 8000H\r\nDB 42H          ; Define byte at 8000H (Decimal 66 or Hex 42H)\r\n\r\nORG 8003H       ; Force assembler to jump to memory address 8003H\r\nDB 24H          ; Define byte at 8003H (Decimal 36 or Hex 24H)\r\n\r\n"
     }
   },
   {
@@ -2833,7 +2885,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.ino": ";Write a program to generate first 10 numbers of the FIBONACCI Series.\r\n\r\n;This program generates the FIBONACCI series. \r\n;The series is. 0 1 1 2 3 5 8 13 21 34.\r\n;the first  two numbers of the series 0and 1.\r\n; The third number is computed as 0 + 1 = 1.\r\n;fourth number is 1 + 1 =2.fifth number is 1+2=3 and so on .\r\n\r\n\r\nORG 9000H       ; Program starting address\r\n\r\nMVI D, 08H      ; Initialize loop counter to 8 (since 2 numbers are already stored)\r\nMVI B, 00H      ; First Fibonacci number (Previous)\r\nMVI C, 01H      ; Second Fibonacci number (Current)\r\nLXI H, 0800H    ; Initialize HL pair as a memory pointer to 0800H\r\n\r\nMOV M, B        ; Store 1st number (00H) at 0800H\r\nINX H           ; Move pointer to 0801H\r\nMOV M, C        ; Store 2nd number (01H) at 0801H\r\n\r\nNEXT:\r\nMOV A, B        ; Load the previous number into Accumulator\r\nADD C           ; Add the current number (A = B + C)\r\nMOV B, C        ; Update previous number: B now gets the value of C\r\nMOV C, A        ; Update current number: C now gets the new sum (A)\r\nINX H           ; Advance memory pointer to the next location\r\nMOV M, A        ; Store the newly generated Fibonacci number into memory\r\nDCR D           ; Decrement the loop counter\r\nJNZ NEXT        ; Repeat the loop if counter D is not zero\r\n\r\nRST 1           ; Terminate the program (or use HLT)\r\n\r\n\r\n\r\n\r\n\r\n;Memory Output MapWhen you execute this program, \r\n;memory locations starting from 0800H will be \r\n;populated with the first 10 Fibonacci numbers\r\n; in hexadecimal format:\r\n;Memory Address      Hex Value     Decimal Equivalent\r\n;0800H               00H                  0\r\n;0801H               01H                  1\r\n;0802H               01H                  1\r\n;0803H               02H                  2\r\n;0804H               03H                  3\r\n;0805H               05H                  5\r\n;0806H               08H                  8\r\n;0807H               0DH                  13\r\n;0808H               15H                  21\r\n;0809H               22H                  34\r\n"
+      "sketch.asm": ";Write a program to generate first 10 numbers of the FIBONACCI Series.\r\n\r\n;This program generates the FIBONACCI series. \r\n;The series is. 0 1 1 2 3 5 8 13 21 34.\r\n;the first  two numbers of the series 0and 1.\r\n; The third number is computed as 0 + 1 = 1.\r\n;fourth number is 1 + 1 =2.fifth number is 1+2=3 and so on .\r\n\r\n\r\nORG 9000H       ; Program starting address\r\n\r\nMVI D, 08H      ; Initialize loop counter to 8 (since 2 numbers are already stored)\r\nMVI B, 00H      ; First Fibonacci number (Previous)\r\nMVI C, 01H      ; Second Fibonacci number (Current)\r\nLXI H, 0800H    ; Initialize HL pair as a memory pointer to 0800H\r\n\r\nMOV M, B        ; Store 1st number (00H) at 0800H\r\nINX H           ; Move pointer to 0801H\r\nMOV M, C        ; Store 2nd number (01H) at 0801H\r\n\r\nNEXT:\r\nMOV A, B        ; Load the previous number into Accumulator\r\nADD C           ; Add the current number (A = B + C)\r\nMOV B, C        ; Update previous number: B now gets the value of C\r\nMOV C, A        ; Update current number: C now gets the new sum (A)\r\nINX H           ; Advance memory pointer to the next location\r\nMOV M, A        ; Store the newly generated Fibonacci number into memory\r\nDCR D           ; Decrement the loop counter\r\nJNZ NEXT        ; Repeat the loop if counter D is not zero\r\n\r\nRST 1           ; Terminate the program (or use HLT)\r\n\r\n\r\n\r\n\r\n\r\n;Memory Output MapWhen you execute this program, \r\n;memory locations starting from 0800H will be \r\n;populated with the first 10 Fibonacci numbers\r\n; in hexadecimal format:\r\n;Memory Address      Hex Value     Decimal Equivalent\r\n;0800H               00H                  0\r\n;0801H               01H                  1\r\n;0802H               01H                  1\r\n;0803H               02H                  2\r\n;0804H               03H                  3\r\n;0805H               05H                  5\r\n;0806H               08H                  8\r\n;0807H               0DH                  13\r\n;0808H               15H                  21\r\n;0809H               22H                  34\r\n"
     }
   },
   {
@@ -2864,7 +2916,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.ino": ";  LOAD 44H to A register and 08H to B register. \n;  ADD the contents of register A and B. \n\n; CODE:\nMVI A,44H    \t\t\t\t\t\nMVI B,08H\t\t\t\t\t\nADD B\t\t\t\t\t\t\nHLT\n\n; END OF CODE"
+      "sketch.asm": ";  LOAD 44H to A register and 08H to B register. \n;  ADD the contents of register A and B. \n\n; CODE:\nMVI A,44H    \t\t\t\t\t\nMVI B,08H\t\t\t\t\t\nADD B\t\t\t\t\t\t\nHLT\n\n; END OF CODE"
     }
   },
   {
@@ -2895,7 +2947,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.ino": "; LOAD 23H to register D and 5643H to register BC. \n; Copy the content of D register to A register.\n\n;CODE:\nMVI D,23H\nLXI B,5643H\nMOV A,D\nHLT\n\n;END OF CODE"
+      "sketch.asm": "; LOAD 23H to register D and 5643H to register BC. \n; Copy the content of D register to A register.\n\n;CODE:\nMVI D,23H\nLXI B,5643H\nMOV A,D\nHLT\n\n;END OF CODE"
     }
   },
   {
@@ -2925,7 +2977,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.ino": ";a set of three readings are stored in memory location starting \r\n;from 9050H, sort the readings in ascending order.\r\n\r\n\r\nORG 8000H           ; Program starting address\r\n\r\nSTART:\r\n  LXI H, 9050H        ; Initialize memory pointer to the start of the data\r\n  MVI D, 00H          ; Clear swap flag (D = 00H means no swap occurred)\r\n  MVI C, 02H          ; Initialize loop counter for 3 elements (Requires 2 comparisons)\r\n\r\nCHECK:\r\n  MOV A, M            ; Load current element into Accumulator\r\n  INX H               ; Move pointer to the next element\r\n  CMP M               ; Compare current element (A) with next element (M)\r\n  JC NEXTBYTE         ; If A < M, it's already in ascending order, skip swap\r\n  JZ NEXTBYTE         ; If A == M, skip swap\r\n\r\n; --- Swap Logic ---\r\n  MOV B, M            ; Save next element in temporary register B\r\n  MOV M, A            ; Move current element (A) into next element's position\r\n  DCX H               ; Move pointer back to current element's position\r\n  MOV M, B            ; Move saved element (B) into current element's position\r\n  INX H               ; Restore pointer to next element to continue array scan\r\n  MVI D, 01H          ; Set swap flag to 01H (indicating a swap took place)\r\n\r\nNEXTBYTE:\r\n  DCR C               ; Decrement comparison counter\r\n  JNZ CHECK           ; If C is not zero, check the next pair of bytes\r\n\r\n; --- Pass Complete: Check Swap Flag ---\r\n  MOV A, D            ; Move swap flag to Accumulator\r\n  CPI 01H             ; Check if a swap occurred (Is D == 01H?)\r\n  JZ START            ; If yes, restart a new pass to ensure fully sorted\r\n\r\nRST 1               ; Terminate the program cleanly\r\n\r\n; --- Data Segment Definitions ---\r\nORG 9050H\r\nDB 87H, 56H, 75H    ; Array to be sorted\r\n"
+      "sketch.asm": ";a set of three readings are stored in memory location starting \r\n;from 9050H, sort the readings in ascending order.\r\n\r\n\r\nORG 8000H           ; Program starting address\r\n\r\nSTART:\r\n  LXI H, 9050H        ; Initialize memory pointer to the start of the data\r\n  MVI D, 00H          ; Clear swap flag (D = 00H means no swap occurred)\r\n  MVI C, 02H          ; Initialize loop counter for 3 elements (Requires 2 comparisons)\r\n\r\nCHECK:\r\n  MOV A, M            ; Load current element into Accumulator\r\n  INX H               ; Move pointer to the next element\r\n  CMP M               ; Compare current element (A) with next element (M)\r\n  JC NEXTBYTE         ; If A < M, it's already in ascending order, skip swap\r\n  JZ NEXTBYTE         ; If A == M, skip swap\r\n\r\n; --- Swap Logic ---\r\n  MOV B, M            ; Save next element in temporary register B\r\n  MOV M, A            ; Move current element (A) into next element's position\r\n  DCX H               ; Move pointer back to current element's position\r\n  MOV M, B            ; Move saved element (B) into current element's position\r\n  INX H               ; Restore pointer to next element to continue array scan\r\n  MVI D, 01H          ; Set swap flag to 01H (indicating a swap took place)\r\n\r\nNEXTBYTE:\r\n  DCR C               ; Decrement comparison counter\r\n  JNZ CHECK           ; If C is not zero, check the next pair of bytes\r\n\r\n; --- Pass Complete: Check Swap Flag ---\r\n  MOV A, D            ; Move swap flag to Accumulator\r\n  CPI 01H             ; Check if a swap occurred (Is D == 01H?)\r\n  JZ START            ; If yes, restart a new pass to ensure fully sorted\r\n\r\nRST 1               ; Terminate the program cleanly\r\n\r\n; --- Data Segment Definitions ---\r\nORG 9050H\r\nDB 87H, 56H, 75H    ; Array to be sorted\r\n"
     }
   },
   {
@@ -2955,7 +3007,7 @@ window.EXAMPLE_SKETCHES = [
       "wires": []
     },
     "files": {
-      "sketch.ino": "; a set of three readings are stored in memory\n; location starting from 9050H, sort the readings \n; in descending order.\n\n\nORG 8000H\nSTART:    LXI H, 9050H    ; Initialize HL pair to point to the start of the data\n          MVI D, 00H      ; Clear D register (D acts as a swap flag: 00 = no swap, 01 = swap occurred)\n          MVI C, 02H      ; Initialize counter C = N-1 = 2 (for 3 data bytes)\n\nCHECK:    MOV A, M        ; Move current byte from memory to Accumulator\n          INX H           ; Point to the next memory location\n          CMP M           ; Compare Accumulator with the next byte\n          JNC NEXTBYTE    ; If Accumulator >= Memory, no swap is needed (keeps descending order)\n\n          ; --- Swap Logic (if Accumulator < Memory) ---\n          MOV B, M        ; Temporary store next byte in B\n          MOV M, A        ; Move smaller byte to next memory location\n          DCX H           ; Move pointer back to current location\n          MOV M, B        ; Move larger byte to current memory location\n          INX H           ; Restore pointer to the next location\n          MVI D, 01H      ; Set swap flag D = 01H to indicate a change was made\n\nNEXTBYTE: DCR C           ; Decrement loop counter\n          JNZ CHECK       ; If C != 0, repeat the comparison for the next pair\n\n          MOV A, D        ; Move swap flag to Accumulator\n          RRC             ; Rotate right to shift the LSb of D into the Carry flag\n          JC START        ; If Carry = 1 (swap occurred), repeat the entire pass\n          RST 1           ; Terminate the program if no swaps occurred\n\n; --- Data Section ---\nORG 9050H\nDB 87H, 56H, 75H          ; Input data\n"
+      "sketch.asm": "; a set of three readings are stored in memory\n; location starting from 9050H, sort the readings \n; in descending order.\n\n\nORG 8000H\nSTART:    LXI H, 9050H    ; Initialize HL pair to point to the start of the data\n          MVI D, 00H      ; Clear D register (D acts as a swap flag: 00 = no swap, 01 = swap occurred)\n          MVI C, 02H      ; Initialize counter C = N-1 = 2 (for 3 data bytes)\n\nCHECK:    MOV A, M        ; Move current byte from memory to Accumulator\n          INX H           ; Point to the next memory location\n          CMP M           ; Compare Accumulator with the next byte\n          JNC NEXTBYTE    ; If Accumulator >= Memory, no swap is needed (keeps descending order)\n\n          ; --- Swap Logic (if Accumulator < Memory) ---\n          MOV B, M        ; Temporary store next byte in B\n          MOV M, A        ; Move smaller byte to next memory location\n          DCX H           ; Move pointer back to current location\n          MOV M, B        ; Move larger byte to current memory location\n          INX H           ; Restore pointer to the next location\n          MVI D, 01H      ; Set swap flag D = 01H to indicate a change was made\n\nNEXTBYTE: DCR C           ; Decrement loop counter\n          JNZ CHECK       ; If C != 0, repeat the comparison for the next pair\n\n          MOV A, D        ; Move swap flag to Accumulator\n          RRC             ; Rotate right to shift the LSb of D into the Carry flag\n          JC START        ; If Carry = 1 (swap occurred), repeat the entire pass\n          RST 1           ; Terminate the program if no swaps occurred\n\n; --- Data Section ---\nORG 9050H\nDB 87H, 56H, 75H          ; Input data\n"
     }
   },
   {
@@ -17553,7 +17605,7 @@ window.EXAMPLE_SKETCHES = [
       ],
       "wires": []
     },
-    "code": "/*\n * LPC2148 SmartX Board - 4-LED Binary Counter\n * Counts from 0 to 15 on onboard LEDs (P0.12-P0.15)\n * No external wiring required!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    // Set P0.12-P0.15 as outputs (LED1-LED4)\n    IO0DIR |= (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);\n    int count = 0;\n    while (1) {\n        IO0CLR = 0xF << 12;              // Clear all 4 LEDs\n        IO0SET = (count & 0xF) << 12;    // Set current count pattern\n        delay_ms(500);\n        count = (count + 1) & 0xF;       // Increment, wrap at 16\n    }\n}"
+    "sketch.c": "/*\n * LPC2148 SmartX Board - 4-LED Binary Counter\n * Counts from 0 to 15 on onboard LEDs (P0.12-P0.15)\n * No external wiring required!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    // Set P0.12-P0.15 as outputs (LED1-LED4)\n    IO0DIR |= (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);\n    int count = 0;\n    while (1) {\n        IO0CLR = 0xF << 12;              // Clear all 4 LEDs\n        IO0SET = (count & 0xF) << 12;    // Set current count pattern\n        delay_ms(500);\n        count = (count + 1) & 0xF;       // Increment, wrap at 16\n    }\n}"
   },
   {
     "id": "lpc2148_binary_counter",
@@ -17669,7 +17721,7 @@ window.EXAMPLE_SKETCHES = [
       ]
     },
     "files": {
-      "sketch.ino": "/*\n * LPC2148 SmartX Board - 4-LED Binary Counter\n * Counts from 0 to 15 on onboard LEDs (P0.12-P0.15)\n * No external wiring required!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    // Set P0.12-P0.15 as outputs (LED1-LED4)\n    IO0DIR |= (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);\n    int count = 0;\n    while (1) {\n        IO0CLR = 0xF << 12;              // Clear all 4 LEDs\n        IO0SET = (count & 0xF) << 12;    // Set current count pattern\n        delay_ms(500);\n        count = (count + 1) & 0xF;       // Increment, wrap at 16\n    }\n}"
+      "sketch.c": "/*\n * LPC2148 SmartX Board - 4-LED Binary Counter\n * Counts from 0 to 15 on onboard LEDs (P0.12-P0.15)\n * No external wiring required!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    // Set P0.12-P0.15 as outputs (LED1-LED4)\n    IO0DIR |= (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);\n    int count = 0;\n    while (1) {\n        IO0CLR = 0xF << 12;              // Clear all 4 LEDs\n        IO0SET = (count & 0xF) << 12;    // Set current count pattern\n        delay_ms(500);\n        count = (count + 1) & 0xF;       // Increment, wrap at 16\n    }\n}"
     }
   },
   {
@@ -17694,7 +17746,9 @@ window.EXAMPLE_SKETCHES = [
       ],
       "wires": []
     },
-    "code": "/*\n * LPC2148 SmartX Board - Onboard LED1 Blink\n * P0.12 drives the red LED1 using register-level GPIO.\n * No external wiring required - just press Run!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    IO0DIR |= (1 << 12);      // P0.12 = output (LED1)\n    while (1) {\n        IO0SET = (1 << 12);   // Set P0.12 HIGH - LED ON\n        delay_ms(500);\n        IO0CLR = (1 << 12);   // Set P0.12 LOW - LED OFF\n        delay_ms(500);\n    }\n}"
+    "files": {
+      "main.c": "/*\n * LPC2148 SmartX Board - Onboard LED1 Blink\n * P0.12 drives the red LED1 using register-level GPIO.\n * No external wiring required - just press Run!\n */\n\n#include <LPC214x.h>\n\nint main() {\n    IO0DIR |= (1 << 12);      // P0.12 = output (LED1)\n    while (1) {\n        IO0SET = (1 << 12);   // Set P0.12 HIGH - LED ON\n        delay_ms(500);\n        IO0CLR = (1 << 12);   // Set P0.12 LOW - LED OFF\n        delay_ms(500);\n    }\n}"
+    }
   },
   {
     "id": "lpc2148_button",
@@ -17814,14 +17868,18 @@ window.EXAMPLE_SKETCHES = [
         }
       ]
     },
-    "code": "/*\n * LPC2148 SmartX Board - Button + LED\n * Read button on P0.16 (active low with pull-up resistor)\n * Control onboard LED1 on P0.12\n */\n\n#include <LPC214x.h>\n\nint main() {\n    IO0DIR |= (1 << 12);       // P0.12 = output (LED1)\n    IO0DIR &= ~(1 << 16);      // P0.16 = input (button)\n    while (1) {\n        if (!(IO0PIN & (1 << 16))) {   // Button pressed (active low)\n            IO0SET = (1 << 12);         // LED1 ON\n        } else {\n            IO0CLR = (1 << 12);         // LED1 OFF\n        }\n        delay_ms(50);\n    }\n}"
+    "files": {
+      "sketch.c": "/*\n * LPC2148 SmartX Board - Button + LED\n * Read button on P0.16 (active low with pull-up resistor)\n * Control onboard LED1 on P0.12\n */\n\n#include <LPC214x.h>\n\nint main() {\n    IO0DIR |= (1 << 12);       // P0.12 = output (LED1)\n    IO0DIR &= ~(1 << 16);      // P0.16 = input (button)\n    while (1) {\n        if (!(IO0PIN & (1 << 16))) {   // Button pressed (active low)\n            IO0SET = (1 << 12);         // LED1 ON\n        } else {\n            IO0CLR = (1 << 12);         // LED1 OFF\n        }\n        delay_ms(50);\n    }\n}"
+    }
   },
   {
     "name": "DAC Sine Wave",
     "category": "LPC2148",
     "description": "Generate a sine wave on the DAC output pin (P0.25)",
     "image": "lpc2148",
-    "code": "var phase = 0;\n\nasync function setup() {\n  _regW(0xE0028008, 0); // P0.25 = INPUT (DAC default)\n}\n\nasync function loop() {\n  var val = Math.round(512 + 511 * Math.sin(phase));\n  _regW(0xE000C500, (val & 0x3FF) << 6);\n  phase += 0.15;\n  if (phase > 6.28) phase -= 6.28;\n  await delay_ms(1);\n}"
+    "files": {
+      "sketch.c": "var phase = 0;\n\nasync function setup() {\n  _regW(0xE0028008, 0); // P0.25 = INPUT (DAC default)\n}\n\nasync function loop() {\n  var val = Math.round(512 + 511 * Math.sin(phase));\n  _regW(0xE000C500, (val & 0x3FF) << 6);\n  phase += 0.15;\n  if (phase > 6.28) phase -= 6.28;\n  await delay_ms(1);\n}"
+    }
   },
   {
     "id": "lpc2148_pot_adc",
@@ -17883,7 +17941,9 @@ window.EXAMPLE_SKETCHES = [
         }
       ]
     },
-    "code": "/*\n * LPC2148 SmartX Board - ADC Potentiometer\n * Read potentiometer on AIN0 (P0.26) using ADC0\n * Send results to Serial Monitor via UART0\n */\n\n#include <LPC214x.h>\n\nvoid uart0_init(void) {\n    PINSEL0 |= (1 << 0) | (1 << 2);  // P0.2=TXD0, P0.3=RXD0\n    U0LCR = 0x83;                     // 8N1, DLAB=1\n    U0DLL = 0x06;                     // 9600 baud @ 60MHz PCLK\n    U0DLM = 0x00;\n    U0LCR = 0x03;                     // DLAB=0, 8N1\n}\n\nvoid uart0_tx(char c) {\n    while (!(U0LSR & 0x20));          // Wait for THR empty\n    U0THR = c;\n}\n\nvoid uart0_print(const char *s) {\n    int i = 0;\n    while (s[i] != 0) uart0_tx(s[i++]);\n}\n\nvoid uart0_printNum(int n) {\n    char buf[8];\n    int i = 0;\n    if (n == 0) { uart0_tx('0'); return; }\n    while (n > 0) { buf[i++] = '0' + (n % 10); n /= 10; }\n    while (i > 0) uart0_tx(buf[--i]);\n}\n\nint main(void) {\n    uart0_init();\n    AD0CR = (1 << 21) | (1 << 0);    // PDN=1, select channel 0\n    uart0_print(\"LPC2148 ADC Demo\\r\\n\");\n    while (1) {\n        AD0CR |= (1 << 24);          // Start conversion\n        while (!(AD0GDR & (1 << 31)));// Wait for DONE\n        int val = (AD0GDR >> 6) & 0x3FF;\n        uart0_print(\"AIN0 = \");\n        uart0_printNum(val);\n        uart0_print(\"\\r\\n\");\n        AD0CR &= ~(1 << 24);         // Stop\n        delay_ms(500);\n    }\n}"
+    "files": {
+      "sketch.c": "/*\n * LPC2148 SmartX Board - ADC Potentiometer\n * Read potentiometer on AIN0 (P0.26) using ADC0\n * Send results to Serial Monitor via UART0\n */\n\n#include <LPC214x.h>\n\nvoid uart0_init(void) {\n    PINSEL0 |= (1 << 0) | (1 << 2);  // P0.2=TXD0, P0.3=RXD0\n    U0LCR = 0x83;                     // 8N1, DLAB=1\n    U0DLL = 0x06;                     // 9600 baud @ 60MHz PCLK\n    U0DLM = 0x00;\n    U0LCR = 0x03;                     // DLAB=0, 8N1\n}\n\nvoid uart0_tx(char c) {\n    while (!(U0LSR & 0x20));          // Wait for THR empty\n    U0THR = c;\n}\n\nvoid uart0_print(const char *s) {\n    int i = 0;\n    while (s[i] != 0) uart0_tx(s[i++]);\n}\n\nvoid uart0_printNum(int n) {\n    char buf[8];\n    int i = 0;\n    if (n == 0) { uart0_tx('0'); return; }\n    while (n > 0) { buf[i++] = '0' + (n % 10); n /= 10; }\n    while (i > 0) uart0_tx(buf[--i]);\n}\n\nint main(void) {\n    uart0_init();\n    AD0CR = (1 << 21) | (1 << 0);    // PDN=1, select channel 0\n    uart0_print(\"LPC2148 ADC Demo\\r\\n\");\n    while (1) {\n        AD0CR |= (1 << 24);          // Start conversion\n        while (!(AD0GDR & (1 << 31)));// Wait for DONE\n        int val = (AD0GDR >> 6) & 0x3FF;\n        uart0_print(\"AIN0 = \");\n        uart0_printNum(val);\n        uart0_print(\"\\r\\n\");\n        AD0CR &= ~(1 << 24);         // Stop\n        delay_ms(500);\n    }\n}"
+    }
   },
   {
     "id": "lpc2148_serial_echo",
@@ -17933,7 +17993,9 @@ window.EXAMPLE_SKETCHES = [
       ],
       "wires": []
     },
-    "code": "/*\n * LPC2148 SmartX Board - UART0 Hello World\n * Sends \"Hello LPC2148\" to the Serial Monitor.\n * Uses register-level UART0 at 9600 baud.\n */\n\n#include <LPC214x.h>\n\nvoid UART0_Init(unsigned int baud) {\n    unsigned int divisor = 15000000 / (16 * baud);\n    PINSEL0 |= (1 << 1);\n    PINSEL0 &= ~(1 << 2);\n    PINSEL0 |= (1 << 7);\n    PINSEL0 &= ~(1 << 6);\n    U0LCR = 0x83;\n    U0DLL = divisor & 0xFF;\n    U0DLM = (divisor >> 8) & 0xFF;\n    U0LCR = 0x03;\n    U0FCR = 0x07;\n}\n\nvoid UART0_SendChar(unsigned char ch) {\n    while (!(U0LSR & 0x20));\n    U0THR = ch;\n}\n\nvoid UART0_SendString(unsigned char *str) {\n    unsigned int i = 0;\n    while (str[i] != 0) {\n        UART0_SendChar(str[i]);\n        i++;\n    }\n}\n\nint main(void) {\n    unsigned char msg[] = {'H','e','l','l','o',' ','L','P','C','2','1','4','8','\\r','\\n',0};\n    UART0_Init(9600);\n    UART0_SendString(msg);\n    while (1) {\n        if (U0LSR & 0x01) {\n            unsigned char ch = U0RBR;\n            UART0_SendChar(ch);\n        }\n        delay_ms(10);\n    }\n}"
+    "files": {
+      "main.c": "/*\n * LPC2148 SmartX Board - UART0 Hello World\n * Sends \"Hello LPC2148\" to the Serial Monitor.\n * Uses register-level UART0 at 9600 baud.\n */\n\n#include <LPC214x.h>\n\nvoid UART0_Init(unsigned int baud) {\n    unsigned int divisor = 15000000 / (16 * baud);\n    PINSEL0 |= (1 << 1);\n    PINSEL0 &= ~(1 << 2);\n    PINSEL0 |= (1 << 7);\n    PINSEL0 &= ~(1 << 6);\n    U0LCR = 0x83;\n    U0DLL = divisor & 0xFF;\n    U0DLM = (divisor >> 8) & 0xFF;\n    U0LCR = 0x03;\n    U0FCR = 0x07;\n}\n\nvoid UART0_SendChar(unsigned char ch) {\n    while (!(U0LSR & 0x20));\n    U0THR = ch;\n}\n\nvoid UART0_SendString(unsigned char *str) {\n    unsigned int i = 0;\n    while (str[i] != 0) {\n        UART0_SendChar(str[i]);\n        i++;\n    }\n}\n\nint main(void) {\n    unsigned char msg[] = {'H','e','l','l','o',' ','L','P','C','2','1','4','8','\\r','\\n',0};\n    UART0_Init(9600);\n    UART0_SendString(msg);\n    while (1) {\n        if (U0LSR & 0x01) {\n            unsigned char ch = U0RBR;\n            UART0_SendChar(ch);\n        }\n        delay_ms(10);\n    }\n}"
+    }
   },
   {
     "id": "lpc2148_serial_print",
@@ -27153,7 +27215,9 @@ window.EXAMPLE_SKETCHES = [
       ],
       "wires": []
     },
-    "code": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOIEN;\n\n  GPIOI->MODER |= (1 << (1 * 2));\n\n  while (1) {\n    GPIOI->ODR |= (1 << 1);\n    HAL_Delay(500);\n    GPIOI->ODR &= ~(1 << 1);\n    HAL_Delay(500);\n  }\n}\n\nvoid SystemClock_Config(void) {\n}"
+    "files": {
+      "sketch.c": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOIEN;\n\n  GPIOI->MODER |= (1 << (1 * 2));\n\n  while (1) {\n    GPIOI->ODR |= (1 << 1);\n    HAL_Delay(500);\n    GPIOI->ODR &= ~(1 << 1);\n    HAL_Delay(500);\n  }\n}\n\nvoid SystemClock_Config(void) {\n}"
+    }
   },
   {
     "id": "stm32f746_button",
@@ -27207,7 +27271,9 @@ window.EXAMPLE_SKETCHES = [
         }
       ]
     },
-    "code": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOIEN | RCC_AHB1ENR_GPIOGEN;\n\n  GPIOI->MODER |= (1 << (1 * 2));\n\n  GPIOG->MODER &= ~(3 << (6 * 2));\n\n  while (1) {\n    if (!(GPIOG->IDR & (1 << 6))) {\n      GPIOI->ODR |= (1 << 1);\n    } else {\n      GPIOI->ODR &= ~(1 << 1);\n    }\n    HAL_Delay(50);\n  }\n}\n\nvoid SystemClock_Config(void) {\n}"
+    "files": {
+      "sketch.c": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOIEN | RCC_AHB1ENR_GPIOGEN;\n\n  GPIOI->MODER |= (1 << (1 * 2));\n\n  GPIOG->MODER &= ~(3 << (6 * 2));\n\n  while (1) {\n    if (!(GPIOG->IDR & (1 << 6))) {\n      GPIOI->ODR |= (1 << 1);\n    } else {\n      GPIOI->ODR &= ~(1 << 1);\n    }\n    HAL_Delay(50);\n  }\n}\n\nvoid SystemClock_Config(void) {\n}"
+    }
   },
   {
     "id": "stm32f746_hal_led_blink",
@@ -27304,7 +27370,7 @@ window.EXAMPLE_SKETCHES = [
       ]
     },
     "files": {
-      "sketch.ino": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOIEN;\n\n  GPIOI->MODER |= (1 << (1 * 2));\n\n  while (1) {\n    HAL_GPIO_TogglePin(GPIOI, GPIO_PIN_1);\n    HAL_Delay(500);\n  }\n}\n\nvoid SystemClock_Config(void) {\n}"
+      "sketch.c": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOIEN;\n\n  GPIOI->MODER |= (1 << (1 * 2));\n\n  while (1) {\n    HAL_GPIO_TogglePin(GPIOI, GPIO_PIN_1);\n    HAL_Delay(500);\n  }\n}\n\nvoid SystemClock_Config(void) {\n}"
     }
   },
   {
@@ -27330,7 +27396,9 @@ window.EXAMPLE_SKETCHES = [
       ],
       "wires": []
     },
-    "code": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n\n  _tftPower(1);\n  _tftFillScreen(0x001F);\n\n  _tftPrint(20, 10, \"STM32F746G-DISCO\", 0xFFE0, 0x001F, 3);\n  _tftPrint(20, 60, \"Register-Level Mode\", 0xFFFF, 0x001F, 2);\n  _tftPrint(20, 85, \"No Arduino libraries\", 0xFFFF, 0x001F, 2);\n\n  _tftFillRect(20, 130, 120, 60, 0xF800);\n  _tftFillRect(160, 130, 120, 60, 0x07E0);\n  _tftFillRect(300, 130, 120, 60, 0x001F);\n\n  _tftPrint(55, 150, \"RED\", 0xFFFF, 0xF800, 2);\n  _tftPrint(180, 150, \"GREEN\", 0xFFFF, 0x07E0, 2);\n  _tftPrint(325, 150, \"BLUE\", 0xFFFF, 0x001F, 2);\n\n  while (1) {\n    HAL_Delay(100);\n  }\n}\n\nvoid SystemClock_Config(void) {\n}"
+    "files": {
+      "main.c": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n\n  _tftPower(1);\n  _tftFillScreen(0x001F);\n\n  _tftPrint(20, 10, \"STM32F746G-DISCO\", 0xFFE0, 0x001F, 3);\n  _tftPrint(20, 60, \"Register-Level Mode\", 0xFFFF, 0x001F, 2);\n  _tftPrint(20, 85, \"No Arduino libraries\", 0xFFFF, 0x001F, 2);\n\n  _tftFillRect(20, 130, 120, 60, 0xF800);\n  _tftFillRect(160, 130, 120, 60, 0x07E0);\n  _tftFillRect(300, 130, 120, 60, 0x001F);\n\n  _tftPrint(55, 150, \"RED\", 0xFFFF, 0xF800, 2);\n  _tftPrint(180, 150, \"GREEN\", 0xFFFF, 0x07E0, 2);\n  _tftPrint(325, 150, \"BLUE\", 0xFFFF, 0x001F, 2);\n\n  while (1) {\n    HAL_Delay(100);\n  }\n}\n\nvoid SystemClock_Config(void) {\n}"
+    }
   },
   {
     "id": "stm32f746_pot_led",
@@ -27440,7 +27508,9 @@ window.EXAMPLE_SKETCHES = [
         }
       ]
     },
-    "code": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\nvoid ADC1_Init(void);\nuint32_t ADC1_Read(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n  ADC1_Init();\n\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOIEN;\n  GPIOI->MODER |= (1 << (0 * 2));\n\n  while (1) {\n    uint32_t val = ADC1_Read();\n    if (val > 2048) {\n      GPIOI->ODR |= (1 << 0);\n    } else {\n      GPIOI->ODR &= ~(1 << 0);\n    }\n    HAL_Delay(100);\n  }\n}\n\nvoid ADC1_Init(void) {\n  RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;\n  GPIOA->MODER |= (3 << (0 * 2));\n  ADC1->CR2 = 0;\n  ADC1->SQR3 = 0;\n  ADC1->CR2 |= ADC_CR2_ADON;\n}\n\nuint32_t ADC1_Read(void) {\n  ADC1->CR2 |= ADC_CR2_SWSTART;\n  while (!(ADC1->SR & ADC_SR_EOC));\n  return ADC1->DR;\n}\n\nvoid SystemClock_Config(void) {\n}"
+    "files": {
+      "sketch.c": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\nvoid ADC1_Init(void);\nuint32_t ADC1_Read(void);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n  ADC1_Init();\n\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOIEN;\n  GPIOI->MODER |= (1 << (0 * 2));\n\n  while (1) {\n    uint32_t val = ADC1_Read();\n    if (val > 2048) {\n      GPIOI->ODR |= (1 << 0);\n    } else {\n      GPIOI->ODR &= ~(1 << 0);\n    }\n    HAL_Delay(100);\n  }\n}\n\nvoid ADC1_Init(void) {\n  RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;\n  GPIOA->MODER |= (3 << (0 * 2));\n  ADC1->CR2 = 0;\n  ADC1->SQR3 = 0;\n  ADC1->CR2 |= ADC_CR2_ADON;\n}\n\nuint32_t ADC1_Read(void) {\n  ADC1->CR2 |= ADC_CR2_SWSTART;\n  while (!(ADC1->SR & ADC_SR_EOC));\n  return ADC1->DR;\n}\n\nvoid SystemClock_Config(void) {\n}"
+    }
   },
   {
     "id": "stm32f746_register_uart",
@@ -27464,7 +27534,9 @@ window.EXAMPLE_SKETCHES = [
       ],
       "wires": []
     },
-    "code": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\nvoid USART1_Init(void);\nvoid USART1_SendChar(char c);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n  USART1_Init();\n\n  while (1) {\n    USART1_SendChar('H');\n    USART1_SendChar('e');\n    USART1_SendChar('l');\n    USART1_SendChar('l');\n    USART1_SendChar('o');\n    USART1_SendChar(' ');\n    USART1_SendChar('S');\n    USART1_SendChar('T');\n    USART1_SendChar('M');\n    USART1_SendChar('3');\n    USART1_SendChar('2');\n    USART1_SendChar('!');\n    USART1_SendChar('\\r');\n    USART1_SendChar('\\n');\n    HAL_Delay(1000);\n  }\n}\n\nvoid USART1_Init(void) {\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;\n  RCC->APB2ENR |= RCC_APB2ENR_USART1EN;\n\n  GPIOA->MODER &= ~(3 << (9 * 2));\n  GPIOA->MODER |= (2 << (9 * 2));\n  GPIOA->AFRL |= (7 << (9 * 4));\n\n  USART1->BRR = 0x683;\n  USART1->CR1 = USART_CR1_UE | USART_CR1_TE | USART_CR1_RE;\n}\n\nvoid USART1_SendChar(char c) {\n  while (!(USART1->SR & USART_SR_TXE));\n  USART1->DR = c;\n}\n\nvoid SystemClock_Config(void) {\n}"
+    "files": {
+      "sketch.c": "#include \"stm32f7xx.h\"\n\nvoid SystemClock_Config(void);\nvoid USART1_Init(void);\nvoid USART1_SendChar(char c);\n\nint main(void) {\n  HAL_Init();\n  SystemClock_Config();\n  USART1_Init();\n\n  while (1) {\n    USART1_SendChar('H');\n    USART1_SendChar('e');\n    USART1_SendChar('l');\n    USART1_SendChar('l');\n    USART1_SendChar('o');\n    USART1_SendChar(' ');\n    USART1_SendChar('S');\n    USART1_SendChar('T');\n    USART1_SendChar('M');\n    USART1_SendChar('3');\n    USART1_SendChar('2');\n    USART1_SendChar('!');\n    USART1_SendChar('\\r');\n    USART1_SendChar('\\n');\n    HAL_Delay(1000);\n  }\n}\n\nvoid USART1_Init(void) {\n  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;\n  RCC->APB2ENR |= RCC_APB2ENR_USART1EN;\n\n  GPIOA->MODER &= ~(3 << (9 * 2));\n  GPIOA->MODER |= (2 << (9 * 2));\n  GPIOA->AFRL |= (7 << (9 * 4));\n\n  USART1->BRR = 0x683;\n  USART1->CR1 = USART_CR1_UE | USART_CR1_TE | USART_CR1_RE;\n}\n\nvoid USART1_SendChar(char c) {\n  while (!(USART1->SR & USART_SR_TXE));\n  USART1->DR = c;\n}\n\nvoid SystemClock_Config(void) {\n}"
+    }
   },
   {
     "id": "tb6600_stepper",

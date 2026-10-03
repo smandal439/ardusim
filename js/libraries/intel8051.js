@@ -107,6 +107,10 @@ window.ArduinoLibs['Intel8051'] = {
         for (var i = 0; i < 10; i++) {
           if (cpu.halted) break;
           cpu.step();
+          // Emulated wall clock: 12 MHz crystal -> 1 machine cycle = 1 us.
+          // Update before syncPort so pin-change listeners stamp samples
+          // with accurate sub-ms time (logic analyzer / oscilloscope).
+          self.simTime = cpu.cycles / 1000;
           syncPort(0, cpu.P0);
           syncPort(1, cpu.P1);
           syncPort(2, cpu.P2);

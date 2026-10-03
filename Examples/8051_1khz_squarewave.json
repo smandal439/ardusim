@@ -1,0 +1,52 @@
+{
+  "id": "8051_1khz_squarewave",
+  "name": "8051 1Khz SquareWave",
+  "icon": "🔧",
+  "desc": "A custom 8051 1Khz SquareWave circuit example.",
+  "tags": [
+    "8051",
+    "squarewave"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1791042559775_x65nv",
+        "type": "intel_8051",
+        "x": 265,
+        "y": 325,
+        "rotation": 0,
+        "props": {
+          "label": "8051"
+        }
+      },
+      {
+        "id": "comp_1791042618583_th5gv",
+        "type": "la_probe_ch1",
+        "x": 170,
+        "y": 395,
+        "rotation": 0,
+        "props": {}
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1791042622727_ewr9z",
+        "from": {
+          "instId": "comp_1791042559775_x65nv",
+          "pinId": "P1.0"
+        },
+        "to": {
+          "instId": "comp_1791042618583_th5gv",
+          "pinId": "tip"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.c": "#include <reg51.h>\n\nsbit WAVE_OUT = P1^0; // Output pin P1.0\n\nvoid delay_500us(void) {\n    TMOD &= 0xF0;     // Clear Timer 0 mode bits\n    TMOD |= 0x01;     // Set Timer 0 in Mode 1 (16-bit timer)\n\n    // 12 MHz crystal: 1 machine cycle = 1 us.\n    // Preload = 65536 - 425 = 65111 (0xFE57). The while(TF0==0) polling\n    // loop detects the overflow on its 14-cycle iteration, so the half\n    // period comes out at ~494 us instead of 500 -> ~1.01 kHz (within 1%).\n    TH0 = 0xFE;\n    TL0 = 0x57;\n\n    TR0 = 1;          // Start Timer 0\n    while (TF0 == 0); // Wait until Timer 0 overflows\n    TR0 = 0;          // Stop Timer 0\n    TF0 = 0;          // Clear Timer 0 flag\n}\n\nvoid main(void) {\n    WAVE_OUT = 0;     // Initialize output\n    while (1) {\n        WAVE_OUT = ~WAVE_OUT; // Toggle P1.0 pin\n        delay_500us();        // Wait 500 microseconds\n    }\n}"
+  }
+}

@@ -164,14 +164,18 @@ class CircuitCanvas {
     }
 
     // Sample oscilloscope and logic analyzer from probe components — always,
-    // so probe-based channels work during both running and stopped states
+    // so probe-based channels work during both running and stopped states.
+    // Use simulation time (emulated ms) whenever available so probe samples,
+    // pin-change samples and tick samples share one time axis; fall back to
+    // the wall clock only before the first run.
     const app = window.App;
     if (app) {
+      const sampleT = (sim && (sim.isRunning || sim.simTime > 0)) ? sim.simTime : performance.now();
       if (app.osc && !app.osc.paused) {
-        app.osc.sample(performance.now(), {});
+        app.osc.sample(sampleT, {});
       }
       if (app.la && !app.la.paused) {
-        app.la.sample(performance.now(), {});
+        app.la.sample(sampleT, {});
       }
     }
 
