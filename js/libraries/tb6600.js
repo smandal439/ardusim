@@ -6,12 +6,17 @@
  */
 window.ArduinoLibs = window.ArduinoLibs || {};
 window.ArduinoLibs['TB6600'] = {
-  classes: ['TB6600Driver'],
-  includes: [],
+  classes: ['TB6600', 'TB6600Driver'],
+  includes: ['<TB6600.h>'],
 
   transpile: [
-    // TB6600Driver driver(PUL_PIN, DIR_PIN, ENA_PIN);
-    [/\bnew\s+TB6600Driver\s*\(([^)]+)\)/g, '_a.tb6600New($1)'],
+    // TB6600 driver(PUL, DIR, ENA);  or  new TB6600Driver(PUL, DIR, ENA);
+    [/\bnew\s+TB6600(?:Driver)?\s*\(([^)]+)\)/g, '_a.tb6600New($1)'],
+    // Trailing `;` required so wiring notes inside comments such as
+    // "TB6600 PUL (Pulse)" are not rewritten into constructor calls.
+    [/\bTB6600\s+(\w+)\s*\(([^)]+)\)\s*;/g, function(match, varName, args) {
+      return 'var ' + varName + ' = _a.tb6600New(' + args + ');';
+    }],
     // driver.begin();
     [/\b(\w+)\.begin\s*\(\s*\)/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
@@ -101,35 +106,58 @@ window.ArduinoLibs['TB6600'] = {
         // Set direction pin
         var dirKey = 'pin_' + d.dirPin;
         var dirVal = n > 0 ? 1 : 0;
-        self.pinStates[dirKey] = dirVal;
-        self._emitPinChange(dirKey, dirVal);
+        if (self.pinStates[dirKey] !== dirVal) {
+          self.pinStates[dirKey] = dirVal;
+          self._emitPinChange(dirKey, dirVal);
+        }
 
         var pulKey = 'pin_' + d.pulPin;
-        var halfPeriod = Math.max(50, Math.round(500000 / Math.max(d.speed, 1)));
         var dir = n > 0 ? 1 : -1;
         var absN = Math.abs(n);
+        var stepAngle = 1.8 / (d.microstep || 16);
 
-        for (var i = 0; i < absN; i++) {
+        // Real ms per micro-step derived from the RPM passed to setSpeed().
+        // 200 RPM is the baseline (1 ms per micro-step = 1000 steps/s), so a
+        // 1/16-microstepped NEMA 17 (3200 usteps/rev) completes a turn in
+        // ~3.2 s at 200 RPM, ~1.6 s at 400 RPM and ~0.8 s at 800+ RPM.
+        var perStepMs = Math.max(0.2, 200 / Math.max(Number(d.speed) || 200, 1));
+        // Aim for one timer per ~33 ms slice. A revolution is 3200 micro-steps,
+        // and one chained setTimeout() per micro-step gets clamped to 4 ms by
+        // the browser (worse on Windows, ~15 ms), stretching the animation into
+        // minutes. ~30 slices/s keeps PUL as a visible square wave while only
+        // costing a hundred timers per revolution.
+        var sliceMs = 33;
+
+        var advance = function(count) {
+          if (!count) return;
+          d.position += dir * count;
+          d.angle = (d.angle || 0) + dir * count * stepAngle;
+        };
+
+        var pulHigh = 1;
+        var done = 0;
+        while (done < absN) {
           if (!self.isRunning) return;
+          var chunk = Math.round(sliceMs / perStepMs);
+          if (!(chunk > 0)) chunk = 1;
+          if (chunk > absN - done) chunk = absN - done;
 
-          // Pulse HIGH
-          self.pinStates[pulKey] = 1;
-          self._emitPinChange(pulKey, 1);
+          // Alternate PUL high/low each slice so the pin reads as a square wave
+          self.pinStates[pulKey] = pulHigh;
+          self._emitPinChange(pulKey, pulHigh);
+          pulHigh = pulHigh ? 0 : 1;
+
+          advance(chunk);
+          done += chunk;
+
           try {
-            await self._delayPromise(halfPeriod / (self.speed || 1));
+            await self._delayPromise((chunk * perStepMs) / (self.speed || 1));
           } catch (e) { return; }
+        }
 
-          // Pulse LOW
+        if (self.pinStates[pulKey]) {
           self.pinStates[pulKey] = 0;
           self._emitPinChange(pulKey, 0);
-          try {
-            await self._delayPromise(halfPeriod / (self.speed || 1));
-          } catch (e) { return; }
-
-          d.position += dir;
-          // Calculate angle: 1.8 degrees per full step / microstep
-          var stepAngle = 1.8 / (d.microstep || 16);
-          d.angle = (d.angle || 0) + dir * stepAngle;
         }
 
         self._serialLog('[TB6600] step(' + n + ') -> pos=' + d.position + '\n', 'system');

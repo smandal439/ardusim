@@ -710,6 +710,10 @@ class ArduinoSimulator {
 
     // Stepper.step() is blocking on real hardware // await the animated motion
     js = js.replace(/(?<!await\s)_a\.stepperStep\s*\(/g, 'await _a.stepperStep(');
+    // TB6600.step() is blocking too — without await the sketch races ahead and
+    // starts the next move while this one is still running, so the concurrent
+    // forward/reverse step loops cancel each other and the shaft never turns.
+    js = js.replace(/(?<!await\s)_a\.tb6600Step\s*\(/g, 'await _a.tb6600Step(');
 
     // Auto-await calls to user-defined functions (they were transpiled to `async`,
     // so an unawaited call would assign a Promise instead of the returned value).
@@ -1881,6 +1885,7 @@ class ArduinoSimulator {
     this.pinModes = {};
     this._avrState = null; // DDRx/PORTx latch -- reset with the pins
     this._steppers = {};
+    this._tb6600s = {};
     this._delays = [];
     this._wireTxAddr = null;
     this._wireRegPtr = 0x3B;

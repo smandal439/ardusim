@@ -2692,8 +2692,21 @@ class TB6600Component extends Component {
     const stepAngle = 1.8 / ms;
     const prevPul = this.runtimeState._lastPul ?? 0;
 
-    // Detect rising edge on PUL
-    if (pul === 1 && prevPul === 0) {
+    // Prefer the TB6600 library's own counters when this driver is backed by
+    // <TB6600.h>: the simulated pulse train is time-sliced (one timer per
+    // ~16 ms), so edge-counting PUL would only see a fraction of the
+    // micro-steps. Fall back to edge detection when the sketch drives PUL with
+    // plain digitalWrite() instead of the library.
+    const pulPinNum = this.getConnectedPinNum('PUL');
+    const lib = (sim._tb6600s && pulPinNum !== null)
+      ? Object.values(sim._tb6600s).find(t => Number(t.pulPin) === Number(pulPinNum))
+      : null;
+
+    if (lib) {
+      this.runtimeState.position = lib.position;
+      this.runtimeState.angle = lib.angle || 0;
+    } else if (pul === 1 && prevPul === 0) {
+      // Detect rising edge on PUL
       const dirSign = dir === 1 ? 1 : -1;
       this.runtimeState.position = (this.runtimeState.position ?? 0) + dirSign;
       this.runtimeState.angle = (this.runtimeState.angle ?? 0) + dirSign * stepAngle;
@@ -3073,26 +3086,33 @@ class Nema17Component extends Component {
     const sim = window.ArduinoSim;
     if (!sim) return;
 
-    // Find any TB6600 driver instance and sync angle
+    // Always write into the circuit instance's own runtimeState — that is the
+    // object defComp's draw() reads. They are normally the same reference, but
+    // re-bind if construction ever saw a missing one.
+    let rs = (this.inst && this.inst.runtimeState) || this.runtimeState;
+    if (!rs) rs = {};
+    if (this.inst) this.inst.runtimeState = rs;
+    this.runtimeState = rs;
+
+    // 1st: Read directly from TB6600 library state (most reliable)
+    if (sim._tb6600s) {
+      for (const id in sim._tb6600s) {
+        const tb = sim._tb6600s[id];
+        rs.angle = tb.angle || 0;
+        rs.position = tb.position || 0;
+        return;
+      }
+    }
+
+    // 2nd: Read from TB6600 component runtimeState
     const cw = window.CircuitCanvas;
     if (cw && Array.isArray(cw.components)) {
       for (const comp of cw.components) {
         if (comp.type === 'tb6600' && comp.runtimeState) {
-          // Sync from TB6600 component's runtimeState
-          this.runtimeState.angle = comp.runtimeState.angle ?? 0;
-          this.runtimeState.position = comp.runtimeState.position ?? 0;
+          rs.angle = comp.runtimeState.angle ?? 0;
+          rs.position = comp.runtimeState.position ?? 0;
           return;
         }
-      }
-    }
-
-    // Fallback: check library state
-    if (sim._tb6600s) {
-      for (const id in sim._tb6600s) {
-        const tb = sim._tb6600s[id];
-        this.runtimeState.angle = tb.angle || 0;
-        this.runtimeState.position = tb.position || 0;
-        return;
       }
     }
   }
