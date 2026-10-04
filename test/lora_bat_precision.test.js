@@ -2,7 +2,8 @@
  * test/lora_bat_precision.test.js — LoRa weather-station battery percentage:
  * the TX sketch computes a float percentage, but the transpiler strips the
  * (int) cast, so an unrounded value leaked into the JSON ("bat":65.52941176470587).
- * The sketch now rounds to 2 decimal places — this test proves it end-to-end.
+ * The example now rounds to 2 decimal places before serializing — this test
+ * proves it end-to-end against the main example file.
  * Run: node node_modules/vitest/vitest.mjs run test/lora_bat_precision.test.js
  */
 import { describe, it, expect, beforeAll } from 'vitest';
@@ -37,7 +38,7 @@ const { CircuitCanvas } = loadScripts([
   'js/components/power.js', 'js/components/output.js', 'js/canvas.js',
 ], ['CircuitCanvas']);
 
-const example = JSON.parse(readSrc('Examples/lora_weather_station_sensor_tx_receiver_display copy.json'));
+const example = JSON.parse(readSrc('Examples/lora_weather_station_sensor_tx_receiver_display.json'));
 
 function buildRig(circuit) {
   const ctx = new Proxy({}, {
@@ -101,10 +102,13 @@ describe('patched LoRa percentage sketch', () => {
     const m = out.match(/"bat":\s*(-?[\d.]+)/);
     expect(m, `TX serial:\n${out.slice(0, 700)}`).toBeTruthy();
     const raw = m[1];
-    console.log('[bat raw] =', raw);
     const decimals = raw.includes('.') ? raw.split('.')[1].length : 0;
     expect(decimals).toBeLessThanOrEqual(2);
     // the original bug: 65.52941176470587
     expect(raw).not.toMatch(/\.\d{3,}/);
+    // it is a percentage, not a raw voltage
+    const bat = parseFloat(raw);
+    expect(bat).toBeGreaterThan(0);
+    expect(bat).toBeLessThanOrEqual(100);
   }, 30000);
 });

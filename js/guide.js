@@ -1210,27 +1210,30 @@ void loop() {
     name: '555 Timer IC',
     icon: '⬟',
     category: 'ICs',
-    longDesc: 'The classic 555 timer IC configured in astable mode. The simulator automatically detects connected R1, R2, and C values and calculates the real oscillation frequency using the standard formulas: f = 1.44 / ((R1 + 2°R2) ° C). Works standalone without an Arduino — the OUT pin drives LEDs and other components directly.',
-    use: 'Generating square waves, LED blinkers, tone generators, PWM sources. Connect R1 between VCC and DIS, R2 between DIS and THR, and C between THR/TRIG and GND.',
+    longDesc: 'The classic 555 timer IC, working in astable (free-running) or monostable (one-shot) mode — pick it in the Mode property. The simulator automatically detects the connected R1, R2 and C values. Astable: f = 1.44 / ((R1 + 2*R2) * C). Monostable: pulse width t = 1.1 * R * C, started by pulling TRIG below 1/3 VCC. Works standalone without an Arduino — the OUT pin drives LEDs and other components directly.',
+    use: 'Astable (square waves, LED blinkers, tone generators): R1 between VCC and DIS, R2 between DIS and THR, C between THR and GND, TRIG tied to THR. Monostable (one-shot, pulse extender, debouncer): R from VCC to DIS, DIS tied to THR, C from THR to GND, TRIG pulled up to VCC with a button to GND.',
     pins: {
       GND: { label: 'GND', type: 'gnd', desc: 'Ground pin.' },
       TRIG: { label: 'TRIG', type: 'digital', desc: 'Trigger input — starts the cycle when voltage falls below 1/3 VCC.' },
       OUT: { label: 'OUT', type: 'digital', desc: 'Output pin — drives HIGH (~VCC) or LOW (GND).' },
-      RST: { label: 'RST', type: 'digital', desc: 'Reset — tie to VCC to keep timer active.' },
-      DIS: { label: 'DIS', type: 'digital', desc: 'Discharge pin — internal transistor sinks current to GND when OUT is LOW.' },
+      RST: { label: 'RST', type: 'digital', desc: 'Reset — tie to VCC to keep timer active; grounding it forces OUT low.' },
+      DIS: { label: 'DIS', type: 'digital', desc: 'Discharge pin — internal transistor sinks current to GND while the output is LOW.' },
       THR: { label: 'THR', type: 'digital', desc: 'Threshold input — resets the cycle when voltage exceeds 2/3 VCC.' },
-      CV: { label: 'CV', type: 'signal', desc: 'Control voltage — add a 0.1 °F cap to GND for noise bypass.' },
+      CV: { label: 'CV', type: 'signal', desc: 'Control voltage — add a 0.1 uF cap to GND for noise bypass.' },
       VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage (4.5–16 V).' },
     },
     props: {
+      mode: 'Astable (free-running oscillator) or monostable (one-shot pulse).',
       frequency: 'Fallback frequency in Hz (used when R/C values cannot be detected).',
       dutyCycle: 'Fallback duty cycle in % (used when R/C values cannot be detected).',
+      pulseTime: 'Fallback monostable pulse width in seconds (used when R/C values cannot be detected).',
     },
-    wiring: 'VCC→5V, GND→GND, RST→VCC, CV→0.1°F→GND, OUT→LED+resistor→GND. For astable: VCC→R1→DIS, DIS→R2→THR, THR→C→GND, TRIG→THR.',
+    wiring: 'VCC→5V, GND→GND, RST→VCC, CV→0.1uF→GND, OUT→LED+resistor→GND. Astable: VCC→R1→DIS, DIS→R2→THR, THR→C→GND, TRIG→THR. Monostable: VCC→R→DIS, DIS→THR, THR→C→GND, TRIG→10k→VCC and TRIG→button→GND.',
     code: `// The 555 timer runs autonomously — no Arduino code needed.
-// Set frequency/duty via component values:
-//   R1, R2 (resistors) and C (capacitor) determine timing.
-//   f = 1.44 / ((R1 + 2*R2) * C)`,
+// Astable:  R1, R2 (resistors) and C (capacitor) set the frequency.
+//   f = 1.44 / ((R1 + 2*R2) * C)
+// Monostable: R and C set the pulse width.
+//   t = 1.1 * R * C`,
     exampleId: '555 Timer Astable LED Blinker',
   },
 
@@ -2160,10 +2163,11 @@ void loop() {
     pins: {
       SHLD: { label: '/SHLD', type: 'digital', desc: 'Shift/load (active LOW = load parallel data).' },
       CLK: { label: 'CLK', type: 'digital', desc: 'Serial clock.' },
-      A: { label: 'A', type: 'digital', desc: 'Parallel input A.' }, B: { label: 'B', type: 'digital', desc: 'Input B (not used, see note).' },
-      E: { label: 'E', type: 'digital', desc: 'Input E.' }, F: { label: 'F', type: 'digital', desc: 'Input F.' },
-      G: { label: 'G', type: 'digital', desc: 'Input G.' }, H: { label: 'H', type: 'digital', desc: 'Input H.' },
-      Q7: { label: 'Q7', type: 'digital', desc: 'Serial output.' }, Q7n: { label: "Q7'", type: 'digital', desc: 'Inverted serial output.' },
+      A: { label: 'A', type: 'digital', desc: 'Parallel input A (bit 0).' }, B: { label: 'B', type: 'digital', desc: 'Parallel input B (bit 1).' },
+      C: { label: 'C', type: 'digital', desc: 'Parallel input C (bit 2).' }, D: { label: 'D', type: 'digital', desc: 'Parallel input D (bit 3).' },
+      E: { label: 'E', type: 'digital', desc: 'Parallel input E (bit 4).' }, F: { label: 'F', type: 'digital', desc: 'Parallel input F (bit 5).' },
+      G: { label: 'G', type: 'digital', desc: 'Parallel input G (bit 6).' }, H: { label: 'H', type: 'digital', desc: 'Parallel input H (bit 7).' },
+      Q7: { label: 'Q7', type: 'digital', desc: 'Serial output (QH).' }, Q7n: { label: "Q7'", type: 'digital', desc: 'Inverted serial output.' },
       SER: { label: 'SER', type: 'digital', desc: 'Serial data input (for cascading).' },
       CLKINH: { label: 'CLKINH', type: 'digital', desc: 'Clock inhibit (active HIGH = clock disabled).' },
       VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
@@ -2175,17 +2179,17 @@ void loop() {
 
   ic_74hc193: {
     id: 'ic_74hc193', name: '74HC193 Counter', icon: '\u2b97', category: 'Digital ICs',
-    longDesc: '4-bit synchronous up/down binary counter with parallel load and master reset. Counts up on CPU rising edge or down on CPD rising edge. Outputs carry (TC_U) and borrow (TC_D) for cascading.',
+    longDesc: '4-bit synchronous up/down binary counter with parallel load and master reset. Counts up on CPU rising edge or down on CPD rising edge. Outputs carry (TCU) and borrow (TCD) for cascading.',
     use: 'Event counting, frequency division, address generation, up/down counters, cascaded multi-bit counters.',
     pins: {
       CPU: { label: 'CPU', type: 'digital', desc: 'Count up input (rising edge).' }, CPD: { label: 'CPD', type: 'digital', desc: 'Count down input (rising edge).' },
       PL: { label: '/PL', type: 'digital', desc: 'Parallel load (active LOW).' },
-      TC_U: { label: 'TC_U', type: 'digital', desc: 'Terminal count up (carry, goes HIGH at overflow).' },
-      TC_D: { label: 'TC_D', type: 'digital', desc: 'Terminal count down (borrow, goes HIGH at underflow).' },
-      QA: { label: 'QA', type: 'digital', desc: 'Output A (bit 0, LSB).' }, QB: { label: 'QB', type: 'digital', desc: 'Output B (bit 1).' },
-      A: { label: 'A', type: 'digital', desc: 'Parallel data A (bit 0).' }, B: { label: 'B', type: 'digital', desc: 'Parallel data B (bit 1).' },
-      C: { label: 'C', type: 'digital', desc: 'Parallel data C (bit 2).' }, DD: { label: 'D', type: 'digital', desc: 'Parallel data D (bit 3, MSB).' },
-      CO: { label: 'CO', type: 'digital', desc: 'Output C (bit 2).' }, BO: { label: 'BO', type: 'digital', desc: 'Output D (bit 3).' },
+      TCU: { label: 'TCU', type: 'digital', desc: 'Terminal count up / carry (goes LOW at overflow).' },
+      TCD: { label: 'TCD', type: 'digital', desc: 'Terminal count down / borrow (goes LOW at underflow).' },
+      Q0: { label: 'Q0', type: 'digital', desc: 'Output bit 0 (LSB).' }, Q1: { label: 'Q1', type: 'digital', desc: 'Output bit 1.' },
+      Q2: { label: 'Q2', type: 'digital', desc: 'Output bit 2.' }, Q3: { label: 'Q3', type: 'digital', desc: 'Output bit 3 (MSB).' },
+      D0: { label: 'D0', type: 'digital', desc: 'Parallel data input 0 (bit 0).' }, D1: { label: 'D1', type: 'digital', desc: 'Parallel data input 1 (bit 1).' },
+      D2: { label: 'D2', type: 'digital', desc: 'Parallel data input 2 (bit 2).' }, D3: { label: 'D3', type: 'digital', desc: 'Parallel data input 3 (bit 3, MSB).' },
       MR: { label: 'MR', type: 'digital', desc: 'Master reset (active HIGH).' },
       VCC: { label: 'VCC', type: 'power', desc: 'Supply voltage.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' },
     },

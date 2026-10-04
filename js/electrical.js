@@ -627,7 +627,7 @@ class ElectricalEngine {
       ic_74hc245: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
       ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
       ic_74hc165: ['Q7', 'Q7n'],
-      ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],
+      ic_74hc193: ['Q0', 'Q1', 'Q2', 'Q3', 'TCU', 'TCD'],
       ic_74hc47: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
       ic_74hc148: ['A0', 'A1', 'A2', 'GS', 'EO'],
       ic_74hc02: ['Y1', 'Y2', 'Y3', 'Y4'],

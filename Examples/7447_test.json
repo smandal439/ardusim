@@ -1,0 +1,363 @@
+{
+  "id": "7447_test",
+  "name": "7447 test",
+  "icon": "🔧",
+  "desc": "Test of the 74HC7447 BCD to 7-segment decoder/driver. The logic level inputs A–D are set to LOW, and the 7-segment display shows a '0'.",
+  "tags": [
+    "custom",
+    "circuit",
+    "7447",
+    "BCD to 7-segment decoder",
+    "7-segment display"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1791133128864_a4ntl",
+        "type": "ic_74hc47",
+        "x": 640,
+        "y": 230,
+        "rotation": 1,
+        "props": {}
+      },
+      {
+        "id": "comp_1791133266110_sh2ga",
+        "type": "seg7",
+        "x": 785,
+        "y": 205,
+        "rotation": 0,
+        "props": {
+          "commonAnode": false,
+          "color": "#ff3333",
+          "colorName": "Red",
+          "brightness": "100"
+        }
+      },
+      {
+        "id": "comp_1791133328083_qo2zz",
+        "type": "power_5v",
+        "x": 735,
+        "y": 130,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_1791133330454_kdn65",
+        "type": "power_gnd",
+        "x": 580,
+        "y": 285,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_1791133341769_re6no",
+        "type": "logic_level_in",
+        "x": 590,
+        "y": 165,
+        "rotation": 0,
+        "props": {
+          "level": 0
+        }
+      },
+      {
+        "id": "comp_1791133342584_pufhf",
+        "type": "logic_level_in",
+        "x": 590,
+        "y": 190,
+        "rotation": 0,
+        "props": {
+          "level": 0
+        }
+      },
+      {
+        "id": "comp_1791133343251_36641",
+        "type": "logic_level_in",
+        "x": 590,
+        "y": 210,
+        "rotation": 0,
+        "props": {
+          "level": 0
+        }
+      },
+      {
+        "id": "comp_1791133344757_0znxl",
+        "type": "logic_level_in",
+        "x": 590,
+        "y": 235,
+        "rotation": 0,
+        "props": {
+          "level": 0
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1791133276554_omf8m",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "a"
+        },
+        "to": {
+          "instId": "comp_1791133266110_sh2ga",
+          "pinId": "segA"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133282471_yu4zf",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "b"
+        },
+        "to": {
+          "instId": "comp_1791133266110_sh2ga",
+          "pinId": "segB"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133287070_phete",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "c"
+        },
+        "to": {
+          "instId": "comp_1791133266110_sh2ga",
+          "pinId": "segC"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133292393_3uj2t",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "d"
+        },
+        "to": {
+          "instId": "comp_1791133266110_sh2ga",
+          "pinId": "segD"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133297603_xqq7c",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "e"
+        },
+        "to": {
+          "instId": "comp_1791133266110_sh2ga",
+          "pinId": "segE"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133305261_1ilj5",
+        "from": {
+          "instId": "comp_1791133266110_sh2ga",
+          "pinId": "segG"
+        },
+        "to": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "g"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133315669_w7a7t",
+        "from": {
+          "instId": "comp_1791133266110_sh2ga",
+          "pinId": "segF"
+        },
+        "to": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "f"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133334333_mesl8",
+        "from": {
+          "instId": "comp_1791133330454_kdn65",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133336121_z2ing",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "comp_1791133328083_qo2zz",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133351171_07ve5",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "A"
+        },
+        "to": {
+          "instId": "comp_1791133341769_re6no",
+          "pinId": "out"
+        },
+        "color": null,
+        "waypoints": [
+          {
+            "x": 659,
+            "y": 289
+          },
+          {
+            "x": 659,
+            "y": 173
+          }
+        ],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133353591_ky5en",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "B"
+        },
+        "to": {
+          "instId": "comp_1791133342584_pufhf",
+          "pinId": "out"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133355515_d5prh",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "C"
+        },
+        "to": {
+          "instId": "comp_1791133343251_36641",
+          "pinId": "out"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133357852_awivi",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "D"
+        },
+        "to": {
+          "instId": "comp_1791133344757_0znxl",
+          "pinId": "out"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791133422183_0sh7i",
+        "from": {
+          "instId": "comp_1791133266110_sh2ga",
+          "pinId": "com"
+        },
+        "to": {
+          "instId": "comp_1791133330454_kdn65",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791137530276_6v3kt",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "LT"
+        },
+        "to": {
+          "instId": "comp_1791133328083_qo2zz",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791137532994_6vh7u",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "BI"
+        },
+        "to": {
+          "instId": "comp_1791133328083_qo2zz",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791137539310_sq4mk",
+        "from": {
+          "instId": "comp_1791133128864_a4ntl",
+          "pinId": "RBI"
+        },
+        "to": {
+          "instId": "comp_1791133330454_kdn65",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "void setup() {\n\n}\n\nvoid loop() {\n\n}"
+  }
+}

@@ -132,9 +132,11 @@ describe('LoRa weather station: battery divider → ESP32 ADC', () => {
 
   it('example sketch reads the ADC, sends bat, and receiver parses it', () => {
     const tx = example.files['sketch.ino'];
-    expect(tx).toMatch(/pinMode\(BATT_ADC,\s*INPUT\)/);
-    expect(tx).toMatch(/analogRead\(BATT_ADC\)/);
-    expect(tx).toMatch(/const int ADC_RESOLUTION = 4095;/);
+    // Live battery path: ADC pin → millivolts → divider → percentage
+    expect(tx).toMatch(/analogReadMilliVolts\(adcPin\)/);
+    expect(tx).toMatch(/constrain\(batteryPercentage, 0\.0, 100\.0\)/);
+    // Percentage must be rounded to 2 decimal places before serializing
+    expect(tx).toMatch(/round\(batteryPercentage \* 100\.0\) \/ 100\.0/);
     expect(tx).toMatch(/doc\["bat"\]/);
     expect(example.board2Code).toMatch(/doc\["bat"\]\.as<float>\(\)/);
     expect(example.board2Code).toMatch(/lastBat/);
@@ -199,13 +201,16 @@ describe('LoRa weather station: end-to-end (TX payload → RX display)', () => {
     const batMatch = txOut.match(/"bat":\s*(-?[\d.]+)/);
     expect(batMatch, `TX serial must carry a bat field:\n${txOut.slice(0, 600)}`).toBeTruthy();
     const bat = parseFloat(batMatch[1]);
-    expect(bat, `TX serial dump:\n${txOut.slice(0, 900)}`).toBeGreaterThan(3.6);
-    expect(bat).toBeLessThan(3.8);
+    // bat is a battery percentage (0-100) with at most 2 decimal places —
+    // never the raw float leak ("bat":65.52941176470587) it once produced.
+    expect(bat, `TX serial dump:\n${txOut.slice(0, 900)}`).toBeGreaterThan(0);
+    expect(bat).toBeLessThanOrEqual(100);
+    expect(batMatch[1]).not.toMatch(/\.\d{3,}/);
 
     // Receiver loop: parse the packet and print/display it.
     global.window.ArduinoSim = rxSim;
     await rx.loop();
     const rxOut = rxLogs.join('');
-    expect(rxOut, `RX serial must show received battery:\n${rxOut.slice(0, 600)}`).toMatch(/Bat:3\.\d/);
+    expect(rxOut, `RX serial must show received battery:\n${rxOut.slice(0, 600)}`).toMatch(/Bat:\d+\.\d{1,2}/);
   }, 30000);
 });

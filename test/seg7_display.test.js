@@ -240,7 +240,7 @@ describe('seg7 — draw()', () => {
     SEG_DEF.draw(ctx, instAt({ A: 0, B: 0, C: 0, D: 0, E: 0, F: 0, G: 0, DP: 0 }));
     expect(ctx.state.fills).toBeGreaterThan(0);
     expect(Math.max(0, ...ctx.state.shadowBlurVals ?? [0])).toBe(0);
-    expect(ctx.state.gradients).toBe(2); // body gradient + sheen only
+    expect(ctx.state.gradients).toBe(1); // matte body gradient only — no sheen (redesign b321c31)
   });
 
   it('adds halos and glow shadow only for lit segments', () => {
@@ -279,7 +279,7 @@ describe('seg7 — draw()', () => {
     SEG_DEF.draw(off, instAt({ A: 1 }, { brightness: 0 }));
 
     expect(Math.max(...dim.state.shadowBlurVals)).toBeLessThan(Math.max(...full.state.shadowBlurVals));
-    expect(off.state.gradients).toBe(2); // body + sheen only — no halo, no lit fill
+    expect(off.state.gradients).toBe(1); // body only — no halo, no lit fill
     expect(Math.max(...off.state.shadowBlurVals)).toBe(0);
   });
 
@@ -294,10 +294,13 @@ describe('seg7 — draw()', () => {
 describe('seg7 — pin layout & property menus', () => {
   const DEF = window.ArduinoComponents.COMPONENT_DEFS.seg7;
 
-  it('spreads the bottom pins evenly across the full width', () => {
-    expect(DEF.pins.filter(p => p.side === 'bottom').map(p => p.id)).toEqual(['segG', 'dp', 'com']);
-    expect(DEF.pins.filter(p => p.side === 'bottom').map(p => p.x)).toEqual([8, 28, 48]);
-    expect(DEF.pins.filter(p => p.side === 'top').map(p => p.x)).toEqual([8, 16, 24, 32, 40, 48]);
+  it('spreads the pins evenly across the full width', () => {
+    // Real 10-pin package (redesign b321c31): bottom = E, D, COM, C, DP (pins 1-5)
+    expect(DEF.pins.filter(p => p.side === 'bottom').map(p => p.id)).toEqual(['segE', 'segD', 'com', 'segC', 'dp']);
+    expect(DEF.pins.filter(p => p.side === 'bottom').map(p => p.x)).toEqual([10, 20, 30, 40, 50]);
+    // top = G, F, COM, A, B (pins 6-10)
+    expect(DEF.pins.filter(p => p.side === 'top').map(p => p.id)).toEqual(['segG', 'segF', 'com2', 'segA', 'segB']);
+    expect(DEF.pins.filter(p => p.side === 'top').map(p => p.x)).toEqual([10, 20, 30, 40, 50]);
   });
 
   it('keeps all pins inside the component body span', () => {

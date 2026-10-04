@@ -39,8 +39,8 @@ function fetchJson(urlPath, options = {}) {
 
 describe('REST API', () => {
   beforeAll(async () => {
-    // Start the server on a random port
-    const port = 30000 + Math.floor(Math.random() * 50000);
+    // Start the server on a random port (must stay ≤ 65535 — URLs reject higher)
+    const port = 30000 + Math.floor(Math.random() * 20000);
     baseUrl = `http://127.0.0.1:${port}`;
 
     serverProcess = spawn('node', [path.join(ROOT, 'server.js')], {
@@ -49,19 +49,40 @@ describe('REST API', () => {
       cwd: ROOT,
     });
 
-    // Wait for server to be ready
+    // Wait until the HTTP server actually responds (immune to banner wording).
     await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Server start timeout')), 10000);
-      serverProcess.stdout.on('data', (data) => {
-        if (data.toString().includes('running at')) {
-          clearTimeout(timeout);
+      const deadline = Date.now() + 15000;
+      let settled = false;
+      const fail = (err) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        reject(err);
+      };
+      const timer = setTimeout(() => fail(new Error('Server start timeout')), 15000);
+      const probe = () => {
+        if (settled) return;
+        const req = http.get(baseUrl + '/', (res) => {
+          res.resume();
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
           resolve();
-        }
-      });
+        });
+        req.on('error', () => {
+          if (settled) return;
+          if (Date.now() > deadline) return fail(new Error('Server start timeout'));
+          setTimeout(probe, 150);
+        });
+      };
+      serverProcess.on('error', (err) => fail(err));
+      serverProcess.on('exit', (code) => fail(new Error(`server exited early (code ${code})`)));
+      serverProcess.stdout.resume(); // drain — banner/visit logs must not block the pipe
       serverProcess.stderr.on('data', (data) => {
+        // Visible for diagnosis, but non-fatal — TLS/DB chatter is expected.
         console.error('Server stderr:', data.toString());
       });
-      serverProcess.on('error', reject);
+      probe();
     });
   });
 

@@ -421,6 +421,9 @@ const server = http.createServer(async (req, res) => {
     }
     try {
       const body = await readJsonBody(req);
+      if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).length === 0) {
+        return sendJson(res, 400, { error: 'Invalid project: empty or missing JSON body' });
+      }
       const project = sanitizeProject(body);
       if (!project) return sendJson(res, 400, { error: 'Invalid project' });
       // Enforce project count limit

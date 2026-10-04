@@ -16,7 +16,7 @@ const IC_OUTPUT_MAP = {
   ic_74hc245: { pins: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'], activeLow: [] },
   ic_74hc74: { pins: ['Q1', 'Q1n', 'Q2', 'Q2n'], activeLow: ['Q1n', 'Q2n'] },
   ic_74hc165: { pins: ['Q7', 'Q7n'], activeLow: ['Q7n'] },
-  ic_74hc193: { pins: ['QA', 'QB', 'QC', 'QD', 'CO', 'BO'], activeLow: ['CO', 'BO'] },
+  ic_74hc193: { pins: ['Q0', 'Q1', 'Q2', 'Q3', 'TCU', 'TCD'], activeLow: ['TCU', 'TCD'] },
   ic_74hc47: { pins: ['a', 'b', 'c', 'd', 'e', 'f', 'g'], activeLow: ['a', 'b', 'c', 'd', 'e', 'f', 'g'] },
   ic_74hc148: { pins: ['A0', 'A1', 'A2', 'GS', 'EO'], activeLow: ['A0', 'A1', 'A2', 'GS', 'EO'] },
   ic_74hc02: { pins: ['Y1', 'Y2', 'Y3', 'Y4'], activeLow: [] },
@@ -45,7 +45,7 @@ const IC_OUTPUT_PIN_LIST = {
   ic_74hc245: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
   ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
   ic_74hc165: ['Q7', 'Q7n'],
-  ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],
+  ic_74hc193: ['Q0', 'Q1', 'Q2', 'Q3', 'TCU', 'TCD'],
   ic_74hc47: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
   ic_74hc148: ['A0', 'A1', 'A2', 'GS', 'EO'],
   ic_74hc02: ['Y1', 'Y2', 'Y3', 'Y4'],
@@ -3149,7 +3149,7 @@ class CircuitCanvas {
           const pinNum = this._pinToNumber(pinId);
           if (pinNum == null) continue;
           const mode = sim.pinModes?.[`pin_${pinNum}`];
-          if (mode !== 'INPUT' && mode !== 'INPUT_PULLUP') continue; // TEMP-REVERT
+          if (mode !== 'INPUT' && mode !== 'INPUT_PULLUP' && mode !== 'INPUT_PULLDOWN') continue;
 
           let voltage = net.voltage || 0;
           if (mode === 'INPUT_PULLUP'
@@ -3694,156 +3694,9 @@ class CircuitCanvas {
           break;
         }
 
-        case 'ic_555': {
-          const sim = window.ArduinoSim;
-          if (!sim || !sim.pinStates) break;
-
-          const vccNet = this._tracePinNet(inst.id, 'VCC');
-          const gndNet = this._tracePinNet(inst.id, 'GND');
-          const hasVcc = vccNet.sources.some(s => s.voltage >= 4.5);
-          const hasGnd = gndNet.grounds.length > 0;
-
-          if (!hasVcc || !hasGnd) {
-            inst.runtimeState.outHigh = false;
-            break;
-          }
-
-          const trigPin = this._getConnectedPinNum(inst.id, 'TRIG');
-          const thrPin = this._getConnectedPinNum(inst.id, 'THR');
-          const rstPin = this._getConnectedPinNum(inst.id, 'RST');
-          const outPin = this._getConnectedPinNum(inst.id, 'OUT');
-          const disPin = this._getConnectedPinNum(inst.id, 'DIS');
-
-          let resetActive = true;
-          if (rstPin !== null) {
-            resetActive = (sim.pinStates[`pin_${rstPin}`] || 0) > 0;
-          }
-
-          if (!resetActive) {
-            inst.runtimeState.outHigh = false;
-            if (outPin !== null) sim.pinStates[`pin_${outPin}`] = 0;
-            if (disPin !== null) sim.pinStates[`pin_${disPin}`] = 0;
-            break;
-          }
-
-          if (!inst.runtimeState._lastTime) inst.runtimeState._lastTime = Date.now();
-          if (inst.runtimeState._capVoltage === undefined) inst.runtimeState._capVoltage = 0;
-
-          const now = Date.now();
-          const dt = (now - inst.runtimeState._lastTime) / 1000;
-          inst.runtimeState._lastTime = now;
-
-          // â”€â”€ Resolve actual R1, R2, C from connected components â”€â”€
-          let r1 = null, r2 = null, capC = null;
-          const self = this;
-
-          const _getOhms = (c) => {
-            let v = c.runtimeState?.value ?? c.props?.value ?? 0;
-            const u = c.runtimeState?.unit || c.props?.unit || 'Ω';
-            if (u === 'kΩ') v *= 1e3;
-            if (u === 'MΩ') v *= 1e6;
-            return v;
-          };
-          const _getFarads = (c) => {
-            let v = c.runtimeState?.value ?? c.props?.value ?? 0;
-            const u = c.runtimeState?.unit || c.props?.unit || 'F';
-            if (u === 'µF') v *= 1e-6;
-            if (u === 'nF') v *= 1e-9;
-            if (u === 'pF') v *= 1e-12;
-            if (u === 'mF') v *= 1e-3;
-            return v;
-          };
-          const _findConnectedComps = (pinId, type) => {
-            const results = [];
-            for (const w of self.wires) {
-              let tid;
-              if (w.from.instId === inst.id && w.from.pinId === pinId) tid = w.to.instId;
-              else if (w.to.instId === inst.id && w.to.pinId === pinId) tid = w.from.instId;
-              else continue;
-              const c = self.components.find(x => x.id === tid);
-              if (c && c.type === type) results.push(c);
-            }
-            return results;
-          };
-
-          // Find all resistors connected to any 555 pin and identify R1, R2
-          const _allResistors = new Map();
-          for (const pid of ['DIS', 'VCC', 'THR', 'TRIG']) {
-            for (const comp of _findConnectedComps(pid, 'resistor')) {
-              _allResistors.set(comp.id, comp);
-            }
-          }
-          for (const [, r] of _allResistors) {
-            const rPins = [];
-            for (const w of self.wires) {
-              if (w.from.instId === r.id || w.to.instId === r.id) {
-                const otherInstId = w.from.instId === r.id ? w.to.instId : w.from.instId;
-                if (otherInstId === inst.id) {
-                  rPins.push(w.from.instId === r.id ? w.from.pinId : w.to.pinId);
-                }
-              }
-            }
-            if (rPins.includes('VCC') && rPins.includes('DIS')) r1 = _getOhms(r);
-            else if (rPins.includes('DIS') && rPins.includes('THR')) r2 = _getOhms(r);
-            else if (r1 == null && rPins.includes('VCC')) r1 = _getOhms(r);
-            else if (r2 == null && rPins.includes('THR')) r2 = _getOhms(r);
-            else if (r1 == null) r1 = _getOhms(r);
-            else if (r2 == null) r2 = _getOhms(r);
-          }
-
-          // Find C from THR or TRIG pin
-          const capComps = _findConnectedComps('THR', 'capacitor');
-          const trigCapComps = _findConnectedComps('TRIG', 'capacitor');
-          const allCaps = [...new Set([...capComps, ...trigCapComps])];
-          if (allCaps.length > 0) capC = _getFarads(allCaps[0]);
-
-          // â”€â”€ Calculate timing from component values â”€â”€
-          let tHigh, tLow;
-          if (r1 != null && r2 != null && capC != null && capC > 0 && r1 > 0 && r2 > 0) {
-            // Real 555 astable formulas
-            tHigh = 0.693 * (r1 + r2) * capC;
-            tLow = 0.693 * r2 * capC;
-          } else {
-            // Fallback to props when components not resolved
-            const freq = inst.props.frequency || 1000;
-            const duty = (inst.props.dutyCycle || 50) / 100;
-            const period = 1 / freq;
-            tHigh = period * duty;
-            tLow = period * (1 - duty);
-          }
-          const vThresh = 2 / 3;
-          const vTrig = 1 / 3;
-
-          let cv = inst.runtimeState._capVoltage;
-
-          if (inst.runtimeState.outHigh) {
-            cv = Math.min(1.0, cv + dt / tHigh * 0.8);
-            if (cv >= vThresh) {
-              inst.runtimeState.outHigh = false;
-              cv = vThresh;
-            }
-          } else {
-            cv = Math.max(0, cv - dt / tLow * 0.8);
-            if (cv <= vTrig) {
-              inst.runtimeState.outHigh = true;
-              cv = vTrig;
-            }
-          }
-
-          inst.runtimeState._capVoltage = cv;
-
-          const outVal = inst.runtimeState.outHigh ? 255 : 0;
-          const disVal = inst.runtimeState.outHigh ? 0 : 255;
-          inst.runtimeState.OUT = outVal;
-          inst.runtimeState.DIS = disVal;
-          if (outPin !== null) sim.pinStates[`pin_${outPin}`] = outVal;
-          if (disPin !== null) sim.pinStates[`pin_${disPin}`] = disVal;
-
-          const capScaled = Math.round(cv * 255);
-          if (thrPin !== null) sim.pinStates[`pin_${thrPin}`] = capScaled;
-          if (trigPin !== null) sim.pinStates[`pin_${trigPin}`] = capScaled;
+        case 'ic_555':
+          this._updateIc555(inst);
           break;
-        }
 
         case 'ic_74hc00': {
           const sim = window.ArduinoSim;
@@ -4096,7 +3949,7 @@ class CircuitCanvas {
             // Parallel load A-H
             let val = 0;
             for (let i = 0; i < 8; i++) {
-              const pinId = ['A', 'E', 'F', 'G', 'H', 'Fn', 'Gn', 'Hn'][i];
+              const pinId = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'][i];
               if (read(pinId)) val |= (1 << i);
             }
             inst.runtimeState.bits = val;
@@ -4131,12 +3984,12 @@ class CircuitCanvas {
           if (mr) {
             inst.runtimeState.count = 0;
           } else if (pl === 0) {
-            // Parallel load from A,B,C,D,DD inputs
+            // Parallel load from D0-D3 inputs
             let val = 0;
-            if (read('A')) val |= 1;
-            if (read('B')) val |= 2;
-            if (read('C')) val |= 4;
-            if (read('DD')) val |= 8;
+            if (read('D0')) val |= 1;
+            if (read('D1')) val |= 2;
+            if (read('D2')) val |= 4;
+            if (read('D3')) val |= 8;
             inst.runtimeState.count = val & 0xF;
           } else {
             if (cpu === 1 && inst.runtimeState._lastCPU === 0) {
@@ -4149,11 +4002,16 @@ class CircuitCanvas {
           inst.runtimeState._lastCPU = cpu;
           inst.runtimeState._lastCPD = cpd;
           const c = inst.runtimeState.count;
-          write('QA', c & 1); write('QB', (c >> 1) & 1);
-          write('CO', (c === 0xF) ? 0 : 1);  // Carry: low when count=15
-          write('BO', (c === 0x0) ? 0 : 1);  // Borrow: low when count=0
-          write('TC_U', c === 0xF ? 1 : 0);
-          write('TC_D', c === 0x0 ? 1 : 0);
+          inst.runtimeState.Q0 = c & 1;
+          inst.runtimeState.Q1 = (c >> 1) & 1;
+          inst.runtimeState.Q2 = (c >> 2) & 1;
+          inst.runtimeState.Q3 = (c >> 3) & 1;
+          inst.runtimeState.TCU = (c === 0xF) ? 0 : 1;
+          inst.runtimeState.TCD = (c === 0x0) ? 0 : 1;
+          write('Q0', c & 1); write('Q1', (c >> 1) & 1);
+          write('Q2', (c >> 2) & 1); write('Q3', (c >> 3) & 1);
+          write('TCU', (c === 0xF) ? 0 : 1);  // carry: LOW at count=15
+          write('TCD', (c === 0x0) ? 0 : 1);  // borrow: LOW at count=0
           break;
         }
 
@@ -4800,6 +4658,260 @@ class CircuitCanvas {
     return best;
   }
 
+  /* ── 555 timer ──────────────────────────────────────────────────
+     Driven from _updateSimStateInner. `now` is injectable so tests can
+     step time deterministically instead of waiting on Date.now(). */
+  _updateIc555(inst, now = Date.now()) {
+    const sim = window.ArduinoSim;
+    const rs = inst.runtimeState;
+    if (!sim || !sim.pinStates) return;
+
+    const outPin = this._getConnectedPinNum(inst.id, 'OUT');
+    const disPin = this._getConnectedPinNum(inst.id, 'DIS');
+    const thrPin = this._getConnectedPinNum(inst.id, 'THR');
+    const trigPin = this._getConnectedPinNum(inst.id, 'TRIG');
+
+    const write = (pin, val) => { if (pin !== null) sim.pinStates[`pin_${pin}`] = val; };
+
+    // Power sanity: no supply or no return path -> output parks low
+    const hasVcc = this._tracePinNet(inst.id, 'VCC').sources.some(s => s.voltage >= 4.5);
+    const hasGnd = this._tracePinNet(inst.id, 'GND').grounds.length > 0;
+    if (!hasVcc || !hasGnd) {
+      rs.outHigh = false;
+      rs.OUT = 0;
+      rs.DIS = 255;
+      rs.pulseProgress = 0;
+      write(outPin, 0);
+      write(disPin, 255);
+      return;
+    }
+
+    // RST is active-low: an explicit ground (or a board pin driven LOW) resets.
+    // Floating / tied to VCC leaves the timer running.
+    const resetActive = this._tracePinNet(inst.id, 'RST').grounds.length === 0;
+    if (!resetActive) {
+      rs.outHigh = false;
+      rs.OUT = 0;
+      rs.DIS = 0;
+      rs._mState = 'idle';
+      rs._capVoltage = 0;
+      rs.pulseProgress = 0;
+      write(outPin, 0);
+      write(disPin, 0);
+      return;
+    }
+
+    const mode = inst.props?.mode === 'monostable' ? 'monostable' : 'astable';
+    if (rs._mode !== mode) {
+      rs._mode = mode;
+      rs._capVoltage = 0;
+      rs._mState = 'idle';
+      rs.outHigh = false;
+      rs.pulseProgress = 0;
+    }
+
+    if (rs._lastTime == null) rs._lastTime = now;
+    if (rs._capVoltage === undefined) rs._capVoltage = 0;
+    const dt = Math.max(0, (now - rs._lastTime) / 1000);
+    rs._lastTime = now;
+
+    const { r1, r2, capC } = this._resolve555RC(inst);
+
+    if (mode === 'monostable') {
+      this._step555Monostable(inst, now, r1, capC);
+    } else {
+      this._step555Astable(inst, dt, r1, r2, capC);
+    }
+
+    const outVal = rs.outHigh ? 255 : 0;
+    // DIS is released while the timing cap charges and pulled to GND to
+    // discharge it — it must never read as a ground during the charge phase.
+    const disVal = rs.outHigh ? 255 : 0;
+    rs.OUT = outVal;
+    rs.DIS = disVal;
+    write(outPin, outVal);
+    write(disPin, disVal);
+
+    const capScaled = Math.round(rs._capVoltage * 255);
+    write(thrPin, capScaled);
+    write(trigPin, capScaled);
+  }
+
+  /* Monostable (one-shot): a TRIG pulse at/below 1/3 VCC asserts OUT for
+     t = 1.1 · R · C, then the cap reaches 2/3 VCC and OUT drops again.
+     The trigger is level-sensitive, exactly as in the datasheet: holding
+     TRIG low keeps OUT asserted and holds the cap discharged. */
+  _step555Monostable(inst, now, rTiming, capC) {
+    const rs = inst.runtimeState;
+
+    // 1.1·R·C when the timing network resolves, else the pulseTime prop
+    let tPulse = (rTiming && capC) ? 1.1 * rTiming * capC : 0;
+    if (!(tPulse > 0)) tPulse = Math.max(0.01, Number(inst.props.pulseTime) || 1);
+    rs.tPulse = tPulse;
+
+    const trigLow = this._tracePinNet(inst.id, 'TRIG').grounds.length > 0;
+
+    if (trigLow) {
+      rs._mState = 'timing';
+      rs._pulseT0 = now;
+      rs.outHigh = true;
+      rs._capVoltage = 0;
+      rs.pulseProgress = 0;
+      return;
+    }
+
+    if (rs._mState !== 'timing') {
+      rs.outHigh = false;
+      rs._capVoltage = 0;
+      rs.pulseProgress = 0;
+      return;
+    }
+
+    const frac = Math.min(1, (now - rs._pulseT0) / 1000 / tPulse);
+    rs.pulseProgress = frac;
+    rs._capVoltage = frac * (2 / 3); // ramp toward the 2/3·VCC threshold
+    if (frac >= 1) {
+      rs._mState = 'idle';
+      rs.outHigh = false;
+      rs._capVoltage = 0;
+      rs.pulseProgress = 0;
+    }
+  }
+
+  /* Astable: free-running oscillator, charging toward 2/3·VCC and
+     discharging toward 1/3·VCC through R1/R2/C. */
+  _step555Astable(inst, dt, r1, r2, capC) {
+    const rs = inst.runtimeState;
+
+    let tHigh, tLow;
+    if (r1 != null && r2 != null && capC != null && capC > 0 && r1 > 0 && r2 > 0) {
+      // Real 555 astable formulas
+      tHigh = 0.693 * (r1 + r2) * capC;
+      tLow = 0.693 * r2 * capC;
+    } else {
+      // Fallback to props when components not resolved
+      const freq = inst.props.frequency || 1000;
+      const duty = (inst.props.dutyCycle || 50) / 100;
+      const period = 1 / freq;
+      tHigh = period * duty;
+      tLow = period * (1 - duty);
+    }
+    rs.tHigh = tHigh;
+    rs.tLow = tLow;
+
+    const vThresh = 2 / 3;
+    const vTrig = 1 / 3;
+
+    let cv = rs._capVoltage;
+    if (rs.outHigh) {
+      cv = Math.min(1.0, cv + dt / tHigh * 0.8);
+      if (cv >= vThresh) {
+        rs.outHigh = false;
+        cv = vThresh;
+      }
+    } else {
+      cv = Math.max(0, cv - dt / tLow * 0.8);
+      if (cv <= vTrig) {
+        rs.outHigh = true;
+        cv = vTrig;
+      }
+    }
+    rs._capVoltage = cv;
+  }
+
+  /* One wire endpoint of `ic`'s pin, as { instId, pinId }. */
+  _linksOnPin(ic, pinId) {
+    const out = [];
+    for (const w of this.wires) {
+      if (w.from.instId === ic.id && w.from.pinId === pinId) out.push({ instId: w.to.instId, pinId: w.to.pinId });
+      else if (w.to.instId === ic.id && w.to.pinId === pinId) out.push({ instId: w.from.instId, pinId: w.from.pinId });
+    }
+    return out;
+  }
+
+  _compsOnPin(ic, pinId, type) {
+    const out = [];
+    for (const link of this._linksOnPin(ic, pinId)) {
+      const c = this.components.find(x => x.id === link.instId);
+      if (c && c.type === type) out.push(c);
+    }
+    return out;
+  }
+
+  _ohmsOf(c) {
+    let v = c.runtimeState?.value ?? c.props?.value ?? 0;
+    const u = c.runtimeState?.unit || c.props?.unit || 'Ω';
+    if (u === 'kΩ') v *= 1e3;
+    else if (u === 'MΩ') v *= 1e6;
+    return v;
+  }
+
+  _faradsOf(c) {
+    let v = c.runtimeState?.value ?? c.props?.value ?? 0;
+    const u = c.runtimeState?.unit || c.props?.unit || 'F';
+    if (u === 'µF') v *= 1e-6;
+    else if (u === 'nF') v *= 1e-9;
+    else if (u === 'pF') v *= 1e-12;
+    else if (u === 'mF') v *= 1e-3;
+    return v;
+  }
+
+  /* Resolve R1, R2 and the timing cap of a 555 from its wiring.
+       R1 : VCC -> DIS/THR   (or a 5 V rail -> DIS/THR)
+       R2 : DIS <-> THR
+       C  : THR/TRIG -> ground
+     Resistors that only touch TRIG (trigger pull-ups), CV or OUT are not
+     timing components and are deliberately ignored. */
+  _resolve555RC(ic) {
+    let r1 = null, r2 = null, capC = null;
+
+    const resistors = new Map();
+    for (const pid of ['VCC', 'DIS', 'THR', 'TRIG']) {
+      for (const c of this._compsOnPin(ic, pid, 'resistor')) resistors.set(c.id, c);
+    }
+
+    for (const [, r] of resistors) {
+      const icPins = [];
+      const far = [];
+      for (const w of this.wires) {
+        if (w.from.instId !== r.id && w.to.instId !== r.id) continue;
+        const other = w.from.instId === r.id ? w.to : w.from;
+        if (other.instId === ic.id) icPins.push(other.pinId);
+        else far.push(other);
+      }
+      const touchesDis = icPins.includes('DIS');
+      const touchesThr = icPins.includes('THR');
+      const ohms = this._ohmsOf(r);
+
+      if (icPins.includes('VCC') && (touchesDis || touchesThr)) {
+        if (r1 == null) r1 = ohms;
+      } else if (touchesDis && touchesThr) {
+        if (r2 == null) r2 = ohms;
+      } else if (r1 == null && (touchesDis || touchesThr)
+        && far.some(f => this._tracePinNet(f.instId, f.pinId).sources.some(s => s.voltage >= 4.5))) {
+        r1 = ohms;
+      }
+    }
+
+    const defs = (window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS) || {};
+    const capPinIds = ((defs.capacitor && defs.capacitor.pins) || []).map(p => p.id);
+    for (const pid of ['THR', 'TRIG']) {
+      for (const link of this._linksOnPin(ic, pid)) {
+        const cap = this.components.find(c => c.id === link.instId);
+        if (!cap || cap.type !== 'capacitor') continue;
+        const farPin = capPinIds.find(id => id !== link.pinId);
+        if (!farPin) continue;
+        if (this._tracePinNet(cap.id, farPin).grounds.length > 0) {
+          capC = this._faradsOf(cap);
+          break;
+        }
+      }
+      if (capC != null) break;
+    }
+
+    return { r1, r2, capC };
+  }
+
   _tracePinNet(startInstId, startPinId, skipInternalTypes) {
     const queue = [{ instId: startInstId, pinId: startPinId, resistance: 0 }];
     const visited = new Set();
@@ -5129,7 +5241,7 @@ class CircuitCanvas {
         ic_74hc245: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
         ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
         ic_74hc165: ['Q7', 'Q7n'],
-        ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],
+        ic_74hc193: ['Q0', 'Q1', 'Q2', 'Q3', 'TCU', 'TCD'],
         ic_74hc47: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
         ic_74hc148: ['A0', 'A1', 'A2', 'GS', 'EO'],
         ic_74hc02: ['Y1', 'Y2', 'Y3', 'Y4'],
@@ -5311,7 +5423,7 @@ class CircuitCanvas {
       ic_74hc245: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
       ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
       ic_74hc165: ['Q7', 'Q7n'],
-      ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],
+      ic_74hc193: ['Q0', 'Q1', 'Q2', 'Q3', 'TCU', 'TCD'],
       ic_74hc47: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
       ic_74hc148: ['A0', 'A1', 'A2', 'GS', 'EO'],
       ic_74hc02: ['Y1', 'Y2', 'Y3', 'Y4'],
@@ -5531,7 +5643,7 @@ class CircuitCanvas {
   //     ic_74hc245: ['A1','A2','A3','A4','A5','A6','A7','A8','B1','B2','B3','B4','B5','B6','B7','B8'],
   //     ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
   //     ic_74hc165: ['Q7', 'Q7n'],
-  //     ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],
+  //     ic_74hc193: ['Q0', 'Q1', 'Q2', 'Q3', 'TCU', 'TCD'],
   //     ic_74hc47: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
   //     ic_74hc148: ['A0', 'A1', 'A2', 'GS', 'EO'],
   //     lm741: ['OUT'],
@@ -5773,7 +5885,7 @@ class CircuitCanvas {
       ic_74hc245: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'],
       ic_74hc74: ['Q1', 'Q1n', 'Q2', 'Q2n'],
       ic_74hc165: ['Q7', 'Q7n'],
-      ic_74hc193: ['QA', 'QB', 'CO', 'BO', 'TC_U', 'TC_D'],
+      ic_74hc193: ['Q0', 'Q1', 'Q2', 'Q3', 'TCU', 'TCD'],
       ic_74hc47: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
       ic_74hc148: ['A0', 'A1', 'A2', 'GS', 'EO'],
       ic_74hc02: ['Y1', 'Y2', 'Y3', 'Y4'],

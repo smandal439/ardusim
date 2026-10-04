@@ -401,6 +401,14 @@ describe('tm1637 component — draw()', () => {
     selected: false,
   });
 
+  // Segment gradient stops as [r, g, b]; hex stops (the blue PCB) don't match.
+  const segStops = (state) => state.stopColors
+    .map(c => String(c).match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/))
+    .filter(Boolean)
+    .map(m => [Number(m[1]), Number(m[2]), Number(m[3])]);
+  const isGreenish = ([r, g, b]) => g > r && g > b;
+  const isRedish = ([r, g, b]) => r > g && r > b;
+
   it('renders an all-dark module (PCB, ghosts) without any glow', () => {
     const ctx = recordCtx();
     DEF.draw(ctx, instAt({}));
@@ -423,12 +431,14 @@ describe('tm1637 component — draw()', () => {
   it('tints lit segments with the selected colour', () => {
     const green = recordCtx();
     DEF.draw(green, instAt({ digits: [0x3F, 0, 0, 0] }, { color: '#33ff66' }));
-    expect(green.state.stopColors.some(c => c.includes('51,255,102'))).toBe(true);
+    // b321c31 edge-shades segment stops (base mixed toward black/white), so the
+    // raw hex string is no longer a stop colour — assert channel dominance instead.
+    expect(segStops(green.state).some(isGreenish)).toBe(true);
 
     const red = recordCtx();
     DEF.draw(red, instAt({ digits: [0x3F, 0, 0, 0] }, { color: '#ff3333' }));
-    expect(red.state.stopColors.some(c => c.includes('255,51,51'))).toBe(true);
-    expect(red.state.stopColors.some(c => c.includes('51,255,102'))).toBe(false);
+    expect(segStops(red.state).some(isRedish)).toBe(true);
+    expect(segStops(red.state).some(isGreenish)).toBe(false);
   });
 
   it('goes fully dark when the display is switched off', () => {

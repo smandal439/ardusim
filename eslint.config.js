@@ -14,6 +14,7 @@ const projectGlobals = {
 
   // Core simulator objects
   ArduinoSim: 'readonly',
+  ArduinoSimulator: 'readonly',
   CircuitCanvas: 'readonly',
   App: 'readonly',
   EditorManager: 'readonly',
@@ -95,9 +96,9 @@ module.exports = [
     },
   },
 
-  /* ── Node.js backend & scripts ── */
+  /* ── Node.js backend ── */
   {
-    files: ['server.js', 'scripts/**/*.js'],
+    files: ['server.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
@@ -107,6 +108,27 @@ module.exports = [
     },
     rules: {
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^(app|stmtAll|EXAMPLE_CIRCUITS|sandbox|sketchesStart)$' }],
+      'no-undef': 'error',
+      'no-redeclare': 'off',
+      'eqeqeq': ['warn', 'smart'],
+      'no-empty': ['warn', { allowEmptyCatch: true }],
+    },
+  },
+
+  /* ── Node harness scripts (load browser JS inside a fake DOM) ── */
+  {
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'commonjs',
+      globals: {
+        ...globals.node,
+        ...globals.browser,
+        ...projectGlobals,
+      },
+    },
+    rules: {
+      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       'no-undef': 'error',
       'no-redeclare': 'off',
       'eqeqeq': ['warn', 'smart'],

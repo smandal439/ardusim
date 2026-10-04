@@ -18,10 +18,10 @@ class LogicAnalyzer {
       { pin: 'D3',  label: 'CH2', color: '#ff9800', enabled: true },
       { pin: 'D4',  label: 'CH3', color: '#4caf50', enabled: true },
       { pin: 'D5',  label: 'CH4', color: '#ff5722', enabled: true },
-      { pin: 'D6',  label: 'CH5', color: '#ab47bc', enabled: false },
-      { pin: 'D7',  label: 'CH6', color: '#ffee33', enabled: false },
-      { pin: 'D8',  label: 'CH7', color: '#e91e63', enabled: false },
-      { pin: 'D13', label: 'CH8', color: '#76ff03', enabled: false },
+      { pin: 'D6',  label: 'CH5', color: '#ab47bc', enabled: true },
+      { pin: 'D7',  label: 'CH6', color: '#ffee33', enabled: true },
+      { pin: 'D8',  label: 'CH7', color: '#e91e63', enabled: true },
+      { pin: 'D13', label: 'CH8', color: '#76ff03', enabled: true },
     ];
 
     /* Timing */
