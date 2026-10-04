@@ -1,0 +1,380 @@
+{
+  "id": "555_timer_monostable",
+  "name": "555 timer monostable",
+  "icon": "🔧",
+  "desc": "A monostable (one-shot) 555 timer circuit. Pressing the button pulls TRIG low and the LED lights for about 1.1 seconds (t = 1.1 x R x C), then turns off again.",
+  "tags": [
+    "555 timer",
+    "monostable",
+    "led",
+    "button"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1791134531987_rokou",
+        "type": "ic_555",
+        "x": 245,
+        "y": 345,
+        "rotation": 1,
+        "props": {
+          "mode": "monostable",
+          "pulseTime": 1
+        }
+      },
+      {
+        "id": "comp_1791134552392_pl9r8",
+        "type": "power_5v",
+        "x": 315,
+        "y": 280,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_1791134557312_d3mis",
+        "type": "power_gnd",
+        "x": 175,
+        "y": 475,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "comp_1791134566113_01zqr",
+        "type": "resistor",
+        "x": 405,
+        "y": 310,
+        "rotation": 0,
+        "props": {
+          "value": 100,
+          "unit": "kΩ"
+        }
+      },
+      {
+        "id": "comp_1791134567959_jzszd",
+        "type": "resistor",
+        "x": 185,
+        "y": 280,
+        "rotation": 0,
+        "props": {
+          "value": 10,
+          "unit": "kΩ"
+        }
+      },
+      {
+        "id": "comp_1791134632318_eml2e",
+        "type": "capacitor",
+        "x": 295,
+        "y": 415,
+        "rotation": 0,
+        "props": {
+          "value": 0.1,
+          "unit": "µF"
+        }
+      },
+      {
+        "id": "comp_1791134673871_7nhql",
+        "type": "led",
+        "x": 100,
+        "y": 350,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
+      },
+      {
+        "id": "resistor_1791134679781_n25lt",
+        "type": "resistor",
+        "x": 105,
+        "y": 440,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
+      },
+      {
+        "id": "capacitor_1791134764082_9kkyy",
+        "type": "capacitor",
+        "x": 350,
+        "y": 410,
+        "rotation": 0,
+        "props": {
+          "value": 10,
+          "unit": "µF"
+        }
+      },
+      {
+        "id": "comp_1791134871902_zg20x",
+        "type": "push_button",
+        "x": 170,
+        "y": 390,
+        "rotation": 0,
+        "props": {
+          "pressed": false,
+          "label": "BTN"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "wire_1791134592586_8donb",
+        "from": {
+          "instId": "comp_1791134531987_rokou",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "comp_1791134552392_pl9r8",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134595411_ld2v5",
+        "from": {
+          "instId": "comp_1791134531987_rokou",
+          "pinId": "RST"
+        },
+        "to": {
+          "instId": "comp_1791134552392_pl9r8",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134600462_wzmhh",
+        "from": {
+          "instId": "comp_1791134531987_rokou",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "comp_1791134557312_d3mis",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134640703_rpo92",
+        "from": {
+          "instId": "comp_1791134632318_eml2e",
+          "pinId": "pos"
+        },
+        "to": {
+          "instId": "comp_1791134531987_rokou",
+          "pinId": "CV"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134645242_8w8zr",
+        "from": {
+          "instId": "comp_1791134632318_eml2e",
+          "pinId": "neg"
+        },
+        "to": {
+          "instId": "comp_1791134557312_d3mis",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134687185_4ubib",
+        "from": {
+          "instId": "resistor_1791134679781_n25lt",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1791134673871_7nhql",
+          "pinId": "cathode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134689371_y9ccx",
+        "from": {
+          "instId": "resistor_1791134679781_n25lt",
+          "pinId": "p2"
+        },
+        "to": {
+          "instId": "comp_1791134557312_d3mis",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134692176_eqt1r",
+        "from": {
+          "instId": "comp_1791134531987_rokou",
+          "pinId": "OUT"
+        },
+        "to": {
+          "instId": "comp_1791134673871_7nhql",
+          "pinId": "anode"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134729398_34fdz",
+        "from": {
+          "instId": "comp_1791134531987_rokou",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "comp_1791134566113_01zqr",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134732996_i2vew",
+        "from": {
+          "instId": "comp_1791134531987_rokou",
+          "pinId": "DIS"
+        },
+        "to": {
+          "instId": "comp_1791134566113_01zqr",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134755251_7k5ap",
+        "from": {
+          "instId": "comp_1791134531987_rokou",
+          "pinId": "THR"
+        },
+        "to": {
+          "instId": "comp_1791134566113_01zqr",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134776223_lgm6h",
+        "from": {
+          "instId": "comp_1791134531987_rokou",
+          "pinId": "THR"
+        },
+        "to": {
+          "instId": "capacitor_1791134764082_9kkyy",
+          "pinId": "pos"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134780160_wq2lo",
+        "from": {
+          "instId": "capacitor_1791134764082_9kkyy",
+          "pinId": "neg"
+        },
+        "to": {
+          "instId": "comp_1791134557312_d3mis",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134858448_yr2lc",
+        "from": {
+          "instId": "comp_1791134552392_pl9r8",
+          "pinId": "vcc"
+        },
+        "to": {
+          "instId": "comp_1791134567959_jzszd",
+          "pinId": "p1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134862803_s7jj9",
+        "from": {
+          "instId": "comp_1791134531987_rokou",
+          "pinId": "TRIG"
+        },
+        "to": {
+          "instId": "comp_1791134567959_jzszd",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134877937_2k45b",
+        "from": {
+          "instId": "comp_1791134871902_zg20x",
+          "pinId": "p1"
+        },
+        "to": {
+          "instId": "comp_1791134567959_jzszd",
+          "pinId": "p2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "wire_1791134883197_jg3h6",
+        "from": {
+          "instId": "comp_1791134557312_d3mis",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "comp_1791134871902_zg20x",
+          "pinId": "p3"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "void setup() {\n\n}\n\nvoid loop() {\n\n}"
+  }
+}
