@@ -3497,6 +3497,17 @@ class CircuitCanvas {
                   bright = raw <= 1 ? 1 : Math.min(raw / 255, 1);
                 }
               }
+            } else if (powered && pinNum === null && sim && typeof sim.getPinVoltage === 'function'
+              && this.wires.some(w =>
+                (w.from.instId === inst.id && w.from.pinId === pinId) ||
+                (w.to.instId === inst.id && w.to.pinId === pinId))) {
+              // No Arduino pin on this net — resolve the far end (IC output,
+              // sensor, power rail) through the wire-graph voltage walk and
+              // map 0–5 V onto the 0–255 raw scale used above.
+              const volts = Number(sim.getPinVoltage(inst, pinId)) || 0;
+              const raw = Math.max(0, Math.min(255, Math.round(volts * 51)));
+              if (commonAnode) bright = raw === 0 ? 1 : 1 - Math.min(raw / 255, 1);
+              else if (raw > 0) bright = Math.min(raw / 255, 1);
             }
             segments[segKeys[i]] = bright;
           });
