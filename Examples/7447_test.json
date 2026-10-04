@@ -2,7 +2,7 @@
   "id": "7447_test",
   "name": "7447 test",
   "icon": "🔧",
-  "desc": "Test of the 74HC7447 BCD to 7-segment decoder/driver. The logic level inputs A–D are set to LOW, and the 7-segment display shows a '0'.",
+  "desc": "Test of the 74HC47 BCD to 7-segment decoder/driver. The logic level inputs A–D are set to LOW, and the common-anode 7-segment display shows a '0'.",
   "tags": [
     "custom",
     "circuit",
@@ -27,10 +27,10 @@
         "y": 205,
         "rotation": 0,
         "props": {
-          "commonAnode": false,
+          "commonAnode": true,
           "color": "#ff3333",
-          "colorName": "Red",
-          "brightness": "100"
+          "colorName": "White",
+          "brightness": "75"
         }
       },
       {
@@ -237,16 +237,7 @@
           "pinId": "out"
         },
         "color": null,
-        "waypoints": [
-          {
-            "x": 659,
-            "y": 289
-          },
-          {
-            "x": 659,
-            "y": 173
-          }
-        ],
+        "waypoints": [],
         "routeStyle": "orthogonal",
         "bezierCtrl": null
       },
@@ -302,8 +293,8 @@
           "pinId": "com"
         },
         "to": {
-          "instId": "comp_1791133330454_kdn65",
-          "pinId": "gnd"
+          "instId": "comp_1791133328083_qo2zz",
+          "pinId": "vcc"
         },
         "color": null,
         "waypoints": [],
@@ -347,8 +338,8 @@
           "pinId": "RBI"
         },
         "to": {
-          "instId": "comp_1791133330454_kdn65",
-          "pinId": "gnd"
+          "instId": "comp_1791133328083_qo2zz",
+          "pinId": "vcc"
         },
         "color": null,
         "waypoints": [],

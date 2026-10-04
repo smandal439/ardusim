@@ -2413,7 +2413,7 @@ window.EXAMPLE_SKETCHES = [
           "y": 205,
           "rotation": 0,
           "props": {
-            "commonAnode": false,
+            "commonAnode": true,
             "color": "#ff3333",
             "colorName": "Red",
             "brightness": "100"
@@ -2623,16 +2623,7 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "out"
           },
           "color": null,
-          "waypoints": [
-            {
-              "x": 659,
-              "y": 289
-            },
-            {
-              "x": 659,
-              "y": 173
-            }
-          ],
+          "waypoints": [],
           "routeStyle": "orthogonal",
           "bezierCtrl": null
         },
@@ -2688,8 +2679,8 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "com"
           },
           "to": {
-            "instId": "comp_1791133330454_kdn65",
-            "pinId": "gnd"
+            "instId": "comp_1791133328083_qo2zz",
+            "pinId": "vcc"
           },
           "color": null,
           "waypoints": [],
@@ -2733,8 +2724,8 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "RBI"
           },
           "to": {
-            "instId": "comp_1791133330454_kdn65",
-            "pinId": "gnd"
+            "instId": "comp_1791133328083_qo2zz",
+            "pinId": "vcc"
           },
           "color": null,
           "waypoints": [],

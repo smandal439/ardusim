@@ -50,6 +50,8 @@ const { COMPONENT_CATALOG, COMPONENT_DEFS, getComponentClass, createComponent, P
   'js/components/power.js',
   'js/components/function_generator.js',
   'js/components/probe.js',
+  'js/components/logic_tag.js',
+  'js/components/output.js',
   'js/components/ics.js',
   'js/components/ic_8255.js',
 ], ['COMPONENT_CATALOG', 'COMPONENT_DEFS', 'getComponentClass', 'createComponent', 'PIN_TYPE']);
@@ -69,6 +71,7 @@ const EXAMPLE_FILES = [
   '74153_test_with_logic_analyzer.json',
   '74164_test_with_logic_analyzer.json',
   '4017_test_with_logic_analyzer.json',
+  '7447_test.json',
 ];
 
 /* ── simulation stubs ─────────────────────────────────────── */

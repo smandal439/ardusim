@@ -4,6 +4,7 @@
  *   - common-anode polarity (LOW lights the segment, inputs can't sink)
  *   - COM supply check (cathode needs a ground, anode needs a source)
  *   - draw() renders ghosts/glow without throwing
+ *   - IC-driven (7447_test): no board on the net, voltage-walk fallback
  * Run: npx vitest run test/seg7_display.test.js
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -46,6 +47,9 @@ const { CircuitCanvas } = loadScripts([
   'js/components/boards.js',
   'js/components/input.js',
   'js/components/output.js',
+  'js/components/power.js',
+  'js/components/logic_tag.js',
+  'js/components/ics.js',
   'js/canvas.js',
 ], ['CircuitCanvas']);
 
@@ -288,6 +292,60 @@ describe('seg7 — draw()', () => {
     SEG_DEF.draw(ctx, instAt({ A: 1 }, { brightness: '50' }));
     expect(Math.max(...ctx.state.shadowBlurVals)).toBeGreaterThan(0);
     expect(ctx.state.stopColors.some(c => c.includes('255,51,51'))).toBe(true);
+  });
+});
+
+/* ═══════════════ IC-driven display (no Arduino board) ═══════════════ */
+describe('seg7 — 7447_test example drives the display', () => {
+  /** Build a live rig straight from an Examples/*.json circuit. */
+  function buildExampleRig(file) {
+    const ex = JSON.parse(readSrc(path.join('Examples', file)));
+    const { canvasEl, wrapperEl } = makeCanvasStub();
+    const cc = new CircuitCanvas(canvasEl, wrapperEl);
+    // createComponent() normally guarantees these on every instance
+    cc.components = JSON.parse(JSON.stringify(ex.circuit.components)).map(c => ({
+      runtimeState: {}, props: {}, ...c,
+    }));
+    cc.wires = JSON.parse(JSON.stringify(ex.circuit.wires));
+    const sim = new ArduinoSimulator();
+    global.window.ArduinoSim = sim;
+    global.window.CircuitCanvas = cc;
+    return { cc, sim, seg: cc.components.find(c => c.type === 'seg7') };
+  }
+
+  afterEach(() => { global.window.ArduinoSim = null; global.window.CircuitCanvas = null; });
+
+  it('lights segments a–f and keeps g/DP dark — shows a "0"', () => {
+    const { cc, sim, seg } = buildExampleRig('7447_test.json');
+    cc.updateSimState(sim.pinStates);
+    expect(seg.runtimeState.segments)
+      .toEqual({ A: 1, B: 1, C: 1, D: 1, E: 1, F: 1, G: 0, DP: 0 });
+  });
+
+  it('is wired as a common-anode display with /RBI held inactive', () => {
+    const ex = JSON.parse(readSrc(path.join('Examples', '7447_test.json')));
+    const seg7 = ex.circuit.components.find(c => c.type === 'seg7');
+    expect(seg7.props.commonAnode).toBe(true);
+    const byId = Object.fromEntries(ex.circuit.components.map(c => [c.id, c.type]));
+    const end = (w, instId, pinId) =>
+      (w.from.instId === instId && w.from.pinId === pinId) ? w.to :
+        (w.to.instId === instId && w.to.pinId === pinId) ? w.from : null;
+    const powerPin = (pinId) => {
+      const ic = ex.circuit.components.find(c => c.type === 'ic_74hc47');
+      const w = ex.circuit.wires.find(x => {
+        const far = end(x, ic.id, pinId);
+        return far !== null && byId[far.instId] === 'power_5v' && far.pinId === 'vcc';
+      });
+      return !!w;
+    };
+    expect(powerPin('RBI'), '/RBI tied to +5V (not blanking)').toBe(true);
+    expect(powerPin('LT'), '/LT tied to +5V').toBe(true);
+    expect(powerPin('BI'), '/BI tied to +5V').toBe(true);
+    const com = ex.circuit.wires.find(x => {
+      const far = end(x, seg7.id, 'com');
+      return far !== null && byId[far.instId] === 'power_5v' && far.pinId === 'vcc';
+    });
+    expect(com, 'display COM tied to +5V').toBeTruthy();
   });
 });
 
