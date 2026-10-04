@@ -4708,6 +4708,8 @@ class CircuitCanvas {
       rs._mState = 'idle';
       rs.outHigh = false;
       rs.pulseProgress = 0;
+      delete rs.tPulse;
+      delete rs._pulseT0;
     }
 
     if (rs._lastTime == null) rs._lastTime = now;

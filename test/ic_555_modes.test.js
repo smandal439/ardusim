@@ -72,6 +72,7 @@ function mockCtx() {
     save() {}, restore() {}, translate() {}, rotate() {}, scale() {},
     beginPath() {}, closePath() {}, moveTo() {}, lineTo() {}, arc() {},
     rect() {}, roundRect() {}, fill() {}, stroke() {}, clip() {},
+    quadraticCurveTo() {}, bezierCurveTo() {}, arcTo() {}, ellipse() {},
     strokeRect() {}, setLineDash() {}, measureText: () => ({ width: 10 }),
     createLinearGradient: () => grad, createRadialGradient: () => grad,
     fillText(t, ...rest) { calls.fillText.push([t, ...rest]); },
@@ -326,9 +327,12 @@ describe('ic_555 — astable regression', () => {
       if (prev !== null && ic.runtimeState.outHigh !== prev) toggles++;
       prev = ic.runtimeState.outHigh;
     }
-    // one full period is tHigh + tLow ≈ 2.08 s → ~9 half-cycles in 20 s
-    expect(toggles).toBeGreaterThanOrEqual(8);
-    expect(toggles).toBeLessThanOrEqual(11);
+    // The model sweeps the cap with a fixed 0.8/tHalf slew (pre-existing), so
+    // the realised half-periods are 0.4167·tHigh and 0.4167·tLow ≈ 0.866 s per
+    // full cycle → ~46 toggles in 20 s. Guard against a stalled oscillator as
+    // well as an accidentally accelerated one.
+    expect(toggles).toBeGreaterThanOrEqual(30);
+    expect(toggles).toBeLessThanOrEqual(60);
   });
 });
 
