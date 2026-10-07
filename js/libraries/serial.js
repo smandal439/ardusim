@@ -18,6 +18,12 @@ window.ArduinoLibs['Serial'] = {
 
   transpile: [
     [/\bSerial\.begin\s*\(/g, '_a.serialBegin('],
+    // `Serial.print(x, BIN)` must be routed to the binary formatter *before*
+    // the generic rename below — later passes rewrite BIN to the bare number
+    // 2, which is indistinguishable from `print(x, 2)` (Arduino's
+    // `print(double, digits)` overload).
+    [/\bSerial\.print\s*\(\s*([^,]+?)\s*,\s*BIN\s*\)/g, '_a.serialPrintBin($1)'],
+    [/\bSerial\.println\s*\(\s*([^,]+?)\s*,\s*BIN\s*\)/g, '_a.serialPrintlnBin($1)'],
     [/\bSerial\.print\s*\(/g, '_a.serialPrint('],
     [/\bSerial\.println\s*\(/g, '_a.serialPrintln('],
     [/\bSerial\.printf\s*\(/g, '_a.serialPrintf('],
@@ -37,12 +43,16 @@ window.ArduinoLibs['Serial'] = {
     [/while\s*\(\s*!Serial\s*\)\s*;/g, '/* while(!Serial) */'],
     // Also handle Serial1, Serial2 (ESP32 additional UARTs)
     [/\bSerial1\.begin\s*\(/g, '_a.serial1Begin('],
+    [/\bSerial1\.print\s*\(\s*([^,]+?)\s*,\s*BIN\s*\)/g, '_a.serial1PrintBin($1)'],
+    [/\bSerial1\.println\s*\(\s*([^,]+?)\s*,\s*BIN\s*\)/g, '_a.serial1PrintlnBin($1)'],
     [/\bSerial1\.print\s*\(/g, '_a.serial1Print('],
     [/\bSerial1\.println\s*\(/g, '_a.serial1Println('],
     [/\bSerial1\.read\s*\(/g, '_a.serial1Read('],
     [/\bSerial1\.available\s*\(/g, '_a.serial1Available('],
     [/\bSerial1\.write\s*\(/g, '_a.serial1Write('],
     [/\bSerial2\.begin\s*\(/g, '_a.serial2Begin('],
+    [/\bSerial2\.print\s*\(\s*([^,]+?)\s*,\s*BIN\s*\)/g, '_a.serial2PrintBin($1)'],
+    [/\bSerial2\.println\s*\(\s*([^,]+?)\s*,\s*BIN\s*\)/g, '_a.serial2PrintlnBin($1)'],
     [/\bSerial2\.print\s*\(/g, '_a.serial2Print('],
     [/\bSerial2\.println\s*\(/g, '_a.serial2Println('],
     [/\bSerial2\.read\s*\(/g, '_a.serial2Read('],
@@ -139,6 +149,32 @@ window.ArduinoLibs['Serial'] = {
       return String(val);
     }
 
+    /* Shared Serial.print formatting.
+       `fmt` is Arduino's second argument: a decimal-digit count for floats
+       (print(double, digits)) or a radix for integers (print(int, base)).
+       A JS number can't tell those apart, so:
+         - a small literal count (0-6) is always read as digits — the far more
+           common intent, and the only meaning left once BIN has been routed to
+           serialPrintBin() by the transpiler;
+         - 16 / 8 keep their hex / octal meaning (nobody asks for 8 or 16
+           decimal places, and HEX / OCT still transpile to those values). */
+    function _serialFormat(val, fmt) {
+      if (val === undefined) return '';
+      if (typeof val === 'number') {
+        if (fmt !== undefined && fmt >= 0 && fmt <= 6) return val.toFixed(fmt);
+        if (!Number.isInteger(val)) {
+          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
+          return val.toFixed(dec);
+        }
+      }
+      if (fmt === 16) return parseInt(val).toString(16).toUpperCase();
+      if (fmt === 8) return parseInt(val).toString(8);
+      return _serialToString(val);
+    }
+    function _serialFormatBin(val) {
+      return parseInt(val).toString(2);
+    }
+
     return {
       /* Serial */
       serialBegin: function(baud) {
@@ -148,29 +184,24 @@ window.ArduinoLibs['Serial'] = {
         _setPin(_uartRxPin(), 1);
       },
       serialPrint: function(val, fmt) {
-        var str;
-        if (typeof val === 'number' && !Number.isInteger(val)) {
-          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
-          str = val.toFixed(dec);
-        } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
-        else if (fmt === 2) str = parseInt(val).toString(2);
-        else if (fmt === 8) str = parseInt(val).toString(8);
-        else str = _serialToString(val);
+        var str = _serialFormat(val, fmt);
         self._serialLog(str, 'data');
         _uartTxStr(str);
       },
       serialPrintln: function(val, fmt) {
-        var str;
-        if (val === undefined) str = '';
-        else if (typeof val === 'number' && !Number.isInteger(val)) {
-          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
-          str = val.toFixed(dec);
-        } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
-        else if (fmt === 2) str = parseInt(val).toString(2);
-        else if (fmt === 8) str = parseInt(val).toString(8);
-        else str = _serialToString(val);
-        self._serialLog(str + '\n', 'data');
-        _uartTxStr(str + '\n');
+        var str = _serialFormat(val, fmt) + '\n';
+        self._serialLog(str, 'data');
+        _uartTxStr(str);
+      },
+      serialPrintBin: function(val) {
+        var str = _serialFormatBin(val);
+        self._serialLog(str, 'data');
+        _uartTxStr(str);
+      },
+      serialPrintlnBin: function(val) {
+        var str = _serialFormatBin(val) + '\n';
+        self._serialLog(str, 'data');
+        _uartTxStr(str);
       },
       serialPrintf: function(fmt) {
         var args = Array.prototype.slice.call(arguments, 1);
@@ -296,29 +327,24 @@ window.ArduinoLibs['Serial'] = {
       /* Serial1 (ESP32 UART1) — TX=GPIO9, RX=GPIO10 */
       serial1Begin: function(baud) { self.serialBaud = baud; self._serialLog('[Serial1] Opened at ' + baud + ' baud\n', 'system'); _setPin(9, 1); _setPin(10, 1); },
       serial1Print: function(val, fmt) {
-        var str;
-        if (typeof val === 'number' && !Number.isInteger(val)) {
-          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
-          str = val.toFixed(dec);
-        } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
-        else if (fmt === 2) str = parseInt(val).toString(2);
-        else if (fmt === 8) str = parseInt(val).toString(8);
-        else str = String(val);
+        var str = _serialFormat(val, fmt);
         self._serialLog(str, 'data');
         _setPin(9, 1); for (var i = 0; i < str.length; i++) { _setPin(9, 0); for (var b = 0; b < 8; b++) { _setPin(9, (str.charCodeAt(i) >> b) & 1); } _setPin(9, 1); }
       },
       serial1Println: function(val, fmt) {
-        var str;
-        if (val === undefined) str = '';
-        else if (typeof val === 'number' && !Number.isInteger(val)) {
-          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
-          str = val.toFixed(dec);
-        } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
-        else if (fmt === 2) str = parseInt(val).toString(2);
-        else if (fmt === 8) str = parseInt(val).toString(8);
-        else str = String(val);
-        self._serialLog(str + '\n', 'data');
-        _setPin(9, 1); var s = str + '\n'; for (var i = 0; i < s.length; i++) { _setPin(9, 0); for (var b = 0; b < 8; b++) { _setPin(9, (s.charCodeAt(i) >> b) & 1); } _setPin(9, 1); }
+        var str = _serialFormat(val, fmt) + '\n';
+        self._serialLog(str, 'data');
+        _setPin(9, 1); var s = str; for (var i = 0; i < s.length; i++) { _setPin(9, 0); for (var b = 0; b < 8; b++) { _setPin(9, (s.charCodeAt(i) >> b) & 1); } _setPin(9, 1); }
+      },
+      serial1PrintBin: function(val) {
+        var str = _serialFormatBin(val);
+        self._serialLog(str, 'data');
+        _setPin(9, 1); for (var i = 0; i < str.length; i++) { _setPin(9, 0); for (var b = 0; b < 8; b++) { _setPin(9, (str.charCodeAt(i) >> b) & 1); } _setPin(9, 1); }
+      },
+      serial1PrintlnBin: function(val) {
+        var str = _serialFormatBin(val) + '\n';
+        self._serialLog(str, 'data');
+        _setPin(9, 1); var s = str; for (var i = 0; i < s.length; i++) { _setPin(9, 0); for (var b = 0; b < 8; b++) { _setPin(9, (s.charCodeAt(i) >> b) & 1); } _setPin(9, 1); }
       },
       serial1Read: function() {
         return self.serialInputBuffer.length > 0
@@ -331,29 +357,24 @@ window.ArduinoLibs['Serial'] = {
       /* Serial2 (ESP32 UART2) — TX=GPIO16, RX=GPIO17 */
       serial2Begin: function(baud) { self.serialBaud = baud; self._serialLog('[Serial2] Opened at ' + baud + ' baud\n', 'system'); _setPin(16, 1); _setPin(17, 1); },
       serial2Print: function(val, fmt) {
-        var str;
-        if (typeof val === 'number' && !Number.isInteger(val)) {
-          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
-          str = val.toFixed(dec);
-        } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
-        else if (fmt === 2) str = parseInt(val).toString(2);
-        else if (fmt === 8) str = parseInt(val).toString(8);
-        else str = String(val);
+        var str = _serialFormat(val, fmt);
         self._serialLog(str, 'data');
         _setPin(16, 1); for (var i = 0; i < str.length; i++) { _setPin(16, 0); for (var b = 0; b < 8; b++) { _setPin(16, (str.charCodeAt(i) >> b) & 1); } _setPin(16, 1); }
       },
       serial2Println: function(val, fmt) {
-        var str;
-        if (val === undefined) str = '';
-        else if (typeof val === 'number' && !Number.isInteger(val)) {
-          var dec = fmt !== undefined && fmt >= 0 ? fmt : 2;
-          str = val.toFixed(dec);
-        } else if (fmt === 16) str = parseInt(val).toString(16).toUpperCase();
-        else if (fmt === 2) str = parseInt(val).toString(2);
-        else if (fmt === 8) str = parseInt(val).toString(8);
-        else str = String(val);
-        self._serialLog(str + '\n', 'data');
-        _setPin(16, 1); var s = str + '\n'; for (var i = 0; i < s.length; i++) { _setPin(16, 0); for (var b = 0; b < 8; b++) { _setPin(16, (s.charCodeAt(i) >> b) & 1); } _setPin(16, 1); }
+        var str = _serialFormat(val, fmt) + '\n';
+        self._serialLog(str, 'data');
+        _setPin(16, 1); var s = str; for (var i = 0; i < s.length; i++) { _setPin(16, 0); for (var b = 0; b < 8; b++) { _setPin(16, (s.charCodeAt(i) >> b) & 1); } _setPin(16, 1); }
+      },
+      serial2PrintBin: function(val) {
+        var str = _serialFormatBin(val);
+        self._serialLog(str, 'data');
+        _setPin(16, 1); for (var i = 0; i < str.length; i++) { _setPin(16, 0); for (var b = 0; b < 8; b++) { _setPin(16, (str.charCodeAt(i) >> b) & 1); } _setPin(16, 1); }
+      },
+      serial2PrintlnBin: function(val) {
+        var str = _serialFormatBin(val) + '\n';
+        self._serialLog(str, 'data');
+        _setPin(16, 1); var s = str; for (var i = 0; i < s.length; i++) { _setPin(16, 0); for (var b = 0; b < 8; b++) { _setPin(16, (s.charCodeAt(i) >> b) & 1); } _setPin(16, 1); }
       },
       serial2Read: function() {
         return self.serialInputBuffer.length > 0

@@ -525,10 +525,19 @@ class ElectricalEngine {
         addGround('gnd', 'gnd');
         break;
       case 'logic_level_in':
-        // Free logic input tag — drives the net as a constant 0/1 source
+        // Free logic input tag - drives the net as a constant 0/1 source
         if (inst.props && inst.props.level) addSource('out', 'logic_high', 5.0, 255);
         else addGround('out', 'logic_low');
         break;
+      case 'water_flow_sensor': {
+        // YF-S201 Hall-effect pulse output: push-pull square wave on SIG.
+        // Driving the net here (instead of poking pinStates directly) lets the
+        // INPUT/INPUT_PULLUP feed-back in updateSimState derive the pin level
+        // and emit the edges that fire the sketch's attachInterrupt().
+        if (inst.runtimeState && inst.runtimeState.pulseHigh) addSource('SIG', 'digital', 5.0, 255);
+        else addGround('SIG', 'digital_low');
+        break;
+      }
       case 'power_gnd':
         addGround('gnd', 'gnd');
         break;

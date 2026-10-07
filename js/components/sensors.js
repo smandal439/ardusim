@@ -4387,21 +4387,72 @@ defComp({
     { id: 'GND', label: 'GND', type: PIN_TYPE.GND, x: 50, y: 100, side: 'bottom' },
   ],
 
-  update(inst, sim, dt) {
+  /* The renderer only ever calls `def.step(inst, sim)` (canvas.js
+     `_drawComponents`) — there is no `def.update` hook, so the generator has
+     to live here or it never runs at all. */
+  step(inst, sim) {
     if (!sim || !sim.isRunning) return;
-    if (!inst.runtimeState) {
-      inst.runtimeState = { phase: 0, pulseHigh: false };
-    }
+    if (!inst.runtimeState) inst.runtimeState = {};
     const state = inst.runtimeState;
+    const now = Number(sim.simTime) || 0;
+
+    // First call: latch the clock so the next one has a valid delta, and start
+    // at the beginning of the low half-cycle (phase 0.5 → level 0).
+    if (state._lastMs === undefined) {
+      state._lastMs = now;
+      state._phase = 0.5;
+      state.pulses = 0;
+      state.pulseHigh = false;
+      this._writeSig(inst, sim, 0);
+      return;
+    }
+    const dt = now - state._lastMs;
+    state._lastMs = now;
+    if (!(dt > 0)) return;
+
+    // YF-S201: ~450 pulses per litre → F(Hz) = Q(L/min) × 7.5
+    //   → cycles per ms = flowRate * 450 / 60000
     const flowRate = Number(inst.props.flowRate ?? 5);
+    const cyclesPerMs = flowRate > 0 ? (flowRate * 450) / 60000 : 0;
+    if (cyclesPerMs <= 0) {
+      state.pulseHigh = false;
+      this._writeSig(inst, sim, 0);
+      return;
+    }
 
-    // ~450 pulses per litre → pulses per ms = flowRate * 450 / 60000
-    const pulsesPerMs = (flowRate * 450) / 60000;
-    const msPerPulse = pulsesPerMs > 0 ? 1 / pulsesPerMs : Infinity;
-    const halfPeriod = msPerPulse / 2;
+    /* The pulse train is quantised to half-cycles: even half index = HIGH.
+       Walk every half-cycle boundary crossed since the previous frame instead
+       of just sampling the level — delay() jumps simTime forward in one go, so
+       a plain sample would skip most of the pulses. */
+    const from = Math.floor(state._phase * 2);
+    let total = state._phase + dt * cyclesPerMs;
+    const to = Math.floor(total * 2);
+    for (let h = from + 1; h <= to; h++) {
+      const level = h % 2 === 0 ? 1 : 0;
+      if (this._writeSig(inst, sim, level) && level === 1) {
+        state.pulses = (state.pulses || 0) + 1;
+      }
+    }
+    // Keep the accumulator small; dropping a whole number of cycles preserves
+    // half-cycle parity, so the walk above stays continuous across frames.
+    if (total > 1e6) total -= Math.floor(total);
+    state._phase = total;
+    state.pulseHigh = (total - Math.floor(total)) < 0.5;
+    this._writeSig(inst, sim, state.pulseHigh ? 1 : 0);
+  },
 
-    state.phase = (state.phase + dt) % msPerPulse;
-    state.pulseHigh = state.phase < halfPeriod && flowRate > 0;
+  /** Drive the wired SIG pin; returns true when a low→high edge was emitted. */
+  _writeSig(inst, sim, level) {
+    const canvas = window.CircuitCanvas;
+    if (!canvas || !canvas._getConnectedPinNum) return false;
+    const pin = canvas._getConnectedPinNum(inst.id, 'SIG');
+    if (pin === null) return false;
+    const key = `pin_${pin}`;
+    const prev = sim.pinStates[key];
+    if (prev === level) return false;
+    sim.pinStates[key] = level;
+    sim._emitPinChange(key, level);
+    return level === 1 && prev !== 1;
   },
 
   draw(ctx, inst, sim) {
