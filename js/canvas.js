@@ -32,6 +32,12 @@ const IC_OUTPUT_MAP = {
     activeLow: [],
   },
   lm741: { pins: ['OUT'], activeLow: [] },
+  ic_8255: {
+    pins: ['PA0','PA1','PA2','PA3','PA4','PA5','PA6','PA7',
+           'PB0','PB1','PB2','PB3','PB4','PB5','PB6','PB7',
+           'PC0','PC1','PC2','PC3','PC4','PC5','PC6','PC7'],
+    activeLow: [],
+  },
 };
 const IC_OUTPUT_PIN_LIST = {
   ic_555: ['OUT'],
@@ -55,6 +61,9 @@ const IC_OUTPUT_PIN_LIST = {
   ic_74hc164: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7'],
   ic_74hc4017: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q59'],
   lm741: ['OUT'],
+  ic_8255: ['PA0','PA1','PA2','PA3','PA4','PA5','PA6','PA7',
+            'PB0','PB1','PB2','PB3','PB4','PB5','PB6','PB7',
+            'PC0','PC1','PC2','PC3','PC4','PC5','PC6','PC7'],
 };
 
 /* Classify an IC's pins into logic-level tag groups for the properties panel.
@@ -5264,6 +5273,9 @@ class CircuitCanvas {
         ic_74hc164: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7'],
         ic_74hc4017: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q59'],
         lm741: ['OUT'],
+        ic_8255: ['PA0','PA1','PA2','PA3','PA4','PA5','PA6','PA7',
+                  'PB0','PB1','PB2','PB3','PB4','PB5','PB6','PB7',
+                  'PC0','PC1','PC2','PC3','PC4','PC5','PC6','PC7'],
       };
       if (IC_OUTPUT_PINS[inst.type] && IC_OUTPUT_PINS[inst.type].includes(current.pinId)) {
         let rawVal;
@@ -5446,6 +5458,9 @@ class CircuitCanvas {
       ic_74hc164: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7'],
       ic_74hc4017: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q59'],
       lm741: ['OUT'],
+      ic_8255: ['PA0','PA1','PA2','PA3','PA4','PA5','PA6','PA7',
+                'PB0','PB1','PB2','PB3','PB4','PB5','PB6','PB7',
+                'PC0','PC1','PC2','PC3','PC4','PC5','PC6','PC7'],
     };
     if (IC_OUTPUT_PINS[inst.type] && IC_OUTPUT_PINS[inst.type].includes(pinId)) {
       const rawVal = inst.runtimeState && inst.runtimeState[pinId] != null ? inst.runtimeState[pinId] : 0;
@@ -5887,6 +5902,14 @@ class CircuitCanvas {
     const wireTarget = this._getWireTarget(fromInstId, pinId);
     if (!wireTarget) return;
     const other = wireTarget.inst;
+    // 8255: latch bus changes immediately. A microprocessor can issue and
+    // retract a WR̄ pulse many thousands of times between two rendered
+    // frames, so waiting for the per-frame step() would miss every write.
+    if (other.type === 'ic_8255') {
+      const defs = window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS;
+      const d8255 = defs && defs.ic_8255;
+      if (d8255 && typeof d8255._onBusPin === 'function') d8255._onBusPin(other, wireTarget.pinId, val);
+    }
     const IC_OUT = {
       ic_555: ['OUT'],
       ic_74hc00: ['Y1', 'Y2', 'Y3', 'Y4'],
@@ -5908,6 +5931,10 @@ class CircuitCanvas {
       ic_74hc164: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7'],
       ic_74hc4017: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q59'],
       lm741: ['OUT'],
+      ic_8255: ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7',
+                'PA0','PA1','PA2','PA3','PA4','PA5','PA6','PA7',
+                'PB0','PB1','PB2','PB3','PB4','PB5','PB6','PB7',
+                'PC0','PC1','PC2','PC3','PC4','PC5','PC6','PC7'],
     };
     if (IC_OUT[other.type] && IC_OUT[other.type].includes(wireTarget.pinId)) {
       other.runtimeState[wireTarget.pinId] = val ? 255 : 0;

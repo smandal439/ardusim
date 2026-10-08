@@ -2391,10 +2391,13 @@ window.EXAMPLE_SKETCHES = [
     "id": "7447_test",
     "name": "7447 test",
     "icon": "🔧",
-    "desc": "A custom 7447 test circuit example.",
+    "desc": "Test of the 74HC47 BCD to 7-segment decoder/driver. The logic level inputs A–D are set to LOW, and the common-anode 7-segment display shows a '0'.",
     "tags": [
       "custom",
-      "circuit"
+      "circuit",
+      "7447",
+      "BCD to 7-segment decoder",
+      "7-segment display"
     ],
     "circuit": {
       "components": [
@@ -2415,8 +2418,8 @@ window.EXAMPLE_SKETCHES = [
           "props": {
             "commonAnode": true,
             "color": "#ff3333",
-            "colorName": "Red",
-            "brightness": "100"
+            "colorName": "White",
+            "brightness": "75"
           }
         },
         {
@@ -4746,25 +4749,44 @@ window.EXAMPLE_SKETCHES = [
           "id": "b1",
           "type": "arduino_uno",
           "x": 200,
-          "y": 100
+          "y": 100,
+          "rotation": 0,
+          "props": {
+            "label": "UNO"
+          }
         },
         {
           "id": "btn1",
           "type": "push_button",
           "x": 120,
-          "y": 300
+          "y": 300,
+          "rotation": 0,
+          "props": {
+            "pressed": false,
+            "label": "BTN"
+          }
         },
         {
           "id": "led1",
           "type": "led",
           "x": 340,
-          "y": 260
+          "y": 260,
+          "rotation": 0,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          }
         },
         {
           "id": "r1",
           "type": "resistor",
           "x": 340,
-          "y": 340
+          "y": 340,
+          "rotation": 0,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          }
         }
       ],
       "wires": [
@@ -4777,7 +4799,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "btn1",
             "pinId": "p1"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w2",
@@ -4788,7 +4814,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "b1",
             "pinId": "GND1"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w3",
@@ -4799,7 +4829,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "led1",
             "pinId": "anode"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w4",
@@ -4810,7 +4844,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "r1",
             "pinId": "p1"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w5",
@@ -4821,11 +4859,17 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "b1",
             "pinId": "GND1"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         }
       ]
     },
-    "code": "/*\n * Button — Read push button, control LED\n */\n\nint buttonPin = 2;\nint ledPin = 13;\nint buttonState = 0;\n\nvoid setup() {\n  pinMode(buttonPin, INPUT_PULLUP);\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Button test ready.\");\n}\n\nvoid loop() {\n  buttonState = digitalRead(buttonPin);\n\n  if (buttonState == LOW) {   // LOW when pressed (pullup)\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"Button PRESSED - LED ON\");\n  } else {\n    digitalWrite(ledPin, LOW);\n  }\n\n  delay(50);\n}"
+    "files": {
+      "sketch.ino": "/*\n * Button — Read push button, control LED\n */\n\nint buttonPin = 2;\nint ledPin = 13;\nint buttonState = 0;\n\nvoid setup() {\n  pinMode(buttonPin, INPUT_PULLUP);\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Button test ready.\");\n}\n\nvoid loop() {\n  buttonState = digitalRead(buttonPin);\n\n  if (buttonState == LOW) {   // LOW when pressed (pullup)\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"Button PRESSED - LED ON\");\n  } else {\n    digitalWrite(ledPin, LOW);\n    Serial.println(\"Button RELEASED - LED OFF\");\n  }\n\n  delay(50);\n}"
+    }
   },
   {
     "id": "buzzer_melody",
@@ -24183,146 +24227,87 @@ window.EXAMPLE_SKETCHES = [
           "type": "arduino_uno",
           "x": 155,
           "y": 85,
-          "width": 230,
-          "height": 150,
+          "rotation": 0,
           "props": {
             "label": "UNO"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "rly",
           "type": "relay",
           "x": 135,
           "y": 300,
-          "width": 90,
-          "height": 50,
+          "rotation": 0,
           "props": {
             "label": "RELAY"
-          },
-          "runtimeState": {
-            "active": true
-          },
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "comp_1787680735754_su6qr",
           "type": "led",
           "x": 315,
           "y": 295,
-          "width": 30,
-          "height": 60,
+          "rotation": 0,
           "props": {
             "color": "#ff3333",
             "colorName": "Red"
-          },
-          "runtimeState": {
-            "val": 0,
-            "lit": false,
-            "brightness": 0,
-            "current_mA": 0,
-            "overload": false,
-            "blown": false,
-            "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "comp_1787680737146_jnqve",
           "type": "led",
           "x": 370,
           "y": 295,
-          "width": 30,
-          "height": 60,
+          "rotation": 0,
           "props": {
             "color": "#ff3333",
             "colorName": "Red"
-          },
-          "runtimeState": {
-            "val": 255,
-            "lit": true,
-            "brightness": 1,
-            "current_mA": 14.598540145985401,
-            "overload": false,
-            "blown": false,
-            "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "comp_1787680760095_m3aw5",
           "type": "resistor",
           "x": 325,
           "y": 380,
-          "width": 20,
-          "height": 60,
+          "rotation": 0,
           "props": {
             "value": 660,
             "unit": "Î©"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "comp_1787680760809_m9ezp",
           "type": "resistor",
           "x": 390,
           "y": 390,
-          "width": 20,
-          "height": 60,
+          "rotation": 0,
           "props": {
             "value": 660,
             "unit": "Î©"
-          },
-          "runtimeState": {},
-          "selected": false,
-          "rotation": 0
+          }
         },
         {
           "id": "comp_1787680840288_f2lyt",
           "type": "bulb_12v",
           "x": 440,
           "y": 290,
-          "width": 40,
-          "height": 80,
-          "props": {},
-          "runtimeState": {
-            "brightness": 0,
-            "blown": false,
-            "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+          "rotation": 0,
+          "props": {}
         },
         {
           "id": "comp_1787680841469_quda8",
           "type": "bulb_12v",
           "x": 530,
           "y": 285,
-          "width": 40,
-          "height": 80,
-          "props": {},
-          "runtimeState": {
-            "brightness": 1,
-            "blown": false,
-            "_warnedBlown": false
-          },
-          "selected": false,
-          "rotation": 0
+          "rotation": 0,
+          "props": {}
         },
         {
           "id": "comp_1788345181417_so3rx",
           "type": "bench_power_supply",
           "x": -230,
           "y": 105,
-          "width": 310,
-          "height": 210,
+          "rotation": 0,
           "props": {
             "powered": 1,
             "outputEnabled": 1,
@@ -24332,15 +24317,7 @@ window.EXAMPLE_SKETCHES = [
             "actualCurrentNeg": 0,
             "mode": "CV",
             "actualCurrent5V": 0
-          },
-          "runtimeState": {
-            "actualCurrentPos": 1,
-            "actualCurrentNeg": 0,
-            "actualCurrent5V": 5,
-            "mode": "CV"
-          },
-          "selected": false,
-          "rotation": 0
+          }
         }
       ],
       "wires": [
@@ -24364,7 +24341,9 @@ window.EXAMPLE_SKETCHES = [
               "x": 171,
               "y": 374
             }
-          ]
+          ],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w2",
@@ -24377,7 +24356,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "vcc"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w3",
@@ -24390,7 +24371,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "GND1"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1787680765836_2n7pm",
@@ -24403,7 +24386,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "p1"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1787680768087_q6ays",
@@ -24416,7 +24401,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "p1"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1788345232620_dvb4d",
@@ -24429,33 +24416,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "com"
           },
           "color": null,
-          "waypoints": []
-        },
-        {
-          "id": "wire_1788345237613_w1yfi",
-          "from": {
-            "instId": "comp_1787680735754_su6qr",
-            "pinId": "anode"
-          },
-          "to": {
-            "instId": "comp_1787680840288_f2lyt",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": []
-        },
-        {
-          "id": "wire_1788345240117_798t2",
-          "from": {
-            "instId": "rly",
-            "pinId": "no"
-          },
-          "to": {
-            "instId": "comp_1787680735754_su6qr",
-            "pinId": "anode"
-          },
-          "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1788345249338_54ba3",
@@ -24468,7 +24431,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "p2"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1788345251313_x5trx",
@@ -24481,7 +24446,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "p2"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1788345253010_5jgc3",
@@ -24494,7 +24461,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "p2"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1788345255122_3phip",
@@ -24507,37 +24476,75 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "p2"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
-          "id": "wire_1788345276178_oca9c",
+          "id": "wire_1791476316978_sf07d",
           "from": {
             "instId": "rly",
             "pinId": "no"
+          },
+          "to": {
+            "instId": "comp_1787680735754_su6qr",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1791476319304_3h1dy",
+          "from": {
+            "instId": "rly",
+            "pinId": "nc"
           },
           "to": {
             "instId": "comp_1787680737146_jnqve",
             "pinId": "anode"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
-          "id": "wire_1788345277839_u84ke",
+          "id": "wire_1791476777141_0b6v4",
           "from": {
-            "instId": "comp_1787680737146_jnqve",
+            "instId": "rly",
+            "pinId": "no"
+          },
+          "to": {
+            "instId": "comp_1787680840288_f2lyt",
             "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1791476780417_la9do",
+          "from": {
+            "instId": "rly",
+            "pinId": "nc"
           },
           "to": {
             "instId": "comp_1787680841469_quda8",
             "pinId": "anode"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         }
       ]
     },
-    "code": "/*\n * Relay Control — energize the coil on D9\n * The LED connected to the relay's NO contact turns on\n * when the relay is active.\n */\n\nint relayPin = 9;\n\nvoid setup() {\n  pinMode(relayPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Relay example started\");\n}\n\nvoid loop() {\n  digitalWrite(relayPin, HIGH);\n  Serial.println(\"Relay ON\");\n  delay(1000);\n\n  digitalWrite(relayPin, LOW);\n  Serial.println(\"Relay OFF\");\n  delay(1000);\n}"
+    "files": {
+      "sketch.ino": "/*\n * Relay Control — energize the coil on D9\n * The LED connected to the relay's NO contact turns on\n * when the relay is active.\n */\n\nint relayPin = 9;\n\nvoid setup() {\n  pinMode(relayPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Relay example started\");\n}\n\nvoid loop() {\n  digitalWrite(relayPin, HIGH);\n  Serial.println(\"Relay ON\");\n  delay(1000);\n\n  digitalWrite(relayPin, LOW);\n  Serial.println(\"Relay OFF\");\n  delay(1000);\n}"
+    }
   },
   {
     "id": "remote_control_leds",

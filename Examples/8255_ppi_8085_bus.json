@@ -1,0 +1,468 @@
+{
+  "id": "8255_ppi_8085_bus",
+  "name": "8255 PPI 8085 Bus",
+  "icon": "💥",
+  "desc": "An Intel 8085 drives an Intel 8255 PPI over a bit-banged external bus: PA0-PA7 carry D0-D7, PB0/PB1 select the register, PB2 is /RD and PB7 is /WR, with /CS tied to GND. The program writes the control word 0x80 (all ports Mode 0 outputs) and then blinks Port A between AAh and 55h.",
+  "tags": [
+    "8255",
+    "8085",
+    "ppi",
+    "bus",
+    "microprocessor"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "cpu8085",
+        "type": "intel_8085",
+        "x": 120,
+        "y": 180,
+        "rotation": 0,
+        "props": {
+          "label": "8085"
+        }
+      },
+      {
+        "id": "u1_8255",
+        "type": "ic_8255",
+        "x": 700,
+        "y": 180,
+        "rotation": 0,
+        "props": {
+          "label": "8255",
+          "busMode": "external",
+          "modeA": "0",
+          "modeB": "0",
+          "dirA": "out",
+          "dirB": "out",
+          "dirCupper": "out",
+          "dirClower": "out",
+          "paValue": 0,
+          "pbValue": 0,
+          "pcValue": 0
+        }
+      },
+      {
+        "id": "arrA",
+        "type": "multi_led_array",
+        "x": 700,
+        "y": 520,
+        "rotation": 0,
+        "props": {
+          "label": "PORT A"
+        }
+      },
+      {
+        "id": "v5",
+        "type": "power_5v",
+        "x": 1010,
+        "y": 460,
+        "rotation": 0,
+        "props": {}
+      },
+      {
+        "id": "gnd",
+        "type": "power_gnd",
+        "x": 640,
+        "y": 460,
+        "rotation": 0,
+        "props": {}
+      }
+    ],
+    "wires": [
+      {
+        "id": "w_db0",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "PA.0"
+        },
+        "to": {
+          "instId": "u1_8255",
+          "pinId": "D0"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_db1",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "PA.1"
+        },
+        "to": {
+          "instId": "u1_8255",
+          "pinId": "D1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_db2",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "PA.2"
+        },
+        "to": {
+          "instId": "u1_8255",
+          "pinId": "D2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_db3",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "PA.3"
+        },
+        "to": {
+          "instId": "u1_8255",
+          "pinId": "D3"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_db4",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "PA.4"
+        },
+        "to": {
+          "instId": "u1_8255",
+          "pinId": "D4"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_db5",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "PA.5"
+        },
+        "to": {
+          "instId": "u1_8255",
+          "pinId": "D5"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_db6",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "PA.6"
+        },
+        "to": {
+          "instId": "u1_8255",
+          "pinId": "D6"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_db7",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "PA.7"
+        },
+        "to": {
+          "instId": "u1_8255",
+          "pinId": "D7"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_a0",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "PB.0"
+        },
+        "to": {
+          "instId": "u1_8255",
+          "pinId": "A0"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_a1",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "PB.1"
+        },
+        "to": {
+          "instId": "u1_8255",
+          "pinId": "A1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_rd",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "PB.2"
+        },
+        "to": {
+          "instId": "u1_8255",
+          "pinId": "RD"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_wr",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "PB.7"
+        },
+        "to": {
+          "instId": "u1_8255",
+          "pinId": "WR"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_cs",
+        "from": {
+          "instId": "u1_8255",
+          "pinId": "CS"
+        },
+        "to": {
+          "instId": "gnd",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_pa0",
+        "from": {
+          "instId": "u1_8255",
+          "pinId": "PA0"
+        },
+        "to": {
+          "instId": "arrA",
+          "pinId": "l1"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_pa1",
+        "from": {
+          "instId": "u1_8255",
+          "pinId": "PA1"
+        },
+        "to": {
+          "instId": "arrA",
+          "pinId": "l2"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_pa2",
+        "from": {
+          "instId": "u1_8255",
+          "pinId": "PA2"
+        },
+        "to": {
+          "instId": "arrA",
+          "pinId": "l3"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_pa3",
+        "from": {
+          "instId": "u1_8255",
+          "pinId": "PA3"
+        },
+        "to": {
+          "instId": "arrA",
+          "pinId": "l4"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_pa4",
+        "from": {
+          "instId": "u1_8255",
+          "pinId": "PA4"
+        },
+        "to": {
+          "instId": "arrA",
+          "pinId": "l5"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_pa5",
+        "from": {
+          "instId": "u1_8255",
+          "pinId": "PA5"
+        },
+        "to": {
+          "instId": "arrA",
+          "pinId": "l6"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_pa6",
+        "from": {
+          "instId": "u1_8255",
+          "pinId": "PA6"
+        },
+        "to": {
+          "instId": "arrA",
+          "pinId": "l7"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_pa7",
+        "from": {
+          "instId": "u1_8255",
+          "pinId": "PA7"
+        },
+        "to": {
+          "instId": "arrA",
+          "pinId": "l8"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_arr_gnd",
+        "from": {
+          "instId": "arrA",
+          "pinId": "gnd"
+        },
+        "to": {
+          "instId": "gnd",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_cpu_vcc",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "v5",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_cpu_gnd",
+        "from": {
+          "instId": "cpu8085",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "gnd",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_chip_vcc",
+        "from": {
+          "instId": "u1_8255",
+          "pinId": "VCC"
+        },
+        "to": {
+          "instId": "v5",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w_chip_gnd",
+        "from": {
+          "instId": "u1_8255",
+          "pinId": "GND"
+        },
+        "to": {
+          "instId": "gnd",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.asm": "; ---------------------------------------------------------------\n; 8085 + 8255 PPI over a bit-banged external bus\n;\n;   8085 PA0-PA7  ->  8255 D0-D7   (data bus)\n;   8085 PB0      ->  8255 A0      (register select bit 0)\n;   8085 PB1      ->  8255 A1      (register select bit 1)\n;   8085 PB2      ->  8255 /RD     (read strobe)\n;   8085 PB7      ->  8255 /WR     (write strobe)\n;   8255 /CS      ->  GND          (always selected)\n;   8255 PA0-PA7  ->  8-LED array\n;\n; Port B control byte:\n;   bit7 = /WR   bit2 = /RD   bit1 = A1   bit0 = A0\n;   idle   = 84H | addr    (WR=1, RD=1)\n;   write  = 44H | addr    (WR=0, RD=1)\n;   read   = 80H | addr    (WR=1, RD=0)\n;\n; A1A0: 00 = Port A   01 = Port B   10 = Port C   11 = control word\n; ---------------------------------------------------------------\n\n        MVI A, 80H      ; control word: A/B/C all Mode 0 outputs\n        OUT 00H         ; data bus <- 80H\n        MVI A, 87H      ; idle, A1A0 = 11b (control word register)\n        OUT 01H\n        MVI A, 47H      ; /WR low -> latch 80H into the CWR\n        OUT 01H\n        MVI A, 87H      ; release /WR\n        OUT 01H\n\nLOOP:   MVI A, AAH      ; 10101010 pattern\n        OUT 00H         ; data bus <- AAh\n        MVI A, 84H      ; idle, A1A0 = 00b (Port A)\n        OUT 01H\n        MVI A, 44H      ; /WR low -> Port A <- AAh\n        OUT 01H\n        MVI A, 84H      ; release /WR\n        OUT 01H\n\n        MVI A, 55H      ; 01010101 pattern\n        OUT 00H\n        MVI A, 84H\n        OUT 01H\n        MVI A, 44H      ; /WR low -> Port A <- 55H\n        OUT 01H\n        MVI A, 84H\n        OUT 01H\n\n        JMP LOOP        ; keep blinking\n"
+  }
+}

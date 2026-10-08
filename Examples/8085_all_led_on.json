@@ -2,7 +2,7 @@
   "id": "8085_all_led_on",
   "name": "8085 all led on",
   "icon": "🔧",
-  "desc": "This example demonstrates how to turn on all the LEDs connected to the ports of an 8085 microprocessor. The program configures the 8255 PPI (Programmable Peripheral Interface) to set all pins of Port A, Port B, and Port C to high (logic level 1), which will turn on any LEDs connected to these ports. The program then halts execution after sending the data to the ports.",
+  "desc": "This example demonstrates how to turn on all the LEDs connected directly to the ports of an 8085 microprocessor. The 8085 abstracts an on-chip 8255 PPI, so OUT 00H / OUT 01H / OUT 02H drive Port A, Port B and Port C straight onto the wires — no separate 8255 is needed. The program then halts execution.",
   "tags": [
     "8085",
     "led",
@@ -237,6 +237,6 @@
     ]
   },
   "files": {
-    "sketch.asm": "MVI A, 80H    ; Load control word: all ports as output, Mode 0\nOUT 03H       ; Send control word to 8255 CWR\nMVI A, FFH    ; Load accumulator with FFH (Use 00H if Common Anode)\nOUT 00H       ; Send data to Port A to turn ON all LEDs\nOUT 01H       ; Send data to Port B to turn ON all LEDs\nOUT 02H       ; Send data to Port C to turn ON all LEDs\nHLT           ; Stop execution\n"
+    "sketch.asm": "MVI A, 80H    ; Port directions are already outputs — nothing to configure\nOUT 03H       ; No external 8255: ports are wired straight to the LEDs\nMVI A, FFH    ; Load accumulator with FFH (Use 00H if Common Anode)\nOUT 00H       ; Send data to Port A to turn ON all LEDs\nOUT 01H       ; Send data to Port B to turn ON all LEDs\nOUT 02H       ; Send data to Port C to turn ON all LEDs\nHLT           ; Stop execution\n"
   }
 }

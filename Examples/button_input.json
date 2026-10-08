@@ -15,25 +15,44 @@
         "id": "b1",
         "type": "arduino_uno",
         "x": 200,
-        "y": 100
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
       },
       {
         "id": "btn1",
         "type": "push_button",
         "x": 120,
-        "y": 300
+        "y": 300,
+        "rotation": 0,
+        "props": {
+          "pressed": false,
+          "label": "BTN"
+        }
       },
       {
         "id": "led1",
         "type": "led",
         "x": 340,
-        "y": 260
+        "y": 260,
+        "rotation": 0,
+        "props": {
+          "color": "#ff3333",
+          "colorName": "Red"
+        }
       },
       {
         "id": "r1",
         "type": "resistor",
         "x": 340,
-        "y": 340
+        "y": 340,
+        "rotation": 0,
+        "props": {
+          "value": 220,
+          "unit": "Ω"
+        }
       }
     ],
     "wires": [
@@ -46,7 +65,11 @@
         "to": {
           "instId": "btn1",
           "pinId": "p1"
-        }
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w2",
@@ -57,7 +80,11 @@
         "to": {
           "instId": "b1",
           "pinId": "GND1"
-        }
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w3",
@@ -68,7 +95,11 @@
         "to": {
           "instId": "led1",
           "pinId": "anode"
-        }
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w4",
@@ -79,7 +110,11 @@
         "to": {
           "instId": "r1",
           "pinId": "p1"
-        }
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w5",
@@ -90,9 +125,15 @@
         "to": {
           "instId": "b1",
           "pinId": "GND1"
-        }
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       }
     ]
   },
-  "code": "/*\n * Button — Read push button, control LED\n */\n\nint buttonPin = 2;\nint ledPin = 13;\nint buttonState = 0;\n\nvoid setup() {\n  pinMode(buttonPin, INPUT_PULLUP);\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Button test ready.\");\n}\n\nvoid loop() {\n  buttonState = digitalRead(buttonPin);\n\n  if (buttonState == LOW) {   // LOW when pressed (pullup)\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"Button PRESSED - LED ON\");\n  } else {\n    digitalWrite(ledPin, LOW);\n  }\n\n  delay(50);\n}"
+  "files": {
+    "sketch.ino": "/*\n * Button — Read push button, control LED\n */\n\nint buttonPin = 2;\nint ledPin = 13;\nint buttonState = 0;\n\nvoid setup() {\n  pinMode(buttonPin, INPUT_PULLUP);\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"Button test ready.\");\n}\n\nvoid loop() {\n  buttonState = digitalRead(buttonPin);\n\n  if (buttonState == LOW) {   // LOW when pressed (pullup)\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"Button PRESSED - LED ON\");\n  } else {\n    digitalWrite(ledPin, LOW);\n    Serial.println(\"Button RELEASED - LED OFF\");\n  }\n\n  delay(50);\n}"
+  }
 }

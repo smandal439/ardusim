@@ -284,8 +284,19 @@ class ElectricalEngine {
     };
 
     for (const inst of this.components) {
+      // Only the bulb gets a real resistive edge here (its 12Ω filament is
+      // physically meaningful). LEDs and diodes stay inert in solve(): a
+      // single linear resistance cannot model their forward drop — a 20Ω
+      // edge would wrongly divide the rail through the cathode ground path.
+      // (measureResistance() has its own LED/diode edges for continuity.)
       const net1 = this.getNetForPin(inst.id, 'p1');
       const net2 = this.getNetForPin(inst.id, 'p2');
+      let bulbNet1 = net1;
+      let bulbNet2 = net2;
+      if (inst.type === 'bulb_12v') {
+        bulbNet1 = this.getNetForPin(inst.id, 'anode');
+        bulbNet2 = this.getNetForPin(inst.id, 'cathode');
+      }
       if (!net1 || !net2) continue;
 
       switch (inst.type) {
@@ -312,7 +323,7 @@ class ElectricalEngine {
           break;
         }
         case 'bulb_12v':
-          addEdge(net1, net2, 12); // nominal 12Ω filament
+          if (bulbNet1 && bulbNet2) addEdge(bulbNet1, bulbNet2, 12); // filament
           break;
         case 'led':
         case 'led_green':
@@ -320,8 +331,7 @@ class ElectricalEngine {
         case 'led_yellow':
         case 'led_orange':
         case 'led_white':
-          // LED: modeled as a forward voltage drop with small resistance
-          addEdge(net1, net2, 20); // ~20Ω effective resistance
+          // Intentionally no solve() edge — see comment above.
           break;
       }
     }
@@ -593,6 +603,7 @@ class ElectricalEngine {
       case 'ic_74hc164':
       case 'ic_74hc4017':
       case 'lm741':
+      case 'ic_8255':
         this._classifyIC(inst);
         break;
       case 'func_gen': {
@@ -646,6 +657,9 @@ class ElectricalEngine {
       ic_74hc164: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7'],
       ic_74hc4017: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q59'],
       lm741: ['OUT'],
+      ic_8255: ['PA0','PA1','PA2','PA3','PA4','PA5','PA6','PA7',
+                'PB0','PB1','PB2','PB3','PB4','PB5','PB6','PB7',
+                'PC0','PC1','PC2','PC3','PC4','PC5','PC6','PC7'],
     };
     const outPins = IC_OUTPUT_PINS[inst.type] || [];
     for (const pinId of outPins) {

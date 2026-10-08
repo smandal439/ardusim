@@ -30,6 +30,7 @@ window.ArduinoLibs['Intel8085'] = {
     var serialBuf = '';
     var lastSync = [-1, -1, -1];
     function syncPort(port, val) {
+      if (port < 0 || port > 2) return;      // only PA/PB/PC drive board pins
       if (val === lastSync[port]) return;
       lastSync[port] = val;
       var b = window.CircuitCanvas.getBoardInst();
@@ -48,12 +49,17 @@ window.ArduinoLibs['Intel8085'] = {
             if (self._emitPinChange) self._emitPinChange('pin_' + (base + i), nv ? 255 : 0);
           }}
     }
+    /* The emulator invokes _portReadCb with a single argument (the port
+       number) and expects a whole byte back. A second argument is only
+       present when a caller wants one bit. */
     function readPort(port, bit) {
+      if (bit === undefined) return readAllPins(port & 0xFF);
       var b = window.CircuitCanvas.getBoardInst();
       if (!b) return 0;
       var portNames = ['PA', 'PB', 'PC'];
-      var pid = portNames[port] + '.' + bit;
-      return window.CircuitCanvas._readDigitalInput(b.id, pid) & 1;
+      var name = portNames[port & 0xFF];
+      if (!name) return 0;
+      return window.CircuitCanvas._readDigitalInput(b.id, name + '.' + bit) & 1;
     }
     function readAllPins(port) {
       var val = 0;

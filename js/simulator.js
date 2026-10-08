@@ -2745,7 +2745,22 @@ class ArduinoSimulator {
     const directVal = this.pinStates[`${inst.id}_${pinId}`];
     if (directVal !== undefined) return directVal;
 
-    // 3. Walk the wire graph — through breadboard internal nodes — to a source
+    // 3. Engine net lookup — the electrical engine solves one voltage per
+    //    net, so both ends of a wire always agree regardless of which pin
+    //    the reader starts from (fixes vantage-point asymmetry).
+    const engine = window.CircuitCanvas && window.CircuitCanvas.engine;
+    if (engine && typeof engine.getNetForPin === 'function') {
+      const net = engine.getNetForPin(inst.id, pinId);
+      if (net) {
+        if (net.sources.length > 0) {
+          return net.sources.reduce((best, s) => (s.voltage > best.voltage ? s : best), net.sources[0]).voltage;
+        }
+        return net.voltage;
+      }
+    }
+
+    // 4. Walk the wire graph — through breadboard internal nodes — to a source
+    //    (fallback for engineless test stubs / pins the engine did not index)
     const IC_OUT = {
       ic_555: ['OUT'],
       ic_74hc00: ['Y1', 'Y2', 'Y3', 'Y4'],
@@ -2767,6 +2782,9 @@ class ArduinoSimulator {
       ic_74hc164: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7'],
       ic_74hc4017: ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q59'],
       lm741: ['OUT'],
+      ic_8255: ['PA0','PA1','PA2','PA3','PA4','PA5','PA6','PA7',
+                'PB0','PB1','PB2','PB3','PB4','PB5','PB6','PB7',
+                'PC0','PC1','PC2','PC3','PC4','PC5','PC6','PC7'],
     };
     const bbGroupOf = (pid) => {
       if (typeof window._breadboardGetGroup === 'function') {
@@ -2926,7 +2944,7 @@ window.loadExamplesFromFiles = async function () {
     '8085_8bit_addition', '8085_all_led_on', '8085_bitwise_and', '8085_block_data_transfer', '8085_data_exchange', '8085_exchange_memory',
     '8085_fibonacci', '8085_load_add', '8085_load_copy', '8085_sorting_ascending', '8085_sorting_descending', 'add_2_number',
     'and_gate', 'battery_in_series', 'battery_led', 'battery_percentage_esp32', 'bh1750_light_sensor', 'blink',
-    'bluetooth_serial_bridge', 'button', 'buzzer_melody', 'coap_client', 'coap_dip_switch_to_8_led', 'coap_simple_server',
+    'bluetooth_serial_bridge', 'button_input', 'buzzer_melody', 'coap_client', 'coap_dip_switch_to_8_led', 'coap_simple_server',
     'continuous_rotation_servo_control_by_pot', 'counter', 'current_divider', 'dc_motor_speed', 'dht11_temperature_humidity', 'dip_switch_and_led_array',
     'dip_switch_binary', 'dmm_current', 'dmm_resistance', 'dmm_voltage', 'ds3231_rtc_clock', 'ds3231_rtc_clock_sync_with_ntp',
     'dso_oscilloscope', 'dual_core_mqtt', 'esp32_blink', 'esp32_deep_sleep_timer', 'esp32_dual_core_blink', 'esp32_fade',

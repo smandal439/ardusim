@@ -317,6 +317,9 @@ describe('seg7 — 7447_test example drives the display', () => {
 
   it('lights segments a–f and keeps g/DP dark — shows a "0"', () => {
     const { cc, sim, seg } = buildExampleRig('7447_test.json');
+    // Frame 1: the 47 computes its outputs. Frame 2: the engine sees those
+    // values and the seg7 voltage fallback resolves them.
+    cc.updateSimState(sim.pinStates);
     cc.updateSimState(sim.pinStates);
     expect(seg.runtimeState.segments)
       .toEqual({ A: 1, B: 1, C: 1, D: 1, E: 1, F: 1, G: 0, DP: 0 });
