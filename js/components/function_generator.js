@@ -1,5 +1,14 @@
 'use strict';
 
+/* Read a numeric generator setting, coerced, finite and clamped to its
+   declared range. Raw Number(...) conversions let "Infinity" or a hand-typed
+   1e999 through, which reaches the waveform math as Infinity and turns the
+   sample into NaN — an invalid voltage on the output pin. */
+function _fgNum(v, def, min, max) {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : def;
+}
+
 defComp({
   id: 'func_gen',
   name: 'Function Generator',
@@ -32,6 +41,21 @@ defComp({
       { value: 'sawtooth', label: 'Sawtooth' },
       { value: 'noise',    label: 'Noise' },
     ]},
+    // Limits follow the guide's documented ranges. Frequency is a log-scale
+    // quantity, so it stays a bounded number field in the properties panel (a
+    // linear 0 Hz … 10 MHz slider would be unusable) while the component keeps
+    // its on-canvas +/- buttons for coarse stepping. It deliberately has no
+    // `step`: the bundled examples run at 0.5 Hz and snapping would round them.
+    { field: 'ch1_freq',   label: 'CH1 Freq',   type: 'number', min: 0, max: 10000000, unit: 'Hz' },
+    { field: 'ch2_freq',   label: 'CH2 Freq',   type: 'number', min: 0, max: 10000000, unit: 'Hz' },
+    { field: 'ch1_amp',    label: 'CH1 Amp',    min: 0,   max: 10,  step: 0.1, unit: 'Vpp' },
+    { field: 'ch1_offset', label: 'CH1 Offset', min: -5,  max: 5,   step: 0.1, unit: 'V' },
+    { field: 'ch1_phase',  label: 'CH1 Phase',  min: 0,   max: 360, step: 1,   unit: '\u00b0' },
+    { field: 'ch1_duty',   label: 'CH1 Duty',   min: 1,   max: 99,  step: 1,   unit: '%' },
+    { field: 'ch2_amp',    label: 'CH2 Amp',    min: 0,   max: 10,  step: 0.1, unit: 'Vpp' },
+    { field: 'ch2_offset', label: 'CH2 Offset', min: -5,  max: 5,   step: 0.1, unit: 'V' },
+    { field: 'ch2_phase',  label: 'CH2 Phase',  min: 0,   max: 360, step: 1,   unit: '\u00b0' },
+    { field: 'ch2_duty',   label: 'CH2 Duty',   min: 1,   max: 99,  step: 1,   unit: '%' },
   ],
 
   pins: [
@@ -42,17 +66,28 @@ defComp({
   ],
 
   step(inst, sim) {
+    inst.runtimeState = inst.runtimeState || {};
+    const rs = inst.runtimeState;
     const props = inst.props || {};
-    const t = sim && typeof sim.simTime === 'number' ? sim.simTime / 1000 : performance.now() / 1000;
-    const powered = Boolean(props.powered ?? 1);
+    // The on-canvas sliders write runtimeState only (CircuitCanvas._updateSliderValue),
+    // while the properties panel writes both — so read through runtimeState first,
+    // exactly as the DSO does. Otherwise dragging a slider would leave the pins
+    // sitting on the stale prop and the control would appear dead.
+    const P = (field, def) => (rs[field] !== undefined ? rs[field] : (props[field] ?? def));
+    const rawT = sim && typeof sim.simTime === 'number' ? sim.simTime / 1000 : performance.now() / 1000;
+    const t = Number.isFinite(rawT) ? rawT : 0;
+    // "0", 0 and false all mean off — Boolean("0") would have left it running.
+    const powered = Number(P('powered', 1)) !== 0;
     const evaluate = (channel) => {
       if (!powered) return 0;
-      const wave = props[`${channel}_wave`] || 'sine';
-      const freq = Number(props[`${channel}_freq`]) || 0;
-      const amp = Number(props[`${channel}_amp`]) || 0;
-      const offset = Number(props[`${channel}_offset`]) || 0;
-      const phase = (Number(props[`${channel}_phase`]) || 0) / 360;
-      const duty = Math.max(0.01, Math.min(0.99, (Number(props[`${channel}_duty`]) || 50) / 100));
+      const wave = P(`${channel}_wave`, 'sine') || 'sine';
+      // Same ranges the properties panel and the on-canvas controls enforce,
+      // so the voltage on the pins can never disagree with what the UI shows.
+      const freq = _fgNum(P(`${channel}_freq`), 0, 0, 10000000);
+      const amp = _fgNum(P(`${channel}_amp`), 0, 0, 10);
+      const offset = _fgNum(P(`${channel}_offset`), 0, -5, 5);
+      const phase = _fgNum(P(`${channel}_phase`), 0, 0, 360) / 360;
+      const duty = _fgNum(P(`${channel}_duty`), 50, 1, 99) / 100;
       const tau = ((t * freq + phase) % 1 + 1) % 1;
       let normalized;
       switch (wave) {
@@ -62,10 +97,11 @@ defComp({
         case 'noise': normalized = Math.sin(t * freq * 137.5) * 0.7 + Math.sin(t * freq * 239.1) * 0.3; break;
         default: normalized = Math.sin(2 * Math.PI * tau); break;
       }
-      return offset + normalized * amp / 2;
+      const out = offset + normalized * amp / 2;
+      // Last line of defence: never drive a pin with a non-finite voltage.
+      return Number.isFinite(out) ? out : 0;
     };
 
-    inst.runtimeState = inst.runtimeState || {};
     inst.runtimeState.ch1_voltage = evaluate('ch1');
     inst.runtimeState.ch2_voltage = evaluate('ch2');
     if (sim && typeof sim.setPinVoltage === 'function') {
@@ -81,8 +117,17 @@ defComp({
   draw(ctx, inst, sim) {
     const { x, y } = inst;
     const props = inst.props || {};
+    // Same read order as step(): the on-canvas sliders write runtimeState only,
+    // so look there first or the drawn readout would lag behind the pins.
+    const rs = inst.runtimeState || {};
+    const P = (field, def) => (rs[field] !== undefined ? rs[field] : (props[field] ?? def));
+    // Coerce and clamp with the *same* bounds step() uses, so the picture on
+    // the front panel can never disagree with the waveform driven onto the pins.
+    const num = (field, def, min, max) => _fgNum(P(field), def, min, max);
     const W = 300, H = 190;
-    const isPowered = Boolean(inst.runtimeState?.powered ?? inst.props.powered ?? 1);
+    // Match step(): "0"/0/false all mean off, so the display can't disagree
+    // with the waveform that is actually being driven onto the pins.
+    const isPowered = Number(P('powered', 1)) !== 0;
 
     ctx.save();
     ctx.translate(x, y);
@@ -153,8 +198,8 @@ defComp({
       ctx.beginPath(); ctx.moveTo(scrX, zeroY); ctx.lineTo(scrX + scrW, zeroY); ctx.stroke();
 
       // Draw waveform traces on screen
-      const ch1Freq = props.ch1_freq || 440;
-      const ch2Freq = props.ch2_freq || 880;
+      const ch1Freq = num('ch1_freq', 440, 0, 10000000);
+      const ch2Freq = num('ch2_freq', 880, 0, 10000000);
       const baseFreq = ch1Freq || ch2Freq || 100;
       const timeWindow = 2.5 / baseFreq;
       const dt = timeWindow / scrW;
@@ -184,7 +229,7 @@ defComp({
       ctx.beginPath();
       for (let px = 0; px < scrW; px++) {
         const t = px * dt;
-        const v = _sampleWave(props.ch1_wave || 'sine', t, ch1Freq, props.ch1_amp || 5, props.ch1_offset || 0, props.ch1_phase || 0, props.ch1_duty || 50);
+        const v = _sampleWave(P('ch1_wave', 'sine'), t, ch1Freq, num('ch1_amp', 5, 0, 10), num('ch1_offset', 0, -5, 5), num('ch1_phase', 0, 0, 360), num('ch1_duty', 50, 1, 99));
         const py = zeroY - v * vScale;
         if (px === 0) ctx.moveTo(scrX + px, py); else ctx.lineTo(scrX + px, py);
       }
@@ -199,7 +244,7 @@ defComp({
       ctx.beginPath();
       for (let px = 0; px < scrW; px++) {
         const t = px * dt;
-        const v = _sampleWave(props.ch2_wave || 'square', t, ch2Freq, props.ch2_amp || 3, props.ch2_offset || 0, props.ch2_phase || 90, props.ch2_duty || 50);
+        const v = _sampleWave(P('ch2_wave', 'square'), t, ch2Freq, num('ch2_amp', 3, 0, 10), num('ch2_offset', 0, -5, 5), num('ch2_phase', 90, 0, 360), num('ch2_duty', 50, 1, 99));
         const py = zeroY - v * vScale;
         if (px === 0) ctx.moveTo(scrX + px, py); else ctx.lineTo(scrX + px, py);
       }
@@ -269,13 +314,13 @@ defComp({
       ctx.fillText('Duty: ' + duty + '%', cx + 8, py);
     };
 
-    const ch1Freq = props.ch1_freq || 440;
-    const ch2Freq = props.ch2_freq || 880;
+    const ch1Freq = num('ch1_freq', 440, 0, 10000000);
+    const ch2Freq = num('ch2_freq', 880, 0, 10000000);
 
     _drawCard(scrX, cardY, cardW, cardH, 'CHANNEL 1', '#00e5ff',
-      props.ch1_wave || 'sine', ch1Freq, props.ch1_amp || 5, props.ch1_offset || 0, props.ch1_phase || 0, props.ch1_duty || 50);
+      P('ch1_wave', 'sine'), ch1Freq, num('ch1_amp', 5, 0, 10), num('ch1_offset', 0, -5, 5), num('ch1_phase', 0, 0, 360), num('ch1_duty', 50, 1, 99));
     _drawCard(scrX + cardW + cardGap, cardY, cardW, cardH, 'CHANNEL 2', '#ff3366',
-      props.ch2_wave || 'square', ch2Freq, props.ch2_amp || 3, props.ch2_offset || 0, props.ch2_phase || 90, props.ch2_duty || 50);
+      P('ch2_wave', 'square'), ch2Freq, num('ch2_amp', 3, 0, 10), num('ch2_offset', 0, -5, 5), num('ch2_phase', 90, 0, 360), num('ch2_duty', 50, 1, 99));
 
     // ── Interactive Control Buttons ──
     const _ctrlBtn = (bx, by, bw, lbl, col, active) => {
@@ -297,7 +342,7 @@ defComp({
     // CH1 Wave Selector
     const waveLabels = { sine: 'SIN', square: 'SQR', triangle: 'TRI', sawtooth: 'SAW', noise: 'NOI' };
     const waveOpts = ['sine', 'square', 'triangle', 'sawtooth', 'noise'];
-    const ch1Wave = props.ch1_wave || 'sine';
+    const ch1Wave = P('ch1_wave', 'sine') || 'sine';
     const freqBtnW = 28;
     _ctrlBtn(scrX, cardY + cardH + 6, cardW / 2 - freqBtnW - 4, waveLabels[ch1Wave] || 'SIN', '#00e5ff', isPowered);
     inst._btnRects.ch1Wave = { x: scrX, y: cardY + cardH + 6, w: cardW / 2 - freqBtnW - 4, h: 14, field: 'ch1_wave', options: waveOpts };
@@ -309,7 +354,7 @@ defComp({
     inst._btnRects.ch1FreqDown = { x: scrX + cardW / 2 - freqBtnW / 2 - 2, y: cardY + cardH + 6, w: freqBtnW / 2, h: 14, field: 'ch1_freq_down' };
 
     // CH2 Wave Selector
-    const ch2Wave = props.ch2_wave || 'square';
+    const ch2Wave = P('ch2_wave', 'square') || 'square';
     _ctrlBtn(scrX + cardW / 2 + 2, cardY + cardH + 6, cardW / 2 - freqBtnW - 4, waveLabels[ch2Wave] || 'SQR', '#ff3366', isPowered);
     inst._btnRects.ch2Wave = { x: scrX + cardW / 2 + 2, y: cardY + cardH + 6, w: cardW / 2 - freqBtnW - 4, h: 14, field: 'ch2_wave', options: waveOpts };
 

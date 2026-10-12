@@ -1,5 +1,28 @@
 'use strict';
 
+/* Numeric props that are used as divisors (V/Div, Time/Div) or as pixel
+   multipliers (Position, Trigger Level) while the trace is drawn. A legacy
+   project or a hand-typed value of 0 / NaN / Infinity turns the geometry into
+   NaN and silently blanks the screen, so they are clamped at read time.
+   Every call site keeps going through the component's P() helper, which means
+   this covers the draw, the trigger line, the OSD and the measurements. */
+const _DSO_BOUNDS = {
+  timebase:   [0.00001, 0.1],
+  ch1_vdiv:   [0.05, 20],
+  ch2_vdiv:   [0.05, 20],
+  ch1_pos:    [-4, 4],
+  ch2_pos:    [-4, 4],
+  trig_level: [-10, 10],
+};
+
+function _dsoProp(rs, props, field, def) {
+  const v = rs[field] !== undefined ? rs[field] : (props[field] ?? def);
+  const lim = _DSO_BOUNDS[field];
+  if (!lim) return v;
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.min(lim[1], Math.max(lim[0], n)) : def;
+}
+
 defComp({
   id: 'dso_4ch',
   name: '2-Channel Digital Storage Oscilloscope',
@@ -67,7 +90,7 @@ defComp({
     if (!isPowered) return;
 
     const rs = inst.runtimeState || {};
-    const P = (runtime, pr, field, def) => (runtime[field] !== undefined) ? runtime[field] : (pr[field] ?? def);
+    const P = _dsoProp;
     const isRunning = rs.runStop !== undefined ? Boolean(rs.runStop) : Boolean(inst.props.runStop ?? 1);
     const isSingleArmed = rs.singleTrigger !== undefined ? Boolean(rs.singleTrigger) : Boolean(inst.props.singleTrigger ?? 0);
     const isPaused = Boolean(rs.paused);
@@ -283,7 +306,7 @@ defComp({
     const isRunning = rs.runStop !== undefined ? Boolean(rs.runStop) : Boolean(inst.props.runStop ?? 1);
     const isSingleArmed = rs.singleTrigger !== undefined ? Boolean(rs.singleTrigger) : Boolean(inst.props.singleTrigger ?? 0);
 
-    const P = (field, def) => (rs[field] !== undefined) ? rs[field] : (props[field] ?? def);
+    const P = (field, def) => _dsoProp(rs, props, field, def);
 
     const _rr = (c, rx, ry, rw, rh, rad) => {
       if (typeof roundRect === 'function') { roundRect(c, rx, ry, rw, rh, rad); return; }

@@ -1128,10 +1128,20 @@ class CircuitCanvas {
 
     const freqSteps = [1, 10, 100, 1000, 10000, 100000, 1000000];
     const shiftFreq = (field, dir) => {
-      const cur = rs[field] !== undefined ? rs[field] : (props[field] ?? 440);
+      const rawCur = rs[field] !== undefined ? rs[field] : (props[field] ?? 440);
+      const cur = Number.isFinite(Number(rawCur)) ? Number(rawCur) : 440;
       let step = 1;
       for (const s of freqSteps) { if (cur >= s) step = s; }
-      const newVal = Math.max(1, Math.min(10000000, cur + dir * step));
+      // Clamp through the component's own declared limits rather than a
+      // hard-coded floor: the old Math.max(1, …) made "freq down" *raise* the
+      // frequency whenever a project ran below 1 Hz (the bundled examples run
+      // at 0.5 Hz), and nothing stopped the buttons reaching 1e999.
+      const AC = window.ArduinoComponents || {};
+      const def = AC.COMPONENT_DEFS && AC.COMPONENT_DEFS.func_gen;
+      const bounded = typeof AC.clampPropValue === 'function'
+        ? AC.clampPropValue(def, field, cur + dir * step)
+        : cur + dir * step;
+      const newVal = Number.isFinite(bounded) ? bounded : 0;
       rs[field] = newVal;
       props[field] = newVal;
     };

@@ -6,6 +6,27 @@
    measurements, controls, responsive layout
    ------------------------------------------------------- */
 
+/* Numeric props used as divisors (V/Div, Time/Div) or as pixel multipliers
+   (Position, Trigger Level) while the trace is drawn. 0 / NaN / Infinity here
+   would silently blank the screen, so they are clamped at read time — every
+   method reads through its local P() helper, which forwards here. */
+const _DSO_FS_BOUNDS = {
+  timebase:   [0.00001, 0.1],
+  ch1_vdiv:   [0.05, 20],
+  ch2_vdiv:   [0.05, 20],
+  ch1_pos:    [-4, 4],
+  ch2_pos:    [-4, 4],
+  trig_level: [-10, 10],
+};
+
+function _dsoFsProp(rs, props, field, def) {
+  const v = rs[field] !== undefined ? rs[field] : (props[field] ?? def);
+  const lim = _DSO_FS_BOUNDS[field];
+  if (!lim) return v;
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.min(lim[1], Math.max(lim[0], n)) : def;
+}
+
 class DSOFullscreen {
   constructor() {
     this.overlay = document.getElementById('dso-fullscreen-overlay');
@@ -216,7 +237,7 @@ class DSOFullscreen {
     const H = this._canvasH;
     const rs = inst.runtimeState || {};
     const props = inst.props || {};
-    const P = (field, def) => (rs[field] !== undefined) ? rs[field] : (props[field] ?? def);
+    const P = (field, def) => _dsoFsProp(rs, props, field, def);
     const fs = this._fontSize;
 
     const isPowered = Boolean(rs.powered ?? props.powered ?? 1);
@@ -399,6 +420,13 @@ class DSOFullscreen {
 
       // ── Math Channel ──
       const mathOp = P('math_op', 'off');
+      // Sample-time axis for the binary search below. This has to be declared
+      // here: the identically named const further up lives inside the
+      // channels.forEach callback, so referencing it from this scope was a
+      // ReferenceError the moment a math operation was selected (which could
+      // never happen before, because the fullscreen Math select used to write
+      // to a dead property).
+      const tS = buf && buf.t && buf.t.length > 0 ? buf.t : null;
       if (mathOp !== 'off' && buf && buf.ch1 && buf.ch1.length > 1 && tS) {
         const ch1Samples = buf.ch1;
         const ch2Samples = buf.ch2 || [];
@@ -438,6 +466,11 @@ class DSOFullscreen {
 
       // ── Spectrum Analyzer Mode ──
       if (this._dsoMode === 'spectrum' && typeof DSP !== 'undefined') {
+        // Block scope, not callback scope: the grid-label loops below read
+        // these *after* the forEach has closed, which threw a ReferenceError
+        // the moment spectrum view was actually selected.
+        const dbMin = -80;
+        const dbMax = 10;
         const specChannels = channels.filter(c => c.en);
         specChannels.forEach((ch) => {
           const samples = buf && buf[ch.id] && buf[ch.id].length > 0 ? buf[ch.id] : null;
@@ -456,9 +489,7 @@ class DSOFullscreen {
           const maxFreq = sampleRate / 2;
           const minFreq = 0;
 
-          // Grid: X = frequency, Y = amplitude dB
-          const dbMin = -80;
-          const dbMax = 10;
+          // Grid: X = frequency, Y = amplitude dB (bounds are declared above)
 
           ctx.strokeStyle = ch.col;
           ctx.globalAlpha = 0.3;
@@ -501,8 +532,12 @@ class DSOFullscreen {
         ctx.fillStyle = '#4a5264';
         ctx.font = `${Math.round(7 * this._fontSize)}px monospace`;
         ctx.textAlign = 'center';
-        const maxFreq = (buf.t.length > 1 ? (buf.t[buf.t.length - 1] - buf.t[0]) : 1) > 0
-          ? buf.t.length / (buf.t[buf.t.length - 1] - buf.t[0]) / 2 : 1e6;
+        // _buffers is created lazily by step(), so it is still undefined until
+        // the DSO has actually been powered and simulated — and an empty time
+        // axis must not divide by zero either.
+        const tAxis = buf && buf.t ? buf.t : null;
+        const span = tAxis && tAxis.length > 1 ? (tAxis[tAxis.length - 1] - tAxis[0]) : 0;
+        const maxFreq = span > 0 ? tAxis.length / span / 2 : 1e6;
         for (let i = 0; i <= 4; i++) {
           const fVal = maxFreq * i / 4;
           const label = fVal >= 1e6 ? (fVal / 1e6).toFixed(1) + 'M' : fVal >= 1e3 ? (fVal / 1e3).toFixed(1) + 'k' : fVal.toFixed(0);
@@ -916,14 +951,14 @@ class DSOFullscreen {
     yPos += 16;
     yPos = this._drawSelect(ctx, x + 8, yPos, w - 16, 'Mode', P('trig_mode', 'auto'), [
       { value: 'auto', label: 'Auto' }, { value: 'norm', label: 'Normal' }, { value: 'single', label: 'Single' }
-    ], 'dso-fs-trig-mode');
+    ], 'trig_mode');
     yPos = this._drawSelect(ctx, x + 8, yPos, w - 16, 'Source', P('trig_source', 'ch1'), [
       { value: 'ch1', label: 'CH1' }, { value: 'ch2', label: 'CH2' }
-    ], 'dso-fs-trig-source');
+    ], 'trig_source');
     yPos = this._drawSelect(ctx, x + 8, yPos, w - 16, 'Slope', P('trig_slope', 'rising'), [
       { value: 'rising', label: 'Rising' }, { value: 'falling', label: 'Falling' }
-    ], 'dso-fs-trig-slope');
-    yPos = this._drawSlider(ctx, x + 8, yPos, w - 16, 'Level', P('trig_level', 0), -10, 10, 0.1, 'V', 'dso-fs-trig-level');
+    ], 'trig_slope');
+    yPos = this._drawSlider(ctx, x + 8, yPos, w - 16, 'Level', P('trig_level', 0), -10, 10, 0.1, 'V', 'trig_level');
     yPos += sectionGap;
 
     // ── Channels ──
@@ -949,7 +984,7 @@ class DSOFullscreen {
     // ── Timebase ──
     this._drawSection(ctx, x + 8, yPos, w - 16, 'TIMEBASE');
     yPos += 16;
-    yPos = this._drawSlider(ctx, x + 8, yPos, w - 16, 'Time/Div', P('timebase', 0.001), 0.00001, 0.1, 0.0001, 's', 'dso-fs-timebase');
+    yPos = this._drawSlider(ctx, x + 8, yPos, w - 16, 'Time/Div', P('timebase', 0.001), 0.00001, 0.1, 0.0001, 's', 'timebase');
     yPos += sectionGap;
 
     // ── Math ──
@@ -959,7 +994,7 @@ class DSOFullscreen {
       { value: 'off', label: 'OFF' }, { value: 'add', label: 'CH1 + CH2' },
       { value: 'sub', label: 'CH1 \u2212 CH2' }, { value: 'abs', label: '|CH1 \u2212 CH2|' },
       { value: 'mul', label: 'CH1 \u00d7 CH2' }
-    ], 'dso-fs-math-op');
+    ], 'math_op');
     yPos += sectionGap;
 
     // ── Display Mode ──
@@ -967,7 +1002,7 @@ class DSOFullscreen {
     yPos += 16;
     yPos = this._drawSelect(ctx, x + 8, yPos, w - 16, 'View', this._dsoMode, [
       { value: 'scope', label: 'Scope' }, { value: 'spectrum', label: 'Spectrum' }, { value: 'xy', label: 'XY Mode' }
-    ], 'dso-fs-display-mode');
+    ], 'dsoMode');
     yPos += sectionGap;
 
     // ── Transport ──
@@ -1240,7 +1275,7 @@ class DSOFullscreen {
     const buf = this.inst._buffers;
     const rs = this.inst.runtimeState || {};
     const props = this.inst.props || {};
-    const P = (field, def) => (rs[field] !== undefined) ? rs[field] : (props[field] ?? def);
+    const P = (field, def) => _dsoFsProp(rs, props, field, def);
 
     // Store the first enabled channel's waveform
     const chIds = ['ch1', 'ch2', 'ch3', 'ch4'];
@@ -1350,7 +1385,7 @@ class DSOFullscreen {
     if (!this.inst) return;
     const rs = this.inst.runtimeState || {};
     const props = this.inst.props || {};
-    const P = (field, def) => (rs[field] !== undefined) ? rs[field] : (props[field] ?? def);
+    const P = (field, def) => _dsoFsProp(rs, props, field, def);
     const buf = this.inst._buffers;
 
     // Trigger status
@@ -1534,6 +1569,11 @@ class DSOFullscreen {
       const modes = ['scope', 'spectrum', 'xy'];
       const idx = modes.indexOf(this._dsoMode);
       this._dsoMode = modes[(idx + 1) % modes.length];
+      if (this.inst) {
+        const rs = this.inst.runtimeState || {};
+        rs.dsoMode = this._dsoMode;
+        this.inst.props.dsoMode = this._dsoMode;
+      }
       e.preventDefault(); return;
     }
 
@@ -1792,10 +1832,9 @@ class DSOFullscreen {
               rs.paused = !rs.paused;
             }
           }
-          if (el.field === 'dso-fs-display-mode' && el.options) {
-            const idx = el.options.findIndex(o => o.value == el.value);
-            this._dsoMode = el.options[(idx + 1) % el.options.length].value;
-          }
+          // The View selector is backed by the component's own dsoMode prop,
+          // so the canvas DSO and the fullscreen view stay on the same mode.
+          if (el.field === 'dsoMode' && el.type === 'select') this._dsoMode = rs.dsoMode;
           e.stopPropagation();
           return;
         }
@@ -1884,6 +1923,13 @@ class DSOFullscreen {
 
   _syncControlsFromInst() {
     if (!this.inst) return;
+    // The fullscreen View selector shares the component's dsoMode, so opening
+    // fullscreen can't silently reset a scope/spectrum/xy choice made on the
+    // canvas (and vice versa).
+    const rs = this.inst.runtimeState || {};
+    const props = this.inst.props || {};
+    const mode = rs.dsoMode !== undefined ? rs.dsoMode : (props.dsoMode ?? 'scope');
+    this._dsoMode = ['scope', 'spectrum', 'xy'].includes(mode) ? mode : 'scope';
   }
 
   _autoSet() {
@@ -1891,7 +1937,7 @@ class DSOFullscreen {
     const buf = this.inst._buffers;
     const rs = this.inst.runtimeState || {};
     const props = this.inst.props || {};
-    const P = (field, def) => (rs[field] !== undefined) ? rs[field] : (props[field] ?? def);
+    const P = (field, def) => _dsoFsProp(rs, props, field, def);
 
     // Find the first enabled channel with data
     const chIds = ['ch1', 'ch2', 'ch3', 'ch4'];
