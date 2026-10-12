@@ -10,10 +10,21 @@ defComp({
   name: 'Push Button',
   category: 'Input',
   icon: '🔘',
-  desc: 'Momentary tactile push button — bridges left and right vertical rails when pressed',
+  desc: 'Tactile push button — bridges the two rails when pressed (momentary or latching)',
   width: 40,
   height: 40,
-  defaultProps: { pressed: false, label: 'BTN' },
+  defaultProps: { pressed: false, label: 'BTN', mode: 'latching' },
+  interactive: [
+    {
+      field: 'mode',
+      label: 'Action',
+      type: 'select',
+      options: [
+        { value: 'momentary', label: 'Momentary — hold to press' },
+        { value: 'latching', label: 'Latching — click to toggle' },
+      ],
+    },
+  ],
 
   pins: [
     { id: 'p1', label: '1', type: PIN_TYPE.DIGITAL, x: 8, y: 0, side: 'top' },
@@ -24,7 +35,9 @@ defComp({
 
   draw(ctx, inst, sim) {
     const { x, y } = inst;
-    const pressed = !!(inst.runtimeState?.pressed || inst.props?.pressed);
+    // runtimeState is what the click/keyboard handlers drive — it must win over
+    // the stored prop even when it is explicitly false (released again).
+    const pressed = !!(inst.runtimeState?.pressed ?? inst.props?.pressed);
 
     ctx.save();
     ctx.translate(x, y);

@@ -3529,6 +3529,8 @@ _newProject() {
         const label = document.createElement('label');
         label.textContent = iDef.label || key.replace(/_/g, ' ');
         label.className = 'prop-label';
+        const propDoc = (g.props && g.props[key]) || '';
+        if (propDoc) label.title = propDoc;
         const select = document.createElement('select');
         select.className = 'prop-input';
         select.name = key;

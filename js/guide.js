@@ -549,7 +549,7 @@ void loop(){}`,
     icon: '🔘',
     category: 'Input',
     longDesc: 'A momentary tactile switch. The four legs form two internally-connected pairs — pressing the cap joins the pairs so current can flow. Read it with digitalRead() and an INPUT_PULLUP so the pin reads HIGH when released and LOW when pressed. Works standalone with ICs (no Arduino needed) — the simulator traces through the switch to find the voltage source on the other side.',
-    use: 'User input — buttons, doorbells, triggers. Wire one side to a digital pin (with internal pull-up) and the other to GND. Toggle it by clicking on the canvas or pressing Space/Enter when selected.',
+    use: 'User input — buttons, doorbells, triggers. Wire one side to a digital pin (with internal pull-up) and the other to GND. Operate it by clicking on the canvas, or with Space/Enter when selected. Set Action in the properties panel to Momentary (hold to press) or Latching (click to toggle).',
     pins: {
       p1: { label: '1', type: 'digital', desc: 'Leg 1 — one side of the switch contact.' },
       p2: { label: '2', type: 'digital', desc: 'Leg 2 — internally connected to leg 1.' },
@@ -559,6 +559,7 @@ void loop(){}`,
     props: {
       pressed: 'Simulated pressed state when toggled in the canvas.',
       label: 'Button label shown on the canvas.',
+      mode: 'Action. Momentary: the contacts close only while the mouse button (or Space/Enter) is physically held, exactly like a real tactile switch. Latching: each click closes the contacts and they stay closed until the next click (default).',
     },
     wiring: 'D2 → pin 1, pin 3 → GND. Enable INPUT_PULLUP in code.',
     code: `void setup(){

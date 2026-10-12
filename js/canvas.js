@@ -1431,6 +1431,33 @@ class CircuitCanvas {
     this._onChanged();
   }
 
+  /* ---- Push button: momentary vs latching ---------------------------- */
+  // A momentary (tactile) button is closed only while the pointer — or
+  // Space/Enter — is physically held down. A latching one stays closed after a
+  // click until the next click. Default is 'latching' so every existing
+  // circuit keeps behaving exactly as it did before the property existed.
+  _isMomentaryButton(inst) {
+    if (!inst || inst.type !== 'push_button') return false;
+    const mode = inst.props?.mode ?? inst.runtimeState?.mode;
+    return mode === 'momentary';
+  }
+
+  _setPushButton(inst, pressed) {
+    if (!inst || inst.type !== 'push_button') return;
+    inst.runtimeState = inst.runtimeState || {};
+    inst.runtimeState.pressed = !!pressed;
+  }
+
+  // Opens every button that the pointer is holding down. Called on document
+  // mouseup so a button can't stay stuck closed when the pointer is released
+  // outside the canvas element (the canvas never sees that mouseup).
+  _releasePointerHeldButton() {
+    if (this._pointerHeldButton) {
+      this._setPushButton(this._pointerHeldButton, false);
+      this._pointerHeldButton = null;
+    }
+  }
+
   // Right-click release: clears the forced level on an attached input tag.
   // Returns true when a force was released (caller should skip its menu).
   _releaseLogicTag(inst) {
@@ -1788,7 +1815,11 @@ class CircuitCanvas {
     canvas.addEventListener('touchend', e => this._onTouchEnd(e), { passive: false });
 
     document.addEventListener('keydown', e => this._onKeyDown(e));
-    document.addEventListener('mouseup', () => { if (this.mode === 'panning') this.mode = 'idle'; });
+    document.addEventListener('keyup', e => this._onKeyUp(e));
+    document.addEventListener('mouseup', () => {
+      if (this.mode === 'panning') this.mode = 'idle';
+      this._releasePointerHeldButton();
+    });
   }
 
   /* --------------- TOUCH HANDLERS --------------- */
@@ -2120,11 +2151,15 @@ class CircuitCanvas {
         this.selected = compHit;
         this.selectedWire = null;
 
-        // --- New: toggle push_button pressed state on click ---
+        // --- push_button: momentary presses while held, latching toggles ---
         if (compHit.type === 'push_button') {
-          const inst = compHit;
-          inst.runtimeState = inst.runtimeState || {};
-          inst.runtimeState.pressed = !inst.runtimeState.pressed;
+          compHit.runtimeState = compHit.runtimeState || {};
+          if (this._isMomentaryButton(compHit)) {
+            compHit.runtimeState.pressed = true;
+            this._pointerHeldButton = compHit;
+          } else {
+            compHit.runtimeState.pressed = !compHit.runtimeState.pressed;
+          }
         }
         // ------------------------------------------------
 
@@ -2384,6 +2419,11 @@ class CircuitCanvas {
   _onMouseUp(e) {
     if (this.mode === 'dragging' && this.dragging) {
       const dragged = this.dragging.inst;
+      // A momentary button opens the instant the pointer comes back up.
+      if (dragged && dragged.type === 'push_button' && this._isMomentaryButton(dragged)) {
+        this._setPushButton(dragged, false);
+      }
+      this._pointerHeldButton = null;
       if (this.dragging.moved) {
         if (dragged && (dragged.type === 'logic_level_in' || dragged.type === 'logic_level_out')) {
           this._tryAttachTag(dragged);
@@ -2473,6 +2513,19 @@ class CircuitCanvas {
     }
   }
 
+  // Release whatever a momentary push button the keyboard is holding. Key repeat
+  // is irrelevant here — only the first keyup of Space/Enter after a press counts.
+  _onKeyUp(e) {
+    const t = e.target;
+    if (t && typeof t.closest === 'function' && t.closest('#editor-container')) return;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    if (e.key !== ' ' && e.key !== 'Enter') return;
+    if (this._keyHeldButton) {
+      this._setPushButton(this._keyHeldButton, false);
+      this._keyHeldButton = null;
+    }
+  }
+
   _onKeyDown(e) {
     // Only handle when canvas is in focus (not in editor)
     const t = e.target;
@@ -2486,8 +2539,12 @@ class CircuitCanvas {
     if (e.key === 'r' || e.key === 'R') { this.rotateSelected(); }
     if ((e.key === ' ' || e.key === 'Enter') && this.selected && this.selected.type === 'push_button') {
       e.preventDefault();
-      this.selected.runtimeState = this.selected.runtimeState || {};
-      this.selected.runtimeState.pressed = !this.selected.runtimeState.pressed;
+      if (this._isMomentaryButton(this.selected)) {
+        this._setPushButton(this.selected, true);
+        this._keyHeldButton = this.selected;
+      } else {
+        this._setPushButton(this.selected, !this.selected.runtimeState?.pressed);
+      }
     }
     if ((e.key === ' ' || e.key === 'Enter') && this.selected && this.selected.type === 'slide_switch') {
       e.preventDefault();
