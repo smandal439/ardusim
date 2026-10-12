@@ -703,6 +703,150 @@ defComp({
   }
 });
 
+/* ═══════════════════════════════════════════════════════
+   SPDT Slide ("Slider") Switch
+   ═══════════════════════════════════════════════════════ */
+
+/* Which throw the common blade is currently touching: 'a' (left) or 'b'
+   (right). `position` lives in both runtimeState and props, and the
+   properties-panel <select> writes it as a string — so always coerce. */
+function slideSwitchThrow(inst) {
+  const pos = inst.runtimeState?.position ?? inst.props?.position ?? 0;
+  return Number(pos) === 1 ? 'b' : 'a';
+}
+window._slideSwitchThrow = slideSwitchThrow;
+
+/* Shared by the component def and its class so the pin lists can't drift. */
+const SLIDE_SWITCH_PINS = [
+  { id: 'a', label: 'A', type: PIN_TYPE.DIGITAL, x: 14, y: 56, side: 'bottom' },
+  { id: 'com', label: 'COM', type: PIN_TYPE.DIGITAL, x: 28, y: 56, side: 'bottom' },
+  { id: 'b', label: 'B', type: PIN_TYPE.DIGITAL, x: 42, y: 56, side: 'bottom' },
+];
+
+defComp({
+  id: 'slide_switch',
+  name: 'Slide Switch (SPDT)',
+  category: 'Input',
+  icon: '↔️',
+  desc: '3-position SPDT slide switch — COM touches throw A or throw B. Click it to slide.',
+  width: 56,
+  height: 56,
+  defaultProps: { position: 0, label: 'SLIDE SW' },
+  interactive: [
+    {
+      field: 'position',
+      label: 'Position',
+      type: 'select',
+      options: [
+        { value: '0', label: 'A  (COM ↔ A)' },
+        { value: '1', label: 'B  (COM ↔ B)' },
+      ],
+    },
+  ],
+  pins: SLIDE_SWITCH_PINS,
+
+  draw(ctx, inst) {
+    const { x, y } = inst;
+    const onA = slideSwitchThrow(inst) === 'a';
+
+    const box = (bx, by, bw, bh, r) => {
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') ctx.roundRect(bx, by, bw, bh, r);
+      else if (typeof roundRect === 'function') roundRect(ctx, bx, by, bw, bh, r);
+      else ctx.rect(bx, by, bw, bh);
+    };
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    // ── Terminal leads: body underside down to the three solder pins ──
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#8f8f8f';
+    ctx.lineWidth = 1.6;
+    for (const px of [14, 28, 42]) {
+      ctx.beginPath();
+      ctx.moveTo(px, 42);
+      ctx.lineTo(px, 56);
+      ctx.stroke();
+    }
+    // Blades carrying signal right now: COM plus the selected throw
+    ctx.strokeStyle = '#00e5ff';
+    for (const px of [28, onA ? 14 : 42]) {
+      ctx.beginPath();
+      ctx.moveTo(px, 42);
+      ctx.lineTo(px, 56);
+      ctx.stroke();
+    }
+    ctx.fillStyle = '#c9c9cf';
+    for (const px of [14, 28, 42]) {
+      ctx.beginPath();
+      ctx.arc(px, 56, 2.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // ── Body housing ──
+    box(2, 6, 52, 36, 5);
+    ctx.fillStyle = '#232327';
+    ctx.fill();
+    ctx.strokeStyle = '#4a4a50';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // ── Slide track ──
+    box(8, 13, 40, 15, 7.5);
+    ctx.fillStyle = '#0d0d11';
+    ctx.fill();
+    ctx.strokeStyle = '#3a3a40';
+    ctx.stroke();
+
+    // ── Throw contacts at either end of the track ──
+    ctx.beginPath();
+    ctx.arc(14, 20.5, 3.2, 0, Math.PI * 2);
+    ctx.fillStyle = onA ? '#00e5ff' : '#56565d';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(42, 20.5, 3.2, 0, Math.PI * 2);
+    ctx.fillStyle = onA ? '#56565d' : '#00e5ff';
+    ctx.fill();
+
+    // ── Sliding actuator ──
+    const cx = onA ? 14 : 42;
+    box(cx - 7, 10, 14, 21, 3);
+    ctx.fillStyle = '#46464d';
+    ctx.fill();
+    ctx.strokeStyle = '#00e5ff'; // the blade is live in either position
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.34)';
+    ctx.fillRect(cx - 5, 12.5, 3, 16);
+    ctx.strokeStyle = 'rgba(255,255,255,0.30)';
+    ctx.lineWidth = 1;
+    for (const gx of [cx + 1, cx + 3.5, cx + 5.5]) {
+      ctx.beginPath();
+      ctx.moveTo(gx, 15);
+      ctx.lineTo(gx, 26);
+      ctx.stroke();
+    }
+
+    // ── Throw labels ──
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 7px monospace';
+    ctx.fillStyle = onA ? '#00e5ff' : '#7e7e87';
+    ctx.fillText('A', 14, 39);
+    ctx.fillStyle = onA ? '#7e7e87' : '#00e5ff';
+    ctx.fillText('B', 42, 39);
+    ctx.font = '6px monospace';
+    ctx.fillStyle = '#66666e';
+    ctx.fillText('COM', 28, 39);
+
+    if (inst.selected && typeof drawSelectionRect === 'function') {
+      drawSelectionRect(ctx, -3, 3, 62, 58);
+    }
+
+    ctx.restore();
+  }
+});
+
 /* ══════════════ CLASS-BASED INPUT COMPONENTS ══════════════ */
 
 class PushButtonComponent extends Component {
@@ -797,7 +941,31 @@ class DipSwitchComponent extends Component {
   }
 }
 
+class SlideSwitchComponent extends Component {
+  getPins() {
+    return SLIDE_SWITCH_PINS;
+  }
+  update(canvas) {
+    /* The engine shorts COM to the selected throw inside buildGraph(), so a pin
+       the sketch configured as INPUT / INPUT_PULLUP / INPUT_PULLDOWN is already
+       resolved — and edge-emitted for attachInterrupt() — by the voltage
+       feed-back pass that runs before this. Only a pin nobody ever ran pinMode()
+       on is left behind (digitalRead() would sit at its default 0 for it), so
+       mirror the level wired to the selected throw there. */
+    const sim = window.ArduinoSim;
+    if (!sim || !sim.isRunning || !sim.pinStates || !canvas) return;
+    const pinNum = this.getConnectedPinNum('com');
+    if (pinNum === null) return;
+    const key = `pin_${pinNum}`;
+    if (sim.pinModes && sim.pinModes[key]) return; // configured pins are owned elsewhere
+    if (typeof canvas._readDigitalInput !== 'function') return;
+    const level = canvas._readDigitalInput(this.inst.id, slideSwitchThrow(this.inst)) ? 1 : 0;
+    if (sim.pinStates[key] !== level) sim.setPinState(key, level);
+  }
+}
+
 registerComponent('push_button', PushButtonComponent);
 registerComponent('joystick', JoystickComponent);
 registerComponent('rotary_encoder', RotaryEncoderComponent);
 registerComponent('dip_switch', DipSwitchComponent);
+registerComponent('slide_switch', SlideSwitchComponent);

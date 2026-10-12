@@ -1420,6 +1420,17 @@ class CircuitCanvas {
     this._onChanged();
   }
 
+  // Slide an SPDT slide switch to the opposite throw (COM ↔ A ⇄ COM ↔ B).
+  // Only the throw index changes — the engine does the rest of the work.
+  _toggleSlideSwitch(inst) {
+    if (!inst || inst.type !== 'slide_switch') return;
+    const onA = typeof window._slideSwitchThrow === 'function'
+      ? window._slideSwitchThrow(inst) === 'a' : !(inst.runtimeState?.position ?? inst.props?.position);
+    inst.runtimeState = inst.runtimeState || {};
+    inst.runtimeState.position = onA ? 1 : 0;
+    this._onChanged();
+  }
+
   // Right-click release: clears the forced level on an attached input tag.
   // Returns true when a force was released (caller should skip its menu).
   _releaseLogicTag(inst) {
@@ -2382,6 +2393,9 @@ class CircuitCanvas {
       } else if (dragged && dragged.type === 'logic_level_in') {
         // Click without moving — toggle the input tag's level
         this._toggleLogicTag(dragged);
+      } else if (dragged && dragged.type === 'slide_switch') {
+        // Click without moving — slide the actuator to the other throw
+        this._toggleSlideSwitch(dragged);
       }
       this.mode = 'idle';
       this.dragging = null;
@@ -2474,6 +2488,10 @@ class CircuitCanvas {
       e.preventDefault();
       this.selected.runtimeState = this.selected.runtimeState || {};
       this.selected.runtimeState.pressed = !this.selected.runtimeState.pressed;
+    }
+    if ((e.key === ' ' || e.key === 'Enter') && this.selected && this.selected.type === 'slide_switch') {
+      e.preventDefault();
+      this._toggleSlideSwitch(this.selected);
     }
     if (e.key === 'Escape') {
       if (this.mode === 'placing') this.cancelPlacing();
@@ -5222,6 +5240,17 @@ class CircuitCanvas {
         }
       }
 
+      // 4b1. Slide switch internal pass-through (COM ↔ selected throw)
+      if (inst.type === 'slide_switch') {
+        const sel = typeof window._slideSwitchThrow === 'function'
+          ? window._slideSwitchThrow(inst) : 'a';
+        if (current.pinId === 'com') {
+          queue.push({ instId: inst.id, pinId: sel, resistance: current.resistance });
+        } else if (current.pinId === sel) {
+          queue.push({ instId: inst.id, pinId: 'com', resistance: current.resistance });
+        }
+      }
+
       // 4b2. SSR channel pass-through (outNa ↔ outNb when channel N is on)
       if (inst.type === 'ssr_8ch') {
         const m = /^out(\d)([ab])$/.exec(current.pinId);
@@ -5517,6 +5546,10 @@ class CircuitCanvas {
       } else if (inst.type === 'relay') {
         const on = inst.runtimeState && inst.runtimeState.active;
         addEdge(key('com'), key(on ? 'no' : 'nc'), 0);
+      } else if (inst.type === 'slide_switch') {
+        const throwPin = typeof window._slideSwitchThrow === 'function'
+          ? window._slideSwitchThrow(inst) : 'a';
+        addEdge(key('com'), key(throwPin), 0);
       } else if (inst.type === 'ssr_8ch') {
         const channels = (inst.runtimeState && inst.runtimeState.channels) || [];
         for (let i = 1; i <= 8; i++) {
@@ -5746,6 +5779,15 @@ class CircuitCanvas {
       return pairMap[targetPin] ? this._readDigitalInput(other.id, pairMap[targetPin], visited) : 0;
     }
 
+    // 3b. Slide switch — only the selected throw conducts through to COM
+    if (other.type === 'slide_switch') {
+      const sel = typeof window._slideSwitchThrow === 'function'
+        ? window._slideSwitchThrow(other) : 'a';
+      if (targetPin === 'com') return this._readDigitalInput(other.id, sel, visited);
+      if (targetPin === sel) return this._readDigitalInput(other.id, 'com', visited);
+      return 0; // the other throw is open
+    }
+
     // 4. Analog signal sources (with 2.5V CMOS digital thresholding)
     if (other.type === 'func_gen') {
       const rs = other.runtimeState || {};
@@ -5813,6 +5855,13 @@ class CircuitCanvas {
         : (targetPin === 'p3' ? 'p4' : 'p3');
       return this._hasDigitalInputSource(other.id, nextPin, visited);
     }
+    if (other.type === 'slide_switch') {
+      const sel = typeof window._slideSwitchThrow === 'function'
+        ? window._slideSwitchThrow(other) : 'a';
+      if (targetPin === 'com') return this._hasDigitalInputSource(other.id, sel, visited);
+      if (targetPin === sel) return this._hasDigitalInputSource(other.id, 'com', visited);
+      return false;
+    }
     if (other.type === 'func_gen') return true;
     if (other.type === 'potentiometer' && targetPin === 'wiper') return true;
     const pn = this._getConnectedPinNum(fromInstId, pinId);
@@ -5850,6 +5899,16 @@ class CircuitCanvas {
       if (tp === 'p2') return this._readAnalogInput(other.id, 'p1');
       if (tp === 'p3') return this._readAnalogInput(other.id, 'p4');
       if (tp === 'p4') return this._readAnalogInput(other.id, 'p3');
+      return 0;
+    }
+    // Slide switch — follow COM onto the selected throw (the open throw reads 0
+    // instead of leaving a stale ADC value from the previous position).
+    if (other.type === 'slide_switch') {
+      const sel = typeof window._slideSwitchThrow === 'function'
+        ? window._slideSwitchThrow(other) : 'a';
+      const tp = wireTarget.pinId;
+      if (tp === 'com') return this._readAnalogInput(other.id, sel);
+      if (tp === sel) return this._readAnalogInput(other.id, 'com');
       return 0;
     }
     // For a potentiometer wiper, return the component's live value directly.

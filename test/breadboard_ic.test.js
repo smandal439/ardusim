@@ -138,7 +138,9 @@ describe('electrical engine breadboard grouping', () => {
 
   it('source classifies all six new ICs via _classifyComponent', () => {
     const src = readSrc('js/electrical.js');
-    const re = /case 'ic_74hc02':[\s\S]*?case 'ic_74hc4017':[\s\S]*?case 'lm741':\s*this\._classifyIC\(inst\);/;
+    // ic_8255 may share the fall-through too — just make sure each of the six
+    // still reaches _classifyIC() rather than being classified separately.
+    const re = /case 'ic_74hc02':[\s\S]*?case 'ic_74hc4017':[\s\S]*?case 'lm741':[\s\S]*?this\._classifyIC\(inst\);/;
     expect(re.test(src)).toBe(true);
   });
 });

@@ -137,7 +137,7 @@ A clean, compact toolbar keeps everything within reach without cluttering the wo
 
 - **Boards**: Arduino Uno R3 (ATmega328P), ESP32 DevKit V1
 - **Outputs**: Standard LED (Red, Green, Blue, Yellow, Orange, White), RGB LED, Multi-LED Array, 16x2 LCD Display (HD44780/I2C), 20x4 LCD Display (HD44780/I2C), OLED Display (SSD1306), Piezo Buzzer, 7-Segment Display, NeoPixel Strip, NeoPixel Ring, NeoPixel 8x8 Matrix, MAX7219 LED Matrix, ILI9341 TFT, 12V Bulb
-- **Inputs**: Push Button, Potentiometer (Rotary Angle Sensor), Joystick, 4x4 Keypad, Rotary Encoder, DIP Switch
+- **Inputs**: Push Button, Potentiometer (Rotary Angle Sensor), Joystick, 4x4 Keypad, Rotary Encoder, DIP Switch, Slide Switch (SPDT)
 - **Actuators**: Micro Servo Motor (SG90), Continuous Rotation Servo, DC Motor, Relay Module, Stepper Motor (28BYJ-48), L298N Motor Driver
 - **Audio**: MAX98357A I2S Amplifier, 4 Ohm Speaker
 - **Sensors**: DHT11 Temperature & Humidity, HC-SR04 Ultrasonic, LDR Light Sensor, PIR Motion, MPU6050 Accelerometer/Gyro, DS3231 RTC, IR Obstacle, Flex Sensor, Thermistor, LM35 Temperature, BME280 Weather, VL53L0X Proximity, MFRC522 RFID, IR Receiver, HC-05 Bluetooth, NEO-6M GPS

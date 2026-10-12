@@ -393,7 +393,7 @@ const COMPONENT_CATALOG = [
       ]
     }
   },
-  { category: 'Input', ids: ['push_button', 'potentiometer', 'joystick', 'keypad_4x4', 'rotary_encoder', 'dip_switch', 'ir_remote', 'ir_receiver'] },
+  { category: 'Input', ids: ['push_button', 'potentiometer', 'joystick', 'keypad_4x4', 'rotary_encoder', 'dip_switch', 'slide_switch', 'ir_remote', 'ir_receiver'] },
   { category: 'Logic', ids: ['logic_level_in', 'logic_level_out'] },
   { category: 'Actuators', ids: ['servo', 'dc_motor', 'relay', 'ssr_8ch', 'stepper_28byj', 'l298n', 'servo_continuous', 'tb6600', 'nema17'] },
   { category: 'Audio', ids: ['max98357a', 'speaker_4ohm', 'dfplayer_mini'] },

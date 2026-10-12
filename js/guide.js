@@ -572,6 +572,34 @@ void loop(){
     exampleId: 'button',
   },
 
+  slide_switch: {
+    id: 'slide_switch',
+    name: 'Slide Switch (SPDT)',
+    icon: '↔️',
+    category: 'Input',
+    longDesc: 'A 3-pin SPDT slide (slider) switch. The centre pin is COM and the blade always touches exactly one outer throw: position A shorts COM to A, position B shorts COM to B. It is a purely passive contact - whatever is wired to the selected throw appears on COM, so it works with or without an Arduino.',
+    use: 'Mode selection, power routing, choosing between two signals. Wire COM to a digital input and tie one throw to GND (or leave it open with INPUT_PULLUP) to read a two-state input, or use it to pick which source reaches an LED, an IC input or an analog pin.',
+    pins: {
+      a: { label: 'A', type: 'digital', desc: 'Throw A - connected to COM while the slider is on the left.' },
+      com: { label: 'COM', type: 'digital', desc: 'Common blade - follows whichever throw is selected.' },
+      b: { label: 'B', type: 'digital', desc: 'Throw B - connected to COM while the slider is on the right.' },
+    },
+    props: {
+      position: 'Selected throw: 0 = A (COM to A), 1 = B (COM to B).',
+      label: 'Label shown on the canvas.',
+    },
+    wiring: 'COM -> D2, A -> GND, B left open (or tied to 5 V). Use INPUT_PULLUP so the open throw reads HIGH.',
+    code: `void setup(){
+  pinMode(2, INPUT_PULLUP);
+  Serial.begin(9600);
+}
+void loop(){
+  if (digitalRead(2) == LOW) Serial.println("Position A");
+  else Serial.println("Position B");
+  delay(100);
+}`,
+  },
+
   potentiometer: {
     id: 'potentiometer',
     name: 'Potentiometer',
