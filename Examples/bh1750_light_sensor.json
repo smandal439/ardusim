@@ -132,21 +132,6 @@
         "bezierCtrl": null
       },
       {
-        "id": "w6",
-        "from": {
-          "instId": "led1",
-          "pinId": "cathode"
-        },
-        "to": {
-          "instId": "b1",
-          "pinId": "GND"
-        },
-        "color": "#333333",
-        "waypoints": [],
-        "routeStyle": "orthogonal",
-        "bezierCtrl": null
-      },
-      {
         "id": "wire_1789712325641_0tgbb",
         "from": {
           "instId": "comp_1789712322627_8umtp",
