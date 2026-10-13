@@ -3238,7 +3238,7 @@ window.EXAMPLE_SKETCHES = [
     "id": "8085_all_led_on",
     "name": "8085 all led on",
     "icon": "🔧",
-    "desc": "This example demonstrates how to turn on all the LEDs connected to the ports of an 8085 microprocessor. The program configures the 8255 PPI (Programmable Peripheral Interface) to set all pins of Port A, Port B, and Port C to high (logic level 1), which will turn on any LEDs connected to these ports. The program then halts execution after sending the data to the ports.",
+    "desc": "This example demonstrates how to turn on all the LEDs connected directly to the ports of an 8085 microprocessor. The 8085 abstracts an on-chip 8255 PPI, so OUT 00H / OUT 01H / OUT 02H drive Port A, Port B and Port C straight onto the wires — no separate 8255 is needed. The program then halts execution.",
     "tags": [
       "8085",
       "led",
@@ -3473,7 +3473,7 @@ window.EXAMPLE_SKETCHES = [
       ]
     },
     "files": {
-      "sketch.asm": "MVI A, 80H    ; Load control word: all ports as output, Mode 0\nOUT 03H       ; Send control word to 8255 CWR\nMVI A, FFH    ; Load accumulator with FFH (Use 00H if Common Anode)\nOUT 00H       ; Send data to Port A to turn ON all LEDs\nOUT 01H       ; Send data to Port B to turn ON all LEDs\nOUT 02H       ; Send data to Port C to turn ON all LEDs\nHLT           ; Stop execution\n"
+      "sketch.asm": "MVI A, 80H    ; Port directions are already outputs — nothing to configure\nOUT 03H       ; No external 8255: ports are wired straight to the LEDs\nMVI A, FFH    ; Load accumulator with FFH (Use 00H if Common Anode)\nOUT 00H       ; Send data to Port A to turn ON all LEDs\nOUT 01H       ; Send data to Port B to turn ON all LEDs\nOUT 02H       ; Send data to Port C to turn ON all LEDs\nHLT           ; Stop execution\n"
     }
   },
   {
@@ -3743,6 +3743,994 @@ window.EXAMPLE_SKETCHES = [
     "files": {
       "sketch.asm": "; a set of three readings are stored in memory\n; location starting from 9050H, sort the readings \n; in descending order.\n\n\nORG 8000H\nSTART:    LXI H, 9050H    ; Initialize HL pair to point to the start of the data\n          MVI D, 00H      ; Clear D register (D acts as a swap flag: 00 = no swap, 01 = swap occurred)\n          MVI C, 02H      ; Initialize counter C = N-1 = 2 (for 3 data bytes)\n\nCHECK:    MOV A, M        ; Move current byte from memory to Accumulator\n          INX H           ; Point to the next memory location\n          CMP M           ; Compare Accumulator with the next byte\n          JNC NEXTBYTE    ; If Accumulator >= Memory, no swap is needed (keeps descending order)\n\n          ; --- Swap Logic (if Accumulator < Memory) ---\n          MOV B, M        ; Temporary store next byte in B\n          MOV M, A        ; Move smaller byte to next memory location\n          DCX H           ; Move pointer back to current location\n          MOV M, B        ; Move larger byte to current memory location\n          INX H           ; Restore pointer to the next location\n          MVI D, 01H      ; Set swap flag D = 01H to indicate a change was made\n\nNEXTBYTE: DCR C           ; Decrement loop counter\n          JNZ CHECK       ; If C != 0, repeat the comparison for the next pair\n\n          MOV A, D        ; Move swap flag to Accumulator\n          RRC             ; Rotate right to shift the LSb of D into the Carry flag\n          JC START        ; If Carry = 1 (swap occurred), repeat the entire pass\n          RST 1           ; Terminate the program if no swaps occurred\n\n; --- Data Section ---\nORG 9050H\nDB 87H, 56H, 75H          ; Input data\n"
     }
+  },
+  {
+    "id": "8255_ppi_8085_bus",
+    "name": "8255 PPI 8085 Bus",
+    "icon": "💥",
+    "desc": "An Intel 8085 drives an Intel 8255 PPI over a bit-banged external bus: PA0-PA7 carry D0-D7, PB0/PB1 select the register, PB2 is /RD and PB7 is /WR, with /CS tied to GND. The program writes the control word 0x80 (all ports Mode 0 outputs) and then blinks Port A between AAh and 55h.",
+    "tags": [
+      "8255",
+      "8085",
+      "ppi",
+      "bus",
+      "microprocessor"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "cpu8085",
+          "type": "intel_8085",
+          "x": 120,
+          "y": 180,
+          "rotation": 0,
+          "props": {
+            "label": "8085"
+          }
+        },
+        {
+          "id": "u1_8255",
+          "type": "ic_8255",
+          "x": 700,
+          "y": 180,
+          "rotation": 0,
+          "props": {
+            "label": "8255",
+            "busMode": "external",
+            "modeA": "0",
+            "modeB": "0",
+            "dirA": "out",
+            "dirB": "out",
+            "dirCupper": "out",
+            "dirClower": "out",
+            "paValue": 0,
+            "pbValue": 0,
+            "pcValue": 0
+          }
+        },
+        {
+          "id": "arrA",
+          "type": "multi_led_array",
+          "x": 700,
+          "y": 520,
+          "rotation": 0,
+          "props": {
+            "label": "PORT A"
+          }
+        },
+        {
+          "id": "v5",
+          "type": "power_5v",
+          "x": 1010,
+          "y": 460,
+          "rotation": 0,
+          "props": {}
+        },
+        {
+          "id": "gnd",
+          "type": "power_gnd",
+          "x": 640,
+          "y": 460,
+          "rotation": 0,
+          "props": {}
+        }
+      ],
+      "wires": [
+        {
+          "id": "w_db0",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "PA.0"
+          },
+          "to": {
+            "instId": "u1_8255",
+            "pinId": "D0"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_db1",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "PA.1"
+          },
+          "to": {
+            "instId": "u1_8255",
+            "pinId": "D1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_db2",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "PA.2"
+          },
+          "to": {
+            "instId": "u1_8255",
+            "pinId": "D2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_db3",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "PA.3"
+          },
+          "to": {
+            "instId": "u1_8255",
+            "pinId": "D3"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_db4",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "PA.4"
+          },
+          "to": {
+            "instId": "u1_8255",
+            "pinId": "D4"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_db5",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "PA.5"
+          },
+          "to": {
+            "instId": "u1_8255",
+            "pinId": "D5"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_db6",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "PA.6"
+          },
+          "to": {
+            "instId": "u1_8255",
+            "pinId": "D6"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_db7",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "PA.7"
+          },
+          "to": {
+            "instId": "u1_8255",
+            "pinId": "D7"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_a0",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "PB.0"
+          },
+          "to": {
+            "instId": "u1_8255",
+            "pinId": "A0"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_a1",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "PB.1"
+          },
+          "to": {
+            "instId": "u1_8255",
+            "pinId": "A1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_rd",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "PB.2"
+          },
+          "to": {
+            "instId": "u1_8255",
+            "pinId": "RD"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_wr",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "PB.7"
+          },
+          "to": {
+            "instId": "u1_8255",
+            "pinId": "WR"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_cs",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "CS"
+          },
+          "to": {
+            "instId": "gnd",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa0",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA0"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa1",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA1"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa2",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA2"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l3"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa3",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA3"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l4"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa4",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA4"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l5"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa5",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA5"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l6"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa6",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA6"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l7"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa7",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA7"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l8"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_arr_gnd",
+          "from": {
+            "instId": "arrA",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "gnd",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_cpu_vcc",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "VCC"
+          },
+          "to": {
+            "instId": "v5",
+            "pinId": "vcc"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_cpu_gnd",
+          "from": {
+            "instId": "cpu8085",
+            "pinId": "GND"
+          },
+          "to": {
+            "instId": "gnd",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_chip_vcc",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "VCC"
+          },
+          "to": {
+            "instId": "v5",
+            "pinId": "vcc"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_chip_gnd",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "GND"
+          },
+          "to": {
+            "instId": "gnd",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "files": {
+      "sketch.asm": "; ---------------------------------------------------------------\n; 8085 + 8255 PPI over a bit-banged external bus\n;\n;   8085 PA0-PA7  ->  8255 D0-D7   (data bus)\n;   8085 PB0      ->  8255 A0      (register select bit 0)\n;   8085 PB1      ->  8255 A1      (register select bit 1)\n;   8085 PB2      ->  8255 /RD     (read strobe)\n;   8085 PB7      ->  8255 /WR     (write strobe)\n;   8255 /CS      ->  GND          (always selected)\n;   8255 PA0-PA7  ->  8-LED array\n;\n; Port B control byte:\n;   bit7 = /WR   bit2 = /RD   bit1 = A1   bit0 = A0\n;   idle   = 84H | addr    (WR=1, RD=1)\n;   write  = 44H | addr    (WR=0, RD=1)\n;   read   = 80H | addr    (WR=1, RD=0)\n;\n; A1A0: 00 = Port A   01 = Port B   10 = Port C   11 = control word\n; ---------------------------------------------------------------\n\n        MVI A, 80H      ; control word: A/B/C all Mode 0 outputs\n        OUT 00H         ; data bus <- 80H\n        MVI A, 87H      ; idle, A1A0 = 11b (control word register)\n        OUT 01H\n        MVI A, 47H      ; /WR low -> latch 80H into the CWR\n        OUT 01H\n        MVI A, 87H      ; release /WR\n        OUT 01H\n\nLOOP:   MVI A, AAH      ; 10101010 pattern\n        OUT 00H         ; data bus <- AAh\n        MVI A, 84H      ; idle, A1A0 = 00b (Port A)\n        OUT 01H\n        MVI A, 44H      ; /WR low -> Port A <- AAh\n        OUT 01H\n        MVI A, 84H      ; release /WR\n        OUT 01H\n\n        MVI A, 55H      ; 01010101 pattern\n        OUT 00H\n        MVI A, 84H\n        OUT 01H\n        MVI A, 44H      ; /WR low -> Port A <- 55H\n        OUT 01H\n        MVI A, 84H\n        OUT 01H\n\n        JMP LOOP        ; keep blinking\n"
+    }
+  },
+  {
+    "id": "8255_ppi_led_demo",
+    "name": "8255 PPI LED Demo",
+    "icon": "🖥",
+    "desc": "Intel 8255 PPI in manual mode: all three ports are configured as Mode 0 outputs and drive an 8-LED array each. Set the Port A/B/C direction and value controls in the Properties panel — an input port stops driving its pins and samples whatever is wired to them instead. Control word 0x80 = all outputs.",
+    "tags": [
+      "8255",
+      "ppi",
+      "led",
+      "digital-ic"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "u1_8255",
+          "type": "ic_8255",
+          "x": 320,
+          "y": 150,
+          "rotation": 0,
+          "props": {
+            "label": "8255",
+            "busMode": "manual",
+            "modeA": "0",
+            "modeB": "0",
+            "dirA": "out",
+            "dirB": "out",
+            "dirCupper": "out",
+            "dirClower": "out",
+            "paValue": 170,
+            "pbValue": 15,
+            "pcValue": 195
+          }
+        },
+        {
+          "id": "arrA",
+          "type": "multi_led_array",
+          "x": 90,
+          "y": 250,
+          "rotation": 0,
+          "props": {
+            "label": "PORT A"
+          }
+        },
+        {
+          "id": "arrB",
+          "type": "multi_led_array",
+          "x": 600,
+          "y": 250,
+          "rotation": 0,
+          "props": {
+            "label": "PORT B"
+          }
+        },
+        {
+          "id": "arrC",
+          "type": "multi_led_array",
+          "x": 320,
+          "y": 470,
+          "rotation": 0,
+          "props": {
+            "label": "PORT C"
+          }
+        },
+        {
+          "id": "v5",
+          "type": "power_5v",
+          "x": 700,
+          "y": 400,
+          "rotation": 0,
+          "props": {}
+        },
+        {
+          "id": "gnd",
+          "type": "power_gnd",
+          "x": 260,
+          "y": 430,
+          "rotation": 0,
+          "props": {}
+        }
+      ],
+      "wires": [
+        {
+          "id": "w_pa0",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA0"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pb0",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PB0"
+          },
+          "to": {
+            "instId": "arrB",
+            "pinId": "l1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pc0",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PC0"
+          },
+          "to": {
+            "instId": "arrC",
+            "pinId": "l1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa1",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA1"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pb1",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PB1"
+          },
+          "to": {
+            "instId": "arrB",
+            "pinId": "l2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pc1",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PC1"
+          },
+          "to": {
+            "instId": "arrC",
+            "pinId": "l2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa2",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA2"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l3"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pb2",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PB2"
+          },
+          "to": {
+            "instId": "arrB",
+            "pinId": "l3"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pc2",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PC2"
+          },
+          "to": {
+            "instId": "arrC",
+            "pinId": "l3"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa3",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA3"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l4"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pb3",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PB3"
+          },
+          "to": {
+            "instId": "arrB",
+            "pinId": "l4"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pc3",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PC3"
+          },
+          "to": {
+            "instId": "arrC",
+            "pinId": "l4"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa4",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA4"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l5"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pb4",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PB4"
+          },
+          "to": {
+            "instId": "arrB",
+            "pinId": "l5"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pc4",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PC4"
+          },
+          "to": {
+            "instId": "arrC",
+            "pinId": "l5"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa5",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA5"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l6"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pb5",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PB5"
+          },
+          "to": {
+            "instId": "arrB",
+            "pinId": "l6"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pc5",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PC5"
+          },
+          "to": {
+            "instId": "arrC",
+            "pinId": "l6"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa6",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA6"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l7"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pb6",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PB6"
+          },
+          "to": {
+            "instId": "arrB",
+            "pinId": "l7"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pc6",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PC6"
+          },
+          "to": {
+            "instId": "arrC",
+            "pinId": "l7"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pa7",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PA7"
+          },
+          "to": {
+            "instId": "arrA",
+            "pinId": "l8"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pb7",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PB7"
+          },
+          "to": {
+            "instId": "arrB",
+            "pinId": "l8"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_pc7",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "PC7"
+          },
+          "to": {
+            "instId": "arrC",
+            "pinId": "l8"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_vcc",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "VCC"
+          },
+          "to": {
+            "instId": "v5",
+            "pinId": "vcc"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_gnd",
+          "from": {
+            "instId": "u1_8255",
+            "pinId": "GND"
+          },
+          "to": {
+            "instId": "gnd",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_arrA_gnd",
+          "from": {
+            "instId": "arrA",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "gnd",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_arrB_gnd",
+          "from": {
+            "instId": "arrB",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "gnd",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w_arrC_gnd",
+          "from": {
+            "instId": "arrC",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "gnd",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ]
+    },
+    "code": "/*\n * 8255 PPI LED Demo\n *\n * No CPU in this circuit — the 8255 is in Bus Mode \"Manual\", so the\n * properties panel is the \"processor\".\n *\n *   8255 PA0-PA7 -> 8-LED array (Port A)\n *   8255 PB0-PB7 -> 8-LED array (Port B)\n *   8255 PC0-PC7 -> 8-LED array (Port C)\n *   8255 VCC -> 5V, 8255 GND -> GND\n *   /CS /RD /WR left unconnected (only used in External bus mode)\n *\n * Press Run, then open Properties and try:\n *   - Port A Value = 0xAA (10101010) — alternating pattern\n *   - Port B Direction = Input      — the array goes dark, the port now\n *                                     samples the wire instead of driving it\n *   - Port A Mode = 2               — bidirectional bus mode on Port A\n *\n * Control word = 1 D7 D6 D5 D4 D3 D2 D1 D0\n *   D7      = 1 (mode set flag)\n *   D6,D5   = Port A mode (00 = Mode 0)\n *   D4      = Port A direction (1 = input)\n *   D3      = Port C upper direction (1 = input)\n *   D2      = Port B mode (0 = Mode 0)\n *   D1      = Port B direction (1 = input)\n *   D0      = Port C lower direction (1 = input)\n *   0x80 = all outputs, 0x9B = all inputs.\n */\n"
   },
   {
     "id": "add_2_number",
