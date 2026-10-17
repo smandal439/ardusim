@@ -1,0 +1,29 @@
+{
+  "id": "8051_logical_not_complement_operation",
+  "name": "Logical NOT / Complement OPERATION",
+  "icon": "🔧",
+  "desc": "A custom Logical NOT / Complement OPERATION circuit example.",
+  "tags": [
+    "NOT",
+    "8051",
+    "COMPLEMENT"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1792256004005_qlm3z",
+        "type": "intel_8051",
+        "x": -35,
+        "y": -40,
+        "rotation": 0,
+        "props": {
+          "label": "8051"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.asm": "MOV A, #0A0H     ; Load A with 1010 0000 binary\nCPL A            ; Complement all bits in A\n"
+  }
+}

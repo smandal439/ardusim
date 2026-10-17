@@ -1,0 +1,28 @@
+{
+  "id": "8051_logical_and_operation",
+  "name": "8051 LOGICAL AND OPERATION",
+  "icon": "🔧",
+  "desc": "A custom 8051 LOGICAL AND OPERATION circuit example.",
+  "tags": [
+    "LOGICAL AND",
+    "8051"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1792255746075_wiril",
+        "type": "intel_8051",
+        "x": -15,
+        "y": 40,
+        "rotation": 0,
+        "props": {
+          "label": "8051"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.asm": "MOV A, #45H      ; Load A with 45H (0100 0101 in binary)\nANL A, #0FH      ; AND accumulator with 0FH (0000 1111 in binary)\n"
+  }
+}

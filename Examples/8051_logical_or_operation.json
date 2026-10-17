@@ -1,0 +1,28 @@
+{
+  "id": "8051_logical_or_operation",
+  "name": "LOGICAL OR OPERATION",
+  "icon": "🔧",
+  "desc": "A custom LOGICAL OR OPERATION circuit example.",
+  "tags": [
+    "8051",
+    "LOGICAL OR"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "comp_1792256004005_qlm3z",
+        "type": "intel_8051",
+        "x": -35,
+        "y": -40,
+        "rotation": 0,
+        "props": {
+          "label": "8051"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "files": {
+    "sketch.asm": "MOV A, #0F0H     ; Load A with 1111 0000 binary\nORL A, #0FH      ; OR accumulator with 0000 1111 binary\n"
+  }
+}
