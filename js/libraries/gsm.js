@@ -268,7 +268,9 @@ window.ArduinoLibs['GSM'] = {
       },
 
       gsmReadSMS: function() {
-        var unread = _smsInbox.filter(function(m) { return !m.read; });
+        var node = bus.nodes[_myNodeId];
+        var inbox = node && node.smsInbox ? node.smsInbox : [];
+        var unread = inbox.filter(function(m) { return !m.read; });
         if (unread.length === 0) {
           self._serialLog('[GSM] No unread SMS\n', 'system');
           return 0;
