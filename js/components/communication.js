@@ -829,7 +829,7 @@ defComp({
   contextMenu: [
     {
       label: 'Upload files to SD card',
-      icon: 'ðŸ“',
+      icon: '📁',
       action(inst) {
         var input = document.createElement('input');
         input.type = 'file';
@@ -865,7 +865,7 @@ defComp({
     },
     {
       label: 'View loaded files',
-      icon: 'ðŸ“‹',
+      icon: '📋',
       action(inst) {
         var uploaded = (inst.runtimeState && inst.runtimeState.uploadedFiles) || {};
         var names = Object.keys(uploaded);
@@ -882,7 +882,7 @@ defComp({
     },
     {
       label: 'Clear all files',
-      icon: 'ðŸ—‘ï¸',
+      icon: '🗑️',
       action(inst) {
         if (inst.runtimeState) inst.runtimeState.uploadedFiles = {};
         if (window.CircuitCanvas && window.CircuitCanvas.render) {
