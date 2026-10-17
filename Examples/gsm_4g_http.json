@@ -1,0 +1,62 @@
+{
+  "id": "gsm_4g_http",
+  "name": "GSM 4G LTE HTTP Client",
+  "icon": "\uD83D\uDCF6",
+  "desc": "4G LTE module (Quectel EC25/BG96) making an HTTP GET request. Demonstrates LTE CAT-4 bands, APN configuration, TCP/IP stack via AT commands (AT+CIPSTART, AT+CIPSEND, AT+HTTPINIT, AT+HTTPACTION, AT+HTTPREAD) and HTTP response handling.",
+  "tags": [
+    "gsm",
+    "4g",
+    "lte",
+    "http",
+    "tcp",
+    "quectel",
+    "ec25",
+    "bg96",
+    "cellular",
+    "iot",
+    "intermediate"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 200,
+        "props": { "label": "4G HTTP Client" },
+        "rotation": 0
+      },
+      {
+        "id": "gsm1",
+        "type": "gsm_module_4g",
+        "x": 50,
+        "y": 200,
+        "props": {
+          "band": 3,
+          "operator": "LTE Network",
+          "imei": "351234000001240",
+          "apn": "lteinternet",
+          "smsNumber": "+1234567890",
+          "ussdCode": "*100#",
+          "httpUrl": "http://example.com/api/data"
+        },
+        "rotation": 0
+      },
+      {
+        "id": "vcc1", "type": "power_5v", "x": 130, "y": 280, "props": {}
+      },
+      {
+        "id": "gnd1", "type": "power_gnd", "x": 130, "y": 380, "props": {}
+      }
+    ],
+    "wires": [
+      {"id":"w_tx1","from":{"instId":"gsm1","pinId":"TX"},"to":{"instId":"b1","pinId":"D0"},"color":"#3498db","waypoints":[]},
+      {"id":"w_rx1","from":{"instId":"gsm1","pinId":"RX"},"to":{"instId":"b1","pinId":"D1"},"color":"#3498db","waypoints":[]},
+      {"id":"w_vcc1","from":{"instId":"vcc1","pinId":"vcc"},"to":{"instId":"gsm1","pinId":"VCC"},"color":"#f1c40f","waypoints":[]},
+      {"id":"w_gnd1a","from":{"instId":"gnd1","pinId":"gnd"},"to":{"instId":"gsm1","pinId":"GND"},"color":"#333333","waypoints":[]},
+      {"id":"w_gnd1b","from":{"instId":"gnd1","pinId":"gnd"},"to":{"instId":"b1","pinId":"GND2"},"color":"#333333","waypoints":[]}
+    ]
+  },
+  "code": "/*\n * GSM 4G LTE HTTP Client — Arduino Uno + Quectel EC25/BG96\n * Makes an HTTP GET request every 10 seconds and prints the response.\n * Demonstrates LTE CAT-4 AT commands for TCP/IP and HTTP.\n */\n\n#include <GSM.h>\n\nGSM gsm;\n\nString serverUrl = \"http://example.com/api/data\";\nint requestCount = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"GSM 4G LTE HTTP Client Starting...\");\n\n  // Initialize GSM module\n  gsm.begin();\n\n  // Check network registration and signal\n  Serial.println(\"AT+COPS?\");\n  Serial.println(\"AT+CREG?\");\n  Serial.println(\"AT+CSQ\");\n\n  Serial.println(\"GSM 4G LTE Client ready!\");\n  Serial.println(\"IMEI: \" + gsm.getIMEI());\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  requestCount++;\n\n  Serial.print(\"HTTP GET request #\");\n  Serial.println(requestCount);\n\n  gsm.httpGet(serverUrl);\n\n  delay(1000);\n  String response = gsm.httpRead();\n  if (response.length() > 0) {\n    Serial.print(\"HTTP Response: \");\n    Serial.println(response);\n  }\n\n  Serial.println(\"---\");\n\n  delay(10000);\n}\n",
+  "board2Code": ""
+}

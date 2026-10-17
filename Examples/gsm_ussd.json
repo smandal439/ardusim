@@ -1,0 +1,60 @@
+{
+  "id": "gsm_ussd",
+  "name": "GSM USSD Query",
+  "icon": "\uD83D\uCDDC",
+  "desc": "GSM USSD (Unstructured Supplementary Service Data) query example using SIM800/SIM900 2G module. Sends USSD codes (e.g., *100# for balance check) and displays the network response. Demonstrates AT+CUSD USSD command handling.",
+  "tags": [
+    "gsm",
+    "ussd",
+    "2g",
+    "sim800",
+    "sim900",
+    "cellular",
+    "balance",
+    "query",
+    "intermediate"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 200,
+        "props": { "label": "USSD Client" },
+        "rotation": 0
+      },
+      {
+        "id": "gsm1",
+        "type": "gsm_module_2g",
+        "x": 50,
+        "y": 200,
+        "props": {
+          "band": 900,
+          "operator": "Home Network",
+          "imei": "351234000001250",
+          "apn": "internet",
+          "smsNumber": "+1234567890",
+          "ussdCode": "*100#",
+          "httpUrl": "http://example.com"
+        },
+        "rotation": 0
+      },
+      {
+        "id": "vcc1", "type": "power_5v", "x": 130, "y": 280, "props": {}
+      },
+      {
+        "id": "gnd1", "type": "power_gnd", "x": 130, "y": 380, "props": {}
+      }
+    ],
+    "wires": [
+      {"id":"w_tx1","from":{"instId":"gsm1","pinId":"TX"},"to":{"instId":"b1","pinId":"D0"},"color":"#e67e22","waypoints":[]},
+      {"id":"w_rx1","from":{"instId":"gsm1","pinId":"RX"},"to":{"instId":"b1","pinId":"D1"},"color":"#e67e22","waypoints":[]},
+      {"id":"w_vcc1","from":{"instId":"vcc1","pinId":"vcc"},"to":{"instId":"gsm1","pinId":"VCC"},"color":"#f1c40f","waypoints":[]},
+      {"id":"w_gnd1a","from":{"instId":"gnd1","pinId":"gnd"},"to":{"instId":"gsm1","pinId":"GND"},"color":"#333333","waypoints":[]},
+      {"id":"w_gnd1b","from":{"instId":"gnd1","pinId":"gnd"},"to":{"instId":"b1","pinId":"GND2"},"color":"#333333","waypoints":[]}
+    ]
+  },
+  "code": "/*\n * GSM USSD Query — Arduino Uno + SIM800/SIM900\n * Sends USSD codes (balance check, etc.) every 8 seconds and displays\n * the network response on the Serial Monitor.\n * Demonstrates AT+CUSD USSD command handling.\n */\n\n#include <GSM.h>\n\nGSM gsm;\n\nString ussdCode = \"*100#\";\nint queryCount = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"GSM USSD Client Starting...\");\n\n  // Initialize GSM module\n  gsm.begin();\n\n  // Check network registration\n  Serial.println(\"AT+CREG?\");\n  Serial.println(\"AT+CSQ\");\n\n  Serial.println(\"GSM USSD Client ready!\");\n  Serial.println(\"USSD Code: \" + ussdCode);\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  queryCount++;\n\n  Serial.print(\"Sending USSD query #\");\n  Serial.println(queryCount);\n\n  gsm.sendUSSD(ussdCode);\n\n  Serial.println(\"USSD query sent!\");\n  Serial.println(\"---\");\n\n  delay(8000);\n}\n",
+  "board2Code": ""
+}

@@ -3010,20 +3010,27 @@ defComp({
     { id: 'CLK', label: 'CLK', type: PIN_TYPE.DIGITAL, x: 130, y: 132, side: 'bottom' },
   ],
 
-  update(inst, sim, dt) {
+  // Canvas pipeline calls def.step(inst, sim) — NOT def.update (see canvas.js _drawComponents).
+  step(inst, sim) {
     if (!sim?.isRunning) return;
 
-    // Initialize runtime framebuffer and state
-    if (!inst.runtimeState) {
-      const buffer = new Uint32Array(64 * 64);
-      inst.runtimeState = {
-        framebuffer: buffer,
-        powered: true,
-        lastUpdate: 0
-      };
+    // Initialize runtime framebuffer and state. runtimeState is usually
+    // pre-attached as {} by the component factory, so check the framebuffer
+    // itself rather than the state object.
+    if (!inst.runtimeState) inst.runtimeState = {};
+    const state = inst.runtimeState;
+    if (!state.framebuffer) {
+      state.framebuffer = new Uint32Array(64 * 64);
+      state.powered = true;
+      state.lastUpdate = 0;
     }
 
-    const state = inst.runtimeState;
+    // HUB75 library driver mode (js/libraries/hub75.js): streamed framebuffer
+    // wins over the built-in procedural test patterns.
+    if (state.driver && state.driver.powered) {
+      state.framebuffer = state.driver.fb;
+      return;
+    }
     const brightness = (inst.props.brightness ?? 80) / 100;
     const pattern = inst.props.testPattern ?? 1;
 

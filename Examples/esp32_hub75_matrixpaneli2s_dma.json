@@ -1,15 +1,48 @@
 {
   "id": "esp32_hub75_matrixpaneli2s_dma",
   "name": "ESP32-HUB75-MatrixPanelI2S-DMA",
-  "icon": "🔧",
-  "desc": "A custom ESP32-HUB75-MatrixPanelI2S-DMA circuit example.",
+  "icon": "🌈",
+  "desc": "Drive a Waveshare 64x64 HUB75 RGB LED matrix from an ESP32 using the ESP32-HUB75-MatrixPanelI2S-DMA library (library-default GPIO mapping).",
   "tags": [
-    "custom",
-    "circuit"
+    "esp32",
+    "display",
+    "hub75",
+    "matrix",
+    "dma"
   ],
   "circuit": {
-    "components": [],
-    "wires": []
+    "components": [
+      {
+        "id": "esp",
+        "type": "esp32_devkit_v1",
+        "x": 300,
+        "y": 40
+      },
+      {
+        "id": "mx1",
+        "type": "rgb_matrix_64x64",
+        "x": 560,
+        "y": 40
+      }
+    ],
+    "wires": [
+      { "id": "w_r1", "from": { "instId": "esp", "pinId": "D25" }, "to": { "instId": "mx1", "pinId": "R1" } },
+      { "id": "w_g1", "from": { "instId": "esp", "pinId": "D26" }, "to": { "instId": "mx1", "pinId": "G1" } },
+      { "id": "w_b1", "from": { "instId": "esp", "pinId": "D27" }, "to": { "instId": "mx1", "pinId": "B1" } },
+      { "id": "w_gnd1", "from": { "instId": "esp", "pinId": "GND1" }, "to": { "instId": "mx1", "pinId": "GND1" } },
+      { "id": "w_r2", "from": { "instId": "esp", "pinId": "D14" }, "to": { "instId": "mx1", "pinId": "R2" } },
+      { "id": "w_g2", "from": { "instId": "esp", "pinId": "D12" }, "to": { "instId": "mx1", "pinId": "G2" } },
+      { "id": "w_b2", "from": { "instId": "esp", "pinId": "D13" }, "to": { "instId": "mx1", "pinId": "B2" } },
+      { "id": "w_gnd2", "from": { "instId": "esp", "pinId": "GND2" }, "to": { "instId": "mx1", "pinId": "GND2" } },
+      { "id": "w_a", "from": { "instId": "esp", "pinId": "D23" }, "to": { "instId": "mx1", "pinId": "A" } },
+      { "id": "w_b", "from": { "instId": "esp", "pinId": "D19" }, "to": { "instId": "mx1", "pinId": "B" } },
+      { "id": "w_c", "from": { "instId": "esp", "pinId": "D5" }, "to": { "instId": "mx1", "pinId": "C" } },
+      { "id": "w_d", "from": { "instId": "esp", "pinId": "D17" }, "to": { "instId": "mx1", "pinId": "D" } },
+      { "id": "w_e", "from": { "instId": "esp", "pinId": "D32" }, "to": { "instId": "mx1", "pinId": "E" } },
+      { "id": "w_lat", "from": { "instId": "esp", "pinId": "D4" }, "to": { "instId": "mx1", "pinId": "LAT" } },
+      { "id": "w_oe", "from": { "instId": "esp", "pinId": "D15" }, "to": { "instId": "mx1", "pinId": "OE" } },
+      { "id": "w_clk", "from": { "instId": "esp", "pinId": "D16" }, "to": { "instId": "mx1", "pinId": "CLK" } }
+    ]
   },
-  "code": "#include <ESP32-HUB75-MatrixPanelI2S-DMA.h>\n\n// Panel configuration for 64x64 HUB75\nconst int PANEL_WIDTH = 64;\nconst int PANEL_HEIGHT = 64;\n\n// Matrix object\nMatrixPanel_I2S_DMA *dma_display = nullptr;\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Configure panel parameters\n  HUB75_I2S_CFG mxconfig(\n    PANEL_WIDTH,   // Module width\n    PANEL_HEIGHT,  // Module height\n    1              // Chain length\n  );\n\n  // Optional: Custom pin overrides if needed (defaults match standard wiring)\n  // mxconfig.gpio.r1 = 25;\n  // mxconfig.gpio.g1 = 27;\n  // ...\n\n  // Initialize display with DMA support\n  dma_display = new MatrixPanel_I2S_DMA(mxconfig);\n  dma_display->begin();\n  dma_display->setBrightness8(60); // Set brightness (0-255)\n  dma_display->clearScreen();\n}\n\nvoid loop() {\n  // Draw basic shapes and text\n  dma_display->clearScreen();\n\n  // Draw colorful border\n  dma_display->drawRect(0, 0, 64, 64, dma_display->color4bit(15, 0, 0)); // Red border\n  dma_display->drawRect(1, 1, 62, 62, dma_display->color4bit(0, 15, 0)); // Green inner border\n\n  // Display scrolling text\n  dma_display->setTextSize(1);\n  dma_display->setTextColor(dma_display->color4bit(15, 15, 15)); // White text\n  dma_display->setCursor(8, 28);\n  dma_display->print(\"WAVESHARE\");\n\n  delay(2000);\n\n  // Fill screen with flashing primary colors\n  dma_display->fillRect(10, 10, 44, 44, dma_display->color4bit(0, 0, 15)); // Blue box\n  delay(1000);\n}"
+  "code": "#include <ESP32-HUB75-MatrixPanelI2S-DMA.h>\n\n// Panel configuration for 64x64 HUB75 (1/32 scan, needs the E address line)\nconst int PANEL_WIDTH = 64;\nconst int PANEL_HEIGHT = 64;\n\n// Matrix object\nMatrixPanel_I2S_DMA *dma_display = nullptr;\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Configure panel parameters\n  HUB75_I2S_CFG mxconfig(\n    PANEL_WIDTH,   // Module width\n    PANEL_HEIGHT,  // Module height\n    1              // Chain length\n  );\n\n  // Library default GPIOs (wired on the canvas):\n  // R1=25 G1=26 B1=27 R2=14 G2=12 B2=13\n  // A=23 B=19 C=5 D=17 E=32 LAT=4 OE=15 CLK=16\n  // Override with e.g.: mxconfig.gpio.r1 = 33;\n\n  // Initialize display with DMA support\n  dma_display = new MatrixPanel_I2S_DMA(mxconfig);\n  dma_display->begin();\n  dma_display->setBrightness8(60); // Set brightness (0-255)\n  dma_display->clearScreen();\n  Serial.println(\"HUB75 64x64 ready\");\n}\n\nvoid loop() {\n  // Draw basic shapes and text\n  dma_display->clearScreen();\n\n  // Draw colorful border\n  dma_display->drawRect(0, 0, 64, 64, dma_display->color4bit(15, 0, 0)); // Red border\n  dma_display->drawRect(1, 1, 62, 62, dma_display->color4bit(0, 15, 0)); // Green inner border\n\n  // Display text\n  dma_display->setTextSize(1);\n  dma_display->setTextColor(dma_display->color4bit(15, 15, 15)); // White text\n  dma_display->setCursor(8, 28);\n  dma_display->print(\"WAVESHARE\");\n\n  delay(2000);\n\n  // Fill screen with flashing primary colors\n  dma_display->fillRect(10, 10, 44, 44, dma_display->color4bit(0, 0, 15)); // Blue box\n  delay(1000);\n}"
 }

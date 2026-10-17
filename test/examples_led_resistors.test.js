@@ -279,5 +279,5 @@ describe('every shipped example', () => {
     }
     expect(offenders, 'LEDs whose series resistor is bypassed by a direct ground wire')
       .toEqual([]);
-  });
+  }, 30000); // scans every Examples/*.json — generous timeout under parallel CI load
 });

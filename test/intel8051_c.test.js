@@ -51,7 +51,7 @@ describe('sniff', () => {
         }
       }
     }
-  });
+  }, 30000); // scans every Examples/*.json — generous timeout under parallel CI load
   it('does not match empty/null', () => {
     expect(window.Intel8051C.sniff('')).toBe(false);
     expect(window.Intel8051C.sniff(null)).toBe(false);

@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 defComp({
   id: 'wifi_module',
@@ -208,12 +208,12 @@ defComp({
       ctx.fillStyle = 'rgba(255,255,255,0.2)';
       ctx.font = 'bold 10px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('·········', w / 2, 40);
+      ctx.fillText('Â·Â·Â·Â·Â·Â·Â·Â·Â·', w / 2, 40);
     } else {
       ctx.fillStyle = isRunning ? '#00d2ff' : 'rgba(255,255,255,0.3)';
       ctx.font = 'bold 10px monospace';
       ctx.textAlign = 'center';
-      const displaySsid = ssid.length > 11 ? ssid.slice(0, 10) + '…' : ssid;
+      const displaySsid = ssid.length > 11 ? ssid.slice(0, 10) + 'â€¦' : ssid;
       ctx.fillText(displaySsid, w / 2, 40);
     }
 
@@ -227,15 +227,15 @@ defComp({
     ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
     ctx.font = '7px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`CH:${inst.props.channel || 6} • ${inst.props.security || 'WPA2'}`, w / 2, 68);
+    ctx.fillText(`CH:${inst.props.channel || 6} â€¢ ${inst.props.security || 'WPA2'}`, w / 2, 68);
 
     ctx.restore();
   },
 });
 
-// ══════════════════════════════════════════════════════════════════════════════
-// LoRa Module Component — RFM95W / SX1276 based LoRa transceiver
-// ══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// LoRa Module Component â€” RFM95W / SX1276 based LoRa transceiver
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 defComp({
   id: 'lora_module',
   name: 'LoRa Module',
@@ -663,7 +663,7 @@ defComp({
   },
 });
 
-/* ═══════════════════════ SD Card Module (SPI) ═══════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SD Card Module (SPI) â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 // defComp({
 //   id: 'sd_card',
@@ -829,7 +829,7 @@ defComp({
   contextMenu: [
     {
       label: 'Upload files to SD card',
-      icon: '📁',
+      icon: 'ðŸ“',
       action(inst) {
         var input = document.createElement('input');
         input.type = 'file';
@@ -865,7 +865,7 @@ defComp({
     },
     {
       label: 'View loaded files',
-      icon: '📋',
+      icon: 'ðŸ“‹',
       action(inst) {
         var uploaded = (inst.runtimeState && inst.runtimeState.uploadedFiles) || {};
         var names = Object.keys(uploaded);
@@ -882,7 +882,7 @@ defComp({
     },
     {
       label: 'Clear all files',
-      icon: '🗑️',
+      icon: 'ðŸ—‘ï¸',
       action(inst) {
         if (inst.runtimeState) inst.runtimeState.uploadedFiles = {};
         if (window.CircuitCanvas && window.CircuitCanvas.render) {
@@ -1110,3 +1110,426 @@ class SDCardComponent extends Component {
 }
 
 registerComponent('sd_card', SDCardComponent);
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   GSM / 4G LTE / 5G NR Modules â€” AT-command cellular transceivers
+   Variants: 2G (SIM800/SIM900), 4G LTE (Quectel EC25/BG96), 5G NR (u-blox SARA-R5)
+   Shared bus: window._gsmBus  (cross-board SMS / voice / USSD / TCP / HTTP delivery)
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */const GSM_VARIANTS = {
+  '2g': {
+    id: 'gsm_module_2g',
+    name: 'GSM 2G Module (SIM800/SIM900)',
+    icon: '\u{1F4DF}',
+    color: '#e67e22',
+    glow: 'rgba(230, 126, 34, 0.35)',
+    desc: 'SIM800/SIM900 quad-band GSM module (850/900/1800/1900 MHz). SMS, voice calls, USSD and GPRS via AT commands.',
+    bands: [
+      { value: 850,  label: 'GSM 850 MHz' },
+      { value: 900,  label: 'GSM 900 MHz' },
+      { value: 1800, label: 'GSM 1800 MHz' },
+      { value: 1900, label: 'GSM 1900 MHz' },
+    ],
+    tech: '2G',
+    maxRate: '14.4 kbps',
+    defaultBand: 900,
+  },
+  '4g': {
+    id: 'gsm_module_4g',
+    name: 'GSM 4G LTE Module (Quectel EC25/BG96)',
+    icon: '\u{1F4F6}',
+    color: '#3498db',
+    glow: 'rgba(52, 152, 219, 0.35)',
+    desc: 'Quectel EC25/BG96 LTE CAT-4 module. FDD/TDD bands, SMS, voice (VoLTE), USSD and TCP/HTTP client via AT commands.',
+    bands: [
+      { value: 1,   label: 'LTE B1 (2100 MHz)' },
+      { value: 3,   label: 'LTE B3 (1800 MHz)' },
+      { value: 5,   label: 'LTE B5 (850 MHz)' },
+      { value: 7,   label: 'LTE B7 (2600 MHz)' },
+      { value: 8,   label: 'LTE B8 (900 MHz)' },
+      { value: 20,  label: 'LTE B20 (800 MHz)' },
+      { value: 28,  label: 'LTE B28 (700 MHz)' },
+      { value: 38,  label: 'LTE B38 (2600 MHz TDD)' },
+      { value: 40,  label: 'LTE B40 (2300 MHz TDD)' },
+      { value: 41,  label: 'LTE B41 (2500 MHz TDD)' },
+    ],
+    tech: '4G LTE',
+    maxRate: '150 Mbps',
+    defaultBand: 3,
+  },
+  '5g': {
+    id: 'gsm_module_5g',
+    name: 'GSM 5G NR Module (u-blox SARA-R5)',
+    icon: '\u{1F4FD}',
+    color: '#9b59b6',
+    glow: 'rgba(155, 89, 182, 0.35)',
+    desc: 'u-blox SARA-R5 5G NR module with LTE fallback. NR bands, SMS, voice (VoNR), USSD and TCP/HTTP client via AT commands.',
+    bands: [
+      { value: 1,   label: 'NR n1 (2100 MHz)' },
+      { value: 3,   label: 'NR n3 (1800 MHz)' },
+      { value: 5,   label: 'NR n5 (850 MHz)' },
+      { value: 7,   label: 'NR n7 (2600 MHz)' },
+      { value: 8,   label: 'NR n8 (900 MHz)' },
+      { value: 20,  label: 'NR n20 (800 MHz)' },
+      { value: 28,  label: 'NR n28 (700 MHz)' },
+      { value: 41,  label: 'NR n41 (2500 MHz)' },
+      { value: 77,  label: 'NR n77 (3700 MHz)' },
+      { value: 78,  label: 'NR n78 (3500 MHz)' },
+    ],
+    tech: '5G NR',
+    maxRate: '1 Gbps',
+    defaultBand: 78,
+  },
+};
+
+function gsmModuleDef(v) {
+  const g = GSM_VARIANTS[v];
+  const bandOpts = g.bands.map(b => ({ value: b.value, label: b.label }));
+  const pins = [
+    { id: 'VCC',  label: 'VCC',  type: PIN_TYPE.POWER,   x: 8,  y: 98, side: 'bottom' },
+    { id: 'GND',  label: 'GND',  type: PIN_TYPE.GND,     x: 20, y: 98, side: 'bottom' },
+    { id: 'TX',   label: 'TX',   type: PIN_TYPE.SIGNAL,  x: 32, y: 98, side: 'bottom' },
+    { id: 'RX',   label: 'RX',   type: PIN_TYPE.SIGNAL,  x: 44, y: 98, side: 'bottom' },
+    { id: 'PWR',  label: 'PWR',  type: PIN_TYPE.DIGITAL, x: 56, y: 98, side: 'bottom' },
+    { id: 'RST',  label: 'RST',  type: PIN_TYPE.DIGITAL, x: 68, y: 98, side: 'bottom' },
+    { id: 'NET',  label: 'NET',  type: PIN_TYPE.DIGITAL, x: 80, y: 98, side: 'bottom' },
+    { id: 'STS',  label: 'STS',  type: PIN_TYPE.DIGITAL, x: 92, y: 98, side: 'bottom' },
+  ];
+
+  return {
+    id: g.id,
+    name: g.name,
+    category: 'Communication',
+    icon: g.icon,
+    desc: g.desc,
+    search: `gsm ${g.tech} cellular sim ${g.name.toLowerCase()} at sms call ussd tcp http`,
+    width: 104,
+    height: 110,
+
+    defaultProps: {
+      band: g.defaultBand,
+      operator: '',
+      imei: '',
+      apn: 'internet',
+      smsNumber: '+1234567890',
+      ussdCode: '*100#',
+      httpUrl: 'http://example.com',
+    },
+
+    interactive: [
+      { field: 'band',     label: 'Band',      type: 'select', options: bandOpts },
+      { field: 'apn',      label: 'APN',       type: 'text' },
+      { field: 'operator', label: 'Operator',  type: 'text' },
+      { field: 'imei',     label: 'IMEI',      type: 'text' },
+      { field: 'smsNumber',label: 'SMS To',    type: 'text' },
+      { field: 'ussdCode', label: 'USSD Code', type: 'text' },
+      { field: 'httpUrl',  label: 'HTTP URL',  type: 'text' },
+    ],
+
+    pins,
+
+    step(inst, sim) {
+      if (!window._gsmBus) {
+        window._gsmBus = {
+          nodes: {},
+          deliverSMS(senderId, to, text) {
+            Object.values(this.nodes).forEach((target) => {
+              if (target.id === senderId || !target.active) return;
+              target.rxCount = (target.rxCount || 0) + 1;
+              target.lastRxMeta = { type: 'sms', from: senderId, to, text, time: Date.now() };
+              if (target.inst && target.inst.setPin) target.inst.setPin('NET', 1);
+            });
+          },
+          deliverVoice(senderId, to, action) {
+            Object.values(this.nodes).forEach((target) => {
+              if (target.id === senderId || !target.active) return;
+              target.rxCount = (target.rxCount || 0) + 1;
+              target.lastRxMeta = { type: 'voice', from: senderId, to, action, time: Date.now() };
+              if (target.inst && target.inst.setPin) target.inst.setPin('NET', 1);
+            });
+          },
+          deliverUSSD(senderId, code, result) {
+            Object.values(this.nodes).forEach((target) => {
+              if (target.id === senderId || !target.active) return;
+              target.rxCount = (target.rxCount || 0) + 1;
+              target.lastRxMeta = { type: 'ussd', from: senderId, code, result, time: Date.now() };
+              if (target.inst && target.inst.setPin) target.inst.setPin('NET', 1);
+            });
+          },
+          deliverHTTP(senderId, url, method, status, body) {
+            Object.values(this.nodes).forEach((target) => {
+              if (target.id === senderId || !target.active) return;
+              target.rxCount = (target.rxCount || 0) + 1;
+              target.lastRxMeta = { type: 'http', from: senderId, url, method, status, body, time: Date.now() };
+              if (target.inst && target.inst.setPin) target.inst.setPin('NET', 1);
+            });
+          },
+        };
+      }
+
+      const isRunning = !!(sim && sim.isRunning);
+
+      if (isRunning) {
+        if (!inst._state) {
+          inst._state = {
+            registered: false,
+            signalBars: 0,
+            lastTxTime: 0,
+            lastRxTime: 0,
+            txCount: 0,
+            rxCount: 0,
+            lastRxMeta: null,
+            netLed: false,
+          };
+        }
+
+        const state = inst._state;
+        if (!state.registered) {
+          state.registered = true;
+          state.signalBars = 3 + Math.floor(Math.random() * 3);
+          inst._gsmNodeId = inst.id;
+          window._gsmBus.nodes[inst.id] = {
+            id: inst.id,
+            inst,
+            tech: g.tech,
+            band: Number(inst.props.band) || g.defaultBand,
+            operator: inst.props.operator || '',
+            imei: inst.props.imei || '',
+            apn: inst.props.apn || 'internet',
+            active: true,
+            x: inst.x + (inst.width || 104) / 2,
+            y: inst.y + (inst.height || 110) / 2,
+            sendSMS: (to, text) => {
+              state.lastTxTime = Date.now();
+              state.txCount = (state.txCount || 0) + 1;
+              window._gsmBus.deliverSMS(inst.id, to, text);
+            },
+            makeCall: (to) => {
+              state.lastTxTime = Date.now();
+              state.txCount = (state.txCount || 0) + 1;
+              window._gsmBus.deliverVoice(inst.id, to, 'call');
+            },
+            hangup: () => {
+              window._gsmBus.deliverVoice(inst.id, null, 'hangup');
+            },
+            sendUSSD: (code) => {
+              state.lastTxTime = Date.now();
+              state.txCount = (state.txCount || 0) + 1;
+              window._gsmBus.deliverUSSD(inst.id, code, 'OK');
+            },
+            httpGet: (url) => {
+              state.lastTxTime = Date.now();
+              state.txCount = (state.txCount || 0) + 1;
+              window._gsmBus.deliverHTTP(inst.id, url, 'GET', 200, 'OK');
+            },
+          };
+        }
+
+        const now = Date.now();
+        const txActive = now - state.lastTxTime < 400;
+        const rxActive = now - state.lastRxTime < 400;
+        if (txActive || rxActive) {
+          state.netLed = true;
+          state.lastRxTime = now;
+        } else {
+          state.netLed = false;
+        }
+
+        window._gsmBus.nodes[inst.id].x = inst.x + (inst.width || 104) / 2;
+        window._gsmBus.nodes[inst.id].y = inst.y + (inst.height || 110) / 2;
+        window._gsmBus.nodes[inst.id].signalBars = state.signalBars;
+        window._gsmBus.nodes[inst.id].operator = inst.props.operator || '';
+        window._gsmBus.nodes[inst.id].apn = inst.props.apn || 'internet';
+        window._gsmBus.nodes[inst.id].lastTxTime = state.lastTxTime;
+        window._gsmBus.nodes[inst.id].lastRxTime = state.lastRxTime;
+        window._gsmBus.nodes[inst.id].txCount = state.txCount;
+        window._gsmBus.nodes[inst.id].rxCount = state.rxCount;
+        window._gsmBus.nodes[inst.id].lastRxMeta = state.lastRxMeta;
+      } else {
+        if (window._gsmBus?.nodes) delete window._gsmBus.nodes[inst.id];
+      }
+    },
+
+    draw(ctx, inst, sim) {
+      const { x, y } = inst;
+      const w = inst.width || 104;
+      const h = inst.height || 110;
+      const isRunning = !!(sim && sim.isRunning);
+      const busNode = window._gsmBus?.nodes[inst.id];
+      const state = inst._state || { registered: false, signalBars: 0, txCount: 0, rxCount: 0, lastRxMeta: null, netLed: false };
+      const color = g.color;
+      const glow = g.glow;
+
+      const lastRxMeta = busNode ? busNode.lastRxMeta : state.lastRxMeta;
+      const txCount = busNode ? busNode.txCount : state.txCount;
+      const rxCount = busNode ? busNode.rxCount : state.rxCount;
+
+      ctx.save();
+      ctx.translate(x, y);
+
+      const drawRR = (rx, ry, rw, rh, rad) => {
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, rad);
+        else ctx.rect(rx, ry, rw, rh);
+      };
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      drawRR(3, 5, w - 2, h - 10, 6);
+      ctx.fill();
+
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, h - 8);
+      bgGrad.addColorStop(0, '#1a1f29');
+      bgGrad.addColorStop(0.5, '#121721');
+      bgGrad.addColorStop(1, '#0c1018');
+      ctx.fillStyle = bgGrad;
+      drawRR(0, 0, w, h - 8, 6);
+      ctx.fill();
+      ctx.strokeStyle = isRunning ? color : 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1.2;
+      drawRR(0, 0, w, h - 8, 6);
+      ctx.stroke();
+
+      const antX = w / 2;
+      ctx.fillStyle = '#d4af37';
+      ctx.fillRect(antX - 3, 4, 6, 3);
+      ctx.strokeStyle = '#b8860b';
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(antX, 4);
+      ctx.lineTo(antX, -10);
+      ctx.stroke();
+      ctx.fillStyle = '#f1c40f';
+      ctx.beginPath();
+      ctx.arc(antX, -10, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (isRunning && state.registered) {
+        const now = Date.now();
+        const phase = (now % 900) / 900;
+        ctx.lineWidth = 1.2;
+        for (let i = 0; i < 3; i++) {
+          const opacity = Math.max(0, 1 - ((phase + i * 0.33) % 1));
+          const radius = 3 + ((phase + i * 0.33) % 1) * 14;
+          ctx.strokeStyle = `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, ${opacity * 0.7})`;
+          ctx.beginPath();
+          ctx.arc(antX, -10, radius, -Math.PI * 0.8, -Math.PI * 0.2);
+          ctx.stroke();
+        }
+      }
+
+      const chipX = 8;
+      const chipY = 16;
+      const chipW = w - 16;
+      const chipH = 30;
+      ctx.fillStyle = '#2d3436';
+      drawRR(chipX, chipY, chipW, chipH, 3);
+      ctx.fill();
+      ctx.strokeStyle = '#636e72';
+      ctx.lineWidth = 1;
+      drawRR(chipX, chipY, chipW, chipH, 3);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ecf0f1';
+      ctx.font = 'bold 7px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(g.tech, chipX + chipW / 2, chipY + 9);
+      ctx.font = '6px monospace';
+      ctx.fillStyle = color;
+      ctx.fillText(v === '2g' ? 'SIM800/SIM900' : v === '4g' ? 'EC25/BG96' : 'SARA-R5', chipX + chipW / 2, chipY + 19);
+
+      const ledY = 52;
+      const drawLED = (lx, active, col, label) => {
+        ctx.fillStyle = active ? col : '#1a2228';
+        ctx.beginPath(); ctx.arc(lx, ledY, 2.5, 0, Math.PI * 2); ctx.fill();
+        if (active) {
+          ctx.fillStyle = glow;
+          ctx.beginPath(); ctx.arc(lx, ledY, 4.5, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.font = '5px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, lx, ledY + 8);
+      };
+
+      const netActive = isRunning && state.registered && state.netLed;
+      drawLED(18, isRunning, '#2ecc71', 'rgba(46, 204, 113, 0.35)', 'PWR');
+      drawLED(40, isRunning && state.registered, color, glow, 'NET');
+      drawLED(62, netActive, '#f39c12', 'rgba(243, 156, 18, 0.4)', 'TX');
+      drawLED(84, isRunning && state.registered, '#3498db', 'rgba(52, 152, 219, 0.3)', 'RX');
+
+      const oledX = 6;
+      const oledY = 62;
+      const oledW = w - 12;
+      const oledH = 26;
+      ctx.fillStyle = '#0b1016';
+      drawRR(oledX, oledY, oledW, oledH, 3);
+      ctx.fill();
+      ctx.strokeStyle = isRunning ? `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.3)` : 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 0.8;
+      drawRR(oledX, oledY, oledW, oledH, 3);
+      ctx.stroke();
+
+      if (isRunning) {
+        ctx.fillStyle = color;
+        ctx.font = 'bold 7px monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText(`${g.tech}`, oledX + 4, oledY + 8);
+
+        ctx.textAlign = 'right';
+        const bars = '|'.repeat(state.signalBars || 3) + '-'.repeat(5 - (state.signalBars || 3));
+        ctx.fillText(bars, oledX + oledW - 4, oledY + 8);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.65)';
+        ctx.font = '6px monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText((inst.props.operator || 'SEARCHING...'), oledX + 4, oledY + 16);
+
+        ctx.textAlign = 'right';
+        ctx.fillText(`TX:${txCount} RX:${rxCount}`, oledX + oledW - 4, oledY + 16);
+
+        ctx.textAlign = 'center';
+        if (lastRxMeta && (Date.now() - lastRxMeta.time < 4000)) {
+          ctx.fillStyle = '#f1c40f';
+          let line = '';
+          if (lastRxMeta.type === 'sms') line = `SMS from ${lastRxMeta.from}`;
+          else if (lastRxMeta.type === 'voice') line = `Voice ${lastRxMeta.action}`;
+          else if (lastRxMeta.type === 'ussd') line = `USSD: ${lastRxMeta.result}`;
+          else if (lastRxMeta.type === 'http') line = `HTTP ${lastRxMeta.status}`;
+          ctx.fillText(line, oledX + oledW / 2, oledY + 24);
+        } else {
+          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.fillText(`${g.tech} ${g.maxRate}  Band ${state.band || g.defaultBand}`, oledX + oledW / 2, oledY + 24);
+        }
+      } else {
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.font = 'bold 7px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('POWER OFF', oledX + oledW / 2, oledY + 14);
+      }
+
+      const pinY = h - 6;
+      ctx.fillStyle = '#111';
+      drawRR(4, pinY - 3, w - 8, 3, 1);
+      ctx.fill();
+      pins.forEach((p) => {
+        ctx.fillStyle = p.type === 'power' ? '#f1c40f' : p.type === 'gnd' ? '#e74c3c' : '#d4af37';
+        ctx.fillRect(p.x - 1.5, pinY, 3, 6);
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.font = '4.5px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(p.label, p.x, pinY - 3);
+      });
+
+      if (inst.selected && typeof drawSelectionRect === 'function') {
+        drawSelectionRect(ctx, -2, -2, w + 4, h + 4);
+      }
+
+      ctx.restore();
+    },
+  };
+}
+
+defComp(gsmModuleDef('2g'));
+defComp(gsmModuleDef('4g'));
+defComp(gsmModuleDef('5g'));
+

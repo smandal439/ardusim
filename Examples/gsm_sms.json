@@ -1,0 +1,94 @@
+{
+  "id": "gsm_sms",
+  "name": "GSM SMS Send & Receive",
+  "icon": "\uD83D\uDCDF",
+  "desc": "Send and receive SMS messages between two Arduino boards using SIM800/SIM900 GSM modules. Board 1 sends an SMS to Board 2, which reads and displays it on the Serial Monitor. Demonstrates AT+CMGF, AT+CMGS, AT+CMGR and SMS text mode.",
+  "tags": [
+    "gsm",
+    "sms",
+    "2g",
+    "sim800",
+    "sim900",
+    "cellular",
+    "wireless",
+    "intermediate"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 200,
+        "props": { "label": "GSM Sender" },
+        "rotation": 0
+      },
+      {
+        "id": "gsm1",
+        "type": "gsm_module_2g",
+        "x": 50,
+        "y": 200,
+        "props": {
+          "band": 900,
+          "operator": "Home Network",
+          "imei": "351234000001234",
+          "apn": "internet",
+          "smsNumber": "+1234567891",
+          "ussdCode": "*100#",
+          "httpUrl": "http://example.com"
+        },
+        "rotation": 0
+      },
+      {
+        "id": "b2",
+        "type": "arduino_uno",
+        "x": 600,
+        "y": 200,
+        "props": { "label": "GSM Receiver" },
+        "rotation": 0
+      },
+      {
+        "id": "gsm2",
+        "type": "gsm_module_2g",
+        "x": 800,
+        "y": 200,
+        "props": {
+          "band": 900,
+          "operator": "Home Network",
+          "imei": "351234000001235",
+          "apn": "internet",
+          "smsNumber": "+1234567890",
+          "ussdCode": "*100#",
+          "httpUrl": "http://example.com"
+        },
+        "rotation": 0
+      },
+      {
+        "id": "vcc1", "type": "power_5v", "x": 130, "y": 280, "props": {}
+      },
+      {
+        "id": "gnd1", "type": "power_gnd", "x": 130, "y": 380, "props": {}
+      },
+      {
+        "id": "vcc2", "type": "power_5v", "x": 530, "y": 280, "props": {}
+      },
+      {
+        "id": "gnd2", "type": "power_gnd", "x": 530, "y": 380, "props": {}
+      }
+    ],
+    "wires": [
+      {"id":"w_tx1","from":{"instId":"gsm1","pinId":"TX"},"to":{"instId":"b1","pinId":"D0"},"color":"#e67e22","waypoints":[]},
+      {"id":"w_rx1","from":{"instId":"gsm1","pinId":"RX"},"to":{"instId":"b1","pinId":"D1"},"color":"#e67e22","waypoints":[]},
+      {"id":"w_vcc1","from":{"instId":"vcc1","pinId":"vcc"},"to":{"instId":"gsm1","pinId":"VCC"},"color":"#f1c40f","waypoints":[]},
+      {"id":"w_gnd1a","from":{"instId":"gnd1","pinId":"gnd"},"to":{"instId":"gsm1","pinId":"GND"},"color":"#333333","waypoints":[]},
+      {"id":"w_gnd1b","from":{"instId":"gnd1","pinId":"gnd"},"to":{"instId":"b1","pinId":"GND2"},"color":"#333333","waypoints":[]},
+      {"id":"w_tx2","from":{"instId":"gsm2","pinId":"TX"},"to":{"instId":"b2","pinId":"D0"},"color":"#e67e22","waypoints":[]},
+      {"id":"w_rx2","from":{"instId":"gsm2","pinId":"RX"},"to":{"instId":"b2","pinId":"D1"},"color":"#e67e22","waypoints":[]},
+      {"id":"w_vcc2","from":{"instId":"vcc2","pinId":"vcc"},"to":{"instId":"gsm2","pinId":"VCC"},"color":"#f1c40f","waypoints":[]},
+      {"id":"w_gnd2a","from":{"instId":"gnd2","pinId":"gnd"},"to":{"instId":"gsm2","pinId":"GND"},"color":"#333333","waypoints":[]},
+      {"id":"w_gnd2b","from":{"instId":"gnd2","pinId":"gnd"},"to":{"instId":"b2","pinId":"GND2"},"color":"#333333","waypoints":[]}
+    ]
+  },
+  "code": "/*\n * GSM SMS Sender — Board 1\n * Sends an SMS message every 5 seconds using SIM800/SIM900 GSM module\n * via AT commands.\n */\n\n#include <GSM.h>\n\nGSM gsm;\n\nString recipient = \"+1234567891\";\nint msgCount = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"GSM SMS Sender Starting...\");\n\n  // Initialize GSM module\n  gsm.begin();\n\n  Serial.println(\"GSM SMS Sender ready!\");\n  Serial.println(\"IMEI: \" + gsm.getIMEI());\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  msgCount++;\n\n  Serial.print(\"Sending SMS #\");\n  Serial.println(msgCount);\n\n  String message = \"GSM SMS #\" + String(msgCount) + \" from Sender\";\n  gsm.sendSMS(recipient, message);\n\n  Serial.println(\"SMS sent!\");\n  Serial.println(\"---\");\n\n  delay(5000);\n}\n",
+  "board2Code": "/*\n * GSM SMS Receiver — Board 2\n * Receives SMS messages from Board 1 and displays them on Serial Monitor.\n */\n\n#include <GSM.h>\n\nGSM gsm;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"GSM SMS Receiver Starting...\");\n\n  // Initialize GSM module\n  gsm.begin();\n\n  Serial.println(\"GSM SMS Receiver ready — waiting for SMS...\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  // Read any received SMS\n  String sms = gsm.readSMS();\n  if (sms.length() > 0) {\n    Serial.print(\"Received SMS: \");\n    Serial.println(sms);\n    Serial.println(\"---\");\n  }\n\n  delay(1000);\n}\n"
+}

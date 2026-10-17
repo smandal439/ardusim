@@ -3114,6 +3114,119 @@ window.EXAMPLE_SKETCHES = [
     }
   },
   {
+    "id": "8051_logical_and_operation",
+    "name": "8051 LOGICAL AND OPERATION",
+    "icon": "🔧",
+    "desc": "A custom 8051 LOGICAL AND OPERATION circuit example.",
+    "tags": [
+      "LOGICAL AND",
+      "8051"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1792255746075_wiril",
+          "type": "intel_8051",
+          "x": -15,
+          "y": 40,
+          "rotation": 0,
+          "props": {
+            "label": "8051"
+          }
+        }
+      ],
+      "wires": []
+    },
+    "files": {
+      "sketch.asm": "MOV A, #45H      ; Load A with 45H (0100 0101 in binary)\nANL A, #0FH      ; AND accumulator with 0FH (0000 1111 in binary)\n"
+    }
+  },
+  {
+    "id": "8051_logical_not_complement_operation",
+    "name": "Logical NOT / Complement OPERATION",
+    "icon": "🔧",
+    "desc": "A custom Logical NOT / Complement OPERATION circuit example.",
+    "tags": [
+      "NOT",
+      "8051",
+      "COMPLEMENT"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1792256004005_qlm3z",
+          "type": "intel_8051",
+          "x": -35,
+          "y": -40,
+          "rotation": 0,
+          "props": {
+            "label": "8051"
+          }
+        }
+      ],
+      "wires": []
+    },
+    "files": {
+      "sketch.asm": "MOV A, #0A0H     ; Load A with 1010 0000 binary\nCPL A            ; Complement all bits in A\n"
+    }
+  },
+  {
+    "id": "8051_logical_or_operation",
+    "name": "LOGICAL OR OPERATION",
+    "icon": "🔧",
+    "desc": "A custom LOGICAL OR OPERATION circuit example.",
+    "tags": [
+      "8051",
+      "LOGICAL OR"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1792256004005_qlm3z",
+          "type": "intel_8051",
+          "x": -35,
+          "y": -40,
+          "rotation": 0,
+          "props": {
+            "label": "8051"
+          }
+        }
+      ],
+      "wires": []
+    },
+    "files": {
+      "sketch.asm": "MOV A, #0F0H     ; Load A with 1111 0000 binary\nORL A, #0FH      ; OR accumulator with 0000 1111 binary\n"
+    }
+  },
+  {
+    "id": "8051_logical_xor_operation",
+    "name": "LOGICAL XOR OPERATION",
+    "icon": "🔧",
+    "desc": "A custom LOGICAL XOR OPERATION circuit example.",
+    "tags": [
+      "8051",
+      "LOGICAL XOR"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1792256004005_qlm3z",
+          "type": "intel_8051",
+          "x": -35,
+          "y": -40,
+          "rotation": 0,
+          "props": {
+            "label": "8051"
+          }
+        }
+      ],
+      "wires": []
+    },
+    "files": {
+      "sketch.asm": "MOV A, #55H      ; Load A with 0101 0101 binary\nXRL A, #0FFH     ; XOR accumulator with 1111 1111 binary\n"
+    }
+  },
+  {
     "id": "8051_port_control",
     "name": "8051 Port Control Example",
     "icon": "🔧",
@@ -9313,17 +9426,210 @@ window.EXAMPLE_SKETCHES = [
   {
     "id": "esp32_hub75_matrixpaneli2s_dma",
     "name": "ESP32-HUB75-MatrixPanelI2S-DMA",
-    "icon": "🔧",
-    "desc": "A custom ESP32-HUB75-MatrixPanelI2S-DMA circuit example.",
+    "icon": "🌈",
+    "desc": "Drive a Waveshare 64x64 HUB75 RGB LED matrix from an ESP32 using the ESP32-HUB75-MatrixPanelI2S-DMA library (library-default GPIO mapping).",
     "tags": [
-      "custom",
-      "circuit"
+      "esp32",
+      "display",
+      "hub75",
+      "matrix",
+      "dma"
     ],
     "circuit": {
-      "components": [],
-      "wires": []
+      "components": [
+        {
+          "id": "esp",
+          "type": "esp32_devkit_v1",
+          "x": 300,
+          "y": 40
+        },
+        {
+          "id": "mx1",
+          "type": "rgb_matrix_64x64",
+          "x": 560,
+          "y": 40
+        }
+      ],
+      "wires": [
+        {
+          "id": "w_r1",
+          "from": {
+            "instId": "esp",
+            "pinId": "D25"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "R1"
+          }
+        },
+        {
+          "id": "w_g1",
+          "from": {
+            "instId": "esp",
+            "pinId": "D26"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "G1"
+          }
+        },
+        {
+          "id": "w_b1",
+          "from": {
+            "instId": "esp",
+            "pinId": "D27"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "B1"
+          }
+        },
+        {
+          "id": "w_gnd1",
+          "from": {
+            "instId": "esp",
+            "pinId": "GND1"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "GND1"
+          }
+        },
+        {
+          "id": "w_r2",
+          "from": {
+            "instId": "esp",
+            "pinId": "D14"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "R2"
+          }
+        },
+        {
+          "id": "w_g2",
+          "from": {
+            "instId": "esp",
+            "pinId": "D12"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "G2"
+          }
+        },
+        {
+          "id": "w_b2",
+          "from": {
+            "instId": "esp",
+            "pinId": "D13"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "B2"
+          }
+        },
+        {
+          "id": "w_gnd2",
+          "from": {
+            "instId": "esp",
+            "pinId": "GND2"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "GND2"
+          }
+        },
+        {
+          "id": "w_a",
+          "from": {
+            "instId": "esp",
+            "pinId": "D23"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "A"
+          }
+        },
+        {
+          "id": "w_b",
+          "from": {
+            "instId": "esp",
+            "pinId": "D19"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "B"
+          }
+        },
+        {
+          "id": "w_c",
+          "from": {
+            "instId": "esp",
+            "pinId": "D5"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "C"
+          }
+        },
+        {
+          "id": "w_d",
+          "from": {
+            "instId": "esp",
+            "pinId": "D17"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "D"
+          }
+        },
+        {
+          "id": "w_e",
+          "from": {
+            "instId": "esp",
+            "pinId": "D32"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "E"
+          }
+        },
+        {
+          "id": "w_lat",
+          "from": {
+            "instId": "esp",
+            "pinId": "D4"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "LAT"
+          }
+        },
+        {
+          "id": "w_oe",
+          "from": {
+            "instId": "esp",
+            "pinId": "D15"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "OE"
+          }
+        },
+        {
+          "id": "w_clk",
+          "from": {
+            "instId": "esp",
+            "pinId": "D16"
+          },
+          "to": {
+            "instId": "mx1",
+            "pinId": "CLK"
+          }
+        }
+      ]
     },
-    "code": "#include <ESP32-HUB75-MatrixPanelI2S-DMA.h>\n\n// Panel configuration for 64x64 HUB75\nconst int PANEL_WIDTH = 64;\nconst int PANEL_HEIGHT = 64;\n\n// Matrix object\nMatrixPanel_I2S_DMA *dma_display = nullptr;\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Configure panel parameters\n  HUB75_I2S_CFG mxconfig(\n    PANEL_WIDTH,   // Module width\n    PANEL_HEIGHT,  // Module height\n    1              // Chain length\n  );\n\n  // Optional: Custom pin overrides if needed (defaults match standard wiring)\n  // mxconfig.gpio.r1 = 25;\n  // mxconfig.gpio.g1 = 27;\n  // ...\n\n  // Initialize display with DMA support\n  dma_display = new MatrixPanel_I2S_DMA(mxconfig);\n  dma_display->begin();\n  dma_display->setBrightness8(60); // Set brightness (0-255)\n  dma_display->clearScreen();\n}\n\nvoid loop() {\n  // Draw basic shapes and text\n  dma_display->clearScreen();\n\n  // Draw colorful border\n  dma_display->drawRect(0, 0, 64, 64, dma_display->color4bit(15, 0, 0)); // Red border\n  dma_display->drawRect(1, 1, 62, 62, dma_display->color4bit(0, 15, 0)); // Green inner border\n\n  // Display scrolling text\n  dma_display->setTextSize(1);\n  dma_display->setTextColor(dma_display->color4bit(15, 15, 15)); // White text\n  dma_display->setCursor(8, 28);\n  dma_display->print(\"WAVESHARE\");\n\n  delay(2000);\n\n  // Fill screen with flashing primary colors\n  dma_display->fillRect(10, 10, 44, 44, dma_display->color4bit(0, 0, 15)); // Blue box\n  delay(1000);\n}"
+    "code": "#include <ESP32-HUB75-MatrixPanelI2S-DMA.h>\n\n// Panel configuration for 64x64 HUB75 (1/32 scan, needs the E address line)\nconst int PANEL_WIDTH = 64;\nconst int PANEL_HEIGHT = 64;\n\n// Matrix object\nMatrixPanel_I2S_DMA *dma_display = nullptr;\n\nvoid setup() {\n  Serial.begin(115200);\n\n  // Configure panel parameters\n  HUB75_I2S_CFG mxconfig(\n    PANEL_WIDTH,   // Module width\n    PANEL_HEIGHT,  // Module height\n    1              // Chain length\n  );\n\n  // Library default GPIOs (wired on the canvas):\n  // R1=25 G1=26 B1=27 R2=14 G2=12 B2=13\n  // A=23 B=19 C=5 D=17 E=32 LAT=4 OE=15 CLK=16\n  // Override with e.g.: mxconfig.gpio.r1 = 33;\n\n  // Initialize display with DMA support\n  dma_display = new MatrixPanel_I2S_DMA(mxconfig);\n  dma_display->begin();\n  dma_display->setBrightness8(60); // Set brightness (0-255)\n  dma_display->clearScreen();\n  Serial.println(\"HUB75 64x64 ready\");\n}\n\nvoid loop() {\n  // Draw basic shapes and text\n  dma_display->clearScreen();\n\n  // Draw colorful border\n  dma_display->drawRect(0, 0, 64, 64, dma_display->color4bit(15, 0, 0)); // Red border\n  dma_display->drawRect(1, 1, 62, 62, dma_display->color4bit(0, 15, 0)); // Green inner border\n\n  // Display text\n  dma_display->setTextSize(1);\n  dma_display->setTextColor(dma_display->color4bit(15, 15, 15)); // White text\n  dma_display->setCursor(8, 28);\n  dma_display->print(\"WAVESHARE\");\n\n  delay(2000);\n\n  // Fill screen with flashing primary colors\n  dma_display->fillRect(10, 10, 44, 44, dma_display->color4bit(0, 0, 15)); // Blue box\n  delay(1000);\n}"
   },
   {
     "id": "esp32_i2s_local_radio_player",
@@ -13277,6 +13583,502 @@ window.EXAMPLE_SKETCHES = [
       ]
     },
     "code": "/*\n * GPS NEO-6M/8M Tracker — ESP32 + OLED + Buzzer\n *\n * Hardware:\n *   NEO-6M/8M GPS:\n *     VCC -> 3.3V   GND -> GND\n *     TX  -> GPIO16 (RX2)   RX  -> GPIO17 (TX2)\n *   SSD1306 OLED (I2C):\n *     VCC -> 3.3V   GND -> GND\n *     SCL -> GPIO22 (I2C SCL)   SDA -> GPIO21 (I2C SDA)\n *   Green LED (Fix OK):  D2 -> Anode, Cathode -> 220R -> GND\n *   Red LED (No Fix):    D4 -> Anode, Cathode -> 220R -> GND\n *   Buzzer (Fix Alert):  D5 -> +, - -> GND\n *\n * Displays: Lat, Lng, Alt, Sats, Speed, Time on OLED.\n * Green LED blinks on fix, red LED on when no fix,\n * buzzer beeps once when fix is first acquired.\n */\n\n#include <TinyGPS++.h>\n#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>\n\n// OLED config\n#define SCREEN_WIDTH 128\n#define SCREEN_HEIGHT 64\n#define OLED_RESET -1\nAdafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);\n\n// GPS\nTinyGPSPlus gps;\n\n// Pins\nconst int GREEN_LED = 2;\nconst int RED_LED   = 4;\nconst int BUZZER    = 5;\n\n// State\nbool greenState = false;\nbool redState   = true;\nbool fixWasAcquired = false;\nunsigned long lastBlink  = 0;\nunsigned long lastPrint = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial2.begin(115200, SERIAL_8N1, 16, 17);\n\n  pinMode(GREEN_LED, OUTPUT);\n  pinMode(RED_LED, OUTPUT);\n  pinMode(BUZZER, OUTPUT);\n\n  digitalWrite(GREEN_LED, LOW);\n  digitalWrite(RED_LED, HIGH);   // Red ON = no fix\n  digitalWrite(BUZZER, LOW);\n\n  // Init OLED\n  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);\n  display.clearDisplay();\n  display.setTextSize(1);\n  display.setTextColor(SSD1306_WHITE);\n  display.setCursor(0, 0);\n  display.println(\"GPS NEO-6M/8M\");\n  display.println(\"Waiting for\");\n  display.println(\"satellites...\");\n  display.display();\n\n  Serial.println(\"========================================\");\n  Serial.println(\"  GPS NEO-6M/8M Tracker\");\n  Serial.println(\"  OLED + Dual LED + Buzzer\");\n  Serial.println(\"========================================\");\n  Serial.println();\n}\n\nvoid loop() {\n  // Feed GPS data\n  while (Serial2.available() > 0) {\n    gps.encode(Serial2.read());\n  }\n\n  static unsigned long lastOled = 0;\n  if (millis() - lastOled >= 1000) {\n    lastOled = millis();\n\n    if (gps.location.isValid()) {\n      // --- FIX ACQUIRED ---\n\n      // Buzzer: beep once on first fix\n      if (!fixWasAcquired) {\n        fixWasAcquired = true;\n        digitalWrite(BUZZER, HIGH);\n        delay(100);\n        digitalWrite(BUZZER, LOW);\n        delay(100);\n        digitalWrite(BUZZER, HIGH);\n        delay(100);\n        digitalWrite(BUZZER, LOW);\n      }\n\n      // Green LED blink, Red LED off\n      digitalWrite(RED_LED, LOW);\n      greenState = !greenState;\n      digitalWrite(GREEN_LED, greenState ? HIGH : LOW);\n\n      // Serial output\n      Serial.println(\"--- GPS Fix Acquired ---\");\n      Serial.print(\"Latitude:    \");\n      Serial.print(gps.location.lat(), 6);\n      Serial.println(\" deg\");\n      Serial.print(\"Longitude:   \");\n      Serial.print(gps.location.lng(), 6);\n      Serial.println(\" deg\");\n      if (gps.altitude.isValid()) {\n        Serial.print(\"Altitude:    \");\n        Serial.print(gps.altitude.meters(), 1);\n        Serial.print(\" m  (\");\n        Serial.print(gps.altitude.feet(), 1);\n        Serial.println(\" ft)\");\n      }\n      if (gps.satellites.isValid()) {\n        Serial.print(\"Satellites:  \");\n        Serial.println(gps.satellites.value());\n      }\n      if (gps.speed.isValid()) {\n        Serial.print(\"Speed:       \");\n        Serial.print(gps.speed.kmph(), 1);\n        Serial.println(\" km/h\");\n      }\n      if (gps.time.isValid()) {\n        Serial.print(\"Time (UTC):  \");\n        if (gps.time.hour() < 10) Serial.print('0');\n        Serial.print(gps.time.hour());\n        Serial.print(':');\n        if (gps.time.minute() < 10) Serial.print('0');\n        Serial.print(gps.time.minute());\n        Serial.print(':');\n        if (gps.time.second() < 10) Serial.print('0');\n        Serial.println(gps.time.second());\n      }\n      Serial.println();\n\n      // --- OLED Display ---\n      display.clearDisplay();\n      display.setTextSize(1);\n      display.setTextColor(SSD1306_WHITE);\n\n      // Header\n      display.setCursor(0, 0);\n      display.println(\"== GPS FIX ACQUIRED ==\");\n\n      // Latitude\n      display.setCursor(0, 12);\n      display.print(\"LAT:\");\n      display.println(gps.location.lat(), 6);\n\n      // Longitude\n      display.setCursor(0, 22);\n      display.print(\"LNG:\");\n      display.println(gps.location.lng(), 6);\n\n      // Altitude\n      if (gps.altitude.isValid()) {\n        display.setCursor(0, 32);\n        display.print(\"ALT:\");\n        display.print(gps.altitude.meters(), 1);\n        display.println(\"m\");\n      }\n\n      // Speed & Sats\n      display.setCursor(0, 42);\n      if (gps.speed.isValid()) {\n        display.print(\"SPD:\");\n        display.print(gps.speed.kmph(), 1);\n        display.print(\"km/h \");\n      }\n      if (gps.satellites.isValid()) {\n        display.print(\"SAT:\");\n        display.println(gps.satellites.value());\n      }\n\n      // Time\n      if (gps.time.isValid()) {\n        display.setCursor(0, 54);\n        display.print(\"UTC \");\n        if (gps.time.hour() < 10) display.print('0');\n        display.print(gps.time.hour());\n        display.print(':');\n        if (gps.time.minute() < 10) display.print('0');\n        display.print(gps.time.minute());\n        display.print(':');\n        if (gps.time.second() < 10) display.print('0');\n        display.print(gps.time.second());\n      }\n\n      display.display();\n\n    } else {\n      // --- NO FIX ---\n      digitalWrite(RED_LED, HIGH);  // Red ON = searching\n      digitalWrite(GREEN_LED, LOW);\n\n      // OLED: waiting screen\n      display.clearDisplay();\n      display.setTextSize(1);\n      display.setTextColor(SSD1306_WHITE);\n      display.setCursor(0, 0);\n      display.println(\"  GPS searching...\");\n      display.setCursor(0, 16);\n      display.print(\"Chars: \");\n      display.println(gps.charsProcessed());\n      display.setCursor(0, 28);\n      display.print(\"Pass:  \");\n      display.println(gps.passedChecksum());\n      display.setCursor(0, 40);\n      display.print(\"Fail:  \");\n      display.println(gps.failedChecksum());\n      display.display();\n\n      Serial.print(\".\");\n    }\n  }\n  delay(1000);\n}"
+  },
+  {
+    "id": "gsm_4g_http",
+    "name": "GSM 4G LTE HTTP Client",
+    "icon": "📶",
+    "desc": "4G LTE module (Quectel EC25/BG96) making an HTTP GET request. Demonstrates LTE CAT-4 bands, APN configuration, TCP/IP stack via AT commands (AT+CIPSTART, AT+CIPSEND, AT+HTTPINIT, AT+HTTPACTION, AT+HTTPREAD) and HTTP response handling.",
+    "tags": [
+      "gsm",
+      "4g",
+      "lte",
+      "http",
+      "tcp",
+      "quectel",
+      "ec25",
+      "bg96",
+      "cellular",
+      "iot",
+      "intermediate"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "arduino_uno",
+          "x": 200,
+          "y": 200,
+          "props": {
+            "label": "4G HTTP Client"
+          },
+          "rotation": 0
+        },
+        {
+          "id": "gsm1",
+          "type": "gsm_module_4g",
+          "x": 50,
+          "y": 200,
+          "props": {
+            "band": 3,
+            "operator": "LTE Network",
+            "imei": "351234000001240",
+            "apn": "lteinternet",
+            "smsNumber": "+1234567890",
+            "ussdCode": "*100#",
+            "httpUrl": "http://example.com/api/data"
+          },
+          "rotation": 0
+        },
+        {
+          "id": "vcc1",
+          "type": "power_5v",
+          "x": 130,
+          "y": 280,
+          "props": {}
+        },
+        {
+          "id": "gnd1",
+          "type": "power_gnd",
+          "x": 130,
+          "y": 380,
+          "props": {}
+        }
+      ],
+      "wires": [
+        {
+          "id": "w_tx1",
+          "from": {
+            "instId": "gsm1",
+            "pinId": "TX"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "D0"
+          },
+          "color": "#3498db",
+          "waypoints": []
+        },
+        {
+          "id": "w_rx1",
+          "from": {
+            "instId": "gsm1",
+            "pinId": "RX"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "D1"
+          },
+          "color": "#3498db",
+          "waypoints": []
+        },
+        {
+          "id": "w_vcc1",
+          "from": {
+            "instId": "vcc1",
+            "pinId": "vcc"
+          },
+          "to": {
+            "instId": "gsm1",
+            "pinId": "VCC"
+          },
+          "color": "#f1c40f",
+          "waypoints": []
+        },
+        {
+          "id": "w_gnd1a",
+          "from": {
+            "instId": "gnd1",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "gsm1",
+            "pinId": "GND"
+          },
+          "color": "#333333",
+          "waypoints": []
+        },
+        {
+          "id": "w_gnd1b",
+          "from": {
+            "instId": "gnd1",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND2"
+          },
+          "color": "#333333",
+          "waypoints": []
+        }
+      ]
+    },
+    "code": "/*\n * GSM 4G LTE HTTP Client — Arduino Uno + Quectel EC25/BG96\n * Makes an HTTP GET request every 10 seconds and prints the response.\n * Demonstrates LTE CAT-4 AT commands for TCP/IP and HTTP.\n */\n\n#include <GSM.h>\n\nGSM gsm;\n\nString serverUrl = \"http://example.com/api/data\";\nint requestCount = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"GSM 4G LTE HTTP Client Starting...\");\n\n  // Initialize GSM module\n  gsm.begin();\n\n  // Check network registration and signal\n  Serial.println(\"AT+COPS?\");\n  Serial.println(\"AT+CREG?\");\n  Serial.println(\"AT+CSQ\");\n\n  Serial.println(\"GSM 4G LTE Client ready!\");\n  Serial.println(\"IMEI: \" + gsm.getIMEI());\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  requestCount++;\n\n  Serial.print(\"HTTP GET request #\");\n  Serial.println(requestCount);\n\n  gsm.httpGet(serverUrl);\n\n  delay(1000);\n  String response = gsm.httpRead();\n  if (response.length() > 0) {\n    Serial.print(\"HTTP Response: \");\n    Serial.println(response);\n  }\n\n  Serial.println(\"---\");\n\n  delay(10000);\n}\n",
+    "board2Code": ""
+  },
+  {
+    "id": "gsm_sms",
+    "name": "GSM SMS Send & Receive",
+    "icon": "📟",
+    "desc": "Send and receive SMS messages between two Arduino boards using SIM800/SIM900 GSM modules. Board 1 sends an SMS to Board 2, which reads and displays it on the Serial Monitor. Demonstrates AT+CMGF, AT+CMGS, AT+CMGR and SMS text mode.",
+    "tags": [
+      "gsm",
+      "sms",
+      "2g",
+      "sim800",
+      "sim900",
+      "cellular",
+      "wireless",
+      "intermediate"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "arduino_uno",
+          "x": 200,
+          "y": 200,
+          "props": {
+            "label": "GSM Sender"
+          },
+          "rotation": 0
+        },
+        {
+          "id": "gsm1",
+          "type": "gsm_module_2g",
+          "x": 50,
+          "y": 200,
+          "props": {
+            "band": 900,
+            "operator": "Home Network",
+            "imei": "351234000001234",
+            "apn": "internet",
+            "smsNumber": "+1234567891",
+            "ussdCode": "*100#",
+            "httpUrl": "http://example.com"
+          },
+          "rotation": 0
+        },
+        {
+          "id": "b2",
+          "type": "arduino_uno",
+          "x": 600,
+          "y": 200,
+          "props": {
+            "label": "GSM Receiver"
+          },
+          "rotation": 0
+        },
+        {
+          "id": "gsm2",
+          "type": "gsm_module_2g",
+          "x": 800,
+          "y": 200,
+          "props": {
+            "band": 900,
+            "operator": "Home Network",
+            "imei": "351234000001235",
+            "apn": "internet",
+            "smsNumber": "+1234567890",
+            "ussdCode": "*100#",
+            "httpUrl": "http://example.com"
+          },
+          "rotation": 0
+        },
+        {
+          "id": "vcc1",
+          "type": "power_5v",
+          "x": 130,
+          "y": 280,
+          "props": {}
+        },
+        {
+          "id": "gnd1",
+          "type": "power_gnd",
+          "x": 130,
+          "y": 380,
+          "props": {}
+        },
+        {
+          "id": "vcc2",
+          "type": "power_5v",
+          "x": 530,
+          "y": 280,
+          "props": {}
+        },
+        {
+          "id": "gnd2",
+          "type": "power_gnd",
+          "x": 530,
+          "y": 380,
+          "props": {}
+        }
+      ],
+      "wires": [
+        {
+          "id": "w_tx1",
+          "from": {
+            "instId": "gsm1",
+            "pinId": "TX"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "D0"
+          },
+          "color": "#e67e22",
+          "waypoints": []
+        },
+        {
+          "id": "w_rx1",
+          "from": {
+            "instId": "gsm1",
+            "pinId": "RX"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "D1"
+          },
+          "color": "#e67e22",
+          "waypoints": []
+        },
+        {
+          "id": "w_vcc1",
+          "from": {
+            "instId": "vcc1",
+            "pinId": "vcc"
+          },
+          "to": {
+            "instId": "gsm1",
+            "pinId": "VCC"
+          },
+          "color": "#f1c40f",
+          "waypoints": []
+        },
+        {
+          "id": "w_gnd1a",
+          "from": {
+            "instId": "gnd1",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "gsm1",
+            "pinId": "GND"
+          },
+          "color": "#333333",
+          "waypoints": []
+        },
+        {
+          "id": "w_gnd1b",
+          "from": {
+            "instId": "gnd1",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND2"
+          },
+          "color": "#333333",
+          "waypoints": []
+        },
+        {
+          "id": "w_tx2",
+          "from": {
+            "instId": "gsm2",
+            "pinId": "TX"
+          },
+          "to": {
+            "instId": "b2",
+            "pinId": "D0"
+          },
+          "color": "#e67e22",
+          "waypoints": []
+        },
+        {
+          "id": "w_rx2",
+          "from": {
+            "instId": "gsm2",
+            "pinId": "RX"
+          },
+          "to": {
+            "instId": "b2",
+            "pinId": "D1"
+          },
+          "color": "#e67e22",
+          "waypoints": []
+        },
+        {
+          "id": "w_vcc2",
+          "from": {
+            "instId": "vcc2",
+            "pinId": "vcc"
+          },
+          "to": {
+            "instId": "gsm2",
+            "pinId": "VCC"
+          },
+          "color": "#f1c40f",
+          "waypoints": []
+        },
+        {
+          "id": "w_gnd2a",
+          "from": {
+            "instId": "gnd2",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "gsm2",
+            "pinId": "GND"
+          },
+          "color": "#333333",
+          "waypoints": []
+        },
+        {
+          "id": "w_gnd2b",
+          "from": {
+            "instId": "gnd2",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "b2",
+            "pinId": "GND2"
+          },
+          "color": "#333333",
+          "waypoints": []
+        }
+      ]
+    },
+    "code": "/*\n * GSM SMS Sender — Board 1\n * Sends an SMS message every 5 seconds using SIM800/SIM900 GSM module\n * via AT commands.\n */\n\n#include <GSM.h>\n\nGSM gsm;\n\nString recipient = \"+1234567891\";\nint msgCount = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"GSM SMS Sender Starting...\");\n\n  // Initialize GSM module\n  gsm.begin();\n\n  Serial.println(\"GSM SMS Sender ready!\");\n  Serial.println(\"IMEI: \" + gsm.getIMEI());\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  msgCount++;\n\n  Serial.print(\"Sending SMS #\");\n  Serial.println(msgCount);\n\n  String message = \"GSM SMS #\" + String(msgCount) + \" from Sender\";\n  gsm.sendSMS(recipient, message);\n\n  Serial.println(\"SMS sent!\");\n  Serial.println(\"---\");\n\n  delay(5000);\n}\n",
+    "board2Code": "/*\n * GSM SMS Receiver — Board 2\n * Receives SMS messages from Board 1 and displays them on Serial Monitor.\n */\n\n#include <GSM.h>\n\nGSM gsm;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"GSM SMS Receiver Starting...\");\n\n  // Initialize GSM module\n  gsm.begin();\n\n  Serial.println(\"GSM SMS Receiver ready — waiting for SMS...\");\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  // Read any received SMS\n  String sms = gsm.readSMS();\n  if (sms.length() > 0) {\n    Serial.print(\"Received SMS: \");\n    Serial.println(sms);\n    Serial.println(\"---\");\n  }\n\n  delay(1000);\n}\n"
+  },
+  {
+    "id": "gsm_ussd",
+    "name": "GSM USSD Query",
+    "icon": "\ud83d췜",
+    "desc": "GSM USSD (Unstructured Supplementary Service Data) query example using SIM800/SIM900 2G module. Sends USSD codes (e.g., *100# for balance check) and displays the network response. Demonstrates AT+CUSD USSD command handling.",
+    "tags": [
+      "gsm",
+      "ussd",
+      "2g",
+      "sim800",
+      "sim900",
+      "cellular",
+      "balance",
+      "query",
+      "intermediate"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "arduino_uno",
+          "x": 200,
+          "y": 200,
+          "props": {
+            "label": "USSD Client"
+          },
+          "rotation": 0
+        },
+        {
+          "id": "gsm1",
+          "type": "gsm_module_2g",
+          "x": 50,
+          "y": 200,
+          "props": {
+            "band": 900,
+            "operator": "Home Network",
+            "imei": "351234000001250",
+            "apn": "internet",
+            "smsNumber": "+1234567890",
+            "ussdCode": "*100#",
+            "httpUrl": "http://example.com"
+          },
+          "rotation": 0
+        },
+        {
+          "id": "vcc1",
+          "type": "power_5v",
+          "x": 130,
+          "y": 280,
+          "props": {}
+        },
+        {
+          "id": "gnd1",
+          "type": "power_gnd",
+          "x": 130,
+          "y": 380,
+          "props": {}
+        }
+      ],
+      "wires": [
+        {
+          "id": "w_tx1",
+          "from": {
+            "instId": "gsm1",
+            "pinId": "TX"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "D0"
+          },
+          "color": "#e67e22",
+          "waypoints": []
+        },
+        {
+          "id": "w_rx1",
+          "from": {
+            "instId": "gsm1",
+            "pinId": "RX"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "D1"
+          },
+          "color": "#e67e22",
+          "waypoints": []
+        },
+        {
+          "id": "w_vcc1",
+          "from": {
+            "instId": "vcc1",
+            "pinId": "vcc"
+          },
+          "to": {
+            "instId": "gsm1",
+            "pinId": "VCC"
+          },
+          "color": "#f1c40f",
+          "waypoints": []
+        },
+        {
+          "id": "w_gnd1a",
+          "from": {
+            "instId": "gnd1",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "gsm1",
+            "pinId": "GND"
+          },
+          "color": "#333333",
+          "waypoints": []
+        },
+        {
+          "id": "w_gnd1b",
+          "from": {
+            "instId": "gnd1",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "b1",
+            "pinId": "GND2"
+          },
+          "color": "#333333",
+          "waypoints": []
+        }
+      ]
+    },
+    "code": "/*\n * GSM USSD Query — Arduino Uno + SIM800/SIM900\n * Sends USSD codes (balance check, etc.) every 8 seconds and displays\n * the network response on the Serial Monitor.\n * Demonstrates AT+CUSD USSD command handling.\n */\n\n#include <GSM.h>\n\nGSM gsm;\n\nString ussdCode = \"*100#\";\nint queryCount = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"GSM USSD Client Starting...\");\n\n  // Initialize GSM module\n  gsm.begin();\n\n  // Check network registration\n  Serial.println(\"AT+CREG?\");\n  Serial.println(\"AT+CSQ\");\n\n  Serial.println(\"GSM USSD Client ready!\");\n  Serial.println(\"USSD Code: \" + ussdCode);\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  queryCount++;\n\n  Serial.print(\"Sending USSD query #\");\n  Serial.println(queryCount);\n\n  gsm.sendUSSD(ussdCode);\n\n  Serial.println(\"USSD query sent!\");\n  Serial.println(\"---\");\n\n  delay(8000);\n}\n",
+    "board2Code": ""
   },
   {
     "id": "hc05_bluetooth_led",
@@ -26089,7 +26891,7 @@ window.EXAMPLE_SKETCHES = [
       "matrix",
       "hub75"
     ],
-    "code": "// 64x64 HUB75 RGB LED Matrix — test pattern demo\n// Pins: R1=D2, G1=D3, B1=D4, R2=D5, G2=D6, B2=D7\n//        LAT=D8, OE=D9, CLK=D10, A=D11, B=D12, C=D13\n\nconst int PATTERN_COUNT = 3;\nint currentPattern = 0;\nunsigned long lastSwitch = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  for (int pin = 2; pin <= 13; pin++) {\n    pinMode(pin, OUTPUT);\n  }\n  Serial.println(\"RGB Matrix 64x64 Demo\");\n  Serial.println(\"Patterns: Gradient, Checkerboard, Radar\");\n}\n\nvoid loop() {\n  unsigned long now = millis();\n\n  if (now - lastSwitch > 3000) {\n    lastSwitch = now;\n    currentPattern = (currentPattern + 1) % PATTERN_COUNT;\n    Serial.print(\"Pattern: \");\n    Serial.println(currentPattern);\n  }\n\n  // Simulate pattern output via Serial plotter\n  for (int y = 0; y < 64; y += 8) {\n    for (int x = 0; x < 64; x += 8) {\n      int r = 0, g = 0, b = 0;\n      if (currentPattern == 0) {\n        r = map(x, 0, 63, 0, 255);\n        g = map(y, 0, 63, 0, 255);\n        b = map(x, 63, 0, 0, 255);\n      } else if (currentPattern == 1) {\n        bool check = ((x / 8 + y / 8) % 2 == 0);\n        r = check ? 255 : 0;\n        g = check ? 128 : 0;\n        b = check ? 0 : 255;\n      } else {\n        float dist = sqrt(pow(x - 31.5, 2) + pow(y - 31.5, 2));\n        r = (int)(sin(dist * 0.3) * 127 + 128);\n        g = 255 - r;\n        b = x * 4;\n      }\n      Serial.print(r); Serial.print(\",\")\n      Serial.print(g); Serial.print(\",\")\n      Serial.print(b); Serial.print(\",\")\n    }\n  }\n  Serial.println();\n  delay(100);\n}",
+    "code": "// 64x64 HUB75 RGB LED Matrix — test pattern demo\n// Pins: R1=D2, G1=D3, B1=D4, R2=D5, G2=D6, B2=D7\n//        LAT=D8, OE=D9, CLK=D10, A=D11, B=D12, C=D13\n\nconst int PATTERN_COUNT = 3;\nint currentPattern = 0;\nunsigned long lastSwitch = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  for (int pin = 2; pin <= 13; pin++) {\n    pinMode(pin, OUTPUT);\n  }\n  Serial.println(\"RGB Matrix 64x64 Demo\");\n  Serial.println(\"Patterns: Gradient, Checkerboard, Radar\");\n}\n\nvoid loop() {\n  unsigned long now = millis();\n\n  if (now - lastSwitch > 3000) {\n    lastSwitch = now;\n    currentPattern = (currentPattern + 1) % PATTERN_COUNT;\n    Serial.print(\"Pattern: \");\n    Serial.println(currentPattern);\n  }\n\n  // Simulate pattern output via Serial plotter\n  for (int y = 0; y < 64; y += 8) {\n    for (int x = 0; x < 64; x += 8) {\n      int r = 0, g = 0, b = 0;\n      if (currentPattern == 0) {\n        r = map(x, 0, 63, 0, 255);\n        g = map(y, 0, 63, 0, 255);\n        b = map(x, 63, 0, 0, 255);\n      } else if (currentPattern == 1) {\n        bool check = ((x / 8 + y / 8) % 2 == 0);\n        r = check ? 255 : 0;\n        g = check ? 128 : 0;\n        b = check ? 0 : 255;\n      } else {\n        float dist = sqrt(pow(x - 31.5, 2) + pow(y - 31.5, 2));\n        r = (int)(sin(dist * 0.3) * 127 + 128);\n        g = 255 - r;\n        b = x * 4;\n      }\n      Serial.print(r); Serial.print(\",\");\n      Serial.print(g); Serial.print(\",\");\n      Serial.print(b); Serial.print(\",\");\n    }\n  }\n  Serial.println();\n  delay(100);\n}",
     "circuit": {
       "components": [
         {
