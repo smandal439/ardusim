@@ -303,8 +303,8 @@ void loop() {
     delay(300);
     digitalWrite(p, LOW);
   }
-}`,
-    exampleId: 'multi_colour_led_blink',
+}`,    
+    exampleId: 'dip_switch_and_led_array',
   },
 
   rgb_led: {
