@@ -182,6 +182,25 @@ window.ArduinoLibs['GSM'] = {
     }
     var bus = window._gsmBus;
 
+    // Ensure all bus delivery methods exist — the bus may have been created
+    // earlier by the component's step() before this library runtime
+    // initialized, in which case deliverMQTT (and other methods) are missing.
+    if (!bus.deliverMQTT) {
+      bus.deliverMQTT = function(senderId, topic, payload, qos) {
+        Object.values(this.nodes).forEach((target) => {
+          if (target.id === senderId || !target.active) return;
+          var subscribed = target.mqttSubscriptions && target.mqttSubscriptions.some(function(s) {
+            return s === topic || s === '#';
+          });
+          if (!subscribed) return;
+          target.mqttInbox = target.mqttInbox || [];
+          target.mqttInbox.push({ from: senderId, topic, payload, qos: qos || 0, time: Date.now(), read: false });
+          target.lastRxMeta = { type: 'mqtt', from: senderId, topic, payload, qos: qos || 0, time: Date.now() };
+          if (target.inst && target.inst.setPin) target.inst.setPin('NET', 1);
+        });
+      };
+    }
+
     var _myNodeId = null;
     var _initialized = false;
     var _registered = false;
