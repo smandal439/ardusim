@@ -73,6 +73,21 @@ window.ArduinoLibs['GSM'] = {
 
     // gsm.getIMEI() → _a.gsmGetIMEI()
     [/\bgsm\.getIMEI\s*\(\s*\)/g, '_a.gsmGetIMEI()'],
+
+    // gsm.mqttConnect(broker, port, clientId) → _a.gsmMqttConnect(broker, port, clientId)
+    [/\bgsm\.mqttConnect\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^)]+)\)/g, '_a.gsmMqttConnect($1, $2, $3)'],
+
+    // gsm.mqttPublish(topic, payload) → _a.gsmMqttPublish(topic, payload)
+    [/\bgsm\.mqttPublish\s*\(\s*([^,]+)\s*,\s*([^)]+)\)/g, '_a.gsmMqttPublish($1, $2)'],
+
+    // gsm.mqttSubscribe(topic) → _a.gsmMqttSubscribe(topic)
+    [/\bgsm\.mqttSubscribe\s*\(\s*([^)]+)\)/g, '_a.gsmMqttSubscribe($1)'],
+
+    // gsm.mqttLoop() → _a.gsmMqttLoop()
+    [/\bgsm\.mqttLoop\s*\(\s*\)/g, '_a.gsmMqttLoop()'],
+
+    // gsm.mqttConnected() → _a.gsmMqttConnected()
+    [/\bgsm\.mqttConnected\s*\(\s*\)/g, '_a.gsmMqttConnected()'],
   ],
 
   constants: {
@@ -97,6 +112,11 @@ window.ArduinoLibs['GSM'] = {
     HTTP_GET: 0,
     HTTP_POST: 1,
     HTTP_HEAD: 2,
+
+    // MQTT QoS
+    MQTT_QOS_0: 0,
+    MQTT_QOS_1: 1,
+    MQTT_QOS_2: 2,
 
     // Band presets (2G / 4G / 5G)
     GSM_BAND_850: 850,
@@ -145,6 +165,19 @@ window.ArduinoLibs['GSM'] = {
             if (target.inst && target.inst.setPin) target.inst.setPin('NET', 1);
           });
         },
+        deliverMQTT(senderId, topic, payload, qos) {
+          Object.values(this.nodes).forEach((target) => {
+            if (target.id === senderId || !target.active) return;
+            var subscribed = target.mqttSubscriptions && target.mqttSubscriptions.some(function(s) {
+              return s === topic || s === '#';
+            });
+            if (!subscribed) return;
+            target.mqttInbox = target.mqttInbox || [];
+            target.mqttInbox.push({ from: senderId, topic, payload, qos: qos || 0, time: Date.now(), read: false });
+            target.lastRxMeta = { type: 'mqtt', from: senderId, topic, payload, qos: qos || 0, time: Date.now() };
+            if (target.inst && target.inst.setPin) target.inst.setPin('NET', 1);
+          });
+        },
       };
     }
     var bus = window._gsmBus;
@@ -183,6 +216,14 @@ window.ArduinoLibs['GSM'] = {
     var _tcpConnected = false;
     var _tcpHost = null;
     var _tcpPort = null;
+
+    // MQTT state
+    var _mqttConnected = false;
+    var _mqttBroker = null;
+    var _mqttPort = null;
+    var _mqttClientId = null;
+    var _mqttSubscriptions = [];
+    var _mqttInbox = [];
 
     function _getMyNode() {
       if (_myNodeId !== null) return bus.nodes[_myNodeId];
@@ -238,6 +279,31 @@ window.ArduinoLibs['GSM'] = {
             _httpInit = true;
             bus.deliverHTTP(_myNodeId, url, 'GET', 200, 'HTTP response body');
           },
+          mqttConnect: (broker, port, clientId) => {
+            _mqttBroker = broker;
+            _mqttPort = port;
+            _mqttClientId = clientId;
+            _mqttConnected = true;
+            _mqttInbox = [];
+            bus.deliverMQTT(_myNodeId, '$SYS/broker/connect', clientId + ' connected', 0);
+          },
+          mqttPublish: (topic, payload) => {
+            if (!_mqttConnected) return;
+            bus.deliverMQTT(_myNodeId, topic, payload, 0);
+          },
+          mqttSubscribe: (topic) => {
+            if (_mqttSubscriptions.indexOf(topic) < 0) {
+              _mqttSubscriptions.push(topic);
+            }
+          },
+          mqttLoop: () => {
+            var node = bus.nodes[_myNodeId];
+            var inbox = node && node.mqttInbox ? node.mqttInbox : [];
+            var unread = inbox.filter(function(m) { return !m.read; });
+            unread.forEach(function(m) { m.read = true; });
+            return unread;
+          },
+          mqttConnected: () => _mqttConnected,
         };
 
         self._serialLog('[GSM] Initialized — IMEI: ' + _imei + '\n', 'system');
@@ -373,6 +439,54 @@ window.ArduinoLibs['GSM'] = {
         _tcpConnected = false;
         self._serialLog('[GSM] TCP CLOSED\n', 'system');
         return 1;
+      },
+
+      // ── MQTT over GSM ──
+      gsmMqttConnect: function(broker, port, clientId) {
+        if (!_initialized) {
+          self._serialLog('[GSM] Error: call gsm.begin() first\n', 'system');
+          return 0;
+        }
+        _mqttBroker = String(broker);
+        _mqttPort = Number(port) || 1883;
+        _mqttClientId = String(clientId || 'ardusim_' + _myNodeId);
+        _mqttConnected = true;
+        _mqttInbox = [];
+        bus.deliverMQTT(_myNodeId, '$SYS/broker/connect', _mqttClientId + ' connected', 0);
+        self._serialLog('[GSM] MQTT connected to ' + _mqttBroker + ':' + _mqttPort + ' as ' + _mqttClientId + '\n', 'system');
+        return 1;
+      },
+
+      gsmMqttPublish: function(topic, payload) {
+        if (!_initialized || !_mqttConnected) return 0;
+        bus.deliverMQTT(_myNodeId, String(topic), String(payload), 0);
+        self._serialLog('[GSM] MQTT publish → ' + topic + ': ' + payload + '\n', 'system');
+        return 1;
+      },
+
+      gsmMqttSubscribe: function(topic) {
+        if (!_initialized || !_mqttConnected) return 0;
+        if (_mqttSubscriptions.indexOf(String(topic)) < 0) {
+          _mqttSubscriptions.push(String(topic));
+        }
+        self._serialLog('[GSM] MQTT subscribed to ' + topic + '\n', 'system');
+        return 1;
+      },
+
+      gsmMqttLoop: function() {
+        if (!_initialized || !_mqttConnected) return 0;
+        var node = bus.nodes[_myNodeId];
+        var inbox = node && node.mqttInbox ? node.mqttInbox : [];
+        var unread = inbox.filter(function(m) { return !m.read; });
+        unread.forEach(function(m) { m.read = true; });
+        unread.forEach(function(m) {
+          self._serialLog('[GSM] MQTT msg [' + m.topic + ']: ' + m.payload + '\n', 'system');
+        });
+        return unread.length;
+      },
+
+      gsmMqttConnected: function() {
+        return _mqttConnected ? 1 : 0;
       },
 
       gsmSignalQuality: function() {
@@ -547,6 +661,64 @@ window.ArduinoLibs['GSM'] = {
         // AT+HTTPTERM — terminate
         if (c === 'AT+HTTPTERM') {
           _httpInit = false;
+          self._serialLog('OK\n', 'data');
+          return 'OK';
+        }
+
+        // AT+CMQTTSTART — start MQTT client
+        if (c === 'AT+CMQTTSTART') {
+          if (!_initialized) { self._serialLog('ERROR\n', 'data'); return 'ERROR'; }
+          _mqttClientId = _mqttClientId || 'ardusim_' + _myNodeId;
+          _mqttConnected = true;
+          self._serialLog('OK\n', 'data');
+          return 'OK';
+        }
+
+        // AT+CMQTT="broker",port,clientId — connect to broker
+        m = c.match(/^AT\+CMQTT\s*=\s*"([^"]*)"\s*,\s*(\d+)\s*,\s*"([^"]*)"/);
+        if (m) {
+          _mqttBroker = m[1];
+          _mqttPort = Number(m[2]);
+          _mqttClientId = m[3];
+          _mqttConnected = true;
+          bus.deliverMQTT(_myNodeId, '$SYS/broker/connect', _mqttClientId + ' connected', 0);
+          self._serialLog('OK\n', 'data');
+          self._serialLog('[GSM] Connected to MQTT broker ' + _mqttBroker + '\n', 'system');
+          return 'OK';
+        }
+
+        // AT+CMQTTSUB="topic" — subscribe
+        m = c.match(/^AT\+CMQTTSUB\s*=\s*"([^"]*)"/);
+        if (m) {
+          if (_mqttSubscriptions.indexOf(m[1]) < 0) _mqttSubscriptions.push(m[1]);
+          self._serialLog('OK\n', 'data');
+          return 'OK';
+        }
+
+        // AT+CMQTTPUB="topic","payload" — publish
+        m = c.match(/^AT\+CMQTTPUB\s*=\s*"([^"]*)"\s*,\s*"([^"]*)"/);
+        if (m) {
+          bus.deliverMQTT(_myNodeId, m[1], m[2], 0);
+          self._serialLog('OK\n', 'data');
+          return 'OK';
+        }
+
+        // AT+CMQTTLOOP — check for messages
+        if (c === 'AT+CMQTTLOOP') {
+          var node = bus.nodes[_myNodeId];
+          var inbox = node && node.mqttInbox ? node.mqttInbox : [];
+          var unread = inbox.filter(function(msg) { return !msg.read; });
+          unread.forEach(function(msg) { msg.read = true; });
+          unread.forEach(function(msg) {
+            self._serialLog('+CMQTTMSG: "' + msg.topic + '","' + msg.payload + '"\n', 'data');
+          });
+          self._serialLog('OK\n', 'data');
+          return 'OK';
+        }
+
+        // AT+CMQTTCONN? — connection status
+        if (c === 'AT+CMQTTCONN?') {
+          self._serialLog('+CMQTTCONN: ' + (_mqttConnected ? 1 : 0) + '\n', 'data');
           self._serialLog('OK\n', 'data');
           return 'OK';
         }

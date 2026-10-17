@@ -1,0 +1,111 @@
+{
+  "id": "gsm_mqtt_pub_sub",
+  "name": "GSM MQTT Pub/Sub",
+  "icon": "\uD83D\uDCDF",
+  "desc": "MQTT publish/subscribe over GSM using SIM800/SIM900 2G modules. Board 1 publishes temperature readings to 'ardusim/temp'; Board 2 subscribes and toggles an LED via 'ardusim/led'. Demonstrates MQTT over cellular (AT+CMQTT*, gsm.mqttConnect/publish/subscribe/loop).",
+  "tags": [
+    "gsm",
+    "mqtt",
+    "2g",
+    "sim800",
+    "sim900",
+    "cellular",
+    "publish",
+    "subscribe",
+    "iot",
+    "intermediate"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 200,
+        "props": { "label": "MQTT Publisher" },
+        "rotation": 0
+      },
+      {
+        "id": "gsm1",
+        "type": "gsm_module_2g",
+        "x": 50,
+        "y": 200,
+        "props": {
+          "band": 900,
+          "operator": "Home Network",
+          "imei": "351234000001260",
+          "apn": "internet",
+          "smsNumber": "+1234567890",
+          "ussdCode": "*100#",
+          "httpUrl": "http://example.com"
+        },
+        "rotation": 0
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "x": 120,
+        "y": 320,
+        "props": { "color": "#33ff33", "colorName": "Green" },
+        "rotation": 0
+      },
+      {
+        "id": "r1",
+        "type": "resistor",
+        "x": 120,
+        "y": 400,
+        "props": { "value": 220, "unit": "\u03a9" },
+        "rotation": 0
+      },
+      {
+        "id": "b2",
+        "type": "arduino_uno",
+        "x": 600,
+        "y": 200,
+        "props": { "label": "MQTT Subscriber" },
+        "rotation": 0
+      },
+      {
+        "id": "gsm2",
+        "type": "gsm_module_2g",
+        "x": 800,
+        "y": 200,
+        "props": {
+          "band": 900,
+          "operator": "Home Network",
+          "imei": "351234000001261",
+          "apn": "internet",
+          "smsNumber": "+1234567890",
+          "ussdCode": "*100#",
+          "httpUrl": "http://example.com"
+        },
+        "rotation": 0
+      },
+      {
+        "id": "vcc1", "type": "power_5v", "x": 130, "y": 280, "props": {} },
+      {
+        "id": "gnd1", "type": "power_gnd", "x": 130, "y": 380, "props": {} },
+      {
+        "id": "vcc2", "type": "power_5v", "x": 530, "y": 280, "props": {} },
+      {
+        "id": "gnd2", "type": "power_gnd", "x": 530, "y": 380, "props": {} }
+    ],
+    "wires": [
+      {"id":"w_tx1","from":{"instId":"gsm1","pinId":"TX"},"to":{"instId":"b1","pinId":"D0"},"color":"#e67e22","waypoints":[]},
+      {"id":"w_rx1","from":{"instId":"gsm1","pinId":"RX"},"to":{"instId":"b1","pinId":"D1"},"color":"#e67e22","waypoints":[]},
+      {"id":"w_vcc1","from":{"instId":"vcc1","pinId":"vcc"},"to":{"instId":"gsm1","pinId":"VCC"},"color":"#f1c40f","waypoints":[]},
+      {"id":"w_gnd1a","from":{"instId":"gnd1","pinId":"gnd"},"to":{"instId":"gsm1","pinId":"GND"},"color":"#333333","waypoints":[]},
+      {"id":"w_gnd1b","from":{"instId":"gnd1","pinId":"gnd"},"to":{"instId":"b1","pinId":"GND2"},"color":"#333333","waypoints":[]},
+      {"id":"w_tx2","from":{"instId":"gsm2","pinId":"TX"},"to":{"instId":"b2","pinId":"D0"},"color":"#e67e22","waypoints":[]},
+      {"id":"w_rx2","from":{"instId":"gsm2","pinId":"RX"},"to":{"instId":"b2","pinId":"D1"},"color":"#e67e22","waypoints":[]},
+      {"id":"w_vcc2","from":{"instId":"vcc2","pinId":"vcc"},"to":{"instId":"gsm2","pinId":"VCC"},"color":"#f1c40f","waypoints":[]},
+      {"id":"w_gnd2a","from":{"instId":"gnd2","pinId":"gnd"},"to":{"instId":"gsm2","pinId":"GND"},"color":"#333333","waypoints":[]},
+      {"id":"w_gnd2b","from":{"instId":"gnd2","pinId":"gnd"},"to":{"instId":"b2","pinId":"GND2"},"color":"#333333","waypoints":[]},
+      {"id":"w_led1","from":{"instId":"b1","pinId":"D13"},"to":{"instId":"led1","pinId":"anode"},"color":"#ff3333","waypoints":[]},
+      {"id":"w_r1","from":{"instId":"led1","pinId":"cathode"},"to":{"instId":"r1","pinId":"p1"},"color":"#333333","waypoints":[]},
+      {"id":"w_r1g","from":{"instId":"r1","pinId":"p2"},"to":{"instId":"gnd1","pinId":"gnd"},"color":"#333333","waypoints":[]}
+    ]
+  },
+  "code": "/*\n * GSM MQTT Publisher — Board 1\n * Publishes temperature readings to 'ardusim/temp' every 5 seconds\n * and subscribes to 'ardusim/led' for LED control commands.\n * Uses SIM800/SIM900 GSM module with MQTT over cellular.\n */\n\n#include <GSM.h>\n\nGSM gsm;\n\nconst char* mqttBroker = \"broker.emqx.io\";\nconst int   mqttPort   = 1883;\nconst char* clientId   = \"ArduinoUno_Publisher\";\nconst char* topicTemp  = \"ardusim/temp\";\nconst char* topicLed   = \"ardusim/led\";\n\nint tempC = 20;\nint msgCount = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"GSM MQTT Publisher Starting...\");\n\n  pinMode(13, OUTPUT);\n  digitalWrite(13, LOW);\n\n  // Initialize GSM module\n  gsm.begin();\n\n  // Connect to MQTT broker\n  gsm.mqttConnect(mqttBroker, mqttPort, clientId);\n\n  // Subscribe to LED control topic\n  gsm.mqttSubscribe(topicLed);\n\n  Serial.println(\"GSM MQTT Publisher ready!\");\n  Serial.println(\"IMEI: \" + gsm.getIMEI());\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  // Process any incoming MQTT messages (LED on/off commands)\n  int msgs = gsm.mqttLoop();\n\n  // Publish temperature reading\n  tempC = 20 + (msgCount % 10);\n  msgCount++;\n\n  Serial.print(\"Publishing temperature: \");\n  Serial.print(tempC);\n  Serial.println(\" °C\");\n\n  gsm.mqttPublish(topicTemp, String(tempC));\n\n  // Toggle built-in LED to show activity\n  digitalWrite(13, !digitalRead(13));\n\n  Serial.println(\"---\");\n  delay(5000);\n}\n",
+  "board2Code": "/*\n * GSM MQTT Subscriber — Board 2\n * Subscribes to 'ardusim/temp' for temperature readings\n * and publishes LED state to 'ardusim/led'.\n * Uses SIM800/SIM900 GSM module with MQTT over cellular.\n */\n\n#include <GSM.h>\n\nGSM gsm;\n\nconst char* mqttBroker = \"broker.emqx.io\";\nconst int   mqttPort   = 1883;\nconst char* clientId   = \"ArduinoUno_Subscriber\";\nconst char* topicTemp  = \"ardusim/temp\";\nconst char* topicLed   = \"ardusim/led\";\n\nbool ledState = false;\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  Serial.println(\"GSM MQTT Subscriber Starting...\");\n\n  pinMode(13, OUTPUT);\n  digitalWrite(13, LOW);\n\n  // Initialize GSM module\n  gsm.begin();\n\n  // Connect to MQTT broker\n  gsm.mqttConnect(mqttBroker, mqttPort, clientId);\n\n  // Subscribe to temperature topic\n  gsm.mqttSubscribe(topicTemp);\n\n  Serial.println(\"GSM MQTT Subscriber ready!\");\n  Serial.println(\"IMEI: \" + gsm.getIMEI());\n  Serial.println(\"---\");\n}\n\nvoid loop() {\n  // Process incoming MQTT messages\n  int msgs = gsm.mqttLoop();\n\n  // Toggle LED state and publish every 6 seconds\n  static unsigned long lastPublish = 0;\n  unsigned long now = millis();\n  if (now - lastPublish > 6000) {\n    lastPublish = now;\n    ledState = !ledState;\n    digitalWrite(13, ledState ? HIGH : LOW);\n\n    Serial.print(\"Publishing LED state: \");\n    Serial.println(ledState ? \"ON\" : \"OFF\");\n\n    gsm.mqttPublish(topicLed, ledState ? \"on\" : \"off\");\n    Serial.println(\"---\");\n  }\n\n  delay(500);\n}\n"
+}
