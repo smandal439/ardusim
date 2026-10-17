@@ -3529,6 +3529,8 @@ _newProject() {
         const label = document.createElement('label');
         label.textContent = iDef.label || key.replace(/_/g, ' ');
         label.className = 'prop-label';
+        const propDoc = (g.props && g.props[key]) || '';
+        if (propDoc) label.title = propDoc;
         const select = document.createElement('select');
         select.className = 'prop-input';
         select.name = key;
@@ -3573,7 +3575,7 @@ _newProject() {
       row.className = 'prop-row';
       const label = document.createElement('label');
       const propDoc = (g.props && g.props[key]) || '';
-      label.textContent = key.replace(/_/g, ' ');
+      label.textContent = (iDef && iDef.label) || key.replace(/_/g, ' ');
       label.className = 'prop-label';
       label.htmlFor = `prop-${key}`;
       if (propDoc) label.title = propDoc;
@@ -3582,8 +3584,20 @@ _newProject() {
       input.name = key;
       input.id   = `prop-${key}`;
       input.value = value;
-      if (typeof value === 'number') { input.type = 'number'; }
-      else if (typeof value === 'boolean') { input.type = 'checkbox'; input.checked = value; }
+      if (typeof value === 'number') {
+        input.type = 'number';
+        // Mirror the control's declared limits onto the field so the browser
+        // can hint (and _applyPropsModal can clamp) typed values. Without this
+        // a hand-typed Time/Div or V/Div of 0 blanks the oscilloscope display.
+        if (iDef && typeof iDef.min === 'number') input.min = iDef.min;
+        if (iDef && typeof iDef.max === 'number') input.max = iDef.max;
+        if (iDef && typeof iDef.step === 'number') input.step = iDef.step;
+        if (iDef && (typeof iDef.min === 'number' || typeof iDef.max === 'number')) {
+          const lo = typeof iDef.min === 'number' ? iDef.min : '-∞';
+          const hi = typeof iDef.max === 'number' ? iDef.max : '+∞';
+          input.title = `Allowed range: ${lo} … ${hi}`;
+        }
+      } else if (typeof value === 'boolean') { input.type = 'checkbox'; input.checked = value; }
       else { input.type = 'text'; }
       row.appendChild(label);
       row.appendChild(input);
@@ -3608,6 +3622,9 @@ _newProject() {
     if (!this._propsComp) return;
     const body = document.getElementById('modal-props-body');
     if (!body) return;
+    const defs = (window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS) || {};
+    const def = defs[this._propsComp.type];
+    const clampPropValue = window.ArduinoComponents && window.ArduinoComponents.clampPropValue;
     const LED_COLORS = [
       { name: 'Red',    hex: '#ff3333' },
       { name: 'Green',  hex: '#33ff66' },
@@ -3619,8 +3636,24 @@ _newProject() {
     body.querySelectorAll('.prop-input').forEach(input => {
       const key = input.name;
       let val = input.value;
-      if (input.type === 'number')   val = Number(val);
+      if (input.type === 'number') {
+        // A blank or half-typed field arrives as '' (the DOM sanitises it out
+        // of type=number), and Number('') is 0 — applying that would silently
+        // zero whatever the user was in the middle of editing. Leave it alone.
+        if (input.value.trim() === '') return;
+        val = Number(input.value);
+      }
       if (input.type === 'checkbox') val = input.checked;
+
+      if (typeof val === 'number') {
+        // Hold typed numbers to the control's declared min/max/step (the same
+        // limits the sliders and the fullscreen controls already enforce) and
+        // never store a NaN — keep the current value instead.
+        const bounded = typeof clampPropValue === 'function' ? clampPropValue(def, key, val) : val;
+        const prev = this._propsComp.props[key];
+        val = Number.isFinite(bounded) ? bounded : (Number.isFinite(prev) ? prev : 0);
+      }
+
       this._propsComp.props[key] = val;
       // Sync runtimeState so draw() picks up the change immediately
       if (this._propsComp.runtimeState) this._propsComp.runtimeState[key] = val;

@@ -182,6 +182,13 @@ class ElectricalEngine {
         }
         break;
       }
+      case 'slide_switch': {
+        // SPDT: the blade always touches exactly one throw
+        const throwPin = typeof window._slideSwitchThrow === 'function'
+          ? window._slideSwitchThrow(inst) : 'a';
+        conns.push([key('com'), key(throwPin)]);
+        break;
+      }
       case 'ssr_8ch': {
         const channels = inst.runtimeState?.channels || [];
         for (let i = 1; i <= 8; i++) {
@@ -821,6 +828,10 @@ class ElectricalEngine {
       } else if (inst.type === 'relay') {
         const on = inst.runtimeState?.active;
         addEdge(key('com'), key(on ? 'no' : 'nc'), 0);
+      } else if (inst.type === 'slide_switch') {
+        const throwPin = typeof window._slideSwitchThrow === 'function'
+          ? window._slideSwitchThrow(inst) : 'a';
+        addEdge(key('com'), key(throwPin), 0);
       } else if (inst.type === 'ssr_8ch') {
         const channels = inst.runtimeState?.channels || [];
         for (let i = 1; i <= 8; i++) {
@@ -850,6 +861,10 @@ class ElectricalEngine {
     dfs(startKey, new Set([startKey]), 0);
 
     if (pathResistances.length === 0) return Infinity;
+    // A dead short (a 0 Ω path — closed switch, pressed button, closed relay)
+    // conducts perfectly: report 0, not Infinity. Callers such as
+    // hasCompleteCircuit() and calculateCurrent() already expect 0 here.
+    if (pathResistances.some(r => r === 0)) return 0;
 
     // Parallel combination: 1/R_total = Σ(1/Ri)
     let totalConductance = 0;

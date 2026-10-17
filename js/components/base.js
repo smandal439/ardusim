@@ -393,7 +393,7 @@ const COMPONENT_CATALOG = [
       ]
     }
   },
-  { category: 'Input', ids: ['push_button', 'potentiometer', 'joystick', 'keypad_4x4', 'rotary_encoder', 'dip_switch', 'ir_remote', 'ir_receiver'] },
+  { category: 'Input', ids: ['push_button', 'potentiometer', 'joystick', 'keypad_4x4', 'rotary_encoder', 'dip_switch', 'slide_switch', 'ir_remote', 'ir_receiver'] },
   { category: 'Logic', ids: ['logic_level_in', 'logic_level_out'] },
   { category: 'Actuators', ids: ['servo', 'dc_motor', 'relay', 'ssr_8ch', 'stepper_28byj', 'l298n', 'servo_continuous', 'tb6600', 'nema17'] },
   { category: 'Audio', ids: ['max98357a', 'speaker_4ohm', 'dfplayer_mini'] },
@@ -432,6 +432,46 @@ const COMPONENT_CATALOG = [
   },
 ];
 
+/**
+ * Clamp one property value against the limits declared by its interactive
+ * control (min / max / step).
+ *
+ * Every surface that can write a property — the properties panel, the on-canvas
+ * sliders, the fullscreen control panel — should funnel typed numbers through
+ * here so they all agree on what a legal value is. The sliders already enforced
+ * their own range while dragging; the free-text number fields did not, which is
+ * how things like Time/Div = 0 (a divisor) or V/Div = 0 reached the renderer and
+ * blanked the display with Infinity/NaN geometry.
+ *
+ * Returns the value unchanged when there is no matching control, when the value
+ * is not a number, or when it is non-finite (the caller decides what to
+ * substitute for a NaN).
+ *
+ * @param {object|undefined} def  COMPONENT_DEFS entry for the component.
+ * @param {string} key            Property name.
+ * @param {number} value          Proposed value.
+ * @returns {*}                   The bounded value.
+ */
+function clampPropValue(def, key, value) {
+  if (typeof value !== 'number') return value;
+  if (!def || !Array.isArray(def.interactive)) return value;
+  const ctrl = def.interactive.find(c => c && c.field === key);
+  if (!ctrl) return value;
+
+  let v = value;
+  if (typeof ctrl.min === 'number') v = Math.max(ctrl.min, v);
+  if (typeof ctrl.max === 'number') v = Math.min(ctrl.max, v);
+  if (typeof ctrl.step === 'number' && ctrl.step > 0) {
+    v = Math.round(v / ctrl.step) * ctrl.step;
+    // Re-apply the bounds after snapping — rounding can step over an edge.
+    if (typeof ctrl.min === 'number') v = Math.max(ctrl.min, v);
+    if (typeof ctrl.max === 'number') v = Math.min(ctrl.max, v);
+    // Snap leaves float dust (0.1 / 0.0001 style artefacts); strip it.
+    v = Number(v.toPrecision(12));
+  }
+  return v;
+}
+
 /* Export */
 window.ArduinoComponents = {
   Component,
@@ -449,4 +489,5 @@ window.ArduinoComponents = {
   registerComponent,
   getComponentClass,
   createComponent,
+  clampPropValue,
 };

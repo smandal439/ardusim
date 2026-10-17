@@ -1128,10 +1128,20 @@ class CircuitCanvas {
 
     const freqSteps = [1, 10, 100, 1000, 10000, 100000, 1000000];
     const shiftFreq = (field, dir) => {
-      const cur = rs[field] !== undefined ? rs[field] : (props[field] ?? 440);
+      const rawCur = rs[field] !== undefined ? rs[field] : (props[field] ?? 440);
+      const cur = Number.isFinite(Number(rawCur)) ? Number(rawCur) : 440;
       let step = 1;
       for (const s of freqSteps) { if (cur >= s) step = s; }
-      const newVal = Math.max(1, Math.min(10000000, cur + dir * step));
+      // Clamp through the component's own declared limits rather than a
+      // hard-coded floor: the old Math.max(1, …) made "freq down" *raise* the
+      // frequency whenever a project ran below 1 Hz (the bundled examples run
+      // at 0.5 Hz), and nothing stopped the buttons reaching 1e999.
+      const AC = window.ArduinoComponents || {};
+      const def = AC.COMPONENT_DEFS && AC.COMPONENT_DEFS.func_gen;
+      const bounded = typeof AC.clampPropValue === 'function'
+        ? AC.clampPropValue(def, field, cur + dir * step)
+        : cur + dir * step;
+      const newVal = Number.isFinite(bounded) ? bounded : 0;
       rs[field] = newVal;
       props[field] = newVal;
     };
@@ -1418,6 +1428,44 @@ class CircuitCanvas {
     }
     inst.props.level = inst.props.level ? 0 : 1;
     this._onChanged();
+  }
+
+  // Slide an SPDT slide switch to the opposite throw (COM ↔ A ⇄ COM ↔ B).
+  // Only the throw index changes — the engine does the rest of the work.
+  _toggleSlideSwitch(inst) {
+    if (!inst || inst.type !== 'slide_switch') return;
+    const onA = typeof window._slideSwitchThrow === 'function'
+      ? window._slideSwitchThrow(inst) === 'a' : !(inst.runtimeState?.position ?? inst.props?.position);
+    inst.runtimeState = inst.runtimeState || {};
+    inst.runtimeState.position = onA ? 1 : 0;
+    this._onChanged();
+  }
+
+  /* ---- Push button: momentary vs latching ---------------------------- */
+  // A momentary (tactile) button is closed only while the pointer — or
+  // Space/Enter — is physically held down. A latching one stays closed after a
+  // click until the next click. Default is 'latching' so every existing
+  // circuit keeps behaving exactly as it did before the property existed.
+  _isMomentaryButton(inst) {
+    if (!inst || inst.type !== 'push_button') return false;
+    const mode = inst.props?.mode ?? inst.runtimeState?.mode;
+    return mode === 'momentary';
+  }
+
+  _setPushButton(inst, pressed) {
+    if (!inst || inst.type !== 'push_button') return;
+    inst.runtimeState = inst.runtimeState || {};
+    inst.runtimeState.pressed = !!pressed;
+  }
+
+  // Opens every button that the pointer is holding down. Called on document
+  // mouseup so a button can't stay stuck closed when the pointer is released
+  // outside the canvas element (the canvas never sees that mouseup).
+  _releasePointerHeldButton() {
+    if (this._pointerHeldButton) {
+      this._setPushButton(this._pointerHeldButton, false);
+      this._pointerHeldButton = null;
+    }
   }
 
   // Right-click release: clears the forced level on an attached input tag.
@@ -1777,7 +1825,11 @@ class CircuitCanvas {
     canvas.addEventListener('touchend', e => this._onTouchEnd(e), { passive: false });
 
     document.addEventListener('keydown', e => this._onKeyDown(e));
-    document.addEventListener('mouseup', () => { if (this.mode === 'panning') this.mode = 'idle'; });
+    document.addEventListener('keyup', e => this._onKeyUp(e));
+    document.addEventListener('mouseup', () => {
+      if (this.mode === 'panning') this.mode = 'idle';
+      this._releasePointerHeldButton();
+    });
   }
 
   /* --------------- TOUCH HANDLERS --------------- */
@@ -2109,11 +2161,15 @@ class CircuitCanvas {
         this.selected = compHit;
         this.selectedWire = null;
 
-        // --- New: toggle push_button pressed state on click ---
+        // --- push_button: momentary presses while held, latching toggles ---
         if (compHit.type === 'push_button') {
-          const inst = compHit;
-          inst.runtimeState = inst.runtimeState || {};
-          inst.runtimeState.pressed = !inst.runtimeState.pressed;
+          compHit.runtimeState = compHit.runtimeState || {};
+          if (this._isMomentaryButton(compHit)) {
+            compHit.runtimeState.pressed = true;
+            this._pointerHeldButton = compHit;
+          } else {
+            compHit.runtimeState.pressed = !compHit.runtimeState.pressed;
+          }
         }
         // ------------------------------------------------
 
@@ -2373,6 +2429,11 @@ class CircuitCanvas {
   _onMouseUp(e) {
     if (this.mode === 'dragging' && this.dragging) {
       const dragged = this.dragging.inst;
+      // A momentary button opens the instant the pointer comes back up.
+      if (dragged && dragged.type === 'push_button' && this._isMomentaryButton(dragged)) {
+        this._setPushButton(dragged, false);
+      }
+      this._pointerHeldButton = null;
       if (this.dragging.moved) {
         if (dragged && (dragged.type === 'logic_level_in' || dragged.type === 'logic_level_out')) {
           this._tryAttachTag(dragged);
@@ -2382,6 +2443,9 @@ class CircuitCanvas {
       } else if (dragged && dragged.type === 'logic_level_in') {
         // Click without moving — toggle the input tag's level
         this._toggleLogicTag(dragged);
+      } else if (dragged && dragged.type === 'slide_switch') {
+        // Click without moving — slide the actuator to the other throw
+        this._toggleSlideSwitch(dragged);
       }
       this.mode = 'idle';
       this.dragging = null;
@@ -2459,6 +2523,19 @@ class CircuitCanvas {
     }
   }
 
+  // Release whatever a momentary push button the keyboard is holding. Key repeat
+  // is irrelevant here — only the first keyup of Space/Enter after a press counts.
+  _onKeyUp(e) {
+    const t = e.target;
+    if (t && typeof t.closest === 'function' && t.closest('#editor-container')) return;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    if (e.key !== ' ' && e.key !== 'Enter') return;
+    if (this._keyHeldButton) {
+      this._setPushButton(this._keyHeldButton, false);
+      this._keyHeldButton = null;
+    }
+  }
+
   _onKeyDown(e) {
     // Only handle when canvas is in focus (not in editor)
     const t = e.target;
@@ -2472,8 +2549,16 @@ class CircuitCanvas {
     if (e.key === 'r' || e.key === 'R') { this.rotateSelected(); }
     if ((e.key === ' ' || e.key === 'Enter') && this.selected && this.selected.type === 'push_button') {
       e.preventDefault();
-      this.selected.runtimeState = this.selected.runtimeState || {};
-      this.selected.runtimeState.pressed = !this.selected.runtimeState.pressed;
+      if (this._isMomentaryButton(this.selected)) {
+        this._setPushButton(this.selected, true);
+        this._keyHeldButton = this.selected;
+      } else {
+        this._setPushButton(this.selected, !this.selected.runtimeState?.pressed);
+      }
+    }
+    if ((e.key === ' ' || e.key === 'Enter') && this.selected && this.selected.type === 'slide_switch') {
+      e.preventDefault();
+      this._toggleSlideSwitch(this.selected);
     }
     if (e.key === 'Escape') {
       if (this.mode === 'placing') this.cancelPlacing();
@@ -5222,6 +5307,17 @@ class CircuitCanvas {
         }
       }
 
+      // 4b1. Slide switch internal pass-through (COM ↔ selected throw)
+      if (inst.type === 'slide_switch') {
+        const sel = typeof window._slideSwitchThrow === 'function'
+          ? window._slideSwitchThrow(inst) : 'a';
+        if (current.pinId === 'com') {
+          queue.push({ instId: inst.id, pinId: sel, resistance: current.resistance });
+        } else if (current.pinId === sel) {
+          queue.push({ instId: inst.id, pinId: 'com', resistance: current.resistance });
+        }
+      }
+
       // 4b2. SSR channel pass-through (outNa ↔ outNb when channel N is on)
       if (inst.type === 'ssr_8ch') {
         const m = /^out(\d)([ab])$/.exec(current.pinId);
@@ -5517,6 +5613,10 @@ class CircuitCanvas {
       } else if (inst.type === 'relay') {
         const on = inst.runtimeState && inst.runtimeState.active;
         addEdge(key('com'), key(on ? 'no' : 'nc'), 0);
+      } else if (inst.type === 'slide_switch') {
+        const throwPin = typeof window._slideSwitchThrow === 'function'
+          ? window._slideSwitchThrow(inst) : 'a';
+        addEdge(key('com'), key(throwPin), 0);
       } else if (inst.type === 'ssr_8ch') {
         const channels = (inst.runtimeState && inst.runtimeState.channels) || [];
         for (let i = 1; i <= 8; i++) {
@@ -5746,6 +5846,15 @@ class CircuitCanvas {
       return pairMap[targetPin] ? this._readDigitalInput(other.id, pairMap[targetPin], visited) : 0;
     }
 
+    // 3b. Slide switch — only the selected throw conducts through to COM
+    if (other.type === 'slide_switch') {
+      const sel = typeof window._slideSwitchThrow === 'function'
+        ? window._slideSwitchThrow(other) : 'a';
+      if (targetPin === 'com') return this._readDigitalInput(other.id, sel, visited);
+      if (targetPin === sel) return this._readDigitalInput(other.id, 'com', visited);
+      return 0; // the other throw is open
+    }
+
     // 4. Analog signal sources (with 2.5V CMOS digital thresholding)
     if (other.type === 'func_gen') {
       const rs = other.runtimeState || {};
@@ -5813,6 +5922,13 @@ class CircuitCanvas {
         : (targetPin === 'p3' ? 'p4' : 'p3');
       return this._hasDigitalInputSource(other.id, nextPin, visited);
     }
+    if (other.type === 'slide_switch') {
+      const sel = typeof window._slideSwitchThrow === 'function'
+        ? window._slideSwitchThrow(other) : 'a';
+      if (targetPin === 'com') return this._hasDigitalInputSource(other.id, sel, visited);
+      if (targetPin === sel) return this._hasDigitalInputSource(other.id, 'com', visited);
+      return false;
+    }
     if (other.type === 'func_gen') return true;
     if (other.type === 'potentiometer' && targetPin === 'wiper') return true;
     const pn = this._getConnectedPinNum(fromInstId, pinId);
@@ -5850,6 +5966,16 @@ class CircuitCanvas {
       if (tp === 'p2') return this._readAnalogInput(other.id, 'p1');
       if (tp === 'p3') return this._readAnalogInput(other.id, 'p4');
       if (tp === 'p4') return this._readAnalogInput(other.id, 'p3');
+      return 0;
+    }
+    // Slide switch — follow COM onto the selected throw (the open throw reads 0
+    // instead of leaving a stale ADC value from the previous position).
+    if (other.type === 'slide_switch') {
+      const sel = typeof window._slideSwitchThrow === 'function'
+        ? window._slideSwitchThrow(other) : 'a';
+      const tp = wireTarget.pinId;
+      if (tp === 'com') return this._readAnalogInput(other.id, sel);
+      if (tp === sel) return this._readAnalogInput(other.id, 'com');
       return 0;
     }
     // For a potentiometer wiper, return the component's live value directly.

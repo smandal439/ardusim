@@ -549,7 +549,7 @@ void loop(){}`,
     icon: '🔘',
     category: 'Input',
     longDesc: 'A momentary tactile switch. The four legs form two internally-connected pairs — pressing the cap joins the pairs so current can flow. Read it with digitalRead() and an INPUT_PULLUP so the pin reads HIGH when released and LOW when pressed. Works standalone with ICs (no Arduino needed) — the simulator traces through the switch to find the voltage source on the other side.',
-    use: 'User input — buttons, doorbells, triggers. Wire one side to a digital pin (with internal pull-up) and the other to GND. Toggle it by clicking on the canvas or pressing Space/Enter when selected.',
+    use: 'User input — buttons, doorbells, triggers. Wire one side to a digital pin (with internal pull-up) and the other to GND. Operate it by clicking on the canvas, or with Space/Enter when selected. Set Action in the properties panel to Momentary (hold to press) or Latching (click to toggle).',
     pins: {
       p1: { label: '1', type: 'digital', desc: 'Leg 1 — one side of the switch contact.' },
       p2: { label: '2', type: 'digital', desc: 'Leg 2 — internally connected to leg 1.' },
@@ -559,6 +559,7 @@ void loop(){}`,
     props: {
       pressed: 'Simulated pressed state when toggled in the canvas.',
       label: 'Button label shown on the canvas.',
+      mode: 'Action. Momentary: the contacts close only while the mouse button (or Space/Enter) is physically held, exactly like a real tactile switch. Latching: each click closes the contacts and they stay closed until the next click (default).',
     },
     wiring: 'D2 → pin 1, pin 3 → GND. Enable INPUT_PULLUP in code.',
     code: `void setup(){
@@ -570,6 +571,34 @@ void loop(){
   delay(50);
 }`,
     exampleId: 'button',
+  },
+
+  slide_switch: {
+    id: 'slide_switch',
+    name: 'Slide Switch (SPDT)',
+    icon: '↔️',
+    category: 'Input',
+    longDesc: 'A 3-pin SPDT slide (slider) switch. The centre pin is COM and the blade always touches exactly one outer throw: position A shorts COM to A, position B shorts COM to B. It is a purely passive contact - whatever is wired to the selected throw appears on COM, so it works with or without an Arduino.',
+    use: 'Mode selection, power routing, choosing between two signals. Wire COM to a digital input and tie one throw to GND (or leave it open with INPUT_PULLUP) to read a two-state input, or use it to pick which source reaches an LED, an IC input or an analog pin.',
+    pins: {
+      a: { label: 'A', type: 'digital', desc: 'Throw A - connected to COM while the slider is on the left.' },
+      com: { label: 'COM', type: 'digital', desc: 'Common blade - follows whichever throw is selected.' },
+      b: { label: 'B', type: 'digital', desc: 'Throw B - connected to COM while the slider is on the right.' },
+    },
+    props: {
+      position: 'Selected throw: 0 = A (COM to A), 1 = B (COM to B).',
+      label: 'Label shown on the canvas.',
+    },
+    wiring: 'COM -> D2, A -> GND, B left open (or tied to 5 V). Use INPUT_PULLUP so the open throw reads HIGH.',
+    code: `void setup(){
+  pinMode(2, INPUT_PULLUP);
+  Serial.begin(9600);
+}
+void loop(){
+  if (digitalRead(2) == LOW) Serial.println("Position A");
+  else Serial.println("Position B");
+  delay(100);
+}`,
   },
 
   potentiometer: {
@@ -1100,18 +1129,19 @@ void loop() {
       ch2_gnd: { label: 'GND2', type: 'gnd', desc: 'Channel 2 ground.' },
     },
     props: {
+      powered: 'Power switch (0/1).',
       ch1_wave: 'CH1 waveform: sine, square, triangle, sawtooth, noise.',
-      ch1_freq: 'CH1 frequency in Hz (10–3000).',
-      ch1_amp: 'CH1 peak-to-peak amplitude in volts (0.1–10).',
+      ch1_freq: 'CH1 frequency in Hz (0 – 10 000 000; sub-1 Hz is allowed).',
+      ch1_amp: 'CH1 peak-to-peak amplitude in volts (0–10).',
       ch1_offset: 'CH1 DC offset in volts (-5 to +5).',
       ch1_phase: 'CH1 phase in degrees (0–360).',
-      ch1_duty: 'CH1 duty cycle in percent (5–95).',
+      ch1_duty: 'CH1 duty cycle in percent (1–99) — square/triangle waves only.',
       ch2_wave: 'CH2 waveform: sine, square, triangle, sawtooth, noise.',
-      ch2_freq: 'CH2 frequency in Hz (10–3000).',
-      ch2_amp: 'CH2 peak-to-peak amplitude in volts (0.1–10).',
+      ch2_freq: 'CH2 frequency in Hz (0 – 10 000 000; sub-1 Hz is allowed).',
+      ch2_amp: 'CH2 peak-to-peak amplitude in volts (0–10).',
       ch2_offset: 'CH2 DC offset in volts (-5 to +5).',
       ch2_phase: 'CH2 phase in degrees (0–360).',
-      ch2_duty: 'CH2 duty cycle in percent (5–95).',
+      ch2_duty: 'CH2 duty cycle in percent (1–99) — square/triangle waves only.',
     },
     wiring: 'Connect CH1 or CH2 output to your circuit input. Connect the corresponding GND to the circuit ground.',
     code: `// The function generator is a signal source — no Arduino code needed.`,
@@ -2308,7 +2338,7 @@ void loop() {
     longDesc: '2-channel digital storage oscilloscope with phosphor display, AC/DC coupling, adjustable trigger, auto-measurement, cursors, math channel, and spectrum/XY display modes.',
     use: 'Visualising voltage waveforms, debugging signal timing, measuring frequency/duty cycle, analysing sensor outputs.',
     pins: { ch1_in: { label: 'CH1', type: 'signal', desc: 'Channel 1 input.' }, ch2_in: { label: 'CH2', type: 'signal', desc: 'Channel 2 input.' }, gnd: { label: 'GND', type: 'gnd', desc: 'Ground reference for probes.' } },
-    props: { powered: 'Power switch (0/1).', runStop: 'Run/Stop toggle.', timebase: 'Time per division (seconds).', trig_source: 'Trigger source: ch1, ch2.', trig_level: 'Trigger level (V).', ch1_vdiv: 'CH1 Volts/division.', ch2_vdiv: 'CH2 Volts/division.', ch1_coupling: 'CH1 coupling: dc, ac, gnd.', ch2_coupling: 'CH2 coupling: dc, ac, gnd.', dsoMode: 'Display mode: scope, spectrum, xy.' },
+    props: { powered: 'Power switch (0/1).', runStop: 'Run/Stop toggle.', timebase: 'Time per division (seconds, 0.00001 – 0.1).', trig_source: 'Trigger source: ch1, ch2.', trig_level: 'Trigger level (V, -10 – +10).', trig_mode: 'Trigger mode: auto, norm, single.', trig_slope: 'Trigger slope: rising, falling.', ch1_vdiv: 'CH1 Volts/division (0.05 – 20).', ch2_vdiv: 'CH2 Volts/division (0.05 – 20).', ch1_coupling: 'CH1 coupling: dc, ac, gnd.', ch2_coupling: 'CH2 coupling: dc, ac, gnd.', math_op: 'Math operation: off, add, sub, abs, mul.', dsoMode: 'Display mode: scope, spectrum, xy.' },
     wiring: 'Connect signal wires to CH1 or CH2 inputs. Connect GND to circuit ground.',
     code: '// Oscilloscope is a measurement instrument — no Arduino code needed.',
   },
