@@ -1268,88 +1268,117 @@ function gsmModuleDef(v) {
 
       const isRunning = !!(sim && sim.isRunning);
 
-      if (isRunning) {
-        if (!inst._state) {
-          inst._state = {
-            registered: false,
-            signalBars: 0,
-            lastTxTime: 0,
-            lastRxTime: 0,
-            txCount: 0,
-            rxCount: 0,
-            lastRxMeta: null,
-            netLed: false,
-          };
-        }
+      try {
+        if (isRunning) {
+          if (!inst._state) {
+            inst._state = {
+              registered: false,
+              signalBars: 0,
+              lastTxTime: 0,
+              lastRxTime: 0,
+              txCount: 0,
+              rxCount: 0,
+              lastRxMeta: null,
+              netLed: false,
+            };
+            inst.runtimeState = inst.runtimeState || {};
+          }
 
-        const state = inst._state;
-        if (!state.registered) {
-          state.registered = true;
-          state.signalBars = 3 + Math.floor(Math.random() * 3);
-          inst._gsmNodeId = inst.id;
-          window._gsmBus.nodes[inst.id] = {
-            id: inst.id,
-            inst,
-            tech: g.tech,
-            band: Number(inst.props.band) || g.defaultBand,
-            operator: inst.props.operator || '',
-            imei: inst.props.imei || '',
-            apn: inst.props.apn || 'internet',
-            active: true,
-            x: inst.x + (inst.width || 104) / 2,
-            y: inst.y + (inst.height || 110) / 2,
-            sendSMS: (to, text) => {
-              state.lastTxTime = Date.now();
-              state.txCount = (state.txCount || 0) + 1;
-              window._gsmBus.deliverSMS(inst.id, to, text);
-            },
-            makeCall: (to) => {
-              state.lastTxTime = Date.now();
-              state.txCount = (state.txCount || 0) + 1;
-              window._gsmBus.deliverVoice(inst.id, to, 'call');
-            },
-            hangup: () => {
-              window._gsmBus.deliverVoice(inst.id, null, 'hangup');
-            },
-            sendUSSD: (code) => {
-              state.lastTxTime = Date.now();
-              state.txCount = (state.txCount || 0) + 1;
-              window._gsmBus.deliverUSSD(inst.id, code, 'OK');
-            },
-            httpGet: (url) => {
-              state.lastTxTime = Date.now();
-              state.txCount = (state.txCount || 0) + 1;
-              window._gsmBus.deliverHTTP(inst.id, url, 'GET', 200, 'OK');
-            },
-          };
-        }
+          const state = inst._state;
+          const rs = inst.runtimeState;
+          const props = inst.props || {};
 
-        const now = Date.now();
-        const txActive = now - state.lastTxTime < 400;
-        const rxActive = now - state.lastRxTime < 400;
-        if (txActive || rxActive) {
-          state.netLed = true;
-          state.lastRxTime = now;
+          // Sync interactive (slider) values from runtimeState into props
+          // so they persist across save/load and are visible to step().
+          if (rs.band !== undefined) props.band = rs.band;
+          if (rs.operator !== undefined) props.operator = rs.operator;
+          if (rs.imei !== undefined) props.imei = rs.imei;
+          if (rs.apn !== undefined) props.apn = rs.apn;
+          if (rs.smsNumber !== undefined) props.smsNumber = rs.smsNumber;
+          if (rs.ussdCode !== undefined) props.ussdCode = rs.ussdCode;
+          if (rs.httpUrl !== undefined) props.httpUrl = rs.httpUrl;
+
+          // Read effective values: runtimeState (slider) overrides props.
+          const effBand = Number(rs.band ?? props.band) || g.defaultBand;
+          const effOperator = rs.operator ?? (props.operator || '');
+          const effImei = rs.imei ?? (props.imei || '');
+          const effApn = rs.apn ?? (props.apn || 'internet');
+
+          if (!state.registered) {
+            state.registered = true;
+            state.signalBars = 3 + Math.floor(Math.random() * 3);
+            inst._gsmNodeId = inst.id;
+            window._gsmBus.nodes[inst.id] = {
+              id: inst.id,
+              inst,
+              tech: g.tech,
+              band: effBand,
+              operator: effOperator,
+              imei: effImei,
+              apn: effApn,
+              active: true,
+              x: inst.x + (inst.width || 104) / 2,
+              y: inst.y + (inst.height || 110) / 2,
+              sendSMS: (to, text) => {
+                state.lastTxTime = Date.now();
+                state.txCount = (state.txCount || 0) + 1;
+                window._gsmBus.deliverSMS(inst.id, to, text);
+              },
+              makeCall: (to) => {
+                state.lastTxTime = Date.now();
+                state.txCount = (state.txCount || 0) + 1;
+                window._gsmBus.deliverVoice(inst.id, to, 'call');
+              },
+              hangup: () => {
+                window._gsmBus.deliverVoice(inst.id, null, 'hangup');
+              },
+              sendUSSD: (code) => {
+                state.lastTxTime = Date.now();
+                state.txCount = (state.txCount || 0) + 1;
+                window._gsmBus.deliverUSSD(inst.id, code, 'OK');
+              },
+              httpGet: (url) => {
+                state.lastTxTime = Date.now();
+                state.txCount = (state.txCount || 0) + 1;
+                window._gsmBus.deliverHTTP(inst.id, url, 'GET', 200, 'OK');
+              },
+            };
+          }
+
+          const now = Date.now();
+          const txActive = now - state.lastTxTime < 400;
+          const rxActive = now - state.lastRxTime < 400;
+          if (txActive || rxActive) {
+            state.netLed = true;
+            state.lastRxTime = now;
+          } else {
+            state.netLed = false;
+          }
+
+          window._gsmBus.nodes[inst.id].x = inst.x + (inst.width || 104) / 2;
+          window._gsmBus.nodes[inst.id].y = inst.y + (inst.height || 110) / 2;
+          window._gsmBus.nodes[inst.id].signalBars = state.signalBars;
+          window._gsmBus.nodes[inst.id].operator = effOperator;
+          window._gsmBus.nodes[inst.id].apn = effApn;
+          window._gsmBus.nodes[inst.id].lastTxTime = state.lastTxTime;
+          window._gsmBus.nodes[inst.id].lastRxTime = state.lastRxTime;
+          window._gsmBus.nodes[inst.id].txCount = state.txCount;
+          window._gsmBus.nodes[inst.id].rxCount = state.rxCount;
+          window._gsmBus.nodes[inst.id].lastRxMeta = state.lastRxMeta;
         } else {
-          state.netLed = false;
+          if (window._gsmBus?.nodes) delete window._gsmBus.nodes[inst.id];
+          // Reset registration so the node is re-created on next start,
+          // picking up any prop/runtimeState changes made while stopped.
+          if (inst._state) inst._state.registered = false;
         }
-
-        window._gsmBus.nodes[inst.id].x = inst.x + (inst.width || 104) / 2;
-        window._gsmBus.nodes[inst.id].y = inst.y + (inst.height || 110) / 2;
-        window._gsmBus.nodes[inst.id].signalBars = state.signalBars;
-        window._gsmBus.nodes[inst.id].operator = inst.props.operator || '';
-        window._gsmBus.nodes[inst.id].apn = inst.props.apn || 'internet';
-        window._gsmBus.nodes[inst.id].lastTxTime = state.lastTxTime;
-        window._gsmBus.nodes[inst.id].lastRxTime = state.lastRxTime;
-        window._gsmBus.nodes[inst.id].txCount = state.txCount;
-        window._gsmBus.nodes[inst.id].rxCount = state.rxCount;
-        window._gsmBus.nodes[inst.id].lastRxMeta = state.lastRxMeta;
-      } else {
-        if (window._gsmBus?.nodes) delete window._gsmBus.nodes[inst.id];
+      } catch (e) {
+        // Guard against a single bad frame killing the GSM module.
+        console.warn('[GSM] step() error:', e.message);
       }
     },
 
     draw(ctx, inst, sim) {
+      try {
       const { x, y } = inst;
       const w = inst.width || 104;
       const h = inst.height || 110;
@@ -1525,6 +1554,10 @@ function gsmModuleDef(v) {
       }
 
       ctx.restore();
+      } catch (e) {
+        try { ctx.restore(); } catch (_) {}
+        console.warn('[GSM] draw() error:', e.message);
+      }
     },
   };
 }
