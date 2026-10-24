@@ -8,8 +8,21 @@ window.ArduinoLibs = window.ArduinoLibs || {};
 window.ArduinoLibs['SoftwareSerial'] = {
   classes: ['SoftwareSerial'],
   includes: ['<SoftwareSerial.h>'],
+  priority: 40,
 
   transpile: [
+    [/[\s\S]+/g, function(code) {
+      var serials = [];
+      var match;
+      var declaration = /\bSoftwareSerial\s+(\w+)\s*\(|\bvar\s+(\w+)\s*=\s*_a\.softwareSerialNew\s*\(/g;
+      while ((match = declaration.exec(code)) !== null) serials.push(match[1] || match[2]);
+      serials.forEach(function(name) {
+        var escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        code = code.replace(new RegExp('\\b' + escaped + '\\.begin\\s*\\(([^)]*)\\)', 'g'),
+          '_a.softSerialBegin(' + name + ', $1)');
+      });
+      return code;
+    }],
     [/\bSoftwareSerial\s+(\w+)\s*\(([^)]+)\)/g, 'var $1 = _a.softwareSerialNew($2)'],
     [/\b(\w+)\.println\s*\(/g, function(match, v) {
       if (v === 'Serial') return match;

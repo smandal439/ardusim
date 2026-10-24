@@ -33,7 +33,10 @@ eval(src);
 
 // Load core library plugins the transpiler relies on (Serial, Wire, etc.)
 const libsDir = path.resolve(__dirname, '..', 'js', 'libraries');
-for (const libFile of ['serial.js', 'wire.js', 'mfrc522.js']) {
+for (const libFile of [
+  'serial.js', 'wire.js', 'mfrc522.js', 'softwareserial.js',
+  'dfplayer.js', 'irremote.js',
+]) {
   const libPath = path.join(libsDir, libFile);
   if (fs.existsSync(libPath)) eval(fs.readFileSync(libPath, 'utf8'));
 }
@@ -186,6 +189,35 @@ describe('transpile() — library plugins', () => {
     expect(api.rfidIsNewCard(instance)).toBe(false);
     cardComponent.x = 70;
     expect(api.rfidIsNewCard(instance)).toBe(true);
+  });
+
+  it('starts the IR Remote MP3 Player example and plays a track on remote input', async () => {
+    const examplePath = path.resolve(__dirname, '..', 'Examples', 'ir_dfplayer_remote.json');
+    const example = JSON.parse(fs.readFileSync(examplePath, 'utf8'));
+    const result = sim.transpile(example.code);
+
+    expect(() => new Function(result)).not.toThrow();
+    expect(result).toContain('_a.softSerialBegin(dfSerial, 9600)');
+    expect(result).toContain('_a.dfplayerBegin(dfPlayer, dfSerial)');
+    expect(result).not.toContain('_a.dfplayerBegin(dfSerial, 9600)');
+    expect(result).toContain('_a.irrecvNew(IR_PIN)');
+
+    const receiver = { type: 'ir_receiver', runtimeState: {} };
+    window.CircuitCanvas = { components: [receiver] };
+    const logs = [];
+    const events = [];
+    sim.onSerial = text => logs.push(text);
+    sim.onEvent = (type, data) => events.push({ type, data });
+
+    const compiled = await sim.compile(example.code);
+    expect(compiled.ok).toBe(true);
+    const sketch = sim._compiledFn(...sim._compiledCtx.vals);
+    await sketch.setup();
+    expect(logs.join('')).toContain('Ready! Press a button');
+
+    receiver.runtimeState = { decoding: true, code: 0x43 };
+    await sketch.loop();
+    expect(events).toContainEqual({ type: 'dfplayer', data: { cmd: 0x03, param: 1 } });
   });
 
   it('registers and transpiles BME280 plugin', () => {

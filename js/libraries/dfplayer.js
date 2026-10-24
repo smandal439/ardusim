@@ -17,9 +17,17 @@ window.ArduinoLibs['DFRobotDFPlayerMini'] = {
   includes: ['<DFRobotDFPlayerMini.h>'],
 
   transpile: [
-    [/\b(\w+)\.begin\s*\(([^)]+)\)/g, function(m, v, a) {
-      if (/^(Serial|Wire|SPI|EEPROM|WiFi|SoftwareSerial)$/i.test(v)) return m;
-      return '_a.dfplayerBegin(' + v + ', ' + a + ')';
+    [/[\s\S]+/g, function(code) {
+      var players = [];
+      var match;
+      var declaration = /\bDFRobotDFPlayerMini\s+(\w+)\b|\bvar\s+(\w+)\s*=\s*new\s+DFRobotDFPlayerMini\b/g;
+      while ((match = declaration.exec(code)) !== null) players.push(match[1] || match[2]);
+      players.forEach(function(name) {
+        var escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        code = code.replace(new RegExp('\\b' + escaped + '\\.begin\\s*\\(([^)]*)\\)', 'g'),
+          '_a.dfplayerBegin(' + name + ', $1)');
+      });
+      return code;
     }],
     [/\b(\w+)\.volume\s*\(([^)]+)\)/g, function(m, v, a) {
       if (/^(Serial|Wire|SPI|EEPROM|WiFi|SoftwareSerial)$/i.test(v)) return m;
@@ -132,6 +140,7 @@ window.ArduinoLibs['DFRobotDFPlayerMini'] = {
         if (varName && typeof varName === 'object') {
           varName._dfplayer = true;
         }
+        return true;
       },
       dfplayerVolume: function(varName, volume) {
         volume = Math.max(0, Math.min(30, Number(volume) || 15));

@@ -11,7 +11,7 @@ window.ArduinoLibs['IRremote'] = {
   transpile: [
     [/decode_results\s+(\w+)\s*;/g, 'var $1 = { protocol: 0, decode_type: "UNKNOWN", value: 0, bits: 0 };'],
     [/IRsend\s+(\w+)\((\d+)\)/g, 'var $1 = _a.irsendNew($2)'],
-    [/IRrecv\s+(\w+)\((\d+)\)/g, 'var $1 = _a.irrecvNew($2)'],
+    [/IRrecv\s+(\w+)\(([^)]+)\)/g, 'var $1 = _a.irrecvNew($2)'],
     [/(\w+)\.sendNEC\(/g, '_a.irsendNEC($1, '],
     [/(\w+)\.sendSony\(/g, '_a.irsendSony($1, '],
     [/(\w+)\.sendRC5\(/g, '_a.irsendRC5($1, '],
