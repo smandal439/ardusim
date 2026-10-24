@@ -33,12 +33,16 @@ eval(src);
 
 // Load core library plugins the transpiler relies on (Serial, Wire, etc.)
 const libsDir = path.resolve(__dirname, '..', 'js', 'libraries');
-for (const libFile of ['serial.js', 'wire.js']) {
+for (const libFile of ['serial.js', 'wire.js', 'mfrc522.js']) {
   const libPath = path.join(libsDir, libFile);
   if (fs.existsSync(libPath)) eval(fs.readFileSync(libPath, 'utf8'));
 }
 
 const sim = new window.ArduinoSimulator();
+
+beforeEach(() => {
+  window.CircuitCanvas = null;
+});
 
 describe('transpile() — basic transformations', () => {
   it('removes #include directives', () => {
@@ -137,6 +141,53 @@ describe('transpile() — Arduino-specific patterns', () => {
 });
 
 describe('transpile() — library plugins', () => {
+  it('produces valid JavaScript for the RFID inventory tracker example', () => {
+    const examplePath = path.resolve(__dirname, '..', 'Examples', 'rfid_inventory_tracker.json');
+    const example = JSON.parse(fs.readFileSync(examplePath, 'utf8'));
+    const result = sim.transpile(example.code);
+
+    expect(() => new Function(result)).not.toThrow();
+    expect(result).toContain('_a.rfidInit(mfrc522)');
+    expect(result).toContain('_a.rfidIsNewCard(mfrc522)');
+  });
+
+  it('reads a nearby simulated RFID card once until it leaves the reader range', () => {
+    const readerComponent = {
+      id: 'reader',
+      type: 'rc522',
+      x: 0,
+      y: 0,
+      width: 60,
+      height: 80,
+      props: { tagPresent: false },
+      runtimeState: {},
+    };
+    const cardComponent = {
+      id: 'card',
+      type: 'rfid_card',
+      x: 70,
+      y: 10,
+      width: 96,
+      height: 62,
+      props: { uid: 'A1:B2:C3:D4' },
+      runtimeState: {},
+    };
+    window.CircuitCanvas = { components: [readerComponent, cardComponent] };
+    const api = window.ArduinoLibs.MFRC522.runtime({ _serialLog() {} });
+    const instance = api.rfidNewV2(api.rfidDriverSPI(api.rfidDriverPin(10)));
+    api.rfidInit(instance);
+
+    expect(api.rfidIsNewCard(instance)).toBe(true);
+    expect(api.rfidReadCard(instance)).toBe(true);
+    expect(api.rfidUidBytes(instance)).toEqual([0xA1, 0xB2, 0xC3, 0xD4]);
+    expect(api.rfidIsNewCard(instance)).toBe(false);
+
+    cardComponent.x = 300;
+    expect(api.rfidIsNewCard(instance)).toBe(false);
+    cardComponent.x = 70;
+    expect(api.rfidIsNewCard(instance)).toBe(true);
+  });
+
   it('registers and transpiles BME280 plugin', () => {
     window.ArduinoLibs['BME280'] = {
       classes: ['SimpleBME280'],

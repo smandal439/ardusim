@@ -406,7 +406,7 @@ const COMPONENT_CATALOG = [
       'ic_74hc74', 'ic_74hc47', 'ic_74hc138', 'ic_74hc139', 'ic_74hc148', 'ic_74hc153', 'ic_74hc164',
       'ic_74hc165', 'ic_74hc193', 'ic_74hc245', 'ic_74hc595', 'ic_74hc4017', 'ic_8255', 'lm741']
   },
-  { category: 'Communication', ids: ['wifi_module', 'lora_module', 'sd_card', 'hc05', 'gps_neo6m', 'rc522', 'gsm_module_2g', 'gsm_module_4g', 'gsm_module_5g'] },
+  { category: 'Communication', ids: ['wifi_module', 'lora_module', 'sd_card', 'hc05', 'gps_neo6m', 'rc522', 'rfid_card', 'gsm_module_2g', 'gsm_module_4g', 'gsm_module_5g'] },
   {
     category: 'Instruments',
     ids: ['multimeter', 'func_gen', 'dso_4ch'],

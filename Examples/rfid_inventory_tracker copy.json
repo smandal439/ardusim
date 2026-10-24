@@ -1,0 +1,240 @@
+{
+  "id": "rfid_inventory_tracker",
+  "name": "RFID Inventory Tracker",
+  "icon": "📦",
+  "desc": "Track RFID tags with LCD display - detects new cards, stores UIDs, shows count and last scanned tag",
+  "tags": [
+    "rfid",
+    "inventory",
+    "lcd",
+    "i2c",
+    "spi"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "arduino1",
+        "type": "arduino_uno",
+        "x": 200,
+        "y": 100,
+        "rotation": 0,
+        "props": {
+          "label": "UNO"
+        }
+      },
+      {
+        "id": "rc522_1",
+        "type": "rc522",
+        "x": 50,
+        "y": 300,
+        "rotation": 0,
+        "props": {
+          "tagPresent": false,
+          "uid": "A1:B2:C3:D4"
+        }
+      },
+      {
+        "id": "rfid_card_1",
+        "type": "rfid_card",
+        "x": -65,
+        "y": 145,
+        "rotation": 0,
+        "props": {
+          "label": "Card 1",
+          "uid": "A1:B2:C3:D4"
+        }
+      },
+      {
+        "id": "rfid_card_2",
+        "type": "rfid_card",
+        "x": -65,
+        "y": 250,
+        "rotation": 0,
+        "props": {
+          "label": "Card 2",
+          "uid": "12:34:56:78"
+        }
+      },
+      {
+        "id": "lcd1",
+        "type": "lcd1602_i2c",
+        "x": 380,
+        "y": 300,
+        "rotation": 0,
+        "props": {
+          "address": "0x27"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "instId": "arduino1",
+          "pinId": "3V3"
+        },
+        "to": {
+          "instId": "rc522_1",
+          "pinId": "3V3"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w2",
+        "from": {
+          "instId": "arduino1",
+          "pinId": "GND1"
+        },
+        "to": {
+          "instId": "rc522_1",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w3",
+        "from": {
+          "instId": "arduino1",
+          "pinId": "D10"
+        },
+        "to": {
+          "instId": "rc522_1",
+          "pinId": "SDA"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w4",
+        "from": {
+          "instId": "arduino1",
+          "pinId": "D13"
+        },
+        "to": {
+          "instId": "rc522_1",
+          "pinId": "SCK"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w5",
+        "from": {
+          "instId": "arduino1",
+          "pinId": "D11"
+        },
+        "to": {
+          "instId": "rc522_1",
+          "pinId": "MOSI"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w6",
+        "from": {
+          "instId": "arduino1",
+          "pinId": "D12"
+        },
+        "to": {
+          "instId": "rc522_1",
+          "pinId": "MISO"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w7",
+        "from": {
+          "instId": "arduino1",
+          "pinId": "D9"
+        },
+        "to": {
+          "instId": "rc522_1",
+          "pinId": "RST"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w8",
+        "from": {
+          "instId": "arduino1",
+          "pinId": "5V"
+        },
+        "to": {
+          "instId": "lcd1",
+          "pinId": "vcc"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w9",
+        "from": {
+          "instId": "arduino1",
+          "pinId": "GND1"
+        },
+        "to": {
+          "instId": "lcd1",
+          "pinId": "gnd"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w10",
+        "from": {
+          "instId": "arduino1",
+          "pinId": "A4"
+        },
+        "to": {
+          "instId": "lcd1",
+          "pinId": "sda"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      },
+      {
+        "id": "w11",
+        "from": {
+          "instId": "arduino1",
+          "pinId": "A5"
+        },
+        "to": {
+          "instId": "lcd1",
+          "pinId": "scl"
+        },
+        "color": null,
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
+      }
+    ]
+  },
+  "files": {
+    "sketch.ino": "/*\n * RFID Inventory Tracker\n * Tracks RFID tags with LCD display and Serial logging.\n * \n * Wiring (Arduino Uno):\n * RC522 RFID (SPI):\n *   SDA  -> Pin 10\n *   SCK  -> Pin 13\n *   MOSI -> Pin 11\n *   MISO -> Pin 12\n *   RST  -> Pin 9\n *   3V3  -> 3.3V\n *   GND  -> GND\n * \n * LCD I2C (16x2 with PCF8574 backpack):\n *   VCC -> 5V\n *   GND -> GND\n *   SDA -> A4\n *   SCL -> A5\n * \n * Usage: Drag an RFID card close to the RC522 reader to scan it.\n *        Change a card's uid in Properties to give it a different identity.\n */\n\n#include <MFRC522v2.h>\n#include <MFRC522DriverSPI.h>\n#include <MFRC522DriverPinSimple.h>\n#include <MFRC522Debug.h>\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\n// RC522 pins\nMFRC522DriverPinSimple ss_pin(10);\nMFRC522DriverSPI driver{ss_pin};\nMFRC522 mfrc522{driver};\n\n// LCD I2C (address 0x27, 16 cols, 2 rows)\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\n// Inventory storage (max 20 tags)\nString inventory[20];\nint tagCount = 0;\nString lastUID = \"\";\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  // Initialize RFID\n  mfrc522.PCD_Init();\n  MFRC522Debug::PCD_DumpVersionToSerial(mfrc522, Serial);\n\n  // Initialize LCD\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"RFID Inventory\");\n  lcd.setCursor(0, 1);\n  lcd.print(\"Tags: 0\");\n\n  Serial.println(F(\"\\n=== RFID Inventory Tracker ===\"));\n  Serial.println(F(\"Scan tags to add to inventory.\"));\n  Serial.println(F(\"Drag an RFID card near the RC522 to simulate.\"));\n}\n\nvoid loop() {\n  // Check for new card\n  if (mfrc522.PICC_IsNewCardPresent()) {\n    if (mfrc522.PICC_ReadCardSerial()) {\n      // Get UID bytes array and size\n      byte *uidBytes = mfrc522.uid.uidByte;\n      byte uidSize = mfrc522.uid.size;\n      \n      // Build UID string\n      String uidStr = \"\";\n      for (byte i = 0; i < uidSize; i++) {\n        if (uidBytes[i] < 0x10) uidStr += \"0\";\n        uidStr += String(uidBytes[i], HEX);\n        uidStr.toUpperCase();\n        if (i < uidSize - 1) uidStr += \":\";\n      }\n\n      // Only process if different from last read\n      if (uidStr != lastUID) {\n        lastUID = uidStr;\n        \n        // Check if already in inventory\n        bool known = false;\n        for (int i = 0; i < tagCount; i++) {\n          if (inventory[i] == uidStr) {\n            known = true;\n            break;\n          }\n        }\n\n        if (!known && tagCount < 20) {\n          // New tag - add to inventory\n          inventory[tagCount] = uidStr;\n          tagCount++;\n          \n          Serial.print(F(\"[NEW] Tag #\"));\n          Serial.print(tagCount);\n          Serial.print(F(\": \"));\n          Serial.println(uidStr);\n        } else if (known) {\n          Serial.print(F(\"[KNOWN] \"));\n          Serial.println(uidStr);\n        } else {\n          Serial.print(F(\"[FULL] Cannot add: \"));\n          Serial.println(uidStr);\n        }\n\n        // Update LCD\n        lcd.clear();\n        lcd.setCursor(0, 0);\n        lcd.print(\"Inventory: \");\n        lcd.print(tagCount);\n        lcd.print(F(\" tags\"));\n        lcd.setCursor(0, 1);\n        lcd.print(\"Last: \");\n        lcd.print(uidStr.substring(0, 11)); // Fit on 16 chars\n\n        // Halt PICC\n        mfrc522.PICC_HaltA();\n        mfrc522.PCD_StopCrypto1();\n      }\n    }\n  }\n\n  // Small delay to prevent flooding\n  delay(100);\n}"
+  }
+}

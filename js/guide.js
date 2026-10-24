@@ -3613,6 +3613,7 @@ Adafruit_NeoPixel strip(NUM_LEDS, PIN, NEO_GRB + NEO_KHZ800);
     category: 'Utility',
     include: '<MFRC522.h>',
     desc: 'Read and write MIFARE RFID tags using the MFRC522 reader module (13.56 MHz).',
+    longDesc: 'Read RFID card UIDs with the RC522 reader. In the simulator, add an RFID Tag Card from Communication and drag it within range of the reader to scan it.',
     api: [
       { fn: 'mfrc522.PCD_Init()', desc: 'Initialize RFID reader' },
       { fn: 'mfrc522.PICC_IsNewCardPresent()', desc: 'Check if a card is present' },

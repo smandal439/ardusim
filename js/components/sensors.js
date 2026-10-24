@@ -2393,7 +2393,10 @@ defComp({
   ],
   draw(ctx, inst, sim) {
     const { x, y } = inst;
-    const tagPresent = inst.runtimeState?.tagPresent ?? inst.props.tagPresent ?? false;
+    const tagPresent = inst.runtimeState?._rfidCardPresent
+      ?? inst.runtimeState?.tagPresent
+      ?? inst.props.tagPresent
+      ?? false;
 
     ctx.save();
     ctx.translate(x, y);
@@ -2455,6 +2458,54 @@ defComp({
     });
 
     if (inst.selected) drawSelectionRect(ctx, -2, -4, 64, 88);
+    ctx.restore();
+  }
+});
+
+defComp({
+  id: 'rfid_card',
+  name: 'RFID Tag Card',
+  category: 'Communication',
+  icon: '💳',
+  desc: 'A draggable simulated RFID card. Move it close to an RC522 reader to scan its UID.',
+  width: 96,
+  height: 62,
+  defaultProps: { label: 'RFID Card', uid: 'A1:B2:C3:D4' },
+  pins: [],
+  draw(ctx, inst) {
+    const { x, y, width = 96, height = 62 } = inst;
+    const uid = String(inst.props?.uid || '');
+    const label = String(inst.props?.label || 'RFID Card');
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    const cardGrad = ctx.createLinearGradient(0, 0, width, height);
+    cardGrad.addColorStop(0, '#263b73');
+    cardGrad.addColorStop(1, '#101a38');
+    ctx.fillStyle = cardGrad;
+    roundRect(ctx, 0, 0, width, height, 7);
+    ctx.fill();
+    ctx.strokeStyle = '#7c9ce8';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(147, 197, 253, 0.65)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(width - 22, 24, 8, -Math.PI / 2, Math.PI / 2);
+    ctx.arc(width - 22, 24, 13, -Math.PI / 2, Math.PI / 2);
+    ctx.stroke();
+
+    ctx.fillStyle = '#dbeafe';
+    ctx.font = 'bold 8px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(label.slice(0, 17), 9, 19);
+    ctx.fillStyle = '#a9c4ff';
+    ctx.font = '6px monospace';
+    ctx.fillText(uid.slice(0, 17), 9, 48);
+
+    if (inst.selected) drawSelectionRect(ctx, -2, -2, width + 4, height + 4);
     ctx.restore();
   }
 });

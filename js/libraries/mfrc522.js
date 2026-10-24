@@ -1,7 +1,7 @@
 /**
  * MFRC522 RFID Library Plugin for ArduSim
  *
- * Provides RFID card simulation with random card detection.
+ * Provides RFID card simulation with draggable virtual tags.
  * Supports both MFRC522 (v1) and MFRC522v2 APIs.
  */
 window.ArduinoLibs = window.ArduinoLibs || {};
@@ -33,27 +33,27 @@ window.ArduinoLibs['MFRC522'] = {
     // ═══════ MFRC522 v1 API: Instance method rules ═══════
     [/\b(\w+)\.PCD_Init\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidInit(' + varName + ')';
+      return '_a.rfidInit(' + varName;
     }],
     [/\b(\w+)\.PCD_DumpVersionToSerial\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidDumpVersion(' + varName + ')';
+      return '_a.rfidDumpVersion(' + varName;
     }],
     [/\b(\w+)\.PICC_IsNewCardPresent\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidIsNewCard(' + varName + ')';
+      return '_a.rfidIsNewCard(' + varName;
     }],
     [/\b(\w+)\.PICC_ReadCardSerial\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidReadCard(' + varName + ')';
+      return '_a.rfidReadCard(' + varName;
     }],
     [/\b(\w+)\.PICC_HaltA\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidHaltA(' + varName + ')';
+      return '_a.rfidHaltA(' + varName;
     }],
     [/\b(\w+)\.PCD_StopCrypto1\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidStopCrypto(' + varName + ')';
+      return '_a.rfidStopCrypto(' + varName;
     }],
     [/\b(\w+)\.uid\.uidByte\b/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
@@ -73,15 +73,15 @@ window.ArduinoLibs['MFRC522'] = {
     }],
     [/\b(\w+)\.PICC_REQA\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidREQA(' + varName + ')';
+      return '_a.rfidREQA(' + varName + ', ';
     }],
     [/\b(\w+)\.PICC_WUPA\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidWUPA(' + varName + ')';
+      return '_a.rfidWUPA(' + varName + ', ';
     }],
     [/\b(\w+)\.PICC_Select\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidSelect(' + varName + ')';
+      return '_a.rfidSelect(' + varName + ', ';
     }],
     [/\b(\w+)\.PICC_ComputeBCC\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
@@ -89,11 +89,11 @@ window.ArduinoLibs['MFRC522'] = {
     }],
     [/\b(\w+)\.PICC_StopCrypto1\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidStopCrypto(' + varName + ')';
+      return '_a.rfidStopCrypto(' + varName;
     }],
     [/\b(\w+)\.PICC_DumpDetailsToSerial\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidDumpDetails(' + varName + ')';
+      return '_a.rfidDumpDetails(' + varName;
     }],
     // v1: PICC_DumpToSerial(mfrc522, &(mfrc522.uid)) — 2 args
     [/\b(\w+)\.PICC_DumpToSerial\s*\(\s*(\w+)\s*,\s*&\s*\(\s*\w+\.uid\s*\)\s*\)/g, '_a.rfidDumpToSerial($2)'],
@@ -102,7 +102,7 @@ window.ArduinoLibs['MFRC522'] = {
     // v1: PICC_DumpToSerial(mfrc522) — 1 arg (fallback)
     [/\b(\w+)\.PICC_DumpToSerial\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidDumpToSerial(' + varName + ')';
+      return '_a.rfidDumpToSerial(' + varName;
     }],
     [/\b(\w+)\.PICC_DumpMifareClassicSectorToSerial\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
@@ -114,7 +114,7 @@ window.ArduinoLibs['MFRC522'] = {
     }],
     [/\b(\w+)\.PICC_DumpMifareUltralightToSerial\s*\(/g, function(match, varName) {
       if (varName === 'Serial' || varName === 'WiFi' || varName === 'Wire' || varName === 'SPI') return match;
-      return '_a.rfidDumpUltralight(' + varName + ')';
+      return '_a.rfidDumpUltralight(' + varName + ', ';
     }],
     // Enum types: MFRC522::MIFARE_Key, MFRC522::PICC_Type → var
     [/\bMFRC522::MIFARE_Key\b/g, 'var'],
@@ -127,6 +127,55 @@ window.ArduinoLibs['MFRC522'] = {
     function _getRfid(obj) {
       if (!obj || !obj._rfidId) return null;
       return self._rfid && self._rfid[obj._rfidId];
+    }
+
+    function _parseUid(uid) {
+      var hex = String(uid || '').replace(/[\s:-]/g, '');
+      if (!/^[0-9a-f]+$/i.test(hex) || hex.length < 2 || hex.length % 2 !== 0) return null;
+      var bytes = [];
+      for (var i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.slice(i, i + 2), 16));
+      return bytes;
+    }
+
+    function _findCard() {
+      var canvas = window.CircuitCanvas;
+      var components = canvas && Array.isArray(canvas.components) ? canvas.components : [];
+      var reader = components.find(function(component) { return component.type === 'rc522'; });
+      if (!reader) return null;
+
+      var manualTagPresent = Number(
+        reader.runtimeState && reader.runtimeState.tagPresent !== undefined
+          ? reader.runtimeState.tagPresent
+          : reader.props && reader.props.tagPresent
+      ) > 0;
+      if (manualTagPresent) {
+        var manualUid = _parseUid(reader.props && reader.props.uid);
+        return manualUid ? { key: 'manual:' + manualUid.join(','), uidBytes: manualUid, reader: reader } : null;
+      }
+
+      var readerX = Number(reader.x || 0) + Number(reader.width || 60) / 2;
+      var readerY = Number(reader.y || 0) + Number(reader.height || 80) / 2;
+      var nearest = null;
+      var nearestDistance = 120;
+
+      components.forEach(function(component) {
+        if (component.type !== 'rfid_card') return;
+        var cardX = Number(component.x || 0) + Number(component.width || 96) / 2;
+        var cardY = Number(component.y || 0) + Number(component.height || 62) / 2;
+        var distance = Math.hypot(cardX - readerX, cardY - readerY);
+        if (distance > nearestDistance) return;
+
+        var uidBytes = _parseUid(component.props && component.props.uid);
+        if (!uidBytes) return;
+        nearestDistance = distance;
+        nearest = {
+          key: (component.id || '') + ':' + uidBytes.join(':'),
+          uidBytes: uidBytes,
+          reader: reader,
+        };
+      });
+
+      return nearest;
     }
 
     return {
@@ -177,8 +226,26 @@ window.ArduinoLibs['MFRC522'] = {
       rfidIsNewCard: function(obj) {
         var r = _getRfid(obj);
         if (!r || !r.initialized) return false;
-        r.cardPresent = Math.random() < 0.3;
-        return r.cardPresent;
+        var card = _findCard();
+        r.cardPresent = !!card;
+        if (!card) {
+          r.lastPresentKey = null;
+          if (r.reader) {
+            r.reader.runtimeState = r.reader.runtimeState || {};
+            r.reader.runtimeState._rfidCardPresent = false;
+          }
+          r.reader = null;
+          return false;
+        }
+
+        r.reader = card.reader;
+        r.reader.runtimeState = r.reader.runtimeState || {};
+        r.reader.runtimeState._rfidCardPresent = true;
+        r.uidBytes = card.uidBytes;
+        r.uidSize = card.uidBytes.length;
+        if (r.lastPresentKey === card.key) return false;
+        r.lastPresentKey = card.key;
+        return true;
       },
       rfidReadCard: function(obj) {
         var r = _getRfid(obj);
