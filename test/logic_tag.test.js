@@ -362,6 +362,45 @@ describe('position sync, connector rects and hit-testing', () => {
     expect(t.x).toBeCloseTo(before.x + 50, 5);
     expect(t.y).toBeCloseTo(before.y + 30, 5);
   });
+
+  it('expands only input-tag hit targets to 44 CSS pixels during touch', () => {
+    const input = tag('logic_level_in', 0, 0);
+    const output = tag('logic_level_out', 100, 0);
+    const fake = bareCanvas([input, output], []);
+    fake._lvlTagRects = [
+      { inst: input, x: input.x, y: input.y, w: 32, h: 16 },
+      { inst: output, x: output.x, y: output.y, w: 32, h: 16 },
+    ];
+
+    expect(fake._hitTestTag(16, 28)).toBeNull();
+    fake._touchActive = true;
+    expect(fake._hitTestTag(16, 28).inst).toBe(input);
+    expect(fake._hitTestTag(116, 28)).toBeNull();
+  });
+
+  it('toggles an input tag on a touch tap with small finger movement', () => {
+    const t = tag('logic_level_in', 0, 0, { level: 1 });
+    const fake = bareCanvas([t], []);
+    fake.canvas = { getBoundingClientRect: () => ({ left: 0, top: 0 }) };
+    fake._drawLvlTags(noopCtx);
+    const touch = { clientX: 16, clientY: 28 };
+    let prevented = false;
+
+    fake._onTouchStart({
+      touches: [touch],
+      preventDefault() { prevented = true; },
+    });
+    fake._onTouchMove({
+      touches: [{ clientX: 18, clientY: 30 }],
+    });
+    fake._onTouchEnd({
+      changedTouches: [{ clientX: 18, clientY: 30 }],
+    });
+
+    expect(prevented).toBe(true);
+    expect(t.props.level).toBe(0);
+    expect(fake._touchActive).toBe(false);
+  });
 });
 
 describe('persistence + integration hooks', () => {

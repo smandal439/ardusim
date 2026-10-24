@@ -113,6 +113,7 @@ class CircuitCanvas {
     /* Interaction state machine */
     this.mode = 'idle';   // idle | dragging | panning | wiring | placing | wiredrag
     this.dragging = null;     // { inst, offsetX, offsetY }
+    this._touchActive = false;
     this.wiringFrom = null;     // { inst, pin, wx, wy }
     this.wireMouse = null;     // { x, y } world coords
     this.placingType = null;
@@ -1359,7 +1360,15 @@ class CircuitCanvas {
     if (!rects || !rects.length) return null;
     for (let i = rects.length - 1; i >= 0; i--) {
       const r = rects[i];
-      if (wx >= r.x && wx <= r.x + r.w && wy >= r.y && wy <= r.y + r.h) return r;
+      const touchScale = Math.max(this.zoom, 0.01);
+      const touchPadX = this._touchActive && r.inst.type === 'logic_level_in'
+        ? Math.max(0, (44 / touchScale - r.w) / 2)
+        : 0;
+      const touchPadY = this._touchActive && r.inst.type === 'logic_level_in'
+        ? Math.max(0, (44 / touchScale - r.h) / 2)
+        : 0;
+      if (wx >= r.x - touchPadX && wx <= r.x + r.w + touchPadX
+        && wy >= r.y - touchPadY && wy <= r.y + r.h + touchPadY) return r;
     }
     return null;
   }
@@ -1836,12 +1845,15 @@ class CircuitCanvas {
   _onTouchStart(e) {
     if (e.touches.length === 2) {
       e.preventDefault();
+      this._touchActive = false;
       this._pinchStart = this._getTouchDist(e.touches);
       this._pinchCenter = this._getTouchCenter(e.touches);
       this._isPinching = true;
       return;
     }
     if (e.touches.length === 1) {
+      e.preventDefault();
+      this._touchActive = true;
       const touch = e.touches[0];
       const rect = this.canvas.getBoundingClientRect();
       const offsetX = touch.clientX - rect.left;
@@ -1882,8 +1894,14 @@ class CircuitCanvas {
       if (this._touchStartPos) {
         const dx = touch.clientX - this._touchStartPos.x;
         const dy = touch.clientY - this._touchStartPos.y;
-        if (Math.sqrt(dx * dx + dy * dy) > 10) {
+        const touchDistance = Math.sqrt(dx * dx + dy * dy);
+        if (touchDistance > 10) {
           clearTimeout(this._longPressTimer);
+        }
+        if (this._touchActive && this.mode === 'dragging'
+          && this.dragging?.inst.type === 'logic_level_in'
+          && !this.dragging.moved && touchDistance <= 10) {
+          return;
         }
       }
       this._onMouseMove({ offsetX, offsetY, clientX: touch.clientX, clientY: touch.clientY, button: 0 });
@@ -1900,6 +1918,7 @@ class CircuitCanvas {
       const offsetY = touch.clientY - rect.top;
       this._onMouseUp({ offsetX, offsetY, clientX: touch.clientX, clientY: touch.clientY, button: 0 });
     }
+    this._touchActive = false;
   }
 
   _getTouchDist(touches) {
