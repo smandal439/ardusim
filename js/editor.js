@@ -25,6 +25,17 @@ void loop() {
 
 }`,
 
+  BLINK_STARTER_CODE: `void setup() {
+  pinMode(13, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(13, HIGH);
+  delay(500);
+  digitalWrite(13, LOW);
+  delay(500);
+}`,
+
   STM32_DEFAULT_CODE: `#include "stm32f7xx.h"
 
 void SystemClock_Config(void);
@@ -1021,6 +1032,10 @@ DL2:    DJNZ R3, DL2
       this.editor.revealLine(1);
     } else if (this._fallbackTA) {
       this._fallbackTA.value = code;
+    }
+    if (this._fallbackTA) {
+      this._fallbackTA.value = code;
+      this._fallbackTA.dispatchEvent(new Event('input', { bubbles: true }));
     }
   },
 

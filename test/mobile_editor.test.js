@@ -72,6 +72,15 @@ describe('mobile code editor', () => {
     expect(editor.getCode()).toBe('void loop() {\n  if (ready) {\n    ');
   });
 
+  it('provides a blink sketch matching the D13 starter circuit', () => {
+    const { editor, textarea } = createMobileEditor();
+    editor.setCode(editor.BLINK_STARTER_CODE);
+    expect(textarea.value).toBe(editor.BLINK_STARTER_CODE);
+    expect(editor.getCode()).toContain('pinMode(13, OUTPUT);');
+    expect(editor.getCode()).toContain('digitalWrite(13, HIGH);');
+    expect(editor.getCode()).toContain('digitalWrite(13, LOW);');
+  });
+
   it('provides touch-sized shortcuts and a zoom-safe editor font', () => {
     const { helperBar, textarea } = createMobileEditor();
     expect(helperBar.children.every(button => button.style.cssText.includes('min-height:40px'))).toBe(true);

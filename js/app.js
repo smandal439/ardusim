@@ -18,6 +18,7 @@ class App {
     this._bottomHeight = 200;
     this._propsComp = null;
     this._projectName = 'Untitled Project';
+    this._freshStart = true;
     this._autoSaveDebounced = null;
     this._activeView = null;
     this._examplesQuery = '';
@@ -2031,6 +2032,7 @@ _newProject() {
   _restoreProject() {
     const project = window.StorageManager?.autoLoad?.();
     if (project) {
+      this._freshStart = false;
       if (this.editor && project.files) {
         this.editor.loadFiles(project.files);
       } else if (this.editor && project.code) {
@@ -2048,6 +2050,7 @@ _newProject() {
 
     const shared = window.StorageManager?.loadFromUrl?.();
     if (shared) {
+      this._freshStart = false;
       if (this.editor && shared.files) {
         this.editor.loadFiles(shared.files);
       } else if (this.editor && shared.code) {
@@ -2067,6 +2070,10 @@ _newProject() {
     // Default starter circuit if canvas is empty
     if (this.canvas && this.canvas.components.length === 0) {
       this._loadExampleCircuit('blink');
+    }
+    if (this._freshStart && this.editor?.activeFile && this.editor.BLINK_STARTER_CODE) {
+      this.editor.setCode(this.editor.BLINK_STARTER_CODE);
+      this._freshStart = false;
     }
   }
 
