@@ -13,7 +13,8 @@ window.ArduinoLibs['Adafruit_MPU6050'] = {
 
     // Object creation & initialization
     [/Adafruit_MPU6050\s+([a-zA-Z0-9_]+)\s*;/g, 'var $1 = new _a._Adafruit_MPU6050();'],
-    [/sensors_event_t\s+([a-zA-Z0-9_]+)\s*;/g, 'var $1 = { acceleration: {x:0, y:0, z:0}, gyro: {x:0, y:0, z:0}, temperature: 0 };'],
+    [/sensors_event_t\s+([a-zA-Z0-9_]+(?:\s*,\s*[a-zA-Z0-9_]+)*)\s*;/g, (_, names) =>
+      names.split(',').map(name => `var ${name.trim()} = { acceleration: {x:0, y:0, z:0}, gyro: {x:0, y:0, z:0}, temperature: 0 };`).join(' ')],
 
     // Method calls
     [/\.begin\s*\(([^)]*)\)/g, '._begin($1)'],
@@ -24,6 +25,13 @@ window.ArduinoLibs['Adafruit_MPU6050'] = {
   ],
 
   runtime: function(self) {
+    function findMpu6050() {
+      var canvas = window.CircuitCanvas;
+      return canvas && Array.isArray(canvas.components)
+        ? canvas.components.find(function(comp) { return comp.type === 'mpu6050'; })
+        : null;
+    }
+
     return {
       _Adafruit_MPU6050: function() {
         this.address = 0x68;
@@ -33,7 +41,7 @@ window.ArduinoLibs['Adafruit_MPU6050'] = {
 
         this._begin = function(addr) {
           if (addr !== undefined) this.address = addr;
-          var comp = self._findComponent('mpu6050');
+          var comp = findMpu6050();
           if (comp) {
             self._serialLog('[MPU6050] Initialized at I2C address 0x' + this.address.toString(16) + '\n', 'system');
             return true;
@@ -43,7 +51,7 @@ window.ArduinoLibs['Adafruit_MPU6050'] = {
         };
 
         this._getEvent = function(a, g, temp) {
-          var comp = self._findComponent('mpu6050');
+          var comp = findMpu6050();
           
           // Raw hardware values from component props/runtime state (default 1024 = ~1G)
           var axRaw = comp ? (comp.runtimeState?.accelX ?? comp.props?.accelX ?? 0) : 0;
@@ -88,7 +96,7 @@ window.ArduinoLibs['Adafruit_MPU6050'] = {
     };
   },
 
-  constructor: function(args) {
+  constructor: function(_args) {
     return {
       begin: function() { return true; },
       getEvent: function() { return true; },

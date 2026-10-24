@@ -24,6 +24,7 @@ for (const file of [
   'onewire.js',
   'dallastemperature.js',
   'adafruit_bmp280.js',
+  'adafruit_mpu6050.js',
   'serial.js',
 ]) {
   eval(fs.readFileSync(path.join(root, 'js', 'libraries', file), 'utf8'));
@@ -34,6 +35,31 @@ beforeEach(() => {
 });
 
 describe('additional library transpilation', () => {
+  it('runs the MPU6050 Accelerometer 2 example with live sensor values', async () => {
+    const examplePath = path.join(root, 'Examples', 'mpu6050_accelerometer_2.json');
+    const example = JSON.parse(fs.readFileSync(examplePath, 'utf8'));
+    const sensor = example.circuit.components.find(component => component.type === 'mpu6050');
+    sensor.runtimeState = {};
+    window.CircuitCanvas = { components: [sensor] };
+    const sim = new window.ArduinoSimulator();
+    const output = [];
+    sim._serialLog = text => output.push(String(text));
+
+    const result = await sim.compile(example.code);
+
+    expect(result.ok).toBe(true);
+    const { vals, fn } = sim._compiledCtx;
+    const sketch = fn(...vals);
+    await sketch.setup();
+    await sketch.loop();
+    expect(output.join('')).not.toContain('Failed to find MPU6050 chip');
+    expect(output.join('')).toContain('Accel X: 0, Y: 0, Z: 9.81 m/s^2');
+
+    sensor.runtimeState.accelX = 512;
+    await sketch.loop();
+    expect(output.join('')).toContain('Accel X: 4.91');
+  });
+
   it('runs a common DS18B20 and ESP32 Preferences sketch', async () => {
     window.CircuitCanvas = {
       components: [
