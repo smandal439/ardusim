@@ -397,7 +397,7 @@ const COMPONENT_CATALOG = [
   { category: 'Logic', ids: ['logic_level_in', 'logic_level_out'] },
   { category: 'Actuators', ids: ['servo', 'dc_motor', 'relay', 'ssr_8ch', 'stepper_28byj', 'l298n', 'servo_continuous', 'tb6600', 'nema17'] },
   { category: 'Audio', ids: ['max98357a', 'speaker_4ohm', 'dfplayer_mini'] },
-  { category: 'Sensors', ids: ['dht11', 'hcsr04', 'ldr', 'pir', 'mpu6050', 'ds3231', 'ir_obstacle', 'flex_sensor', 'thermistor', 'lm35_sensor', 'bme280', 'vl53l0x', 'hx711', 'water_flow_sensor', 'load_cell', 'bh1750', 'ina219', 'max6675', 'v_to_i_420ma', 'i_to_v_420ma'] },
+  { category: 'Sensors', ids: ['dht11', 'ds18b20', 'hcsr04', 'ldr', 'pir', 'mpu6050', 'ds3231', 'ir_obstacle', 'flex_sensor', 'thermistor', 'lm35_sensor', 'bme280', 'vl53l0x', 'hx711', 'water_flow_sensor', 'load_cell', 'bh1750', 'ina219', 'max6675', 'v_to_i_420ma', 'i_to_v_420ma'] },
   { category: 'Passive', ids: ['resistor', 'capacitor', 'breadboard', 'breadboard_small', 'diode_1n4007'] },
   { category: 'Power', ids: ['power_5v', 'power_gnd', 'battery', 'mb102_power', 'bench_power_supply'] },
   {

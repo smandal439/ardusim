@@ -1,0 +1,34 @@
+{
+  "projectType": "server",
+  "assertions": [
+    {
+      "name": "health-endpoint-200",
+      "kind": "http-probe",
+      "startCommand": "node",
+      "startArgs": ["server.js"],
+      "url": "http://localhost:3000/api/health",
+      "verificationMethod": "http-status",
+      "expected": "200",
+      "timeoutSeconds": 60
+    },
+    {
+      "name": "simulator-page-200",
+      "kind": "http-probe",
+      "startCommand": "node",
+      "startArgs": ["server.js"],
+      "url": "http://localhost:3000/",
+      "verificationMethod": "http-status",
+      "expected": "200",
+      "timeoutSeconds": 60
+    },
+    {
+      "name": "tests-pass",
+      "kind": "process",
+      "command": "npm.cmd",
+      "args": ["test"],
+      "verificationMethod": "test-results",
+      "expected": "0",
+      "timeoutSeconds": 300
+    }
+  ]
+}

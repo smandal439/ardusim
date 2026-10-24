@@ -141,6 +141,8 @@ describe('module registration', () => {
     const sensors = COMPONENT_CATALOG.find(g => g.category === 'Sensors');
     expect(sensors.ids).toContain('v_to_i_420ma');
     expect(sensors.ids).toContain('i_to_v_420ma');
+    expect(COMPONENT_DEFS.ds18b20).toBeTruthy();
+    expect(sensors.ids).toContain('ds18b20');
   });
 
   it('has guide reference entries', () => {
