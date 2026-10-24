@@ -98,7 +98,7 @@ window.ArduinoLibs['Wire'] = {
           self._wireRxQueue = [];
         }
         for (var i = 0; i < qty; i++) {
-          var byte = (self._wireRxQueue && self._wireRxQueue.length) ? self._wireRxQueue.shift() : 0;
+          var byte = (self._wireRxQueue && i < self._wireRxQueue.length) ? self._wireRxQueue[i] : 0;
           _i2cByte(byte);
         }
         _i2cStop();

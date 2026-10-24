@@ -191,6 +191,23 @@ describe('transpile() — library plugins', () => {
     expect(api.rfidIsNewCard(instance)).toBe(true);
   });
 
+  it('prints live MPU6050 axis values from the accelerometer example', async () => {
+    const examplePath = path.resolve(__dirname, '..', 'Examples', 'mpu6050_accelerometer.json');
+    const example = JSON.parse(fs.readFileSync(examplePath, 'utf8'));
+    const sensor = example.circuit.components.find(component => component.type === 'mpu6050');
+    window.CircuitCanvas = { components: [sensor] };
+    const logs = [];
+    sim.onSerial = text => logs.push(text);
+
+    const compiled = await sim.compile(example.files['sketch.ino']);
+    expect(compiled.ok).toBe(true);
+    const sketch = sim._compiledFn(...sim._compiledCtx.vals);
+    await sketch.setup();
+    await sketch.loop();
+
+    expect(logs.join('')).toContain('X: 20  Y: 0  Z: 1020');
+  });
+
   it('starts the IR Remote MP3 Player example and plays a track on remote input', async () => {
     const examplePath = path.resolve(__dirname, '..', 'Examples', 'ir_dfplayer_remote.json');
     const example = JSON.parse(fs.readFileSync(examplePath, 'utf8'));
