@@ -55,7 +55,8 @@
         "y": 60,
         "rotation": 0,
         "props": {
-          "voltage": 3.7
+          "voltage": 3.7,
+          "capacity_mah": 50
         },
         "runtimeState": {}
       },
