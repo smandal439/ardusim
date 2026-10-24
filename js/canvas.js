@@ -4,6 +4,26 @@
 
 'use strict'; 
 
+function _canvasSliderProgress(value, min, max, scale) {
+  const n = Number(value);
+  const bounded = Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : min;
+  if (scale === 'log' && min > 0 && max > min) {
+    return (Math.log(bounded) - Math.log(min)) / (Math.log(max) - Math.log(min));
+  }
+  return (bounded - min) / (max - min || 1);
+}
+
+function _canvasSliderValue(progress, min, max, scale) {
+  const n = Number(progress);
+  const pct = Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0;
+  if (pct === 0) return min;
+  if (pct === 1) return max;
+  if (scale === 'log' && min > 0 && max > min) {
+    return Math.exp(Math.log(min) + pct * (Math.log(max) - Math.log(min)));
+  }
+  return min + pct * (max - min);
+}
+
 /* ---- Hoisted IC output-pin tables (used by _readDigitalInput / _readAnalogInput) ---- */
 const IC_OUTPUT_MAP = {
   ic_555: { pins: ['OUT'], activeLow: [] },
@@ -858,8 +878,7 @@ class CircuitCanvas {
     if (ctrl.type === 'toggle') return this._drawToggle(ctx, inst, ctrl, rect);
     // Default: range slider
     const value = this._getInteractiveValue(inst, ctrl);
-    const range = ctrl.max - ctrl.min || 1;
-    const pct = Math.max(0, Math.min(1, (value - ctrl.min) / range));
+    const pct = _canvasSliderProgress(value, ctrl.min, ctrl.max, ctrl.scale);
     const active = !!(window.ArduinoSim && window.ArduinoSim.isRunning);
     const invZ = 1 / this.zoom;
 
@@ -1289,7 +1308,7 @@ class CircuitCanvas {
 
     // Knob or range slider: drag horizontally
     const pct = Math.max(0, Math.min(1, (wx - rect.x) / rect.width));
-    let value = ctrl.min + pct * (ctrl.max - ctrl.min);
+    let value = _canvasSliderValue(pct, ctrl.min, ctrl.max, ctrl.scale);
     if (ctrl.step) value = Math.round(value / ctrl.step) * ctrl.step;
     value = Math.max(ctrl.min, Math.min(ctrl.max, value));
     inst.runtimeState = inst.runtimeState || {};

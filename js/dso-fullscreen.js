@@ -27,6 +27,35 @@ function _dsoFsProp(rs, props, field, def) {
   return Number.isFinite(n) ? Math.min(lim[1], Math.max(lim[0], n)) : def;
 }
 
+function _dsoFsBool(value) {
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['', '0', 'false', 'off', 'no'].includes(normalized)) return false;
+    if (['1', 'true', 'on', 'yes'].includes(normalized)) return true;
+  }
+  return Boolean(value);
+}
+
+function _dsoFsSliderProgress(value, min, max, scale) {
+  const n = Number(value);
+  const bounded = Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : min;
+  if (scale === 'log' && min > 0 && max > min) {
+    return (Math.log(bounded) - Math.log(min)) / (Math.log(max) - Math.log(min));
+  }
+  return (bounded - min) / (max - min || 1);
+}
+
+function _dsoFsSliderValue(progress, min, max, scale) {
+  const n = Number(progress);
+  const pct = Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0;
+  if (pct === 0) return min;
+  if (pct === 1) return max;
+  if (scale === 'log' && min > 0 && max > min) {
+    return Math.exp(Math.log(min) + pct * (Math.log(max) - Math.log(min)));
+  }
+  return min + pct * (max - min);
+}
+
 class DSOFullscreen {
   constructor() {
     this.overlay = document.getElementById('dso-fullscreen-overlay');
@@ -123,7 +152,7 @@ class DSOFullscreen {
     this.overlay.classList.remove('hidden');
     this._resize();
     this._syncControlsFromInst();
-    this._frozen = Boolean(this.inst.runtimeState?.paused);
+    this._frozen = _dsoFsBool(this.inst.runtimeState?.paused);
     this._updateHoldButton();
     this._startRender();
 
@@ -240,10 +269,10 @@ class DSOFullscreen {
     const P = (field, def) => _dsoFsProp(rs, props, field, def);
     const fs = this._fontSize;
 
-    const isPowered = Boolean(rs.powered ?? props.powered ?? 1);
-    const isRunning = rs.runStop !== undefined ? Boolean(rs.runStop) : Boolean(props.runStop ?? 1);
-    const isSingleArmed = rs.singleTrigger !== undefined ? Boolean(rs.singleTrigger) : Boolean(props.singleTrigger ?? 0);
-    const isPaused = Boolean(rs.paused ?? false);
+    const isPowered = _dsoFsBool(rs.powered ?? props.powered ?? 1);
+    const isRunning = _dsoFsBool(rs.runStop !== undefined ? rs.runStop : (props.runStop ?? 1));
+    const isSingleArmed = _dsoFsBool(rs.singleTrigger !== undefined ? rs.singleTrigger : (props.singleTrigger ?? 0));
+    const isPaused = _dsoFsBool(rs.paused ?? false);
     if (this._frozen !== isPaused) {
       this._frozen = isPaused;
       this._updateHoldButton();
@@ -343,8 +372,8 @@ class DSOFullscreen {
 
     if (isPowered) {
       const channels = [
-        { id: 'ch1', en: P('ch1_en', true) !== false, col: '#ffe600', glow: '#ffe600', vdiv: P('ch1_vdiv', 1), pos: P('ch1_pos', 2), coup: P('ch1_coupling', 'dc') },
-        { id: 'ch2', en: P('ch2_en', true) !== false, col: '#00e5ff', glow: '#00e5ff', vdiv: P('ch2_vdiv', 2), pos: P('ch2_pos', 0), coup: P('ch2_coupling', 'dc') },
+        { id: 'ch1', en: _dsoFsBool(P('ch1_en', true)), col: '#ffe600', glow: '#ffe600', vdiv: P('ch1_vdiv', 1), pos: P('ch1_pos', 2), coup: P('ch1_coupling', 'dc') },
+        { id: 'ch2', en: _dsoFsBool(P('ch2_en', true)), col: '#00e5ff', glow: '#00e5ff', vdiv: P('ch2_vdiv', 2), pos: P('ch2_pos', 0), coup: P('ch2_coupling', 'dc') },
       ];
 
       channels.forEach((ch) => {
@@ -738,8 +767,8 @@ class DSOFullscreen {
       ctx.fillText(txt, ox, osdY + 12);
     };
     const osdGap = this._isCompact ? 60 : 80;
-    _osd(scrX + 10, '1:' + this._fmtV(P('ch1_vdiv', 1)) + (P('ch1_coupling', 'dc') === 'ac' ? '~' : '='), '#ffe600', P('ch1_en', true) !== false);
-    _osd(scrX + osdGap, '2:' + this._fmtV(P('ch2_vdiv', 2)) + (P('ch2_coupling', 'dc') === 'ac' ? '~' : '='), '#00e5ff', P('ch2_en', true) !== false);
+    _osd(scrX + 10, '1:' + this._fmtV(P('ch1_vdiv', 1)) + (P('ch1_coupling', 'dc') === 'ac' ? '~' : '='), '#ffe600', _dsoFsBool(P('ch1_en', true)));
+    _osd(scrX + osdGap, '2:' + this._fmtV(P('ch2_vdiv', 2)) + (P('ch2_coupling', 'dc') === 'ac' ? '~' : '='), '#00e5ff', _dsoFsBool(P('ch2_en', true)));
 
     ctx.fillStyle = '#ffffff';
     ctx.font = `bold ${Math.round(10 * fs)}px monospace`;
@@ -884,8 +913,8 @@ class DSOFullscreen {
     const meas = inst._computeMeas || {};
     const fs = this._fontSize;
     const channels = [
-      { id: 'ch1', en: P('ch1_en', true) !== false, col: '#ffe600', label: 'CH1' },
-      { id: 'ch2', en: P('ch2_en', true) !== false, col: '#00e5ff', label: 'CH2' },
+      { id: 'ch1', en: _dsoFsBool(P('ch1_en', true)), col: '#ffe600', label: 'CH1' },
+      { id: 'ch2', en: _dsoFsBool(P('ch2_en', true)), col: '#00e5ff', label: 'CH2' },
     ];
 
     const colW = w / 4;
@@ -969,8 +998,8 @@ class DSOFullscreen {
     chDefs.forEach((chDef) => {
       this._drawSection(ctx, x + 8, yPos, w - 16, chDef.id.toUpperCase(), chDef.col);
       yPos += 16;
-      yPos = this._drawCheckbox(ctx, x + 8, yPos, w - 16, 'Enable', P(chDef.id + '_en', chDef.defEn), chDef.id + '_en');
-      yPos = this._drawSlider(ctx, x + 8, yPos, w - 16, 'V/Div', P(chDef.id + '_vdiv', chDef.defVdiv), 0.05, 20, 0.05, 'V', chDef.id + '_vdiv');
+      yPos = this._drawCheckbox(ctx, x + 8, yPos, w - 16, 'Enable', _dsoFsBool(P(chDef.id + '_en', chDef.defEn)), chDef.id + '_en');
+      yPos = this._drawSlider(ctx, x + 8, yPos, w - 16, 'V/Div', P(chDef.id + '_vdiv', chDef.defVdiv), 0.05, 20, 0.05, 'V', chDef.id + '_vdiv', 'log');
       yPos = this._drawSlider(ctx, x + 8, yPos, w - 16, 'Position', P(chDef.id + '_pos', chDef.defPos), -4, 4, 0.1, 'div', chDef.id + '_pos');
       yPos = this._drawSelect(ctx, x + 8, yPos, w - 16, 'Coupling', P(chDef.id + '_coupling', 'dc'), [
         { value: 'dc', label: 'DC' }, { value: 'ac', label: 'AC' }, { value: 'gnd', label: 'GND' }
@@ -984,7 +1013,7 @@ class DSOFullscreen {
     // ── Timebase ──
     this._drawSection(ctx, x + 8, yPos, w - 16, 'TIMEBASE');
     yPos += 16;
-    yPos = this._drawSlider(ctx, x + 8, yPos, w - 16, 'Time/Div', P('timebase', 0.001), 0.00001, 0.1, 0.0001, 's', 'timebase');
+    yPos = this._drawSlider(ctx, x + 8, yPos, w - 16, 'Time/Div', P('timebase', 0.001), 0.00001, 0.1, null, 's', 'timebase', 'log');
     yPos += sectionGap;
 
     // ── Math ──
@@ -1052,7 +1081,7 @@ class DSOFullscreen {
 
     // Pause / Hold button
     yPos += 26;
-    const isPaused = Boolean(P('paused', false));
+    const isPaused = _dsoFsBool(P('paused', false));
     ctx.fillStyle = isPaused ? '#352515' : '#1a1d24';
     this._rr(ctx, x + 8, yPos, w - 20, 22, 4);
     ctx.fill();
@@ -1109,7 +1138,7 @@ class DSOFullscreen {
     return y + 18;
   }
 
-  _drawSlider(ctx, x, y, w, label, value, min, max, step, unit, id) {
+  _drawSlider(ctx, x, y, w, label, value, min, max, step, unit, id, scale = 'linear') {
     const fs = this._fontSize;
     ctx.fillStyle = '#6a7488';
     ctx.font = `${Math.round(8 * fs)}px sans-serif`;
@@ -1127,8 +1156,7 @@ class DSOFullscreen {
     const trackY = y + 14;
     const trackW = w;
     const trackH = 8;
-    const range = max - min || 1;
-    const pct = Math.max(0, Math.min(1, (value - min) / range));
+    const pct = _dsoFsSliderProgress(value, min, max, scale);
 
     ctx.fillStyle = '#080a0c';
     this._rr(ctx, trackX, trackY, trackW, trackH, trackH / 2);
@@ -1158,7 +1186,7 @@ class DSOFullscreen {
     ctx.stroke();
 
     if (!this._elements) this._elements = {};
-    this._elements[id] = { x: trackX, y: trackY, w: trackW, h: trackH, type: 'range', value, min, max, step, field: id };
+    this._elements[id] = { x: trackX, y: trackY, w: trackW, h: trackH, type: 'range', value, min, max, step, scale, field: id };
 
     return y + 28;
   }
@@ -1280,7 +1308,7 @@ class DSOFullscreen {
     // Store the first enabled channel's waveform
     const chIds = ['ch1', 'ch2', 'ch3', 'ch4'];
     for (const chId of chIds) {
-      if (!P(chId + '_en', chId === 'ch1' || chId === 'ch2')) continue;
+      if (!_dsoFsBool(P(chId + '_en', chId === 'ch1' || chId === 'ch2'))) continue;
       const samples = buf[chId];
       const times = buf.t;
       if (!samples || samples.length < 2 || !times) continue;
@@ -1812,7 +1840,7 @@ class DSOFullscreen {
             props[el.field] = !el.value;
           } else if (el.type === 'range') {
             const pct = Math.max(0, Math.min(1, (x - el.x) / el.w));
-            let val = el.min + pct * (el.max - el.min);
+            let val = _dsoFsSliderValue(pct, el.min, el.max, el.scale);
             if (el.step) val = Math.round(val / el.step) * el.step;
             val = Math.max(el.min, Math.min(el.max, val));
             rs[el.field] = val;
@@ -1863,7 +1891,7 @@ class DSOFullscreen {
       const rect = this.canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const pct = Math.max(0, Math.min(1, (x - el.x) / el.w));
-      let val = el.min + pct * (el.max - el.min);
+      let val = _dsoFsSliderValue(pct, el.min, el.max, el.scale);
       if (el.step) val = Math.round(val / el.step) * el.step;
       val = Math.max(el.min, Math.min(el.max, val));
       this.inst.runtimeState[el.field] = val;
@@ -1942,7 +1970,7 @@ class DSOFullscreen {
     // Find the first enabled channel with data
     const chIds = ['ch1', 'ch2', 'ch3', 'ch4'];
     for (const chId of chIds) {
-      if (!P(chId + '_en', chId === 'ch1' || chId === 'ch2')) continue;
+      if (!_dsoFsBool(P(chId + '_en', chId === 'ch1' || chId === 'ch2'))) continue;
       const samples = buf && buf[chId] && buf[chId].length > 10 ? buf[chId] : null;
       if (!samples) continue;
 

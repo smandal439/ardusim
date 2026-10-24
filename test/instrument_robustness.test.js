@@ -61,22 +61,22 @@ function loadScripts(files, names) {
   return fn(global.window, global.document);
 }
 
-const { COMPONENT_DEFS, clampPropValue, _fgNum, _dsoProp } = loadScripts([
+const { COMPONENT_DEFS, clampPropValue, _fgNum, _fgBool, _dsoProp, _dsoBool } = loadScripts([
   'js/components/base.js',
   'js/components/function_generator.js',
   'js/components/dso.js',
-], ['COMPONENT_DEFS', 'clampPropValue', '_fgNum', '_dsoProp']);
+], ['COMPONENT_DEFS', 'clampPropValue', '_fgNum', '_fgBool', '_dsoProp', '_dsoBool']);
 
-const { DSOFullscreen, _dsoFsProp } = loadScripts([
+const { DSOFullscreen, _dsoFsProp, _dsoFsBool, _dsoFsSliderProgress, _dsoFsSliderValue } = loadScripts([
   'js/dso-fullscreen.js',
-], ['DSOFullscreen', '_dsoFsProp']);
+], ['DSOFullscreen', '_dsoFsProp', '_dsoFsBool', '_dsoFsSliderProgress', '_dsoFsSliderValue']);
 
-const { CircuitCanvas } = loadScripts([
+const { CircuitCanvas, _canvasSliderProgress, _canvasSliderValue } = loadScripts([
   'js/electrical.js',
   'js/components/base.js',
   'js/components/function_generator.js',
   'js/canvas.js',
-], ['CircuitCanvas']);
+], ['CircuitCanvas', '_canvasSliderProgress', '_canvasSliderValue']);
 
 const DSO_ID = 'dso_4ch';
 const dsoDef = COMPONENT_DEFS[DSO_ID];
@@ -332,6 +332,58 @@ describe('DSO divisor props are bounded at read time', () => {
   });
 });
 
+describe('DSO controls are scale-aware and normalize boolean values', () => {
+  it('uses logarithmic scales for timebase and volts per division', () => {
+    const controls = Object.fromEntries(dsoDef.interactive.map(ctrl => [ctrl.field, ctrl]));
+    for (const field of ['timebase', 'ch1_vdiv', 'ch2_vdiv']) {
+      expect(controls[field].scale, field).toBe('log');
+    }
+    expect(controls.timebase.step).toBeUndefined();
+
+    const timeControl = controls.timebase;
+    const geometricMidpoint = Math.sqrt(timeControl.min * timeControl.max);
+    expect(_canvasSliderProgress(geometricMidpoint, timeControl.min, timeControl.max, 'log')).toBeCloseTo(0.5);
+    expect(_canvasSliderValue(0.5, timeControl.min, timeControl.max, 'log')).toBeCloseTo(geometricMidpoint);
+    expect(_canvasSliderProgress(NaN, timeControl.min, timeControl.max, 'log')).toBe(0);
+    expect(_canvasSliderValue(NaN, timeControl.min, timeControl.max, 'log')).toBe(timeControl.min);
+
+    const inst = makeDsoInst();
+    CircuitCanvas.prototype._updateSliderValue.call({}, {
+      inst,
+      ctrl: timeControl,
+      rect: { x: 0, width: 100 },
+    }, 50, 0);
+    expect(inst.runtimeState.timebase).toBeCloseTo(geometricMidpoint);
+  });
+
+  it('uses the same logarithmic scale in fullscreen controls', () => {
+    const elements = drawPanel(new DSOFullscreen(), makeDsoInst());
+    expect(elements.timebase.scale).toBe('log');
+    expect(elements.ch1_vdiv.scale).toBe('log');
+    const midpoint = Math.sqrt(elements.timebase.min * elements.timebase.max);
+    expect(_dsoFsSliderProgress(midpoint, elements.timebase.min, elements.timebase.max, 'log')).toBeCloseTo(0.5);
+    expect(_dsoFsSliderValue(0.5, elements.timebase.min, elements.timebase.max, 'log')).toBeCloseTo(midpoint);
+    expect(_dsoFsSliderProgress(Infinity, elements.timebase.min, elements.timebase.max, 'log')).toBe(0);
+    expect(_dsoFsSliderValue(NaN, elements.timebase.min, elements.timebase.max, 'log')).toBe(elements.timebase.min);
+  });
+
+  it('treats serialized false values as off across both displays', () => {
+    for (const value of ['0', 'false', 'off', 'no', '', 0, false]) {
+      expect(_dsoBool(value), `component value ${JSON.stringify(value)}`).toBe(false);
+      expect(_dsoFsBool(value), `fullscreen value ${JSON.stringify(value)}`).toBe(false);
+    }
+    for (const value of ['1', 'true', 'on', 'yes', 1, true]) {
+      expect(_dsoBool(value), `component value ${JSON.stringify(value)}`).toBe(true);
+      expect(_dsoFsBool(value), `fullscreen value ${JSON.stringify(value)}`).toBe(true);
+    }
+
+    const inst = makeDsoInst();
+    inst.props.powered = '0';
+    dsoDef.step(inst, { simTime: 0 });
+    expect(inst._buffers).toBeUndefined();
+  });
+});
+
 /* ══════════════════════════════════════════════════════════════════════════
    3. Properties panel write path
    ═══════════════════════════════════════════════════════════════════════ */
@@ -396,6 +448,19 @@ describe('function generator hardening', () => {
     expect(_fgNum(-440, 0, 1, 100)).toBe(1);
     expect(_fgNum(1e9, 0, 1, 100)).toBe(100);
     expect(_fgNum('42', 0, 1, 100)).toBe(42);
+  });
+
+  it('recognizes string-valued power states', () => {
+    for (const off of ['0', 'false', 'off', 'no', '', 0, false]) {
+      expect(_fgBool(off), `powered=${JSON.stringify(off)}`).toBe(false);
+      const inst = fgInst({ powered: off });
+      fgDef.step(inst, sim);
+      expect(inst.runtimeState.ch1_voltage).toBe(0);
+      expect(inst.runtimeState.ch2_voltage).toBe(0);
+    }
+    for (const on of ['1', 'true', 'on', 'yes', 1, true]) {
+      expect(_fgBool(on), `powered=${JSON.stringify(on)}`).toBe(true);
+    }
   });
 
   it('drives a real waveform with the default settings', () => {

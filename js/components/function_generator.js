@@ -9,6 +9,15 @@ function _fgNum(v, def, min, max) {
   return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : def;
 }
 
+function _fgBool(value) {
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['', '0', 'false', 'off', 'no'].includes(normalized)) return false;
+    if (['1', 'true', 'on', 'yes'].includes(normalized)) return true;
+  }
+  return Boolean(value);
+}
+
 defComp({
   id: 'func_gen',
   name: 'Function Generator',
@@ -77,7 +86,7 @@ defComp({
     const rawT = sim && typeof sim.simTime === 'number' ? sim.simTime / 1000 : performance.now() / 1000;
     const t = Number.isFinite(rawT) ? rawT : 0;
     // "0", 0 and false all mean off — Boolean("0") would have left it running.
-    const powered = Number(P('powered', 1)) !== 0;
+    const powered = _fgBool(P('powered', 1));
     const evaluate = (channel) => {
       if (!powered) return 0;
       const wave = P(`${channel}_wave`, 'sine') || 'sine';
@@ -127,7 +136,7 @@ defComp({
     const W = 300, H = 190;
     // Match step(): "0"/0/false all mean off, so the display can't disagree
     // with the waveform that is actually being driven onto the pins.
-    const isPowered = Number(P('powered', 1)) !== 0;
+    const isPowered = _fgBool(P('powered', 1));
 
     ctx.save();
     ctx.translate(x, y);

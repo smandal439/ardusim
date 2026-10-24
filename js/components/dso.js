@@ -23,6 +23,15 @@ function _dsoProp(rs, props, field, def) {
   return Number.isFinite(n) ? Math.min(lim[1], Math.max(lim[0], n)) : def;
 }
 
+function _dsoBool(value) {
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['', '0', 'false', 'off', 'no'].includes(normalized)) return false;
+    if (['1', 'true', 'on', 'yes'].includes(normalized)) return true;
+  }
+  return Boolean(value);
+}
+
 defComp({
   id: 'dso_4ch',
   name: '2-Channel Digital Storage Oscilloscope',
@@ -54,7 +63,7 @@ defComp({
     { field: 'runStop',     label: 'Run/Stop',   type: 'toggle', min: 0, max: 1, step: 1, unit: '', inline: { x: 316, y: 185, w: 38, h: 18 } },
     { field: 'singleTrigger', label: 'Single',   type: 'toggle', min: 0, max: 1, step: 1, unit: '', inline: { x: 358, y: 185, w: 38, h: 18 } },
     { field: 'autoSet',     label: 'Auto Set',    type: 'toggle', min: 0, max: 1, step: 1, unit: '', inline: { x: 316, y: 209, w: 38, h: 16 } },
-    { field: 'timebase',    label: 'Time/Div',     min: 0.00001, max: 0.1, step: 0.0001, unit: 's' },
+    { field: 'timebase',    label: 'Time/Div',     min: 0.00001, max: 0.1, scale: 'log', unit: 's' },
     { field: 'trig_source', label: 'Trig Source',  type: 'select', options: [
       { value: 'ch1', label: 'CH1' }, { value: 'ch2', label: 'CH2' }
     ]},
@@ -63,13 +72,13 @@ defComp({
       { value: 'rising', label: 'Rising' }, { value: 'falling', label: 'Falling' }
     ]},
     { field: 'ch1_en',       label: 'CH1 Enable',   type: 'checkbox' },
-    { field: 'ch1_vdiv',     label: 'CH1 V/Div',    min: 0.05, max: 20, step: 0.05, unit: 'V' },
+    { field: 'ch1_vdiv',     label: 'CH1 V/Div',    min: 0.05, max: 20, step: 0.05, scale: 'log', unit: 'V' },
     { field: 'ch1_pos',      label: 'CH1 Position',  min: -4, max: 4, step: 0.1, unit: 'div' },
     { field: 'ch1_coupling', label: 'CH1 Coupling',  type: 'select', options: [
       { value: 'dc', label: 'DC' }, { value: 'ac', label: 'AC' }, { value: 'gnd', label: 'GND' }
     ]},
     { field: 'ch2_en',       label: 'CH2 Enable',   type: 'checkbox' },
-    { field: 'ch2_vdiv',     label: 'CH2 V/Div',    min: 0.05, max: 20, step: 0.05, unit: 'V' },
+    { field: 'ch2_vdiv',     label: 'CH2 V/Div',    min: 0.05, max: 20, step: 0.05, scale: 'log', unit: 'V' },
     { field: 'ch2_pos',      label: 'CH2 Position',  min: -4, max: 4, step: 0.1, unit: 'div' },
     { field: 'ch2_coupling', label: 'CH2 Coupling',  type: 'select', options: [
       { value: 'dc', label: 'DC' }, { value: 'ac', label: 'AC' }, { value: 'gnd', label: 'GND' }
@@ -86,14 +95,14 @@ defComp({
   ],
 
   step(inst, sim) {
-    const isPowered = Boolean(inst.runtimeState?.powered ?? inst.props.powered ?? 1);
+    const isPowered = _dsoBool(inst.runtimeState?.powered ?? inst.props?.powered ?? 1);
     if (!isPowered) return;
 
     const rs = inst.runtimeState || {};
     const P = _dsoProp;
-    const isRunning = rs.runStop !== undefined ? Boolean(rs.runStop) : Boolean(inst.props.runStop ?? 1);
-    const isSingleArmed = rs.singleTrigger !== undefined ? Boolean(rs.singleTrigger) : Boolean(inst.props.singleTrigger ?? 0);
-    const isPaused = Boolean(rs.paused);
+    const isRunning = _dsoBool(rs.runStop !== undefined ? rs.runStop : (inst.props?.runStop ?? 1));
+    const isSingleArmed = _dsoBool(rs.singleTrigger !== undefined ? rs.singleTrigger : (inst.props?.singleTrigger ?? 0));
+    const isPaused = _dsoBool(rs.paused);
 
     if (!inst._buffers) {
       inst._buffers = { ch1: [], ch2: [], ch3: [], ch4: [], t: [] };
@@ -288,7 +297,7 @@ defComp({
     });
 
     // Auto-set: triggered when autoSet prop toggles to 1
-    const isAutoSet = rs.autoSet !== undefined ? Boolean(rs.autoSet) : Boolean(inst.props.autoSet ?? 0);
+    const isAutoSet = _dsoBool(rs.autoSet !== undefined ? rs.autoSet : (inst.props.autoSet ?? 0));
     if (isAutoSet) {
       _dsoAutoSet(inst, rs, buf, P);
       rs.autoSet = 0;
@@ -302,9 +311,9 @@ defComp({
     const rs = inst.runtimeState || {};
     const W = 440, H = 300;
     const t = sim && typeof sim.time === 'number' ? sim.time : performance.now() / 1000;
-    const isPowered = Boolean(inst.runtimeState?.powered ?? inst.props.powered ?? 1);
-    const isRunning = rs.runStop !== undefined ? Boolean(rs.runStop) : Boolean(inst.props.runStop ?? 1);
-    const isSingleArmed = rs.singleTrigger !== undefined ? Boolean(rs.singleTrigger) : Boolean(inst.props.singleTrigger ?? 0);
+    const isPowered = _dsoBool(inst.runtimeState?.powered ?? inst.props?.powered ?? 1);
+    const isRunning = _dsoBool(rs.runStop !== undefined ? rs.runStop : (inst.props?.runStop ?? 1));
+    const isSingleArmed = _dsoBool(rs.singleTrigger !== undefined ? rs.singleTrigger : (inst.props?.singleTrigger ?? 0));
 
     const P = (field, def) => _dsoProp(rs, props, field, def);
 
@@ -431,8 +440,8 @@ defComp({
 
     // ── Waveform Rendering ──
     const channels = [
-      { id: 'ch1', en: P('ch1_en', true) !== false, col: '#ffe600', glow: '#ffe600', vdiv: P('ch1_vdiv', 1), pos: P('ch1_pos', 2), coup: P('ch1_coupling', 'dc') },
-      { id: 'ch2', en: P('ch2_en', true) !== false, col: '#00e5ff', glow: '#00e5ff', vdiv: P('ch2_vdiv', 2), pos: P('ch2_pos', 0), coup: P('ch2_coupling', 'dc') },
+      { id: 'ch1', en: _dsoBool(P('ch1_en', true)), col: '#ffe600', glow: '#ffe600', vdiv: P('ch1_vdiv', 1), pos: P('ch1_pos', 2), coup: P('ch1_coupling', 'dc') },
+      { id: 'ch2', en: _dsoBool(P('ch2_en', true)), col: '#00e5ff', glow: '#00e5ff', vdiv: P('ch2_vdiv', 2), pos: P('ch2_pos', 0), coup: P('ch2_coupling', 'dc') },
     ];
 
     const buf = inst._buffers;
@@ -703,8 +712,8 @@ defComp({
       ctx.textAlign = 'left';
       ctx.fillText(txt, ox, osdY + 10);
     };
-    _osd(scrX + 8, '1:' + _fmtV(P('ch1_vdiv', 1)) + (P('ch1_coupling', 'dc') === 'ac' ? '~' : '='), '#ffe600', P('ch1_en', true) !== false);
-    _osd(scrX + 72, '2:' + _fmtV(P('ch2_vdiv', 2)) + (P('ch2_coupling', 'dc') === 'ac' ? '~' : '='), '#00e5ff', P('ch2_en', true) !== false);
+    _osd(scrX + 8, '1:' + _fmtV(P('ch1_vdiv', 1)) + (P('ch1_coupling', 'dc') === 'ac' ? '~' : '='), '#ffe600', _dsoBool(P('ch1_en', true)));
+    _osd(scrX + 72, '2:' + _fmtV(P('ch2_vdiv', 2)) + (P('ch2_coupling', 'dc') === 'ac' ? '~' : '='), '#00e5ff', _dsoBool(P('ch2_en', true)));
 
     // Timebase on right
     ctx.fillStyle = '#ffffff';
@@ -724,7 +733,7 @@ defComp({
     }
 
     // Paused overlay
-    const isPaused = Boolean(P('paused', false));
+    const isPaused = _dsoBool(P('paused', false));
     if (isPaused) {
       ctx.fillStyle = 'rgba(255, 170, 0, 0.12)';
       ctx.fillRect(scrX, scrY, scrW, scrH);
@@ -857,8 +866,8 @@ defComp({
     const btnY = 136;
     const chBtnW = 21;
     const chBtnGap = 1;
-    _chBtn(panX + 4,              btnY, chBtnW, 'CH1', '#ffe600', isPowered && P('ch1_en', true) !== false);
-    _chBtn(panX + 4 + chBtnW + chBtnGap, btnY, chBtnW, 'CH2', '#00e5ff', isPowered && P('ch2_en', true) !== false);
+    _chBtn(panX + 4,              btnY, chBtnW, 'CH1', '#ffe600', isPowered && _dsoBool(P('ch1_en', true)));
+    _chBtn(panX + 4 + chBtnW + chBtnGap, btnY, chBtnW, 'CH2', '#00e5ff', isPowered && _dsoBool(P('ch2_en', true)));
 
     inst._btnRects.ch1 = { x: panX + 4,              y: btnY, w: chBtnW, h: 14, field: 'ch1_en' };
     inst._btnRects.ch2 = { x: panX + 4 + chBtnW + chBtnGap, y: btnY, w: chBtnW, h: 14, field: 'ch2_en' };
@@ -969,11 +978,11 @@ defComp({
     // ── Coupling Buttons (CH1 & CH2) ──
     const coupY = modeY + 14;
     const ch1Coup = P('ch1_coupling', 'dc').toUpperCase();
-    _ctrlBtn(panX + 4, coupY, modeW, 12, 'CH1:' + ch1Coup, '#ffe600', isPowered && P('ch1_en', true) !== false);
+    _ctrlBtn(panX + 4, coupY, modeW, 12, 'CH1:' + ch1Coup, '#ffe600', isPowered && _dsoBool(P('ch1_en', true)));
     inst._btnRects.ch1Coupling = { x: panX + 4, y: coupY, w: modeW, h: 12, field: 'ch1_coupling' };
 
     const ch2Coup = P('ch2_coupling', 'dc').toUpperCase();
-    _ctrlBtn(panX + 52, coupY, modeW, 12, 'CH2:' + ch2Coup, '#00e5ff', isPowered && P('ch2_en', true) !== false);
+    _ctrlBtn(panX + 52, coupY, modeW, 12, 'CH2:' + ch2Coup, '#00e5ff', isPowered && _dsoBool(P('ch2_en', true)));
     inst._btnRects.ch2Coupling = { x: panX + 52, y: coupY, w: modeW, h: 12, field: 'ch2_coupling' };
 
     // ── Power toggle switch ──
