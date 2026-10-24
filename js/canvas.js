@@ -4287,13 +4287,12 @@ class CircuitCanvas {
         case 'mpu6050': {
           const sim = window.ArduinoSim;
           if (!sim || !sim.pinStates) break;
-          // User-adjustable values are exposed via interactive props
-          inst.runtimeState.accelX = inst.props.accelX ?? 0;
-          inst.runtimeState.accelY = inst.props.accelY ?? 0;
-          inst.runtimeState.accelZ = inst.props.accelZ ?? 1024;
-          inst.runtimeState.gyroX = inst.props.gyroX ?? 0;
-          inst.runtimeState.gyroY = inst.props.gyroY ?? 0;
-          inst.runtimeState.gyroZ = inst.props.gyroZ ?? 0;
+          const defaults = { accelX: 0, accelY: 0, accelZ: 1024, gyroX: 0, gyroY: 0, gyroZ: 0 };
+          for (const [key, fallback] of Object.entries(defaults)) {
+            if (inst.runtimeState[key] === undefined) {
+              inst.runtimeState[key] = inst.props[key] ?? fallback;
+            }
+          }
           break;
         }
 

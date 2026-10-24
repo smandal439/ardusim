@@ -137,6 +137,31 @@ describe('module registration', () => {
     expect(tx.getPins().map(p => p.id)).toEqual(['VIN', 'OUT+', 'OUT-', 'VCC', 'GND']);
   });
 
+  it('keeps MPU6050 slider values when the sensor updates', () => {
+    const inst = makeInstance('imu', 'mpu6050');
+    const canvas = buildRig([inst], []);
+    const sensor = makeComponent(inst, canvas);
+    const controls = COMPONENT_DEFS.mpu6050.interactive;
+    const rects = canvas._getInteractiveRects(inst);
+
+    sensor.update(canvas);
+    const sliderValues = controls.map((ctrl, index) => {
+      const rect = rects[index];
+      canvas._updateSliderValue(
+        { inst, ctrl, rect },
+        rect.x + rect.width * [0.75, 0.3, 0.6][index],
+        rect.y
+      );
+      return inst.runtimeState[ctrl.field];
+    });
+
+    sensor.update(canvas);
+
+    controls.forEach((ctrl, index) => {
+      expect(inst.runtimeState[ctrl.field]).toBe(sliderValues[index]);
+    });
+  });
+
   it('appears in the component catalog (Sensors group)', () => {
     const sensors = COMPONENT_CATALOG.find(g => g.category === 'Sensors');
     expect(sensors.ids).toContain('v_to_i_420ma');

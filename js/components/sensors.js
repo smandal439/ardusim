@@ -3048,12 +3048,19 @@ class MPU6050Component extends Component {
     ];
   }
   update(canvas) {
-    this.runtimeState.accelX = this.props.accelX ?? 0;
-    this.runtimeState.accelY = this.props.accelY ?? 0;
-    this.runtimeState.accelZ = this.props.accelZ ?? 1024;
-    this.runtimeState.gyroX = this.props.gyroX ?? 0;
-    this.runtimeState.gyroY = this.props.gyroY ?? 0;
-    this.runtimeState.gyroZ = this.props.gyroZ ?? 0;
+    const defaults = {
+      accelX: 0,
+      accelY: 0,
+      accelZ: 1024,
+      gyroX: 0,
+      gyroY: 0,
+      gyroZ: 0,
+    };
+    for (const [key, fallback] of Object.entries(defaults)) {
+      if (this.runtimeState[key] === undefined) {
+        this.runtimeState[key] = this.props[key] ?? fallback;
+      }
+    }
   }
 }
 
