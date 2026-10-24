@@ -2968,15 +2968,15 @@ window.loadExamplesFromFiles = async function () {
     'neopixel_strip_color_pattern', 'not_gate_test', 'ntc_thermistor_dc_motor', 'oled_ssd1306', 'opamp_741_non_inverting', 'or_gate',
     'pico2w_blink', 'pico2w_button', 'pico2w_counter', 'pico2w_fade', 'pico2w_serial_hello', 'pico2w_wifi_scan',
     'pico_2_w_analog_read', 'pico_2_w_rgb_led', 'pico_8led', 'pir_alarm', 'plugin_tutorial', 'potentiometer',
-    'print_binary_data', 'rainbow_rgb', 'read_rfid_card_raw_data', 'register_based_arduino_code2', 'register_based_arduino_code_1', 'register_based_blink_arduino',
-    'relay_control', 'remote_control_leds', 'remote_servo_control', 'rfid_inventory_tracker', 'rgb_matrix_demo', 'rotary_encoder_counter',
-    'rotary_encoder_servo', 'seg7_counter', 'serial_peek', 'serial_peek_2', 'serial_plotter', 'serial_plotter_sine_and_triangle',
-    'servo_continuous_spin', 'servo_sweep', 'shift_resister_circuit', 'simplebme280_altimeter_on_lcd', 'simplebme280_altitude', 'simplebme280_basic',
-    'ssr_8ch_chaser', 'stepper_motor', 'stm32f746_blink', 'stm32f746_button', 'stm32f746_hal_led_blink', 'stm32f746_lcd',
-    'stm32f746_pot_led', 'stm32f746_register_uart', 'tb6600_stepper', 'tb6600_stepper_motor', 'tm1637_clock', 'traffic_light',
-    'two_lcd', 'u8g2_oled_example', 'ultrasonic', 'ultrasonic_distance_pulsein', 'vl53l0x_proximity_sensor', 'voltage_divider',
-    'water_flow', 'weather_station_multi', 'weather_station_simple', 'weather_station_tft', 'wifi_bssid', 'wifi_scan',
-    'zigbee_8_led_control', 'zigbee_led_control', 'zigbee_sender_receiver', 'zigbee_sensor_network'
+    'print_binary_data', 'rainbow_rgb', 'read_rfid_card_raw_data', 'read_rfid_card_raw_data copy', 'register_based_arduino_code2', 'register_based_arduino_code_1',
+    'register_based_blink_arduino', 'relay_control', 'remote_control_leds', 'remote_servo_control', 'rfid_inventory_tracker', 'rfid_inventory_tracker copy',
+    'rgb_matrix_demo', 'rotary_encoder_counter', 'rotary_encoder_servo', 'seg7_counter', 'serial_peek', 'serial_peek_2',
+    'serial_plotter', 'serial_plotter_sine_and_triangle', 'servo_continuous_spin', 'servo_sweep', 'shift_resister_circuit', 'simplebme280_altimeter_on_lcd',
+    'simplebme280_altitude', 'simplebme280_basic', 'ssr_8ch_chaser', 'stepper_motor', 'stm32f746_blink', 'stm32f746_button',
+    'stm32f746_hal_led_blink', 'stm32f746_lcd', 'stm32f746_pot_led', 'stm32f746_register_uart', 'tb6600_stepper', 'tb6600_stepper_motor',
+    'tm1637_clock', 'traffic_light', 'two_lcd', 'u8g2_oled_example', 'ultrasonic', 'ultrasonic_distance_pulsein',
+    'vl53l0x_proximity_sensor', 'voltage_divider', 'water_flow', 'weather_station_multi', 'weather_station_simple', 'weather_station_tft',
+    'wifi_bssid', 'wifi_scan', 'zigbee_8_led_control', 'zigbee_led_control', 'zigbee_sender_receiver', 'zigbee_sensor_network'
   ];
 
   const sketches = [];
