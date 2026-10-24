@@ -150,8 +150,15 @@ class CircuitCanvas {
     const w = this.wrapper.clientWidth;
     const h = this.wrapper.clientHeight;
     if (w === 0 || h === 0) return;
-    this.canvas.width = w;
-    this.canvas.height = h;
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    this._viewportWidth = w;
+    this._viewportHeight = h;
+    this._dpr = dpr;
+    const pixelWidth = Math.round(w * dpr);
+    const pixelHeight = Math.round(h * dpr);
+    if (this.canvas.width !== pixelWidth) this.canvas.width = pixelWidth;
+    if (this.canvas.height !== pixelHeight) this.canvas.height = pixelHeight;
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (this.panX === 0 && this.panY === 0) {
       this.panX = w / 2 - 200;
       this.panY = h / 2 - 150;
@@ -161,7 +168,11 @@ class CircuitCanvas {
   /* -------------- RENDER -------------- */
   _render() {
     const { ctx, canvas, zoom, panX, panY } = this;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const dpr = this._dpr || 1;
+    const width = this._viewportWidth || canvas.width;
+    const height = this._viewportHeight || canvas.height;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
 
     // Refresh active simulation states for live glowing & component updates
     const sim = window.ArduinoSim;
@@ -209,8 +220,8 @@ class CircuitCanvas {
     const invZ = 1 / this.zoom;
     const startX = Math.floor(-this.panX * invZ / G) * G;
     const startY = Math.floor(-this.panY * invZ / G) * G;
-    const endX = startX + (this.canvas.width * invZ) + G;
-    const endY = startY + (this.canvas.height * invZ) + G;
+    const endX = startX + ((this._viewportWidth || this.canvas.width) * invZ) + G;
+    const endY = startY + ((this._viewportHeight || this.canvas.height) * invZ) + G;
 
     ctx.strokeStyle = this.zoom < 0.5 ? 'transparent' : 'rgba(255,255,255,0.04)';
     ctx.lineWidth = 0.5 / this.zoom;
@@ -1820,6 +1831,7 @@ class CircuitCanvas {
   _bindEvents() {
     const canvas = this.canvas;
 
+    window.addEventListener('resize', () => this._resize());
     canvas.addEventListener('mousedown', e => this._onMouseDown(e));
     canvas.addEventListener('mousemove', e => this._onMouseMove(e));
     canvas.addEventListener('mouseup', e => this._onMouseUp(e));
@@ -2940,8 +2952,8 @@ class CircuitCanvas {
   /* -------------- VIEWPORT -------------- */
   fitView() {
     if (this.components.length === 0) {
-      this.panX = this.canvas.width / 2 - 200;
-      this.panY = this.canvas.height / 2 - 100;
+      this.panX = (this._viewportWidth || this.canvas.width) / 2 - 200;
+      this.panY = (this._viewportHeight || this.canvas.height) / 2 - 100;
       this.zoom = 1;
       this._updateZoomDisplay();
       return;
@@ -2957,7 +2969,8 @@ class CircuitCanvas {
       maxY = Math.max(maxY, inst.y + def.height + 20);
     }
 
-    const w = this.canvas.width, h = this.canvas.height;
+    const w = this._viewportWidth || this.canvas.width;
+    const h = this._viewportHeight || this.canvas.height;
     const cw = maxX - minX, ch = maxY - minY;
     const safeCw = cw > 0 && Number.isFinite(cw) ? cw : 1;
     const safeCh = ch > 0 && Number.isFinite(ch) ? ch : 1;

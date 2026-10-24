@@ -403,6 +403,29 @@ describe('position sync, connector rects and hit-testing', () => {
   });
 });
 
+describe('canvas display resolution', () => {
+  it('uses device pixels for sharp rendering while keeping a CSS-pixel viewport', () => {
+    const previousDpr = window.devicePixelRatio;
+    window.devicePixelRatio = 2;
+    const transforms = [];
+    const fake = bareCanvas();
+    fake.wrapper = { clientWidth: 390, clientHeight: 720 };
+    fake.canvas = { width: 300, height: 150 };
+    fake.ctx = { setTransform: (...args) => transforms.push(args) };
+
+    fake._resize();
+
+    expect(fake.canvas.width).toBe(780);
+    expect(fake.canvas.height).toBe(1440);
+    expect(fake._viewportWidth).toBe(390);
+    expect(fake._viewportHeight).toBe(720);
+    expect(transforms.at(-1)).toEqual([2, 0, 0, 2, 0, 0]);
+    expect(fake.panX).toBe(-5);
+    expect(fake.panY).toBe(210);
+    window.devicePixelRatio = previousDpr;
+  });
+});
+
 describe('persistence + integration hooks', () => {
   it('canvas.serialize() keeps attach + level', () => {
     const t = { id: 't1', type: 'logic_level_in', x: 4, y: 8, rotation: 0,
