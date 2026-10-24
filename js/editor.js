@@ -709,13 +709,17 @@ DL2:    DJNZ R3, DL2
 
     // Quick insertion toolbar for special characters
     const helperBar = document.createElement('div');
-    helperBar.style.cssText = 'display:flex;gap:6px;padding:6px;background:#161b22;border-bottom:1px solid #21262d;overflow-x:auto;-webkit-overflow-scrolling:touch;';
+    helperBar.setAttribute('aria-label', 'Code insertion shortcuts');
+    helperBar.style.cssText = 'display:flex;gap:6px;padding:6px;background:#161b22;border-bottom:1px solid #21262d;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0;min-height:52px;align-items:center;';
 
     const symbols = ['{', '}', '(', ')', ';', '=', 'HIGH', 'LOW', 'INPUT', 'OUTPUT'];
     symbols.forEach(symbol => {
       const btn = document.createElement('button');
+      btn.type = 'button';
       btn.textContent = symbol;
-      btn.style.cssText = 'background:#21262d;color:#e6edf3;border:1px solid #30363d;padding:4px 10px;border-radius:4px;font-family:"JetBrains Mono",monospace;font-size:12px;cursor:pointer;flex-shrink:0;';
+      btn.title = `Insert ${symbol}`;
+      btn.setAttribute('aria-label', `Insert ${symbol}`);
+      btn.style.cssText = 'background:#21262d;color:#e6edf3;border:1px solid #30363d;min-height:40px;min-width:40px;padding:6px 10px;border-radius:6px;font-family:"JetBrains Mono",monospace;font-size:13px;cursor:pointer;flex-shrink:0;touch-action:manipulation;';
       btn.onclick = (e) => {
         e.preventDefault();
         const start = ta.selectionStart;
@@ -723,16 +727,16 @@ DL2:    DJNZ R3, DL2
         ta.value = ta.value.substring(0, start) + symbol + ta.value.substring(end);
         ta.selectionStart = ta.selectionEnd = start + symbol.length;
         ta.focus();
-        updateLineNumbers();
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
       };
       helperBar.appendChild(btn);
     });
 
     const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'display:flex;width:100%;height:calc(100% - 37px);overflow:hidden;background:#0d1117;';
+    wrapper.style.cssText = 'display:flex;flex:1;min-height:0;width:100%;overflow:hidden;background:#0d1117;';
 
     const gutter = document.createElement('div');
-    gutter.style.cssText = 'width:40px;padding:12px 4px 12px 8px;text-align:right;color:#484f58;font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.6;overflow:hidden;user-select:none;flex-shrink:0;background:#0d1117;border-right:1px solid #21262d;';
+    gutter.style.cssText = 'width:40px;padding:12px 4px 12px 8px;text-align:right;color:#7d8590;font-family:"JetBrains Mono",monospace;font-size:16px;line-height:1.5;overflow:hidden;user-select:none;flex-shrink:0;background:#0d1117;border-right:1px solid #21262d;';
     gutter.id = 'mobile-line-numbers';
 
     const ta = document.createElement('textarea');
@@ -741,10 +745,14 @@ DL2:    DJNZ R3, DL2
     ta.autocomplete = 'off';
     ta.autocorrect = 'off';
     ta.autocapitalize = 'off';
-    ta.style.cssText = `flex:1;width:100%;background:#0d1117;color:#e6edf3;font-family:'JetBrains Mono',monospace;font-size:14px;padding:12px;border:none;outline:none;resize:none;tab-size:2;white-space:pre;line-height:1.6;overflow:auto;-webkit-overflow-scrolling:touch;`;
+    ta.setAttribute('aria-label', 'Arduino code editor');
+    ta.style.cssText = `flex:1;min-width:0;min-height:0;width:100%;background:#0d1117;color:#e6edf3;font-family:'JetBrains Mono',monospace;font-size:16px;padding:12px;border:none;outline:none;resize:none;tab-size:2;white-space:pre;line-height:1.5;overflow:auto;-webkit-overflow-scrolling:touch;`;
 
     wrapper.appendChild(gutter);
     wrapper.appendChild(ta);
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.minHeight = '0';
     container.appendChild(helperBar);
     container.appendChild(wrapper);
 
@@ -768,11 +776,26 @@ DL2:    DJNZ R3, DL2
         const end = ta.selectionEnd;
         ta.value = ta.value.substring(0, start) + '  ' + ta.value.substring(end);
         ta.selectionStart = ta.selectionEnd = start + 2;
-        updateLineNumbers();
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const start = ta.selectionStart;
+        const end = ta.selectionEnd;
+        const lineStart = ta.value.lastIndexOf('\n', start - 1) + 1;
+        const currentLine = ta.value.slice(lineStart, start);
+        const indent = currentLine.match(/^\s*/)[0];
+        const extraIndent = currentLine.trimEnd().endsWith('{') ? '  ' : '';
+        const insertion = `\n${indent}${extraIndent}`;
+        ta.value = ta.value.slice(0, start) + insertion + ta.value.slice(end);
+        ta.selectionStart = ta.selectionEnd = start + insertion.length;
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
       }
     });
 
     ta.addEventListener('input', () => {
+      if (this.activeFile && this.files[this.activeFile]) {
+        this.files[this.activeFile].content = ta.value;
+      }
       if (window.StorageManager) window.StorageManager.markDirty();
       clearTimeout(this._saveTimer);
       this._saveTimer = setTimeout(() => {
