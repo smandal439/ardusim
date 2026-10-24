@@ -33,6 +33,9 @@
   - `WiFi` (Wi-Fi connection simulation)
   - `HTTPClient` & `WebServer` (HTTP requests and server)
   - `DHT` (DHT11/22 temperature & humidity sensor)
+  - `OneWire` & `DallasTemperature` (DS18B20 components on the circuit canvas)
+  - `Adafruit_BMP280` (temperature, pressure, and altitude using a placed BME280 component)
+  - ESP32 `Preferences` (typed, namespaced in-memory key-value storage for the current page load)
   - `NewPing` (HC-SR04 ultrasonic sensor)
   - `Adafruit_SSD1306` & `Adafruit_GFX` (OLED display)
   - `Adafruit_MPU6050` (accelerometer/gyroscope)
@@ -45,6 +48,7 @@
   - `Stepper` (stepper motor control)
   - `SoftwareSerial` (software serial ports)
   - `tone()` / `noTone()` (Web Audio API synthesis)
+- Sensor libraries read values from their corresponding canvas components. These are software models; bus timing, electrical faults, and physical hardware behavior are not fully emulated.
 - **Speed Control**: Variable simulation speeds (0.25× to 10×).
 
 ### 🎨 High-Performance Circuit Canvas

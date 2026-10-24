@@ -8584,6 +8584,93 @@ window.EXAMPLE_SKETCHES = [
     "code": "/*\n * ESP32 Onboard LED Blink\n * The DevKit V1 has a blue built-in LED on GPIO2.\n * LED_BUILTIN is mapped to GPIO2 automatically.\n */\n\nvoid setup() {\n  pinMode(LED_BUILTIN, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"ESP32 onboard LED blink started\");\n}\n\nvoid loop() {\n  digitalWrite(LED_BUILTIN, HIGH);\n  Serial.println(\"LED ON\");\n  delay(1000);\n\n  digitalWrite(LED_BUILTIN, LOW);\n  Serial.println(\"LED OFF\");\n  delay(1000);\n}"
   },
   {
+    "id": "esp32_bmp280_weather_monitor",
+    "name": "ESP32 BMP280 Weather Monitor",
+    "icon": "🌤️",
+    "desc": "Read temperature, pressure, and calculated altitude from a simulated BME280 component using the Adafruit BMP280 API.",
+    "tags": [
+      "esp32",
+      "bmp280",
+      "bme280",
+      "i2c",
+      "sensor",
+      "weather"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "esp32_devkit_v1",
+          "x": 180,
+          "y": 75,
+          "rotation": 0,
+          "props": {
+            "label": "ESP32"
+          }
+        },
+        {
+          "id": "s1",
+          "type": "bme280",
+          "x": 430,
+          "y": 225,
+          "rotation": 0,
+          "props": {
+            "temperature": 24.5,
+            "humidity": 55,
+            "pressure": 1008
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "3V3"
+          },
+          "to": {
+            "instId": "s1",
+            "pinId": "VCC"
+          }
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "b1",
+            "pinId": "GND1"
+          },
+          "to": {
+            "instId": "s1",
+            "pinId": "GND"
+          }
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "b1",
+            "pinId": "D22"
+          },
+          "to": {
+            "instId": "s1",
+            "pinId": "SCL"
+          }
+        },
+        {
+          "id": "w4",
+          "from": {
+            "instId": "b1",
+            "pinId": "D21"
+          },
+          "to": {
+            "instId": "s1",
+            "pinId": "SDA"
+          }
+        }
+      ]
+    },
+    "code": "/*\n * ESP32 BMP280 — temperature, pressure, and altitude\n *\n * The simulator reads environmental values from the BME280 canvas\n * component. Adjust its Temp and Press controls while the sketch runs.\n * ESP32 I2C defaults: SDA GPIO21 and SCL GPIO22.\n */\n#include <Wire.h>\n#include <Adafruit_BMP280.h>\n\nAdafruit_BMP280 bmp;\n\nvoid setup() {\n  Serial.begin(115200);\n  Wire.begin(21, 22);\n\n  if (!bmp.begin(0x76)) {\n    Serial.println(\"BMP280 sensor not found on the canvas\");\n    return;\n  }\n  Serial.println(\"BMP280 ready\");\n}\n\nvoid loop() {\n  Serial.print(\"Temperature: \");\n  Serial.print(bmp.readTemperature(), 1);\n  Serial.println(\" C\");\n\n  Serial.print(\"Pressure: \");\n  Serial.print(bmp.readPressure() / 100.0, 1);\n  Serial.println(\" hPa\");\n\n  Serial.print(\"Approx. altitude: \");\n  Serial.print(bmp.readAltitude(1013.25), 1);\n  Serial.println(\" m\");\n  Serial.println();\n  delay(2000);\n}\n"
+  },
+  {
     "id": "esp32_deep_sleep_timer",
     "name": "ESP32 Deep Sleep Timer Wakeup",
     "icon": "😴",
@@ -11258,6 +11345,35 @@ window.EXAMPLE_SKETCHES = [
     "files": {
       "sketch.ino": "/*\n* ESP32 NTP Clock on LCD I2C - Indian Standard Time (IST)\n* Connects to Wi-Fi, fetches UTC time via ntpEpoch(),\n* applies UTC+5:30 offset, and displays HH:MM:SS on a 16x2 LCD.\n*\n* Wiring: LCD VCC -> 3V3/5V, GND -> GND, SDA -> D21, SCL -> D22\n*/\n\n#include <WiFi.h>\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\nconst char* ssid = \"ArduSimNet\";\nconst char* password = \"simulator\";\n\n// IST is UTC +5:30 (5*3600 + 30*60 = 19800 seconds)\nconst long istOffsetSec = 19800;\n\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\nvoid setup() {\n  Serial.begin(115200);\n  lcd.init();\n  lcd.backlight();\n\n  lcd.setCursor(0, 0);\n  lcd.print(\"Connecting...\");\n  Serial.println(\"Connecting to Wi-Fi...\");\n\n  WiFi.begin(ssid, password);\n  while (WiFi.status() != WL_CONNECTED) {\n    delay(300);\n    Serial.print(\".\");\n  }\n  Serial.println();\n  Serial.print(\"IP: \");\n  Serial.println(WiFi.localIP());\n\n  lcd.clear();\n  lcd.setCursor(0, 0);\n  lcd.print(\" NTP Clock\");\n  lcd.setCursor(0, 1);\n  lcd.print(WiFi.localIP());\n  delay(1500);\n  lcd.clear();\n}\n\nvoid loop() {\n// Fetch UTC epoch and apply IST offset\n  unsigned long epoch = ntpEpoch() + istOffsetSec;\n\n  int hours = (epoch % 86400) / 3600 |0;\n  int minutes = (epoch % 3600) / 60 |0;\n  int seconds = epoch % 60 | 0;\n\n// Row 0: static label (exactly 16 chars)\n  lcd.setCursor(0, 0);\n  lcd.print(\" NTP Time (IST) \");\n\n// Row 1: always write all 16 chars to avoid leftover IP characters\n// Format: '  HH:MM:SS      ' = 2 + 8 + 6 trailing spaces = 16 chars\n  lcd.setCursor(0, 1);\n  lcd.print(\"  \");\n  if (hours < 10) lcd.print(\"0\");\n  lcd.print(hours);\n  lcd.print(\":\");\n  if (minutes < 10) lcd.print(\"0\");\n  lcd.print(minutes);\n  lcd.print(\":\");\n  if (seconds < 10) lcd.print(\"0\");\n  lcd.print(seconds);\n  lcd.print(\"      \");\n\n  Serial.print(\"IST Time: \");\n  if (hours < 10) Serial.print(\"0\");\n  Serial.print(hours);\n  Serial.print(\":\");\n  if (minutes < 10) Serial.print(\"0\");\n  Serial.print(minutes);\n  Serial.print(\":\");\n  if (seconds < 10) Serial.print(\"0\");\n  Serial.println(seconds);\n\n  delay(1000);\n}"
     }
+  },
+  {
+    "id": "esp32_preferences_settings",
+    "name": "ESP32 Preferences Settings",
+    "icon": "💾",
+    "desc": "Save and reload typed settings in an ESP32 Preferences namespace, then print them to Serial Monitor.",
+    "tags": [
+      "esp32",
+      "preferences",
+      "nvs",
+      "storage",
+      "serial"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "esp32_devkit_v1",
+          "x": 240,
+          "y": 100,
+          "rotation": 0,
+          "props": {
+            "label": "ESP32"
+          }
+        }
+      ],
+      "wires": []
+    },
+    "code": "/*\n * ESP32 Preferences — store and retrieve settings\n *\n * The simulator keeps Preferences values in memory for this page load.\n * They do not survive a page refresh like real ESP32 NVS storage.\n */\n#include <Preferences.h>\n\nPreferences preferences;\n\nvoid setup() {\n  Serial.begin(115200);\n\n  if (!preferences.begin(\"settings\", false)) {\n    Serial.println(\"Could not open Preferences\");\n    return;\n  }\n\n  preferences.putInt(\"bootCount\", 7);\n  preferences.putBool(\"enabled\", true);\n  preferences.putString(\"deviceName\", \"ArduSim ESP32\");\n\n  Serial.println(\"Saved settings:\");\n  Serial.print(\"Boot count: \");\n  Serial.println(preferences.getInt(\"bootCount\", 0));\n  Serial.print(\"Enabled: \");\n  Serial.println(preferences.getBool(\"enabled\", false) ? \"yes\" : \"no\");\n  Serial.print(\"Device: \");\n  Serial.println(preferences.getString(\"deviceName\", \"unknown\"));\n  Serial.print(\"Stored keys: \");\n  Serial.println(preferences.isKey(\"bootCount\") ? \"bootCount found\" : \"missing\");\n\n  preferences.end();\n}\n\nvoid loop() {\n  delay(1000);\n}\n"
   },
   {
     "id": "esp32_sd_songs_player",
@@ -23467,6 +23583,80 @@ window.EXAMPLE_SKETCHES = [
     "code": "/*\n * OLED SSD1306 — draw text and graphics on a 128x64 monochrome OLED.\n * Wiring: OLED VCC → 5V, GND → GND, SDA → A4, SCL → A5.\n */\n\n#include <Wire.h>\n#include <Adafruit_SSD1306.h>\n\nAdafruit_SSD1306 display(128, 64, &Wire, -1);\n\nint counter = 0;\n\nvoid setup() {\n  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);\n  display.clearDisplay();\n  display.setTextSize(2);\n  display.setTextColor(SSD1306_WHITE);\n  display.setCursor(24, 20);\n  display.print(\"ArduSim\");\n  display.display();\n  delay(1500);\n}\n\nvoid loop() {\n  counter++;\n  display.clearDisplay();\n  display.setTextSize(1);\n  display.setTextColor(SSD1306_WHITE);\n  display.setCursor(0, 0);\n  display.print(\"OLED I2C 0x3C\");\n  display.setCursor(0, 16);\n  display.print(\"Count: \");\n  display.print(counter);\n\n  // Draw a frame and a progress bar\n  display.drawRect(0, 30, 127, 33, SSD1306_WHITE);\n  display.fillRect(0, 48, (counter % 120) + 4, 4, SSD1306_WHITE);\n\n  display.display();\n  delay(200);\n}"
   },
   {
+    "id": "onewire_ds18b20_temperature",
+    "name": "OneWire DS18B20 Temperature",
+    "icon": "🌡️",
+    "desc": "Read a simulated DS18B20 temperature with OneWire and DallasTemperature, and view the value in Serial Monitor.",
+    "tags": [
+      "arduino",
+      "onewire",
+      "ds18b20",
+      "dallastemperature",
+      "sensor",
+      "temperature"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "arduino_uno",
+          "x": 180,
+          "y": 80,
+          "rotation": 0,
+          "props": {
+            "label": "UNO"
+          }
+        },
+        {
+          "id": "ds1",
+          "type": "ds18b20",
+          "x": 390,
+          "y": 210,
+          "rotation": 0,
+          "props": {
+            "temperature": 26.5
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "D2"
+          },
+          "to": {
+            "instId": "ds1",
+            "pinId": "data"
+          }
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "b1",
+            "pinId": "5V"
+          },
+          "to": {
+            "instId": "ds1",
+            "pinId": "vcc"
+          }
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "b1",
+            "pinId": "GND1"
+          },
+          "to": {
+            "instId": "ds1",
+            "pinId": "gnd"
+          }
+        }
+      ]
+    },
+    "code": "/*\n * OneWire DS18B20 — temperature over the OneWire bus\n *\n * Change the Temp control on the DS18B20 canvas component to try\n * different readings. D2 is the OneWire data pin in this example.\n */\n#include <OneWire.h>\n#include <DallasTemperature.h>\n\nconst int ONE_WIRE_BUS = 2;\nOneWire oneWire(ONE_WIRE_BUS);\nDallasTemperature sensors(&oneWire);\n\nvoid setup() {\n  Serial.begin(115200);\n  sensors.begin();\n  Serial.print(\"DS18B20 devices found: \");\n  Serial.println(sensors.getDeviceCount());\n}\n\nvoid loop() {\n  sensors.requestTemperatures();\n  float temperatureC = sensors.getTempCByIndex(0);\n  Serial.print(\"Temperature: \");\n  Serial.print(temperatureC, 1);\n  Serial.println(\" C\");\n  delay(2000);\n}\n"
+  },
+  {
     "id": "opamp_741_non_inverting",
     "name": "LM741 Non-Inverting Amplifier",
     "icon": "📐",
@@ -25907,6 +26097,39 @@ window.EXAMPLE_SKETCHES = [
           "props": {
             "label": "ESP32"
           }
+        },
+        {
+          "id": "comp_1792836156398_87ju1",
+          "type": "rfid_card",
+          "x": -50,
+          "y": -30,
+          "rotation": 0,
+          "props": {
+            "label": "RFID Card 3",
+            "uid": "A1:B2:C3:55"
+          }
+        },
+        {
+          "id": "comp_1792836157681_58x7z",
+          "type": "rfid_card",
+          "x": -55,
+          "y": 55,
+          "rotation": 0,
+          "props": {
+            "label": "RFID Card 2",
+            "uid": "51:92:53:94"
+          }
+        },
+        {
+          "id": "comp_1792836159196_kowuo",
+          "type": "rfid_card",
+          "x": -50,
+          "y": 145,
+          "rotation": 0,
+          "props": {
+            "label": "RFID Card 1",
+            "uid": "AC:BE2:63:57"
+          }
         }
       ],
       "wires": [
@@ -25921,7 +26144,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "D5"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1788253879416_y4p8e",
@@ -25934,7 +26159,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "D18"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1788253903144_iaogg",
@@ -25947,7 +26174,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "D23"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1788253910272_o2z1q",
@@ -25960,7 +26189,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "D19"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1788253915135_wy7jr",
@@ -25973,7 +26204,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "GND"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1788253925616_k3m8b",
@@ -25986,7 +26219,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "D21"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "wire_1788253932929_cjycp",
@@ -25999,11 +26234,15 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "3V3"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         }
       ]
     },
-    "code": "/*\nMFRC522 RFID Reader\t    ESP32\t          Description\nSDA\t                    GPIO 5\t        SPI signal input, I2C data line, or UART data input\nSCK\t                    GPIO 18\t        SPI clock\nMOSI\t                  GPIO 23\t        SPI data input\nMISO\t                  GPIO 19\t        SPI master-in-slave-out, I2C serial clock, or UART serial output\nIRQ\t                    Don’t connect\t  Interrupt pin; signals the microcontroller when an RFID tag is nearby\nGND\t                    GND\t\nRST\t                    GPIO 21\t        LOW signal to put the module in power-down mode; send a HIGH signal to reset the module\n3.3V\t                  3.3V\t          Power supply (2.5-3.3V)\n*/\n#include <MFRC522v2.h>\n#include <MFRC522DriverSPI.h>\n//#include <MFRC522DriverI2C.h>\n#include <MFRC522DriverPinSimple.h>\n#include <MFRC522Debug.h>\n\n// Learn more about using SPI/I2C or check the pin assigment for your board: https://github.com/OSSLibraries/Arduino_MFRC522v2#pin-layout\nMFRC522DriverPinSimple ss_pin(5);\n\nMFRC522DriverSPI driver{ss_pin}; // Create SPI driver\n//MFRC522DriverI2C driver{};     // Create I2C driver\nMFRC522 mfrc522{driver};         // Create MFRC522 instance\n\nvoid setup() {\n  Serial.begin(115200);  // Initialize serial communication\n  while (!Serial);       // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4).\n  \n  mfrc522.PCD_Init();    // Init MFRC522 board.\n  MFRC522Debug::PCD_DumpVersionToSerial(mfrc522, Serial);\t// Show details of PCD - MFRC522 Card Reader details.\n  Serial.println(F(\"Scan PICC to see UID, SAK, type, and data blocks...\"));\n}\n\nvoid loop() {\n  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.\n  if (!mfrc522.PICC_IsNewCardPresent()) {\n    return;\n  }\n\n  // Select one of the cards.\n  if (!mfrc522.PICC_ReadCardSerial()) {\n    return;\n  }\n\n  // Dump debug info about the card; PICC_HaltA() is automatically called.\n  MFRC522Debug::PICC_DumpToSerial(mfrc522, Serial, &(mfrc522.uid));\n\n  delay(2000);\n}"
+    "files": {
+      "sketch.ino": "/*\nMFRC522 RFID Reader\t    ESP32\t          Description\nSDA\t                    GPIO 5\t        SPI signal input, I2C data line, or UART data input\nSCK\t                    GPIO 18\t        SPI clock\nMOSI\t                  GPIO 23\t        SPI data input\nMISO\t                  GPIO 19\t        SPI master-in-slave-out, I2C serial clock, or UART serial output\nIRQ\t                    Don’t connect\t  Interrupt pin; signals the microcontroller when an RFID tag is nearby\nGND\t                    GND\t\nRST\t                    GPIO 21\t        LOW signal to put the module in power-down mode; send a HIGH signal to reset the module\n3.3V\t                  3.3V\t          Power supply (2.5-3.3V)\n*/\n#include <MFRC522v2.h>\n#include <MFRC522DriverSPI.h>\n//#include <MFRC522DriverI2C.h>\n#include <MFRC522DriverPinSimple.h>\n#include <MFRC522Debug.h>\n\n// Learn more about using SPI/I2C or check the pin assigment for your board: https://github.com/OSSLibraries/Arduino_MFRC522v2#pin-layout\nMFRC522DriverPinSimple ss_pin(5);\n\nMFRC522DriverSPI driver{ss_pin}; // Create SPI driver\n//MFRC522DriverI2C driver{};     // Create I2C driver\nMFRC522 mfrc522{driver};         // Create MFRC522 instance\n\nvoid setup() {\n  Serial.begin(115200);  // Initialize serial communication\n  while (!Serial);       // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4).\n  \n  mfrc522.PCD_Init();    // Init MFRC522 board.\n  MFRC522Debug::PCD_DumpVersionToSerial(mfrc522, Serial);\t// Show details of PCD - MFRC522 Card Reader details.\n  Serial.println(F(\"Scan PICC to see UID, SAK, type, and data blocks...\"));\n}\n\nvoid loop() {\n  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.\n  if (!mfrc522.PICC_IsNewCardPresent()) {\n    return;\n  }\n\n  // Select one of the cards.\n  if (!mfrc522.PICC_ReadCardSerial()) {\n    return;\n  }\n\n  // Dump debug info about the card; PICC_HaltA() is automatically called.\n  MFRC522Debug::PICC_DumpToSerial(mfrc522, Serial, &(mfrc522.uid));\n\n  delay(2000);\n}"
+    }
   },
   {
     "id": "register_based_arduino_code2",
@@ -27031,13 +27270,18 @@ window.EXAMPLE_SKETCHES = [
           "id": "arduino1",
           "type": "arduino_uno",
           "x": 200,
-          "y": 100
+          "y": 100,
+          "rotation": 0,
+          "props": {
+            "label": "UNO"
+          }
         },
         {
           "id": "rc522_1",
           "type": "rc522",
           "x": 50,
           "y": 300,
+          "rotation": 0,
           "props": {
             "tagPresent": false,
             "uid": "A1:B2:C3:D4"
@@ -27046,8 +27290,9 @@ window.EXAMPLE_SKETCHES = [
         {
           "id": "rfid_card_1",
           "type": "rfid_card",
-          "x": 125,
-          "y": 305,
+          "x": -65,
+          "y": 145,
+          "rotation": 0,
           "props": {
             "label": "Card 1",
             "uid": "A1:B2:C3:D4"
@@ -27056,8 +27301,9 @@ window.EXAMPLE_SKETCHES = [
         {
           "id": "rfid_card_2",
           "type": "rfid_card",
-          "x": 265,
-          "y": 305,
+          "x": -65,
+          "y": 250,
+          "rotation": 0,
           "props": {
             "label": "Card 2",
             "uid": "12:34:56:78"
@@ -27067,7 +27313,11 @@ window.EXAMPLE_SKETCHES = [
           "id": "lcd1",
           "type": "lcd1602_i2c",
           "x": 380,
-          "y": 300
+          "y": 300,
+          "rotation": 0,
+          "props": {
+            "address": "0x27"
+          }
         }
       ],
       "wires": [
@@ -27080,7 +27330,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "rc522_1",
             "pinId": "3V3"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w2",
@@ -27091,7 +27345,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "rc522_1",
             "pinId": "GND"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w3",
@@ -27102,7 +27360,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "rc522_1",
             "pinId": "SDA"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w4",
@@ -27113,7 +27375,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "rc522_1",
             "pinId": "SCK"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w5",
@@ -27124,7 +27390,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "rc522_1",
             "pinId": "MOSI"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w6",
@@ -27135,7 +27405,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "rc522_1",
             "pinId": "MISO"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w7",
@@ -27146,7 +27420,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "rc522_1",
             "pinId": "RST"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w8",
@@ -27157,7 +27435,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "lcd1",
             "pinId": "vcc"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w9",
@@ -27168,7 +27450,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "lcd1",
             "pinId": "gnd"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w10",
@@ -27179,7 +27465,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "lcd1",
             "pinId": "sda"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w11",
@@ -27190,11 +27480,17 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "lcd1",
             "pinId": "scl"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         }
       ]
     },
-    "code": "/*\n * RFID Inventory Tracker\n * Tracks RFID tags with LCD display and Serial logging.\n * \n * Wiring (Arduino Uno):\n * RC522 RFID (SPI):\n *   SDA  -> Pin 10\n *   SCK  -> Pin 13\n *   MOSI -> Pin 11\n *   MISO -> Pin 12\n *   RST  -> Pin 9\n *   3V3  -> 3.3V\n *   GND  -> GND\n * \n * LCD I2C (16x2 with PCF8574 backpack):\n *   VCC -> 5V\n *   GND -> GND\n *   SDA -> A4\n *   SCL -> A5\n * \n * Usage: Drag an RFID card close to the RC522 reader to scan it.\n *        Change a card's uid in Properties to give it a different identity.\n */\n\n#include <MFRC522v2.h>\n#include <MFRC522DriverSPI.h>\n#include <MFRC522DriverPinSimple.h>\n#include <MFRC522Debug.h>\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\n// RC522 pins\nMFRC522DriverPinSimple ss_pin(10);\nMFRC522DriverSPI driver{ss_pin};\nMFRC522 mfrc522{driver};\n\n// LCD I2C (address 0x27, 16 cols, 2 rows)\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\n// Inventory storage (max 20 tags)\nString inventory[20];\nint tagCount = 0;\nString lastUID = \"\";\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  // Initialize RFID\n  mfrc522.PCD_Init();\n  MFRC522Debug::PCD_DumpVersionToSerial(mfrc522, Serial);\n\n  // Initialize LCD\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"RFID Inventory\");\n  lcd.setCursor(0, 1);\n  lcd.print(\"Tags: 0\");\n\n  Serial.println(F(\"\\n=== RFID Inventory Tracker ===\"));\n  Serial.println(F(\"Scan tags to add to inventory.\"));\n  Serial.println(F(\"Drag an RFID card near the RC522 to simulate.\"));\n}\n\nvoid loop() {\n  // Check for new card\n  if (mfrc522.PICC_IsNewCardPresent()) {\n    if (mfrc522.PICC_ReadCardSerial()) {\n      // Get UID bytes array and size\n      byte *uidBytes = mfrc522.uid.uidByte;\n      byte uidSize = mfrc522.uid.size;\n      \n      // Build UID string\n      String uidStr = \"\";\n      for (byte i = 0; i < uidSize; i++) {\n        if (uidBytes[i] < 0x10) uidStr += \"0\";\n        uidStr += String(uidBytes[i], HEX);\n        uidStr.toUpperCase();\n        if (i < uidSize - 1) uidStr += \":\";\n      }\n\n      // Only process if different from last read\n      if (uidStr != lastUID) {\n        lastUID = uidStr;\n        \n        // Check if already in inventory\n        bool known = false;\n        for (int i = 0; i < tagCount; i++) {\n          if (inventory[i] == uidStr) {\n            known = true;\n            break;\n          }\n        }\n\n        if (!known && tagCount < 20) {\n          // New tag - add to inventory\n          inventory[tagCount] = uidStr;\n          tagCount++;\n          \n          Serial.print(F(\"[NEW] Tag #\"));\n          Serial.print(tagCount);\n          Serial.print(F(\": \"));\n          Serial.println(uidStr);\n        } else if (known) {\n          Serial.print(F(\"[KNOWN] \"));\n          Serial.println(uidStr);\n        } else {\n          Serial.print(F(\"[FULL] Cannot add: \"));\n          Serial.println(uidStr);\n        }\n\n        // Update LCD\n        lcd.clear();\n        lcd.setCursor(0, 0);\n        lcd.print(\"Inventory: \");\n        lcd.print(tagCount);\n        lcd.print(F(\" tags\"));\n        lcd.setCursor(0, 1);\n        lcd.print(\"Last: \");\n        lcd.print(uidStr.substring(0, 11)); // Fit on 16 chars\n\n        // Halt PICC\n        mfrc522.PICC_HaltA();\n        mfrc522.PCD_StopCrypto1();\n      }\n    }\n  }\n\n  // Small delay to prevent flooding\n  delay(100);\n}"
+    "files": {
+      "sketch.ino": "/*\n * RFID Inventory Tracker\n * Tracks RFID tags with LCD display and Serial logging.\n * \n * Wiring (Arduino Uno):\n * RC522 RFID (SPI):\n *   SDA  -> Pin 10\n *   SCK  -> Pin 13\n *   MOSI -> Pin 11\n *   MISO -> Pin 12\n *   RST  -> Pin 9\n *   3V3  -> 3.3V\n *   GND  -> GND\n * \n * LCD I2C (16x2 with PCF8574 backpack):\n *   VCC -> 5V\n *   GND -> GND\n *   SDA -> A4\n *   SCL -> A5\n * \n * Usage: Drag an RFID card close to the RC522 reader to scan it.\n *        Change a card's uid in Properties to give it a different identity.\n */\n\n#include <MFRC522v2.h>\n#include <MFRC522DriverSPI.h>\n#include <MFRC522DriverPinSimple.h>\n#include <MFRC522Debug.h>\n#include <Wire.h>\n#include <LiquidCrystal_I2C.h>\n\n// RC522 pins\nMFRC522DriverPinSimple ss_pin(10);\nMFRC522DriverSPI driver{ss_pin};\nMFRC522 mfrc522{driver};\n\n// LCD I2C (address 0x27, 16 cols, 2 rows)\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\n// Inventory storage (max 20 tags)\nString inventory[20];\nint tagCount = 0;\nString lastUID = \"\";\n\nvoid setup() {\n  Serial.begin(115200);\n  while (!Serial);\n\n  // Initialize RFID\n  mfrc522.PCD_Init();\n  MFRC522Debug::PCD_DumpVersionToSerial(mfrc522, Serial);\n\n  // Initialize LCD\n  lcd.init();\n  lcd.backlight();\n  lcd.setCursor(0, 0);\n  lcd.print(\"RFID Inventory\");\n  lcd.setCursor(0, 1);\n  lcd.print(\"Tags: 0\");\n\n  Serial.println(F(\"\\n=== RFID Inventory Tracker ===\"));\n  Serial.println(F(\"Scan tags to add to inventory.\"));\n  Serial.println(F(\"Drag an RFID card near the RC522 to simulate.\"));\n}\n\nvoid loop() {\n  // Check for new card\n  if (mfrc522.PICC_IsNewCardPresent()) {\n    if (mfrc522.PICC_ReadCardSerial()) {\n      // Get UID bytes array and size\n      byte *uidBytes = mfrc522.uid.uidByte;\n      byte uidSize = mfrc522.uid.size;\n      \n      // Build UID string\n      String uidStr = \"\";\n      for (byte i = 0; i < uidSize; i++) {\n        if (uidBytes[i] < 0x10) uidStr += \"0\";\n        uidStr += String(uidBytes[i], HEX);\n        uidStr.toUpperCase();\n        if (i < uidSize - 1) uidStr += \":\";\n      }\n\n      // Only process if different from last read\n      if (uidStr != lastUID) {\n        lastUID = uidStr;\n        \n        // Check if already in inventory\n        bool known = false;\n        for (int i = 0; i < tagCount; i++) {\n          if (inventory[i] == uidStr) {\n            known = true;\n            break;\n          }\n        }\n\n        if (!known && tagCount < 20) {\n          // New tag - add to inventory\n          inventory[tagCount] = uidStr;\n          tagCount++;\n          \n          Serial.print(F(\"[NEW] Tag #\"));\n          Serial.print(tagCount);\n          Serial.print(F(\": \"));\n          Serial.println(uidStr);\n        } else if (known) {\n          Serial.print(F(\"[KNOWN] \"));\n          Serial.println(uidStr);\n        } else {\n          Serial.print(F(\"[FULL] Cannot add: \"));\n          Serial.println(uidStr);\n        }\n\n        // Update LCD\n        lcd.clear();\n        lcd.setCursor(0, 0);\n        lcd.print(\"Inventory: \");\n        lcd.print(tagCount);\n        lcd.print(F(\" tags\"));\n        lcd.setCursor(0, 1);\n        lcd.print(\"Last: \");\n        lcd.print(uidStr.substring(0, 11)); // Fit on 16 chars\n\n        // Halt PICC\n        mfrc522.PICC_HaltA();\n        mfrc522.PCD_StopCrypto1();\n      }\n    }\n  }\n\n  // Small delay to prevent flooding\n  delay(100);\n}"
+    }
   },
   {
     "id": "rgb_matrix_demo",

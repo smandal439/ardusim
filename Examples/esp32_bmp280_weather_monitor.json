@@ -1,0 +1,50 @@
+{
+  "id": "esp32_bmp280_weather_monitor",
+  "name": "ESP32 BMP280 Weather Monitor",
+  "icon": "🌤️",
+  "desc": "Read temperature, pressure, and calculated altitude from a simulated BME280 component using the Adafruit BMP280 API.",
+  "tags": ["esp32", "bmp280", "bme280", "i2c", "sensor", "weather"],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "esp32_devkit_v1",
+        "x": 180,
+        "y": 75,
+        "rotation": 0,
+        "props": { "label": "ESP32" }
+      },
+      {
+        "id": "s1",
+        "type": "bme280",
+        "x": 430,
+        "y": 225,
+        "rotation": 0,
+        "props": { "temperature": 24.5, "humidity": 55, "pressure": 1008 }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": { "instId": "b1", "pinId": "3V3" },
+        "to": { "instId": "s1", "pinId": "VCC" }
+      },
+      {
+        "id": "w2",
+        "from": { "instId": "b1", "pinId": "GND1" },
+        "to": { "instId": "s1", "pinId": "GND" }
+      },
+      {
+        "id": "w3",
+        "from": { "instId": "b1", "pinId": "D22" },
+        "to": { "instId": "s1", "pinId": "SCL" }
+      },
+      {
+        "id": "w4",
+        "from": { "instId": "b1", "pinId": "D21" },
+        "to": { "instId": "s1", "pinId": "SDA" }
+      }
+    ]
+  },
+  "code": "/*\n * ESP32 BMP280 — temperature, pressure, and altitude\n *\n * The simulator reads environmental values from the BME280 canvas\n * component. Adjust its Temp and Press controls while the sketch runs.\n * ESP32 I2C defaults: SDA GPIO21 and SCL GPIO22.\n */\n#include <Wire.h>\n#include <Adafruit_BMP280.h>\n\nAdafruit_BMP280 bmp;\n\nvoid setup() {\n  Serial.begin(115200);\n  Wire.begin(21, 22);\n\n  if (!bmp.begin(0x76)) {\n    Serial.println(\"BMP280 sensor not found on the canvas\");\n    return;\n  }\n  Serial.println(\"BMP280 ready\");\n}\n\nvoid loop() {\n  Serial.print(\"Temperature: \");\n  Serial.print(bmp.readTemperature(), 1);\n  Serial.println(\" C\");\n\n  Serial.print(\"Pressure: \");\n  Serial.print(bmp.readPressure() / 100.0, 1);\n  Serial.println(\" hPa\");\n\n  Serial.print(\"Approx. altitude: \");\n  Serial.print(bmp.readAltitude(1013.25), 1);\n  Serial.println(\" m\");\n  Serial.println();\n  delay(2000);\n}\n"
+}

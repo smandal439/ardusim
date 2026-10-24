@@ -158,6 +158,57 @@ defComp({
   }
 });
 
+defComp({
+  id: 'ds18b20',
+  name: 'DS18B20 Temperature Sensor',
+  category: 'Sensors',
+  icon: '🌡️',
+  desc: 'OneWire digital temperature sensor for DallasTemperature sketches',
+  width: 68,
+  height: 72,
+  defaultProps: { temperature: 25 },
+  interactive: [
+    { field: 'temperature', label: 'Temp', min: -55, max: 125, step: 0.1, unit: '°C' },
+  ],
+  pins: [
+    { id: 'gnd', label: 'GND', type: PIN_TYPE.GND, x: 14, y: 72, side: 'bottom' },
+    { id: 'data', label: 'DQ', type: PIN_TYPE.DIGITAL, x: 34, y: 72, side: 'bottom' },
+    { id: 'vcc', label: 'VDD', type: PIN_TYPE.POWER, x: 54, y: 72, side: 'bottom' },
+  ],
+  draw(ctx, inst) {
+    const temp = inst.runtimeState?.temperature ?? inst.props?.temperature ?? 25;
+    ctx.save();
+    ctx.translate(inst.x, inst.y);
+    ctx.fillStyle = '#263238';
+    roundRect(ctx, 8, 4, 52, 50, 5);
+    ctx.fill();
+    ctx.strokeStyle = '#90a4ae';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = '#e0f2f1';
+    ctx.font = 'bold 8px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('DS18B20', 34, 20);
+    ctx.fillStyle = '#80cbc4';
+    ctx.font = 'bold 9px "JetBrains Mono", monospace';
+    ctx.fillText(`${Number(temp).toFixed(1)}°C`, 34, 38);
+    const pins = [
+      { x: 14, label: 'GND' },
+      { x: 34, label: 'DQ' },
+      { x: 54, label: 'VDD' },
+    ];
+    pins.forEach(pin => {
+      ctx.fillStyle = '#cfd8dc';
+      ctx.fillRect(pin.x - 2, 54, 4, 12);
+      ctx.fillStyle = '#263238';
+      ctx.font = '5px "JetBrains Mono", monospace';
+      ctx.fillText(pin.label, pin.x, 51);
+    });
+    if (inst.selected) drawSelectionRect(ctx, 4, 0, 60, 76);
+    ctx.restore();
+  },
+});
+
 /* ----------------------------Ultrasonic Sensor HC-SR04 -------------------------------- */
 defComp({
   id: 'hcsr04',

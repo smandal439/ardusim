@@ -1,0 +1,45 @@
+{
+  "id": "onewire_ds18b20_temperature",
+  "name": "OneWire DS18B20 Temperature",
+  "icon": "🌡️",
+  "desc": "Read a simulated DS18B20 temperature with OneWire and DallasTemperature, and view the value in Serial Monitor.",
+  "tags": ["arduino", "onewire", "ds18b20", "dallastemperature", "sensor", "temperature"],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "arduino_uno",
+        "x": 180,
+        "y": 80,
+        "rotation": 0,
+        "props": { "label": "UNO" }
+      },
+      {
+        "id": "ds1",
+        "type": "ds18b20",
+        "x": 390,
+        "y": 210,
+        "rotation": 0,
+        "props": { "temperature": 26.5 }
+      }
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": { "instId": "b1", "pinId": "D2" },
+        "to": { "instId": "ds1", "pinId": "data" }
+      },
+      {
+        "id": "w2",
+        "from": { "instId": "b1", "pinId": "5V" },
+        "to": { "instId": "ds1", "pinId": "vcc" }
+      },
+      {
+        "id": "w3",
+        "from": { "instId": "b1", "pinId": "GND1" },
+        "to": { "instId": "ds1", "pinId": "gnd" }
+      }
+    ]
+  },
+  "code": "/*\n * OneWire DS18B20 — temperature over the OneWire bus\n *\n * Change the Temp control on the DS18B20 canvas component to try\n * different readings. D2 is the OneWire data pin in this example.\n */\n#include <OneWire.h>\n#include <DallasTemperature.h>\n\nconst int ONE_WIRE_BUS = 2;\nOneWire oneWire(ONE_WIRE_BUS);\nDallasTemperature sensors(&oneWire);\n\nvoid setup() {\n  Serial.begin(115200);\n  sensors.begin();\n  Serial.print(\"DS18B20 devices found: \");\n  Serial.println(sensors.getDeviceCount());\n}\n\nvoid loop() {\n  sensors.requestTemperatures();\n  float temperatureC = sensors.getTempCByIndex(0);\n  Serial.print(\"Temperature: \");\n  Serial.print(temperatureC, 1);\n  Serial.println(\" C\");\n  delay(2000);\n}\n"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "esp32_preferences_settings",
+  "name": "ESP32 Preferences Settings",
+  "icon": "💾",
+  "desc": "Save and reload typed settings in an ESP32 Preferences namespace, then print them to Serial Monitor.",
+  "tags": ["esp32", "preferences", "nvs", "storage", "serial"],
+  "circuit": {
+    "components": [
+      {
+        "id": "b1",
+        "type": "esp32_devkit_v1",
+        "x": 240,
+        "y": 100,
+        "rotation": 0,
+        "props": { "label": "ESP32" }
+      }
+    ],
+    "wires": []
+  },
+  "code": "/*\n * ESP32 Preferences — store and retrieve settings\n *\n * The simulator keeps Preferences values in memory for this page load.\n * They do not survive a page refresh like real ESP32 NVS storage.\n */\n#include <Preferences.h>\n\nPreferences preferences;\n\nvoid setup() {\n  Serial.begin(115200);\n\n  if (!preferences.begin(\"settings\", false)) {\n    Serial.println(\"Could not open Preferences\");\n    return;\n  }\n\n  preferences.putInt(\"bootCount\", 7);\n  preferences.putBool(\"enabled\", true);\n  preferences.putString(\"deviceName\", \"ArduSim ESP32\");\n\n  Serial.println(\"Saved settings:\");\n  Serial.print(\"Boot count: \");\n  Serial.println(preferences.getInt(\"bootCount\", 0));\n  Serial.print(\"Enabled: \");\n  Serial.println(preferences.getBool(\"enabled\", false) ? \"yes\" : \"no\");\n  Serial.print(\"Device: \");\n  Serial.println(preferences.getString(\"deviceName\", \"unknown\"));\n  Serial.print(\"Stored keys: \");\n  Serial.println(preferences.isKey(\"bootCount\") ? \"bootCount found\" : \"missing\");\n\n  preferences.end();\n}\n\nvoid loop() {\n  delay(1000);\n}\n"
+}
