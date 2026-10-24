@@ -1,5 +1,5 @@
 {
-  "id": "mpu6050_accelerometer_2",
+    "id": "mpu6050_accelerometer_2",
   "name": "MPU6050 Accelerometer 2",
   "icon": "🔧",
   "desc": "This example demonstrates how to use an MPU6050 Accelerometer and Gyroscope sensor with an Arduino. The circuit includes an Arduino Uno and an MPU6050 sensor. The code reads the accelerometer and gyroscope data from the sensor and prints the values to the Serial Monitor.",
@@ -23,8 +23,8 @@
       {
         "id": "mpu1",
         "type": "mpu6050",
-        "x": 380,
-        "y": 320,
+        "x": 455,
+        "y": 120,
         "rotation": 0,
         "props": {
           "accelX": 0,
@@ -48,7 +48,9 @@
           "pinId": "VCC"
         },
         "color": null,
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w2",
@@ -61,7 +63,9 @@
           "pinId": "GND1"
         },
         "color": null,
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w3",
@@ -74,7 +78,9 @@
           "pinId": "SCL"
         },
         "color": null,
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       },
       {
         "id": "w4",
@@ -87,9 +93,13 @@
           "pinId": "SDA"
         },
         "color": null,
-        "waypoints": []
+        "waypoints": [],
+        "routeStyle": "orthogonal",
+        "bezierCtrl": null
       }
     ]
   },
-  "code": "#include <Wire.h>\n#include <Adafruit_MPU6050.h>\n#include <Adafruit_Sensor.h>\n\nAdafruit_MPU6050 mpu;\n\nvoid setup(void) {\n  Serial.begin(115200);\n  while (!Serial) delay(10);\n\n  if (!mpu.begin()) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) { delay(10); }\n  }\n\n  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);\n  mpu.setGyroRange(MPU6050_RANGE_500_DEG);\n  mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);\n}\n\nvoid loop() {\n  sensors_event_t a, g, temp;\n  mpu.getEvent(&a, &g, &temp);\n\n  Serial.print(\"Accel X: \"); Serial.print(a.acceleration.x);\n  Serial.print(\", Y: \"); Serial.print(a.acceleration.y);\n  Serial.print(\", Z: \"); Serial.print(a.acceleration.z);\n  Serial.println(\" m/s^2\");\n\n  delay(500);\n}\n"
+  "files": {
+    "sketch.ino": "#include <Wire.h>\n#include <Adafruit_MPU6050.h>\n#include <Adafruit_Sensor.h>\n\nAdafruit_MPU6050 mpu;\n\nvoid setup(void) {\n  Serial.begin(115200);\n  while (!Serial) delay(10);\n\n  if (!mpu.begin()) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) { delay(10); }\n  }\n\n  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);\n  mpu.setGyroRange(MPU6050_RANGE_500_DEG);\n  mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);\n}\n\nvoid loop() {\n  sensors_event_t a, g, temp;\n  mpu.getEvent(&a, &g, &temp);\n\n  Serial.print(\"Accel X: \"); Serial.print(a.acceleration.x);\n  Serial.print(\", Y: \"); Serial.print(a.acceleration.y);\n  Serial.print(\", Z: \"); Serial.print(a.acceleration.z);\n  Serial.println(\" m/s^2\");\n\n  delay(500);\n}\n"
+  }
 }

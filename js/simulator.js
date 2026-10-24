@@ -2963,7 +2963,7 @@ window.loadExamplesFromFiles = async function () {
     'lm35_temperature', 'lm35_temperature_sensor', 'logic_analyzer_test', 'lora_sender_receiver', 'lora_weather_station_sensor_tx_receiver_display', 'lpc2148_all_leds',
     'lpc2148_binary_counter', 'lpc2148_blink', 'lpc2148_button', 'lpc2148_dac_sine', 'lpc2148_pot_adc', 'lpc2148_serial_echo',
     'lpc2148_serial_hello', 'lpc2148_serial_print', 'lpc2148_timer0_led', 'lpc2148_uart1_echo', 'math_operations', 'max7219',
-    'morse', 'morse_code_using_serial_data', 'mpu6050_accel', 'mpu6050_accelerometer_2', 'multi_colour_led_blink', 'multiplexer_using_74153',
+    'morse', 'morse_code_using_serial_data', 'mpu6050_accelerometer', 'mpu6050_accelerometer_2', 'multi_colour_led_blink', 'multiplexer_using_74153',
     'nano_blink', 'nano_pushbutton_led', 'nano_pwm', 'neopixel_8x8_matrix_rainbow_2', 'neopixel_8x8_matrix_rainbow_3', 'neopixel_8x8_matrix_rainbow_4',
     'neopixel_color_cycle', 'neopixel_strip_chase', 'neopixel_strip_color_pattern', 'not_gate_test', 'ntc_thermistor_dc_motor', 'oled_ssd1306',
     'onewire_ds18b20_temperature', 'opamp_741_non_inverting', 'or_gate', 'pico2w_blink', 'pico2w_button', 'pico2w_counter',
