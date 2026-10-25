@@ -3500,6 +3500,7 @@ body.file-explorer-collapsed .file-explorer-expand {
     flex-direction: column;
     position: fixed;
   }
+  body.bottom-collapsed .main-layout { bottom: 52px; }
 
   /* --- Hide all desktop panels by default --- */
   .panel-editor {
@@ -3677,6 +3678,7 @@ body.file-explorer-collapsed .file-explorer-expand {
   .hdr-btn { padding: 5px 6px; font-size: 10px; }
   .hdr-btn-run { padding: 5px 10px; }
   .main-layout { top: 42px; bottom: 48px; }
+  body.bottom-collapsed .main-layout { bottom: 48px; }
   .mobile-nav { height: 48px; }
   .mobile-nav-btn { font-size: 9px; padding: 4px 8px; min-width: 48px; }
   .mobile-nav-btn svg { width: 18px; height: 18px; }
@@ -4163,4 +4165,3 @@ canvas {
   border: none;
   background: #ffffff;
 }
-
