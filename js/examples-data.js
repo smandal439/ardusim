@@ -13701,6 +13701,108 @@ window.EXAMPLE_SKETCHES = [
     "code": "/*\n * GPS NEO-6M/8M Tracker — ESP32 + OLED + Buzzer\n *\n * Hardware:\n *   NEO-6M/8M GPS:\n *     VCC -> 3.3V   GND -> GND\n *     TX  -> GPIO16 (RX2)   RX  -> GPIO17 (TX2)\n *   SSD1306 OLED (I2C):\n *     VCC -> 3.3V   GND -> GND\n *     SCL -> GPIO22 (I2C SCL)   SDA -> GPIO21 (I2C SDA)\n *   Green LED (Fix OK):  D2 -> Anode, Cathode -> 220R -> GND\n *   Red LED (No Fix):    D4 -> Anode, Cathode -> 220R -> GND\n *   Buzzer (Fix Alert):  D5 -> +, - -> GND\n *\n * Displays: Lat, Lng, Alt, Sats, Speed, Time on OLED.\n * Green LED blinks on fix, red LED on when no fix,\n * buzzer beeps once when fix is first acquired.\n */\n\n#include <TinyGPS++.h>\n#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>\n\n// OLED config\n#define SCREEN_WIDTH 128\n#define SCREEN_HEIGHT 64\n#define OLED_RESET -1\nAdafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);\n\n// GPS\nTinyGPSPlus gps;\n\n// Pins\nconst int GREEN_LED = 2;\nconst int RED_LED   = 4;\nconst int BUZZER    = 5;\n\n// State\nbool greenState = false;\nbool redState   = true;\nbool fixWasAcquired = false;\nunsigned long lastBlink  = 0;\nunsigned long lastPrint = 0;\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial2.begin(115200, SERIAL_8N1, 16, 17);\n\n  pinMode(GREEN_LED, OUTPUT);\n  pinMode(RED_LED, OUTPUT);\n  pinMode(BUZZER, OUTPUT);\n\n  digitalWrite(GREEN_LED, LOW);\n  digitalWrite(RED_LED, HIGH);   // Red ON = no fix\n  digitalWrite(BUZZER, LOW);\n\n  // Init OLED\n  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);\n  display.clearDisplay();\n  display.setTextSize(1);\n  display.setTextColor(SSD1306_WHITE);\n  display.setCursor(0, 0);\n  display.println(\"GPS NEO-6M/8M\");\n  display.println(\"Waiting for\");\n  display.println(\"satellites...\");\n  display.display();\n\n  Serial.println(\"========================================\");\n  Serial.println(\"  GPS NEO-6M/8M Tracker\");\n  Serial.println(\"  OLED + Dual LED + Buzzer\");\n  Serial.println(\"========================================\");\n  Serial.println();\n}\n\nvoid loop() {\n  // Feed GPS data\n  while (Serial2.available() > 0) {\n    gps.encode(Serial2.read());\n  }\n\n  static unsigned long lastOled = 0;\n  if (millis() - lastOled >= 1000) {\n    lastOled = millis();\n\n    if (gps.location.isValid()) {\n      // --- FIX ACQUIRED ---\n\n      // Buzzer: beep once on first fix\n      if (!fixWasAcquired) {\n        fixWasAcquired = true;\n        digitalWrite(BUZZER, HIGH);\n        delay(100);\n        digitalWrite(BUZZER, LOW);\n        delay(100);\n        digitalWrite(BUZZER, HIGH);\n        delay(100);\n        digitalWrite(BUZZER, LOW);\n      }\n\n      // Green LED blink, Red LED off\n      digitalWrite(RED_LED, LOW);\n      greenState = !greenState;\n      digitalWrite(GREEN_LED, greenState ? HIGH : LOW);\n\n      // Serial output\n      Serial.println(\"--- GPS Fix Acquired ---\");\n      Serial.print(\"Latitude:    \");\n      Serial.print(gps.location.lat(), 6);\n      Serial.println(\" deg\");\n      Serial.print(\"Longitude:   \");\n      Serial.print(gps.location.lng(), 6);\n      Serial.println(\" deg\");\n      if (gps.altitude.isValid()) {\n        Serial.print(\"Altitude:    \");\n        Serial.print(gps.altitude.meters(), 1);\n        Serial.print(\" m  (\");\n        Serial.print(gps.altitude.feet(), 1);\n        Serial.println(\" ft)\");\n      }\n      if (gps.satellites.isValid()) {\n        Serial.print(\"Satellites:  \");\n        Serial.println(gps.satellites.value());\n      }\n      if (gps.speed.isValid()) {\n        Serial.print(\"Speed:       \");\n        Serial.print(gps.speed.kmph(), 1);\n        Serial.println(\" km/h\");\n      }\n      if (gps.time.isValid()) {\n        Serial.print(\"Time (UTC):  \");\n        if (gps.time.hour() < 10) Serial.print('0');\n        Serial.print(gps.time.hour());\n        Serial.print(':');\n        if (gps.time.minute() < 10) Serial.print('0');\n        Serial.print(gps.time.minute());\n        Serial.print(':');\n        if (gps.time.second() < 10) Serial.print('0');\n        Serial.println(gps.time.second());\n      }\n      Serial.println();\n\n      // --- OLED Display ---\n      display.clearDisplay();\n      display.setTextSize(1);\n      display.setTextColor(SSD1306_WHITE);\n\n      // Header\n      display.setCursor(0, 0);\n      display.println(\"== GPS FIX ACQUIRED ==\");\n\n      // Latitude\n      display.setCursor(0, 12);\n      display.print(\"LAT:\");\n      display.println(gps.location.lat(), 6);\n\n      // Longitude\n      display.setCursor(0, 22);\n      display.print(\"LNG:\");\n      display.println(gps.location.lng(), 6);\n\n      // Altitude\n      if (gps.altitude.isValid()) {\n        display.setCursor(0, 32);\n        display.print(\"ALT:\");\n        display.print(gps.altitude.meters(), 1);\n        display.println(\"m\");\n      }\n\n      // Speed & Sats\n      display.setCursor(0, 42);\n      if (gps.speed.isValid()) {\n        display.print(\"SPD:\");\n        display.print(gps.speed.kmph(), 1);\n        display.print(\"km/h \");\n      }\n      if (gps.satellites.isValid()) {\n        display.print(\"SAT:\");\n        display.println(gps.satellites.value());\n      }\n\n      // Time\n      if (gps.time.isValid()) {\n        display.setCursor(0, 54);\n        display.print(\"UTC \");\n        if (gps.time.hour() < 10) display.print('0');\n        display.print(gps.time.hour());\n        display.print(':');\n        if (gps.time.minute() < 10) display.print('0');\n        display.print(gps.time.minute());\n        display.print(':');\n        if (gps.time.second() < 10) display.print('0');\n        display.print(gps.time.second());\n      }\n\n      display.display();\n\n    } else {\n      // --- NO FIX ---\n      digitalWrite(RED_LED, HIGH);  // Red ON = searching\n      digitalWrite(GREEN_LED, LOW);\n\n      // OLED: waiting screen\n      display.clearDisplay();\n      display.setTextSize(1);\n      display.setTextColor(SSD1306_WHITE);\n      display.setCursor(0, 0);\n      display.println(\"  GPS searching...\");\n      display.setCursor(0, 16);\n      display.print(\"Chars: \");\n      display.println(gps.charsProcessed());\n      display.setCursor(0, 28);\n      display.print(\"Pass:  \");\n      display.println(gps.passedChecksum());\n      display.setCursor(0, 40);\n      display.print(\"Fail:  \");\n      display.println(gps.failedChecksum());\n      display.display();\n\n      Serial.print(\".\");\n    }\n  }\n  delay(1000);\n}"
   },
   {
+    "id": "gps_nmea_serial_monitor",
+    "name": "GPS NMEA Serial Monitor",
+    "icon": "🛰️",
+    "desc": "Watch raw checksummed GPS GGA and RMC NMEA sentences in the Serial Monitor. The module starts without a fix, acquires one after a few seconds, and then moves east at the configured speed.",
+    "tags": [
+      "gps",
+      "nmea",
+      "neo6m",
+      "neo8m",
+      "serial",
+      "uart",
+      "beginner"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "esp1",
+          "type": "esp32_devkit_v1",
+          "x": 220,
+          "y": 120,
+          "rotation": 0,
+          "props": {
+            "label": "ESP32"
+          }
+        },
+        {
+          "id": "gps1",
+          "type": "gps_neo6m",
+          "x": 520,
+          "y": 130,
+          "rotation": 0,
+          "props": {
+            "latitude": 28.6139,
+            "longitude": 77.209,
+            "altitude": 215,
+            "satellites": 8,
+            "speedKmph": 12,
+            "courseDeg": 90,
+            "powered": true,
+            "baudRate": 115200,
+            "label": "NEO-6M GPS"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "gps-nmea-vcc",
+          "from": {
+            "instId": "esp1",
+            "pinId": "3V3"
+          },
+          "to": {
+            "instId": "gps1",
+            "pinId": "VCC"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "gps-nmea-gnd",
+          "from": {
+            "instId": "esp1",
+            "pinId": "GND4"
+          },
+          "to": {
+            "instId": "gps1",
+            "pinId": "GND"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "gps-nmea-tx",
+          "from": {
+            "instId": "gps1",
+            "pinId": "TX"
+          },
+          "to": {
+            "instId": "esp1",
+            "pinId": "D16"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "gps-nmea-rx",
+          "from": {
+            "instId": "gps1",
+            "pinId": "RX"
+          },
+          "to": {
+            "instId": "esp1",
+            "pinId": "D17"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ]
+    },
+    "code": "/*\n * Raw GPS NMEA Monitor — ESP32 + NEO-6M/8M\n *\n * Open the Serial Monitor and press Run to see the GPS module's\n * checksummed GGA and RMC sentences. The module first reports no fix,\n * then reports position, UTC time/date, speed, and course.\n */\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial2.begin(115200, SERIAL_8N1, 16, 17);\n  Serial.println(\"Raw GPS NMEA stream (GGA + RMC):\");\n}\n\nvoid loop() {\n  while (Serial2.available() > 0) {\n    Serial.write(Serial2.read());\n  }\n  delay(10);\n}\n"
+  },
+  {
     "id": "gsm_4g_http",
     "name": "GSM 4G LTE HTTP Client",
     "icon": "📶",
@@ -21226,13 +21328,26 @@ window.EXAMPLE_SKETCHES = [
           "id": "b1",
           "type": "arduino_uno",
           "x": 200,
-          "y": 100
+          "y": 100,
+          "rotation": 0,
+          "props": {
+            "label": "UNO"
+          }
         },
         {
           "id": "mpu1",
           "type": "mpu6050",
-          "x": 380,
-          "y": 320
+          "x": 455,
+          "y": 110,
+          "rotation": 0,
+          "props": {
+            "accelX": 20,
+            "accelY": 0,
+            "accelZ": 1020,
+            "gyroX": 0,
+            "gyroY": 0,
+            "gyroZ": 0
+          }
         }
       ],
       "wires": [
@@ -21245,7 +21360,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "mpu1",
             "pinId": "VCC"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w2",
@@ -21256,7 +21375,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "b1",
             "pinId": "GND1"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w3",
@@ -21267,7 +21390,11 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "mpu1",
             "pinId": "SCL"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w4",
@@ -21278,11 +21405,17 @@ window.EXAMPLE_SKETCHES = [
           "to": {
             "instId": "mpu1",
             "pinId": "SDA"
-          }
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         }
       ]
     },
-    "code": "/*\n * MPU6050 Accelerometer — read X/Y/Z over I2C\n *\n * Wiring:\n *   VCC -> 5V\n *   GND -> GND\n *   SCL -> A5\n *   SDA -> A4\n *\n * Run the sketch, then drag the AccelX/Y/Z sliders on the\n * sensor component — the readings update live.\n */\n\n#include <Wire.h>\n\nconst int MPU_ADDR = 0x68;\n\nint accelX = 0;\nint accelY = 0;\nint accelZ = 0;\n\nvoid setup() {\n  Wire.begin();\n  Serial.begin(115200);\n  Serial.println(\"MPU6050 ready. Move the Accel sliders!\");\n}\n\nvoid loop() {\n  // Point the register pointer at ACCEL_XOUT_H (0x3B), then read 6 bytes\n  Wire.beginTransmission(MPU_ADDR);\n  Wire.write(0x3B);\n  Wire.endTransmission(false);\n\n  Wire.requestFrom(MPU_ADDR, 6);\n  accelX = Wire.read() << 8 | Wire.read();\n  accelY = Wire.read() << 8 | Wire.read();\n  accelZ = Wire.read() << 8 | Wire.read();\n\n  Serial.print(\"X: \");\n  Serial.print(accelX);\n  Serial.print(\"  Y: \");\n  Serial.print(accelY);\n  Serial.print(\"  Z: \");\n  Serial.println(accelZ);\n\n  delay(300);\n}"
+    "files": {
+      "sketch.ino": "/*\n * MPU6050 Accelerometer — read X/Y/Z over I2C\n *\n * Wiring:\n *   VCC -> 5V\n *   GND -> GND\n *   SCL -> A5\n *   SDA -> A4\n *\n * Run the sketch, then drag the AccelX/Y/Z sliders on the\n * sensor component — the readings update live.\n */\n\n#include <Wire.h>\n\nconst int MPU_ADDR = 0x68;\n\nint accelX = 0;\nint accelY = 0;\nint accelZ = 0;\n\nvoid setup() {\n  Wire.begin();\n  Serial.begin(115200);\n  Serial.println(\"MPU6050 ready. Move the Accel sliders!\");\n}\n\nvoid loop() {\n  // Point the register pointer at ACCEL_XOUT_H (0x3B), then read 6 bytes\n  Wire.beginTransmission(MPU_ADDR);\n  Wire.write(0x3B);\n  Wire.endTransmission(false);\n\n  Wire.requestFrom(MPU_ADDR, 6);\n  accelX = Wire.read() << 8 | Wire.read();\n  accelY = Wire.read() << 8 | Wire.read();\n  accelZ = Wire.read() << 8 | Wire.read();\n\n  Serial.print(\"X: \");\n  Serial.print(accelX);\n  Serial.print(\"  Y: \");\n  Serial.print(accelY);\n  Serial.print(\"  Z: \");\n  Serial.println(accelZ);\n\n  delay(300);\n}"
+    }
   },
   {
     "id": "mpu6050_accelerometer_2",
@@ -21310,8 +21443,8 @@ window.EXAMPLE_SKETCHES = [
         {
           "id": "mpu1",
           "type": "mpu6050",
-          "x": 380,
-          "y": 320,
+          "x": 455,
+          "y": 120,
           "rotation": 0,
           "props": {
             "accelX": 0,
@@ -21335,7 +21468,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "VCC"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w2",
@@ -21348,7 +21483,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "GND1"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w3",
@@ -21361,7 +21498,9 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "SCL"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         },
         {
           "id": "w4",
@@ -21374,11 +21513,15 @@ window.EXAMPLE_SKETCHES = [
             "pinId": "SDA"
           },
           "color": null,
-          "waypoints": []
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
         }
       ]
     },
-    "code": "#include <Wire.h>\n#include <Adafruit_MPU6050.h>\n#include <Adafruit_Sensor.h>\n\nAdafruit_MPU6050 mpu;\n\nvoid setup(void) {\n  Serial.begin(115200);\n  while (!Serial) delay(10);\n\n  if (!mpu.begin()) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) { delay(10); }\n  }\n\n  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);\n  mpu.setGyroRange(MPU6050_RANGE_500_DEG);\n  mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);\n}\n\nvoid loop() {\n  sensors_event_t a, g, temp;\n  mpu.getEvent(&a, &g, &temp);\n\n  Serial.print(\"Accel X: \"); Serial.print(a.acceleration.x);\n  Serial.print(\", Y: \"); Serial.print(a.acceleration.y);\n  Serial.print(\", Z: \"); Serial.print(a.acceleration.z);\n  Serial.println(\" m/s^2\");\n\n  delay(500);\n}\n"
+    "files": {
+      "sketch.ino": "#include <Wire.h>\n#include <Adafruit_MPU6050.h>\n#include <Adafruit_Sensor.h>\n\nAdafruit_MPU6050 mpu;\n\nvoid setup(void) {\n  Serial.begin(115200);\n  while (!Serial) delay(10);\n\n  if (!mpu.begin()) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) { delay(10); }\n  }\n\n  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);\n  mpu.setGyroRange(MPU6050_RANGE_500_DEG);\n  mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);\n}\n\nvoid loop() {\n  sensors_event_t a, g, temp;\n  mpu.getEvent(&a, &g, &temp);\n\n  Serial.print(\"Accel X: \"); Serial.print(a.acceleration.x);\n  Serial.print(\", Y: \"); Serial.print(a.acceleration.y);\n  Serial.print(\", Z: \"); Serial.print(a.acceleration.z);\n  Serial.println(\" m/s^2\");\n\n  delay(500);\n}\n"
+    }
   },
   {
     "id": "multi_colour_led_blink",
@@ -29251,7 +29394,8 @@ window.EXAMPLE_SKETCHES = [
           "y": 60,
           "rotation": 0,
           "props": {
-            "voltage": 3.7
+            "voltage": 3.7,
+            "capacity_mah": 50
           },
           "runtimeState": {}
         },

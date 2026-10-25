@@ -1,0 +1,102 @@
+{
+  "id": "gps_nmea_serial_monitor",
+  "name": "GPS NMEA Serial Monitor",
+  "icon": "🛰️",
+  "desc": "Watch raw checksummed GPS GGA and RMC NMEA sentences in the Serial Monitor. The module starts without a fix, acquires one after a few seconds, and then moves east at the configured speed.",
+  "tags": [
+    "gps",
+    "nmea",
+    "neo6m",
+    "neo8m",
+    "serial",
+    "uart",
+    "beginner"
+  ],
+  "circuit": {
+    "components": [
+      {
+        "id": "esp1",
+        "type": "esp32_devkit_v1",
+        "x": 220,
+        "y": 120,
+        "rotation": 0,
+        "props": {
+          "label": "ESP32"
+        }
+      },
+      {
+        "id": "gps1",
+        "type": "gps_neo6m",
+        "x": 520,
+        "y": 130,
+        "rotation": 0,
+        "props": {
+          "latitude": 28.6139,
+          "longitude": 77.209,
+          "altitude": 215,
+          "satellites": 8,
+          "speedKmph": 12,
+          "courseDeg": 90,
+          "powered": true,
+          "baudRate": 115200,
+          "label": "NEO-6M GPS"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "id": "gps-nmea-vcc",
+        "from": {
+          "instId": "esp1",
+          "pinId": "3V3"
+        },
+        "to": {
+          "instId": "gps1",
+          "pinId": "VCC"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "gps-nmea-gnd",
+        "from": {
+          "instId": "esp1",
+          "pinId": "GND4"
+        },
+        "to": {
+          "instId": "gps1",
+          "pinId": "GND"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "gps-nmea-tx",
+        "from": {
+          "instId": "gps1",
+          "pinId": "TX"
+        },
+        "to": {
+          "instId": "esp1",
+          "pinId": "D16"
+        },
+        "color": null,
+        "waypoints": []
+      },
+      {
+        "id": "gps-nmea-rx",
+        "from": {
+          "instId": "gps1",
+          "pinId": "RX"
+        },
+        "to": {
+          "instId": "esp1",
+          "pinId": "D17"
+        },
+        "color": null,
+        "waypoints": []
+      }
+    ]
+  },
+  "code": "/*\n * Raw GPS NMEA Monitor — ESP32 + NEO-6M/8M\n *\n * Open the Serial Monitor and press Run to see the GPS module's\n * checksummed GGA and RMC sentences. The module first reports no fix,\n * then reports position, UTC time/date, speed, and course.\n */\n\nvoid setup() {\n  Serial.begin(115200);\n  Serial2.begin(115200, SERIAL_8N1, 16, 17);\n  Serial.println(\"Raw GPS NMEA stream (GGA + RMC):\");\n}\n\nvoid loop() {\n  while (Serial2.available() > 0) {\n    Serial.write(Serial2.read());\n  }\n  delay(10);\n}\n"
+}
