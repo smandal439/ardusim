@@ -4031,7 +4031,7 @@ const GUIDE_SCRIPTS = [
     name: 'build-examples-data.js',
     batch: 'build-examples.bat',
     when: 'After adding, removing, or editing any Examples/*.json file.',
-    why: 'Bundles all 184 example JSON files into a single js/examples-data.js file (~782 KB). This is loaded with the page on GitHub Pages so examples appear instantly — zero extra network requests. Without this, the browser would fetch 184 individual JSON files sequentially, which is slow on static hosting.',
+    why: 'Bundles all 184 example JSON files into a single js/examples-data.js file (~782 KB). Static hosting loads this bundle only when the Examples library is opened, avoiding the bundle download during initial page load. Without the bundle, the browser would fetch 184 individual JSON files sequentially, which is slow on static hosting.',
     usage: 'Double-click build-examples.bat, or run: node scripts/build-examples-data.js',
     output: 'Generates js/examples-data.js containing window.EXAMPLE_SKETCHES = [...].',
     note: 'Commit the generated file to git so GitHub Pages serves it. The Node.js dev server ignores it and reads from disk directly.',

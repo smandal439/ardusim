@@ -27,6 +27,7 @@ class App {
     this._examplesPageIndex = 0;
     this._examplesFiltered = [];
     this._examplesObserver = null;
+    this._examplesDataLoadPromise = null;
     this._savedQuery = '';
     this.remote = null;
     this._activeBottomTab = 'serial';
@@ -53,7 +54,6 @@ class App {
       this._initWebBrowser();
       this._attachSimulatorEvents();
       this._renderComponentLibrary();
-      this._renderExamples();
       this._initBoardSelector();
       this.remote = new RemoteControl();
       window.GuideManager?.bind?.();
@@ -3297,12 +3297,44 @@ _newProject() {
   }
 
   /* ---------------------- EXAMPLES ---------------------- */
+  _loadExamplesDataBundle() {
+    if (Array.isArray(window.EXAMPLE_SKETCHES) && window.EXAMPLE_SKETCHES.length > 0) {
+      return Promise.resolve();
+    }
+    if (this._examplesDataLoadPromise) return this._examplesDataLoadPromise;
+
+    this._examplesDataLoadPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = new URL('js/examples-data.js?v=20261025-1', document.baseURI).href;
+      script.onload = () => {
+        if (Array.isArray(window.EXAMPLE_SKETCHES) && window.EXAMPLE_SKETCHES.length > 0) {
+          resolve();
+        } else {
+          reject(new Error('Examples bundle loaded without any example data'));
+        }
+      };
+      script.onerror = () => reject(new Error('Failed to load examples bundle'));
+      document.head.appendChild(script);
+    }).catch((error) => {
+      this._examplesDataLoadPromise = null;
+      throw error;
+    });
+
+    return this._examplesDataLoadPromise;
+  }
+
   async _renderExamples() {
     const container = document.getElementById('examples-grid');
     if (!container) return;
 
     // Show spinner while loading
     container.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;grid-column:1/-1;min-height:300px;padding:40px 20px;color:var(--text-muted)"><div class="loading-spinner" style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:12px"></div><span style="font-size:13px">Loading examples...</span></div>';
+
+    try {
+      await this._loadExamplesDataBundle();
+    } catch (e) {
+      console.error('[ArduSim] Failed to load examples bundle:', e);
+    }
 
     try {
       if (window.loadExamplesFromFiles && (!window.EXAMPLE_SKETCHES || window.EXAMPLE_SKETCHES.length === 0)) {
