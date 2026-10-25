@@ -1950,10 +1950,10 @@ void loop() {
 
   gps_neo6m: {
     id: 'gps_neo6m', name: 'GPS NEO-6M/8M', icon: '📱', category: 'Sensors',
-    longDesc: 'NEO-6M/8M GPS module with TinyGPS++ simulation. Provides latitude, longitude, altitude, satellite count, ground speed, and time via UART NMEA stream.',
+    longDesc: 'NEO-6M/8M GPS module with TinyGPS++ simulation. Emits checksummed GGA/RMC NMEA sentences with UTC date/time, fix status, position, altitude, speed, and course. Configure the route speed and heading; four or more satellites acquire a fix after a short startup delay.',
     use: 'Location tracking, navigation, geo-fencing, time synchronisation, vehicle tracking.',
     pins: { VCC: { label: 'VCC', type: 'power', desc: '3.3 V or 5 V power.' }, GND: { label: 'GND', type: 'gnd', desc: 'Ground.' }, TX: { label: 'TX', type: 'digital', desc: 'GPS TX \u2192 Arduino RX (soft or hardware serial).' }, RX: { label: 'RX', type: 'digital', desc: 'GPS RX \u2192 Arduino TX.' } },
-    props: { latitude: 'Simulated latitude (\u221290 to 90).', longitude: 'Simulated longitude (\u2212180 to 180).', altitude: 'Simulated altitude in metres (\u2212500 to 9000).', satellites: 'Simulated satellite count (0\u201320).', baudRate: 'UART baud rate (default 9600).' },
+    props: { latitude: 'Starting latitude (\u221290 to 90).', longitude: 'Starting longitude (\u2212180 to 180).', altitude: 'Simulated altitude in metres (\u2212500 to 9000).', satellites: 'Simulated satellite count; at least four are needed for a fix.', speedKmph: 'Route speed in km/h.', courseDeg: 'Route heading in degrees clockwise from north.', powered: 'Toggle the GPS module power.', baudRate: 'UART baud rate (default 9600).' },
     wiring: 'VCC\u21925V, GND\u2192GND, TX\u2192D2 (SoftwareSerial RX), RX\u2192D3 (SoftwareSerial TX).',
     code: '#include <SoftwareSerial.h>\n#include <TinyGPS++.h>\nSoftwareSerial gpsSerial(2, 3);\nTinyGPSPlus gps;\nvoid setup() {\n  Serial.begin(9600);\n  gpsSerial.begin(9600);\n}\nvoid loop() {\n  while (gpsSerial.available()) gps.encode(gpsSerial.read());\n  if (gps.location.isUpdated()) {\n    Serial.print("Lat: "); Serial.println(gps.location.lat(), 6);\n    Serial.print("Lng: "); Serial.println(gps.location.lng(), 6);\n  }\n}',
   },

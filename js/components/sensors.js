@@ -3417,26 +3417,73 @@ defComp({
 
 /* ═══════════════════════ GPS NEO-6M/8M Module ═══════════════════════ */
 
+function gpsNmeaChecksum(body) {
+  let checksum = 0;
+  for (let i = 0; i < body.length; i++) checksum ^= body.charCodeAt(i);
+  return `$${body}*${checksum.toString(16).toUpperCase().padStart(2, '0')}\r\n`;
+}
+
+function gpsNmeaCoordinate(value, isLatitude) {
+  let degrees = Math.floor(Math.abs(value));
+  let minuteUnits = Math.round((Math.abs(value) - degrees) * 60 * 10000);
+  if (minuteUnits >= 600000) {
+    degrees++;
+    minuteUnits = 0;
+  }
+  const minutes = (minuteUnits / 10000).toFixed(4).padStart(7, '0');
+  return `${String(degrees).padStart(isLatitude ? 2 : 3, '0')}${minutes}`;
+}
+
+function gpsMovePosition(latitude, longitude, speedKmph, courseDeg, elapsedMs) {
+  const distanceKm = speedKmph * elapsedMs / 3600000;
+  if (distanceKm <= 0) return { latitude, longitude };
+
+  const earthRadiusKm = 6371.0088;
+  const angularDistance = distanceKm / earthRadiusKm;
+  const bearing = courseDeg * Math.PI / 180;
+  const lat1 = latitude * Math.PI / 180;
+  const lon1 = longitude * Math.PI / 180;
+  const lat2 = Math.asin(
+    Math.sin(lat1) * Math.cos(angularDistance) +
+    Math.cos(lat1) * Math.sin(angularDistance) * Math.cos(bearing),
+  );
+  const lon2 = lon1 + Math.atan2(
+    Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(lat1),
+    Math.cos(angularDistance) - Math.sin(lat1) * Math.sin(lat2),
+  );
+  return {
+    latitude: lat2 * 180 / Math.PI,
+    longitude: ((lon2 * 180 / Math.PI + 540) % 360) - 180,
+  };
+}
+
 defComp({
   id: 'gps_neo6m',
   name: 'GPS NEO-6M/8M',
   category: 'Communication',
   icon: '🛰️',
-  desc: 'NEO-6M/8M GPS module with TinyGPS++ simulation — provides latitude, longitude, altitude, satellites, speed, time, and live NMEA stream via UART',
+  desc: 'NEO-6M/8M GPS module with GGA/RMC NMEA output, simulated movement, fix acquisition, and TinyGPS++ support',
   width: 64,
   height: 80,
-  defaultProps: { 
-    latitude: 28.6139, 
-    longitude: 77.2090, 
-    altitude: 215, 
+  defaultProps: {
+    latitude: 28.6139,
+    longitude: 77.2090,
+    altitude: 215,
     satellites: 8,
-    baudRate: 9600 
+    speedKmph: 0,
+    courseDeg: 0,
+    powered: true,
+    hdop: 1.0,
+    baudRate: 9600,
   },
   interactive: [
     { field: 'latitude', label: 'Lat', min: -90, max: 90, step: 0.0001, unit: '°' },
     { field: 'longitude', label: 'Lng', min: -180, max: 180, step: 0.0001, unit: '°' },
     { field: 'altitude', label: 'Alt', min: -500, max: 9000, step: 1, unit: 'm' },
     { field: 'satellites', label: 'Sats', min: 0, max: 20, step: 1, unit: '' },
+    { field: 'speedKmph', label: 'Speed', min: 0, max: 300, step: 1, unit: 'km/h' },
+    { field: 'courseDeg', label: 'Course', min: 0, max: 359, step: 1, unit: '°' },
+    { field: 'powered', label: 'Power', type: 'toggle', min: 0, max: 1 },
     { field: 'baudRate', label: 'Baud', min: 4800, max: 115200, step: 4800, unit: 'bps' },
   ],
   pins: [
@@ -3445,70 +3492,88 @@ defComp({
     { id: 'TX', label: 'TX', type: PIN_TYPE.DIGITAL, x: 40, y: 80, side: 'bottom' },
     { id: 'RX', label: 'RX', type: PIN_TYPE.DIGITAL, x: 54, y: 80, side: 'bottom' },
   ],
-  
+
   step(inst, sim) {
     if (!sim?.isRunning) return;
-    
-    // Ensure runtimeState exists with all required fields.
-    // The slider writes to inst.runtimeState[ctrl.field], which may create a
-    // partial object before simulation starts. Fill in any missing fields.
+
     inst.runtimeState = inst.runtimeState || {};
     const state = inst.runtimeState;
-    if (state.latitude === undefined)  state.latitude  = inst.props.latitude  ?? 28.6139;
-    if (state.longitude === undefined) state.longitude = inst.props.longitude ?? 77.2090;
-    if (state.altitude === undefined)  state.altitude  = inst.props.altitude  ?? 215;
-    if (state.satellites === undefined) state.satellites = inst.props.satellites ?? 8;
-    if (state.powered === undefined)   state.powered   = true;
-    if (state.lastNmeaTime === undefined) state.lastNmeaTime = 0;
-    if (state.nmeaBuffer === undefined)   state.nmeaBuffer = '';
+    const props = inst.props || {};
+    if (state.latitude === undefined) state.latitude = props.latitude ?? 28.6139;
+    if (state.longitude === undefined) state.longitude = props.longitude ?? 77.2090;
+    if (state.altitude === undefined) state.altitude = props.altitude ?? 215;
+    if (state.satellites === undefined) state.satellites = props.satellites ?? 8;
+    if (state.speedKmph === undefined) state.speedKmph = props.speedKmph ?? 0;
+    if (state.courseDeg === undefined) state.courseDeg = props.courseDeg ?? 0;
+    if (state.powered === undefined) state.powered = props.powered ?? true;
+    if (state.lastNmeaTime === undefined) state.lastNmeaTime = null;
+    if (state.lastMovementTime === undefined) state.lastMovementTime = null;
+    if (state.fixCandidateSince === undefined) state.fixCandidateSince = null;
+    if (state.utcStartMs === undefined) state.utcStartMs = null;
 
-    const isPowered = state.powered;
-    const sats = state.satellites;
-    const hasFix = isPowered && sats > 0;
+    const now = Number.isFinite(sim.simTime) ? sim.simTime : 0;
+    if (state.lastMovementTime !== null && now >= state.lastMovementTime &&
+        state.powered && state.hasFix) {
+      const moved = gpsMovePosition(
+        Number(state.latitude),
+        Number(state.longitude),
+        Math.max(0, Number(state.speedKmph) || 0),
+        ((Number(state.courseDeg) || 0) % 360 + 360) % 360,
+        now - state.lastMovementTime,
+      );
+      state.latitude = moved.latitude;
+      state.longitude = moved.longitude;
+    }
+    state.lastMovementTime = now;
 
-    if (!hasFix) return;
+    const hasFixConditions = state.powered && Number(state.satellites) >= 4;
+    if (!hasFixConditions) {
+      state.fixCandidateSince = null;
+      state.hasFix = false;
+    } else if (state.fixCandidateSince === null || now < state.fixCandidateSince) {
+      state.fixCandidateSince = now;
+      state.hasFix = false;
+    } else {
+      state.hasFix = now - state.fixCandidateSince >= 3000;
+    }
 
-    // Simulate NMEA sentence generation ($GPGGA) every 1 second
-    const now = sim.simTime ?? Date.now();
-    if (!state.lastNmeaTime || now - state.lastNmeaTime >= 1000) {
+    if (!state.powered) {
+      state.nmeaBuffer = '';
+      state.lastNmeaTime = null;
+      state.utcStartMs = null;
+      return;
+    }
+
+    if (state.utcStartMs === null || state.lastNmeaTime !== null && now < state.lastNmeaTime) {
+      state.utcStartMs = Date.now() - now;
+    }
+
+    if (state.lastNmeaTime === null || now - state.lastNmeaTime >= 1000) {
       state.lastNmeaTime = now;
-      
-      const lat = state.latitude ?? inst.props.latitude;
-      const lng = state.longitude ?? inst.props.longitude;
-      const alt = state.altitude ?? inst.props.altitude;
-      
-      // Convert decimal degrees to NMEA coordinate format (DDMM.MMMM)
-      const latDeg = Math.floor(Math.abs(lat));
-      const latMin = (Math.abs(lat) - latDeg) * 60;
-      const latStr = `${String(latDeg).padStart(2, '0')}${latMin.toFixed(4).padStart(7, '0')},${lat >= 0 ? 'N' : 'S'}`;
-
-      const lngDeg = Math.floor(Math.abs(lng));
-      const lngMin = (Math.abs(lng) - lngDeg) * 60;
-      const lngStr = `${String(lngDeg).padStart(3, '0')}${lngMin.toFixed(4).padStart(7, '0')},${lng >= 0 ? 'E' : 'W'}`;
-
-      // Construct a basic GGA sentence
-      const timeStr = '123519.00'; // UTC placeholder
-      const fixQuality = sats > 3 ? '1' : '0';
-      const hdop = '1.0';
-      const altUnit = 'M';
-      
-      const sentenceBody = `GPGGA,${timeStr},${latStr},${lngStr},${fixQuality},${sats},${hdop},${alt},${altUnit},0.0,M,,`;
-      
-      // Calculate NMEA checksum
-      let checksum = 0;
-      for (let i = 0; i < sentenceBody.length; i++) {
-        checksum ^= sentenceBody.charCodeAt(i);
-      }
-      const checksumStr = checksum.toString(16).toUpperCase().padStart(2, '0');
-      const fullSentence = `$${sentenceBody}*${checksumStr}\r\n`;
-
-      state.nmeaBuffer = fullSentence;
-
-      // Push NMEA characters into the simulator's serial input buffer
-      // so Serial2.available() > 0 and Serial2.read() returns the bytes
-      if (sim && typeof sim.sendSerialInput === 'function') {
-        sim.sendSerialInput(fullSentence);
-      }
+      const fix = state.hasFix;
+      const lat = Number(state.latitude);
+      const lng = Number(state.longitude);
+      const sats = Math.max(0, Math.min(99, Math.floor(Number(state.satellites) || 0)));
+      const gpsTime = new Date(state.utcStartMs + now);
+      const timeStr = `${String(gpsTime.getUTCHours()).padStart(2, '0')}${String(gpsTime.getUTCMinutes()).padStart(2, '0')}${String(gpsTime.getUTCSeconds()).padStart(2, '0')}.${String(Math.floor(gpsTime.getUTCMilliseconds() / 10)).padStart(2, '0')}`;
+      const dateStr = `${String(gpsTime.getUTCDate()).padStart(2, '0')}${String(gpsTime.getUTCMonth() + 1).padStart(2, '0')}${String(gpsTime.getUTCFullYear() % 100).padStart(2, '0')}`;
+      const latCoord = fix ? gpsNmeaCoordinate(lat, true) : '';
+      const lngCoord = fix ? gpsNmeaCoordinate(lng, false) : '';
+      const latHemisphere = fix ? (lat >= 0 ? 'N' : 'S') : '';
+      const lngHemisphere = fix ? (lng >= 0 ? 'E' : 'W') : '';
+      const altitude = fix ? (Number(state.altitude) || 0).toFixed(1) : '';
+      const hdop = fix ? (Number(props.hdop) || 1).toFixed(1) : '';
+      const speedKmph = Math.max(0, Number(state.speedKmph) || 0);
+      const speedKnots = fix ? (speedKmph / 1.852).toFixed(2) : '';
+      const course = fix ? (((Number(state.courseDeg) || 0) % 360 + 360) % 360).toFixed(1) : '';
+      const gga = gpsNmeaChecksum(
+        `GPGGA,${timeStr},${latCoord},${latHemisphere},${lngCoord},${lngHemisphere},${fix ? 1 : 0},${sats},${hdop},${altitude},M,0.0,M,,`,
+      );
+      const rmc = gpsNmeaChecksum(
+        `GPRMC,${timeStr},${fix ? 'A' : 'V'},${latCoord},${latHemisphere},${lngCoord},${lngHemisphere},${speedKnots},${course},${dateStr},,,${fix ? 'A' : 'N'}`,
+      );
+      state.nmeaBuffer = `${gga}${rmc}`;
+      if (typeof sim.sendSerialInput === 'function') sim.sendSerialInput(state.nmeaBuffer);
     }
   },
 
@@ -3518,8 +3583,8 @@ defComp({
     const lng = inst.runtimeState?.longitude ?? inst.props.longitude ?? 77.2090;
     const alt = inst.runtimeState?.altitude ?? inst.props.altitude ?? 215;
     const sats = inst.runtimeState?.satellites ?? inst.props.satellites ?? 8;
-    const isPowered = sim?.isRunning ? (inst.runtimeState?.powered ?? true) : false;
-    const hasFix = isPowered && sats > 0;
+    const isPowered = sim?.isRunning ? (inst.runtimeState?.powered ?? inst.props.powered ?? true) : false;
+    const hasFix = isPowered && (inst.runtimeState?.hasFix ?? false);
 
     ctx.save();
     ctx.translate(x, y);

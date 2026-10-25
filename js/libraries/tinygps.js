@@ -91,64 +91,144 @@ window.ArduinoLibs['TinyGPSPlus'] = {
       if (gpsInst.props && gpsInst.props[key] !== undefined) return gpsInst.props[key];
       return fallback;
     }
+    function decodeCoordinate(value, hemisphere, maxDegrees) {
+      if (!value || !/^[0-9]+(?:\.[0-9]+)?$/.test(value)) return null;
+      const degreesDigits = hemisphere === 'N' || hemisphere === 'S' ? 2 : 3;
+      if (degreesDigits === 2 && hemisphere !== 'N' && hemisphere !== 'S' ||
+          degreesDigits === 3 && hemisphere !== 'E' && hemisphere !== 'W') return null;
+      const degrees = Number(value.slice(0, degreesDigits));
+      const minutes = Number(value.slice(degreesDigits));
+      if (!Number.isFinite(degrees) || !Number.isFinite(minutes) ||
+          minutes >= 60 || degrees > maxDegrees || degrees === maxDegrees && minutes > 0) return null;
+      const coordinate = degrees + minutes / 60;
+      return hemisphere === 'S' || hemisphere === 'W' ? -coordinate : coordinate;
+    }
+    function updateTime(data, value) {
+      const match = /^(\d{2})(\d{2})(\d{2})(?:\.(\d+))?$/.exec(value || '');
+      data.timeValid = false;
+      if (!match) return;
+      const [hour, minute, second] = match.slice(1, 4).map(Number);
+      if (hour > 23 || minute > 59 || second > 59) return;
+      data.hour = hour;
+      data.minute = minute;
+      data.second = second;
+      data.centisecond = Number(`0.${match[4] || '0'}`) * 100 | 0;
+      data.timeValid = true;
+    }
+    function updatePosition(data, fields, latIndex, lngIndex) {
+      const lat = decodeCoordinate(fields[latIndex], fields[latIndex + 1], 90);
+      const lng = decodeCoordinate(fields[lngIndex], fields[lngIndex + 1], 180);
+      if (lat === null || lng === null) {
+        data.locationValid = false;
+        return false;
+      }
+      data.lat = lat;
+      data.lng = lng;
+      data.locationValid = true;
+      return true;
+    }
+    function decodeSentence(sentence, data) {
+      const checksumAt = sentence.indexOf('*');
+      if (sentence[0] !== '$' || checksumAt < 0 || !/^[0-9A-Fa-f]{2}$/.test(sentence.slice(checksumAt + 1))) {
+        return false;
+      }
+      const body = sentence.slice(1, checksumAt);
+      let checksum = 0;
+      for (let i = 0; i < body.length; i++) checksum ^= body.charCodeAt(i);
+      if (checksum !== parseInt(sentence.slice(checksumAt + 1), 16)) return false;
+
+      const fields = body.split(',');
+      const type = fields[0].slice(-3);
+      if (type === 'GGA' && fields.length >= 10) {
+        updateTime(data, fields[1]);
+        data.satellites = Number(fields[7]) || 0;
+        data.satellitesValid = fields[7] !== '';
+        data.hdop = Number(fields[8]) || 0;
+        data.hdopValid = fields[8] !== '';
+        const hasFix = Number(fields[6]) > 0;
+        data.locationValid = hasFix && updatePosition(data, fields, 2, 4);
+        data.altitudeMeters = Number(fields[9]) || 0;
+        data.altitudeValid = hasFix && fields[9] !== '';
+        return true;
+      }
+      if (type === 'RMC' && fields.length >= 10) {
+        updateTime(data, fields[1]);
+        const date = /^(\d{2})(\d{2})(\d{2})$/.exec(fields[9]);
+        if (date) {
+          const shortYear = Number(date[3]);
+          data.day = Number(date[1]);
+          data.month = Number(date[2]);
+          data.year = shortYear >= 80 ? 1900 + shortYear : 2000 + shortYear;
+          const daysInMonth = new Date(Date.UTC(data.year, data.month, 0)).getUTCDate();
+          data.dateValid = data.month >= 1 && data.month <= 12 &&
+            data.day >= 1 && data.day <= daysInMonth;
+        } else {
+          data.dateValid = false;
+        }
+        const hasFix = fields[2] === 'A';
+        if (hasFix) updatePosition(data, fields, 3, 5);
+        else data.locationValid = false;
+        data.speedKmph = (Number(fields[7]) || 0) * 1.852;
+        data.speedValid = hasFix && fields[7] !== '';
+        data.courseDeg = Number(fields[8]) || 0;
+        data.courseValid = hasFix && fields[8] !== '';
+        return true;
+      }
+      return false;
+    }
     return {
       __class: 'TinyGPSPlus',
       _data: {
         lat: getProp('latitude', 28.6139),
         lng: getProp('longitude', 77.2090),
-        locationValid: true,
+        locationValid: false,
         locationAge: 0,
-        altitudeValid: true,
+        altitudeValid: false,
         altitudeMeters: getProp('altitude', 215.0),
         altitudeAge: 0,
-        dateValid: true,
-        year: 2026,
-        month: 9,
-        day: 4,
+        dateValid: false,
+        year: 0,
+        month: 0,
+        day: 0,
         dateAge: 0,
-        timeValid: true,
-        hour: 12,
-        minute: 30,
-        second: 15,
-        centisecond: 50,
+        timeValid: false,
+        hour: 0,
+        minute: 0,
+        second: 0,
+        centisecond: 0,
         timeAge: 0,
-        satellitesValid: true,
+        satellitesValid: false,
         satellites: getProp('satellites', 8),
         satellitesAge: 0,
-        hdopValid: true,
-        hdop: 1.2,
+        hdopValid: false,
+        hdop: 0,
         hdopAge: 0,
-        speedValid: true,
+        speedValid: false,
         speedKmph: 0,
-        courseValid: true,
+        courseValid: false,
         courseDeg: 0,
         charsProcessed: 0,
         failedChecksum: 0,
         passedChecksum: 0,
       },
+      _gps_sentenceBuffer: '',
       // encode: feed a single character (returns true if new sentence decoded)
       _gps_encode: function(c) {
         this._data.charsProcessed++;
-        // Sync from canvas GPS component on every character for instant availability
-        var canvas = window.CircuitCanvas;
-        if (canvas && Array.isArray(canvas.components)) {
-          var inst = canvas.components.find(function(c) { return c.type === 'gps_neo6m'; });
-          if (inst) {
-            var rs = inst.runtimeState || {};
-            var pr = inst.props || {};
-            this._data.lat = rs.latitude ?? pr.latitude ?? this._data.lat;
-            this._data.lng = rs.longitude ?? pr.longitude ?? this._data.lng;
-            this._data.altitudeMeters = rs.altitude ?? pr.altitude ?? this._data.altitudeMeters;
-            this._data.satellites = rs.satellites ?? pr.satellites ?? this._data.satellites;
-          }
-        }
-        // Every 100 characters, count as a decoded sentence
-        if (this._data.charsProcessed % 100 === 0) {
+        var character = typeof c === 'number' ? String.fromCharCode(c) : String(c);
+        if (character === '$') this._gps_sentenceBuffer = '$';
+        else if (this._gps_sentenceBuffer) this._gps_sentenceBuffer += character;
+        if (character !== '\n') return false;
+        if (!this._gps_sentenceBuffer) return false;
+
+        var sentence = this._gps_sentenceBuffer.trim();
+        this._gps_sentenceBuffer = '';
+        if (decodeSentence(sentence, this._data)) {
           this._data.passedChecksum++;
-          this._data.speedKmph = Math.random() * 60;
-          this._data.courseDeg = Math.random() * 360;
+          return true;
         }
-        return true;
+        this._data.failedChecksum++;
+        return false;
       },
       // Location
       _gps_locationIsValid: function() { return this._data.locationValid; },
