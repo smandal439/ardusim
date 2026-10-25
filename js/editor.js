@@ -1074,6 +1074,10 @@ DL2:    DJNZ R3, DL2
         this.openFile(target);
       } else {
         this.activeFile = target;
+        if (this._fallbackTA) {
+          this._fallbackTA.value = this.files[target].content || '';
+          this._fallbackTA.dispatchEvent(new Event('input', { bubbles: true }));
+        }
       }
     }
     this._renderFileExplorer();

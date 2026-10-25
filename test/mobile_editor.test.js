@@ -60,6 +60,23 @@ describe('mobile code editor', () => {
     expect(editor.getCode()).toBe('digitalWrite(LED_BUILTIN, HIGH);HIGH');
   });
 
+  it('shows loaded example files in the mobile textarea', () => {
+    const { editor, textarea } = createMobileEditor();
+    editor.loadFiles({
+      'sketch.ino': 'void setup() {}\nvoid loop() {}',
+      'helper.h': '#define LED_PIN 13',
+    }, 'sketch.ino');
+
+    expect(textarea.value).toBe('void setup() {}\nvoid loop() {}');
+    expect(editor.getCode()).toBe(textarea.value);
+
+    editor.loadFiles({
+      'sketch.ino': 'void setup() { pinMode(13, OUTPUT); }',
+      'helper.h': '#define LED_PIN 13',
+    }, 'sketch.ino');
+    expect(textarea.value).toBe('void setup() { pinMode(13, OUTPUT); }');
+  });
+
   it('adds matching indentation when inserting a new line inside a block', () => {
     const { editor, textarea } = createMobileEditor();
     textarea.value = 'void loop() {\n  if (ready) {';
