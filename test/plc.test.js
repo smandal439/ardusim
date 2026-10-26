@@ -5,6 +5,11 @@ import vm from 'node:vm';
 
 const sourcePath = path.resolve(__dirname, '..', 'js', 'plc.js');
 const context = { window: {} };
+context.performance = performance;
+context.setInterval = setInterval;
+context.clearInterval = clearInterval;
+context.setTimeout = setTimeout;
+context.clearTimeout = clearTimeout;
 vm.runInNewContext(fs.readFileSync(sourcePath, 'utf8'), context);
 const { defaultProgram, generateArduinoCode, normalizeProgram } = context.window.PLCLadder;
 context.window.ArduinoLibs = {};
@@ -19,7 +24,7 @@ context.window.CppTypes = {
   },
 };
 vm.runInNewContext(fs.readFileSync(path.resolve(__dirname, '..', 'js', 'simulator.js'), 'utf8'), context);
-const simulator = Object.create(context.window.ArduinoSimulator.prototype);
+const simulator = new context.window.ArduinoSimulator();
 simulator.board = 'arduino_uno';
 
 describe('PLC ladder transpiler', () => {
@@ -86,6 +91,47 @@ describe('PLC ladder transpiler', () => {
 
     const javascript = simulator.transpile(code);
     expect(() => new Function(javascript)).not.toThrow();
+  });
+
+  it('advances TON time while PLC scans repeatedly write unchanged outputs', async () => {
+    const code = generateArduinoCode({
+      mode: 'ladder',
+      rungs: [{
+        elements: [{ type: 'NO', input: 'I0_0' }, { type: 'TON', preset: 30 }],
+        output: 'Q0_0',
+      }],
+    });
+    simulator._loopCount = 0;
+    simulator._MAX_TIGHT_ITERS = 1000;
+    simulator.onPinChange = null;
+    await simulator.compile(code);
+    simulator._startExecution();
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 20));
+      simulator.pinStates.pin_2 = 0;
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(simulator.simTime).toBeGreaterThanOrEqual(30);
+      expect(simulator.pinStates.pin_8).toBe(1);
+    } finally {
+      simulator.stop();
+    }
+  });
+
+  it('advances simulator time for no-delay sketches that repeatedly write pins', async () => {
+    simulator._loopCount = 0;
+    simulator._MAX_TIGHT_ITERS = 1000;
+    simulator.onPinChange = null;
+    await simulator.compile('void setup() { pinMode(8, OUTPUT); } void loop() { digitalWrite(8, LOW); }');
+    simulator._startExecution();
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 80));
+      expect(simulator.simTime).toBeGreaterThan(0);
+    } finally {
+      simulator.stop();
+    }
   });
 
   it('rejects invalid pins, presets, and empty runnable programs', () => {

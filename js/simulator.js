@@ -2031,15 +2031,15 @@ class ArduinoSimulator {
                 this.simTime += Math.max(1, Math.round(_now - _lastLoopTime));
                 _lastLoopTime = _now;
               }
+              const simTimeBeforeLoop = this.simTime;
               await ctx.loop();
               this._loopCount++;
               // Yield to UI thread // advance simTime by actual elapsed ms
               await new Promise(r => setTimeout(r, 0));
               const _now = performance.now();
-              // Only add elapsed time if delay() was NOT called during loop();
-              // delay() already advanced simTime and slept for real time,
-              // so adding again would double-count the delay period.
-              if (this._iterSinceDelay > 0) {
+              // Avoid double-counting time already advanced by delay() or another
+              // timing helper during this loop.
+              if (this.simTime === simTimeBeforeLoop) {
                 this.simTime += Math.max(1, Math.round(_now - _lastLoopTime));
               }
               _lastLoopTime = _now;
@@ -2270,11 +2270,12 @@ class ArduinoSimulator {
                   self.simTime += Math.max(1, Math.round(_n2 - _lastLoopTime2));
                   _lastLoopTime2 = _n2;
                 }
+                const _simTimeBeforeLoop = self.simTime;
                 await ctx.loop();
                 self._loopCount++;
                 await new Promise(r => setTimeout(r, 0));
                 const _n2 = performance.now();
-                if (self._iterSinceDelay > 0) {
+                if (self.simTime === _simTimeBeforeLoop) {
                   self.simTime += Math.max(1, Math.round(_n2 - _lastLoopTime2));
                 }
                 _lastLoopTime2 = _n2;

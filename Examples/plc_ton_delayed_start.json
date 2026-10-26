@@ -8,7 +8,7 @@
   "circuit": {
     "components": [
       { "id": "plc_board", "type": "industrial_plc", "x": 0, "y": 0, "rotation": 0, "props": { "label": "ARDU-PLC 328" } },
-      { "id": "plc_start", "type": "push_button", "x": -100, "y": 105, "rotation": 0, "props": { "pressed": false, "label": "START", "mode": "momentary" } },
+      { "id": "plc_start", "type": "push_button", "x": -100, "y": 105, "rotation": 0, "props": { "pressed": false, "label": "START", "mode": "Latching" } },
       { "id": "plc_motor", "type": "dc_motor", "x": 330, "y": 35, "rotation": 0, "props": { "label": "CONVEYOR MOTOR" } }
     ],
     "wires": [
