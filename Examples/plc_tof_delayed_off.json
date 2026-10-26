@@ -1,0 +1,22 @@
+{
+  "id": "plc_tof_delayed_off",
+  "name": "PLC - TOF delayed off",
+  "icon": "⏱️",
+  "desc": "Press START (I0.0) to energize Q0.0. After releasing the button, the TOF timer keeps the output on for 2 seconds.",
+  "tags": ["plc", "ladder", "industrial automation", "timer", "tof"],
+  "code": "",
+  "circuit": {
+    "components": [
+      { "id": "plc_board", "type": "industrial_plc", "x": 0, "y": 0, "rotation": 0, "props": { "label": "ARDU-PLC 328" } },
+      { "id": "plc_start", "type": "push_button", "x": -90, "y": 105, "rotation": 0, "props": { "pressed": false, "label": "START", "mode": "momentary" } }
+    ],
+    "wires": [
+      { "id": "plc_wire_i00", "from": { "instId": "plc_start", "pinId": "p1" }, "to": { "instId": "plc_board", "pinId": "I0_0" }, "color": null, "waypoints": [] },
+      { "id": "plc_wire_com", "from": { "instId": "plc_start", "pinId": "p2" }, "to": { "instId": "plc_board", "pinId": "COM" }, "color": null, "waypoints": [] }
+    ],
+    "plcProgram": {
+      "mode": "ladder",
+      "rungs": [{ "elements": [{ "type": "NO", "input": "I0_0" }, { "type": "TOF", "preset": 2000 }], "output": "Q0_0" }]
+    }
+  }
+}

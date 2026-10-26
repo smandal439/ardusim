@@ -3534,7 +3534,7 @@ _newProject() {
 
     this._examplesDataLoadPromise = new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = new URL('js/examples-data.js?v=20261025-1', document.baseURI).href;
+      script.src = new URL('js/examples-data.js?v=20261026-1', document.baseURI).href;
       script.onload = () => {
         if (Array.isArray(window.EXAMPLE_SKETCHES) && window.EXAMPLE_SKETCHES.length > 0) {
           resolve();

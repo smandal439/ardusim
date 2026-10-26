@@ -1,0 +1,25 @@
+{
+  "id": "plc_series_interlock",
+  "name": "PLC - Series interlock",
+  "icon": "🏭",
+  "desc": "Q0.0 energizes while START (I0.0) is pressed and STOP (I0.1) is released. The NO and NC contacts are evaluated in series.",
+  "tags": ["plc", "ladder", "industrial automation", "interlock", "contacts"],
+  "code": "",
+  "circuit": {
+    "components": [
+      { "id": "plc_board", "type": "industrial_plc", "x": 0, "y": 0, "rotation": 0, "props": { "label": "ARDU-PLC 328" } },
+      { "id": "plc_start", "type": "push_button", "x": -90, "y": 105, "rotation": 0, "props": { "pressed": false, "label": "START", "mode": "momentary" } },
+      { "id": "plc_stop", "type": "push_button", "x": -90, "y": 180, "rotation": 0, "props": { "pressed": false, "label": "STOP", "mode": "momentary" } }
+    ],
+    "wires": [
+      { "id": "plc_wire_i00", "from": { "instId": "plc_start", "pinId": "p1" }, "to": { "instId": "plc_board", "pinId": "I0_0" }, "color": null, "waypoints": [] },
+      { "id": "plc_wire_start_com", "from": { "instId": "plc_start", "pinId": "p2" }, "to": { "instId": "plc_board", "pinId": "COM" }, "color": null, "waypoints": [] },
+      { "id": "plc_wire_i01", "from": { "instId": "plc_stop", "pinId": "p1" }, "to": { "instId": "plc_board", "pinId": "I0_1" }, "color": null, "waypoints": [] },
+      { "id": "plc_wire_stop_com", "from": { "instId": "plc_stop", "pinId": "p2" }, "to": { "instId": "plc_board", "pinId": "COM" }, "color": null, "waypoints": [] }
+    ],
+    "plcProgram": {
+      "mode": "ladder",
+      "rungs": [{ "elements": [{ "type": "NO", "input": "I0_0" }, { "type": "NC", "input": "I0_1" }], "output": "Q0_0" }]
+    }
+  }
+}

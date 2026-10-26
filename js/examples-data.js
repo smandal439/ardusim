@@ -25849,6 +25849,509 @@ window.EXAMPLE_SKETCHES = [
     "code": "/*\n * PIR Motion Alarm — detect motion on D2\n * Flip the \"Motion\" slider ON to trigger the LED and alarm messages.\n */\n\nint pirPin = 2;\nint ledPin = 13;\n\nvoid setup() {\n  pinMode(pirPin, INPUT);\n  pinMode(ledPin, OUTPUT);\n  Serial.begin(115200);\n  Serial.println(\"PIR alarm armed\");\n}\n\nvoid loop() {\n  int motion = digitalRead(pirPin);\n\n  if (motion == HIGH) {\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"MOTION DETECTED!\");\n  } else {\n    digitalWrite(ledPin, LOW);\n  }\n  delay(200);\n}"
   },
   {
+    "id": "plc_ctu_event_counter",
+    "name": "PLC - CTU event counter",
+    "icon": "🔢",
+    "desc": "Press START (I0.0) five times to reach the CTU preset. Press RESET (I0.3) to clear the count. Q0.0 indicates the threshold while the rung is active.",
+    "tags": [
+      "plc",
+      "ladder",
+      "industrial automation",
+      "counter",
+      "ctu"
+    ],
+    "code": "",
+    "circuit": {
+      "components": [
+        {
+          "id": "plc_board",
+          "type": "industrial_plc",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "props": {
+            "label": "ARDU-PLC 328"
+          }
+        },
+        {
+          "id": "plc_start",
+          "type": "push_button",
+          "x": -90,
+          "y": 105,
+          "rotation": 0,
+          "props": {
+            "pressed": false,
+            "label": "START",
+            "mode": "momentary"
+          }
+        },
+        {
+          "id": "plc_reset",
+          "type": "push_button",
+          "x": -90,
+          "y": 180,
+          "rotation": 0,
+          "props": {
+            "pressed": false,
+            "label": "RESET",
+            "mode": "momentary"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "plc_wire_i00",
+          "from": {
+            "instId": "plc_start",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "I0_0"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_start_com",
+          "from": {
+            "instId": "plc_start",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "COM"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_i03",
+          "from": {
+            "instId": "plc_reset",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "I0_3"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_reset_com",
+          "from": {
+            "instId": "plc_reset",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "COM"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ],
+      "plcProgram": {
+        "mode": "ladder",
+        "rungs": [
+          {
+            "elements": [
+              {
+                "type": "NO",
+                "input": "I0_0"
+              },
+              {
+                "type": "CTU",
+                "preset": 5,
+                "resetInput": "I0_3"
+              }
+            ],
+            "output": "Q0_0"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "plc_series_interlock",
+    "name": "PLC - Series interlock",
+    "icon": "🏭",
+    "desc": "Q0.0 energizes while START (I0.0) is pressed and STOP (I0.1) is released. The NO and NC contacts are evaluated in series.",
+    "tags": [
+      "plc",
+      "ladder",
+      "industrial automation",
+      "interlock",
+      "contacts"
+    ],
+    "code": "",
+    "circuit": {
+      "components": [
+        {
+          "id": "plc_board",
+          "type": "industrial_plc",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "props": {
+            "label": "ARDU-PLC 328"
+          }
+        },
+        {
+          "id": "plc_start",
+          "type": "push_button",
+          "x": -90,
+          "y": 105,
+          "rotation": 0,
+          "props": {
+            "pressed": false,
+            "label": "START",
+            "mode": "momentary"
+          }
+        },
+        {
+          "id": "plc_stop",
+          "type": "push_button",
+          "x": -90,
+          "y": 180,
+          "rotation": 0,
+          "props": {
+            "pressed": false,
+            "label": "STOP",
+            "mode": "momentary"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "plc_wire_i00",
+          "from": {
+            "instId": "plc_start",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "I0_0"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_start_com",
+          "from": {
+            "instId": "plc_start",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "COM"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_i01",
+          "from": {
+            "instId": "plc_stop",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "I0_1"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_stop_com",
+          "from": {
+            "instId": "plc_stop",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "COM"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ],
+      "plcProgram": {
+        "mode": "ladder",
+        "rungs": [
+          {
+            "elements": [
+              {
+                "type": "NO",
+                "input": "I0_0"
+              },
+              {
+                "type": "NC",
+                "input": "I0_1"
+              }
+            ],
+            "output": "Q0_0"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "plc_simple_output_control",
+    "name": "PLC - Simple output control",
+    "icon": "🏭",
+    "desc": "Press the START push button to energize output Q0.0. The button is wired to I0.0 and COM; the PLC input is active-low.",
+    "tags": [
+      "plc",
+      "ladder",
+      "industrial automation",
+      "input",
+      "output"
+    ],
+    "code": "",
+    "circuit": {
+      "components": [
+        {
+          "id": "plc_board",
+          "type": "industrial_plc",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "props": {
+            "label": "ARDU-PLC 328"
+          }
+        },
+        {
+          "id": "plc_start",
+          "type": "push_button",
+          "x": -90,
+          "y": 105,
+          "rotation": 0,
+          "props": {
+            "pressed": false,
+            "label": "START",
+            "mode": "momentary"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "plc_wire_i00",
+          "from": {
+            "instId": "plc_start",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "I0_0"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_com",
+          "from": {
+            "instId": "plc_start",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "COM"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ],
+      "plcProgram": {
+        "mode": "ladder",
+        "rungs": [
+          {
+            "elements": [
+              {
+                "type": "NO",
+                "input": "I0_0"
+              }
+            ],
+            "output": "Q0_0"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "plc_tof_delayed_off",
+    "name": "PLC - TOF delayed off",
+    "icon": "⏱️",
+    "desc": "Press START (I0.0) to energize Q0.0. After releasing the button, the TOF timer keeps the output on for 2 seconds.",
+    "tags": [
+      "plc",
+      "ladder",
+      "industrial automation",
+      "timer",
+      "tof"
+    ],
+    "code": "",
+    "circuit": {
+      "components": [
+        {
+          "id": "plc_board",
+          "type": "industrial_plc",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "props": {
+            "label": "ARDU-PLC 328"
+          }
+        },
+        {
+          "id": "plc_start",
+          "type": "push_button",
+          "x": -90,
+          "y": 105,
+          "rotation": 0,
+          "props": {
+            "pressed": false,
+            "label": "START",
+            "mode": "momentary"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "plc_wire_i00",
+          "from": {
+            "instId": "plc_start",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "I0_0"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_com",
+          "from": {
+            "instId": "plc_start",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "COM"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ],
+      "plcProgram": {
+        "mode": "ladder",
+        "rungs": [
+          {
+            "elements": [
+              {
+                "type": "NO",
+                "input": "I0_0"
+              },
+              {
+                "type": "TOF",
+                "preset": 2000
+              }
+            ],
+            "output": "Q0_0"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "plc_ton_delayed_start",
+    "name": "PLC - TON delayed start",
+    "icon": "⏱️",
+    "desc": "Press and hold START (I0.0). The TON timer energizes Q0.0 after the input has remained active for 3 seconds; releasing early resets the timer.",
+    "tags": [
+      "plc",
+      "ladder",
+      "industrial automation",
+      "timer",
+      "ton"
+    ],
+    "code": "",
+    "circuit": {
+      "components": [
+        {
+          "id": "plc_board",
+          "type": "industrial_plc",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "props": {
+            "label": "ARDU-PLC 328"
+          }
+        },
+        {
+          "id": "plc_start",
+          "type": "push_button",
+          "x": -90,
+          "y": 105,
+          "rotation": 0,
+          "props": {
+            "pressed": false,
+            "label": "START",
+            "mode": "momentary"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "plc_wire_i00",
+          "from": {
+            "instId": "plc_start",
+            "pinId": "p1"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "I0_0"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_com",
+          "from": {
+            "instId": "plc_start",
+            "pinId": "p2"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "COM"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ],
+      "plcProgram": {
+        "mode": "ladder",
+        "rungs": [
+          {
+            "elements": [
+              {
+                "type": "NO",
+                "input": "I0_0"
+              },
+              {
+                "type": "TON",
+                "preset": 3000
+              }
+            ],
+            "output": "Q0_0"
+          }
+        ]
+      }
+    }
+  },
+  {
     "id": "plugin_tutorial",
     "name": "Plugin Tutorial: 7-Segment Display Driver",
     "icon": "🔢",
