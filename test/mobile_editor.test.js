@@ -43,8 +43,10 @@ function createMobileEditor() {
 
   const helperBar = container.children[0];
   const wrapper = container.children[1];
-  const textarea = wrapper.children[1];
-  return { editor, helperBar, textarea };
+  const codePane = wrapper.children[1];
+  const highlight = codePane.children[0].children[0];
+  const textarea = codePane.children[1];
+  return { editor, helperBar, textarea, highlight };
 }
 
 describe('mobile code editor', () => {
@@ -102,5 +104,19 @@ describe('mobile code editor', () => {
     const { helperBar, textarea } = createMobileEditor();
     expect(helperBar.children.every(button => button.style.cssText.includes('min-height:40px'))).toBe(true);
     expect(textarea.style.cssText).toContain('font-size:16px');
+  });
+
+  it('highlights code tokens while keeping the mobile textarea editable', () => {
+    const { editor, textarea, highlight } = createMobileEditor();
+    textarea.value = 'void setup() {\n  digitalWrite(13, HIGH); // ready\n  const char* label = "<gps>";\n}';
+    textarea.dispatchEvent(new Event('input'));
+
+    expect(highlight.innerHTML).toContain('mobile-token-keyword">void</span>');
+    expect(highlight.innerHTML).toContain('mobile-token-function">digitalWrite</span>');
+    expect(highlight.innerHTML).toContain('mobile-token-constant">HIGH</span>');
+    expect(highlight.innerHTML).toContain('mobile-token-comment">// ready</span>');
+    expect(highlight.innerHTML).toContain('&lt;gps&gt;');
+    expect(highlight.innerHTML).not.toContain('<gps>');
+    expect(editor.getCode()).toBe(textarea.value);
   });
 });

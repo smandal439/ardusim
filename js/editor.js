@@ -721,7 +721,7 @@ DL2:    DJNZ R3, DL2
     // Quick insertion toolbar for special characters
     const helperBar = document.createElement('div');
     helperBar.setAttribute('aria-label', 'Code insertion shortcuts');
-    helperBar.style.cssText = 'display:flex;gap:6px;padding:6px;background:#161b22;border-bottom:1px solid #21262d;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0;min-height:52px;align-items:center;';
+    helperBar.style.cssText = 'display:flex;gap:6px;padding:6px;background:var(--bg-panel,#161b22);border-bottom:1px solid var(--border-subtle,#21262d);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0;min-height:52px;align-items:center;';
 
     const symbols = ['{', '}', '(', ')', ';', '=', 'HIGH', 'LOW', 'INPUT', 'OUTPUT'];
     symbols.forEach(symbol => {
@@ -730,7 +730,7 @@ DL2:    DJNZ R3, DL2
       btn.textContent = symbol;
       btn.title = `Insert ${symbol}`;
       btn.setAttribute('aria-label', `Insert ${symbol}`);
-      btn.style.cssText = 'background:#21262d;color:#e6edf3;border:1px solid #30363d;min-height:40px;min-width:40px;padding:6px 10px;border-radius:6px;font-family:"JetBrains Mono",monospace;font-size:13px;cursor:pointer;flex-shrink:0;touch-action:manipulation;';
+      btn.style.cssText = 'background:var(--bg-hover,#21262d);color:var(--text-primary,#e6edf3);border:1px solid var(--border,#30363d);min-height:40px;min-width:40px;padding:6px 10px;border-radius:6px;font-family:"JetBrains Mono",monospace;font-size:13px;cursor:pointer;flex-shrink:0;touch-action:manipulation;';
       btn.onclick = (e) => {
         e.preventDefault();
         const start = ta.selectionStart;
@@ -744,11 +744,21 @@ DL2:    DJNZ R3, DL2
     });
 
     const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'display:flex;flex:1;min-height:0;width:100%;overflow:hidden;background:#0d1117;';
+    wrapper.style.cssText = 'display:flex;flex:1;min-height:0;width:100%;overflow:hidden;background:var(--bg-input,#0d1117);';
 
     const gutter = document.createElement('div');
-    gutter.style.cssText = 'width:40px;padding:12px 4px 12px 8px;text-align:right;color:#7d8590;font-family:"JetBrains Mono",monospace;font-size:16px;line-height:1.5;overflow:hidden;user-select:none;flex-shrink:0;background:#0d1117;border-right:1px solid #21262d;';
+    gutter.style.cssText = 'width:40px;padding:12px 4px 12px 8px;text-align:right;color:var(--text-secondary,#7d8590);font-family:"JetBrains Mono",monospace;font-size:16px;line-height:1.5;overflow:hidden;user-select:none;flex-shrink:0;background:var(--bg-input,#0d1117);border-right:1px solid var(--border-subtle,#21262d);';
     gutter.id = 'mobile-line-numbers';
+
+    const codePane = document.createElement('div');
+    codePane.style.cssText = 'position:relative;flex:1;min-width:0;min-height:0;overflow:hidden;background:var(--bg-input,#0d1117);';
+
+    const highlight = document.createElement('pre');
+    highlight.className = 'mobile-code-highlight';
+    highlight.setAttribute('aria-hidden', 'true');
+    highlight.style.cssText = 'position:absolute;top:0;left:0;margin:0;padding:12px;font-family:"JetBrains Mono",monospace;font-size:16px;line-height:1.5;white-space:pre;tab-size:2;pointer-events:none;transform-origin:top left;min-height:100%;';
+    const highlightCode = document.createElement('code');
+    highlight.appendChild(highlightCode);
 
     const ta = document.createElement('textarea');
     ta.value = this._getDefaultCode();
@@ -757,10 +767,12 @@ DL2:    DJNZ R3, DL2
     ta.autocorrect = 'off';
     ta.autocapitalize = 'off';
     ta.setAttribute('aria-label', 'Arduino code editor');
-    ta.style.cssText = `flex:1;min-width:0;min-height:0;width:100%;background:#0d1117;color:#e6edf3;font-family:'JetBrains Mono',monospace;font-size:16px;padding:12px;border:none;outline:none;resize:none;tab-size:2;white-space:pre;line-height:1.5;overflow:auto;-webkit-overflow-scrolling:touch;`;
+    ta.style.cssText = `position:absolute;inset:0;width:100%;height:100%;background:transparent;color:transparent;-webkit-text-fill-color:transparent;caret-color:var(--text-primary,#e6edf3);font-family:'JetBrains Mono',monospace;font-size:16px;padding:12px;border:none;outline:none;resize:none;tab-size:2;white-space:pre;line-height:1.5;overflow:auto;-webkit-overflow-scrolling:touch;`;
 
     wrapper.appendChild(gutter);
-    wrapper.appendChild(ta);
+    codePane.appendChild(highlight);
+    codePane.appendChild(ta);
+    wrapper.appendChild(codePane);
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
     container.style.minHeight = '0';
@@ -773,11 +785,20 @@ DL2:    DJNZ R3, DL2
       const lines = ta.value.split('\n').length;
       gutter.innerHTML = Array.from({ length: lines }, (_, i) => `<div style="height:1.6em">${i + 1}</div>`).join('');
     };
+    const updateHighlight = () => {
+      highlightCode.innerHTML = this._highlightMobileCode(ta.value);
+      highlight.style.transform = `translate(${-ta.scrollLeft}px, ${-ta.scrollTop}px)`;
+    };
     updateLineNumbers();
+    updateHighlight();
 
-    ta.addEventListener('input', updateLineNumbers);
+    ta.addEventListener('input', () => {
+      updateLineNumbers();
+      updateHighlight();
+    });
     ta.addEventListener('scroll', () => {
       gutter.scrollTop = ta.scrollTop;
+      updateHighlight();
     });
 
     ta.addEventListener('keydown', (e) => {
@@ -827,6 +848,46 @@ DL2:    DJNZ R3, DL2
     this.files[sketchName2] = { content: ta.value, model: null };
     this._fileStates[sketchName2] = { cursor: { lineNumber: 1, column: 1 }, scrollTop: 0 };
     if (window.App) window.App.onEditorReady(this.loadFromUrlHash());
+  },
+
+  _highlightMobileCode(source) {
+    const keywords = new Set([
+      'void', 'int', 'long', 'float', 'double', 'byte', 'boolean', 'bool',
+      'char', 'String', 'unsigned', 'const', 'return', 'if', 'else', 'for',
+      'while', 'do', 'switch', 'case', 'break', 'continue', 'struct', 'class',
+      'true', 'false', 'static', 'volatile',
+    ]);
+    const constants = new Set([
+      'HIGH', 'LOW', 'INPUT', 'OUTPUT', 'INPUT_PULLUP', 'LED_BUILTIN',
+      'RISING', 'FALLING', 'CHANGE', 'HEX', 'DEC', 'OCT', 'BIN',
+    ]);
+    const functions = new Set([
+      'setup', 'loop', 'pinMode', 'digitalWrite', 'digitalRead', 'analogWrite',
+      'analogRead', 'delay', 'delayMicroseconds', 'millis', 'micros', 'tone',
+      'noTone', 'pulseIn', 'attachInterrupt', 'detachInterrupt', 'map',
+      'constrain', 'random', 'randomSeed', 'Serial', 'Serial1', 'Serial2',
+    ]);
+    const tokenPattern = /(\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$)|#[^\n]*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|0[xX][\da-fA-F]+|\b\d+(?:\.\d+)?[fF]?\b|\b[A-Za-z_]\w*\b)/g;
+    const escapeHtml = value => value.replace(/[&<>"]/g, char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+    })[char]);
+
+    return source.split(tokenPattern).map(token => {
+      if (!token) return '';
+      let type = '';
+      if (token.startsWith('//') || token.startsWith('/*')) type = 'comment';
+      else if (token.startsWith('#')) type = 'preprocessor';
+      else if (token.startsWith('"') || token.startsWith("'")) type = 'string';
+      else if (/^(?:0[xX][\da-fA-F]+|\d)/.test(token)) type = 'number';
+      else if (constants.has(token)) type = 'constant';
+      else if (keywords.has(token)) type = 'keyword';
+      else if (functions.has(token)) type = 'function';
+      const escaped = escapeHtml(token);
+      return type ? `<span class="mobile-token-${type}">${escaped}</span>` : escaped;
+    }).join('');
   },
 
   /* ---------------------------------------------------------

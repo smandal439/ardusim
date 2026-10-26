@@ -84,6 +84,7 @@ class App {
       this._updateStatus('Ready \u2014 press Run to start simulation');
       this._updateCompileStatus('Ready');
       this._hideLoadingOverlay();
+      this._initTour();
     } catch (err) {
       console.error('[ArduSim] Init error:', err);
       this._showInitError(err.message || String(err));
@@ -222,6 +223,11 @@ class App {
     helpTutorialsBtn?.addEventListener('click', () => {
       this._closeHeaderDropdowns();
       window.GuideManager?.open('tutorials');
+    });
+    const helpTourBtn = get('btn-help-tour');
+    helpTourBtn?.addEventListener('click', () => {
+      this._closeHeaderDropdowns();
+      this._startTour();
     });
     const helpShortcutsBtn = get('btn-help-shortcuts');
     helpShortcutsBtn?.addEventListener('click', () => {
@@ -2623,6 +2629,166 @@ _newProject() {
     setTimeout(() => {
       overlay.style.display = 'none';
     }, 400);
+  }
+
+  /* ---------------------- FIRST-VISIT TOUR ---------------------- */
+  _initTour() {
+    this._tourSteps = [
+      {
+        title: 'Welcome to ArduSim',
+        description: 'Build circuits, write Arduino code, and see your ideas run in the browser. Here is a quick tour of the workspace.'
+      },
+      {
+        title: 'Start with an example',
+        description: 'Explore ready-made sketches and circuits here. Examples are a quick way to learn or start a new project.',
+        target: '#btn-examples'
+      },
+      {
+        title: 'Find components',
+        description: 'Search the component library, then select a part and place it on the circuit canvas.',
+        target: '#component-search'
+      },
+      {
+        title: 'Build your circuit',
+        description: 'Arrange parts on the canvas and connect their pins to create your circuit.',
+        target: '#canvas-wrapper'
+      },
+      {
+        title: 'Write your code',
+        description: 'Edit your Arduino sketch here. The editor includes code completion and compile checks.',
+        target: '#editor-container'
+      },
+      {
+        title: 'Run the simulation',
+        description: 'Press Run to compile your sketch and simulate the circuit.',
+        target: '#btn-run'
+      },
+      {
+        title: 'See what your circuit does',
+        description: 'Use the Serial Monitor and other instrument tabs to inspect output from your simulation.',
+        target: '#tab-serial'
+      }
+    ];
+    this._tourOverlay = document.getElementById('tour-overlay');
+    if (!this._tourOverlay) return;
+
+    document.getElementById('tour-next')?.addEventListener('click', () => {
+      if (this._tourIndex >= this._tourActiveSteps.length - 1) {
+        this._endTour();
+        return;
+      }
+      this._tourIndex++;
+      this._renderTourStep();
+    });
+    document.getElementById('tour-back')?.addEventListener('click', () => {
+      if (this._tourIndex > 0) {
+        this._tourIndex--;
+        this._renderTourStep();
+      }
+    });
+    document.getElementById('tour-close')?.addEventListener('click', () => this._endTour());
+    document.getElementById('tour-skip')?.addEventListener('click', () => this._endTour());
+    document.addEventListener('keydown', (event) => {
+      if (this._tourOverlay.classList.contains('hidden')) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        this._endTour();
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        document.getElementById('tour-next')?.click();
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        document.getElementById('tour-back')?.click();
+      } else if (event.key === 'Tab') {
+        const focusable = [...this._tourOverlay.querySelectorAll('button:not(:disabled)')];
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }
+    });
+
+    let tourCompleted = false;
+    try {
+      tourCompleted = localStorage.getItem('ardusim-tour-completed') === 'true';
+    } catch (error) {
+      console.warn('[ArduSim] Could not read tour preference:', error);
+    }
+    if (!tourCompleted) {
+      setTimeout(() => this._startTour(), 450);
+    }
+  }
+
+  _startTour() {
+    if (!this._tourOverlay) return;
+    this._tourPreviousFocus = document.activeElement;
+    this._tourIndex = 0;
+    this._tourActiveSteps = this._tourSteps.filter((step) => {
+      if (!step.target) return true;
+      const target = document.querySelector(step.target);
+      return target && target.getClientRects().length > 0;
+    });
+    this._tourOverlay.classList.remove('hidden');
+    this._tourOverlay.setAttribute('aria-hidden', 'false');
+    this._renderTourStep();
+    document.getElementById('tour-close')?.focus();
+  }
+
+  _renderTourStep() {
+    const previousTarget = document.querySelector('.tour-highlight');
+    previousTarget?.classList.remove('tour-highlight');
+
+    while (this._tourIndex < this._tourActiveSteps.length) {
+      const step = this._tourActiveSteps[this._tourIndex];
+      const target = step.target ? document.querySelector(step.target) : null;
+      if (!step.target || (target && target.getClientRects().length > 0)) break;
+      this._tourIndex++;
+    }
+    if (this._tourIndex >= this._tourActiveSteps.length) {
+      this._endTour();
+      return;
+    }
+
+    const currentStep = this._tourActiveSteps[this._tourIndex];
+    const target = currentStep.target ? document.querySelector(currentStep.target) : null;
+    if (target && target.getClientRects().length > 0) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      target.classList.add('tour-highlight');
+    }
+
+    const stepCount = document.getElementById('tour-step-count');
+    const title = document.getElementById('tour-title');
+    const description = document.getElementById('tour-description');
+    const progress = document.getElementById('tour-progress-bar');
+    const backButton = document.getElementById('tour-back');
+    const nextButton = document.getElementById('tour-next');
+    if (stepCount) stepCount.textContent = `STEP ${this._tourIndex + 1} OF ${this._tourActiveSteps.length}`;
+    if (title) title.textContent = currentStep.title;
+    if (description) description.textContent = currentStep.description;
+    if (progress) progress.style.width = `${((this._tourIndex + 1) / this._tourActiveSteps.length) * 100}%`;
+    if (backButton) backButton.disabled = this._tourIndex === 0;
+    if (nextButton) nextButton.textContent = this._tourIndex === this._tourActiveSteps.length - 1 ? 'Finish' : 'Next';
+  }
+
+  _endTour() {
+    if (!this._tourOverlay || this._tourOverlay.classList.contains('hidden')) return;
+    document.querySelector('.tour-highlight')?.classList.remove('tour-highlight');
+    this._tourOverlay.classList.add('hidden');
+    this._tourOverlay.setAttribute('aria-hidden', 'true');
+    try {
+      localStorage.setItem('ardusim-tour-completed', 'true');
+    } catch (error) {
+      console.warn('[ArduSim] Could not save tour preference:', error);
+    }
+    const previousFocus = this._tourPreviousFocus;
+    if (previousFocus instanceof HTMLElement && previousFocus.isConnected && previousFocus.getClientRects().length > 0) {
+      previousFocus.focus();
+    }
   }
 
   /* ---------------------- THEME ---------------------- */

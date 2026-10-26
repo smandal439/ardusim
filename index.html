@@ -25,7 +25,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=20260927-3" /> <noscript>
+    <link rel="stylesheet" href="css/style.css?v=20261026-1" /> <noscript>
         <style>
             .loading-overlay {
                 display: flex !important;
@@ -216,6 +216,12 @@
                             <path
                                 d="M8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783M8 13.069c-1.108-.63-2.722-.95-4.413-.796-1.073.099-2.153.345-3.087.661V2.88c1.108-.413 2.419-.743 3.525-.847 1.696-.16 3.325.196 4.975.843zm4.5-10.924c1.106.104 2.417.434 3.525.847v8.034c-.934-.316-2.014-.562-3.087-.66-1.691-.155-3.305.165-4.413.796V2.84c1.65-.647 3.279-1.004 4.975-.843z" />
                         </svg> How to Use &amp; Tutorials
+                    </button>
+                    <button class="hdr-dropdown-item" id="btn-help-tour" role="menuitem"
+                        title="Take the guided tour">
+                        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 1a7 7 0 1 0 7 7 7.008 7.008 0 0 0-7-7m0 12.8A5.8 5.8 0 1 1 8 2.2a5.807 5.807 0 0 1 0 11.6M7.4 4.5h1.2v4H7.4zm0 5h1.2v1.2H7.4z" />
+                        </svg> Take a Tour
                     </button>
                     <div class="ctx-separator"></div>
                     <button class="hdr-dropdown-item" id="btn-help-shortcuts" role="menuitem"
@@ -911,6 +917,28 @@
             </div>
         </div>
     </div> <!-- ------------------------ MODALS -------------------------- -->
+    <div class="tour-overlay hidden" id="tour-overlay" aria-hidden="true">
+        <section class="tour-card" role="dialog" aria-modal="true" aria-labelledby="tour-title"
+            aria-describedby="tour-description" tabindex="-1">
+            <div class="tour-card-topline">
+                <span class="tour-step-count" id="tour-step-count"></span>
+                <button class="tour-close" id="tour-close" type="button" aria-label="Close tour">&times;</button>
+            </div>
+            <div class="tour-progress" aria-hidden="true">
+                <span class="tour-progress-bar" id="tour-progress-bar"></span>
+            </div>
+            <h2 id="tour-title"></h2>
+            <p id="tour-description" aria-live="polite"></p>
+            <div class="tour-card-actions">
+                <button class="tour-skip" id="tour-skip" type="button">Skip tour</button>
+                <div class="tour-navigation">
+                    <button class="tour-back" id="tour-back" type="button">Back</button>
+                    <button class="tour-next" id="tour-next" type="button">Next</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
     <div class="modal-overlay hidden" id="modal-overlay" tabindex="-1"> <!-- Examples Modal -->
         <div class="modal modal-lg" id="modal-examples" role="dialog" aria-modal="true"
             aria-labelledby="modal-examples-title">
@@ -1488,7 +1516,7 @@
     <script src="js/editor.js?v=20260826-4"></script>
     <script src="js/thumbnails.js?v=20260825-1"></script>
     <script src="js/guide.js?v=20260928-2"></script>
-    <script src="js/app.js?v=20260927-3"></script>
+    <script src="js/app.js?v=20261026-1"></script>
     <script src="js/remote-control.js?v=20260826-1"></script>
     
     <script>
