@@ -3594,8 +3594,16 @@ body.file-explorer-collapsed .file-explorer-expand {
     z-index: 101;
     background: var(--bg-panel);
   }
+  .header #btn-remote {
+    position: fixed;
+    top: 8px;
+    right: 44px;
+    z-index: 101;
+    background: var(--bg-panel);
+  }
   .header #btn-theme svg { display: block; }
-  .header-controls { padding-right: 36px; }
+  .header #btn-remote svg { display: block; }
+  .header-controls { padding-right: 72px; }
   .hdr-btn-run { min-width: auto; padding: 6px 14px; }
   .hdr-btn-run svg { display: inline; }
   .hdr-select { font-size: 11px; padding: 4px 6px; }
@@ -3801,6 +3809,7 @@ body.file-explorer-collapsed .file-explorer-expand {
 @media (max-width: 480px) {
   .header { height: 42px; padding: 0 6px; }
   .header #btn-theme { top: 6px; right: 6px; }
+  .header #btn-remote { top: 6px; right: 42px; }
   .hdr-btn { padding: 5px 6px; font-size: 10px; }
   .hdr-btn-run { padding: 5px 10px; }
   .main-layout { top: 42px; bottom: 48px; }
