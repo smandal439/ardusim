@@ -2686,3 +2686,118 @@ defComp({
     ctx.restore();
   }
 });
+
+defComp({
+  id: 'industrial_plc',
+  name: 'Ardu-PLC 328',
+  category: 'Boards',
+  icon: '🏭',
+  desc: 'Virtual 4-input, 4-output PLC with Arduino-compatible execution',
+  width: 280,
+  height: 220,
+  defaultProps: { label: 'ARDU-PLC 328' },
+  pins: [
+    { id: 'I0_0', label: 'I0.0', type: PIN_TYPE.DIGITAL, x: 44, y: 94, side: 'top' },
+    { id: 'I0_1', label: 'I0.1', type: PIN_TYPE.DIGITAL, x: 99, y: 94, side: 'top' },
+    { id: 'I0_2', label: 'I0.2', type: PIN_TYPE.DIGITAL, x: 154, y: 94, side: 'top' },
+    { id: 'I0_3', label: 'I0.3', type: PIN_TYPE.DIGITAL, x: 209, y: 94, side: 'top' },
+    { id: 'Q0_0', label: 'Q0.0', type: PIN_TYPE.DIGITAL, x: 44, y: 165, side: 'bottom' },
+    { id: 'Q0_1', label: 'Q0.1', type: PIN_TYPE.DIGITAL, x: 99, y: 165, side: 'bottom' },
+    { id: 'Q0_2', label: 'Q0.2', type: PIN_TYPE.DIGITAL, x: 154, y: 165, side: 'bottom' },
+    { id: 'Q0_3', label: 'Q0.3', type: PIN_TYPE.DIGITAL, x: 209, y: 165, side: 'bottom' },
+    { id: '24V', label: '24V', type: PIN_TYPE.POWER, x: 12, y: 208, side: 'bottom' },
+    { id: 'COM', label: 'COM', type: PIN_TYPE.GND, x: 268, y: 208, side: 'bottom' },
+  ],
+  draw(ctx, inst, sim) {
+    const { x, y, width: W, height: H } = inst;
+    const inputPins = ['I0_0', 'I0_1', 'I0_2', 'I0_3'];
+    const outputPins = ['Q0_0', 'Q0_1', 'Q0_2', 'Q0_3'];
+    const inputStates = inputPins.map(pin => (sim?.pinStates?.[`pin_${plcPinNumber(pin)}`] ?? 1) === 0);
+    const outputStates = outputPins.map(pin => (sim?.pinStates?.[`pin_${plcPinNumber(pin)}`] || 0) > 0);
+    const running = !!sim?.isRunning;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = '#2c3e50';
+    ctx.strokeStyle = '#1a252f';
+    ctx.lineWidth = 2;
+    roundRect(ctx, 0, 0, W, H, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#1a252f';
+    for (let i = 0; i < 8; i++) {
+      ctx.fillRect(40 + i * 20, 8, 10, 4);
+      ctx.fillRect(40 + i * 20, H - 12, 10, 4);
+    }
+
+    ctx.fillStyle = '#ecf0f1';
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('ARDU-PLC 328', 20, 32);
+    ctx.fillStyle = '#bdc3c7';
+    ctx.font = '8px sans-serif';
+    ctx.fillText('PROGRAMMABLE LOGIC CONTROLLER', 20, 44);
+
+    const leds = [
+      { label: 'PWR', color: '#2ecc71', on: true },
+      { label: 'RUN', color: '#3498db', on: running },
+      { label: 'ERR', color: '#e74c3c', on: false },
+    ];
+    leds.forEach((led, idx) => {
+      ctx.fillStyle = led.on ? led.color : '#333';
+      ctx.beginPath();
+      ctx.arc(200 + idx * 24, 38, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = '6px sans-serif';
+      ctx.fillText(led.label, 192 + idx * 24, 52);
+    });
+
+    const drawTerminalBlock = (title, startY, titleY, pins, states, stateY, labelY, activeColor, terminalY) => {
+      ctx.fillStyle = '#34495e';
+      ctx.fillRect(15, startY, W - 30, 55);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText(title, 25, titleY);
+      pins.forEach((pin, i) => {
+        const tx = 35 + i * 55;
+        ctx.fillStyle = '#bdc3c7';
+        ctx.fillRect(tx, terminalY - 9, 18, 18);
+        ctx.fillStyle = '#2c3e50';
+        ctx.fillRect(tx + 5, terminalY - 4, 8, 8);
+        ctx.fillStyle = states[i] ? activeColor : '#555';
+        ctx.beginPath();
+        ctx.arc(tx + 9, stateY, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = '7px monospace';
+        ctx.fillText(pin.replace('_', '.'), tx + 2, labelY);
+      });
+    };
+
+    drawTerminalBlock('INPUTS (I0.0 - I0.3)', 62, 76, inputPins, inputStates, 116, 132, '#f1c40f', 94);
+    drawTerminalBlock('OUTPUTS (Q0.0 - Q0.3)', 140, 154, outputPins, outputStates, 183, 198, '#2ecc71', 165);
+
+    ctx.fillStyle = '#d8dee9';
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('24V', 7, 204);
+    ctx.textAlign = 'right';
+    ctx.fillText('COM', 273, 204);
+    if (inst.selected) {
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      roundRect(ctx, -3, -3, W + 6, H + 6, 6);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+  },
+});
+
+function plcPinNumber(pin) {
+  const pinMap = { I0_0: 2, I0_1: 3, I0_2: 4, I0_3: 5, Q0_0: 8, Q0_1: 9, Q0_2: 10, Q0_3: 11 };
+  return pinMap[pin];
+}

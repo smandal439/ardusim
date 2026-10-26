@@ -285,7 +285,7 @@ class CircuitCanvas {
     const sim2 = window.App && window.App.sim2;
     if (!sim2) return sim1;
     if (boards.length < 2) return sim1;
-    const boardTypes = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051'];
+    const boardTypes = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051', 'industrial_plc'];
     if (boardTypes.includes(inst.type)) {
       const idx = boards.indexOf(inst);
       return idx === 1 ? sim2 : sim1;
@@ -404,7 +404,7 @@ class CircuitCanvas {
       }
 
       // Pin label (only when zoomed in enough) — boards have baked-in labels
-      const isBoard = inst.type === 'arduino_uno' || inst.type === 'esp32_devkit_v1' || inst.type === 'arduino_nano' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148' || inst.type === 'pico2w' || inst.type === 'intel_8085' || inst.type === 'intel_8051';
+      const isBoard = inst.type === 'arduino_uno' || inst.type === 'esp32_devkit_v1' || inst.type === 'arduino_nano' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148' || inst.type === 'pico2w' || inst.type === 'intel_8085' || inst.type === 'intel_8051' || inst.type === 'industrial_plc';
       if (this.zoom >= 1 && !isBoard && !def.hidePinLabels) {
         ctx.fillStyle = '#888';
         ctx.font = `${8 / this.zoom}px Inter, sans-serif`;
@@ -2890,6 +2890,8 @@ class CircuitCanvas {
   }
 
   _pinToNumber(pinId) {
+    const plcMap = { I0_0: 2, I0_1: 3, I0_2: 4, I0_3: 5, Q0_0: 8, Q0_1: 9, Q0_2: 10, Q0_3: 11 };
+    if (pinId in plcMap) return plcMap[pinId];
     const analogMap = { A0: 14, A1: 15, A2: 16, A3: 17, A4: 18, A5: 19, A6: 20, A7: 21 };
     if (pinId in analogMap) return analogMap[pinId];
     // ESP32 DevKit V1 pin aliases
@@ -3232,17 +3234,17 @@ class CircuitCanvas {
   /* -------------- SIM HELPERS -------------- */
   // Get Arduino Uno instance (first one found)
   getArduinoInst() {
-    return this.components.find(c => c.type === 'arduino_uno') || null;
+    return this.components.find(c => c.type === 'arduino_uno' || c.type === 'industrial_plc') || null;
   }
 
   // Get whichever microcontroller board instance is placed (first one found)
   getBoardInst() {
-    return this.components.find(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano' || c.type === 'stm32f746_disco' || c.type === 'lpc2148' || c.type === 'pico2w' || c.type === 'intel_8085' || c.type === 'intel_8051') || null;
+    return this.components.find(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano' || c.type === 'stm32f746_disco' || c.type === 'lpc2148' || c.type === 'pico2w' || c.type === 'intel_8085' || c.type === 'intel_8051' || c.type === 'industrial_plc') || null;
   }
 
   // Get all board instances on the canvas
   getAllBoardInsts() {
-    return this.components.filter(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano' || c.type === 'stm32f746_disco' || c.type === 'lpc2148' || c.type === 'pico2w' || c.type === 'intel_8085' || c.type === 'intel_8051');
+    return this.components.filter(c => c.type === 'arduino_uno' || c.type === 'esp32_devkit_v1' || c.type === 'arduino_nano' || c.type === 'stm32f746_disco' || c.type === 'lpc2148' || c.type === 'pico2w' || c.type === 'intel_8085' || c.type === 'intel_8051' || c.type === 'industrial_plc');
   }
 
   // Get board instance by index (0-based)
@@ -3284,7 +3286,7 @@ class CircuitCanvas {
     // (func_gen, sensors, etc.) propagate to pinStates ← _emitPinChange ← interrupts
     const sim = window.ArduinoSim;
     if (sim && this.engine.pinToNet) {
-      const arduinoTypes = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051'];
+      const arduinoTypes = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051', 'industrial_plc'];
       for (const inst of this.components) {
         if (!arduinoTypes.includes(inst.type)) continue;
         const maxV = (inst.type === 'esp32_devkit_v1' || inst.type === 'stm32f746_disco' || inst.type === 'lpc2148' || inst.type === 'pico2w') ? 3.3 : 5.0;
@@ -5557,6 +5559,7 @@ class CircuitCanvas {
 
   // Quick check if a pin is a ground-type pin (for parallel path re-visiting)
   _isGroundPin(inst, pinId) {
+    if (inst.type === 'industrial_plc') return pinId === 'COM';
     if (inst.type === 'arduino_uno' || inst.type === 'arduino_nano') {
       return pinId === 'GND1' || pinId === 'GND2' || pinId === 'GND_D' || pinId === 'GND';
     }
@@ -5574,7 +5577,7 @@ class CircuitCanvas {
     if (inst.type === 'mb102_power') return pinId === 'gnd_t' || pinId === 'gnd_b' || pinId === 'aux_gnd';
     if (inst.type === 'battery') return pinId === 'neg';
     // Arduino / LPC2148 digital pin LOW acts as ground
-    if (inst.type === 'arduino_uno' || inst.type === 'arduino_nano' || inst.type === 'esp32_devkit_v1' || inst.type === 'lpc2148' || inst.type === 'pico2w' || inst.type === 'intel_8085' || inst.type === 'intel_8051') {
+    if (inst.type === 'arduino_uno' || inst.type === 'arduino_nano' || inst.type === 'esp32_devkit_v1' || inst.type === 'lpc2148' || inst.type === 'pico2w' || inst.type === 'intel_8085' || inst.type === 'intel_8051' || inst.type === 'industrial_plc') {
       const pinNum = this._pinToNumber(pinId);
       if (pinNum != null) {
         const sim = window.ArduinoSim;
@@ -5755,7 +5758,7 @@ class CircuitCanvas {
   }
 
   _getConnectedPinNum(instId, pinId) {
-    const BOARD_TYPES = new Set(['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'lpc2148', 'stm32f746_disco', 'pico2w', 'intel_8085', 'intel_8051']);
+    const BOARD_TYPES = new Set(['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'lpc2148', 'stm32f746_disco', 'pico2w', 'intel_8085', 'intel_8051', 'industrial_plc']);
     const inst = this.components.find(c => c.id === instId);
     if (inst && BOARD_TYPES.has(inst.type)) {
       return this._pinToNumber(pinId);
@@ -5772,7 +5775,7 @@ class CircuitCanvas {
 
       const otherInst = this.components.find(c => c.id === otherInstId);
       if (!otherInst) continue;
-      if (otherInst.type === 'arduino_uno' || otherInst.type === 'arduino_nano' || otherInst.type === 'esp32_devkit_v1' || otherInst.type === 'lpc2148' || otherInst.type === 'pico2w' || otherInst.type === 'intel_8085' || otherInst.type === 'intel_8051') {
+      if (otherInst.type === 'arduino_uno' || otherInst.type === 'arduino_nano' || otherInst.type === 'esp32_devkit_v1' || otherInst.type === 'lpc2148' || otherInst.type === 'pico2w' || otherInst.type === 'intel_8085' || otherInst.type === 'intel_8051' || otherInst.type === 'industrial_plc') {
         return this._pinToNumber(otherPinId);
       }
     }
@@ -5994,7 +5997,7 @@ class CircuitCanvas {
       // No wire on this pin — an interactive value (e.g. a remote slider)
       // may already sit in pinStates for board pins.
       const from = this.components.find(c => c.id === fromInstId);
-      const boardTypes = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'lpc2148', 'stm32f746_disco', 'pico2w', 'intel_8085', 'intel_8051'];
+      const boardTypes = ['arduino_uno', 'arduino_nano', 'esp32_devkit_v1', 'lpc2148', 'stm32f746_disco', 'pico2w', 'intel_8085', 'intel_8051', 'industrial_plc'];
       if (from && boardTypes.includes(from.type)) {
         const pn = this._pinToNumber(pinId);
         const sim = window.ArduinoSim;
@@ -6057,7 +6060,7 @@ class CircuitCanvas {
     // If the source is a board but the wire target is a sensor (not a board),
     // read from pinStates directly — sensors like LM35 write ADC values there.
     const fromInst = this.components.find(c => c.id === fromInstId);
-    if (fromInst && (fromInst.type === 'arduino_uno' || fromInst.type === 'arduino_nano' || fromInst.type === 'esp32_devkit_v1' || fromInst.type === 'lpc2148' || fromInst.type === 'pico2w' || fromInst.type === 'stm32f746_disco' || fromInst.type === 'intel_8085' || fromInst.type === 'intel_8051')) {
+    if (fromInst && (fromInst.type === 'arduino_uno' || fromInst.type === 'arduino_nano' || fromInst.type === 'esp32_devkit_v1' || fromInst.type === 'lpc2148' || fromInst.type === 'pico2w' || fromInst.type === 'stm32f746_disco' || fromInst.type === 'intel_8085' || fromInst.type === 'intel_8051' || fromInst.type === 'industrial_plc')) {
       const boardPn = this._pinToNumber(pinId);
       const sim = window.ArduinoSim;
       return (sim && sim.pinStates) ? (sim.pinStates[`pin_${boardPn}`] || 0) : 0;

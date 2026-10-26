@@ -59,6 +59,12 @@
 - **Context Menu**: Right-click actions for properties, rotation, duplication, and deletion.
 - **Exporting**: One-click circuit diagram export to PNG.
 
+### 🏭 Virtual PLC and Ladder Logic
+- Add the **Ardu-PLC 328** from the board selector or Boards component library.
+- Switch the editor to **Ladder Diagram** to build series rungs with normally-open/normally-closed contacts, TON/TOF timers, CTU counters, and output coils.
+- Run or verify to transpile the ladder program to Arduino C++ and use ArduSim's existing simulation engine. PLC inputs I0.0–I0.3 map to digital pins 2–5 and are active-low; outputs Q0.0–Q0.3 map to pins 8–11.
+- Ladder programs are included in saved, downloaded, auto-saved, and shared circuit projects. This is a virtual educational model, not a safety-certified or hardware-compatible industrial PLC; parallel branches and IEC 61131-3 portability are not currently provided.
+
 ### 📊 Diagnostic Instruments
 - **Serial Monitor**:
   - Live bi-directional communication.
@@ -96,7 +102,7 @@ A clean, compact toolbar keeps everything within reach without cluttering the wo
 |---|---|
 | **Examples** | Open the built-in example project gallery. |
 | **Speed** | Adjust simulation speed from 0.25× to 10×. |
-| **Board** | Switch between Arduino Uno and ESP32 DevKit V1 targets. |
+| **Board** | Select a supported simulator target, including the virtual Ardu-PLC 328. |
 | **Run / Stop / Pause** | Control the simulation lifecycle. |
 | **File ▾** (dropdown) | **New**, **Save**, **Download**, **Load**, **Saved Projects**, and **Share**. |
 | **View ▾** (dropdown) | Focus the **Code** editor, **Circuit** canvas, or **Serial** monitor. |
@@ -106,7 +112,7 @@ A clean, compact toolbar keeps everything within reach without cluttering the wo
 > The **File** and **View** menus are dropdowns that collapse secondary actions, keeping the header short and the canvas maximized. Menus close on outside click or <kbd>ESC</kbd>.
 
 ### Main Workspace
-- **Left** — Code Editor with line numbers, cursor position, and live compile diagnostics.
+- **Left** — Code Editor or Ladder Diagram editor with line numbers/cursor position and compile diagnostics.
 - **Center** — Circuit Canvas with zoom controls, undo/redo, clear, and PNG export.
 - **Right** — Searchable Component Library.
 - **Bottom** — Tabbed instruments: Serial Monitor, Output, Oscilloscope, Plotter, and Pin Monitor.
@@ -139,7 +145,7 @@ A clean, compact toolbar keeps everything within reach without cluttering the wo
 
 ## 📦 Component Library
 
-- **Boards**: Arduino Uno R3 (ATmega328P), ESP32 DevKit V1
+- **Boards**: Arduino Uno R3 (ATmega328P), ESP32 DevKit V1, and virtual Ardu-PLC 328
 - **Outputs**: Standard LED (Red, Green, Blue, Yellow, Orange, White), RGB LED, Multi-LED Array, 16x2 LCD Display (HD44780/I2C), 20x4 LCD Display (HD44780/I2C), OLED Display (SSD1306), Piezo Buzzer, 7-Segment Display, NeoPixel Strip, NeoPixel Ring, NeoPixel 8x8 Matrix, MAX7219 LED Matrix, ILI9341 TFT, 12V Bulb
 - **Inputs**: Push Button, Potentiometer (Rotary Angle Sensor), Joystick, 4x4 Keypad, Rotary Encoder, DIP Switch, Slide Switch (SPDT)
 - **Actuators**: Micro Servo Motor (SG90), Continuous Rotation Servo, DC Motor, Relay Module, Stepper Motor (28BYJ-48), L298N Motor Driver

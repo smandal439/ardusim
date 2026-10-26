@@ -3,6 +3,8 @@
 class App {
   constructor() {
     this.sim = window.ArduinoSim;
+    this.plcEditor = null;
+    this._selectedBoard = 'arduino_uno';
     this.sim2 = null; // second simulator instance for dual-board
     this.editor = window.EditorManager;
     this.canvas = null;
@@ -54,6 +56,7 @@ class App {
       this._initWebBrowser();
       this._attachSimulatorEvents();
       this._renderComponentLibrary();
+      this._initPLCEditor();
       this._initBoardSelector();
       this.remote = new RemoteControl();
       window.GuideManager?.bind?.();
@@ -528,12 +531,22 @@ class App {
   }
 
   /* ---------------------- BOARD SELECTOR ---------------------- */
+  _initPLCEditor() {
+    if (!window.PLCLadder?.PLCLadderEditor) return;
+    this.plcEditor = new window.PLCLadder.PLCLadderEditor();
+    this.plcEditor.init();
+  }
+
   _initBoardSelector() {
     const settings = window.StorageManager?.loadSettings?.() || {};
-    const board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051'].includes(settings.board) ? settings.board : 'arduino_uno';
-    this.sim.setBoard(board);
+    const board = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051', 'industrial_plc'].includes(settings.board) ? settings.board : 'arduino_uno';
+    this._selectedBoard = board;
+    this.sim.setBoard(board === 'industrial_plc' ? 'arduino_uno' : board);
     const sel = document.getElementById('board-select');
     if (sel) sel.value = board;
+    const mobileSel = document.getElementById('mobile-board-select');
+    if (mobileSel && [...mobileSel.options].some(option => option.value === board)) mobileSel.value = board;
+    if (board === 'industrial_plc') this.plcEditor?.setMode('ladder', { markDirty: false });
   }
 
   // Returns the board type driving the simulation: the board actually placed
@@ -542,7 +555,7 @@ class App {
     const boardInst = this.canvas?.getBoardInst?.();
     if (boardInst) return boardInst.type;
     if (this.sim?._asmBoard) return this.sim._asmBoard;
-    return this.sim.board || 'arduino_uno';
+    return this._selectedBoard || this.sim.board || 'arduino_uno';
   }
 
   _getDefaultSketchName() {
@@ -563,20 +576,26 @@ class App {
   // on the canvas, so LED_BUILTIN / A0—A5 map to the right pins.
   _syncBoardFromCanvas() {
     const active = this._getActiveBoardType();
-    if (this.sim.board !== active) {
-      this.sim.setBoard(active);
+    const simulatorBoard = active === 'industrial_plc' ? 'arduino_uno' : active;
+    if (this.sim.board !== simulatorBoard) {
+      this.sim.setBoard(simulatorBoard);
       window.StorageManager?.saveSettings?.({ ...(window.StorageManager.loadSettings() || {}), board: active });
       this._pinMonitorBoard = null;
     }
+    this._selectedBoard = active;
     const sel = document.getElementById('board-select');
     if (sel && sel.value !== active) sel.value = active;
+    const mobileSel = document.getElementById('mobile-board-select');
+    if (mobileSel && [...mobileSel.options].some(option => option.value === active) && mobileSel.value !== active) mobileSel.value = active;
   }
 
   _setBoard(board) {
-    const b = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051'].includes(board) ? board : 'arduino_uno';
-    const boardName = b === 'esp32_devkit_v1' ? 'ESP32 DevKit V1' : b === 'arduino_nano' ? 'Arduino Nano' : b === 'stm32f746_disco' ? 'STM32F746G-DISCO' : b === 'lpc2148' ? 'LPC2148 SmartX' : b === 'pico2w' ? 'Pico 2 W' : b === 'intel_8085' ? 'Intel 8085' : b === 'intel_8051' ? 'Intel 8051' : 'Arduino Uno';
-    this.sim.setBoard(b);
+    const b = ['arduino_uno', 'esp32_devkit_v1', 'arduino_nano', 'stm32f746_disco', 'lpc2148', 'pico2w', 'intel_8085', 'intel_8051', 'industrial_plc'].includes(board) ? board : 'arduino_uno';
+    const boardName = b === 'esp32_devkit_v1' ? 'ESP32 DevKit V1' : b === 'arduino_nano' ? 'Arduino Nano' : b === 'stm32f746_disco' ? 'STM32F746G-DISCO' : b === 'lpc2148' ? 'LPC2148 SmartX' : b === 'pico2w' ? 'Pico 2 W' : b === 'intel_8085' ? 'Intel 8085' : b === 'intel_8051' ? 'Intel 8051' : b === 'industrial_plc' ? 'Ardu-PLC 328' : 'Arduino Uno';
+    this._selectedBoard = b;
+    this.sim.setBoard(b === 'industrial_plc' ? 'arduino_uno' : b);
     window.StorageManager?.saveSettings?.({ ...(window.StorageManager.loadSettings() || {}), board: b });
+    this.plcEditor?.setMode(b === 'industrial_plc' ? 'ladder' : 'code');
 
     // Rename the sketch file to match the new board's extension
     const newSketchName = this._getDefaultSketchName();
@@ -587,7 +606,7 @@ class App {
 
     // If the canvas only holds the default starter circuit, reload it for the new board
     const comps = this.canvas?.components || [];
-    const hasOnlyStarterBoard = comps.length === 1 && (comps[0].type === 'arduino_uno' || comps[0].type === 'esp32_devkit_v1' || comps[0].type === 'arduino_nano' || comps[0].type === 'stm32f746_disco' || comps[0].type === 'lpc2148' || comps[0].type === 'pico2w' || comps[0].type === 'intel_8085' || comps[0].type === 'intel_8051');
+    const hasOnlyStarterBoard = comps.length === 1 && (comps[0].type === 'arduino_uno' || comps[0].type === 'esp32_devkit_v1' || comps[0].type === 'arduino_nano' || comps[0].type === 'stm32f746_disco' || comps[0].type === 'lpc2148' || comps[0].type === 'pico2w' || comps[0].type === 'intel_8085' || comps[0].type === 'intel_8051' || comps[0].type === 'industrial_plc');
     if (hasOnlyStarterBoard || comps.length === 0) {
       this._loadExampleCircuit('blink');
       this.showToast(`${boardName} starter circuit loaded`, 'success');
@@ -1503,9 +1522,23 @@ void loop() {
   }
 
   /* ---------------------- RUN / STOP / PAUSE ---------------------- */
+  _getExecutionCode() {
+    if (this.plcEditor?.program.mode === 'ladder') return this.plcEditor.getGeneratedCode();
+    return this.editor.getCombinedCode();
+  }
+
   async run() {
     if (!this.editor) return;
-    const code = this.editor.getCombinedCode();
+    let code;
+    try {
+      code = this._getExecutionCode();
+    } catch (err) {
+      this._updateCompileStatus('Ladder generation failed');
+      this._updateStatus('PLC program is invalid');
+      this.output?.log(`PLC program generation failed: ${err.message}`, 'error');
+      this.showToast(`PLC program generation failed: ${err.message}`, 'error');
+      return;
+    }
     this._syncBoardFromCanvas();
     this._updateCompileStatus('Compiling…');
     this._updateStatus('Compiling sketch');
@@ -1664,25 +1697,41 @@ void loop() {
     if (el) el.value = this._projectName;
   }
 
+  _getProjectCircuit() {
+    const circuit = this.canvas?.serialize() || { components: [], wires: [] };
+    if (this.plcEditor) circuit.plcProgram = this.plcEditor.serialize();
+    return circuit;
+  }
+
+  _restorePLCProgram(circuit) {
+    try {
+      this.plcEditor?.load(circuit?.plcProgram || null);
+    } catch (error) {
+      console.error('[ArduSim] Failed to restore PLC program:', error);
+      this.showToast(`PLC program could not be loaded: ${error.message}`, 'error');
+      this.plcEditor?.load(window.PLCLadder?.defaultProgram?.());
+    }
+  }
+
   /* ---------------------- SAVE / DOWNLOAD / LOAD / SHARE ---------------------- */
   saveProject() {
     const files = this.editor?.getAllFiles?.() || { [this._getDefaultSketchName()]: '' };
     const board2Code = this._getBoard2Code();
-    const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
+    const circuitData = this._getProjectCircuit();
     window.StorageManager?.saveToLibrary(files, circuitData, this._projectName, board2Code);
   }
 
   downloadProject() {
     const files = this.editor?.getAllFiles?.() || { [this._getDefaultSketchName()]: '' };
     const board2Code = this._getBoard2Code();
-    const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
+    const circuitData = this._getProjectCircuit();
     window.StorageManager?.downloadProject(files, circuitData, this._projectName, board2Code);
   }
 
   downloadProjectZip() {
     const files = this.editor?.getAllFiles?.() || { [this._getDefaultSketchName()]: '' };
     const board2Code = this._getBoard2Code();
-    const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
+    const circuitData = this._getProjectCircuit();
     window.StorageManager?.downloadProjectZip(files, circuitData, this._projectName, board2Code);
   }
 
@@ -1695,7 +1744,7 @@ void loop() {
     if (tags === null) return;
     const files = this.editor?.getAllFiles?.() || { [this._getDefaultSketchName()]: '' };
     const board2Code = this._getBoard2Code();
-    const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
+    const circuitData = this._getProjectCircuit();
     window.StorageManager?.downloadExample(files, circuitData, name.trim(), description.trim(), tags, board2Code);
   }
 
@@ -1708,6 +1757,7 @@ void loop() {
       }
       this._setBoard2Code(project.board2Code || '');
       if (this.canvas) this.canvas.deserialize(project.circuit || { components: [], wires: [] });
+      this._restorePLCProgram(project.circuit);
       this._syncBoardFromCanvas();
       this._setProjectName(project.name || 'Untitled Project');
       this._refreshCanvasSummary();
@@ -1717,7 +1767,7 @@ void loop() {
   shareProject() {
     const files = this.editor?.getAllFiles?.() || { [this._getDefaultSketchName()]: '' };
     const board2Code = this._getBoard2Code();
-    const circuitData = this.canvas?.serialize() || { components: [], wires: [] };
+    const circuitData = this._getProjectCircuit();
     window.StorageManager?.shareUrl(files, circuitData, board2Code);
   }
 
@@ -1798,6 +1848,7 @@ void loop() {
       this.editor.loadFiles({ [this._getDefaultSketchName()]: p.code });
     }
     if (this.canvas) this.canvas.deserialize(p.circuit || { components: [], wires: [] });
+    this._restorePLCProgram(p.circuit);
     this._board2Code = p.board2Code || '';
     const textarea = document.getElementById('board2-code-textarea');
     if (textarea) textarea.value = this._board2Code;
@@ -1833,6 +1884,7 @@ _newProject() {
     this._board1FilesCache = null;
     this._board1ActiveFile = null;
     this._setBoard2Code('');
+    this.plcEditor?.reset();
     this._setProjectName('Untitled Project');
     this.output?.log('New project created', 'system');
   }
@@ -1849,7 +1901,7 @@ _newProject() {
     }
     const files = this.editor?.getAllFiles?.() || { [this._getDefaultSketchName()]: this.editor?.getCode?.() || '' };
     const board2Code = this._getBoard2Code();
-    const circuit = this.canvas?.serialize() || { components: [], wires: [] };
+    const circuit = this._getProjectCircuit();
     this._autoSaveDebounced(files, circuit, board2Code);
   }
 
@@ -2046,6 +2098,7 @@ _newProject() {
       }
       this._setBoard2Code(project.board2Code || '');
       if (this.canvas) this.canvas.deserialize(project.circuit || { components: [], wires: [] });
+      this._restorePLCProgram(project.circuit);
       this._syncBoardFromCanvas();
       this._setProjectName(project.name || 'Untitled Project');
       this._refreshCanvasSummary();
@@ -2066,6 +2119,7 @@ _newProject() {
       const b2ta = document.getElementById('board2-code-textarea');
       if (b2ta) b2ta.value = this._board2Code;
       if (this.canvas) this.canvas.deserialize(shared.circuit || { components: [], wires: [] });
+      this._restorePLCProgram(shared.circuit);
       this._syncBoardFromCanvas();
       this._setProjectName(shared.name || 'Shared Project');
       this._refreshCanvasSummary();
@@ -3377,7 +3431,16 @@ _newProject() {
   /* ---------------------- VERIFY ---------------------- */
   async verify() {
     if (!this.editor) return;
-    const code = this.editor.getCombinedCode();
+    let code;
+    try {
+      code = this._getExecutionCode();
+    } catch (err) {
+      this._updateCompileStatus('Ladder generation failed');
+      this._updateStatus('PLC program is invalid');
+      this.output?.log(`PLC program generation failed: ${err.message}`, 'error');
+      this.showToast(`PLC program generation failed: ${err.message}`, 'error');
+      return false;
+    }
     this._syncBoardFromCanvas();
     this._updateCompileStatus('Verifying…');
     this._updateStatus('Verifying sketch');
@@ -3622,6 +3685,7 @@ _newProject() {
     this._board1FilesCache = null;
     this._board1ActiveFile = null;
     if (ex.circuit && this.canvas) this._loadExampleCircuit(ex.circuit);
+    this._restorePLCProgram(ex.circuit);
     this.showToast(`${ex.name} loaded`, 'success');
   }
 
@@ -3631,6 +3695,7 @@ _newProject() {
     // Data-driven circuit (serialized project data) — most examples use this
     if (key && typeof key === 'object' && Array.isArray(key.components)) {
       this.canvas.deserialize(key);
+      this._restorePLCProgram(key);
       this._syncBoardFromCanvas();
       this._refreshCanvasSummary();
       return;
@@ -3640,10 +3705,17 @@ _newProject() {
     const lower = String(key || '').toLowerCase();
     if (lower === 'led_on_13' || lower === 'blink') {
       this.canvas.clearCanvas();
-      const boardType = this.sim.board === 'esp32_devkit_v1' ? 'esp32_devkit_v1'
+      const boardType = this._selectedBoard === 'industrial_plc' ? 'industrial_plc'
+        : this.sim.board === 'esp32_devkit_v1' ? 'esp32_devkit_v1'
         : this.sim.board === 'arduino_nano' ? 'arduino_nano'
         : this.sim.board === 'stm32f746_disco' ? 'stm32f746_disco' : this.sim.board === 'lpc2148' ? 'lpc2148' : 'arduino_uno';
       const board = this.canvas.addComponent(boardType, 200, 100);
+      if (boardType === 'industrial_plc') {
+        this._syncBoardFromCanvas();
+        this._refreshCanvasSummary();
+        setTimeout(() => this.canvas.fitView(), 80);
+        return;
+      }
       const led   = this.canvas.addComponent('led', 120, 280);
       const res   = this.canvas.addComponent('resistor', 120, 360);
       if (board && led && res) {

@@ -679,6 +679,164 @@ body.view-serial #resizer-bottom { display: none; }
   min-width: 0;
 }
 
+.editor-mode-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 6px 10px 0;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.editor-mode-tab {
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+}
+.editor-mode-tab:hover { color: var(--text-primary); background: var(--bg-hover); }
+.editor-mode-tab.active {
+  color: var(--accent);
+  background: var(--bg-root);
+  border-color: var(--border);
+}
+.plc-editor {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+  background: var(--bg-root);
+}
+.plc-editor[hidden] { display: none; }
+.plc-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px 6px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.plc-toolbar-label { margin-right: 4px; color: var(--text-muted); font-size: 11px; }
+.plc-toolbar button,
+.plc-remove-rung {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 11px;
+}
+.plc-toolbar button:hover,
+.plc-remove-rung:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.plc-remove-rung:disabled { opacity: 0.4; cursor: default; }
+.plc-help {
+  margin: 0;
+  padding: 8px 12px;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.plc-rungs { display: flex; flex-direction: column; gap: 8px; padding: 4px 12px 12px; }
+.plc-rung {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 86px;
+  padding: 10px 8px 10px 22px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg-panel);
+  cursor: pointer;
+}
+.plc-rung.active { border-color: var(--accent); }
+.plc-rail {
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.plc-right-rail {
+  position: absolute;
+  right: 34px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.plc-rung-number { align-self: flex-start; min-width: 44px; color: var(--text-muted); font: 10px var(--font-mono); }
+.plc-rung-logic { display: flex; align-items: center; flex: 1; gap: 0; min-width: 0; overflow-x: auto; padding: 8px 0; }
+.plc-element {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 4px;
+  min-width: 76px;
+  min-height: 58px;
+  padding: 7px 8px 5px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-root);
+}
+.plc-element select,
+.plc-element input,
+.plc-coil select {
+  max-width: 110px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  font: 10px var(--font-mono);
+}
+.plc-element select { padding: 3px; }
+.plc-element input { width: 72px; padding: 3px 5px; }
+.plc-element label { display: flex; align-items: center; gap: 4px; color: var(--text-muted); font-size: 9px; }
+.plc-contact-symbol,
+.plc-coil > span { color: var(--accent); font: 12px var(--font-mono); white-space: nowrap; }
+.plc-function-block strong { color: var(--accent); font: bold 11px var(--font-mono); }
+.plc-block-output { color: var(--text-muted); font: 9px var(--font-mono); }
+.plc-remove {
+  position: absolute;
+  top: 1px;
+  right: 3px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+.plc-remove:hover { color: var(--stop-color); }
+.plc-series-wire { flex: 0 0 14px; height: 2px; background: var(--accent); }
+.plc-empty-rung { color: var(--text-muted); font-size: 11px; }
+.plc-coil { display: flex; flex: 0 0 auto; flex-direction: column; align-items: center; gap: 4px; }
+.plc-coil select { padding: 3px; }
+.plc-code-details { margin: 0 12px 12px; border: 1px solid var(--border); border-radius: 5px; }
+.plc-code-details summary { padding: 8px 10px; color: var(--text-secondary); cursor: pointer; font-size: 11px; }
+.plc-generated-code {
+  max-height: 260px;
+  margin: 0;
+  padding: 10px;
+  overflow: auto;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font: 10px/1.5 var(--font-mono);
+  white-space: pre;
+}
+
 /* ═══════════════ FILE EXPLORER ═══════════════ */
 .file-explorer {
   width: 180px;

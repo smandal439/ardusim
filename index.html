@@ -25,7 +25,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=20261026-1" /> <noscript>
+    <link rel="stylesheet" href="css/style.css?v=20261026-3" /> <noscript>
         <style>
             .loading-overlay {
                 display: flex !important;
@@ -111,10 +111,11 @@
                             <option value="esp32_devkit_v1">ESP32 DevKit V1</option>
                             <option value="arduino_nano">Arduino Nano</option>
                             <option value="stm32f746_disco">STM32F746G-DISCO</option>
-                    <option value="lpc2148">LPC2148 SmartX Board</option>
-                    <option value="pico2w">Raspberry Pi Pico 2 W</option>
-                    <option value="intel_8085">Intel 8085</option>
-                    <option value="intel_8051">Intel 8051</option>
+                            <option value="lpc2148">LPC2148 SmartX Board</option>
+                            <option value="pico2w">Raspberry Pi Pico 2 W</option>
+                            <option value="intel_8085">Intel 8085</option>
+                            <option value="intel_8051">Intel 8051</option>
+                            <option value="industrial_plc">Ardu-PLC 328</option>
                         </select>
                     </div>
                 </div>
@@ -334,6 +335,10 @@
                     <span class="board-tab-icon">②</span> Board 2
                 </button>
             </div>
+            <div class="editor-mode-tabs" role="tablist" aria-label="Program editor">
+                <button class="editor-mode-tab active" id="editor-mode-code" type="button" role="tab" aria-selected="true">Code</button>
+                <button class="editor-mode-tab" id="editor-mode-ladder" type="button" role="tab" aria-selected="false">Ladder Diagram</button>
+            </div>
             <div class="editor-body" id="editor-body">
                 <button class="file-explorer-expand" id="btn-expand-file-explorer" title="Expand File Explorer">
                     <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"/></svg>
@@ -358,6 +363,23 @@
                     <div class="editor-container" id="editor-container"></div>
                 </div>
             </div>
+            <section class="plc-editor" id="plc-editor" aria-label="Ladder diagram editor" hidden>
+                <div class="plc-toolbar">
+                    <span class="plc-toolbar-label">Add to rung</span>
+                    <button type="button" data-plc-action="add-rung">+ Rung</button>
+                    <button type="button" data-plc-action="add-element" data-plc-kind="NO">+ NO contact</button>
+                    <button type="button" data-plc-action="add-element" data-plc-kind="NC">+ NC contact</button>
+                    <button type="button" data-plc-action="add-element" data-plc-kind="TON">+ TON</button>
+                    <button type="button" data-plc-action="add-element" data-plc-kind="TOF">+ TOF</button>
+                    <button type="button" data-plc-action="add-element" data-plc-kind="CTU">+ CTU</button>
+                </div>
+                <p class="plc-help">Contacts and function blocks are evaluated in series. Wire switches to I0.x inputs and loads to Q0.x outputs. Inputs use pull-ups (active when connected to ground).</p>
+                <div class="plc-rungs" id="plc-rungs"></div>
+                <details class="plc-code-details">
+                    <summary>Generated Arduino C++</summary>
+                    <pre id="plc-generated-code" class="plc-generated-code"></pre>
+                </details>
+            </section>
             <div id="board2-editor-area" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
                 <div class="code-editor-wrapper">
                     <pre class="code-editor-highlight" id="board2-highlight" aria-hidden="true"><code id="board2-highlight-code"></code></pre>
@@ -1040,6 +1062,7 @@
                     <option value="stm32f746_disco">STM32F746G-DISCO</option>
                     <option value="lpc2148">LPC2148 SmartX Board</option>
                     <option value="pico2w">Raspberry Pi Pico 2 W</option>
+                    <option value="industrial_plc">Ardu-PLC 328</option>
                 </select>
             </div>
             <div class="modal-footer">
@@ -1418,8 +1441,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="js/utils.js?v=20260825-1"></script>
-    <script src="js/components/base.js?v=20261024-1"></script>
-    <script src="js/components/boards.js?v=20260826-1"></script>
+    <script src="js/components/base.js?v=20261026-1"></script>
+    <script src="js/components/boards.js?v=20261026-1"></script>
     <script src="js/components/output.js?v=20260825-2"></script>
     <script src="js/components/input.js?v=20260825-2"></script>
     <script src="js/components/actuators.js?v=20260928-2"></script>
@@ -1504,7 +1527,7 @@
     <script src="js/libraries/adafruit_bmp280.js?v=20261024-1"></script>
     <script src="js/libraries/adafruit_mpu6050.js?v=20261024-2"></script>
     <script src="js/simulator.js?v=20260928-2"></script>
-    <script src="js/canvas.js?v=20261024-1"></script>
+    <script src="js/canvas.js?v=20261026-1"></script>
     <script src="js/serial_monitor.js?v=20260905-1"></script>
     <script src="js/output.js?v=20260825-1"></script>
     <script src="js/oscilloscope.js?v=20260825-1"></script>
@@ -1514,9 +1537,10 @@
     <script src="js/api.js?v=20260825-2"></script>
     <script src="js/storage.js?v=20260904-1"></script>
     <script src="js/editor.js?v=20260826-4"></script>
+    <script src="js/plc.js?v=20261026-3"></script>
     <script src="js/thumbnails.js?v=20260825-1"></script>
     <script src="js/guide.js?v=20260928-2"></script>
-    <script src="js/app.js?v=20261026-1"></script>
+    <script src="js/app.js?v=20261026-2"></script>
     <script src="js/remote-control.js?v=20260826-1"></script>
     
     <script>
