@@ -2,17 +2,20 @@
   "id": "plc_ton_delayed_start",
   "name": "PLC - TON delayed start",
   "icon": "⏱️",
-  "desc": "Press and hold START (I0.0). The TON timer energizes Q0.0 after the input has remained active for 3 seconds; releasing early resets the timer.",
-  "tags": ["plc", "ladder", "industrial automation", "timer", "ton"],
+  "desc": "Press and hold START (I0.0). After 3 seconds, Q0.0 starts the connected DC motor; releasing early resets the timer.",
+  "tags": ["plc", "ladder", "industrial automation", "timer", "ton", "dc motor", "actuator"],
   "code": "",
   "circuit": {
     "components": [
       { "id": "plc_board", "type": "industrial_plc", "x": 0, "y": 0, "rotation": 0, "props": { "label": "ARDU-PLC 328" } },
-      { "id": "plc_start", "type": "push_button", "x": -90, "y": 105, "rotation": 0, "props": { "pressed": false, "label": "START", "mode": "momentary" } }
+      { "id": "plc_start", "type": "push_button", "x": -100, "y": 105, "rotation": 0, "props": { "pressed": false, "label": "START", "mode": "momentary" } },
+      { "id": "plc_motor", "type": "dc_motor", "x": 330, "y": 35, "rotation": 0, "props": { "label": "CONVEYOR MOTOR" } }
     ],
     "wires": [
       { "id": "plc_wire_i00", "from": { "instId": "plc_start", "pinId": "p1" }, "to": { "instId": "plc_board", "pinId": "I0_0" }, "color": null, "waypoints": [] },
-      { "id": "plc_wire_com", "from": { "instId": "plc_start", "pinId": "p2" }, "to": { "instId": "plc_board", "pinId": "COM" }, "color": null, "waypoints": [] }
+      { "id": "plc_wire_com", "from": { "instId": "plc_start", "pinId": "p2" }, "to": { "instId": "plc_board", "pinId": "COM" }, "color": null, "waypoints": [] },
+      { "id": "plc_wire_motor_signal", "from": { "instId": "plc_motor", "pinId": "in" }, "to": { "instId": "plc_board", "pinId": "Q0_0" }, "color": null, "waypoints": [] },
+      { "id": "plc_wire_motor_com", "from": { "instId": "plc_motor", "pinId": "gnd" }, "to": { "instId": "plc_board", "pinId": "COM" }, "color": null, "waypoints": [] }
     ],
     "plcProgram": {
       "mode": "ladder",

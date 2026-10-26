@@ -2,20 +2,25 @@
   "id": "plc_series_interlock",
   "name": "PLC - Series interlock",
   "icon": "🏭",
-  "desc": "Q0.0 energizes while START (I0.0) is pressed and STOP (I0.1) is released. The NO and NC contacts are evaluated in series.",
-  "tags": ["plc", "ladder", "industrial automation", "interlock", "contacts"],
+  "desc": "Press START (I0.0) only while the IR sensor reports a clear path (NC contact on I0.1). Q0.0 sounds the buzzer when both series conditions are true.",
+  "tags": ["plc", "ladder", "industrial automation", "interlock", "ir sensor", "buzzer", "actuator"],
   "code": "",
   "circuit": {
     "components": [
       { "id": "plc_board", "type": "industrial_plc", "x": 0, "y": 0, "rotation": 0, "props": { "label": "ARDU-PLC 328" } },
-      { "id": "plc_start", "type": "push_button", "x": -90, "y": 105, "rotation": 0, "props": { "pressed": false, "label": "START", "mode": "momentary" } },
-      { "id": "plc_stop", "type": "push_button", "x": -90, "y": 180, "rotation": 0, "props": { "pressed": false, "label": "STOP", "mode": "momentary" } }
+      { "id": "plc_start", "type": "push_button", "x": -100, "y": 105, "rotation": 0, "props": { "pressed": false, "label": "START", "mode": "momentary" } },
+      { "id": "plc_sensor", "type": "ir_obstacle", "x": -110, "y": -155, "rotation": 0, "props": { "detected": 0 } },
+      { "id": "plc_buzzer", "type": "buzzer", "x": 330, "y": 125, "rotation": 0, "props": { "frequency": 1000 } },
+      { "id": "plc_5v", "type": "power_5v", "x": -160, "y": 0, "rotation": 0, "props": {} }
     ],
     "wires": [
       { "id": "plc_wire_i00", "from": { "instId": "plc_start", "pinId": "p1" }, "to": { "instId": "plc_board", "pinId": "I0_0" }, "color": null, "waypoints": [] },
       { "id": "plc_wire_start_com", "from": { "instId": "plc_start", "pinId": "p2" }, "to": { "instId": "plc_board", "pinId": "COM" }, "color": null, "waypoints": [] },
-      { "id": "plc_wire_i01", "from": { "instId": "plc_stop", "pinId": "p1" }, "to": { "instId": "plc_board", "pinId": "I0_1" }, "color": null, "waypoints": [] },
-      { "id": "plc_wire_stop_com", "from": { "instId": "plc_stop", "pinId": "p2" }, "to": { "instId": "plc_board", "pinId": "COM" }, "color": null, "waypoints": [] }
+      { "id": "plc_wire_i01", "from": { "instId": "plc_sensor", "pinId": "OUT" }, "to": { "instId": "plc_board", "pinId": "I0_1" }, "color": null, "waypoints": [] },
+      { "id": "plc_wire_sensor_vcc", "from": { "instId": "plc_sensor", "pinId": "VCC" }, "to": { "instId": "plc_5v", "pinId": "vcc" }, "color": null, "waypoints": [] },
+      { "id": "plc_wire_sensor_com", "from": { "instId": "plc_sensor", "pinId": "GND" }, "to": { "instId": "plc_board", "pinId": "COM" }, "color": null, "waypoints": [] },
+      { "id": "plc_wire_buzzer_signal", "from": { "instId": "plc_buzzer", "pinId": "vcc" }, "to": { "instId": "plc_board", "pinId": "Q0_0" }, "color": null, "waypoints": [] },
+      { "id": "plc_wire_buzzer_com", "from": { "instId": "plc_buzzer", "pinId": "gnd" }, "to": { "instId": "plc_board", "pinId": "COM" }, "color": null, "waypoints": [] }
     ],
     "plcProgram": {
       "mode": "ladder",

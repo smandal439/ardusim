@@ -25852,13 +25852,15 @@ window.EXAMPLE_SKETCHES = [
     "id": "plc_ctu_event_counter",
     "name": "PLC - CTU event counter",
     "icon": "🔢",
-    "desc": "Press START (I0.0) five times to reach the CTU preset. Press RESET (I0.3) to clear the count. Q0.0 indicates the threshold while the rung is active.",
+    "desc": "Press START (I0.0) five times to reach the CTU preset. Press RESET (I0.3) to clear the count. The relay on Q0.0 indicates the threshold while START is pressed.",
     "tags": [
       "plc",
       "ladder",
       "industrial automation",
       "counter",
-      "ctu"
+      "ctu",
+      "relay",
+      "actuator"
     ],
     "code": "",
     "circuit": {
@@ -25876,7 +25878,7 @@ window.EXAMPLE_SKETCHES = [
         {
           "id": "plc_start",
           "type": "push_button",
-          "x": -90,
+          "x": -100,
           "y": 105,
           "rotation": 0,
           "props": {
@@ -25888,7 +25890,7 @@ window.EXAMPLE_SKETCHES = [
         {
           "id": "plc_reset",
           "type": "push_button",
-          "x": -90,
+          "x": -100,
           "y": 180,
           "rotation": 0,
           "props": {
@@ -25896,6 +25898,24 @@ window.EXAMPLE_SKETCHES = [
             "label": "RESET",
             "mode": "momentary"
           }
+        },
+        {
+          "id": "plc_relay",
+          "type": "relay",
+          "x": 330,
+          "y": 40,
+          "rotation": 0,
+          "props": {
+            "label": "COUNT RELAY"
+          }
+        },
+        {
+          "id": "plc_5v",
+          "type": "power_5v",
+          "x": -160,
+          "y": 0,
+          "rotation": 0,
+          "props": {}
         }
       ],
       "wires": [
@@ -25950,6 +25970,45 @@ window.EXAMPLE_SKETCHES = [
           },
           "color": null,
           "waypoints": []
+        },
+        {
+          "id": "plc_wire_relay_vcc",
+          "from": {
+            "instId": "plc_relay",
+            "pinId": "vcc"
+          },
+          "to": {
+            "instId": "plc_5v",
+            "pinId": "vcc"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_relay_com",
+          "from": {
+            "instId": "plc_relay",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "COM"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_relay_signal",
+          "from": {
+            "instId": "plc_relay",
+            "pinId": "sig"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "Q0_0"
+          },
+          "color": null,
+          "waypoints": []
         }
       ],
       "plcProgram": {
@@ -25977,13 +26036,15 @@ window.EXAMPLE_SKETCHES = [
     "id": "plc_series_interlock",
     "name": "PLC - Series interlock",
     "icon": "🏭",
-    "desc": "Q0.0 energizes while START (I0.0) is pressed and STOP (I0.1) is released. The NO and NC contacts are evaluated in series.",
+    "desc": "Press START (I0.0) only while the IR sensor reports a clear path (NC contact on I0.1). Q0.0 sounds the buzzer when both series conditions are true.",
     "tags": [
       "plc",
       "ladder",
       "industrial automation",
       "interlock",
-      "contacts"
+      "ir sensor",
+      "buzzer",
+      "actuator"
     ],
     "code": "",
     "circuit": {
@@ -26001,7 +26062,7 @@ window.EXAMPLE_SKETCHES = [
         {
           "id": "plc_start",
           "type": "push_button",
-          "x": -90,
+          "x": -100,
           "y": 105,
           "rotation": 0,
           "props": {
@@ -26011,16 +26072,32 @@ window.EXAMPLE_SKETCHES = [
           }
         },
         {
-          "id": "plc_stop",
-          "type": "push_button",
-          "x": -90,
-          "y": 180,
+          "id": "plc_sensor",
+          "type": "ir_obstacle",
+          "x": -110,
+          "y": -155,
           "rotation": 0,
           "props": {
-            "pressed": false,
-            "label": "STOP",
-            "mode": "momentary"
+            "detected": 0
           }
+        },
+        {
+          "id": "plc_buzzer",
+          "type": "buzzer",
+          "x": 330,
+          "y": 125,
+          "rotation": 0,
+          "props": {
+            "frequency": 1000
+          }
+        },
+        {
+          "id": "plc_5v",
+          "type": "power_5v",
+          "x": -160,
+          "y": 0,
+          "rotation": 0,
+          "props": {}
         }
       ],
       "wires": [
@@ -26053,8 +26130,8 @@ window.EXAMPLE_SKETCHES = [
         {
           "id": "plc_wire_i01",
           "from": {
-            "instId": "plc_stop",
-            "pinId": "p1"
+            "instId": "plc_sensor",
+            "pinId": "OUT"
           },
           "to": {
             "instId": "plc_board",
@@ -26064,10 +26141,49 @@ window.EXAMPLE_SKETCHES = [
           "waypoints": []
         },
         {
-          "id": "plc_wire_stop_com",
+          "id": "plc_wire_sensor_vcc",
           "from": {
-            "instId": "plc_stop",
-            "pinId": "p2"
+            "instId": "plc_sensor",
+            "pinId": "VCC"
+          },
+          "to": {
+            "instId": "plc_5v",
+            "pinId": "vcc"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_sensor_com",
+          "from": {
+            "instId": "plc_sensor",
+            "pinId": "GND"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "COM"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_buzzer_signal",
+          "from": {
+            "instId": "plc_buzzer",
+            "pinId": "vcc"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "Q0_0"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_buzzer_com",
+          "from": {
+            "instId": "plc_buzzer",
+            "pinId": "gnd"
           },
           "to": {
             "instId": "plc_board",
@@ -26099,15 +26215,168 @@ window.EXAMPLE_SKETCHES = [
   },
   {
     "id": "plc_simple_output_control",
-    "name": "PLC - Simple output control",
+    "name": "PLC - Obstacle relay control",
     "icon": "🏭",
-    "desc": "Press the START push button to energize output Q0.0. The button is wired to I0.0 and COM; the PLC input is active-low.",
+    "desc": "When the IR obstacle sensor detects an object, I0.0 energizes Q0.0 and switches the relay module. Toggle the sensor's Object control to test it.",
     "tags": [
       "plc",
       "ladder",
       "industrial automation",
-      "input",
-      "output"
+      "ir sensor",
+      "relay",
+      "actuator"
+    ],
+    "code": "",
+    "circuit": {
+      "components": [
+        {
+          "id": "plc_board",
+          "type": "industrial_plc",
+          "x": 0,
+          "y": 0,
+          "rotation": 0,
+          "props": {
+            "label": "ARDU-PLC 328"
+          }
+        },
+        {
+          "id": "plc_sensor",
+          "type": "ir_obstacle",
+          "x": -100,
+          "y": -150,
+          "rotation": 0,
+          "props": {
+            "detected": 0
+          }
+        },
+        {
+          "id": "plc_relay",
+          "type": "relay",
+          "x": 330,
+          "y": 40,
+          "rotation": 0,
+          "props": {
+            "label": "OUTPUT RELAY"
+          }
+        },
+        {
+          "id": "plc_5v",
+          "type": "power_5v",
+          "x": -130,
+          "y": 10,
+          "rotation": 0,
+          "props": {}
+        }
+      ],
+      "wires": [
+        {
+          "id": "plc_wire_i00",
+          "from": {
+            "instId": "plc_sensor",
+            "pinId": "OUT"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "I0_0"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_sensor_vcc",
+          "from": {
+            "instId": "plc_sensor",
+            "pinId": "VCC"
+          },
+          "to": {
+            "instId": "plc_5v",
+            "pinId": "vcc"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_sensor_com",
+          "from": {
+            "instId": "plc_sensor",
+            "pinId": "GND"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "COM"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_relay_vcc",
+          "from": {
+            "instId": "plc_relay",
+            "pinId": "vcc"
+          },
+          "to": {
+            "instId": "plc_5v",
+            "pinId": "vcc"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_relay_com",
+          "from": {
+            "instId": "plc_relay",
+            "pinId": "gnd"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "COM"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_relay_signal",
+          "from": {
+            "instId": "plc_relay",
+            "pinId": "sig"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "Q0_0"
+          },
+          "color": null,
+          "waypoints": []
+        }
+      ],
+      "plcProgram": {
+        "mode": "ladder",
+        "rungs": [
+          {
+            "elements": [
+              {
+                "type": "NO",
+                "input": "I0_0"
+              }
+            ],
+            "output": "Q0_0"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "plc_tof_delayed_off",
+    "name": "PLC - TOF delayed off",
+    "icon": "⏱️",
+    "desc": "Press START (I0.0) to sound the buzzer on Q0.0. After releasing the button, the TOF timer keeps it active for 2 seconds.",
+    "tags": [
+      "plc",
+      "ladder",
+      "industrial automation",
+      "timer",
+      "tof",
+      "buzzer",
+      "actuator"
     ],
     "code": "",
     "circuit": {
@@ -26125,13 +26394,23 @@ window.EXAMPLE_SKETCHES = [
         {
           "id": "plc_start",
           "type": "push_button",
-          "x": -90,
+          "x": -100,
           "y": 105,
           "rotation": 0,
           "props": {
             "pressed": false,
             "label": "START",
             "mode": "momentary"
+          }
+        },
+        {
+          "id": "plc_buzzer",
+          "type": "buzzer",
+          "x": 330,
+          "y": 125,
+          "rotation": 0,
+          "props": {
+            "frequency": 1000
           }
         }
       ],
@@ -26161,81 +26440,25 @@ window.EXAMPLE_SKETCHES = [
           },
           "color": null,
           "waypoints": []
-        }
-      ],
-      "plcProgram": {
-        "mode": "ladder",
-        "rungs": [
-          {
-            "elements": [
-              {
-                "type": "NO",
-                "input": "I0_0"
-              }
-            ],
-            "output": "Q0_0"
-          }
-        ]
-      }
-    }
-  },
-  {
-    "id": "plc_tof_delayed_off",
-    "name": "PLC - TOF delayed off",
-    "icon": "⏱️",
-    "desc": "Press START (I0.0) to energize Q0.0. After releasing the button, the TOF timer keeps the output on for 2 seconds.",
-    "tags": [
-      "plc",
-      "ladder",
-      "industrial automation",
-      "timer",
-      "tof"
-    ],
-    "code": "",
-    "circuit": {
-      "components": [
-        {
-          "id": "plc_board",
-          "type": "industrial_plc",
-          "x": 0,
-          "y": 0,
-          "rotation": 0,
-          "props": {
-            "label": "ARDU-PLC 328"
-          }
         },
         {
-          "id": "plc_start",
-          "type": "push_button",
-          "x": -90,
-          "y": 105,
-          "rotation": 0,
-          "props": {
-            "pressed": false,
-            "label": "START",
-            "mode": "momentary"
-          }
-        }
-      ],
-      "wires": [
-        {
-          "id": "plc_wire_i00",
+          "id": "plc_wire_buzzer_signal",
           "from": {
-            "instId": "plc_start",
-            "pinId": "p1"
+            "instId": "plc_buzzer",
+            "pinId": "vcc"
           },
           "to": {
             "instId": "plc_board",
-            "pinId": "I0_0"
+            "pinId": "Q0_0"
           },
           "color": null,
           "waypoints": []
         },
         {
-          "id": "plc_wire_com",
+          "id": "plc_wire_buzzer_com",
           "from": {
-            "instId": "plc_start",
-            "pinId": "p2"
+            "instId": "plc_buzzer",
+            "pinId": "gnd"
           },
           "to": {
             "instId": "plc_board",
@@ -26269,13 +26492,15 @@ window.EXAMPLE_SKETCHES = [
     "id": "plc_ton_delayed_start",
     "name": "PLC - TON delayed start",
     "icon": "⏱️",
-    "desc": "Press and hold START (I0.0). The TON timer energizes Q0.0 after the input has remained active for 3 seconds; releasing early resets the timer.",
+    "desc": "Press and hold START (I0.0). After 3 seconds, Q0.0 starts the connected DC motor; releasing early resets the timer.",
     "tags": [
       "plc",
       "ladder",
       "industrial automation",
       "timer",
-      "ton"
+      "ton",
+      "dc motor",
+      "actuator"
     ],
     "code": "",
     "circuit": {
@@ -26293,13 +26518,23 @@ window.EXAMPLE_SKETCHES = [
         {
           "id": "plc_start",
           "type": "push_button",
-          "x": -90,
+          "x": -100,
           "y": 105,
           "rotation": 0,
           "props": {
             "pressed": false,
             "label": "START",
             "mode": "momentary"
+          }
+        },
+        {
+          "id": "plc_motor",
+          "type": "dc_motor",
+          "x": 330,
+          "y": 35,
+          "rotation": 0,
+          "props": {
+            "label": "CONVEYOR MOTOR"
           }
         }
       ],
@@ -26322,6 +26557,32 @@ window.EXAMPLE_SKETCHES = [
           "from": {
             "instId": "plc_start",
             "pinId": "p2"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "COM"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_motor_signal",
+          "from": {
+            "instId": "plc_motor",
+            "pinId": "in"
+          },
+          "to": {
+            "instId": "plc_board",
+            "pinId": "Q0_0"
+          },
+          "color": null,
+          "waypoints": []
+        },
+        {
+          "id": "plc_wire_motor_com",
+          "from": {
+            "instId": "plc_motor",
+            "pinId": "gnd"
           },
           "to": {
             "instId": "plc_board",
