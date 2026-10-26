@@ -1,11 +1,17 @@
 {
-  "id": "ds3231_rtc_clock_sync_with_ntp",
-  "name": "DS3231 RTC Clock sync with NTP",
-  "icon": "🔧",
-  "desc": "A custom DS3231 RTC Clock sync with NTP circuit example.",
+  "id": "ds3231_rtc_clock_sync_with_ntp_2",
+  "name": "DS3231 RTC Clock sync with NTP 2",
+  "icon": "🕐",
+  "desc": "DS3231 RTC clock with LCD display. Syncs time from NTP every hour using ntpEpoch(), non-blocking millis() timers. Displays HH:MM:SS and temperature on Serial and LCD.",
   "tags": [
-    "custom",
-    "circuit"
+    "esp32",
+    "rtc",
+    "ds3231",
+    "ntp",
+    "wifi",
+    "i2c",
+    "lcd",
+    "clock"
   ],
   "circuit": {
     "components": [
