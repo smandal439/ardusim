@@ -43,6 +43,11 @@ class ArduinoSimulator {
     // Infinite-loop guard: max iterations per real-second without a delay
     this._iterSinceDelay = 0;
     this._MAX_TIGHT_ITERS = 1000;
+    this._loopActivityVersion = 0;
+    this._observedLoopActivityVersion = 0;
+    this._idleLoopIterations = 0;
+    this._lastEmittedPinValues = {};
+    this._delayVersion = 0;
     // EEPROM simulation (512 bytes)
     this._eeprom = new Uint8Array(512);
     // ESP32 LEDC PWM channel registry: channel -> { pin, freq, resolution, maxDuty }
@@ -1901,6 +1906,7 @@ class ArduinoSimulator {
     this._fps = 0;
     this._loopCount = 0;
     this._iterSinceDelay = 0;
+    this._resetAdaptiveLoopState();
     this._interrupts = {};
     this._prevPinValues = {};
     // FreeRTOS dual-core state // reset on each run
@@ -2031,11 +2037,14 @@ class ArduinoSimulator {
                 this.simTime += Math.max(1, Math.round(_now - _lastLoopTime));
                 _lastLoopTime = _now;
               }
+              const delayVersionBeforeLoop = this._delayVersion;
               const simTimeBeforeLoop = this.simTime;
               await ctx.loop();
               this._loopCount++;
               // Yield to UI thread // advance simTime by actual elapsed ms
-              await new Promise(r => setTimeout(r, 0));
+              await new Promise(r => setTimeout(r, this._getAdaptiveLoopDelay(
+                this._delayVersion === delayVersionBeforeLoop
+              )));
               const _now = performance.now();
               // Avoid double-counting time already advanced by delay() or another
               // timing helper during this loop.
@@ -2140,6 +2149,7 @@ class ArduinoSimulator {
     this._iterSinceDelay = 0;
     this._interrupts = {};
     this._prevPinValues = {};
+    this._resetAdaptiveLoopState();
     this._deepsleepTimerUs = 0;
     this._deepsleepExt0 = null;
     this._deepsleepExt1 = null;
@@ -2156,6 +2166,7 @@ class ArduinoSimulator {
     const runId = ++this._runSeq;
     this._interrupts = {};
     this._prevPinValues = {};
+    this._resetAdaptiveLoopState();
 
     // Assembly mode: run CPU step loop instead of setup/loop
     if (this._assemblyMode && this._asmRuntime) {
@@ -2270,10 +2281,13 @@ class ArduinoSimulator {
                   self.simTime += Math.max(1, Math.round(_n2 - _lastLoopTime2));
                   _lastLoopTime2 = _n2;
                 }
+                const _delayVersionBeforeLoop = self._delayVersion;
                 const _simTimeBeforeLoop = self.simTime;
                 await ctx.loop();
                 self._loopCount++;
-                await new Promise(r => setTimeout(r, 0));
+                await new Promise(r => setTimeout(r, self._getAdaptiveLoopDelay(
+                  self._delayVersion === _delayVersionBeforeLoop
+                )));
                 const _n2 = performance.now();
                 if (self.simTime === _simTimeBeforeLoop) {
                   self.simTime += Math.max(1, Math.round(_n2 - _lastLoopTime2));
@@ -2422,6 +2436,7 @@ class ArduinoSimulator {
 
   /* Pausable sketch delay // records start/duration so pause() can freeze it */
   _delayPromise(realMs) {
+    this._delayVersion++;
     const entry = {
       duration: Math.max(0, realMs),
       start: Date.now(),
@@ -2489,6 +2504,38 @@ class ArduinoSimulator {
   }
 
   /* FPS tracking */
+  _resetAdaptiveLoopState() {
+    this._loopActivityVersion = 0;
+    this._observedLoopActivityVersion = 0;
+    this._idleLoopIterations = 0;
+    this._lastEmittedPinValues = {};
+    this._delayVersion = 0;
+  }
+
+  _markLoopActivity() {
+    this._loopActivityVersion++;
+  }
+
+  _getAdaptiveLoopDelay(allowBackoff = true) {
+    if (!allowBackoff) {
+      this._observedLoopActivityVersion = this._loopActivityVersion;
+      this._idleLoopIterations = 0;
+      return 0;
+    }
+
+    if (this._observedLoopActivityVersion !== this._loopActivityVersion) {
+      this._observedLoopActivityVersion = this._loopActivityVersion;
+      this._idleLoopIterations = 0;
+      return 0;
+    }
+
+    this._idleLoopIterations++;
+    if (this._idleLoopIterations <= 8) return 0;
+    if (this._idleLoopIterations <= 32) return 1;
+    if (this._idleLoopIterations <= 128) return 4;
+    return 16;
+  }
+
   _tickFps() {
     const now = Date.now();
     const elapsed = now - this._fpsLast;
@@ -2670,12 +2717,17 @@ class ArduinoSimulator {
 
   /* -------------- INTERNALS -------------- */
   _serialLog(text, type = 'data') {
+    if (type === 'data' && text) this._markLoopActivity();
     if (this.onSerial) this.onSerial(text, type);
   }
 
   _emitPinChange(key, val) {
     // Reset tight-iter counter whenever a pin changes (means the sketch is doing work)
     this._iterSinceDelay = 0;
+    if (!Object.is(this._lastEmittedPinValues[key], val)) {
+      this._lastEmittedPinValues[key] = val;
+      this._markLoopActivity();
+    }
     if (this.onPinChange) this.onPinChange(key, val);
     // Fire registered interrupts when pin state matches the trigger mode
     if (key.startsWith('pin_') && this._interrupts) {
@@ -2705,6 +2757,7 @@ class ArduinoSimulator {
   }
 
   _emitEvent(type, data) {
+    this._markLoopActivity();
     if (this.onEvent) this.onEvent(type, data);
   }
 

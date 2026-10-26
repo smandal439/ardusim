@@ -134,6 +134,28 @@ describe('PLC ladder transpiler', () => {
     }
   });
 
+  it('backs off unchanged loop scans and returns to a fast scan after a pin transition', () => {
+    simulator._resetAdaptiveLoopState();
+
+    for (let i = 0; i < 8; i++) {
+      expect(simulator._getAdaptiveLoopDelay()).toBe(0);
+    }
+    expect(simulator._getAdaptiveLoopDelay()).toBe(1);
+
+    for (let i = 0; i < 24; i++) simulator._getAdaptiveLoopDelay();
+    expect(simulator._getAdaptiveLoopDelay()).toBe(4);
+
+    for (let i = 0; i < 96; i++) simulator._getAdaptiveLoopDelay();
+    expect(simulator._getAdaptiveLoopDelay()).toBe(16);
+
+    simulator._emitPinChange('pin_8', 1);
+    expect(simulator._getAdaptiveLoopDelay()).toBe(0);
+    expect(simulator._getAdaptiveLoopDelay(false)).toBe(0);
+    expect(simulator._getAdaptiveLoopDelay()).toBe(0);
+    simulator._serialLog('loop output', 'data');
+    expect(simulator._getAdaptiveLoopDelay()).toBe(0);
+  });
+
   it('rejects invalid pins, presets, and empty runnable programs', () => {
     expect(() => normalizeProgram({
       rungs: [{ elements: [{ type: 'NO', input: 'D2' }], output: 'Q0_0' }],

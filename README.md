@@ -18,6 +18,7 @@
 ### ⚡ Robust Arduino Execution Engine
 - **In-Browser C++ Transpiler**: Converts Arduino code to safe, asynchronous JavaScript execution on the fly.
 - **Infinite-Loop Protection**: Automatically throttles non-yielding tight loops to prevent browser hanging.
+- **Adaptive Idle Scanning**: Repeated scans with unchanged outputs gradually back off to 16 ms; pin transitions and serial output restore immediate scans. Input polling may therefore have up to 16 ms of additional latency while idle.
 - **Real-time FPS & Timing**: Status bar displays exact simulation time and frame-rates.
 - **Library Support**:
   - `Servo` (angle writes and positioning)
