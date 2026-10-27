@@ -111,12 +111,19 @@ afterEach(() => { global.window.CircuitCanvas = null; });
 describe('electrical engine breadboard grouping', () => {
   const eng = new ElectricalEngine('t');
 
-  it('uses the passive.js pin-id scheme (ut/ub/lt/lb + rails)', () => {
+  it('groups every row in each half-column and every socket on each rail', () => {
     expect(eng._breadboardGroup('ut5')).toBe('u5');
     expect(eng._breadboardGroup('ub5')).toBe('u5');
+    expect(eng._breadboardGroup('um25')).toBe('u5');
+    expect(eng._breadboardGroup('um35')).toBe('u5');
     expect(eng._breadboardGroup('lt5')).toBe('l5');
     expect(eng._breadboardGroup('lb5')).toBe('l5');
+    expect(eng._breadboardGroup('lm15')).toBe('l5');
+    expect(eng._breadboardGroup('lm25')).toBe('l5');
+    expect(eng._breadboardGroup('lm35')).toBe('l5');
     expect(eng._breadboardGroup('rp')).toBe('rail_tp');
+    expect(eng._breadboardGroup('rp25')).toBe('rail_tp');
+    expect(eng._breadboardGroup('rn12')).toBe('rail_tn');
     expect(eng._breadboardGroup('bn')).toBe('rail_bn');
     expect(eng._breadboardGroup('1a')).toBe(null); // legacy dead ids stay null
   });
@@ -131,9 +138,35 @@ describe('electrical engine breadboard grouping', () => {
     const hasPair = (a, b) => conns.some(([x, y]) =>
       (x === `bb1:${a}` && y === `bb1:${b}`) || (x === `bb1:${b}` && y === `bb1:${a}`));
     expect(hasPair('ut5', 'ub5')).toBe(true);
+    expect(hasPair('ut5', 'um25')).toBe(true);
     expect(hasPair('lt7', 'lb7')).toBe(true);
     expect(hasPair('ut5', 'lt5')).toBe(false);
     expect(hasPair('ut5', 'ut6')).toBe(false);
+    expect(hasPair('rp', 'rp25')).toBe(true);
+    expect(hasPair('rp', 'rn')).toBe(false);
+  });
+
+  it('provides a wire pin for every tie hole and power-rail socket', () => {
+    const full = COMPONENT_DEFS.breadboard.pins;
+    const small = COMPONENT_DEFS.breadboard_small.pins;
+    expect(full).toHaveLength(400);
+    expect(small).toHaveLength(208);
+    expect(full.some(pin => pin.id === 'um25' && pin.x === 110 && pin.y === 81)).toBe(true);
+    expect(full.some(pin => pin.id === 'lm35' && pin.y === 162)).toBe(true);
+    expect(full.some(pin => pin.id === 'rp25' && pin.x > 500)).toBe(true);
+    expect(small.some(pin => pin.id === 'lm315' && pin.y === 135)).toBe(true);
+  });
+
+  it('selects the nearest hole when pin hit areas overlap at low zoom', () => {
+    const board = el('breadboard', 'bb');
+    board.x = 100;
+    board.y = 200;
+    const canvas = Object.create(CircuitCanvas.prototype);
+    canvas.components = [board];
+    canvas.zoom = 0.5;
+    const target = COMPONENT_DEFS.breadboard.pins.find(pin => pin.id === 'um25');
+    const hit = canvas._hitTestPin(board.x + target.x, board.y + target.y);
+    expect(hit.pin.id).toBe('um25');
   });
 
   it('source classifies all six new ICs via _classifyComponent', () => {
@@ -154,6 +187,14 @@ describe('getPinVoltage walks through breadboard nodes', () => {
     const fn = el('func_gen', 'fn', { ch1_voltage: 5 });
     const ic = el('ic_74hc86', 'ic1');
     global.window.CircuitCanvas = makeCanvas([bb, fn, ic], [w(fn, 'ch1_out', bb, 'ut5'), w(ic, 'A1', bb, 'ub5')]);
+    expect(sim.getPinVoltage(ic, 'A1')).toBe(5);
+  });
+
+  it('resolves signals wired through a middle-row hole', () => {
+    const bb = el('breadboard', 'bb');
+    const fn = el('func_gen', 'fn', { ch1_voltage: 5 });
+    const ic = el('ic_74hc86', 'ic1');
+    global.window.CircuitCanvas = makeCanvas([bb, fn, ic], [w(fn, 'ch1_out', bb, 'um25'), w(ic, 'A1', bb, 'ub5')]);
     expect(sim.getPinVoltage(ic, 'A1')).toBe(5);
   });
 

@@ -238,16 +238,15 @@ class ElectricalEngine {
   }
 
   _breadboardGroup(pinId) {
-    // Must mirror js/components/passive.js pin ids: ut/ub = upper half
-    // (rows a–e share a node), lt/lb = lower half (rows f–j), rails are
-    // four continuous nodes (rp/rn top, bp/bn bottom).
+    // Must mirror js/components/passive.js pin ids: all five holes in each
+    // column share a node, while the two halves and four rails stay isolated.
     if (!pinId) return null;
-    if (pinId === 'rp') return 'rail_tp';
-    if (pinId === 'rn') return 'rail_tn';
-    if (pinId === 'bp') return 'rail_bp';
-    if (pinId === 'bn') return 'rail_bn';
+    const railMatch = /^(rp|rn|bp|bn)\d*$/.exec(pinId);
+    if (railMatch) return { rp: 'rail_tp', rn: 'rail_tn', bp: 'rail_bp', bn: 'rail_bn' }[railMatch[1]];
     const m = /^([ul])([tb])(\d+)$/.exec(pinId);
     if (m) return m[1] + m[3];
+    const middle = /^([ul])m[123](\d+)$/.exec(pinId);
+    if (middle) return middle[1] + middle[2];
     return null;
   }
 

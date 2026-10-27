@@ -137,63 +137,56 @@ defComp({
 });
 
 /* -------- BREADBOARD (Realistic Half-Size / 400 Tie-Points) ----------- */
-function _genBreadboardPins() {
-  const W = 580, cols = 30, startX = 42, stepX = (W - 84) / (cols - 1);
-  const upperTopY = 55, upperBotY = 107;
-  const lowerTopY = 123, lowerBotY = 175;
+function _genBreadboardPins({ cols, startX, width, upperRowsY, lowerRowsY, railCount, railGroupSize, railStartX, railOffset, railStep, railRowsY }) {
   const pins = [];
+  const stepX = (width - startX * 2) / (cols - 1);
+  const rowLabelsUpper = ['a', 'b', 'c', 'd', 'e'];
+  const rowLabelsLower = ['f', 'g', 'h', 'i', 'j'];
 
   for (let c = 0; c < cols; c++) {
     const hx = Math.round(startX + c * stepX);
     const n = c + 1;
-    // Upper half: top pin (row a) and bottom pin (row e) — same electrical node
-    pins.push({ id: `ut${n}`, label: `${n}a`, type: PIN_TYPE.SIGNAL, x: hx, y: upperTopY, side: 'top' });
-    pins.push({ id: `ub${n}`, label: `${n}e`, type: PIN_TYPE.SIGNAL, x: hx, y: upperBotY, side: 'top' });
-    // Lower half: top pin (row f) and bottom pin (row j) — same electrical node
-    pins.push({ id: `lt${n}`, label: `${n}f`, type: PIN_TYPE.SIGNAL, x: hx, y: lowerTopY, side: 'bottom' });
-    pins.push({ id: `lb${n}`, label: `${n}j`, type: PIN_TYPE.SIGNAL, x: hx, y: lowerBotY, side: 'bottom' });
+    for (let row = 0; row < 5; row++) {
+      const upperId = row === 0 ? `ut${n}` : row === 4 ? `ub${n}` : `um${row}${n}`;
+      const lowerId = row === 0 ? `lt${n}` : row === 4 ? `lb${n}` : `lm${row}${n}`;
+      pins.push({ id: upperId, label: `${n}${rowLabelsUpper[row]}`, type: PIN_TYPE.SIGNAL, x: hx, y: upperRowsY[row], side: 'top' });
+      pins.push({ id: lowerId, label: `${n}${rowLabelsLower[row]}`, type: PIN_TYPE.SIGNAL, x: hx, y: lowerRowsY[row], side: 'bottom' });
+    }
   }
 
-  // Power rails (each rail represents a continuous electrical node)
-  pins.push({ id: 'rp', label: '+', type: PIN_TYPE.POWER, x: 30, y: 19, side: 'top' });
-  pins.push({ id: 'rn', label: '-', type: PIN_TYPE.GND, x: 30, y: 31, side: 'top' });
-  pins.push({ id: 'bp', label: '+', type: PIN_TYPE.POWER, x: 30, y: 189, side: 'bottom' });
-  pins.push({ id: 'bn', label: '-', type: PIN_TYPE.GND, x: 30, y: 201, side: 'bottom' });
+  const railIds = ['rp', 'rn', 'bp', 'bn'];
+  const railTypes = [PIN_TYPE.POWER, PIN_TYPE.GND, PIN_TYPE.POWER, PIN_TYPE.GND];
+  for (let i = 0; i < railCount; i++) {
+    const hx = railStartX + i * railStep + Math.floor(i / railGroupSize) * railOffset;
+    for (let rail = 0; rail < railIds.length; rail++) {
+      const id = i === 0 ? railIds[rail] : `${railIds[rail]}${i + 1}`;
+      pins.push({ id, label: railTypes[rail] === PIN_TYPE.POWER ? '+' : '-', type: railTypes[rail], x: hx, y: railRowsY[rail], side: rail < 2 ? 'top' : 'bottom' });
+    }
+  }
   return pins;
 }
 
 function _breadboardGetGroup(pinId) {
-  if (pinId === 'rp') return 'rail_tp';
-  if (pinId === 'rn') return 'rail_tn';
-  if (pinId === 'bp') return 'rail_bp';
-  if (pinId === 'bn') return 'rail_bn';
+  const railMatch = /^(rp|rn|bp|bn)\d*$/.exec(pinId);
+  if (railMatch) return { rp: 'rail_tp', rn: 'rail_tn', bp: 'rail_bp', bn: 'rail_bn' }[railMatch[1]];
   const m = pinId.match(/^([ul])([tb])(\d+)$/);
   if (m) return m[1] + m[3];
+  const middle = /^([ul])m[123](\d+)$/.exec(pinId);
+  if (middle) return middle[1] + middle[2];
   return null;
 }
 window._breadboardGetGroup = _breadboardGetGroup;
 
 /* ════════════════ Small Breadboard (16-column) ════════════════ */
 function _genSmallBreadboardPins() {
-  const W = 320, H = 170, cols = 16, startX = 36, stepX = (W - 72) / (cols - 1);
-  const upperTopY = 45, upperBotY = 90;
-  const lowerTopY = 102, lowerBotY = 147;
-  const pins = [];
-
-  for (let c = 0; c < cols; c++) {
-    const hx = Math.round(startX + c * stepX);
-    const n = c + 1;
-    pins.push({ id: `ut${n}`, label: `${n}a`, type: PIN_TYPE.SIGNAL, x: hx, y: upperTopY, side: 'top' });
-    pins.push({ id: `ub${n}`, label: `${n}e`, type: PIN_TYPE.SIGNAL, x: hx, y: upperBotY, side: 'top' });
-    pins.push({ id: `lt${n}`, label: `${n}f`, type: PIN_TYPE.SIGNAL, x: hx, y: lowerTopY, side: 'bottom' });
-    pins.push({ id: `lb${n}`, label: `${n}j`, type: PIN_TYPE.SIGNAL, x: hx, y: lowerBotY, side: 'bottom' });
-  }
-
-  pins.push({ id: 'rp', label: '+', type: PIN_TYPE.POWER, x: 24, y: 14, side: 'top' });
-  pins.push({ id: 'rn', label: '-', type: PIN_TYPE.GND, x: 24, y: 24, side: 'top' });
-  pins.push({ id: 'bp', label: '+', type: PIN_TYPE.POWER, x: 24, y: H - 24, side: 'bottom' });
-  pins.push({ id: 'bn', label: '-', type: PIN_TYPE.GND, x: 24, y: H - 14, side: 'bottom' });
-  return pins;
+  const W = 320, H = 170;
+  return _genBreadboardPins({
+    cols: 16, startX: 36, width: W,
+    upperRowsY: [45, 56, 67, 78, 90],
+    lowerRowsY: [102, 113, 124, 135, 147],
+    railCount: 12, railGroupSize: 4, railStartX: 38, railOffset: 6, railStep: (W - 90) / 11,
+    railRowsY: [14, 24, H - 24, H - 14],
+  });
 }
 
 defComp({
@@ -205,6 +198,7 @@ defComp({
   width: 320,
   height: 170,
   defaultProps: {},
+  hidePinLabels: true,
   pins: _genSmallBreadboardPins(),
   draw(ctx, inst, sim) {
     const { x, y } = inst;
@@ -324,7 +318,14 @@ defComp({
   width: 580,
   height: 220,
   defaultProps: {},
-  pins: _genBreadboardPins(),
+  hidePinLabels: true,
+  pins: _genBreadboardPins({
+    cols: 30, startX: 42, width: 580,
+    upperRowsY: [55, 68, 81, 94, 107],
+    lowerRowsY: [123, 136, 149, 162, 175],
+    railCount: 25, railGroupSize: 5, railStartX: 45, railOffset: 8, railStep: (580 - 122) / 24,
+    railRowsY: [19, 31, 220 - 31, 220 - 19],
+  }),
   draw(ctx, inst, sim) {
     const { x, y, width: W, height: H } = inst;
     ctx.save();

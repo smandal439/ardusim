@@ -2845,12 +2845,12 @@ class ArduinoSimulator {
         const g = window._breadboardGetGroup(pid);
         if (g) return g;
       }
-      if (pid === 'rp') return 'rail_tp';
-      if (pid === 'rn') return 'rail_tn';
-      if (pid === 'bp') return 'rail_bp';
-      if (pid === 'bn') return 'rail_bn';
+      const railMatch = /^(rp|rn|bp|bn)\d*$/.exec(pid || '');
+      if (railMatch) return { rp: 'rail_tp', rn: 'rail_tn', bp: 'rail_bp', bn: 'rail_bn' }[railMatch[1]];
       const m = /^([ul])([tb])(\d+)$/.exec(pid || '');
-      return m ? m[1] + m[3] : null;
+      if (m) return m[1] + m[3];
+      const middle = /^([ul])m[123](\d+)$/.exec(pid || '');
+      return middle ? middle[1] + middle[2] : null;
     };
     const canvas = window.CircuitCanvas;
     const visited = new Set();

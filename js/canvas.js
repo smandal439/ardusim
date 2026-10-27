@@ -2653,15 +2653,19 @@ class CircuitCanvas {
     for (const inst of [...this.components].reverse()) {
       const def = COMPONENT_DEFS[inst.type];
       if (!def) continue;
+      let nearest = null;
+      let nearestDistance = radius;
       for (const pin of def.pins) {
         const wp = this._pinWorldPos(inst, pin);
         const px = wp.x;
         const py = wp.y;
         const dist = Math.sqrt((wx - px) ** 2 + (wy - py) ** 2);
-        if (dist <= radius) {
-          return { inst, pin, worldX: px, worldY: py };
+        if (dist <= radius && (!nearest || dist < nearestDistance)) {
+          nearest = { inst, pin, worldX: px, worldY: py };
+          nearestDistance = dist;
         }
       }
+      if (nearest) return nearest;
     }
     return null;
   }
