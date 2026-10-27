@@ -8251,6 +8251,293 @@ window.EXAMPLE_SKETCHES = [
     "code": "/*\n* DS3231 RTC Clock\n*\n* Wiring:\n*   DS3231 VCC -> 5V\n*   DS3231 GND -> GND\n*   DS3231 SCL -> A5\n*   DS3231 SDA -> A4\n*   LED anode  -> D13 (via 220Ω resistor)\n*\n* Reads time and temperature from the DS3231 every second.\n* LED on D13 toggles each second as a visual heartbeat.\n* Use the interactive sliders on the DS3231 to set the initial time.\n*/\n\n#include <Wire.h>\n#include <RtcDS3231.h>\n#include <LiquidCrystal_I2C.h>\n\nRtcDS3231<TwoWire> Rtc(Wire);\nLiquidCrystal_I2C lcd(0x27,16,2);\n\nconst int LED_PIN = 13;\nbool ledState = false;\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(LED_PIN, OUTPUT);\n\n  Rtc.Begin();\n  lcd.init();\n  lcd.backlight();\n\n// Uncomment the next line to set time from compile timestamp:\n// Rtc.SetDateTime(RtcDateTime(__DATE__, __TIME__));\n\n  RtcDateTime now = Rtc.GetDateTime();\n  if (!now.IsValid()) {\n    Serial.println(\"RTC lost power — setting time from compile date\");\n    Rtc.SetDateTime(RtcDateTime(__DATE__, __TIME__));\n  }\n\n  Serial.println(\"DS3231 RTC Clock started\");\n  Serial.println(\"-----------------------------\");\n}\n\nvoid loop() {\n  RtcDateTime now = Rtc.GetDateTime();\n  lcd.setCursor(0,0);\n// Format: HH:MM:SS\n  if (now.Hour() < 10) {\n    Serial.print(\"0\");\n    lcd.print(\"0\");\n  }\n  Serial.print(now.Hour());\n  lcd.print(now.Hour());\n  Serial.print(\":\");\n  lcd.print(\":\");\n  if (now.Minute() < 10){\n    Serial.print(\"0\");\n    lcd.print(\"0\");\n  }\n  Serial.print(now.Minute());\n  lcd.print(now.Minute());\n  Serial.print(\":\");\n  lcd.print(\":\");\n  if (now.Second() < 10) {\n    Serial.print(\"0\");\n    lcd.print(\"0\");\n  }\n  Serial.print(now.Second());\n  lcd.print(now.Second());\n\n// Date: DD/MM/YYYY\n  Serial.print(\"  \");\n  if (now.Day() < 10) Serial.print(\"0\");\n  Serial.print(now.Day());\n  Serial.print(\"/\");\n  if (now.Month() < 10) Serial.print(\"0\");\n  Serial.print(now.Month());\n  Serial.print(\"/\");\n  Serial.print(now.Year());\n\n// Temperature\n  RtcTemperature temp = Rtc.GetTemperature();\n  Serial.print(\"  \");\n  Serial.print(temp.AsFloatDegC(), 1);\n  Serial.println(\"°C\");//alt+0176=degree symbol\n \n \n  lcd.print(\" \");\n  lcd.print(temp.AsFloatDegC(), 1);\n  lcd.println(\"°C\");//alt+0176=degree symbol\n//-----------------------------------------------------\n\n// Date: DD/MM/YYYY\n  lcd.setCursor(0,1);\n  // lcd.print(\"  \");\n  if (now.Day() < 10) lcd.print(\"0\");\n  lcd.print(now.Day());\n  lcd.print(\"/\");\n  if (now.Month() < 10) lcd.print(\"0\");\n  lcd.print(now.Month());\n  lcd.print(\"/\");\n  lcd.print(now.Year());\n\n\n\n// Blink LED every second\n  ledState = !ledState;\n  digitalWrite(LED_PIN, ledState ? HIGH : LOW);\n\n  delay(1000);\n}"
   },
   {
+    "id": "ds3231_rtc_clock_2",
+    "name": "DS3231 RTC Clock 2",
+    "icon": "🕐",
+    "desc": "DS3231 RTC clock with LCD display. Syncs time from NTP every hour using ntpEpoch(), non-blocking millis() timers. Displays HH:MM:SS and temperature on Serial and LCD.",
+    "tags": [
+      "esp32",
+      "rtc",
+      "ds3231",
+      "ntp",
+      "wifi",
+      "i2c",
+      "lcd",
+      "clock"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "b1",
+          "type": "esp32_devkit_v1",
+          "x": 200,
+          "y": 50,
+          "rotation": 0,
+          "props": {
+            "label": "ESP32"
+          }
+        },
+        {
+          "id": "rtc1",
+          "type": "ds3231",
+          "x": 420,
+          "y": 200,
+          "rotation": 0,
+          "props": {
+            "hour": 12,
+            "minute": 0,
+            "second": 0,
+            "day": 1,
+            "month": 1,
+            "year": 26,
+            "alarm1Hour": 0,
+            "alarm1Minute": 0,
+            "alarm1Second": 0,
+            "alarm2Hour": 0,
+            "alarm2Minute": 0,
+            "temperature": 25
+          }
+        },
+        {
+          "id": "lcd1",
+          "type": "lcd1602_i2c",
+          "x": 420,
+          "y": 50,
+          "rotation": 0,
+          "props": {
+            "address": "0x27"
+          }
+        },
+        {
+          "id": "wifi_hotspot_1",
+          "type": "wifi_module",
+          "x": 525,
+          "y": 180,
+          "rotation": 0,
+          "props": {
+            "ssid": "ArduSimNet",
+            "password": "simulator",
+            "channel": 6,
+            "ipAddress": "192.168.1.1",
+            "txPower": 20,
+            "security": "WPA2-PSK",
+            "hidden": false
+          }
+        },
+        {
+          "id": "comp_1793035750776_ye88q",
+          "type": "tm1637",
+          "x": 615,
+          "y": 45,
+          "rotation": 0,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "w1",
+          "from": {
+            "instId": "b1",
+            "pinId": "3V3"
+          },
+          "to": {
+            "instId": "rtc1",
+            "pinId": "VCC"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w2",
+          "from": {
+            "instId": "b1",
+            "pinId": "GND1"
+          },
+          "to": {
+            "instId": "rtc1",
+            "pinId": "GND"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w3",
+          "from": {
+            "instId": "b1",
+            "pinId": "D22"
+          },
+          "to": {
+            "instId": "rtc1",
+            "pinId": "SCL"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w4",
+          "from": {
+            "instId": "b1",
+            "pinId": "D21"
+          },
+          "to": {
+            "instId": "rtc1",
+            "pinId": "SDA"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w5",
+          "from": {
+            "instId": "b1",
+            "pinId": "3V3"
+          },
+          "to": {
+            "instId": "lcd1",
+            "pinId": "vcc"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w6",
+          "from": {
+            "instId": "b1",
+            "pinId": "GND2"
+          },
+          "to": {
+            "instId": "lcd1",
+            "pinId": "gnd"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w7",
+          "from": {
+            "instId": "b1",
+            "pinId": "D21"
+          },
+          "to": {
+            "instId": "lcd1",
+            "pinId": "sda"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "w8",
+          "from": {
+            "instId": "b1",
+            "pinId": "D22"
+          },
+          "to": {
+            "instId": "lcd1",
+            "pinId": "scl"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1793036851624_yxskw",
+          "from": {
+            "instId": "b1",
+            "pinId": "D2"
+          },
+          "to": {
+            "instId": "comp_1793035750776_ye88q",
+            "pinId": "CLK"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1793036854656_1vk77",
+          "from": {
+            "instId": "b1",
+            "pinId": "D4"
+          },
+          "to": {
+            "instId": "comp_1793035750776_ye88q",
+            "pinId": "DIO"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1793036860489_ezzam",
+          "from": {
+            "instId": "b1",
+            "pinId": "3V3"
+          },
+          "to": {
+            "instId": "comp_1793035750776_ye88q",
+            "pinId": "VCC"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1793036867911_oihe3",
+          "from": {
+            "instId": "b1",
+            "pinId": "GND2"
+          },
+          "to": {
+            "instId": "comp_1793035750776_ye88q",
+            "pinId": "GND"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ],
+      "plcProgram": {
+        "mode": "code",
+        "rungs": [
+          {
+            "output": "Q0_0",
+            "elements": [
+              {
+                "type": "NO",
+                "input": "I0_0"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "files": {
+      "sketch.ino": "/*\n* DS3231 RTC Clock + LCD + Hourly NTP Sync (non-blocking)\n*\n* Uses ntpEpoch() to fetch real UTC time from the browser.\n* Syncs the DS3231 RTC every hour using millis() timers.\n* Displays time and temperature on Serial + 16x2 I2C LCD.\n*\n* Wiring:\n*   DS3231 & LCD share I2C bus: SDA->D21, SCL->D22\n*   Both powered from 3V3\n*/\n\n#include <Wire.h>\n#include <RtcDS3231.h>\n#include <LiquidCrystal_I2C.h>\n#include <WiFi.h>\n#include <TM1637Display.h>\n\n#define CLK 2\n#define DIO 4\n\nTM1637Display display(CLK, DIO);\n\nunsigned long lastTick = 0;\nbool colonOn = false;\n\n//\n\n// IST = UTC + 5:30 = 19800 seconds\n// Change this for your timezone\nvar gmtOffsetSec = 19800;\n\n// Non-blocking intervals\nvar DISPLAY_INTERVAL = 1000;\n// var NTP_SYNC_INTERVAL = 3600000;\nvar NTP_SYNC_INTERVAL = 30000;//sync every 30 seconds for demonstration\n\nvar lastDisplayTime = 0;\nvar lastNtpSyncTime = 0;\n\nRtcDS3231<TwoWire> Rtc(Wire);\nLiquidCrystal_I2C lcd(0x27, 16, 2);\n\n// Helper: sync RTC from NTP with full date\nvoid syncRtcFromNtp() {\n  var epoch = ntpEpoch() + gmtOffsetSec;\n  var h = ((epoch % 86400) / 3600) | 0;\n  var m = ((epoch % 3600) / 60) | 0;\n  var s = (epoch % 60) | 0;\n\n// Compute date from epoch\n  var days = (epoch / 86400) | 0;\n  var yr = 1970;\n  while (days >= 365) {\n    var leap = ((yr % 4 == 0 && yr % 100 != 0) || (yr % 400 == 0)) ? 1 : 0;\n    if (days < 365 + leap) break;\n    days -= (365 + leap);\n    yr++;\n  }\n  var monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];\n  if ((yr % 4 == 0 && yr % 100 != 0) || (yr % 400 == 0)) monthDays[1] = 29;\n  var mo = 0;\n  var dy = days;\n  while (mo < 12 && dy >= monthDays[mo]) {\n    dy -= monthDays[mo];\n    mo++;\n  }\n  mo++;\n  dy++;\n\n  Rtc.SetDateTime(RtcDateTime(yr, mo, dy, h, m, s));\n  Serial.print(\"[NTP] Synced: \");\n  if (h < 10) Serial.print(\"0\");\n  Serial.print(h);\n  Serial.print(\":\");\n  if (m < 10) Serial.print(\"0\");\n  Serial.print(m);\n  Serial.print(\":\");\n  if (s < 10) Serial.print(\"0\");\n  Serial.println(s);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  Wire.begin();\n  display.setBrightness(7);   // 0 = dimmest, 7 = brightest\n  lcd.init();\n  lcd.backlight();\n\n// Connect WiFi (simulated)\n  WiFi.begin(\"ArduSimNet\", \"simulator\");\n  while (WiFi.status() != WL_CONNECTED) {\n    delay(300);\n  }\n  Serial.println(\"WiFi connected\");\n\n// Initialize RTC\n  Rtc.Begin();\n  if (!Rtc.IsDateTimeValid()) {\n    Serial.println(\"RTC lost power - setting from NTP\");\n  }\n  if (!Rtc.IsRunning()) {\n    Rtc.SetIsRunning(true);\n  }\n\n// Sync immediately on boot\n  syncRtcFromNtp();\n\n  lastNtpSyncTime = millis();\n  lastDisplayTime = millis();\n\n  lcd.clear();\n  lcd.setCursor(0, 0);\n  lcd.print(\"DS3231 + NTP\");\n  lcd.setCursor(0, 1);\n  lcd.print(\"Syncing...\");\n  delay(1500);\n  lcd.clear();\n}\n\nvoid loop() {\n  var now = millis();\n\n// Non-blocking NTP sync every 1 hour\n  if (now - lastNtpSyncTime >= NTP_SYNC_INTERVAL || lastNtpSyncTime == 0) {\n    lastNtpSyncTime = now;\n    syncRtcFromNtp();\n  }\n\n// Non-blocking 1-second display refresh\n  if (now - lastDisplayTime >= DISPLAY_INTERVAL) {\n    lastDisplayTime = now;\n    RtcDateTime dt = Rtc.GetDateTime();\n    RtcTemperature temp = Rtc.GetTemperature();\n\n// Serial output\n    if (dt.Hour() < 10) Serial.print(\"0\");\n    Serial.print(dt.Hour());\n    Serial.print(\":\");\n    if (dt.Minute() < 10) Serial.print(\"0\");\n    Serial.print(dt.Minute());\n    Serial.print(\":\");\n    if (dt.Second() < 10) Serial.print(\"0\");\n    Serial.print(dt.Second());\n    Serial.print(\"  \");\n    if (dt.Day() < 10) Serial.print(\"0\");\n    Serial.print(dt.Day());\n    Serial.print(\"/\");\n    if (dt.Month() < 10) Serial.print(\"0\");\n    Serial.print(dt.Month());\n    Serial.print(\"/\");\n    Serial.print(dt.Year());\n    Serial.print(\"  Temp: \");\n    Serial.print(temp.AsFloatDegC(), 1);\n    Serial.println(\" C\");\n\n// LCD row 0: time\n    lcd.setCursor(0, 0);\n    if (dt.Hour() < 10) lcd.print(\"0\");\n    lcd.print(dt.Hour());\n    lcd.print(\":\");\n    if (dt.Minute() < 10) lcd.print(\"0\");\n    lcd.print(dt.Minute());\n    lcd.print(\":\");\n    if (dt.Second() < 10) lcd.print(\"0\");\n    lcd.print(dt.Second());\n    lcd.print(\"  \");\n    lcd.print(temp.AsFloatDegC(), 1);\n    lcd.print(\"°C\");\n\n// LCD row 1: date\n    lcd.setCursor(0, 1);\n    if (dt.Day() < 10) lcd.print(\"0\");\n    lcd.print(dt.Day());\n    lcd.print(\"/\");\n    if (dt.Month() < 10) lcd.print(\"0\");\n    lcd.print(dt.Month());\n    lcd.print(\"/\");\n    lcd.print(dt.Year());\n    display.showNumberDec(dt.Hour() * 100 + dt.Minute() , true);\n  }\n  if (millis() - lastTick >= 500) {\n    lastTick = millis();\n    colonOn = !colonOn;\n    if (colonOn) display.showColonSegment();\n    else display.hideColonSegment();\n  }\n}"
+    }
+  },
+  {
     "id": "ds3231_rtc_clock_sync_with_ntp",
     "name": "DS3231 RTC Clock sync with NTP",
     "icon": "🕐",
@@ -26400,7 +26687,7 @@ window.EXAMPLE_SKETCHES = [
           "props": {
             "pressed": false,
             "label": "START",
-            "mode": "momentary"
+            "mode": "latching"
           }
         },
         {
@@ -26524,7 +26811,7 @@ window.EXAMPLE_SKETCHES = [
           "props": {
             "pressed": false,
             "label": "START",
-            "mode": "momentary"
+            "mode": "latching"
           }
         },
         {
