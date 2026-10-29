@@ -117,8 +117,10 @@ class CircuitCanvas {
     /* State */
     this.components = [];  // { id, type, x, y, props, runtimeState, selected, rotation }
     this.wires = [];  // { id, from:{instId,pinId}, to:{instId,pinId}, color, waypoints:[], routeStyle:'orthogonal'|'bezier', bezierCtrl:{c1:{x,y},c2:{x,y}} }
+    this.annotations = [];
     this.selected = null;
     this.selectedWire = null;
+    this.selectedAnnotation = null;
     this._hasStandalonePower = false;
 
     /* Electrical engine */
@@ -131,8 +133,9 @@ class CircuitCanvas {
     this.GRID = 5;
 
     /* Interaction state machine */
-    this.mode = 'idle';   // idle | dragging | panning | wiring | placing | wiredrag
+    this.mode = 'idle';   // idle | dragging | annotationDragging | panning | wiring | placing | placingText | wiredrag
     this.dragging = null;     // { inst, offsetX, offsetY }
+    this.draggingAnnotation = null;
     this._touchActive = false;
     this.wiringFrom = null;     // { inst, pin, wx, wy }
     this.wireMouse = null;     // { x, y } world coords
@@ -1318,21 +1321,79 @@ class CircuitCanvas {
     }
   }
 
-  _drawOverlays(ctx) {
-    // Draw component labels
-    if (this.zoom >= 0.7) {
+  _drawOverlays(ctx, zoom = this.zoom, includeComponentLabels = false) {
+    if (zoom >= 0.7 || includeComponentLabels) {
       for (const inst of this.components) {
         const def = window.ArduinoComponents.COMPONENT_DEFS[inst.type];
-        if (!def || def.hideLabel) continue;
-        const labelText = inst.props.label || def.name;
+        const labelText = inst.props?.label || '';
+        if (!def || (def.hideLabel && !labelText)) continue;
+        const displayText = labelText || def.name;
         ctx.save();
-        ctx.fillStyle = 'rgba(200,200,200,0.6)';
-        ctx.font = `${11 / this.zoom}px Inter, sans-serif`;
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#0d1117';
+        ctx.lineWidth = 3 / zoom;
+        ctx.font = `600 ${12 / zoom}px Inter, sans-serif`;
         ctx.textAlign = 'center';
-        ctx.fillText(labelText, inst.x + def.width / 2, inst.y - 8 / this.zoom);
+        ctx.strokeText(displayText, inst.x + def.width / 2, inst.y - 8 / zoom);
+        ctx.fillText(displayText, inst.x + def.width / 2, inst.y - 8 / zoom);
         ctx.restore();
       }
     }
+
+    for (const annotation of this.annotations || []) {
+      const bounds = this._annotationBounds(annotation, ctx);
+      ctx.save();
+      ctx.font = '600 16px Inter, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#0d1117';
+      ctx.lineWidth = 3;
+      annotation.text.split(/\r?\n/).forEach((line, index) => {
+        ctx.strokeText(line, annotation.x, annotation.y + index * 20);
+        ctx.fillText(line, annotation.x, annotation.y + index * 20);
+      });
+      if (annotation.selected) {
+        ctx.strokeStyle = '#58a6ff';
+        ctx.lineWidth = 1 / zoom;
+        ctx.strokeRect(annotation.x - 4, annotation.y - 4, bounds.width + 8, bounds.height + 8);
+      }
+      ctx.restore();
+    }
+
+    if (this.mode === 'placingText' && this.placingMouse) {
+      ctx.save();
+      ctx.font = '600 16px Inter, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.strokeStyle = '#0d1117';
+      ctx.lineWidth = 3;
+      ctx.strokeText('Text', this.placingMouse.x, this.placingMouse.y);
+      ctx.fillText('Text', this.placingMouse.x, this.placingMouse.y);
+      ctx.restore();
+    }
+  }
+
+  _annotationBounds(annotation, ctx = this.ctx) {
+    const lines = String(annotation.text || '').split(/\r?\n/);
+    const previousFont = ctx.font;
+    ctx.font = '600 16px Inter, sans-serif';
+    const width = Math.max(8, ...lines.map(line =>
+      typeof ctx.measureText === 'function' ? ctx.measureText(line).width : line.length * 8));
+    ctx.font = previousFont;
+    return { x: annotation.x, y: annotation.y, width, height: Math.max(20, lines.length * 20) };
+  }
+
+  _hitTestAnnotation(wx, wy) {
+    for (const annotation of [...(this.annotations || [])].reverse()) {
+      const bounds = this._annotationBounds(annotation);
+      if (wx >= bounds.x - 4 && wx <= bounds.x + bounds.width + 4 &&
+        wy >= bounds.y - 4 && wy <= bounds.y + bounds.height + 4) {
+        return annotation;
+      }
+    }
+    return null;
   }
 
   /* -------------- ON-CANVAS LOGIC TAGS -------------- */
@@ -1657,8 +1718,10 @@ class CircuitCanvas {
     this._pushHistory();
     this.components = [];
     this.wires = [];
+    this.annotations = [];
     this.selected = null;
     this.selectedWire = null;
+    this.selectedAnnotation = null;
     this._onChanged();
   }
 
@@ -1674,6 +1737,14 @@ class CircuitCanvas {
   }
 
   deleteSelected() {
+    if (this.selectedAnnotation) {
+      this._pushHistory();
+      this.annotations = this.annotations.filter(a => a.id !== this.selectedAnnotation.id);
+      this.selectedAnnotation = null;
+      this._pushHistory();
+      this._onChanged();
+      return;
+    }
     const selComps = this.components.filter(c => c.selected);
     if (selComps.length > 0) {
       this._pushHistory();
@@ -1682,6 +1753,7 @@ class CircuitCanvas {
       this.components = this.components.filter(c => !ids.has(c.id));
       this.selected = null;
       this.selectedWire = null;
+      this.selectedAnnotation = null;
       this._onChanged();
       return;
     }
@@ -1691,6 +1763,8 @@ class CircuitCanvas {
   selectAll() {
     this.components.forEach(c => c.selected = true);
     this.selected = this.components[this.components.length - 1] || null;
+    (this.annotations || []).forEach(a => a.selected = false);
+    this.selectedAnnotation = null;
   }
 
   duplicateSelected() {
@@ -1820,7 +1894,11 @@ class CircuitCanvas {
   startPlacing(type) {
     this.mode = 'placing';
     this.placingType = type;
+    this.placingMouse = null;
     this.canvas.style.cursor = 'crosshair';
+    const textButton = document.getElementById('btn-add-canvas-text');
+    textButton?.classList.remove('active');
+    textButton?.setAttribute('aria-pressed', 'false');
     // Show hint
     const hint = document.getElementById('placing-hint');
     const nameEl = document.getElementById('placing-name');
@@ -1833,13 +1911,65 @@ class CircuitCanvas {
     if (this.onPlacingChanged) this.onPlacingChanged(true, type);
   }
 
+  startTextPlacement() {
+    if (this.mode === 'placingText') {
+      this.cancelPlacing();
+      return;
+    }
+    if (this.mode === 'placing') this.cancelPlacing();
+    this.mode = 'placingText';
+    this.placingType = null;
+    this.placingMouse = null;
+    this.canvas.style.cursor = 'crosshair';
+    const button = document.getElementById('btn-add-canvas-text');
+    button?.classList.add('active');
+    button?.setAttribute('aria-pressed', 'true');
+    const hint = document.getElementById('placing-hint');
+    const nameEl = document.getElementById('placing-name');
+    if (hint && nameEl) {
+      nameEl.textContent = 'Text annotation';
+      hint.classList.remove('hidden');
+    }
+    if (this.onPlacingChanged) this.onPlacingChanged(true, null);
+  }
+
+  addTextAnnotation(text, worldX, worldY) {
+    const value = String(text || '');
+    if (!value.trim()) return null;
+    const annotation = {
+      id: `text_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      text: value,
+      x: this._snap(Number.isFinite(Number(worldX)) ? Number(worldX) : 0),
+      y: this._snap(Number.isFinite(Number(worldY)) ? Number(worldY) : 0),
+      selected: false,
+    };
+    this._pushHistory();
+    this.annotations.push(annotation);
+    this._selectAll(false);
+    annotation.selected = true;
+    this.selectedAnnotation = annotation;
+    this._pushHistory();
+    this._onChanged();
+    return annotation;
+  }
+
+  _placeTextAnnotation(world) {
+    const text = window.prompt('Enter annotation text:');
+    if (text !== null) this.addTextAnnotation(text, world.x, world.y);
+  }
+
   cancelPlacing() {
     this.mode = 'idle';
     this.placingType = null;
     this.placingMouse = null;
     this.canvas.style.cursor = '';
+    const button = document.getElementById('btn-add-canvas-text');
+    button?.classList.remove('active');
+    button?.setAttribute('aria-pressed', 'false');
     const hint = document.getElementById('placing-hint');
     if (hint) hint.classList.add('hidden');
+    const nameEl = document.getElementById('placing-name');
+    if (nameEl) nameEl.textContent = 'Component';
     // Remove active class from sidebar
     document.querySelectorAll('.comp-item').forEach(el => el.classList.remove('placing'));
     // Notify app that placing mode ended
@@ -1988,6 +2118,10 @@ class CircuitCanvas {
     }
 
     if (e.button === 0) {
+      if (this.mode === 'placingText') {
+        this._placeTextAnnotation(world);
+        return;
+      }
       if (this.mode === 'placing') {
         this._placeComponent(world);
         return;
@@ -2013,6 +2147,24 @@ class CircuitCanvas {
           };
           return;
         }
+      }
+
+      const annotationHit = this._hitTestAnnotation(world.x, world.y);
+      if (annotationHit) {
+        this._selectAll(false);
+        annotationHit.selected = true;
+        this.selectedAnnotation = annotationHit;
+        this.selected = null;
+        this.selectedWire = null;
+        this.mode = 'annotationDragging';
+        this.draggingAnnotation = {
+          annotation: annotationHit,
+          offsetX: world.x - annotationHit.x,
+          offsetY: world.y - annotationHit.y,
+          moved: false,
+          historyPushed: false,
+        };
+        return;
       }
 
       // Check pin click first (start wiring)
@@ -2042,6 +2194,7 @@ class CircuitCanvas {
         this._selectAll(false);
         this.selected = null;
         this.selectedWire = null;
+        this.selectedAnnotation = null;
         this.mode = 'sliderdrag';
         this.sliderDrag = sliderHit;
         this._updateSliderValue(sliderHit, world.x, world.y);
@@ -2207,6 +2360,10 @@ class CircuitCanvas {
       const compHit = this._hitTestComp(world.x, world.y);
       if (compHit) {
         if (!e.shiftKey) this._selectAll(false);
+        else {
+          (this.annotations || []).forEach(a => a.selected = false);
+          this.selectedAnnotation = null;
+        }
         compHit.selected = true;
         this.selected = compHit;
         this.selectedWire = null;
@@ -2255,6 +2412,24 @@ class CircuitCanvas {
       const dy = e.clientY - this._lastMouse.y;
       this.panX += dx;
       this.panY += dy;
+      this._lastMouse = { x: e.clientX, y: e.clientY };
+      this._hidePinTooltip();
+      return;
+    }
+
+    if (this.mode === 'annotationDragging' && this.draggingAnnotation) {
+      const { annotation } = this.draggingAnnotation;
+      const newX = this._snap(world.x - this.draggingAnnotation.offsetX);
+      const newY = this._snap(world.y - this.draggingAnnotation.offsetY);
+      if (newX !== annotation.x || newY !== annotation.y) {
+        if (!this.draggingAnnotation.historyPushed) {
+          this._pushHistory();
+          this.draggingAnnotation.historyPushed = true;
+        }
+        annotation.x = newX;
+        annotation.y = newY;
+        this.draggingAnnotation.moved = true;
+      }
       this._lastMouse = { x: e.clientX, y: e.clientY };
       this._hidePinTooltip();
       return;
@@ -2431,6 +2606,11 @@ class CircuitCanvas {
       this._hidePinTooltip();
       return;
     }
+    if (this.mode === 'placingText') {
+      this.placingMouse = world;
+      this._hidePinTooltip();
+      return;
+    }
 
     // Hover cursor + pin tooltip
     const tagHover = this._hitTestTag(world.x, world.y);
@@ -2466,7 +2646,9 @@ class CircuitCanvas {
       this._hidePinTooltip();
     } else {
       this._hidePinTooltip();
-      if (comp) {
+      if (this._hitTestAnnotation(world.x, world.y)) {
+        this.canvas.style.cursor = 'move';
+      } else if (comp) {
         this.canvas.style.cursor = 'move';
       } else if (wireDetail) {
         this.canvas.style.cursor = 'grab';
@@ -2477,6 +2659,13 @@ class CircuitCanvas {
   }
 
   _onMouseUp(e) {
+    if (this.mode === 'annotationDragging' && this.draggingAnnotation) {
+      if (this.draggingAnnotation.moved) this._onChanged();
+      if (this.draggingAnnotation.moved) this._pushHistory();
+      this.mode = 'idle';
+      this.draggingAnnotation = null;
+      this.canvas.style.cursor = '';
+    }
     if (this.mode === 'dragging' && this.dragging) {
       const dragged = this.dragging.inst;
       // A momentary button opens the instant the pointer comes back up.
@@ -2540,6 +2729,17 @@ class CircuitCanvas {
 
   _onDblClick(e) {
     const world = this._toWorld(e.offsetX, e.offsetY);
+    const annotation = this._hitTestAnnotation(world.x, world.y);
+    if (annotation) {
+      const text = window.prompt('Edit annotation text:', annotation.text);
+      if (text !== null && text.trim() && text !== annotation.text) {
+        this._pushHistory();
+        annotation.text = text;
+        this._pushHistory();
+        this._onChanged();
+      }
+      return;
+    }
     const comp = this._hitTestComp(world.x, world.y);
     if (comp && window.App) {
       if (comp.type === 'dso_4ch') {
@@ -2556,6 +2756,15 @@ class CircuitCanvas {
     // Right-click on a forced input tag releases its force (no menu)
     const tagHit = this._hitTestTag(world.x, world.y);
     if (tagHit && this._releaseLogicTag(tagHit.inst)) return;
+    const annotation = this._hitTestAnnotation(world.x, world.y);
+    if (annotation) {
+      this._selectAll(false);
+      annotation.selected = true;
+      this.selectedAnnotation = annotation;
+      this.selected = null;
+      this.selectedWire = null;
+      return;
+    }
     const comp = this._hitTestComp(world.x, world.y);
     const wire = this._hitTestWire(world.x, world.y);
     if (comp) {
@@ -2611,11 +2820,12 @@ class CircuitCanvas {
       this._toggleSlideSwitch(this.selected);
     }
     if (e.key === 'Escape') {
-      if (this.mode === 'placing') this.cancelPlacing();
+      if (this.mode === 'placing' || this.mode === 'placingText') this.cancelPlacing();
       if (this.mode === 'wiring') this._endWiring();
       this._selectAll(false);
       this.selected = null;
       this.selectedWire = null;
+      this.selectedAnnotation = null;
     }
     if (e.key === 'f' || e.key === 'F') { this.fitView(); }
     if (e.ctrlKey && e.key.toLowerCase() === 'c') { this.copySelected(); }
@@ -2866,7 +3076,11 @@ class CircuitCanvas {
 
   _snap(v) { return Math.round(v / this.GRID) * this.GRID; }
 
-  _selectAll(sel) { this.components.forEach(c => c.selected = sel); }
+  _selectAll(sel) {
+    this.components.forEach(c => c.selected = sel);
+    (this.annotations || []).forEach(a => a.selected = false);
+    this.selectedAnnotation = null;
+  }
 
   _getPinWorldPos(instId, pinId) {
     const inst = this.components.find(c => c.id === instId);
@@ -2976,7 +3190,7 @@ class CircuitCanvas {
 
   /* -------------- VIEWPORT -------------- */
   fitView() {
-    if (this.components.length === 0) {
+    if (this.components.length === 0 && (!this.annotations || this.annotations.length === 0)) {
       this.panX = (this._viewportWidth || this.canvas.width) / 2 - 200;
       this.panY = (this._viewportHeight || this.canvas.height) / 2 - 100;
       this.zoom = 1;
@@ -2989,9 +3203,16 @@ class CircuitCanvas {
       const def = window.ArduinoComponents.COMPONENT_DEFS[inst.type];
       if (!def) continue;
       minX = Math.min(minX, inst.x - 20);
-      minY = Math.min(minY, inst.y - 20);
+      minY = Math.min(minY, inst.y - 30);
       maxX = Math.max(maxX, inst.x + def.width + 20);
       maxY = Math.max(maxY, inst.y + def.height + 20);
+    }
+    for (const annotation of this.annotations || []) {
+      const bounds = this._annotationBounds(annotation);
+      minX = Math.min(minX, bounds.x - 20);
+      minY = Math.min(minY, bounds.y - 20);
+      maxX = Math.max(maxX, bounds.x + bounds.width + 20);
+      maxY = Math.max(maxY, bounds.y + bounds.height + 20);
     }
 
     const w = this._viewportWidth || this.canvas.width;
@@ -3010,7 +3231,7 @@ class CircuitCanvas {
 
   /* -------------- HISTORY -------------- */
   _serializeState() {
-    return JSON.stringify({ components: this.components, wires: this.wires }, (key, val) => {
+    return JSON.stringify({ components: this.components, wires: this.wires, annotations: this.annotations }, (key, val) => {
       if (key === '_componentInstance') return undefined;
       return val;
     });
@@ -3038,8 +3259,11 @@ class CircuitCanvas {
 
   _restoreState(json) {
     try {
-      const { components, wires } = JSON.parse(json);
+      const { components, wires, annotations } = JSON.parse(json);
       this.components = components;
+      this.annotations = Array.isArray(annotations)
+        ? annotations.map(a => ({ ...a, selected: false }))
+        : [];
       this.wires = (Array.isArray(wires) ? wires : []).map(w => ({
         ...w,
         color: (typeof w.color === 'string' && w.color.length > 0) ? w.color : null,
@@ -3054,6 +3278,7 @@ class CircuitCanvas {
       }));
       this.selected = null;
       this.selectedWire = null;
+      this.selectedAnnotation = null;
       this._onChanged();
     } catch (e) { }
   }
@@ -3077,6 +3302,12 @@ class CircuitCanvas {
         waypoints: w.waypoints || [],
         routeStyle: w.routeStyle || 'orthogonal',
         bezierCtrl: w.bezierCtrl || null,
+      })),
+      annotations: (this.annotations || []).map(a => ({
+        id: a.id,
+        text: a.text,
+        x: a.x,
+        y: a.y,
       })),
     };
   }
@@ -3115,6 +3346,20 @@ class CircuitCanvas {
         return true;
       });
 
+    const annotations = (Array.isArray(data.annotations) ? data.annotations : [])
+      .filter(a => a && typeof a === 'object' && typeof a.text === 'string' && a.text.trim())
+      .map((a, index) => {
+        const x = Number(a.x);
+        const y = Number(a.y);
+        return {
+          id: String(a.id || `text_${index}_${Date.now()}`),
+          text: a.text,
+          x: Number.isFinite(x) ? x : 0,
+          y: Number.isFinite(y) ? y : 0,
+          selected: false,
+        };
+      });
+
     const idSet = new Set(components.map(c => c.id));
     const seenWires = new Set();
     const wires = (Array.isArray(data.wires) ? data.wires : [])
@@ -3145,8 +3390,10 @@ class CircuitCanvas {
 
     this.components = components;
     this.wires = wires;
+    this.annotations = annotations;
     this.selected = null;
     this.selectedWire = null;
+    this.selectedAnnotation = null;
 
     // Reset history so undo can't roll back into a blank/empty state
     this.history = [this._serializeState()];
@@ -3167,9 +3414,16 @@ class CircuitCanvas {
         const def = window.ArduinoComponents?.COMPONENT_DEFS?.[inst.type];
         if (!def) continue;
         minX = Math.min(minX, inst.x - 20);
-        minY = Math.min(minY, inst.y - 20);
+        minY = Math.min(minY, inst.y - 30);
         maxX = Math.max(maxX, inst.x + (def.width || 120) + 20);
         maxY = Math.max(maxY, inst.y + (def.height || 80) + 20);
+      }
+      for (const annotation of this.annotations || []) {
+        const bounds = this._annotationBounds(annotation);
+        minX = Math.min(minX, bounds.x - 20);
+        minY = Math.min(minY, bounds.y - 20);
+        maxX = Math.max(maxX, bounds.x + bounds.width + 20);
+        maxY = Math.max(maxY, bounds.y + bounds.height + 20);
       }
       if (!Number.isFinite(minX)) { minX = 0; minY = 0; maxX = 400; maxY = 300; }
 
@@ -3222,6 +3476,7 @@ class CircuitCanvas {
       this._drawComponents(tc);
 
       try { this._drawInteractives(tc); } catch (_e) { /* guard */ }
+      this._drawOverlays(tc, fitZoom, true);
 
       tc.restore();
 

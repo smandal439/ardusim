@@ -166,6 +166,7 @@ class App {
     const zoomOutBtn = get('btn-zoom-out');
     const fitViewBtn = get('btn-fit-view');
     const canvasFullscreenBtn = get('btn-canvas-fullscreen');
+    const canvasTextBtn = get('btn-add-canvas-text');
     const undoBtn    = get('btn-undo-canvas');
     const redoBtn    = get('btn-redo-canvas');
     const oscClearBtn = get('btn-osc-clear');
@@ -195,6 +196,7 @@ class App {
     newProjectBtn?.addEventListener('click', () => this._newProject());
     clearBtn?.addEventListener('click', () => this.clearCanvas());
     exportBtn?.addEventListener('click', () => this.exportImage());
+    canvasTextBtn?.addEventListener('click', () => this.canvas?.startTextPlacement());
     formatBtn?.addEventListener('click', () => this.formatCode());
     verifyBtn?.addEventListener('click', () => this.verify());
     // Logo click ← go to home page
@@ -3793,7 +3795,24 @@ _newProject() {
       }
     }
 
+    const labelRow = document.createElement('div');
+    labelRow.className = 'prop-row';
+    const labelLabel = document.createElement('label');
+    labelLabel.textContent = 'Component label';
+    labelLabel.className = 'prop-label';
+    labelLabel.htmlFor = 'prop-label';
+    const labelInput = document.createElement('input');
+    labelInput.className = 'prop-input';
+    labelInput.name = 'label';
+    labelInput.id = 'prop-label';
+    labelInput.type = 'text';
+    labelInput.value = comp.props?.label || (def?.hideLabel ? '' : ((def && def.name) || comp.type));
+    labelRow.appendChild(labelLabel);
+    labelRow.appendChild(labelInput);
+    rows.push(labelRow);
+
     Object.entries(comp.props || {}).forEach(([key, value]) => {
+      if (key === 'label') return;
       if (key === 'colorName') return; // derived from the colour select — never editable
       if (key === 'forcedInputs') return; // canvas input-tag force state, not an editable field
       if (key === 'attach') return; // canvas tag anchor { instId, pinId }, not an editable field
@@ -3901,6 +3920,11 @@ _newProject() {
     if (!body) return;
     const defs = (window.ArduinoComponents && window.ArduinoComponents.COMPONENT_DEFS) || {};
     const def = defs[this._propsComp.type];
+    const labelInput = body.querySelector('.prop-input[name="label"]');
+    const currentLabel = this._propsComp.props?.label || (def?.hideLabel ? '' : ((def && def.name) || this._propsComp.type));
+    const labelChanged = !!labelInput && labelInput.value !== currentLabel;
+    if (labelChanged) this.canvas?._pushHistory?.();
+    this._propsComp.props = this._propsComp.props || {};
     const clampPropValue = window.ArduinoComponents && window.ArduinoComponents.clampPropValue;
     const LED_COLORS = [
       { name: 'Red',    hex: '#ff3333' },
@@ -3943,6 +3967,7 @@ _newProject() {
       }
     });
     this.canvas?._onChanged?.();
+    if (labelChanged) this.canvas?._pushHistory?.();
     this._closeModal();
     this.showToast('Properties updated', 'success');
   }

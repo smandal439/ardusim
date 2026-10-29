@@ -657,6 +657,7 @@ body.view-serial #resizer-bottom { display: none; }
   transition: all var(--trans-fast);
 }
 .panel-icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.panel-icon-btn.active { background: var(--bg-active); color: var(--accent); }
 .panel-icon-btn.btn-danger:hover { background: rgba(218, 54, 51, 0.15); color: var(--stop-color); }
 .panel-icon-btn svg { transition: transform var(--trans-fast); }
 

@@ -57,6 +57,7 @@
 - **Grid Snapping**: Precision component positioning with visual alignment.
 - **Interactive Wiring**: Click-to-connect pin-to-pin wiring with live signal coloring (HIGH/LOW/PWM).
 - **Clipboard & Manipulation**: `Ctrl+C` / `Ctrl+V`, `Ctrl+D` (Duplicate), `R` (Rotate), `Del` (Delete), and Undo/Redo history stack.
+- **Circuit Labels**: Set a custom label for any component in its properties, or use the canvas **T** tool to place, move, edit (double-click), and delete free-text annotations. Labels are saved with the circuit and included in PNG exports.
 - **Context Menu**: Right-click actions for properties, rotation, duplication, and deletion.
 - **Exporting**: One-click circuit diagram export to PNG.
 
