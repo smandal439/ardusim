@@ -1593,7 +1593,10 @@ class ArduinoSimulator {
             // If page is HTTPS, must use WSS (mixed-content blocks ws://)
             const isSecure = window.location.protocol === 'https:';
             let wsPort, scheme;
-            if (isSecure || port === 8884 || port === 8883) {
+            if (host === 'broker.emqx.io' && port === 1883) {
+              wsPort = isSecure ? 8084 : 8083;
+              scheme = isSecure ? 'wss' : 'ws';
+            } else if (isSecure || port === 8884 || port === 8883) {
               wsPort = 8884; scheme = 'wss';
             } else if (port === 8084) {
               wsPort = 8084; scheme = 'wss';

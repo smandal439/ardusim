@@ -2,7 +2,7 @@
  * test/transpiler.test.js — Unit tests for the Arduino C++ → JS transpiler
  * Run: npx vitest run test/transpiler.test.js
  */
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 /* ── Minimal browser-like globals for the transpiler ── */
 global.window = {
@@ -149,9 +149,64 @@ describe('transpile() — library plugins', () => {
     const example = JSON.parse(fs.readFileSync(examplePath, 'utf8'));
     const result = sim.transpile(example.files['sketch.ino']);
 
+    expect(example.files['sketch.ino']).toContain('mqtt_server = "broker.emqx.io"');
+    expect(example.files['sketch.ino']).toContain('mqtt_port = 1883');
     expect(result).toContain('client.connect(clientId)');
     expect(result).not.toContain('c0_str');
     expect(() => new Function(result)).not.toThrow();
+  });
+
+  it('uses the correct WebSocket endpoint for EMQX without changing HiveMQ endpoints', () => {
+    const originalWindowValues = {
+      mqtt: window.mqtt,
+      WebSocket: window.WebSocket,
+      location: window.location,
+    };
+    const cases = [
+      ['broker.emqx.io', 1883, 'http:', 'ws://broker.emqx.io:8083/mqtt'],
+      ['broker.emqx.io', 1883, 'https:', 'wss://broker.emqx.io:8084/mqtt'],
+      ['broker.hivemq.com', 1883, 'http:', 'ws://broker.hivemq.com:8000/mqtt'],
+      ['broker.hivemq.com', 1883, 'https:', 'wss://broker.hivemq.com:8884/mqtt'],
+    ];
+
+    vi.useFakeTimers();
+    try {
+      window.WebSocket = function WebSocket() {};
+      window.location = { protocol: '' };
+
+      for (const [host, port, protocol, expectedUrl] of cases) {
+        const handlers = {};
+        const connection = {
+          on(event, handler) {
+            handlers[event] = handler;
+            return this;
+          },
+          end() {},
+        };
+        const connect = vi.fn(() => connection);
+        const mqtt = vi.fn();
+        mqtt.connect = connect;
+        window.mqtt = mqtt;
+        window.location.protocol = protocol;
+
+        const client = sim.buildContext().PubSubClient();
+        client.setServer(host, port);
+        client.connect('test-client');
+        handlers.connect();
+
+        expect(connect).toHaveBeenCalledWith(expectedUrl, expect.any(Object));
+        client.disconnect();
+        sim._mqttOpen = [];
+      }
+
+      vi.clearAllTimers();
+    } finally {
+      vi.useRealTimers();
+      for (const [key, value] of Object.entries(originalWindowValues)) {
+        if (value === undefined) delete window[key];
+        else window[key] = value;
+      }
+    }
   });
 
   it('produces valid JavaScript for the RFID inventory tracker example', () => {
