@@ -144,6 +144,16 @@ describe('transpile() — Arduino-specific patterns', () => {
 });
 
 describe('transpile() — library plugins', () => {
+  it('transpiles the MQTT LED control example client ID correctly', () => {
+    const examplePath = path.resolve(__dirname, '..', 'Examples', 'mqtt_led_control.json');
+    const example = JSON.parse(fs.readFileSync(examplePath, 'utf8'));
+    const result = sim.transpile(example.files['sketch.ino']);
+
+    expect(result).toContain('client.connect(clientId)');
+    expect(result).not.toContain('c0_str');
+    expect(() => new Function(result)).not.toThrow();
+  });
+
   it('produces valid JavaScript for the RFID inventory tracker example', () => {
     const examplePath = path.resolve(__dirname, '..', 'Examples', 'rfid_inventory_tracker.json');
     const example = JSON.parse(fs.readFileSync(examplePath, 'utf8'));

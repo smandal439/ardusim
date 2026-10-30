@@ -21811,6 +21811,141 @@ window.EXAMPLE_SKETCHES = [
     }
   },
   {
+    "id": "mqtt_led_control",
+    "name": "mqtt led control",
+    "icon": "🔧",
+    "desc": "A custom mqtt led control circuit example.",
+    "tags": [
+      "mqtt",
+      "iot",
+      "led"
+    ],
+    "circuit": {
+      "components": [
+        {
+          "id": "comp_1793270418771_g6m2l",
+          "type": "esp32_devkit_v1",
+          "x": -20,
+          "y": -10,
+          "rotation": 0,
+          "props": {
+            "label": "ESP32"
+          }
+        },
+        {
+          "id": "comp_1793270437324_602di",
+          "type": "wifi_module",
+          "x": 400,
+          "y": -120,
+          "rotation": 0,
+          "props": {
+            "ssid": "ArduSim_Network",
+            "password": "password123",
+            "channel": 6,
+            "ipAddress": "192.168.4.1",
+            "txPower": 20,
+            "security": "WPA2-PSK",
+            "hidden": false
+          }
+        },
+        {
+          "id": "comp_1793270447234_2whxk",
+          "type": "led",
+          "x": 420,
+          "y": 95,
+          "rotation": 0,
+          "props": {
+            "color": "#ff3333",
+            "colorName": "Red"
+          }
+        },
+        {
+          "id": "comp_1793270455482_g06b5",
+          "type": "resistor",
+          "x": 425,
+          "y": 225,
+          "rotation": 0,
+          "props": {
+            "value": 220,
+            "unit": "Ω"
+          }
+        }
+      ],
+      "wires": [
+        {
+          "id": "wire_1793270468220_2vk9s",
+          "from": {
+            "instId": "comp_1793270418771_g6m2l",
+            "pinId": "D2"
+          },
+          "to": {
+            "instId": "comp_1793270447234_2whxk",
+            "pinId": "anode"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1793270469683_e93ev",
+          "from": {
+            "instId": "comp_1793270447234_2whxk",
+            "pinId": "cathode"
+          },
+          "to": {
+            "instId": "comp_1793270455482_g06b5",
+            "pinId": "p1"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        },
+        {
+          "id": "wire_1793270472476_x86jc",
+          "from": {
+            "instId": "comp_1793270418771_g6m2l",
+            "pinId": "GND2"
+          },
+          "to": {
+            "instId": "comp_1793270455482_g06b5",
+            "pinId": "p2"
+          },
+          "color": null,
+          "waypoints": [],
+          "routeStyle": "orthogonal",
+          "bezierCtrl": null
+        }
+      ],
+      "annotations": [
+        {
+          "id": "text_1793354547123_3tifv",
+          "text": "R1",
+          "x": 455,
+          "y": 245
+        }
+      ],
+      "plcProgram": {
+        "mode": "code",
+        "rungs": [
+          {
+            "output": "Q0_0",
+            "elements": [
+              {
+                "type": "NO",
+                "input": "I0_0"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "files": {
+      "sketch.ino": "#include <WiFi.h>\n#include <PubSubClient.h>\n\n// Replace with your network credentials\nconst char* ssid = \"ArduSim_Network\";\nconst char* password = \"password123\";\n\n// EMQX Public Broker details\nconst char* mqtt_server = \"broker.hivemq.com\";\nconst int mqtt_port = 1883;\nconst char* mqtt_topic = \"emqx/esp32/led\";\n\n// Define LED pin (GPIO 2 is often the onboard LED on many ESP32 boards)\nconst int ledPin = 2;\n\nWiFiClient espClient;\nPubSubClient client(espClient);\n\nvoid setup_wifi() {\n  delay(10);\n  Serial.println();\n  Serial.print(\"Connecting to \");\n  Serial.println(ssid);\n\n  WiFi.begin(ssid, password);\n\n  while (WiFi.status() != WL_CONNECTED) {\n    delay(500);\n    Serial.print(\".\");\n  }\n\n  Serial.println(\"\");\n  Serial.println(\"WiFi connected\");\n}\n\nvoid callback(char* topic, byte* payload, unsigned int length) {\n  String message = \"\";\n  for (int i = 0; i < length; i++) {\n    message += (char)payload[i];\n  }\n  \n  message.trim();\n  Serial.print(\"Message arrived [\");\n  Serial.print(topic);\n  Serial.print(\"] \");\n  Serial.println(message);\n\n  if (message == \"on\") {\n    digitalWrite(ledPin, HIGH);   // Turn LED ON\n  } else if (message == \"off\") {\n    digitalWrite(ledPin, LOW);    // Turn LED OFF\n  }\n}\n\nvoid reconnect() {\n  while (!client.connected()) {\n    Serial.print(\"Attempting MQTT connection...\");\n    // Create a random client ID\n    String clientId = \"ESP32Client-\";\n    clientId += String(random(0xffff), HEX);\n    \n    if (client.connect(clientId.c_str())) {\n      Serial.println(\"connected\");\n      client.subscribe(mqtt_topic);\n    } else {\n      Serial.print(\"failed, rc=\");\n      Serial.print(client.state());\n      Serial.println(\" try again in 5 seconds\");\n      delay(5000);\n    }\n  }\n}\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n  digitalWrite(ledPin, LOW);\n  Serial.begin(115200);\n  setup_wifi();\n  client.setServer(mqtt_server, mqtt_port);\n  client.setCallback(callback);\n}\n\nvoid loop() {\n  if (!client.connected()) {\n    reconnect();\n  }\n  client.loop();\n}\n"
+    }
+  },
+  {
     "id": "multi_colour_led_blink",
     "name": "multi colour led blink",
     "icon": "🔧",
